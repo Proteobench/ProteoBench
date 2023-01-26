@@ -18,27 +18,6 @@ class StreamlitPage(ABC):
             initial_sidebar_state="expanded",
         )
 
-        # Instantiate session_state items
-        stateful_items = [
-            "input_file",
-            "output_file",
-            "input_filetype",
-            "output_filetype",
-            "fdr_threshold",
-            "reverse",
-            "log_scale",
-            "file_state",
-            "psm_list",
-            "psm_df",
-            "percolator_score_column",
-            "convert_input_file",
-            "convert_input_filetype",
-            "convert_output_filetype",
-        ]
-        for item in stateful_items:
-            if item not in self.state:
-                self.state[item] = None
-
         self._preface()
         self._main_page()
         self._sidebar()
@@ -46,19 +25,13 @@ class StreamlitPage(ABC):
     def _preface(self):
         st.markdown(
             """
-            # psm_utils online
-
-            **psm_utils online** is a [Streamlit](http://streamlit.io/)-based web server,
-            built on top of the [psm_utils](https://psm-utils.readthedocs.io/) Python
-            package. It allows you to easily get **proteomics peptide-spectrum match
-            (PSM) statistics** for any supported PSM file type, and to **convert search
-            engine results** from one PSM file format into another.
+            # Proteobench
 
             **👈 Select a page from the sidebar to get started!**<br>
-            **📖 Learn more about psm_utils on
-            [readthedocs.io](https://psm-utils.readthedocs.io/)**<br>
+            **📖 Learn more about Proteobench on
+            [Proteobench.io](https://github.com/Proteobench/Proteobench)**<br>
             **💻 Find the source code on
-            [github.com](https://github.com/compomics/psm_utils)**<br>
+            [github.com](https://github.com/Proteobench/Proteobench)**<br>
             """,
             unsafe_allow_html=True,
         )

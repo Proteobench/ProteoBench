@@ -20,14 +20,14 @@ LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = 2
 "HUMAN" = "_HUMAN"
 
 [species_expected_ratio]
-    ["YEAST"] 
-    "1|2" = 0.5
+[species_expected_ratio.YEAST]
+"1|2" = 0.5
 
-    ["ECOLI"]
-    "1|2" = 1.5
+[species_expected_ratio.ECOLI]
+"1|2" = 1.5
     
-    ["HUMAN"]
-    "1|2" = 1.0
+[species_expected_ratio.HUMAN]
+"1|2" = 1.0
 
 [general]
 contaminant_flag = "Cont_"

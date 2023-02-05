@@ -137,12 +137,14 @@ class StreamlitUI:
             fig = plot_bench(result_performance)
             st.plotly_chart(fig, use_container_width=True)
 
+            sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
+
             # Download link
             st.subheader("Download calculated ratios")
             st.download_button(
                 label="Download",
                 data=save_dataframe(result_performance),
-                file_name="%s-%s-%s-%s.csv" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp),
+                file_name=f"{sample_name}.csv",
                 mime="text/csv"
             )
 

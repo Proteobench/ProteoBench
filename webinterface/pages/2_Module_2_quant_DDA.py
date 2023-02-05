@@ -77,6 +77,8 @@ class StreamlitUI:
                 "Quantified with MBR"
             )
 
+            self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
+
 
             st.subheader("Add results to online repository")
 

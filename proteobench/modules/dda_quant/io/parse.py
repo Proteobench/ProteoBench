@@ -18,7 +18,6 @@ def prepare_df(
         except KeyError:
             replicate_to_raw[v] = [k]
 
-    
     if ("Reverse" in mapper):
       df = df[df["Reverse"] != decoy_flag]
 
@@ -26,7 +25,6 @@ def prepare_df(
     for species,flag in species_dict.items():
         df[species] = df["Proteins"].str.contains(flag)
     df["MULTI_SPEC"] = (df[list(species_dict.keys())].sum(axis=1) > min_count_multispec)
-
     
     # If there is "Raw file" then it is a long format, otherwise short format
     if ("Raw file" not in mapper.values()):  
@@ -38,8 +36,9 @@ def prepare_df(
     df = df[df["MULTI_SPEC"] == False]
 
     df.loc[df.index,"peptidoform"] = df.loc[df.index,"Modified sequence"]
-    count_non_zero = (df.groupby(["peptidoform","Raw file"]).sum()["Intensity"] > 0.0).groupby(level=[0]).sum() == 6
+    count_non_zero = (df.groupby(["Sequence","Raw file"]).sum()["Intensity"] > 0.0).groupby(level=[0]).sum() == 6
+
     allowed_peptidoforms = list(count_non_zero.index[count_non_zero])
-    filtered_df = df[df["peptidoform"].isin(allowed_peptidoforms)]
+    filtered_df = df[df["Seqence"].isin(allowed_peptidoforms)]
 
     return filtered_df, replicate_to_raw

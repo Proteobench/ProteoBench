@@ -95,6 +95,9 @@ def main(
     elif input_format == "AlphaPept":
         df = pd.read_csv(input_csv,low_memory=False,sep="\t")
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_alphapept.toml"))
+    elif input_format == "MSFragger":
+        df = pd.read_csv(input_csv,low_memory=False,sep="\t")
+        parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_msfragger.toml"))
     elif input_format == "WOMBAT":
         df = pd.read_csv(input_csv,low_memory=False,sep=",")
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_wombat.toml"))

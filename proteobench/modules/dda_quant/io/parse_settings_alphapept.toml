@@ -1,4 +1,5 @@
 [mapper]
+sequence_naked = "Sequence"
 shortname = "Raw file"
 protein = "Proteins"
 sequence = "Modified sequence"

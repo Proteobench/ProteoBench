@@ -29,7 +29,7 @@ def prepare_df(
 
     
     # If there is "Raw file" then it is a long format, otherwise short format
-    if ("Raw file" not in mapper):  
+    if ("Raw file" not in mapper.values()):  
         meltvars = replicate_mapper.keys()
         df = df.melt(id_vars=list(set(df.columns).difference(set(meltvars))), value_vars=meltvars, var_name="Raw file", value_name="Intensity")
     df["replicate"] = df["Raw file"].map(replicate_mapper)        

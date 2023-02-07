@@ -1,6 +1,5 @@
 import os
 import unittest
-import numpy as np
 
 import proteobench.modules.dda_quant as dda_quant
 

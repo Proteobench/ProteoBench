@@ -33,7 +33,7 @@ def prepare_df(
     df["replicate"] = df["Raw file"].map(replicate_mapper)        
     df = pd.concat([df,pd.get_dummies(df["Raw file"])],axis=1)
 
-    df = df[df["MULTI_SPEC"] == False]
+    df = df[df["MULTI_SPEC"] is False]
 
     df.loc[df.index,"peptidoform"] = df.loc[df.index,"Modified sequence"]
     count_non_zero = (df.groupby(["Sequence","Raw file"]).sum()["Intensity"] > 0.0).groupby(level=[0]).sum() == 6

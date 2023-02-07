@@ -1,41 +1,21 @@
-"""Streamlit-based web interface for DeepLC."""
+"""Streamlit-based web interface for ProteoBench."""
 
 import logging
-import os
-import pathlib
 from datetime import datetime
 try:
     from importlib.metadata import version
 except ImportError:
     from importlib_metadata import version
 
-import pandas as pd
-import plotly.express as px
-import plotly.figure_factory as ff
 
 import streamlit as st
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
-import pandas as pd
-import numpy as np
-import itertools
-from matplotlib import pyplot as plt
-from datetime import datetime
-
-from collections import Counter
-import toml
 from proteobench.modules.dda_quant import main
 from proteobench.modules.dda_quant.plot.plot import plot_bench
 
 logger = logging.getLogger(__name__)
 
-
-class DeepLCStreamlitError(Exception):
-    pass
-
-
-class MissingPeptideCSV(DeepLCStreamlitError):
-    pass
 
 class StreamlitUI:
     """Proteobench Streamlit UI."""

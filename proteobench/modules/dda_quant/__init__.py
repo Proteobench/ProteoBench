@@ -88,7 +88,7 @@ def strip_sequence_wombat(seq):
 def main(
         input_csv: str,
         input_format: str,
-        mbr: str,    
+        mbr: bool   
     ):
 
     dir_f = os.path.join(os.path.dirname(os.path.realpath(__file__)))

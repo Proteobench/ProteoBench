@@ -17,10 +17,11 @@ INPUT_FORMATS = {   "MaxQuant" : "MaxQuant",
                     "WOMBAT" : "WOMBAT"}
 
 
-def load_file(dataset_name:str):
+def load_file(format_name:str):
+        """ Method used to load the input file of a given format."""
         user_input = dict()
-        user_input["input_csv"] = TESTDATA_FILES[dataset_name]
-        user_input["input_format"] = INPUT_FORMATS[dataset_name]
+        user_input["input_csv"] = TESTDATA_FILES[format_name]
+        user_input["input_format"] = INPUT_FORMATS[format_name]
         user_input["mbr"] = True
         df = dda_quant.main(
             user_input["input_csv"],

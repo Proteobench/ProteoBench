@@ -4,6 +4,7 @@ import itertools
 import toml
 import os
 from proteobench.modules.dda_quant.io.parse import prepare_df
+import re
 
 def get_quant(
         filtered_df,
@@ -81,6 +82,9 @@ def get_vertical(
 
     return len(set(filtered_df[filtered_df[list(replicate_mapper.keys())[0]] != 0]["peptidoform"]))
 
+def strip_sequence_wombat(seq):
+    return re.sub("([\(\[]).*?([\)\]])", "", seq)
+
 def main(
         input_csv: str,
         input_format: str,
@@ -100,6 +104,8 @@ def main(
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_msfragger.toml"))
     elif input_format == "WOMBAT":
         df = pd.read_csv(input_csv,low_memory=False,sep=",")
+        df["sequence"] = df["modified_peptide"].apply(strip_sequence_wombat)
+
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_wombat.toml"))
 
     print(parse_settings)

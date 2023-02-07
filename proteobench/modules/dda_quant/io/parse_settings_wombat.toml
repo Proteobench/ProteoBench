@@ -1,5 +1,4 @@
 [mapper]
-raw_file = "Raw file"
 protein_group = "Proteins"
 "modified_peptide" = "Modified sequence"
 

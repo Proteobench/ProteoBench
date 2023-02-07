@@ -104,7 +104,7 @@ def main(
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_msfragger.toml"))
     elif input_format == "WOMBAT":
         df = pd.read_csv(input_csv,low_memory=False,sep=",")
-        df["sequence"] = df["modified_peptide"].apply(strip_sequence_wombat)
+        df["Sequence"] = df["modified_peptide"].apply(strip_sequence_wombat)
 
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_wombat.toml"))
 

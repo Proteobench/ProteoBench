@@ -35,7 +35,7 @@ def prepare_df(
 
     df = df[df["MULTI_SPEC"] is False]
 
-    df.loc[df.index,"peptidoform"] = df.loc[df.index,"Modified sequence"]
+    df.loc[df.index,"peptidoform"] = df.loc[df.index,"Sequence"]
     count_non_zero = (df.groupby(["Sequence","Raw file"]).sum()["Intensity"] > 0.0).groupby(level=[0]).sum() == 6
 
     allowed_peptidoforms = list(count_non_zero.index[count_non_zero])

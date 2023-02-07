@@ -26,7 +26,8 @@ dependencies = [
 
 [project.optional-dependencies]
 web = [
-    "streamlit"
+    "streamlit",
+    "scipy"
 ]
 
 [project.urls]

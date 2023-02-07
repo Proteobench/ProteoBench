@@ -68,7 +68,8 @@ class StreamlitUI:
 
             self.user_input["input_format"] = st.selectbox(
                 "Search engine",
-                ("MaxQuant", "AlphaPept", "Proline", "MSFragger")
+
+                ("MaxQuant", "AlphaPept", "Proline", "WOMBAT", "MSFragger")
             )
 
             self.user_input["version"] = st.text_input(

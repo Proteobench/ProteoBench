@@ -92,9 +92,12 @@ def main(
     if input_format == "MaxQuant":
         df = pd.read_csv(input_csv,sep="\t",low_memory=False)
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_maxquant.toml"))
-    if input_format == "AlphaPept":
+    elif input_format == "AlphaPept":
         df = pd.read_csv(input_csv,low_memory=False,sep="\t")
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_alphapept.toml"))
+    elif input_format == "WOMBAT":
+        df = pd.read_csv(input_csv,low_memory=False,sep=",")
+        parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_wombat.toml"))
 
     print(parse_settings)
     mapper = parse_settings["mapper"]
@@ -114,6 +117,8 @@ def main(
         contaminant_flag,
         min_count_multispec
     )
+
+    print(prepared_df.columns)
 
     species_quant_df, cv_replicate_quant_df = get_quant(
             prepared_df,

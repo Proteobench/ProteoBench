@@ -1,16 +1,39 @@
-[build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
-
 [project]
 name = "proteobench"
 authors = [{name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be"}]
 readme = "README.md"
 license = {file = "LICENSE"}
-classifiers = ["License :: OSI Approved :: Apache Software License"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Development Status :: 4 - Beta"
+]
+keywords=[
+    'proteomics', 'peptides', 'retention time', 'mass spectrometry'
+]
+requires-python = ">=3.7"
 dynamic = ["version", "description"]
+dependencies = [
+    "pandas",
+    "numpy",
+    "plotly",
+    "matplotlib",
+    "importlib-metadata; python_version < '3.8'"
+]
+
+[project.optional-dependencies]
+web = [
+    "streamlit"
+]
 
 [project.urls]
-Home = "https://github.com/RobbinBouwmeester"
+"Home" = "https://github.com/RobbinBouwmeester"
 "Homepage" = "https://github.com/RobbinBouwmeester/"
 "Bug Tracker" = "https://github.com/RobbinBouwmeester/"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"

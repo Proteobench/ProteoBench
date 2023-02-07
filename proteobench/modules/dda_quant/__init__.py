@@ -3,7 +3,7 @@ import numpy as np
 import itertools
 import toml
 import os
-from proteobench.module2_quant_DDA.io.parse import prepare_df
+from proteobench.modules.dda_quant.io.parse import prepare_df
 
 def get_quant(
         filtered_df,

@@ -4,7 +4,10 @@ import logging
 import os
 import pathlib
 from datetime import datetime
-from importlib.metadata import version
+try:
+    from importlib.metadata import version
+except ImportError:
+    from importlib_metadata import version
 
 import pandas as pd
 import plotly.express as px
@@ -21,8 +24,8 @@ from datetime import datetime
 
 from collections import Counter
 import toml
-from proteobench.module2_quant_DDA.module2_quant_DDA import main
-from proteobench.module2_quant_DDA.plot.plot import plot_bench
+from proteobench.modules.dda_quant import main
+from proteobench.modules.dda_quant.plot.plot import plot_bench
 
 logger = logging.getLogger(__name__)
 

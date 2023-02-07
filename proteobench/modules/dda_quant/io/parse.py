@@ -39,6 +39,6 @@ def prepare_df(
     count_non_zero = (df.groupby(["Sequence","Raw file"]).sum()["Intensity"] > 0.0).groupby(level=[0]).sum() == 6
 
     allowed_peptidoforms = list(count_non_zero.index[count_non_zero])
-    filtered_df = df[df["Seqence"].isin(allowed_peptidoforms)]
+    filtered_df = df[df["Sequence"].isin(allowed_peptidoforms)]
 
     return filtered_df, replicate_to_raw

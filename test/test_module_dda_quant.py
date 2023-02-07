@@ -5,13 +5,18 @@ import numpy as np
 import proteobench.modules.dda_quant as dda_quant
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
-TESTDATA_FILES = { "WOMBAT"         : os.path.join(TESTDATA_DIR, 'stand_pep_quant_mergedproline.csv'),
-                 "MaxQuant"         : os.path.join(TESTDATA_DIR, 'evidence_sample.txt')
+TESTDATA_FILES = { "WOMBAT"         : os.path.join(TESTDATA_DIR, 'WOMBAT_stand_pep_quant_mergedproline.csv'),
+                   "MaxQuant"         : os.path.join(TESTDATA_DIR, 'MaxQuant_evidence_sample.txt'),
+                   "MSFragger"         : os.path.join(TESTDATA_DIR, 'MSFragger_combined_ion.tsv')
             }
+
 INPUT_FORMATS = {   "MaxQuant" : "MaxQuant",
                     "AlphaPept" : "AlphaPept",
+                    "MSFragger" : "MSFragger",
                     "Proline" : "Proline",
                     "WOMBAT" : "WOMBAT"}
+
+
 def load_file(dataset_name:str):
         user_input = dict()
         user_input["input_csv"] = TESTDATA_FILES[dataset_name]
@@ -35,6 +40,12 @@ class TestOutputFileReading(unittest.TestCase):
     def test_Wombat_file(self):
         """ Test whether WOMBAT input is parsed correctly."""
         test_dataset_name = "WOMBAT"
+        df = load_file(test_dataset_name)
+        self.assertFalse(df.empty)
+
+    def test_MSFragger_file(self):
+        """ Test whether MSFragger input is parsed correctly."""
+        test_dataset_name = "MSFragger"
         df = load_file(test_dataset_name)
         self.assertFalse(df.empty)
 

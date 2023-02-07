@@ -1,4 +1,5 @@
 [mapper]
+"Sequence" = "Sequence"
 Raw_file = "Raw file"
 Proteins = "Proteins"
 Modified_sequence = "Modified sequence"

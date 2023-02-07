@@ -95,7 +95,10 @@ def main(
     if input_format == "AlphaPept":
         df = pd.read_csv(input_csv,low_memory=False,sep="\t")
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_alphapept.toml"))
-
+    if input_format == "MSFragger":
+        df = pd.read_csv(input_csv,low_memory=False,sep="\t")
+        parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_msfragger.toml"))
+    
     print(parse_settings)
     mapper = parse_settings["mapper"]
     replicate_mapper = parse_settings["replicate_mapper"]

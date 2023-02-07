@@ -1,0 +1,33 @@
+[mapper]
+"Peptide Sequence" = "Sequence"
+Protein = "Proteins"
+"Modified Sequence" = "Modified sequence"
+Charge = "Charge"
+
+[replicate_mapper]
+"A_1 Intensity" = 1
+"A_2 Intensity" = 1
+"A_3 Intensity" = 1
+"B_1 Intensity" = 2
+"B_2 Intensity" = 2
+"B_3 Intensity" = 2
+
+[species_dict]
+"YEAST" = "_YEAST"
+"ECOLI" = "_ECOLI"
+"HUMAN" = "_HUMAN"
+
+[species_expected_ratio]
+[species_expected_ratio.YEAST]
+"1|2" = 0.5
+
+[species_expected_ratio.ECOLI]
+"1|2" = 1.5
+    
+[species_expected_ratio.HUMAN]
+"1|2" = 1.0
+
+[general]
+contaminant_flag = "Cont_"
+decoy_flag = false
+min_count_multispec = 1

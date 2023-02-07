@@ -30,11 +30,11 @@ class TestOutputFileReading(unittest.TestCase):
         """ Test whether MaxQuant input is parsed correctly."""
         test_dataset_name = "MaxQuant"
         df = load_file(test_dataset_name)
-        self.assertEqual(0, 0)
+        self.assertFalse(df.empty)
 
     def test_Wombat_file(self):
         """ Test whether WOMBAT input is parsed correctly."""
         test_dataset_name = "WOMBAT"
         df = load_file(test_dataset_name)
-        self.assertEqual(0, 0)
+        self.assertFalse(df.empty)
 

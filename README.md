@@ -1,15 +1,18 @@
-# Proteobench
+# ProteoBench
 
-## Installation
-- Clone the repository using `git clone https://github.com/Proteobench/Proteobench.git`
-- Install the package by running `pip install .`
+## Installation instructions
 
-## Running the Application
-- Navigate to the webinterface folder `cd webinterface`
-- Run the following command in the terminal/command prompt: `streamlit run Home.py`
+For developement, install with:
 
-This will launch the Proteobench application in your web browser.
+```
+pip install --editable .
+```
 
-Enjoy using Proteobench!
+For development on the web interface, install with the optional dependencies:
 
+```
+pip install --editable .[web]
+```
+
+Using a virtual environment is recommended.
 

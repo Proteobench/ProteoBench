@@ -1,0 +1,32 @@
+[mapper]
+protein_group = "Proteins"
+"modified_peptide" = "Modified sequence"
+
+
+[replicate_mapper]
+abundance_A_1 = 1
+abundance_A_2 = 1
+abundance_A_3 = 1
+abundance_B_1 = 2
+abundance_B_2 = 2
+abundance_B_3 = 2
+
+[species_dict]
+"YEAST" = "_YEAST"
+"ECOLI" = "_ECOLI"
+"HUMAN" = "_HUMAN"
+
+[species_expected_ratio]
+[species_expected_ratio.YEAST]
+"1|2" = 0.5
+
+[species_expected_ratio.ECOLI]
+"1|2" = 1.5
+    
+[species_expected_ratio.HUMAN]
+"1|2" = 1.0
+
+[general]
+contaminant_flag = "Cont_"
+decoy_flag = true
+min_count_multispec = 1

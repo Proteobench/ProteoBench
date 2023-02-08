@@ -177,7 +177,7 @@ class StreamlitUI:
                     "6"
                 )
 
-                self.user_input["min_peptide_length"] = st.text_input(
+                self.user_input["max_peptide_length"] = st.text_input(
                     "max_peptide_length", 
                     "25"
                 )
@@ -219,7 +219,8 @@ class StreamlitUI:
             result_performance = main(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
-                self.user_input["mbr"]
+                self.user_input["mbr"],
+                self.user_input
             )
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")

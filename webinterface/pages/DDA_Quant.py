@@ -141,7 +141,7 @@ class StreamlitUI:
                     "6"
                 )
 
-                self.user_input["min_peptide_length"] = st.text_input(
+                self.user_input["max_peptide_length"] = st.text_input(
                     "max_peptide_length", 
                     "25"
                 )
@@ -177,9 +177,10 @@ class StreamlitUI:
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
         try:
-            result_performance = module_dda_quant.main(
+            result_performance = benchmarking(
                 self.user_input["input_csv"],
-                self.user_input["input_format"]
+                self.user_input["input_format"],
+                self.user_input
             )
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")

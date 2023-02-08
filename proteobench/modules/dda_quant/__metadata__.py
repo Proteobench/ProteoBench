@@ -28,9 +28,6 @@ class Metadata():
     #precursor_charge: int = 0,    
     #reproducibility: int = 0,
     #mean_reproducibility: int = 0,
-        
-
-
 
     def calculate_missing_quan_prec(self,df, nr_missing_0):
         nr_quan_prec_missing =[]
@@ -52,15 +49,12 @@ class Metadata():
             sum_ratios += prop_ratio
             nr_missing_0 += f
 
-
-        
         self.weighted_sum = round(sum_ratios, ndigits=3)
         self.nr_prec = len(df)
     
     def generate_id(self):
         self.id = self.search_engine + "_" + str(self.software_version) + "_" + str(datetime.timestamp(datetime.now()))
         print(self.id)
-
 
     def dump_json_object(self, file_name):
         f = open(file_name, "a")

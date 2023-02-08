@@ -16,10 +16,12 @@ def load_file(format_name:str):
         """ Method used to load the input file of a given format."""
         user_input = dict()
         user_input["input_csv"] = TESTDATA_FILES[format_name]
-        user_input["input_format"] = format_name
-        df = module_dda_quant.main(
+        user_input["input_format"] = INPUT_FORMATS[format_name]
+        user_input["version"] = "1.5.8.3"
+        df = dda_quant.benchmarking(
             user_input["input_csv"],
-            user_input["input_format"]
+            user_input["input_format"],
+            user_input
         )
         return df
 

@@ -6,6 +6,7 @@ import itertools
 import pandas as pd
 import toml
 from proteobench.modules.dda_quant import parse_dda_id, parse_settings_dda_quant
+from proteobench.modules.dda_quant.__metadata__ import Metadata
 
 def is_implemented() -> bool:
     """ Returns whether the module is fully implemented. """
@@ -134,5 +135,26 @@ def main(
                 species_expected_ratio
     )
 
+    _metadata = Metadata(
+        id = 0,
+        search_engine = input_format,
+        software_version = 0,
+        fdr_psm = 0,
+        fdr_peptide = 0,
+        fdr_protein = 0,
+        MBR = False,
+        precursor_tol = 0,
+        precursor_tol_unit = "Da",
+        fragmnent_tol = 0,
+        fragment_tol_unit = "Da",
+        enzyme_name = None,
+        missed_cleavages = 0,
+        min_pep_length = 0,
+        max_pep_length = 0
+    )
+    _metadata.generate_id()
+    _metadata.calculate_plot_data(result_performance)
+    _metadata.dump_json_object("results.json")
+
+
     return result_performance
-    

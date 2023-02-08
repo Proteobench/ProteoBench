@@ -22,9 +22,7 @@ def plot_bench(result_df):
     
     return fig
 
-
-    
-    
+   
 def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
     """
     Plot mean metrics in a scatterplot with plotly.  

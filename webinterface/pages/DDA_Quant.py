@@ -53,35 +53,109 @@ class StreamlitUI:
                 INPUT_FORMATS
             )
 
-            self.user_input["version"] = st.text_input(
-                "Search engine version", 
-                "1.5.8.3"
-            )
-
-            self.user_input["mbr"] = st.checkbox(
-                "Quantified with MBR"
-            )
-            
-            self.user_input["ms1_mass_tolerance"] = st.text_input(
-                "MS1 Mass tolerance", 
-                "10 ppm"
-            )
-
-            self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
-
-
             st.subheader("Add results to online repository")
 
-            
             self.user_input["pull_req"] = st.text_input(
                 "Open pull request to make results available to everyone (type \"YES\" to enable)", 
                 "NO"
             )
-            
 
-            with st.expander("What does this \"pull reqest\" mean?"):
-                st.markdown(self.texts.Help.pull_req)
+            with st.expander("Additional parameters"):
+                self.user_input["version"] = st.text_input(
+                    "Search engine version", 
+                    "1.5.8.3"
+                )
+
+                self.user_input["software_name"] = st.text_input(
+                    "software name", 
+                    "Search engine name"
+                )
+
+                self.user_input["fdr_psm"] = st.text_input(
+                    "FDR psm", 
+                    "0.01"
+                )
+                
+                self.user_input["fdr_peptide"] = st.text_input(
+                    "FDR peptide", 
+                    "0.01"
+                )
+
+                self.user_input["fdr_protein"] = st.text_input(
+                    "FDR protein", 
+                    "0.01"
+                )
+
+                self.user_input["precursor_mass_tolerance"] = st.text_input(
+                    "Precursor mass tolerance", 
+                    "10.0"
+                )
+
+                self.user_input["precursor_mass_tolerance_unit"] = st.selectbox(
+                    "Precursor tolerance unit",
+                    ("PPM", "Da")
+                )
+
+                self.user_input["fragment_mass_tolerance"] = st.text_input(
+                    "Fragment mass tolerance", 
+                    "10.0"
+                )
+
+                self.user_input["fragment_mass_tolerance_unit"] = st.selectbox(
+                    "",
+                    ("PPM", "Da")
+                )
+
+                self.user_input["search_enzyme_name"] = st.selectbox(
+                    "Enzyme",
+                    ("Trypsin", "Chemotrypsin")
+                )
+
+                self.user_input["allowed_missed_cleavage"] = st.text_input(
+                    "Allowed missed cleavage", 
+                    "2"
+                )
+
+                self.user_input["fixed_mods"] = st.text_input(
+                    "What fixed mods were set", 
+                    "CAM"
+                )
+
+                self.user_input["variable_mods"] = st.text_input(
+                    "What variable mods were set", 
+                    "MOxid"
+                )
+
+                self.user_input["precursor_charge"] = st.text_input(
+                    "Possible charge states", 
+                    "[2,3,4,5,6]"
+                )
+
+                self.user_input["max_num_mods_on_peptide"] = st.text_input(
+                    "Maximum number of modifications on peptides", 
+                    "2"
+                )
+
+                self.user_input["min_peptide_length"] = st.text_input(
+                    "Minimum peptide length", 
+                    "6"
+                )
+
+                self.user_input["min_peptide_length"] = st.text_input(
+                    "max_peptide_length", 
+                    "25"
+                )
+
+                self.user_input["mbr"] = st.checkbox(
+                    "Quantified with MBR"
+                )
+
+                self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
+
             submit_button = st.form_submit_button("Parse and bench")
+
+                
+            
 
         if submit_button:
             self._run_proteobench()

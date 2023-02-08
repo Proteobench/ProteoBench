@@ -2,6 +2,9 @@
 
 import logging
 from datetime import datetime
+from proteobench.modules.dda_quant import module_dda_quant
+
+from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
 try:
     from importlib.metadata import version
 except ImportError:
@@ -11,11 +14,9 @@ except ImportError:
 import streamlit as st
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
-from proteobench.modules.dda_quant import main
-from proteobench.modules.dda_quant.plot.plot import plot_bench
+from proteobench.modules.dda_quant import plot_dda_id
 
 logger = logging.getLogger(__name__)
-
 
 class StreamlitUI:
     """Proteobench Streamlit UI."""
@@ -48,8 +49,7 @@ class StreamlitUI:
 
             self.user_input["input_format"] = st.selectbox(
                 "Search engine",
-
-                ("MaxQuant", "AlphaPept", "Proline", "WOMBAT", "MSFragger")
+                INPUT_FORMATS
             )
 
             self.user_input["version"] = st.text_input(
@@ -78,10 +78,7 @@ class StreamlitUI:
             submit_button = st.form_submit_button("Parse and bench")
 
         if submit_button:
-            try:
-                self._run_proteobench()
-            except MissingPeptideCSV:
-                st.error(self.texts.Errors.missing_peptide_csv)
+            self._run_proteobench()
 
     def _sidebar(self):
         """Format sidebar."""
@@ -100,10 +97,9 @@ class StreamlitUI:
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
         try:
-            result_performance = main(
+            result_performance = module_dda_quant.main(
                 self.user_input["input_csv"],
-                self.user_input["input_format"],
-                self.user_input["mbr"]
+                self.user_input["input_format"]
             )
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
@@ -120,7 +116,7 @@ class StreamlitUI:
 
             # Plot results
             st.subheader("Ratio between conditions")
-            fig = plot_bench(result_performance)
+            fig = plot_dda_id.plot_bench(result_performance)
             st.plotly_chart(fig, use_container_width=True)
 
             sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)

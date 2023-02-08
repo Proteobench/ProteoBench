@@ -1,14 +1,16 @@
 import pandas as pd
+from typing import Dict, List
 
 def prepare_df(
-            df,
-            mapper,
-            replicate_mapper,
-            decoy_flag,
-            species_dict,
-            contaminant_flag,
-            min_count_multispec
-        ):
+            df:pd.DataFrame,
+            mapper:Dict[str,str],
+            replicate_mapper:Dict[str,int],
+            decoy_flag:str,
+            species_dict:Dict[str,str],
+            contaminant_flag:str,
+            min_count_multispec:int
+        ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+    """ Convert a search engine output into a generic format supported by the module.  """
     df.rename(columns=mapper,inplace=True)
 
     replicate_to_raw = {}

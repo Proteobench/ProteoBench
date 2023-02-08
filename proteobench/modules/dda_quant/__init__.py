@@ -5,6 +5,7 @@ import toml
 import os
 from proteobench.modules.dda_quant.io.parse import prepare_df
 import re
+from proteobench.modules.dda_quant.io.__metadata__ import Metadata
 
 def get_quant(
         filtered_df,
@@ -142,6 +143,28 @@ def main(
                 replicate_mapper,
                 species_expected_ratio
     )
+    
+    _metadata = Metadata(
+        id = 0,
+        search_engine = input_format,
+        software_version = 0,
+        fdr_psm = 0,
+        fdr_peptide = 0,
+        fdr_protein = 0,
+        MBR = False,
+        precursor_tol = 0,
+        precursor_tol_unit = "Da",
+        fragmnent_tol = 0,
+        fragment_tol_unit = "Da",
+        enzyme_name = None,
+        missed_cleavages = 0,
+        min_pep_length = 0,
+        max_pep_length = 0
+    )
+    _metadata.generate_id()
+    _metadata.calculate_plot_data(result_performance)
+    _metadata.dump_json_object("results.json")
+
 
     return result_performance
     

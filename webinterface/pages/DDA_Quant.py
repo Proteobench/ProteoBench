@@ -25,7 +25,7 @@ from datetime import datetime
 from collections import Counter
 import toml
 from proteobench.modules.dda_quant import main
-from proteobench.modules.dda_quant.plot.plot import plot_bench
+from proteobench.modules.dda_quant.plot.plot import plot_bench, plot_metric 
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +79,11 @@ class StreamlitUI:
 
             self.user_input["mbr"] = st.checkbox(
                 "Quantified with MBR"
+            )
+            
+            self.user_input["ms1_mass_tolerance"] = st.text_input(
+                "MS1 Mass tolerance", 
+                "10 ppm"
             )
 
             self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
@@ -142,6 +147,13 @@ class StreamlitUI:
             st.subheader("Ratio between conditions")
             fig = plot_bench(result_performance)
             st.plotly_chart(fig, use_container_width=True)
+            
+            
+            # Plot results
+            st.subheader("Mean error between conditions")
+            fig2 = plot_metric(result_performance)
+            st.plotly_chart(fig2, use_container_width=True)
+            
 
             sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
 

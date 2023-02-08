@@ -72,10 +72,4 @@ def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
     
     
     
-    
-    
-    
-    
-    
-    
-    
+

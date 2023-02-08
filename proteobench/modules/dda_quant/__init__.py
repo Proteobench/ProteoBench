@@ -87,12 +87,12 @@ def get_vertical(
 def strip_sequence_wombat(seq):
     return re.sub("([\(\[]).*?([\)\]])", "", seq)
 
-def main(
+def benchmarking(
         input_csv: str,
         input_format: str,
-        mbr: str, 
-        user_input,   
+        user_input 
     ):
+    """ The method is used to perform the full benchmarking of the data. """
 
     dir_f = os.path.join(os.path.dirname(os.path.realpath(__file__)))
     # Parse user config        

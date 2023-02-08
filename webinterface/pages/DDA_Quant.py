@@ -24,8 +24,8 @@ from datetime import datetime
 
 from collections import Counter
 import toml
-from proteobench.modules.dda_quant import main
-from proteobench.modules.dda_quant.plot.plot import plot_bench 
+from proteobench.modules.dda_quant import benchmarking
+from proteobench.modules.dda_quant.plot.plot import plot_bench, plot_metric
 
 logger = logging.getLogger(__name__)
 
@@ -199,10 +199,9 @@ class StreamlitUI:
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
         try:
-            result_performance = main(
+            result_performance = benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
-                self.user_input["mbr"],
                 self.user_input
             )
         except Exception as e:

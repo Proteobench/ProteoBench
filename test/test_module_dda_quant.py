@@ -22,11 +22,11 @@ def load_file(format_name:str):
         user_input = dict()
         user_input["input_csv"] = TESTDATA_FILES[format_name]
         user_input["input_format"] = INPUT_FORMATS[format_name]
-        user_input["mbr"] = True
-        df = dda_quant.main(
+        user_input["version"] = "1.5.8.3"
+        df = dda_quant.benchmarking(
             user_input["input_csv"],
             user_input["input_format"],
-            user_input["mbr"]
+            user_input
         )
         return df
 

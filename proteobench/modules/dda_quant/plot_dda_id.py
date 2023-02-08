@@ -1,5 +1,6 @@
 import numpy as np
 import plotly.figure_factory as ff
+import plotly.graph_objects as go
 
 def plot_bench(result_df):
     """Plot results with Plotly Express."""
@@ -18,5 +19,57 @@ def plot_bench(result_df):
     fig = ff.create_distplot(hist_data, group_labels,show_hist=False)
 
     fig.update_xaxes(range = [0,4])
-    return fig
     
+    return fig
+
+
+    
+    
+def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
+    """
+    Plot mean metrics in a scatterplot with plotly.  
+    
+    x = median absolute precentage error between all meansured and expected ratio
+    y = total number of precursours quantified in all raw files 
+    
+    Input: result_df
+    
+    Information in dataframe to show in hover:
+    workflow identifier	software_name	software_version	match_between_runs	precursor_mass_tolerance
+    fragment_mass_tolerance allowed_missed_cleavage	fixed_mods	variable_mods min_peptide_length
+    max_peptide_length
+  
+    
+    Return: Plotly figure object
+    
+    """
+
+    # read data from input_dict (not ready)
+    #df = pd.DataFrame(input_dict)
+    
+    
+    # add hover text. 
+    hover_text = [] 
+    
+    # add all info
+    for index, row in result_df.iterrows():
+        hover_text.append("info") # f"workflow identifier: {row["workflow identifier"]} software_name: {row["software_name"]} match between runs : {row["match_between_runs"]} precursor mass tolerance :{row["precursor_mass_tolerance"]} fragment mass tolerance: {row["fragment_mass_tolerance"]}"
+        
+
+    df["text"] = hover_text
+    
+        
+    fig = go.Figure(data=[go.Scatter(
+        x=result_df["x"], 
+        y=result_df["y"],
+        mode="markers",
+        text = result_df["text"], 
+        marker=dict(color=result_df["software_name"], 
+                   size=result_df["cv"]))])
+    
+    
+    return fig 
+    
+    
+    
+

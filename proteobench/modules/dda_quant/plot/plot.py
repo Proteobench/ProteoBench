@@ -21,13 +21,8 @@ def plot_bench(result_df):
     fig.update_xaxes(range = [0,4])
     
     return fig
-
-
-
-
-
     
-    
+
 def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
     """
     Plot mean metrics in a scatterplot with plotly.  
@@ -50,17 +45,14 @@ def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
     # read data from input_dict (not ready)
     #df = pd.DataFrame(input_dict)
     
-    
     # add hover text. 
     hover_text = [] 
     
     # add all info
     for index, row in result_df.iterrows():
         hover_text.append(f"workflow identifier: {row["workflow identifier"]} software_name: {row["software_name"]}")
-        
 
     df["text"] = hover_text
-    
         
     fig = go.Figure(data=[go.Scatter(
         x=result_df["x"], 
@@ -70,15 +62,4 @@ def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
         marker=dict(color=result_df["software_name"], 
                    size=result_df["cv"]))])
     
-    
-    return fig 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    return fig

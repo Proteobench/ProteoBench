@@ -18,7 +18,7 @@ def get_quant(
         
     replicate_quant_list = {}
 
-    for replicate,replicate_runs in replicate_to_raw.items():
+    for replicate, replicate_runs in replicate_to_raw.items():
         selected_replicate_df = quant_df.index.get_level_values("Raw file").isin(replicate_runs)
         replicate_quant_df = quant_df[selected_replicate_df]
         

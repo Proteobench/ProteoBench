@@ -74,11 +74,13 @@ class StreamlitUI:
 
             self.user_input["version"] = st.text_input(
                 "Search engine version", 
-                "1.5.8.3"
+                "1.5.8.3",
+                key="version_input_1"
             )
 
             self.user_input["mbr"] = st.checkbox(
-                "Quantified with MBR"
+                "Quantified with MBR",
+                key="mbr_input_1"
             )
             
             self.user_input["ms1_mass_tolerance"] = st.text_input(
@@ -86,8 +88,12 @@ class StreamlitUI:
                 "10 ppm"
             )
 
-            self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
-
+            self.user_input["workflow_description"] = st.text_area(
+                "Fill in details not specified above, such as:",
+                "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...",
+                height=275,
+                key="workflow_description_input_1"
+                )
 
             st.subheader("Add results to online repository")
 
@@ -99,7 +105,8 @@ class StreamlitUI:
             with st.expander("Additional parameters"):
                 self.user_input["version"] = st.text_input(
                     "Search engine version", 
-                    "1.5.8.3"
+                    "1.5.8.3",
+                    key="version_input_2"
                 )
 
                 self.user_input["software_name"] = st.text_input(
@@ -183,10 +190,16 @@ class StreamlitUI:
                 )
 
                 self.user_input["mbr"] = st.checkbox(
-                    "Quantified with MBR"
+                    "Quantified with MBR",
+                    key="mbr_input_2"
                 )
 
-                self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
+                self.user_input["workflow_description"] = st.text_area(
+                    "Fill in details not specified above, such as:",
+                    "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...",
+                    height=275,
+                    key="workflow_description_input_2"
+                    )
 
             submit_button = st.form_submit_button("Parse and bench")
 

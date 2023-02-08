@@ -72,7 +72,6 @@ class StreamlitUI:
                 ("MaxQuant", "AlphaPept", "Proline", "WOMBAT", "MSFragger")
             )
 
-<<<<<<< Updated upstream
             self.user_input["version"] = st.text_input(
                 "Search engine version", 
                 "1.5.8.3"
@@ -90,8 +89,6 @@ class StreamlitUI:
             self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
 
 
-=======
->>>>>>> Stashed changes
             st.subheader("Add results to online repository")
 
             self.user_input["pull_req"] = st.text_input(

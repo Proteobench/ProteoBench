@@ -97,7 +97,7 @@ def main(
         df = pd.read_csv(input_csv,sep="\t",low_memory=False)
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_maxquant.toml"))
     elif input_format == "AlphaPept":
-        df = pd.read_csv(input_csv,low_memory=False,sep="\t")
+        df = pd.read_csv(input_csv,low_memory=False)
         parse_settings = toml.load(os.path.join(dir_f,"io/parse_settings_alphapept.toml"))
     elif input_format == "MSFragger":
         df = pd.read_csv(input_csv,low_memory=False,sep="\t")

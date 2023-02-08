@@ -6,7 +6,8 @@ import proteobench.modules.dda_quant as dda_quant
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 TESTDATA_FILES = { "WOMBAT"         : os.path.join(TESTDATA_DIR, 'WOMBAT_stand_pep_quant_mergedproline.csv'),
                    "MaxQuant"         : os.path.join(TESTDATA_DIR, 'MaxQuant_evidence_sample.txt'),
-                   "MSFragger"         : os.path.join(TESTDATA_DIR, 'MSFragger_combined_ion.tsv')
+                   "MSFragger"         : os.path.join(TESTDATA_DIR, 'MSFragger_combined_ion.tsv'),
+                   "AlphaPept"         : os.path.join(TESTDATA_DIR, 'AlphaPept_subset.csv')
             }
 
 INPUT_FORMATS = {   "MaxQuant" : "MaxQuant",

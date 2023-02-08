@@ -11,6 +11,14 @@ abundance_B_1 = 2
 abundance_B_2 = 2
 abundance_B_3 = 2
 
+[run_mapper]
+abundance_A_1 = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"
+abundance_A_2 = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02"
+abundance_A_3 = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03"
+abundance_B_1 = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"
+abundance_B_2 = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02"
+abundance_B_3 = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03"
+
 [species_dict]
 "YEAST" = "_YEAST"
 "ECOLI" = "_ECOLI"

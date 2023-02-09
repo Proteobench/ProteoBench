@@ -179,13 +179,19 @@ class StreamlitUI:
         st.header("Running Proteobench")
         status_placeholder = st.empty()
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
+        
+        if 'all_datapoints' not in st.session_state:
+            st.session_state['all_datapoints'] = None
+        
 
         try:
-            result_performance = module_dda_quant.benchmarking(
+            result_performance, all_datapoints = module_dda_quant.benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
-                self.user_input
+                self.user_input,
+                st.session_state['all_datapoints']
             )
+            st.session_state['all_datapoints'] = all_datapoints
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)

@@ -9,6 +9,10 @@ def prepare_df(
         ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
     """ Convert a search engine output into a generic format supported by the module.  """
 
+    for k,v in parse_settings.mapper.items():
+        if k not in df.columns:
+            raise ImportError(f"Column {k} not found in input dataframe. Please check input file and selected search engine.")
+
     df.rename(columns=parse_settings.mapper,inplace=True)
 
     replicate_to_raw = {}

@@ -1,5 +1,35 @@
 from git import Repo
 import os
+from tempfile import TemporaryDirectory
+
+def clone_pr(
+        df_new,
+        token,
+        username="Proteobot",
+        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+        branch_name="new_branch"
+    ):
+    t_dir = TemporaryDirectory().name
+
+    clone_repo(
+            clone_dir=t_dir,
+            token=token,
+            remote_git=remote_git,
+            username=username
+        )
+
+    # do the pd.write_json() here!!!
+    #f = open(os.path.join(t_dir,"newf.txt"),"w")
+    #f.write("asdfsdaf")
+    #f.close()
+
+    pr_github(
+        clone_dir=t_dir,
+        token=token,
+        remote_git=remote_git,
+        username=username,
+        branch_name=branch_name
+    )
 
 def clone_repo(
         clone_dir="K:/pb/",

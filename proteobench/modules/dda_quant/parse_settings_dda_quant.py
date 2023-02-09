@@ -2,7 +2,9 @@
 import os
 from dataclasses import dataclass
 from typing import List
+
 import toml
+
 #import proteobench.modules.dda_quant.p
 
 PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), 'io_parse_settings')
@@ -14,7 +16,7 @@ PARSE_SETTINGS_FILES = { "WOMBAT"     : os.path.join(PARSE_SETTINGS_DIR, 'parse_
                         "AlphaPept"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_alphapept.toml')
             }
 
-INPUT_FORMATS:list[str] = ("MaxQuant", 
+INPUT_FORMATS = ("MaxQuant", 
                 "AlphaPept",
                 "MSFragger",
                 "Proline",

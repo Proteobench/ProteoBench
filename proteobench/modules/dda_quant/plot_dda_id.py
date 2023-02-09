@@ -1,6 +1,9 @@
 import numpy as np
 import plotly.figure_factory as ff
-import plotly.graph_objects as go
+import plotly.graph_objects as go  
+import plotly.express as px
+import streamlit as st 
+from streamlit_plotly_events import plotly_events
 
 def plot_bench(result_df):
     """Plot results with Plotly Express."""
@@ -23,7 +26,7 @@ def plot_bench(result_df):
     return fig
 
    
-def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
+def plot_metric(meta_data): 
     """
     Plot mean metrics in a scatterplot with plotly.  
     
@@ -41,33 +44,49 @@ def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
     Return: Plotly figure object
     
     """
-
-    # read data from input_dict (not ready)
-    #df = pd.DataFrame(input_dict)
-    
     
     # add hover text. 
-    hover_text = [] 
+    #t = f"Workflow Identifier: {meta_data.id}<br>MBR: {meta_data.MBR}<br>Precursor Mass Tolerance: {meta_data.precursor_tol} {meta_data.precursor_tol_unit}<br>Fragment Mass Tolerance: {meta_data.fragmnent_tol} {meta_data.fragment_tol_unit}"
     
-    # add all info
-    for index, row in result_df.iterrows():
-        hover_text.append("info") # f"workflow identifier: {row["workflow identifier"]} software_name: {row["software_name"]} match between runs : {row["match_between_runs"]} precursor mass tolerance :{row["precursor_mass_tolerance"]} fragment mass tolerance: {row["fragment_mass_tolerance"]}"
-        
-
-    df["text"] = hover_text
+    #hover_text = [t, t]   
+    
+    #colors = ["MaxQuant", "AlphaPept"]
+    #colors = meta_data["search_engine"]
+    
+    x = [meta_data.weighted_sum, meta_data.weighted_sum + 15] 
+    y = [meta_data.nr_prec, meta_data.nr_prec + 42] 
+    
+    search_engine_colors = {"MaxQuant": px.colors.qualitative.Pastel2[2], 
+                            "AlphaPept": px.colors.qualitative.Dark24[22], 
+                            "MSFragger": px.colors.qualitative.Pastel2[5], 
+                            "WOMBAT": px.colors.qualitative.D3[5]
+                           }
     
         
-    fig = go.Figure(data=[go.Scatter(
-        x=result_df["x"], 
-        y=result_df["y"],
-        mode="markers",
-        text = result_df["text"], 
-        marker=dict(color=result_df["software_name"], 
-                   size=result_df["cv"]))])
+    #fig = go.Figure(data=[go.Scatter(
+    #    x=x, 
+    #    y=y,
+    #    mode="markers",
+    #    text = hover_text)]) #, 
+    #    #marker=dict(color=meta_data.software_version))]) # , size=result_df["cv"]  
+    
+    
+    fig = px.scatter(meta_data,
+        x="weighted_sum", 
+        y="nr_prec",
+        color="search_engine")
+        #hover_data = "hover_text") #]) #, 
+    #    #marker=dict(color=meta_data.software_version))]) # , size=result_df["cv"] 
+    
+    selected_points = plotly_events(fig)
+    
+    if len(selected_points) == 0:
+        st.warning('Please select a data point')
+    else:
+        st.write(selected_points[0])
+    
     
     
     return fig 
-    
-    
     
 

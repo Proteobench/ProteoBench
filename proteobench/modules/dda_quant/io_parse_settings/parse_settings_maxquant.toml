@@ -1,8 +1,8 @@
 [mapper]
 "Sequence" = "Sequence"
-Raw_file = "Raw file"
+"Raw file" = "Raw file"
 Proteins = "Proteins"
-Modified_sequence = "Modified sequence"
+"Modified sequence" = "Modified sequence"
 Charge = "Charge"
 
 [replicate_mapper]

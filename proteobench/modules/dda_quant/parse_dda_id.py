@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pandas as pd
 from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
 from typing import Dict, List
@@ -7,6 +8,10 @@ def prepare_df(
             parse_settings:ParseSettings
         ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
     """ Convert a search engine output into a generic format supported by the module.  """
+
+    for k,v in parse_settings.mapper.items():
+        if k not in df.columns:
+            raise ImportError(f"Column {k} not found in input dataframe. Please check input file and selected search engine.")
 
     df.rename(columns=parse_settings.mapper,inplace=True)
 

@@ -20,6 +20,7 @@ INPUT_FORMATS:list[str] = ("MaxQuant",
                 "Proline",
                 "WOMBAT")
 
+DDA_QUANT_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json"
         
 
 class ParseSettings:

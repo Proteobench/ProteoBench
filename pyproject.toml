@@ -19,12 +19,25 @@ dynamic = ["version", "description"]
 dependencies = [
     "pandas",
     "numpy",
-    "plotly",
+    "plotly", "streamlit-plotly-events",
     "matplotlib",
-    "importlib-metadata; python_version < '3.8'"
+    "importlib-metadata; python_version < '3.8'",
+    "toml"
 ]
 
 [project.optional-dependencies]
+dev = [
+    "black",
+]
+docs = [
+    "numpydoc>=1,<2",
+    "recommonmark",
+    "sphinx",
+    "sphinx-autobuild",
+    "sphinx-autodoc-typehints",
+    "sphinx-mdinclude",
+    "sphinx-rtd-theme",
+]
 web = [
     "streamlit",
     "scipy"

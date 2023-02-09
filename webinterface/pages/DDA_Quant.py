@@ -211,9 +211,10 @@ class StreamlitUI:
             st.plotly_chart(fig, use_container_width=True)
             
             
-            # Plot results
             st.subheader("Mean error between conditions")
-            fig2 = plot_dda_id.plot_metric(result_performance)
+            st.text(all_datapoints.head(100))
+            
+            fig2 = plot_dda_id.plot_metric(all_datapoints) 
             st.plotly_chart(fig2, use_container_width=True)
 
             sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)

@@ -19,7 +19,7 @@ dynamic = ["version", "description"]
 dependencies = [
     "pandas",
     "numpy",
-    "plotly",
+    "plotly", "streamlit-plotly-events",
     "matplotlib",
     "importlib-metadata; python_version < '3.8'",
     "toml"

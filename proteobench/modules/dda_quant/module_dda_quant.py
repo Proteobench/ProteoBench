@@ -130,6 +130,14 @@ def load_data_points_from_repo():
     df = pd.read_json(DDA_QUANT_RESULTS_PATH)
     return df
 
+def add_current_data_point(all_datapoints, current_datapoint):
+    if (not isinstance(all_datapoints,pd.DataFrame)):
+        all_datapoints = load_data_points_from_repo()
+    else:
+        all_datapoints = all_datapoints.T
+    all_datapoints = pd.concat([all_datapoints, current_datapoint],axis=1)
+    all_datapoints = all_datapoints.T.reset_index(drop=True)
+    return all_datapoints
 
 def benchmarking(
         input_file: str,
@@ -165,11 +173,6 @@ def benchmarking(
     )
 
     current_datapoint = compute_metadata(result_performance, input_format, user_input)
-
-    if (not isinstance(all_datapoints,pd.DataFrame)):
-        all_datapoints = load_data_points_from_repo()
-    else:
-        all_datapoints = all_datapoints.T
-    all_datapoints = pd.concat([all_datapoints, current_datapoint],axis=1)
-    all_datapoints = all_datapoints.T.reset_index(drop=True)
+    all_datapoints = add_current_data_point(all_datapoints, current_datapoint)
+    
     return result_performance, all_datapoints

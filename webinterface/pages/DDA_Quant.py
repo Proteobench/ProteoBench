@@ -153,7 +153,8 @@ class StreamlitUI:
                 self.user_input["workflow_description"] = st.text_area(
                     "Fill in details not specified above, such as:",
                     "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", 
-                    height=275)
+                    height=275
+                    )
 
             submit_button = st.form_submit_button("Parse and bench")
 

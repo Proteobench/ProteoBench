@@ -79,6 +79,35 @@ def strip_sequence_wombat(seq:str) -> str:
     """ Remove parts of the peptide sequence that contain modifications. """
     return re.sub("([\(\[]).*?([\)\]])", "", seq)
 
+def compute_metadata(
+        result_performance:pd.DataFrame,
+        input_format:str,
+        user_input:dict,
+        json_dump_path:str
+        ) -> Metadata:
+    """ Method used to compute metadata for the provided result. """
+    result_metadata = Metadata(
+        id = input_format + "_" + user_input["version"] + "_" + str(datetime.datetime.now()),
+        search_engine = input_format,
+        software_version = user_input["version"],
+        fdr_psm = user_input["fdr_psm"],
+        fdr_peptide = user_input["fdr_peptide"],
+        fdr_protein = user_input["fdr_protein"],
+        MBR = user_input["mbr"],
+        precursor_tol = user_input["precursor_mass_tolerance"],
+        precursor_tol_unit = user_input["precursor_mass_tolerance_unit"],
+        fragmnent_tol = user_input["fragment_mass_tolerance"],
+        fragment_tol_unit = user_input["fragment_mass_tolerance_unit"],
+        enzyme_name = user_input["search_enzyme_name"],
+        missed_cleavages = user_input["allowed_missed_cleavage"], 
+        min_pep_length = user_input["min_peptide_length"],
+        max_pep_length = user_input["max_peptide_length"]
+    )
+    result_metadata.generate_id()
+    result_metadata.calculate_plot_data(result_performance)
+    result_metadata.dump_json_object(json_dump_path)
+
+    return result_metadata
 
 def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
     """ Method loads dataframe from a csv depending on its format."""
@@ -131,36 +160,4 @@ def benchmarking(
 
     _metadata = compute_metadata(result_performance, input_format, user_input, "proteobench/modules/dda_quant/results.json")
 
-
     return result_performance
-
-
-def compute_metadata(
-        result_performance:pd.DataFrame,
-        input_format:str,
-        user_input:dict,
-        json_dump_path:str
-        ) -> Metadata:
-    """ Method used to compute metadata for the provided result. """
-    result_metadata = Metadata(
-        id = input_format + "_" + user_input["version"] + "_" + str(datetime.datetime.now()),
-        search_engine = input_format,
-        software_version = user_input["version"],
-        fdr_psm = user_input["fdr_psm"],
-        fdr_peptide = user_input["fdr_peptide"],
-        fdr_protein = user_input["fdr_protein"],
-        MBR = user_input["mbr"],
-        precursor_tol = user_input["precursor_mass_tolerance"],
-        precursor_tol_unit = user_input["precursor_mass_tolerance_unit"],
-        fragmnent_tol = user_input["fragment_mass_tolerance"],
-        fragment_tol_unit = user_input["fragment_mass_tolerance_unit"],
-        enzyme_name = user_input["search_enzyme_name"],
-        missed_cleavages = user_input["allowed_missed_cleavage"], 
-        min_pep_length = user_input["min_peptide_length"],
-        max_pep_length = user_input["max_peptide_length"]
-    )
-    result_metadata.generate_id()
-    result_metadata.calculate_plot_data(result_performance)
-    result_metadata.dump_json_object(json_dump_path)
-
-    return result_metadata

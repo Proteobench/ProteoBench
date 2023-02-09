@@ -19,7 +19,22 @@ def plot_bench(result_df):
         "ECOLI",
     ]
 
-    fig = ff.create_distplot(hist_data, group_labels,show_hist=False)
+    fig = ff.create_distplot(hist_data, group_labels, show_hist=False) 
+    
+    
+    fig.update_layout(
+        title="Distplot",
+        xaxis=dict(
+            title="1|2_ratio",
+            color='white',
+            gridwidth=2,
+        ),
+        yaxis=dict(
+            title="Density",
+            color='white', 
+            gridwidth=2,
+        )
+    )
 
     fig.update_xaxes(range = [0,4])
     
@@ -33,7 +48,7 @@ def plot_metric(meta_data):
     x = median absolute precentage error between all meansured and expected ratio
     y = total number of precursours quantified in all raw files 
     
-    Input: result_df
+    Input: meta_data
     
     Information in dataframe to show in hover:
     workflow identifier	software_name	software_version	match_between_runs	precursor_mass_tolerance
@@ -43,6 +58,44 @@ def plot_metric(meta_data):
     
     Return: Plotly figure object
     
+   
+    color list :
+    aliceblue, antiquewhite, aqua, aquamarine, azure,
+            beige, bisque, black, blanchedalmond, blue,
+            blueviolet, brown, burlywood, cadetblue,
+            chartreuse, chocolate, coral, cornflowerblue,
+            cornsilk, crimson, cyan, darkblue, darkcyan,
+            darkgoldenrod, darkgray, darkgrey, darkgreen,
+            darkkhaki, darkmagenta, darkolivegreen, darkorange,
+            darkorchid, darkred, darksalmon, darkseagreen,
+            darkslateblue, darkslategray, darkslategrey,
+            darkturquoise, darkviolet, deeppink, deepskyblue,
+            dimgray, dimgrey, dodgerblue, firebrick,
+            floralwhite, forestgreen, fuchsia, gainsboro,
+            ghostwhite, gold, goldenrod, gray, grey, green,
+            greenyellow, honeydew, hotpink, indianred, indigo,
+            ivory, khaki, lavender, lavenderblush, lawngreen,
+            lemonchiffon, lightblue, lightcoral, lightcyan,
+            lightgoldenrodyellow, lightgray, lightgrey,
+            lightgreen, lightpink, lightsalmon, lightseagreen,
+            lightskyblue, lightslategray, lightslategrey,
+            lightsteelblue, lightyellow, lime, limegreen,
+            linen, magenta, maroon, mediumaquamarine,
+            mediumblue, mediumorchid, mediumpurple,
+            mediumseagreen, mediumslateblue, mediumspringgreen,
+            mediumturquoise, mediumvioletred, midnightblue,
+            mintcream, mistyrose, moccasin, navajowhite, navy,
+            oldlace, olive, olivedrab, orange, orangered,
+            orchid, palegoldenrod, palegreen, paleturquoise,
+            palevioletred, papayawhip, peachpuff, peru, pink,
+            plum, powderblue, purple, red, rosybrown,
+            royalblue, rebeccapurple, saddlebrown, salmon,
+            sandybrown, seagreen, seashell, sienna, silver,
+            skyblue, slateblue, slategray, slategrey, snow,
+            springgreen, steelblue, tan, teal, thistle, tomato,
+            turquoise, violet, wheat, white, whitesmoke,
+            yellow, yellowgreen
+    
     """
     
     # add hover text. 
@@ -50,41 +103,52 @@ def plot_metric(meta_data):
     
     #hover_text = [t, t]   
     
-    #colors = ["MaxQuant", "AlphaPept"]
-    #colors = meta_data["search_engine"]
     
-    x = [meta_data.weighted_sum, meta_data.weighted_sum + 15] 
-    y = [meta_data.nr_prec, meta_data.nr_prec + 42] 
     
-    search_engine_colors = {"MaxQuant": px.colors.qualitative.Pastel2[2], 
-                            "AlphaPept": px.colors.qualitative.Dark24[22], 
-                            "MSFragger": px.colors.qualitative.Pastel2[5], 
-                            "WOMBAT": px.colors.qualitative.D3[5]
-                           }
-    
+    search_engine_colors = {"MaxQuant": "midnightblue", 
+                            "AlphaPept": "grey", 
+                            "MSFragger": "orange", 
+                            "WOMBAT": "firebrick"
+                           } 
         
-    #fig = go.Figure(data=[go.Scatter(
-    #    x=x, 
-    #    y=y,
-    #    mode="markers",
-    #    text = hover_text)]) #, 
-    #    #marker=dict(color=meta_data.software_version))]) # , size=result_df["cv"]  
+    colors = [search_engine_colors[engine] for engine in meta_data["search_engine"]]
+    
+    fig = go.Figure(data=[go.Scatter(
+        x=meta_data["weighted_sum"], 
+        y=meta_data["nr_prec"],
+        mode='markers',
+        #text = , 
+        marker=dict(
+            color=colors,
+            showscale=True, 
+            size = 20
+            ))])
+    
+    fig.update_layout(
+        title="Metric",
+        xaxis=dict(
+            title="Weighted sum",
+            gridcolor='white',
+            gridwidth=2,
+        ),
+        yaxis=dict(
+            title="Numper of precursors",
+            gridcolor='white',
+            gridwidth=2,
+        )
+    )
     
     
-    fig = px.scatter(meta_data,
-        x="weighted_sum", 
-        y="nr_prec",
-        color="search_engine")
-        #hover_data = "hover_text") #]) #, 
-    #    #marker=dict(color=meta_data.software_version))]) # , size=result_df["cv"] 
+    #selected_points = plotly_events(
+    #    fig,
+    #    select_event=True,
+    #    key='Smth'
+    #)
     
-    selected_points = plotly_events(fig)
-    
-    if len(selected_points) == 0:
-        st.warning('Please select a data point')
-    else:
-        st.write(selected_points[0])
-    
+    #if len(selected_points) == 0:
+    #    st.warning('Please select a data point')
+    #else:
+    #    st.write(selected_points)
     
     
     return fig 

@@ -99,7 +99,7 @@ def plot_metric(meta_data):
     """
     
     # add hover text. 
-    #t = f"Workflow Identifier: {meta_data.id}<br>MBR: {meta_data.MBR}<br>Precursor Mass Tolerance: {meta_data.precursor_tol} {meta_data.precursor_tol_unit}<br>Fragment Mass Tolerance: {meta_data.fragmnent_tol} {meta_data.fragment_tol_unit}"
+    #
     
     #hover_text = [t, t]   
     
@@ -111,13 +111,18 @@ def plot_metric(meta_data):
                             "WOMBAT": "firebrick"
                            } 
         
-    colors = [search_engine_colors[engine] for engine in meta_data["search_engine"]]
+    colors = [search_engine_colors[engine] for engine in meta_data["search_engine"]] 
+    
+    #hover_texts = [ f"Workflow Identifier: {search_engine_colors["id"]}<br>MBR: {meta_data["MBR"]}" for row in meta_data] 
+    
+    
+    # <br>Precursor Mass Tolerance: {meta_data.precursor_tol} {meta_data.precursor_tol_unit}<br>Fragment Mass Tolerance: {meta_data.fragmnent_tol} {meta_data.fragment_tol_unit} 
     
     fig = go.Figure(data=[go.Scatter(
         x=meta_data["weighted_sum"], 
         y=meta_data["nr_prec"],
         mode='markers',
-        #text = , 
+        #text = hover_texts, 
         marker=dict(
             color=colors,
             showscale=True, 

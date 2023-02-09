@@ -181,6 +181,12 @@ class StreamlitUI:
             fig = st.session_state[FIG1]
         st.plotly_chart(fig, use_container_width=True)
             
+<<<<<<< Updated upstream
+=======
+            st.subheader("Mean error between conditions")
+            # show metadata 
+            #st.text(all_datapoints.head(100))
+>>>>>>> Stashed changes
             
         st.subheader("Mean error between conditions")
         st.text(all_datapoints.head(100))

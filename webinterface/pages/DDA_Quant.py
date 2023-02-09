@@ -185,7 +185,11 @@ class StreamlitUI:
         
 
         try:
+<<<<<<< Updated upstream
             result_performance, all_datapoints = module_dda_quant.benchmarking(
+=======
+            result_performance, meta_data = module_dda_quant.benchmarking(
+>>>>>>> Stashed changes
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
@@ -211,9 +215,8 @@ class StreamlitUI:
             st.plotly_chart(fig, use_container_width=True)
             
             
-            # Plot results
             st.subheader("Mean error between conditions")
-            fig2 = plot_dda_id.plot_metric(result_performance)
+            fig2 = plot_dda_id.plot_metric(meta_data) 
             st.plotly_chart(fig2, use_container_width=True)
 
             sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)

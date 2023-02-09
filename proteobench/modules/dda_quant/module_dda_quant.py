@@ -172,7 +172,13 @@ def benchmarking(
                 parse_settings
     )
 
+<<<<<<< Updated upstream
     current_datapoint = compute_metadata(result_performance, input_format, user_input)
     all_datapoints = add_current_data_point(all_datapoints, current_datapoint)
     
     return result_performance, all_datapoints
+=======
+    _metadata = compute_metadata(result_performance, input_format, user_input, "proteobench/modules/dda_quant/results.json")
+
+    return result_performance, _metadata 
+>>>>>>> Stashed changes

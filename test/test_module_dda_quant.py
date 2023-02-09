@@ -2,7 +2,7 @@ import os
 import unittest
 
 from proteobench.modules.dda_quant import module_dda_quant, parse_dda_id
-from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
+from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS, ParseSettings
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 TESTDATA_FILES = { "WOMBAT"         : os.path.join(TESTDATA_DIR, 'WOMBAT_stand_pep_quant_mergedproline.csv'),
@@ -20,7 +20,7 @@ def load_file(format_name:str):
 def load__local_parsing_configuration_file(format_name:str):
         """ Method used to load the input file of a given format."""
         input_df = load_file(format_name)
-        parse_settings = module_dda_quant.parse_settings_dda_quant.ParseSettings(format_name)
+        parse_settings = ParseSettings(format_name)
         prepared_df, replicate_to_raw = parse_dda_id.prepare_df(input_df, parse_settings)
         species_quant_df, cv_replicate_quant_df = module_dda_quant.get_quant(
             prepared_df,
@@ -40,7 +40,7 @@ def load__local_parsing_configuration_file(format_name:str):
 def process_file(format_name:str):
         """ Method used to load the input file of a given format."""
         input_df = load_file(format_name)
-        parse_settings = module_dda_quant.parse_settings_dda_quant.ParseSettings(format_name)
+        parse_settings = ParseSettings(format_name)
         prepared_df, replicate_to_raw = parse_dda_id.prepare_df(input_df, parse_settings)
         species_quant_df, cv_replicate_quant_df = module_dda_quant.get_quant(
             prepared_df,
@@ -74,7 +74,7 @@ class TestOutputFileReading(unittest.TestCase):
     def test_local_parsing_configuration_file(self):
         """ Test parsing of the local parsing configuration files."""
         for format_name in self.supported_formats:
-            parse_settings = module_dda_quant.parse_settings_dda_quant.ParseSettings(format_name)
+            parse_settings = ParseSettings(format_name)
             
             self.assertFalse(parse_settings is None)
 
@@ -82,7 +82,7 @@ class TestOutputFileReading(unittest.TestCase):
         """ Test the initial parsing of the input file."""
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
-            parse_settings = module_dda_quant.parse_settings_dda_quant.ParseSettings(format_name)
+            parse_settings = ParseSettings(format_name)
             prepared_df, replicate_to_raw = parse_dda_id.prepare_df(input_df, parse_settings)
             
             self.assertFalse(prepared_df.empty)
@@ -92,7 +92,7 @@ class TestOutputFileReading(unittest.TestCase):
         """ Test the processing of the input files."""
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
-            parse_settings = module_dda_quant.parse_settings_dda_quant.ParseSettings(format_name)
+            parse_settings = ParseSettings(format_name)
             prepared_df, replicate_to_raw = parse_dda_id.prepare_df(input_df, parse_settings)
 
             # Get quantification data

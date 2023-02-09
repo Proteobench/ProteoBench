@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pandas as pd
 from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
 from typing import Dict, List

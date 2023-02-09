@@ -19,18 +19,23 @@ def get_quant(
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """ Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it). """
 
-    quant_df = filtered_df.groupby(["peptidoform","Raw file"]).mean()["Intensity"]
-        
-    replicate_quant_list = {}
+    # Summarize values of the same peptide using mean
+    quant_raw_df = filtered_df.groupby(["peptidoform","Raw file"]).mean()["Intensity"]
+    quant_df = quant_raw_df.unstack(level=1)
+
+    # Count number of values per peptidoform and Raw file
 
     for replicate, replicate_runs in replicate_to_raw.items():
-        selected_replicate_df = quant_df.index.get_level_values("Raw file").isin(replicate_runs)
-        replicate_quant_df = quant_df[selected_replicate_df]
-        
-        cv_series = replicate_quant_df.groupby(["peptidoform"]).mean()
-        replicate_quant_list[replicate] = cv_series
-    
-    cv_replicate_quant_df = pd.DataFrame(replicate_quant_list)
+        selected_replicate_df = quant_raw_df.index.get_level_values("Raw file").isin(replicate_runs)
+        replicate_quant_df = quant_raw_df[selected_replicate_df]
+        ## Add means of replicates
+        mean_series = replicate_quant_df.groupby(["peptidoform"]).mean()
+        # change indices of mean_series from peptidoform to multiindices containing peptidoform,replicate
+        quant_df["mean_of_" + str(replicate)] = mean_series
+
+        ## Add number of missing values per row of replicate
+        missing_series = replicate_quant_df.isna().groupby(["peptidoform"]).sum()
+        quant_df["missing_values_" + str(replicate)] = missing_series
 
     species_peptidoform = list(parse_settings.species_dict.keys())
     species_peptidoform.append("peptidoform")
@@ -38,19 +43,19 @@ def get_quant(
     peptidoform_to_species.index = peptidoform_to_species["peptidoform"]
     peptidoform_to_species_dict = peptidoform_to_species.T.to_dict()
 
-    species_quant_df = pd.DataFrame([peptidoform_to_species_dict[idx] for idx in cv_replicate_quant_df.index])
+    species_quant_df = pd.DataFrame([peptidoform_to_species_dict[idx] for idx in quant_df.index])
     species_quant_df.set_index("peptidoform", drop = True, inplace = True)
 
-    return species_quant_df,cv_replicate_quant_df
+    return species_quant_df,quant_df
 
 def get_quant_ratios(
-        cv_replicate_quant_df:pd.DataFrame,
+        quant_df:pd.DataFrame,
         species_quant_df:pd.DataFrame,
         parse_settings:ParseSettings
     ) -> pd.DataFrame:
     """ Calculate the quantification ratios and compare them to the expected ratios. """
 
-    cv_replicate_quant_species_df = pd.concat([cv_replicate_quant_df,species_quant_df],axis=1)
+    cv_replicate_quant_species_df = pd.concat([quant_df,species_quant_df],axis=1)
 
     ratio_dict = {}
     for species in parse_settings.species_dict.keys():
@@ -58,7 +63,7 @@ def get_quant_ratios(
         for conditions in itertools.combinations(set(parse_settings.replicate_mapper.values()),2):
             condition_comp_id = "|".join(map(str,conditions))
 
-            ratio = species_df_slice[conditions[0]]/species_df_slice[conditions[1]]
+            ratio = species_df_slice["mean_of_" + str(conditions[0])]/species_df_slice["mean_of_" + str(conditions[1])]
             ratio_diff = abs(ratio-parse_settings.species_expected_ratio[species][condition_comp_id])*100
             
             try:
@@ -143,7 +148,7 @@ def benchmarking(
     #print(prepared_df.columns)
 
     # Get quantification data
-    species_quant_df, cv_replicate_quant_df = get_quant(
+    species_quant_df, quant_df = get_quant(
             prepared_df,
             replicate_to_raw,
             parse_settings
@@ -151,7 +156,7 @@ def benchmarking(
 
     # Compute quantification ratios
     result_performance = get_quant_ratios(
-                cv_replicate_quant_df,
+                quant_df,
                 species_quant_df,
                 parse_settings
     )

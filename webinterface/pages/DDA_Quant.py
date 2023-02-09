@@ -22,6 +22,13 @@ from proteobench.modules.dda_quant import plot_dda_id
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
+SUBMIT = 'submit'
+FIG1 = 'fig1'
+FIG2 = 'fig2'
+RESULT_PERF = 'result_perf'
+
+if 'submission_ready' not in st.session_state:
+    st.session_state['submission_ready'] = False
 
 class StreamlitUI:
     """Proteobench Streamlit UI."""
@@ -37,9 +44,11 @@ class StreamlitUI:
             layout="centered",
             initial_sidebar_state="expanded",
         )
-
+        if SUBMIT not in st.session_state:
+            st.session_state[SUBMIT] = False
         self._main_page()
         self._sidebar()
+        
 
     def generate_input_field(self, input_format:str, content:dict):
         if(content["type"] == "text_input"):
@@ -91,9 +100,22 @@ class StreamlitUI:
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
             submit_button = st.form_submit_button("Parse and bench")
-
+                
+        #if st.session_state[SUBMIT]:
+        if FIG1 in st.session_state:
+            self._populate_results()
+            
+    
         if submit_button:
             self._run_proteobench()
+
+
+    def _populate_results(self):
+        self.generate_results("", 
+                None,
+                None,
+                False)
+
 
     def _sidebar(self):
         """Format sidebar."""
@@ -127,51 +149,87 @@ class StreamlitUI:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)
         else:
-            time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.generate_results(status_placeholder, 
+                result_performance,
+                all_datapoints,
+                True)
 
+    def generate_results(self, 
+        status_placeholder, 
+        result_performance, 
+        all_datapoints,
+        recalculate):
+        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        if recalculate:
             status_placeholder.success(":heavy_check_mark: Finished!")
 
             # Show head of result DataFrame
-            st.header("Results")
-            st.subheader("Sample of the processed file")
-            st.dataframe(result_performance.head(100))
+        st.header("Results")
+        st.subheader("Sample of the processed file")
+        if not recalculate:
+            result_performance = st.session_state[RESULT_PERF]
+            all_datapoints = st.session_state[ALL_DATAPOINTS]
+        st.dataframe(result_performance.head(100))
+
 
             # Plot results
-            st.subheader("Ratio between conditions")
+        st.subheader("Ratio between conditions")
+        if recalculate:
             fig = plot_dda_id.plot_bench(result_performance)
-            st.plotly_chart(fig, use_container_width=True)
+        else:
+            fig = st.session_state[FIG1]
+        st.plotly_chart(fig, use_container_width=True)
             
             
-            st.subheader("Mean error between conditions")
-            st.text(all_datapoints.head(100))
-            
+        st.subheader("Mean error between conditions")
+        st.text(all_datapoints.head(100))
+        if recalculate:
             fig2 = plot_dda_id.plot_metric(all_datapoints) 
-            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            fig2 = st.session_state[FIG2]
+        st.plotly_chart(fig2, use_container_width=True)
 
-            sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
+        sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
 
             # Download link
-            st.subheader("Download calculated ratios")
-            st.download_button(
+        st.subheader("Download calculated ratios")
+        st.download_button(
                 label="Download",
                 data=save_dataframe(result_performance),
                 file_name=f"{sample_name}.csv",
                 mime="text/csv"
             )
 
-            #with st.form(key="submission_form"):
-            #    st.subheader("Add results to online repository")
-            #    submit_pr = st.form_submit_button("Upload run to ProteoBench")
-                #TODO: check if parameters are filled
-            submit_pr = False
+        
+        st.subheader("Add results to online repository")
+        st.session_state[FIG1] = fig
+        st.session_state[FIG2] = fig2
+        st.session_state[RESULT_PERF]=result_performance
+        st.session_state[ALL_DATAPOINTS] = all_datapoints
+
+        
+        checkbox = st.checkbox('I confirm that the metadata is correct')
+        if checkbox:
+            st.session_state['submission_ready'] = True 
+            submit_pr = st.button("I really want to upload it")
+                    #TODO: check if parameters are filled
+                    #submit_pr = False
             if submit_pr:
+                st.session_state[SUBMIT]=True
                 clone_pr(
-                    st.session_state[ALL_DATAPOINTS],
-                    st.secrets["gh"]["token"],
-                    username="Proteobot",
-                    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                    branch_name="new_branch"
+                        st.session_state[ALL_DATAPOINTS],
+                        st.secrets["gh"]["token"],
+                        username="Proteobot",
+                        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                        branch_name="new_branch"
                 )
+        if SUBMIT in st.session_state:
+            if st.session_state[SUBMIT]:
+            #status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
+                st.subheader("SUCCESS")
+                st.session_state[SUBMIT]=False
+
 
             
 

@@ -227,6 +227,16 @@ class StreamlitUI:
                 mime="text/csv"
             )
 
+            submit_pr = st.form_submit_button("Submit PR")
+
+            #clone_pr(
+            #    df_new,
+            #    st.secrets["gh"]["token"],
+            #    username="Proteobot",
+            #    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+            #    branch_name="new_branch"
+            #)
+
 class WebpageTexts:
     class Sidebar:
 

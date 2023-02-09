@@ -124,3 +124,7 @@ class TestWrongFormatting(unittest.TestCase):
                 user_input["input_format"],
                 {}
             )
+
+
+if __name__ == '__main__':
+    unittest.main()

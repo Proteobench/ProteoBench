@@ -33,7 +33,7 @@ def get_quant(
     
     cv_replicate_quant_df = pd.DataFrame(replicate_quant_list)
 
-    species_peptidoform = list(species_dict.keys())
+    species_peptidoform = list(parse_settings.species_dict.keys())
     species_peptidoform.append("peptidoform")
     peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
     peptidoform_to_species.index = peptidoform_to_species["peptidoform"]

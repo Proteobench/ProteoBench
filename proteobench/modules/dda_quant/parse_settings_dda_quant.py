@@ -23,15 +23,15 @@ INPUT_FORMATS = ("MaxQuant",
 
 class ParseSettings:
     """ Structure that contains all the parameters used to parse the given database search output. """
-    
+   
     def __init__(self, input_format:str):
         parse_settings = toml.load(PARSE_SETTINGS_FILES[input_format])
 
-        mapper = parse_settings["mapper"]
-        replicate_mapper = parse_settings["replicate_mapper"]
-        decoy_flag = parse_settings["general"]["decoy_flag"]
-        species_dict = parse_settings["species_dict"]
-        contaminant_flag = parse_settings["general"]["contaminant_flag"]
-        min_count_multispec = parse_settings["general"]["min_count_multispec"]
-        species_expected_ratio = parse_settings["species_expected_ratio"]
+        self.mapper = parse_settings["mapper"]
+        self.replicate_mapper = parse_settings["replicate_mapper"]
+        self.decoy_flag = parse_settings["general"]["decoy_flag"]
+        self.species_dict = parse_settings["species_dict"]
+        self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
+        self.min_count_multispec = parse_settings["general"]["min_count_multispec"]
+        self.species_expected_ratio = parse_settings["species_expected_ratio"]
     

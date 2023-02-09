@@ -21,8 +21,8 @@ dependencies = [
     "numpy",
     "plotly",
     "matplotlib",
-    "importlib-metadata; python_version < '3.8'"
-    "toml",
+    "importlib-metadata; python_version < '3.8'",
+    "toml"
 ]
 
 [project.optional-dependencies]

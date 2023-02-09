@@ -57,8 +57,6 @@ class StreamlitUI:
             return st.checkbox(
                     content["label"], 
                     content["value"][input_format])
-        
-        
 
     def _main_page(self):
         """Format main page."""
@@ -92,9 +90,6 @@ class StreamlitUI:
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
             submit_button = st.form_submit_button("Parse and bench")
-
-                
-            
 
         if submit_button:
             self._run_proteobench()

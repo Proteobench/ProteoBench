@@ -16,6 +16,7 @@ pip install --editable .[web]
 
 Using a virtual environment is recommended.
 
+## Run the tests
 To run the tests run the command:
 
 ```

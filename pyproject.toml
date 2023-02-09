@@ -25,6 +25,18 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+dev = [
+    "black",
+]
+docs = [
+    "numpydoc>=1,<2",
+    "recommonmark",
+    "sphinx",
+    "sphinx-autobuild",
+    "sphinx-autodoc-typehints",
+    "sphinx-mdinclude",
+    "sphinx-rtd-theme",
+]
 web = [
     "streamlit",
     "scipy"

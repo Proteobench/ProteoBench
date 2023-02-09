@@ -122,7 +122,8 @@ class TestWrongFormatting(unittest.TestCase):
             module_dda_quant.benchmarking(
                 user_input["input_csv"],
                 user_input["input_format"],
-                {}
+                {},
+                None
             )
 
 

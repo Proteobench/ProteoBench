@@ -5,6 +5,7 @@ from datetime import datetime
 
 @dataclass
 class Metadata():
+    """ Data used to stored the """
     id: str = None
     search_engine: str = None
     software_version: int = 0

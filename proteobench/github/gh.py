@@ -1,9 +1,14 @@
-from git import Repo
 import os
 from tempfile import TemporaryDirectory
 
+from git import Repo
+
+from proteobench.modules.dda_quant.module_dda_quant import \
+    add_current_data_point
+
+
 def clone_pr(
-        df_new,
+        temporary_datapoints,
         token,
         username="Proteobot",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
@@ -17,18 +22,25 @@ def clone_pr(
             remote_git=remote_git,
             username=username
         )
+    current_datapoint = temporary_datapoints.iloc[-1]
+    current_datapoint['is_temporary'] = False
+    all_datapoints = add_current_data_point(None, current_datapoint)
+    branch_name = current_datapoint['id']
 
     # do the pd.write_json() here!!!
-    #f = open(os.path.join(t_dir,"newf.txt"),"w")
-    #f.write("asdfsdaf")
-    #f.close()
+    print(os.path.join(t_dir,"results.json"))
+    f = open(os.path.join(t_dir,"results.json"),"w")
+    all_datapoints.T.to_json(f)
+    f.close()
+    commit_message = "Added new run with id " + branch_name
 
     pr_github(
         clone_dir=t_dir,
         token=token,
         remote_git=remote_git,
         username=username,
-        branch_name=branch_name
+        branch_name=branch_name,
+        commit_message=commit_message
     )
 
 def clone_repo(
@@ -46,7 +58,8 @@ def pr_github(
         token="",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         username= "Proteobot",
-        branch_name="test"
+        branch_name="test",
+        commit_message ="New commit"
     ):
     remote = f"https://{username}:{token}@{remote_git}"
     repo = Repo(clone_dir)
@@ -57,5 +70,5 @@ def pr_github(
     current.checkout()
 
     repo.git.add(A=True)
-    repo.git.commit(m="Some commit message")
+    repo.git.commit(m=commit_message)
     repo.git.push('--set-upstream', 'origin', current)

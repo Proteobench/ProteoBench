@@ -2,22 +2,25 @@
 
 import logging
 from datetime import datetime
-from proteobench.modules.dda_quant import module_dda_quant
 
-from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
+from proteobench.modules.dda_quant import module_dda_quant
+from proteobench.modules.dda_quant.parse_settings_dda_quant import \
+    INPUT_FORMATS
+
 try:
     from importlib.metadata import version
 except ImportError:
     from importlib_metadata import version
 
-
 import streamlit as st
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
+from proteobench.github.gh import clone_pr
 from proteobench.modules.dda_quant import plot_dda_id
 
-
 logger = logging.getLogger(__name__)
+
+ALL_DATAPOINTS = "all_datapoints"
 
 class StreamlitUI:
     """Proteobench Streamlit UI."""
@@ -53,12 +56,10 @@ class StreamlitUI:
                 INPUT_FORMATS
             )
 
-            st.subheader("Add results to online repository")
-
-            self.user_input["pull_req"] = st.text_input(
-                "Open pull request to make results available to everyone (type \"YES\" to enable)", 
-                "NO"
-            )
+            # self.user_input["pull_req"] = st.text_input(
+            #     "Open pull request to make results available to everyone (type \"YES\" to enable)", 
+            #     "NO"
+            # )
 
             with st.expander("Additional parameters"):
                 self.user_input["version"] = st.text_input(
@@ -180,8 +181,8 @@ class StreamlitUI:
         status_placeholder = st.empty()
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
         
-        if 'all_datapoints' not in st.session_state:
-            st.session_state['all_datapoints'] = None
+        if ALL_DATAPOINTS not in st.session_state:
+            st.session_state[ALL_DATAPOINTS] = None
         
 
         try:
@@ -191,7 +192,7 @@ class StreamlitUI:
                 self.user_input,
                 st.session_state['all_datapoints']
             )
-            st.session_state['all_datapoints'] = all_datapoints
+            st.session_state[ALL_DATAPOINTS] = all_datapoints
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)
@@ -228,15 +229,21 @@ class StreamlitUI:
                 mime="text/csv"
             )
 
-            submit_pr = st.form_submit_button("Submit PR")
+            #with st.form(key="submission_form"):
+            #    st.subheader("Add results to online repository")
+            #    submit_pr = st.form_submit_button("Upload run to ProteoBench")
+                #TODO: check if parameters are filled
+            submit_pr = False
+            if submit_pr:
+                clone_pr(
+                    st.session_state[ALL_DATAPOINTS],
+                    st.secrets["gh"]["token"],
+                    username="Proteobot",
+                    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                    branch_name="new_branch"
+                )
 
-            #clone_pr(
-            #    df_new,
-            #    st.secrets["gh"]["token"],
-            #    username="Proteobot",
-            #    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-            #    branch_name="new_branch"
-            #)
+            
 
 class WebpageTexts:
     class Sidebar:

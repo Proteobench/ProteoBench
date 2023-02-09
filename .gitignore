@@ -134,3 +134,6 @@ dmypy.json
 
 # Generated results
 results.json
+
+# secrets
+.streamlit/

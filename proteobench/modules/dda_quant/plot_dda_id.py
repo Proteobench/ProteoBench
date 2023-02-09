@@ -54,7 +54,7 @@ def plot_metric(result_df):  # x: [], y: [], color: [], cv: []
         hover_text.append("info") # f"workflow identifier: {row["workflow identifier"]} software_name: {row["software_name"]} match between runs : {row["match_between_runs"]} precursor mass tolerance :{row["precursor_mass_tolerance"]} fragment mass tolerance: {row["fragment_mass_tolerance"]}"
         
 
-    df["text"] = hover_text
+    result_df["text"] = hover_text
     
         
     fig = go.Figure(data=[go.Scatter(

@@ -1,41 +1,23 @@
-"""Streamlit-based web interface for DeepLC."""
+"""Streamlit-based web interface for ProteoBench."""
 
 import logging
-import os
-import pathlib
 from datetime import datetime
+from proteobench.modules.dda_quant import module_dda_quant
+
+from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
 try:
     from importlib.metadata import version
 except ImportError:
     from importlib_metadata import version
 
-import pandas as pd
-import plotly.express as px
-import plotly.figure_factory as ff
 
 import streamlit as st
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
-import pandas as pd
-import numpy as np
-import itertools
-from matplotlib import pyplot as plt
-from datetime import datetime
+from proteobench.modules.dda_quant import plot_dda_id
 
-from collections import Counter
-import toml
-from proteobench.modules.dda_quant import benchmarking
-from proteobench.modules.dda_quant.plot.plot import plot_bench, plot_metric
 
 logger = logging.getLogger(__name__)
-
-
-class DeepLCStreamlitError(Exception):
-    pass
-
-
-class MissingPeptideCSV(DeepLCStreamlitError):
-    pass
 
 class StreamlitUI:
     """Proteobench Streamlit UI."""
@@ -68,8 +50,7 @@ class StreamlitUI:
 
             self.user_input["input_format"] = st.selectbox(
                 "Search engine",
-
-                ("MaxQuant", "AlphaPept", "Proline", "WOMBAT", "MSFragger")
+                INPUT_FORMATS
             )
 
             st.subheader("Add results to online repository")
@@ -169,7 +150,11 @@ class StreamlitUI:
                     "Quantified with MBR"
                 )
 
-                self.user_input["workflow_description"] = st.text_area("Fill in details not specified above, such as:","This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", height=275)
+                self.user_input["workflow_description"] = st.text_area(
+                    "Fill in details not specified above, such as:",
+                    "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", 
+                    height=275
+                    )
 
             submit_button = st.form_submit_button("Parse and bench")
 
@@ -177,10 +162,7 @@ class StreamlitUI:
             
 
         if submit_button:
-            try:
-                self._run_proteobench()
-            except MissingPeptideCSV:
-                st.error(self.texts.Errors.missing_peptide_csv)
+            self._run_proteobench()
 
     def _sidebar(self):
         """Format sidebar."""
@@ -199,7 +181,7 @@ class StreamlitUI:
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
         try:
-            result_performance = benchmarking(
+            result_performance = module_dda_quant.benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input
@@ -219,15 +201,14 @@ class StreamlitUI:
 
             # Plot results
             st.subheader("Ratio between conditions")
-            fig = plot_bench(result_performance)
+            fig = plot_dda_id.plot_bench(result_performance)
             st.plotly_chart(fig, use_container_width=True)
             
             
             # Plot results
             st.subheader("Mean error between conditions")
-            fig2 = plot_metric(result_performance)
+            fig2 = plot_dda_id.plot_metric(result_performance)
             st.plotly_chart(fig2, use_container_width=True)
-            
 
             sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
 
@@ -239,10 +220,6 @@ class StreamlitUI:
                 file_name=f"{sample_name}.csv",
                 mime="text/csv"
             )
-
-    def _parse_user_config(self, user_input):
-        """Validate and parse user input."""
-        return config
 
 class WebpageTexts:
     class Sidebar:

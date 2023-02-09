@@ -15,3 +15,13 @@ pip install --editable .[web]
 ```
 
 Using a virtual environment is recommended.
+
+## Running the Web Application
+Run the following command in the terminal/command prompt:
+```
+streamlit run ./webinterface/Home.py
+```
+
+This will launch the Proteobench application in your web browser.
+
+

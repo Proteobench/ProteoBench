@@ -177,7 +177,7 @@ class StreamlitUI:
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
         try:
-            result_performance = benchmarking(
+            result_performance = module_dda_quant.benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input
@@ -216,10 +216,6 @@ class StreamlitUI:
                 file_name=f"{sample_name}.csv",
                 mime="text/csv"
             )
-
-    def _parse_user_config(self, user_input):
-        """Validate and parse user input."""
-        return config
 
 class WebpageTexts:
     class Sidebar:

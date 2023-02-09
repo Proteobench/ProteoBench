@@ -16,24 +16,30 @@ def load_file(format_name:str):
         """ Method used to load the input file of a given format."""
         user_input = dict()
         user_input["input_csv"] = TESTDATA_FILES[format_name]
-        user_input["input_format"] = INPUT_FORMATS[format_name]
+        user_input["input_format"] = format_name
         user_input["version"] = "1.5.8.3"
-        df = dda_quant.benchmarking(
+        df = module_dda_quant.load_input_file(
             user_input["input_csv"],
-            user_input["input_format"],
-            user_input
+            user_input["input_format"]
         )
         return df
 
 class TestOutputFileReading(unittest.TestCase):
-    """ Simple tests for reading of input files."""
-    def test_MaxQuant_file(self):
-        """ Test whether MaxQuant input is parsed correctly."""
+    """ Simple tests for reading csv input files."""
+    def test_MaxQuant_file_loading(self):
+        """ Test whether MaxQuant input is loaded successfully."""
         test_dataset_name = "MaxQuant"
         self.assertTrue(test_dataset_name in INPUT_FORMATS)
         df = load_file(test_dataset_name)
         self.assertFalse(df.empty)
 
+    def test_MaxQuant_file_loading(self):
+        """ Test whether MaxQuant input is loaded successfully."""
+        test_dataset_name = "MaxQuant"
+        self.assertTrue(test_dataset_name in INPUT_FORMATS)
+        df = load_file(test_dataset_name)
+        self.assertFalse(df.empty)
+       
     def test_Wombat_file(self):
         """ Test whether WOMBAT input is parsed correctly."""
         test_dataset_name = "WOMBAT"
@@ -48,3 +54,13 @@ class TestOutputFileReading(unittest.TestCase):
         df = load_file(test_dataset_name)
         self.assertFalse(df.empty)
 
+
+class TestWrongFormatting(unittest.TestCase):
+    """ Simple tests that should break if the ."""
+    def test_MaxQuant_file(self):
+        """ Test whether MaxQuant input is parsed correctly."""
+        test_dataset_name = "MaxQuant"
+        self.assertTrue(test_dataset_name in INPUT_FORMATS)
+        with self.assertRaises(Exception) as context:
+            load_file(test_dataset_name)
+        self.assertTrue("fdr_psm" in str(context.exception))

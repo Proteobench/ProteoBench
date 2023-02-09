@@ -1,12 +1,13 @@
 """ Main interface of the module."""
 
-import os
+import datetime
 import re
 import itertools
 import pandas as pd
 import toml
 from proteobench.modules.dda_quant import parse_dda_id, parse_settings_dda_quant
 from proteobench.modules.dda_quant.__metadata__ import Metadata
+from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
 
 def is_implemented() -> bool:
     """ Returns whether the module is fully implemented. """
@@ -15,7 +16,7 @@ def is_implemented() -> bool:
 def get_quant(
         filtered_df,
         replicate_to_raw:dict,
-        species_dict
+        parse_settings:ParseSettings
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """ Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it). """
 
@@ -46,22 +47,20 @@ def get_quant(
 def get_quant_ratios(
         cv_replicate_quant_df:pd.DataFrame,
         species_quant_df:pd.DataFrame,
-        species_dict:dict,
-        replicate_mapper,
-        species_expected_ratio
+        parse_settings:ParseSettings
     ) -> pd.DataFrame:
     """ Calculate the quantification ratios and compare them to the expected ratios. """
 
     cv_replicate_quant_species_df = pd.concat([cv_replicate_quant_df,species_quant_df],axis=1)
 
     ratio_dict = {}
-    for species in species_dict.keys():
+    for species in parse_settings.species_dict.keys():
         species_df_slice = cv_replicate_quant_species_df[cv_replicate_quant_species_df[species] == True]
-        for conditions in itertools.combinations(set(replicate_mapper.values()),2):
+        for conditions in itertools.combinations(set(parse_settings.replicate_mapper.values()),2):
             condition_comp_id = "|".join(map(str,conditions))
 
             ratio = species_df_slice[conditions[0]]/species_df_slice[conditions[1]]
-            ratio_diff = abs(ratio-species_expected_ratio[species][condition_comp_id])*100
+            ratio_diff = abs(ratio-parse_settings.species_expected_ratio[species][condition_comp_id])*100
             
             try:
                 ratio_dict[condition_comp_id+"_ratio"] = pd.concat([ratio,ratio_dict[condition_comp_id+"_ratio"]])
@@ -81,80 +80,87 @@ def strip_sequence_wombat(seq:str) -> str:
     return re.sub("([\(\[]).*?([\)\]])", "", seq)
 
 
-def main(
-        input_csv: str,
-        input_format: str
+def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
+    """ Method loads dataframe from a csv depending on its format."""
+    input_data_frame:pd.DataFrame
+
+    if input_format == "MaxQuant":
+        input_data_frame = pd.read_csv(input_csv,sep="\t",low_memory=False)
+        
+    elif input_format == "AlphaPept":
+        input_data_frame = pd.read_csv(input_csv,low_memory=False,sep="\t")
+    elif input_format == "MSFragger":
+        input_data_frame = pd.read_csv(input_csv,low_memory=False,sep="\t")
+    elif input_format == "WOMBAT":
+        input_data_frame = pd.read_csv(input_csv,low_memory=False,sep=",")
+        input_data_frame["Sequence"] = input_data_frame["modified_peptide"].apply(strip_sequence_wombat)
+
+    return input_data_frame
+
+def benchmarking(
+        input_file: str,
+        input_format: str,
+        user_input:dict
     ) -> pd.DataFrame:
     """ Main workflow of the module. Used to benchmark workflow results. """
 
-    # Parse user config   
-    parse_settings = toml.load(parse_settings_dda_quant.PARSE_SETTINGS_FILES[input_format])   
-    if input_format == "MaxQuant":
-        df = pd.read_csv(input_csv,sep="\t",low_memory=False)
-        
-    elif input_format == "AlphaPept":
-        df = pd.read_csv(input_csv,low_memory=False,sep="\t")
-    elif input_format == "MSFragger":
-        df = pd.read_csv(input_csv,low_memory=False,sep="\t")
-    elif input_format == "WOMBAT":
-        df = pd.read_csv(input_csv,low_memory=False,sep=",")
-        df["Sequence"] = df["modified_peptide"].apply(strip_sequence_wombat)
-
-    print(parse_settings)
-    mapper = parse_settings["mapper"]
-    replicate_mapper = parse_settings["replicate_mapper"]
-    decoy_flag = parse_settings["general"]["decoy_flag"]
-    species_dict = parse_settings["species_dict"]
-    contaminant_flag = parse_settings["general"]["contaminant_flag"]
-    min_count_multispec = parse_settings["general"]["min_count_multispec"]
-    species_expected_ratio = parse_settings["species_expected_ratio"]
+    # Parse user config
+    input_df = load_input_file(input_file,input_format)
+    parse_settings = parse_settings_dda_quant.ParseSettings(input_format)
 
     prepared_df, replicate_to_raw = parse_dda_id.prepare_df(
-        df,
-        mapper,
-        replicate_mapper,
-        decoy_flag,
-        species_dict,
-        contaminant_flag,
-        min_count_multispec
+        input_df,
+        parse_settings
     )
 
-    print(prepared_df.columns)
+    #print(prepared_df.columns)
 
+    # Get quantification data
     species_quant_df, cv_replicate_quant_df = get_quant(
             prepared_df,
             replicate_to_raw,
-            species_dict
+            parse_settings
     )
 
+    # Compute quantification ratios
     result_performance = get_quant_ratios(
                 cv_replicate_quant_df,
                 species_quant_df,
-                species_dict,
-                replicate_mapper,
-                species_expected_ratio
+                parse_settings
     )
 
-    _metadata = Metadata(
-        id = 0,
-        search_engine = input_format,
-        software_version = 0,
-        fdr_psm = 0,
-        fdr_peptide = 0,
-        fdr_protein = 0,
-        MBR = False,
-        precursor_tol = 0,
-        precursor_tol_unit = "Da",
-        fragmnent_tol = 0,
-        fragment_tol_unit = "Da",
-        enzyme_name = None,
-        missed_cleavages = 0,
-        min_pep_length = 0,
-        max_pep_length = 0
-    )
-    _metadata.generate_id()
-    _metadata.calculate_plot_data(result_performance)
-    _metadata.dump_json_object("results.json")
+    _metadata = compute_metadata(result_performance, input_format, user_input, "proteobench/modules/dda_quant/results.json")
 
 
     return result_performance
+
+
+def compute_metadata(
+        result_performance:pd.DataFrame,
+        input_format:str,
+        user_input:dict,
+        json_dump_path:str
+        ) -> Metadata:
+    """ Method used to compute metadata for the provided result. """
+    result_metadata = Metadata(
+        id = input_format + "_" + user_input["version"] + "_" + str(datetime.datetime.now()),
+        search_engine = input_format,
+        software_version = user_input["version"],
+        fdr_psm = user_input["fdr_psm"],
+        fdr_peptide = user_input["fdr_peptide"],
+        fdr_protein = user_input["fdr_protein"],
+        MBR = user_input["mbr"],
+        precursor_tol = user_input["precursor_mass_tolerance"],
+        precursor_tol_unit = user_input["precursor_mass_tolerance_unit"],
+        fragmnent_tol = user_input["fragment_mass_tolerance"],
+        fragment_tol_unit = user_input["fragment_mass_tolerance_unit"],
+        enzyme_name = user_input["search_enzyme_name"],
+        missed_cleavages = user_input["allowed_missed_cleavage"], 
+        min_pep_length = user_input["min_peptide_length"],
+        max_pep_length = user_input["max_peptide_length"]
+    )
+    result_metadata.generate_id()
+    result_metadata.calculate_plot_data(result_performance)
+    result_metadata.dump_json_object(json_dump_path)
+
+    return result_metadata

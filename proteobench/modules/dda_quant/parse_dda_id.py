@@ -1,38 +1,35 @@
 import pandas as pd
+from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
 from typing import Dict, List
 
 def prepare_df(
             df:pd.DataFrame,
-            mapper:Dict[str,str],
-            replicate_mapper:Dict[str,int],
-            decoy_flag:str,
-            species_dict:Dict[str,str],
-            contaminant_flag:str,
-            min_count_multispec:int
+            parse_settings:ParseSettings
         ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
     """ Convert a search engine output into a generic format supported by the module.  """
-    df.rename(columns=mapper,inplace=True)
+
+    df.rename(columns=parse_settings.mapper,inplace=True)
 
     replicate_to_raw = {}
-    for k,v in replicate_mapper.items():
+    for k,v in parse_settings.replicate_mapper.items():
         try:
             replicate_to_raw[v].append(k) 
         except KeyError:
             replicate_to_raw[v] = [k]
 
-    if ("Reverse" in mapper):
-      df = df[df["Reverse"] != decoy_flag]
+    if ("Reverse" in parse_settings.mapper):
+      df = df[df["Reverse"] != parse_settings.decoy_flag]
 
-    df["contaminant"] = df["Proteins"].str.contains(contaminant_flag)
-    for species,flag in species_dict.items():
+    df["contaminant"] = df["Proteins"].str.contains(parse_settings.contaminant_flag)
+    for species,flag in parse_settings.species_dict.items():
         df[species] = df["Proteins"].str.contains(flag)
-    df["MULTI_SPEC"] = (df[list(species_dict.keys())].sum(axis=1) > min_count_multispec)
+    df["MULTI_SPEC"] = (df[list(parse_settings.species_dict.keys())].sum(axis=1) > parse_settings.min_count_multispec)
     
     # If there is "Raw file" then it is a long format, otherwise short format
-    if ("Raw file" not in mapper.values()):  
-        meltvars = replicate_mapper.keys()
+    if ("Raw file" not in parse_settings.mapper.values()):  
+        meltvars = parse_settings.replicate_mapper.keys()
         df = df.melt(id_vars=list(set(df.columns).difference(set(meltvars))), value_vars=meltvars, var_name="Raw file", value_name="Intensity")
-    df["replicate"] = df["Raw file"].map(replicate_mapper)        
+    df["replicate"] = df["Raw file"].map(parse_settings.replicate_mapper)        
     df = pd.concat([df,pd.get_dummies(df["Raw file"])],axis=1)
 
     df = df[df["MULTI_SPEC"] == False]

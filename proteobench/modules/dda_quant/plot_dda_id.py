@@ -46,19 +46,12 @@ def plot_metric(meta_data):
     """
     
     # add hover text. 
-    t= f"Workflow Identifier: {meta_data.id}<br>MBR: {meta_data.MBR}<br>Precursor Mass Tolerance: {meta_data.precursor_tol} {meta_data.precursor_tol_unit}<br>Fragment Mass Tolerance: {meta_data.fragmnent_tol} {meta_data.fragment_tol_unit}"
+    #t = f"Workflow Identifier: {meta_data.id}<br>MBR: {meta_data.MBR}<br>Precursor Mass Tolerance: {meta_data.precursor_tol} {meta_data.precursor_tol_unit}<br>Fragment Mass Tolerance: {meta_data.fragmnent_tol} {meta_data.fragment_tol_unit}"
     
-<<<<<<< Updated upstream
-    # add all info
-    for index, row in result_df.iterrows():
-        hover_text.append("info") # f"workflow identifier: {row["workflow identifier"]} software_name: {row["software_name"]} match between runs : {row["match_between_runs"]} precursor mass tolerance :{row["precursor_mass_tolerance"]} fragment mass tolerance: {row["fragment_mass_tolerance"]}"
-        
-
-    result_df["text"] = hover_text
-=======
-    hover_text = [t, t]   
+    #hover_text = [t, t]   
     
-    colors = ["MaxQuant", "AlphaPept"]
+    #colors = ["MaxQuant", "AlphaPept"]
+    #colors = meta_data["search_engine"]
     
     x = [meta_data.weighted_sum, meta_data.weighted_sum + 15] 
     y = [meta_data.nr_prec, meta_data.nr_prec + 42] 
@@ -68,7 +61,6 @@ def plot_metric(meta_data):
                             "MSFragger": px.colors.qualitative.Pastel2[5], 
                             "WOMBAT": px.colors.qualitative.D3[5]
                            }
->>>>>>> Stashed changes
     
         
     #fig = go.Figure(data=[go.Scatter(
@@ -79,14 +71,15 @@ def plot_metric(meta_data):
     #    #marker=dict(color=meta_data.software_version))]) # , size=result_df["cv"]  
     
     
-    fig = px.scatter(
-        x=x, 
-        y=y,
-        color=colors,
-        hover_data = hover_text) #]) #, 
+    fig = px.scatter(meta_data,
+        x="weighted_sum", 
+        y="nr_prec",
+        color="search_engine")
+        #hover_data = "hover_text") #]) #, 
     #    #marker=dict(color=meta_data.software_version))]) # , size=result_df["cv"] 
     
     selected_points = plotly_events(fig)
+    
     if len(selected_points) == 0:
         st.warning('Please select a data point')
     else:

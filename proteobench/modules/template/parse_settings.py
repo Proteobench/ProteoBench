@@ -14,7 +14,8 @@ PARSE_SETTINGS_FILES = {
 
 INPUT_FORMATS = ("Format1", "Format2")
 
-DDA_QUANT_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_Module_TEMPLATE/main/results.json"
+# TODO Path with all the stored results of the modules
+TEMPLATE_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_Module_TEMPLATE/main/results.json"
 
 
 class ParseSettings:

@@ -4,9 +4,9 @@ import json
 import logging
 from datetime import datetime
 
-from proteobench.modules.dda_quant.module_dda_quant import Module
-from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
-from proteobench.modules.dda_quant.plot_dda_id import PlotDataPoint
+from proteobench.modules.dda_quant.module import Module
+from proteobench.modules.dda_quant.parse_settings import INPUT_FORMATS
+from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 try:
     from importlib.metadata import version
@@ -170,9 +170,9 @@ class StreamlitUI:
         st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("Mean error between conditions")
-        # show metadata 
-        #st.text(all_datapoints.head(100))
-            
+        # show metadata
+        # st.text(all_datapoints.head(100))
+
         if recalculate:
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:

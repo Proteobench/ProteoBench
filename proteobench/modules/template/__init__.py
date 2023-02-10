@@ -29,3 +29,10 @@ class ModuleInterface(ABC):
     @abstractmethod
     def add_current_data_point(self):
         pass
+
+
+class ParseInputsInterface(ABC):
+    @abstractmethod
+    def convert_to_standard_format(self):
+        """Convert a search engine output into a generic format supported by the module."""
+        pass

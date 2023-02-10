@@ -1,22 +1,15 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from typing import Dict, List
 
 import pandas as pd
+from __init__ import ParseInputsInterface
 
-from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
-
-
-class ParseInputsInterface(ABC):
-    @abstractmethod
-    def prepare_df(self):
-        """Convert a search engine output into a generic format supported by the module."""
-        pass
+from proteobench.modules.dda_quant.parse_settings import ParseSettings
 
 
 class ParseInputs(ParseInputsInterface):
-    def prepare_df(
+    def convert_to_standard_format(
         self, df: pd.DataFrame, parse_settings: ParseSettings
     ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """Convert a search engine output into a generic format supported by the module."""

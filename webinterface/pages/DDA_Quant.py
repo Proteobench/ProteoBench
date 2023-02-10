@@ -19,6 +19,8 @@ from streamlit_utils import hide_streamlit_menu, save_dataframe
 from proteobench.github.gh import clone_pr
 from proteobench.modules.dda_quant import plot_dda_id
 
+from streamlit_extras.let_it_rain import rain
+
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
@@ -229,6 +231,12 @@ class StreamlitUI:
             #status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
                 st.session_state[SUBMIT]=False
+                rain(
+                    emoji="🎈",
+                    font_size=54,
+                    falling_speed=5,
+                    animation_length="infinite",
+                )
 
 
             

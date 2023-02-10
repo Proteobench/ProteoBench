@@ -9,8 +9,8 @@ import pandas as pd
 import toml
 from __init__ import ModuleInterface
 
-from proteobench.modules.template import parse, parse_settings
 from proteobench.modules.template.datapoint import Datapoint
+from proteobench.modules.template.parse import convert_to_standard_format
 from proteobench.modules.template.parse_settings import (
     TEMPLATE_RESULTS_PATH,
     ParseSettings,
@@ -84,7 +84,7 @@ class Module(ModuleInterface):
         df = pd.read_json(TEMPLATE_RESULTS_PATH)
         return df
 
-    def add_current_data_point(all_datapoints, current_datapoint):
+    def add_current_data_point(self, all_datapoints, current_datapoint):
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.load_data_points_from_repo()
         else:
@@ -94,18 +94,19 @@ class Module(ModuleInterface):
         return all_datapoints
 
     def benchmarking(
-        input_file: str, input_format: str, user_input: dict, all_datapoints
+        self, input_file: str, input_format: str, user_input: dict, all_datapoints
     ) -> pd.DataFrame:
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Read input file
+        # call load_input_file() method
         input_df = self.load_input_file(input_file, input_format)
 
         # Parse user config
         parse_settings = ParseSettings(input_format)
 
         # Converte uploaded data to standard format
-        standard_format = parse.convert_to_standard_format(input_df, parse_settings)
+        standard_format = convert_to_standard_format(input_df, parse_settings)
 
         # Create intermediate data structure for benchmarking
         intermediate_data_structure = self.generate_intermediate(

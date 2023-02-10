@@ -1,12 +1,11 @@
 """Streamlit-based web interface for ProteoBench."""
 
-import logging
 import json
+import logging
 from datetime import datetime
 
 from proteobench.modules.dda_quant import module_dda_quant
-from proteobench.modules.dda_quant.parse_settings_dda_quant import \
-    INPUT_FORMATS
+from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
 
 try:
     from importlib.metadata import version
@@ -14,6 +13,7 @@ except ImportError:
     from importlib_metadata import version
 
 import streamlit as st
+from streamlit_extras.let_it_rain import rain
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
 from proteobench.github.gh import clone_pr
@@ -22,19 +22,20 @@ from proteobench.modules.dda_quant import plot_dda_id
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
-SUBMIT = 'submit'
-FIG1 = 'fig1'
-FIG2 = 'fig2'
-RESULT_PERF = 'result_perf'
+SUBMIT = "submit"
+FIG1 = "fig1"
+FIG2 = "fig2"
+RESULT_PERF = "result_perf"
 
-if 'submission_ready' not in st.session_state:
-    st.session_state['submission_ready'] = False
+if "submission_ready" not in st.session_state:
+    st.session_state["submission_ready"] = False
+
 
 class StreamlitUI:
     """Proteobench Streamlit UI."""
 
     def __init__(self):
-        """Proteobench Streamlit UI. """
+        """Proteobench Streamlit UI."""
         self.texts = WebpageTexts
         self.user_input = dict()
 
@@ -48,27 +49,24 @@ class StreamlitUI:
             st.session_state[SUBMIT] = False
         self._main_page()
         self._sidebar()
-        
 
-    def generate_input_field(self, input_format:str, content:dict):
-        if(content["type"] == "text_input"):
-            return st.text_input(
-                    content["label"], 
-                    content["value"][input_format])
-        if(content["type"] == "number_input"):
+    def generate_input_field(self, input_format: str, content: dict):
+        if content["type"] == "text_input":
+            return st.text_input(content["label"], content["value"][input_format])
+        if content["type"] == "number_input":
             return st.number_input(
-                    content["label"], 
-                    value = content["value"][input_format],
-                    format = content["format"])
-        if(content["type"] == "selectbox"):
+                content["label"],
+                value=content["value"][input_format],
+                format=content["format"],
+            )
+        if content["type"] == "selectbox":
             return st.selectbox(
-                    content["label"],
-                    content["options"],
-                    content["options"].index(content["value"][input_format]))
-        if(content["type"] == "checkbox"):
-            return st.checkbox(
-                    content["label"], 
-                    content["value"][input_format])
+                content["label"],
+                content["options"],
+                content["options"].index(content["value"][input_format]),
+            )
+        if content["type"] == "checkbox":
+            return st.checkbox(content["label"], content["value"][input_format])
 
     def _main_page(self):
         """Format main page."""
@@ -82,12 +80,11 @@ class StreamlitUI:
             )
 
             self.user_input["input_format"] = st.selectbox(
-                "Search engine",
-                INPUT_FORMATS
+                "Search engine", INPUT_FORMATS
             )
 
             # self.user_input["pull_req"] = st.text_input(
-            #     "Open pull request to make results available to everyone (type \"YES\" to enable)", 
+            #     "Open pull request to make results available to everyone (type \"YES\" to enable)",
             #     "NO"
             # )
 
@@ -97,25 +94,21 @@ class StreamlitUI:
                     config = json.load(file)
 
                 for key, value in config.items():
-                    self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+                    self.user_input[key] = self.generate_input_field(
+                        self.user_input["input_format"], value
+                    )
 
             submit_button = st.form_submit_button("Parse and bench")
-                
-        #if st.session_state[SUBMIT]:
+
+        # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
             self._populate_results()
-            
-    
+
         if submit_button:
             self._run_proteobench()
 
-
     def _populate_results(self):
-        self.generate_results("", 
-                None,
-                None,
-                False)
-
+        self.generate_results("", None, None, False)
 
     def _sidebar(self):
         """Format sidebar."""
@@ -123,7 +116,7 @@ class StreamlitUI:
             "https://upload.wikimedia.org/wikipedia/commons/8/85/Garden_bench_001.jpg",
             width=150,
         )
-        #st.sidebar.markdown(self.texts.Sidebar.badges)
+        # st.sidebar.markdown(self.texts.Sidebar.badges)
         st.sidebar.header("About")
         st.sidebar.markdown(self.texts.Sidebar.about, unsafe_allow_html=True)
 
@@ -132,33 +125,29 @@ class StreamlitUI:
         st.header("Running Proteobench")
         status_placeholder = st.empty()
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
-        
+
         if ALL_DATAPOINTS not in st.session_state:
             st.session_state[ALL_DATAPOINTS] = None
-        
 
         try:
             result_performance, all_datapoints = module_dda_quant.benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
-                st.session_state['all_datapoints']
+                st.session_state["all_datapoints"],
             )
             st.session_state[ALL_DATAPOINTS] = all_datapoints
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)
         else:
-            self.generate_results(status_placeholder, 
-                result_performance,
-                all_datapoints,
-                True)
+            self.generate_results(
+                status_placeholder, result_performance, all_datapoints, True
+            )
 
-    def generate_results(self, 
-        status_placeholder, 
-        result_performance, 
-        all_datapoints,
-        recalculate):
+    def generate_results(
+        self, status_placeholder, result_performance, all_datapoints, recalculate
+    ):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if recalculate:
@@ -172,67 +161,68 @@ class StreamlitUI:
             all_datapoints = st.session_state[ALL_DATAPOINTS]
         st.dataframe(result_performance.head(100))
 
-
-            # Plot results
+        # Plot results
         st.subheader("Ratio between conditions")
         if recalculate:
             fig = plot_dda_id.plot_bench(result_performance)
         else:
             fig = st.session_state[FIG1]
         st.plotly_chart(fig, use_container_width=True)
-            
+
         st.subheader("Mean error between conditions")
         # show metadata 
         #st.text(all_datapoints.head(100))
             
         if recalculate:
-            fig2 = plot_dda_id.plot_metric(all_datapoints) 
+            fig2 = plot_dda_id.plot_metric(all_datapoints)
         else:
             fig2 = st.session_state[FIG2]
         st.plotly_chart(fig2, use_container_width=True)
 
-        sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
+        sample_name = "%s-%s-%s-%s" % (
+            self.user_input["input_format"],
+            self.user_input["version"],
+            self.user_input["mbr"],
+            time_stamp,
+        )
 
-            # Download link
+        # Download link
         st.subheader("Download calculated ratios")
         st.download_button(
-                label="Download",
-                data=save_dataframe(result_performance),
-                file_name=f"{sample_name}.csv",
-                mime="text/csv"
-            )
+            label="Download",
+            data=save_dataframe(result_performance),
+            file_name=f"{sample_name}.csv",
+            mime="text/csv",
+        )
 
-        
         st.subheader("Add results to online repository")
         st.session_state[FIG1] = fig
         st.session_state[FIG2] = fig2
-        st.session_state[RESULT_PERF]=result_performance
+        st.session_state[RESULT_PERF] = result_performance
         st.session_state[ALL_DATAPOINTS] = all_datapoints
 
-        
-        checkbox = st.checkbox('I confirm that the metadata is correct')
+        checkbox = st.checkbox("I confirm that the metadata is correct")
         if checkbox:
-            st.session_state['submission_ready'] = True 
+            st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
-                    #TODO: check if parameters are filled
-                    #submit_pr = False
+            # TODO: check if parameters are filled
+            # submit_pr = False
             if submit_pr:
-                st.session_state[SUBMIT]=True
+                st.session_state[SUBMIT] = True
                 clone_pr(
-                        st.session_state[ALL_DATAPOINTS],
-                        st.secrets["gh"]["token"],
-                        username="Proteobot",
-                        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                        branch_name="new_branch"
+                    st.session_state[ALL_DATAPOINTS],
+                    st.secrets["gh"]["token"],
+                    username="Proteobot",
+                    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                    branch_name="new_branch",
                 )
         if SUBMIT in st.session_state:
             if st.session_state[SUBMIT]:
-            #status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
+                # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
-                st.session_state[SUBMIT]=False
+                st.session_state[SUBMIT] = False
+                rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 
-
-            
 
 class WebpageTexts:
     class Sidebar:

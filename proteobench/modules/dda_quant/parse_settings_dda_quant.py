@@ -1,7 +1,10 @@
 """ All formats available for the module """
 import os
 from dataclasses import dataclass
+from typing import List
+
 import toml
+
 #import proteobench.modules.dda_quant.p
 
 PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), 'io_parse_settings')
@@ -19,6 +22,7 @@ INPUT_FORMATS = ("MaxQuant",
                 "Proline",
                 "WOMBAT")
 
+DDA_QUANT_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json"
         
 
 class ParseSettings:

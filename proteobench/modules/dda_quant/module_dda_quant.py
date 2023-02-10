@@ -7,6 +7,8 @@ import toml
 from proteobench.modules.dda_quant import parse_dda_id, parse_settings_dda_quant
 from proteobench.modules.dda_quant.__metadata__ import Metadata
 from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
+from proteobench.modules.dda_quant.parse_settings_dda_quant import DDA_QUANT_RESULTS_PATH
+from dataclasses import asdict
 
 def is_implemented() -> bool:
     """ Returns whether the module is fully implemented. """
@@ -86,8 +88,7 @@ def strip_sequence_wombat(seq:str) -> str:
 def compute_metadata(
         result_performance:pd.DataFrame,
         input_format:str,
-        user_input:dict,
-        json_dump_path:str
+        user_input:dict
         ) -> Metadata:
     """ Method used to compute metadata for the provided result. """
     result_metadata = Metadata(
@@ -109,9 +110,10 @@ def compute_metadata(
     )
     result_metadata.generate_id()
     result_metadata.calculate_plot_data(result_performance)
-    result_metadata.dump_json_object(json_dump_path)
+    #result_metadata.dump_json_object(json_dump_path)
+    df = pd.Series(asdict(result_metadata))
 
-    return result_metadata
+    return df
 
 def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
     """ Method loads dataframe from a csv depending on its format."""
@@ -129,10 +131,24 @@ def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
 
     return input_data_frame
 
+def load_data_points_from_repo():
+    df = pd.read_json(DDA_QUANT_RESULTS_PATH)
+    return df
+
+def add_current_data_point(all_datapoints, current_datapoint):
+    if (not isinstance(all_datapoints,pd.DataFrame)):
+        all_datapoints = load_data_points_from_repo()
+    else:
+        all_datapoints = all_datapoints.T
+    all_datapoints = pd.concat([all_datapoints, current_datapoint],axis=1)
+    all_datapoints = all_datapoints.T.reset_index(drop=True)
+    return all_datapoints
+
 def benchmarking(
         input_file: str,
         input_format: str,
-        user_input:dict
+        user_input:dict,
+        all_datapoints
     ) -> pd.DataFrame:
     """ Main workflow of the module. Used to benchmark workflow results. """
 
@@ -161,6 +177,7 @@ def benchmarking(
                 parse_settings
     )
 
-    _metadata = compute_metadata(result_performance, input_format, user_input, "proteobench/modules/dda_quant/results.json")
-
-    return result_performance
+    current_datapoint = compute_metadata(result_performance, input_format, user_input)
+    all_datapoints = add_current_data_point(all_datapoints, current_datapoint)
+    
+    return result_performance, all_datapoints

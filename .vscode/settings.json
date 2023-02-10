@@ -1,4 +1,10 @@
 {
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {"source.organizeImports": true},
+        "editor.rulers": [88]
+    },
+    "python.formatting.provider": "black",
     "python.testing.unittestArgs": [
         "-v",
         "-s",

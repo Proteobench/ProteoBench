@@ -1,29 +1,40 @@
 """Streamlit-based web interface for ProteoBench."""
 
 import logging
+import json
 from datetime import datetime
-from proteobench.modules.dda_quant import module_dda_quant
 
-from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
+from proteobench.modules.dda_quant import module_dda_quant
+from proteobench.modules.dda_quant.parse_settings_dda_quant import \
+    INPUT_FORMATS
+
 try:
     from importlib.metadata import version
 except ImportError:
     from importlib_metadata import version
 
-
 import streamlit as st
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
+from proteobench.github.gh import clone_pr
 from proteobench.modules.dda_quant import plot_dda_id
 
-
 logger = logging.getLogger(__name__)
+
+ALL_DATAPOINTS = "all_datapoints"
+SUBMIT = 'submit'
+FIG1 = 'fig1'
+FIG2 = 'fig2'
+RESULT_PERF = 'result_perf'
+
+if 'submission_ready' not in st.session_state:
+    st.session_state['submission_ready'] = False
 
 class StreamlitUI:
     """Proteobench Streamlit UI."""
 
     def __init__(self):
-        """Proteobench Streamlit UI."""
+        """Proteobench Streamlit UI. """
         self.texts = WebpageTexts
         self.user_input = dict()
 
@@ -33,9 +44,31 @@ class StreamlitUI:
             layout="centered",
             initial_sidebar_state="expanded",
         )
-
+        if SUBMIT not in st.session_state:
+            st.session_state[SUBMIT] = False
         self._main_page()
         self._sidebar()
+        
+
+    def generate_input_field(self, input_format:str, content:dict):
+        if(content["type"] == "text_input"):
+            return st.text_input(
+                    content["label"], 
+                    content["value"][input_format])
+        if(content["type"] == "number_input"):
+            return st.number_input(
+                    content["label"], 
+                    value = content["value"][input_format],
+                    format = content["format"])
+        if(content["type"] == "selectbox"):
+            return st.selectbox(
+                    content["label"],
+                    content["options"],
+                    content["options"].index(content["value"][input_format]))
+        if(content["type"] == "checkbox"):
+            return st.checkbox(
+                    content["label"], 
+                    content["value"][input_format])
 
     def _main_page(self):
         """Format main page."""
@@ -53,116 +86,36 @@ class StreamlitUI:
                 INPUT_FORMATS
             )
 
-            st.subheader("Add results to online repository")
-
-            self.user_input["pull_req"] = st.text_input(
-                "Open pull request to make results available to everyone (type \"YES\" to enable)", 
-                "NO"
-            )
+            # self.user_input["pull_req"] = st.text_input(
+            #     "Open pull request to make results available to everyone (type \"YES\" to enable)", 
+            #     "NO"
+            # )
 
             with st.expander("Additional parameters"):
-                self.user_input["version"] = st.text_input(
-                    "Search engine version", 
-                    "1.5.8.3"
-                )
 
-                self.user_input["software_name"] = st.text_input(
-                    "software name", 
-                    "Search engine name"
-                )
+                with open("webinterface/configuration/dda_quant.json") as file:
+                    config = json.load(file)
 
-                self.user_input["fdr_psm"] = st.text_input(
-                    "FDR psm", 
-                    "0.01"
-                )
-                
-                self.user_input["fdr_peptide"] = st.text_input(
-                    "FDR peptide", 
-                    "0.01"
-                )
-
-                self.user_input["fdr_protein"] = st.text_input(
-                    "FDR protein", 
-                    "0.01"
-                )
-
-                self.user_input["precursor_mass_tolerance"] = st.text_input(
-                    "Precursor mass tolerance", 
-                    "10.0"
-                )
-
-                self.user_input["precursor_mass_tolerance_unit"] = st.selectbox(
-                    "Precursor tolerance unit",
-                    ("PPM", "Da")
-                )
-
-                self.user_input["fragment_mass_tolerance"] = st.text_input(
-                    "Fragment mass tolerance", 
-                    "10.0"
-                )
-
-                self.user_input["fragment_mass_tolerance_unit"] = st.selectbox(
-                    "",
-                    ("PPM", "Da")
-                )
-
-                self.user_input["search_enzyme_name"] = st.selectbox(
-                    "Enzyme",
-                    ("Trypsin", "Chemotrypsin")
-                )
-
-                self.user_input["allowed_missed_cleavage"] = st.text_input(
-                    "Allowed missed cleavage", 
-                    "2"
-                )
-
-                self.user_input["fixed_mods"] = st.text_input(
-                    "What fixed mods were set", 
-                    "CAM"
-                )
-
-                self.user_input["variable_mods"] = st.text_input(
-                    "What variable mods were set", 
-                    "MOxid"
-                )
-
-                self.user_input["precursor_charge"] = st.text_input(
-                    "Possible charge states", 
-                    "[2,3,4,5,6]"
-                )
-
-                self.user_input["max_num_mods_on_peptide"] = st.text_input(
-                    "Maximum number of modifications on peptides", 
-                    "2"
-                )
-
-                self.user_input["min_peptide_length"] = st.text_input(
-                    "Minimum peptide length", 
-                    "6"
-                )
-
-                self.user_input["max_peptide_length"] = st.text_input(
-                    "max_peptide_length", 
-                    "25"
-                )
-
-                self.user_input["mbr"] = st.checkbox(
-                    "Quantified with MBR"
-                )
-
-                self.user_input["workflow_description"] = st.text_area(
-                    "Fill in details not specified above, such as:",
-                    "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...", 
-                    height=275
-                    )
+                for key, value in config.items():
+                    self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
             submit_button = st.form_submit_button("Parse and bench")
-
                 
+        #if st.session_state[SUBMIT]:
+        if FIG1 in st.session_state:
+            self._populate_results()
             
-
+    
         if submit_button:
             self._run_proteobench()
+
+
+    def _populate_results(self):
+        self.generate_results("", 
+                None,
+                None,
+                False)
+
 
     def _sidebar(self):
         """Format sidebar."""
@@ -179,47 +132,106 @@ class StreamlitUI:
         st.header("Running Proteobench")
         status_placeholder = st.empty()
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
+        
+        if ALL_DATAPOINTS not in st.session_state:
+            st.session_state[ALL_DATAPOINTS] = None
+        
 
         try:
-            result_performance = module_dda_quant.benchmarking(
+            result_performance, all_datapoints = module_dda_quant.benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
-                self.user_input
+                self.user_input,
+                st.session_state['all_datapoints']
             )
+            st.session_state[ALL_DATAPOINTS] = all_datapoints
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)
         else:
-            time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.generate_results(status_placeholder, 
+                result_performance,
+                all_datapoints,
+                True)
 
+    def generate_results(self, 
+        status_placeholder, 
+        result_performance, 
+        all_datapoints,
+        recalculate):
+        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        if recalculate:
             status_placeholder.success(":heavy_check_mark: Finished!")
 
             # Show head of result DataFrame
-            st.header("Results")
-            st.subheader("Sample of the processed file")
-            st.dataframe(result_performance.head(100))
+        st.header("Results")
+        st.subheader("Sample of the processed file")
+        if not recalculate:
+            result_performance = st.session_state[RESULT_PERF]
+            all_datapoints = st.session_state[ALL_DATAPOINTS]
+        st.dataframe(result_performance.head(100))
+
 
             # Plot results
-            st.subheader("Ratio between conditions")
+        st.subheader("Ratio between conditions")
+        if recalculate:
             fig = plot_dda_id.plot_bench(result_performance)
-            st.plotly_chart(fig, use_container_width=True)
+        else:
+            fig = st.session_state[FIG1]
+        st.plotly_chart(fig, use_container_width=True)
             
             
-            # Plot results
-            st.subheader("Mean error between conditions")
-            fig2 = plot_dda_id.plot_metric(result_performance)
-            st.plotly_chart(fig2, use_container_width=True)
+        st.subheader("Mean error between conditions")
+        st.text(all_datapoints.head(100))
+        if recalculate:
+            fig2 = plot_dda_id.plot_metric(all_datapoints) 
+        else:
+            fig2 = st.session_state[FIG2]
+        st.plotly_chart(fig2, use_container_width=True)
 
-            sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
+        sample_name = "%s-%s-%s-%s" % (self.user_input["input_format"],self.user_input["version"],self.user_input["mbr"],time_stamp)
 
             # Download link
-            st.subheader("Download calculated ratios")
-            st.download_button(
+        st.subheader("Download calculated ratios")
+        st.download_button(
                 label="Download",
                 data=save_dataframe(result_performance),
                 file_name=f"{sample_name}.csv",
                 mime="text/csv"
             )
+
+        
+        st.subheader("Add results to online repository")
+        st.session_state[FIG1] = fig
+        st.session_state[FIG2] = fig2
+        st.session_state[RESULT_PERF]=result_performance
+        st.session_state[ALL_DATAPOINTS] = all_datapoints
+
+        
+        checkbox = st.checkbox('I confirm that the metadata is correct')
+        if checkbox:
+            st.session_state['submission_ready'] = True 
+            submit_pr = st.button("I really want to upload it")
+                    #TODO: check if parameters are filled
+                    #submit_pr = False
+            if submit_pr:
+                st.session_state[SUBMIT]=True
+                clone_pr(
+                        st.session_state[ALL_DATAPOINTS],
+                        st.secrets["gh"]["token"],
+                        username="Proteobot",
+                        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                        branch_name="new_branch"
+                )
+        if SUBMIT in st.session_state:
+            if st.session_state[SUBMIT]:
+            #status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
+                st.subheader("SUCCESS")
+                st.session_state[SUBMIT]=False
+
+
+            
 
 class WebpageTexts:
     class Sidebar:

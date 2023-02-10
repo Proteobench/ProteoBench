@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Dict, List
 
 import pandas as pd
-from __init__ import ParseInputsInterface
 
+from proteobench.modules.template.__init__ import ParseInputsInterface
 from proteobench.modules.template.parse_settings import ParseSettings
 
 

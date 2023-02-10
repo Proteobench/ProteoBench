@@ -6,8 +6,8 @@ import re
 from dataclasses import asdict
 
 import pandas as pd
-from __init__ import ModuleInterface
 
+from proteobench.modules.dda_quant.__init__ import ModuleInterface
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (

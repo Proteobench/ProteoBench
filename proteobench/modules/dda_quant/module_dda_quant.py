@@ -23,6 +23,11 @@ class ModuleInterface(ABC):
         """Method used to run the benchmarking."""
         pass
 
+    @abstractmethod
+    def load_input_file(self):
+        """Method loads dataframe from the file depending on its format."""
+        pass
+
 
 class Module(ModuleInterface):
     """Object is used as a main interface with the Proteobench library within the module."""

@@ -3,11 +3,11 @@ from __future__ import annotations
 import datetime
 import itertools
 import re
-from abc import ABC, abstractmethod
 from dataclasses import asdict
 
 import pandas as pd
 import toml
+from __init__ import ModuleInterface
 
 from proteobench.modules.template import parse, parse_settings
 from proteobench.modules.template.datapoint import Datapoint
@@ -15,36 +15,6 @@ from proteobench.modules.template.parse_settings import (
     TEMPLATE_RESULTS_PATH,
     ParseSettings,
 )
-
-
-class ModuleInterface(ABC):
-    @abstractmethod
-    def benchmarking(self):
-        """Method used to run the benchmarking."""
-        pass
-
-    @abstractmethod
-    def load_input_file(self):
-        """Method loads dataframe from the file depending on its format."""
-        pass
-
-    @abstractmethod
-    def generate_intermediate(self):
-        """Calculate intermediate values from the uploaded file."""
-        pass
-
-    @abstractmethod
-    def generate_datapoint(self):
-        """Method used to compute benchmarks for the provided intermediate structure."""
-        pass
-
-    @abstractmethod
-    def load_data_points_from_repo(self):
-        pass
-
-    @abstractmethod
-    def add_current_data_point(self):
-        pass
 
 
 class Module(ModuleInterface):
@@ -116,7 +86,7 @@ class Module(ModuleInterface):
 
     def add_current_data_point(all_datapoints, current_datapoint):
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = load_data_points_from_repo()
+            all_datapoints = self.load_data_points_from_repo()
         else:
             all_datapoints = all_datapoints.T
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
@@ -129,7 +99,7 @@ class Module(ModuleInterface):
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Read input file
-        input_df = load_input_file(input_file, input_format)
+        input_df = self.load_input_file(input_file, input_format)
 
         # Parse user config
         parse_settings = ParseSettings(input_format)
@@ -138,16 +108,16 @@ class Module(ModuleInterface):
         standard_format = parse.convert_to_standard_format(input_df, parse_settings)
 
         # Create intermediate data structure for benchmarking
-        intermediate_data_structure = generate_intermediate(
+        intermediate_data_structure = self.generate_intermediate(
             standard_format, parse_settings
         )
 
         # Compute performance metrics
-        current_datapoint = generate_datapoint(
+        current_datapoint = self.generate_datapoint(
             intermediate_data_structure, input_format, user_input
         )
 
         # Add data point to all data points
-        all_datapoints = add_current_data_point(all_datapoints, current_datapoint)
+        all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
         return intermediate_data_structure, all_datapoints

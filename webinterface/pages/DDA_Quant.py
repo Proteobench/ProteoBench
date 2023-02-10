@@ -4,8 +4,9 @@ import json
 import logging
 from datetime import datetime
 
-from proteobench.modules.dda_quant import module_dda_quant
+from proteobench.modules.dda_quant.module_dda_quant import Module
 from proteobench.modules.dda_quant.parse_settings_dda_quant import INPUT_FORMATS
+from proteobench.modules.dda_quant.plot_dda_id import PlotDataPoint
 
 try:
     from importlib.metadata import version
@@ -17,7 +18,6 @@ from streamlit_extras.let_it_rain import rain
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
 from proteobench.github.gh import clone_pr
-from proteobench.modules.dda_quant import plot_dda_id
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ class StreamlitUI:
             st.session_state[ALL_DATAPOINTS] = None
 
         try:
-            result_performance, all_datapoints = module_dda_quant.benchmarking(
+            result_performance, all_datapoints = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
@@ -164,7 +164,7 @@ class StreamlitUI:
         # Plot results
         st.subheader("Ratio between conditions")
         if recalculate:
-            fig = plot_dda_id.plot_bench(result_performance)
+            fig = PlotDataPoint().plot_bench(result_performance)
         else:
             fig = st.session_state[FIG1]
         st.plotly_chart(fig, use_container_width=True)
@@ -174,7 +174,7 @@ class StreamlitUI:
         #st.text(all_datapoints.head(100))
             
         if recalculate:
-            fig2 = plot_dda_id.plot_metric(all_datapoints)
+            fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:
             fig2 = st.session_state[FIG2]
         st.plotly_chart(fig2, use_container_width=True)

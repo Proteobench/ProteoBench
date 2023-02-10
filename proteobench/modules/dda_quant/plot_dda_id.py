@@ -1,49 +1,58 @@
+from abc import ABC, abstractmethod
+
 import numpy as np
 import plotly.figure_factory as ff
-import plotly.graph_objects as go  
-import plotly.express as px
-import streamlit as st 
+import plotly.graph_objects as go
+import streamlit as st
 from streamlit_plotly_events import plotly_events
 
-def plot_bench(result_df):
-    """Plot results with Plotly Express."""
 
-    hist_data = [
-        np.array(result_df[result_df["YEAST"] == True]["1|2_ratio"]),
-        np.array(result_df[result_df["HUMAN"] == True]["1|2_ratio"]),
-        np.array(result_df[result_df["ECOLI"] == True]["1|2_ratio"])
-    ]
-    group_labels = [
-        "YEAST",
-        "HUMAN",
-        "ECOLI",
-    ]
+class PlotDataPointInterface(ABC):
+    @abstractmethod
+    def plot_bench(self):
+        """Plot the data points of the module.."""
+        pass 
 
-    fig = ff.create_distplot(hist_data, group_labels, show_hist=False) 
-    
-    
-    fig.update_layout(
-        width=700,
-        height=700,
-        title="Distplot",
-        xaxis=dict(
-            title="1|2_ratio",
-            color='white',
-            gridwidth=2,
-        ),
-        yaxis=dict(
-            title="Density",
-            color='white', 
-            gridwidth=2,
-        )
-    )
 
-    fig.update_xaxes(range = [0,4])
-    
-    return fig
+class PlotDataPoint(PlotDataPointInterface):
+  def plot_bench(result_df):
+      """Plot results with Plotly Express."""
 
-   
-def plot_metric(benchmark_metrics_df): 
+      hist_data = [
+          np.array(result_df[result_df["YEAST"] == True]["1|2_ratio"]),
+          np.array(result_df[result_df["HUMAN"] == True]["1|2_ratio"]),
+          np.array(result_df[result_df["ECOLI"] == True]["1|2_ratio"])
+      ]
+      group_labels = [
+          "YEAST",
+          "HUMAN",
+          "ECOLI",
+      ]
+
+      fig = ff.create_distplot(hist_data, group_labels, show_hist=False) 
+
+
+      fig.update_layout(
+          width=700,
+          height=700,
+          title="Distplot",
+          xaxis=dict(
+              title="1|2_ratio",
+              color='white',
+              gridwidth=2,
+          ),
+          yaxis=dict(
+              title="Density",
+              color='white', 
+              gridwidth=2,
+          )
+      )
+
+      fig.update_xaxes(range = [0,4])
+
+      return fig
+
+    def plot_metric(benchmark_metrics_df): 
     """
     Plot mean metrics in a scatterplot with plotly.  
     
@@ -98,22 +107,18 @@ def plot_metric(benchmark_metrics_df):
             title="Total number of precursours quantified in all raw files",
             gridcolor='white',
             gridwidth=2,
-        )
-    )
-    
-    
-    #selected_points = plotly_events(
-    #    fig,
-    #    select_event=True,
-    #    key='Smth'
-    #)
-    
-    #if len(selected_points) == 0:
-    #    st.warning('Please select a data point')
-    #else:
-    #    st.write(selected_points)
-    
-    
-    return fig 
-    
 
+        )
+
+        # selected_points = plotly_events(
+        #    fig,
+        #    select_event=True,
+        #    key='Smth'
+        # )
+
+        # if len(selected_points) == 0:
+        #    st.warning('Please select a data point')
+        # else:
+        #    st.write(selected_points)
+
+        return fig

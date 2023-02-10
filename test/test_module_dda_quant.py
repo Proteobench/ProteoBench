@@ -1,8 +1,8 @@
 import os
 import unittest
 
-from proteobench.modules.dda_quant import parse_dda_id
 from proteobench.modules.dda_quant.module_dda_quant import Module
+from proteobench.modules.dda_quant.parse_dda_id import ParseInputs
 from proteobench.modules.dda_quant.parse_settings_dda_quant import (
     INPUT_FORMATS,
     ParseSettings,
@@ -27,7 +27,7 @@ def load__local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = parse_dda_id.prepare_df(input_df, parse_settings)
+    prepared_df, replicate_to_raw = ParseInputs().prepare_df(input_df, parse_settings)
     species_quant_df, cv_replicate_quant_df = Module().get_quant(
         prepared_df, replicate_to_raw, parse_settings
     )
@@ -44,7 +44,7 @@ def process_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = parse_dda_id.prepare_df(input_df, parse_settings)
+    prepared_df, replicate_to_raw = ParseInputs().prepare_df(input_df, parse_settings)
     species_quant_df, cv_replicate_quant_df = Module().get_quant(
         prepared_df, replicate_to_raw, parse_settings
     )
@@ -84,7 +84,7 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = parse_dda_id.prepare_df(
+            prepared_df, replicate_to_raw = ParseInputs().prepare_df(
                 input_df, parse_settings
             )
 
@@ -96,7 +96,7 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = parse_dda_id.prepare_df(
+            prepared_df, replicate_to_raw = ParseInputs().prepare_df(
                 input_df, parse_settings
             )
 

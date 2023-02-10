@@ -8,8 +8,9 @@ from dataclasses import asdict
 
 import pandas as pd
 
-from proteobench.modules.dda_quant import parse_dda_id, parse_settings_dda_quant
+from proteobench.modules.dda_quant import parse_settings_dda_quant
 from proteobench.modules.dda_quant.__metadata__ import Metadata
+from proteobench.modules.dda_quant.parse_dda_id import ParseInputs
 from proteobench.modules.dda_quant.parse_settings_dda_quant import (
     DDA_QUANT_RESULTS_PATH,
     ParseSettings,
@@ -180,6 +181,7 @@ class Module(ModuleInterface):
         return input_data_frame
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
+        """TODO"""
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
         else:
@@ -197,7 +199,7 @@ class Module(ModuleInterface):
         input_df = self.load_input_file(input_file, input_format)
         parse_settings = parse_settings_dda_quant.ParseSettings(input_format)
 
-        prepared_df, replicate_to_raw = parse_dda_id.prepare_df(
+        prepared_df, replicate_to_raw = ParseInputs().prepare_df(
             input_df, parse_settings
         )
 

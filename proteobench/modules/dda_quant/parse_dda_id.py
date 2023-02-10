@@ -8,14 +8,14 @@ import pandas as pd
 from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
 
 
-class ParsingInterface(ABC):
+class ParseInputsInterface(ABC):
     @abstractmethod
     def prepare_df(self):
         """Convert a search engine output into a generic format supported by the module."""
         pass
 
 
-class Parsing(ParsingInterface):
+class ParseInputs(ParseInputsInterface):
     def prepare_df(
         self, df: pd.DataFrame, parse_settings: ParseSettings
     ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:

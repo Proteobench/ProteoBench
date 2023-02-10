@@ -170,7 +170,9 @@ class StreamlitUI:
         st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("Mean error between conditions")
-        st.text(all_datapoints.head(100))
+        # show metadata 
+        #st.text(all_datapoints.head(100))
+            
         if recalculate:
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:

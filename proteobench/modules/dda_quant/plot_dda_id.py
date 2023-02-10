@@ -23,6 +23,8 @@ def plot_bench(result_df):
     
     
     fig.update_layout(
+        width=700,
+        height=700,
         title="Distplot",
         xaxis=dict(
             title="1|2_ratio",
@@ -41,7 +43,7 @@ def plot_bench(result_df):
     return fig
 
    
-def plot_metric(meta_data): 
+def plot_metric(benchmark_metrics_df): 
     """
     Plot mean metrics in a scatterplot with plotly.  
     
@@ -49,80 +51,34 @@ def plot_metric(meta_data):
     y = total number of precursours quantified in all raw files 
     
     Input: meta_data
-    
-    Information in dataframe to show in hover:
-    workflow identifier	software_name	software_version	match_between_runs	precursor_mass_tolerance
-    fragment_mass_tolerance allowed_missed_cleavage	fixed_mods	variable_mods min_peptide_length
-    max_peptide_length
   
     
     Return: Plotly figure object
-    
-   
-    color list :
-    aliceblue, antiquewhite, aqua, aquamarine, azure,
-            beige, bisque, black, blanchedalmond, blue,
-            blueviolet, brown, burlywood, cadetblue,
-            chartreuse, chocolate, coral, cornflowerblue,
-            cornsilk, crimson, cyan, darkblue, darkcyan,
-            darkgoldenrod, darkgray, darkgrey, darkgreen,
-            darkkhaki, darkmagenta, darkolivegreen, darkorange,
-            darkorchid, darkred, darksalmon, darkseagreen,
-            darkslateblue, darkslategray, darkslategrey,
-            darkturquoise, darkviolet, deeppink, deepskyblue,
-            dimgray, dimgrey, dodgerblue, firebrick,
-            floralwhite, forestgreen, fuchsia, gainsboro,
-            ghostwhite, gold, goldenrod, gray, grey, green,
-            greenyellow, honeydew, hotpink, indianred, indigo,
-            ivory, khaki, lavender, lavenderblush, lawngreen,
-            lemonchiffon, lightblue, lightcoral, lightcyan,
-            lightgoldenrodyellow, lightgray, lightgrey,
-            lightgreen, lightpink, lightsalmon, lightseagreen,
-            lightskyblue, lightslategray, lightslategrey,
-            lightsteelblue, lightyellow, lime, limegreen,
-            linen, magenta, maroon, mediumaquamarine,
-            mediumblue, mediumorchid, mediumpurple,
-            mediumseagreen, mediumslateblue, mediumspringgreen,
-            mediumturquoise, mediumvioletred, midnightblue,
-            mintcream, mistyrose, moccasin, navajowhite, navy,
-            oldlace, olive, olivedrab, orange, orangered,
-            orchid, palegoldenrod, palegreen, paleturquoise,
-            palevioletred, papayawhip, peachpuff, peru, pink,
-            plum, powderblue, purple, red, rosybrown,
-            royalblue, rebeccapurple, saddlebrown, salmon,
-            sandybrown, seagreen, seashell, sienna, silver,
-            skyblue, slateblue, slategray, slategrey, snow,
-            springgreen, steelblue, tan, teal, thistle, tomato,
-            turquoise, violet, wheat, white, whitesmoke,
-            yellow, yellowgreen
-    
+
     """
     
-    # add hover text. 
-    #
-    
-    #hover_text = [t, t]   
-    
-    
-    
+    # Define search colors for each search engine 
     search_engine_colors = {"MaxQuant": "midnightblue", 
                             "AlphaPept": "grey", 
                             "MSFragger": "orange", 
                             "WOMBAT": "firebrick"
                            } 
-        
-    colors = [search_engine_colors[engine] for engine in meta_data["search_engine"]] 
     
-    #hover_texts = [ f"Workflow Identifier: {search_engine_colors["id"]}<br>MBR: {meta_data["MBR"]}" for row in meta_data] 
+    # Color plot based on search engine 
+    colors = [search_engine_colors[engine] for engine in benchmark_metrics_df["search_engine"]] 
+    
+    # Add hover text
+    hover_texts = [ f"Search Engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.software_version[idx]}<br>MBR: {benchmark_metrics_df.MBR[idx]}<br>Precursor Tolerance: {benchmark_metrics_df.precursor_tol[idx]} {benchmark_metrics_df.precursor_tol_unit[idx]}<br>Fragment Tolerance: {benchmark_metrics_df.fragment_tol_unit[idx]}<br>Enzyme: {benchmark_metrics_df.enzyme_name[idx]} <br>Missed Cleavages: {benchmark_metrics_df.missed_cleavages[idx]}<br>FDR psm: {benchmark_metrics_df.fdr_psm[idx]}<br>FDR Peptide: {benchmark_metrics_df.fdr_peptide[idx]}<br>FRD Protein: {benchmark_metrics_df.fdr_protein[idx]}" for idx, row in benchmark_metrics_df.iterrows()]  
     
     
-    # <br>Precursor Mass Tolerance: {meta_data.precursor_tol} {meta_data.precursor_tol_unit}<br>Fragment Mass Tolerance: {meta_data.fragmnent_tol} {meta_data.fragment_tol_unit} 
+    #  spellerror {meta_data.fragmnent_tol[idx]}
+    
     
     fig = go.Figure(data=[go.Scatter(
-        x=meta_data["weighted_sum"], 
-        y=meta_data["nr_prec"],
+        x=benchmark_metrics_df["weighted_sum"], 
+        y=benchmark_metrics_df["nr_prec"],
         mode='markers',
-        #text = hover_texts, 
+        text = hover_texts, 
         marker=dict(
             color=colors,
             showscale=True, 
@@ -130,14 +86,16 @@ def plot_metric(meta_data):
             ))])
     
     fig.update_layout(
-        title="Metric",
+        title="Metric", 
+        width=700,
+        height=700,
         xaxis=dict(
-            title="Weighted sum",
+            title="Median absolute precentage error between all meansured ratios and expected ratio",
             gridcolor='white',
             gridwidth=2,
         ),
         yaxis=dict(
-            title="Numper of precursors",
+            title="Total number of precursours quantified in all raw files",
             gridcolor='white',
             gridwidth=2,
         )

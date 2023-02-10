@@ -5,6 +5,7 @@ from datetime import datetime
 
 @dataclass
 class Metadata():
+    """ Data used to stored the """
     id: str = None
     search_engine: str = None
     software_version: int = 0
@@ -22,6 +23,7 @@ class Metadata():
     max_pep_length: int = 0
     weighted_sum: int = 0
     nr_prec: int = 0
+    is_temporary: bool = True
     #fixed_mods: [],
     #variable_mods: [],
     #max_number_mods_pep: int = 0,

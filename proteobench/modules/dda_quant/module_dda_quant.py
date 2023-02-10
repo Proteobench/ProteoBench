@@ -1,5 +1,4 @@
-""" Main interface of the module."""
-
+from __future__ import annotations
 import datetime
 import re
 import itertools
@@ -8,6 +7,8 @@ import toml
 from proteobench.modules.dda_quant import parse_dda_id, parse_settings_dda_quant
 from proteobench.modules.dda_quant.__metadata__ import Metadata
 from proteobench.modules.dda_quant.parse_settings_dda_quant import ParseSettings
+from proteobench.modules.dda_quant.parse_settings_dda_quant import DDA_QUANT_RESULTS_PATH
+from dataclasses import asdict
 
 def is_implemented() -> bool:
     """ Returns whether the module is fully implemented. """
@@ -20,18 +21,23 @@ def get_quant(
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """ Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it). """
 
-    quant_df = filtered_df.groupby(["peptidoform","Raw file"]).mean()["Intensity"]
-        
-    replicate_quant_list = {}
+    # Summarize values of the same peptide using mean
+    quant_raw_df = filtered_df.groupby(["peptidoform","Raw file"]).mean()["Intensity"]
+    quant_df = quant_raw_df.unstack(level=1)
+
+    # Count number of values per peptidoform and Raw file
 
     for replicate, replicate_runs in replicate_to_raw.items():
-        selected_replicate_df = quant_df.index.get_level_values("Raw file").isin(replicate_runs)
-        replicate_quant_df = quant_df[selected_replicate_df]
-        
-        cv_series = replicate_quant_df.groupby(["peptidoform"]).mean()
-        replicate_quant_list[replicate] = cv_series
-    
-    cv_replicate_quant_df = pd.DataFrame(replicate_quant_list)
+        selected_replicate_df = quant_raw_df.index.get_level_values("Raw file").isin(replicate_runs)
+        replicate_quant_df = quant_raw_df[selected_replicate_df]
+        ## Add means of replicates
+        mean_series = replicate_quant_df.groupby(["peptidoform"]).mean()
+        # change indices of mean_series from peptidoform to multiindices containing peptidoform,replicate
+        quant_df["mean_of_" + str(replicate)] = mean_series
+
+        ## Add number of missing values per row of replicate
+        missing_series = replicate_quant_df.isna().groupby(["peptidoform"]).sum()
+        quant_df["missing_values_" + str(replicate)] = missing_series
 
     species_peptidoform = list(parse_settings.species_dict.keys())
     species_peptidoform.append("peptidoform")
@@ -39,19 +45,19 @@ def get_quant(
     peptidoform_to_species.index = peptidoform_to_species["peptidoform"]
     peptidoform_to_species_dict = peptidoform_to_species.T.to_dict()
 
-    species_quant_df = pd.DataFrame([peptidoform_to_species_dict[idx] for idx in cv_replicate_quant_df.index])
+    species_quant_df = pd.DataFrame([peptidoform_to_species_dict[idx] for idx in quant_df.index])
     species_quant_df.set_index("peptidoform", drop = True, inplace = True)
 
-    return species_quant_df,cv_replicate_quant_df
+    return species_quant_df,quant_df
 
 def get_quant_ratios(
-        cv_replicate_quant_df:pd.DataFrame,
+        quant_df:pd.DataFrame,
         species_quant_df:pd.DataFrame,
         parse_settings:ParseSettings
     ) -> pd.DataFrame:
     """ Calculate the quantification ratios and compare them to the expected ratios. """
 
-    cv_replicate_quant_species_df = pd.concat([cv_replicate_quant_df,species_quant_df],axis=1)
+    cv_replicate_quant_species_df = pd.concat([quant_df,species_quant_df],axis=1)
 
     ratio_dict = {}
     for species in parse_settings.species_dict.keys():
@@ -59,7 +65,7 @@ def get_quant_ratios(
         for conditions in itertools.combinations(set(parse_settings.replicate_mapper.values()),2):
             condition_comp_id = "|".join(map(str,conditions))
 
-            ratio = species_df_slice[conditions[0]]/species_df_slice[conditions[1]]
+            ratio = species_df_slice["mean_of_" + str(conditions[0])]/species_df_slice["mean_of_" + str(conditions[1])]
             ratio_diff = abs(ratio-parse_settings.species_expected_ratio[species][condition_comp_id])*100
             
             try:
@@ -82,8 +88,7 @@ def strip_sequence_wombat(seq:str) -> str:
 def compute_metadata(
         result_performance:pd.DataFrame,
         input_format:str,
-        user_input:dict,
-        json_dump_path:str
+        user_input:dict
         ) -> Metadata:
     """ Method used to compute metadata for the provided result. """
     result_metadata = Metadata(
@@ -105,9 +110,10 @@ def compute_metadata(
     )
     result_metadata.generate_id()
     result_metadata.calculate_plot_data(result_performance)
-    result_metadata.dump_json_object(json_dump_path)
+    #result_metadata.dump_json_object(json_dump_path)
+    df = pd.Series(asdict(result_metadata))
 
-    return result_metadata
+    return df
 
 def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
     """ Method loads dataframe from a csv depending on its format."""
@@ -115,9 +121,8 @@ def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
 
     if input_format == "MaxQuant":
         input_data_frame = pd.read_csv(input_csv,sep="\t",low_memory=False)
-        
     elif input_format == "AlphaPept":
-        input_data_frame = pd.read_csv(input_csv,low_memory=False,sep="\t")
+        input_data_frame = pd.read_csv(input_csv,low_memory=False)
     elif input_format == "MSFragger":
         input_data_frame = pd.read_csv(input_csv,low_memory=False,sep="\t")
     elif input_format == "WOMBAT":
@@ -126,10 +131,24 @@ def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
 
     return input_data_frame
 
+def load_data_points_from_repo():
+    df = pd.read_json(DDA_QUANT_RESULTS_PATH)
+    return df
+
+def add_current_data_point(all_datapoints, current_datapoint):
+    if (not isinstance(all_datapoints,pd.DataFrame)):
+        all_datapoints = load_data_points_from_repo()
+    else:
+        all_datapoints = all_datapoints.T
+    all_datapoints = pd.concat([all_datapoints, current_datapoint],axis=1)
+    all_datapoints = all_datapoints.T.reset_index(drop=True)
+    return all_datapoints
+
 def benchmarking(
         input_file: str,
         input_format: str,
-        user_input:dict
+        user_input:dict,
+        all_datapoints
     ) -> pd.DataFrame:
     """ Main workflow of the module. Used to benchmark workflow results. """
 
@@ -145,7 +164,7 @@ def benchmarking(
     #print(prepared_df.columns)
 
     # Get quantification data
-    species_quant_df, cv_replicate_quant_df = get_quant(
+    species_quant_df, quant_df = get_quant(
             prepared_df,
             replicate_to_raw,
             parse_settings
@@ -153,11 +172,12 @@ def benchmarking(
 
     # Compute quantification ratios
     result_performance = get_quant_ratios(
-                cv_replicate_quant_df,
+                quant_df,
                 species_quant_df,
                 parse_settings
     )
 
-    _metadata = compute_metadata(result_performance, input_format, user_input, "proteobench/modules/dda_quant/results.json")
-
-    return result_performance
+    current_datapoint = compute_metadata(result_performance, input_format, user_input)
+    all_datapoints = add_current_data_point(all_datapoints, current_datapoint)
+    
+    return result_performance, all_datapoints

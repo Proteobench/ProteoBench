@@ -7,10 +7,10 @@ from dataclasses import asdict
 
 import pandas as pd
 import toml
-from __init__ import ModuleInterface
 
+from proteobench.modules.dda_quant.__init__ import ModuleInterface
 from proteobench.modules.template.datapoint import Datapoint
-from proteobench.modules.template.parse import convert_to_standard_format
+from proteobench.modules.template.parse import ParseInputs
 from proteobench.modules.template.parse_settings import (
     TEMPLATE_RESULTS_PATH,
     ParseSettings,
@@ -80,13 +80,10 @@ class Module(ModuleInterface):
 
         return input_data_frame
 
-    def load_data_points_from_repo():
-        df = pd.read_json(TEMPLATE_RESULTS_PATH)
-        return df
-
     def add_current_data_point(self, all_datapoints, current_datapoint):
+        """Add current data point to all data points and load them from file if empty"""
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = self.load_data_points_from_repo()
+            all_datapoints = pd.read_json(TEMPLATE_RESULTS_PATH)
         else:
             all_datapoints = all_datapoints.T
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
@@ -106,7 +103,9 @@ class Module(ModuleInterface):
         parse_settings = ParseSettings(input_format)
 
         # Converte uploaded data to standard format
-        standard_format = convert_to_standard_format(input_df, parse_settings)
+        standard_format = ParseInputs().convert_to_standard_format(
+            input_df, parse_settings
+        )
 
         # Create intermediate data structure for benchmarking
         intermediate_data_structure = self.generate_intermediate(

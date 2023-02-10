@@ -127,15 +127,13 @@ def load_input_file(input_csv:str, input_format:str) -> pd.DataFrame:
     return input_data_frame
 
 def load_data_points_from_repo():
-    df = pd.read_json(DDA_QUANT_RESULTS_PATH)
+    df = pd.read_json(DDA_QUANT_RESULTS_PATH, orient='records')
     return df
 
 def add_current_data_point(all_datapoints, current_datapoint):
     if (not isinstance(all_datapoints,pd.DataFrame)):
         all_datapoints = load_data_points_from_repo()
-    else:
-        all_datapoints = all_datapoints.T
-    all_datapoints = pd.concat([all_datapoints, current_datapoint],axis=1)
+    all_datapoints = pd.concat([all_datapoints.T, current_datapoint],axis=1)
     all_datapoints = all_datapoints.T.reset_index(drop=True)
     return all_datapoints
 

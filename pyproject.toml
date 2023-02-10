@@ -21,6 +21,7 @@ dependencies = [
     "numpy",
     "plotly",
     "streamlit_extras",
+    "streamlit-plotly-events",
     "matplotlib",
     "importlib-metadata; python_version < '3.8'",
     "toml"

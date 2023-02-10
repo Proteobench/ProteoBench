@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 
 from git import Repo
 
-from proteobench.modules.dda_quant.module_dda_quant import Module
+from proteobench.modules.dda_quant.module import Module
 
 
 def clone_pr(

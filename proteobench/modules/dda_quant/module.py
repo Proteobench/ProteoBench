@@ -23,7 +23,7 @@ class Module(ModuleInterface):
         """Returns whether the module is fully implemented."""
         return True
 
-    def get_quant(
+    def generate_intermediate(
         self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
     ) -> pd.DataFrame:
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
@@ -163,7 +163,7 @@ class Module(ModuleInterface):
         return input_data_frame
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
-        """TODO"""
+        """Add current data point to all data points and load them from file if empty"""
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
         else:

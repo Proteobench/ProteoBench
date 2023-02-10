@@ -81,8 +81,9 @@ class Module(ModuleInterface):
         return input_data_frame
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
+        """Add current data point to all data points and load them from file if empty"""
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = self.load_data_points_from_repo()
+            all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
         else:
             all_datapoints = all_datapoints.T
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)

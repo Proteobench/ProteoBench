@@ -1,12 +1,9 @@
 import os
 import unittest
 
-from proteobench.modules.dda_quant.module_dda_quant import Module
-from proteobench.modules.dda_quant.parse_dda_id import ParseInputs
-from proteobench.modules.dda_quant.parse_settings_dda_quant import (
-    INPUT_FORMATS,
-    ParseSettings,
-)
+from proteobench.modules.dda_quant.module import Module
+from proteobench.modules.dda_quant.parse import ParseInputs
+from proteobench.modules.dda_quant.parse_settings import INPUT_FORMATS, ParseSettings
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 TESTDATA_FILES = {
@@ -27,34 +24,28 @@ def load__local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().prepare_df(input_df, parse_settings)
-    species_quant_df, cv_replicate_quant_df = Module().get_quant(
+    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
+        input_df, parse_settings
+    )
+    intermediate = Module().generate_intermediate(
         prepared_df, replicate_to_raw, parse_settings
     )
 
-    # Compute quantification ratios
-    result_performance = Module().get_quant_ratios(
-        cv_replicate_quant_df, species_quant_df, parse_settings
-    )
-
-    return result_performance
+    return intermediate
 
 
 def process_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().prepare_df(input_df, parse_settings)
-    species_quant_df, cv_replicate_quant_df = Module().get_quant(
+    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
+        input_df, parse_settings
+    )
+    intermediate = Module().generate_intermediate(
         prepared_df, replicate_to_raw, parse_settings
     )
 
-    # Compute quantification ratios
-    result_performance = Module().get_quant_ratios(
-        cv_replicate_quant_df, species_quant_df, parse_settings
-    )
-
-    return result_performance
+    return intermediate
 
 
 class TestOutputFileReading(unittest.TestCase):
@@ -84,7 +75,7 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().prepare_df(
+            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
                 input_df, parse_settings
             )
 
@@ -96,20 +87,15 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().prepare_df(
+            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
                 input_df, parse_settings
             )
 
             # Get quantification data
-            species_quant_df, cv_replicate_quant_df = Module().get_quant(
+            intermediate = Module().generate_intermediate(
                 prepared_df, replicate_to_raw, parse_settings
             )
-
-            # Compute quantification ratios
-            result_performance = Module().get_quant_ratios(
-                cv_replicate_quant_df, species_quant_df, parse_settings
-            )
-            self.assertFalse(result_performance.empty)
+            self.assertFalse(intermediate.empty)
 
 
 class TestWrongFormatting(unittest.TestCase):

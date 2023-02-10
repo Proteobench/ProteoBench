@@ -23,10 +23,6 @@ class ModuleInterface(ABC):
         pass
 
     @abstractmethod
-    def load_data_points_from_repo(self):
-        pass
-
-    @abstractmethod
     def add_current_data_point(self):
         pass
 

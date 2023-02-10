@@ -104,7 +104,7 @@ def benchmarking(
     input_df = load_input_file(input_file, input_format)
 
     # Parse user config
-    parse_settings = parse_settings.ParseSettings(input_format)
+    parse_settings = ParseSettings(input_format)
 
     # Converte uploaded data to standard format
     standard_format = parse.convert_to_standard_format(input_df, parse_settings)

@@ -8,13 +8,11 @@ from dataclasses import asdict
 import pandas as pd
 import toml
 
-from proteobench.modules.dda_quant.__init__ import ModuleInterface
+from proteobench.modules.dda_quant import ModuleInterface
 from proteobench.modules.template.datapoint import Datapoint
 from proteobench.modules.template.parse import ParseInputs
-from proteobench.modules.template.parse_settings import (
-    TEMPLATE_RESULTS_PATH,
-    ParseSettings,
-)
+from proteobench.modules.template.parse_settings import (TEMPLATE_RESULTS_PATH,
+                                                         ParseSettings)
 
 
 class Module(ModuleInterface):

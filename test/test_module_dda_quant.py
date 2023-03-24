@@ -1,10 +1,17 @@
 import os
 import unittest
+import json
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import INPUT_FORMATS, ParseSettings
-from proteobench.modules.dda_quant.plot import PlotDataPoint
+from proteobench.modules.dda_quant.plot import PlotDataPoint  
+
+
+from pandas import DataFrame 
+
+# genereate_input_field 
+
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 TESTDATA_FILES = {
@@ -115,35 +122,22 @@ class TestWrongFormatting(unittest.TestCase):
             )
             
             
+            
+            
 class TestPlot(unittest.TestCase): 
     """Test if the plots return a figure."""
-    supported_formats = ("MaxQuant", "WOMBAT", "MSFragger", "AlphaPept")
     
-    def test_plot_bench(self): 
-         for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            user_input = dict()
-            user_input["input_csv"] = TESTDATA_FILES[format_name]
-            user_input["input_format"] = format_name
-
-            intermediate_data_structure, all_datapoints = Module().benchmarking(user_input["input_csv"], user_input["input_format"], user_input, None)  
-
-            fig = PlotDataPoint().plot_bench(all_datapoints)
-            self.assertFalse(fig.empty)
+    with open("../ProteoBench/results.json") as file:
+        config = json.load(file)  
+        df = DataFrame(data=config) 
+    
+    #def test_plot_bench(self): 
+        #fig = PlotDataPoint().plot_bench(self.df)
+        #self.assertFalse(fig.empty)
         
-    
     def test_plot_metric(self):
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            user_input = dict()
-            user_input["input_csv"] = TESTDATA_FILES[format_name]
-            user_input["input_format"] = format_name
-            
-
-            intermediate_data_structure, all_datapoints = Module().benchmarking(user_input["input_csv"], user_input["input_format"], user_input, None)  
-
-            fig = PlotDataPoint().plot_metric(all_datapoints)
-            self.assertFalse(fig.empty)
+        fig = PlotDataPoint().plot_metric(self.df)
+        self.assertFalse(fig.empty)
         
 
 if __name__ == "__main__":

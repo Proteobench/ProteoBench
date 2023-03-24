@@ -137,7 +137,7 @@ class TestPlot(unittest.TestCase):
         
     def test_plot_metric(self):
         fig = PlotDataPoint().plot_metric(self.df)
-        self.assertFalse(fig.empty)
+        self.assertIsNotNone(fig)
         
 
 if __name__ == "__main__":

@@ -15,7 +15,6 @@ from proteobench.modules.dda_quant.parse_settings import (
     ParseSettings,
 )
 
-
 class Module(ModuleInterface):
     """Object is used as a main interface with the Proteobench library within the module."""
 

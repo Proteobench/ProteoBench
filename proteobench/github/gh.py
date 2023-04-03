@@ -14,9 +14,10 @@ def write_json_local_development(
     current_datapoint = temporary_datapoints.iloc[-1]
     current_datapoint["is_temporary"] = False
     all_datapoints = Module().add_current_data_point(None, current_datapoint)
-    
+
     # TODO write below to logger instead of std.out
-    print(f"Writing the json to: {os.path.join(t_dir, "results.json")}")
+    fname = os.path.join(t_dir, "results.json")
+    print(f"Writing the json to: {fname}")
 
     f = open(os.path.join(t_dir, "results.json"), "w")
     all_datapoints.T.to_json(f)

@@ -1,16 +1,18 @@
 import os
 import unittest
-import json
+
+from pandas import read_json
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
-from proteobench.modules.dda_quant.parse_settings import INPUT_FORMATS, ParseSettings
-from proteobench.modules.dda_quant.plot import PlotDataPoint  
+from proteobench.modules.dda_quant.parse_settings import (
+    DDA_QUANT_RESULTS_PATH,
+    INPUT_FORMATS,
+    ParseSettings,
+)
+from proteobench.modules.dda_quant.plot import PlotDataPoint
 
-
-from pandas import DataFrame 
-
-# genereate_input_field 
+# genereate_input_field
 
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data")
@@ -120,25 +122,18 @@ class TestWrongFormatting(unittest.TestCase):
             Module().benchmarking(
                 user_input["input_csv"], user_input["input_format"], {}, None
             )
-            
-            
-            
-            
-class TestPlot(unittest.TestCase): 
+
+
+class TestPlot(unittest.TestCase):
     """Test if the plots return a figure."""
-    
-    with open("../ProteoBench/results.json") as file:
-        config = json.load(file)  
-        df = DataFrame(data=config) 
-    
-    #def test_plot_bench(self): 
-        #fig = PlotDataPoint().plot_bench(self.df)
-        #self.assertFalse(fig.empty)
-        
+
     def test_plot_metric(self):
-        fig = PlotDataPoint().plot_metric(self.df)
+
+        df = read_json(DDA_QUANT_RESULTS_PATH)
+
+        fig = PlotDataPoint().plot_metric(df)
         self.assertIsNotNone(fig)
-        
+
 
 if __name__ == "__main__":
     unittest.main()

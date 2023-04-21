@@ -57,10 +57,10 @@ class PlotDataPoint:
 
         # Define search colors for each search engine
         search_engine_colors = {
-            "MaxQuant": "midnightblue",
-            "AlphaPept": "grey",
-            "MSFragger": "orange",
-            "WOMBAT": "firebrick",
+            "MaxQuant": "#1f77b4",
+            "AlphaPept": "#2ca02c",
+            "MSFragger": "#ff7f0e",
+            "WOMBAT": "#7f7f7f",
         }
 
         # Color plot based on search engine
@@ -71,7 +71,7 @@ class PlotDataPoint:
 
         # Add hover text
         hover_texts = [
-            f"Search Engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.software_version[idx]}<br>MBR: {benchmark_metrics_df.MBR[idx]}<br>Precursor Tolerance: {benchmark_metrics_df.precursor_tol[idx]} {benchmark_metrics_df.precursor_tol_unit[idx]}<br>Fragment Tolerance: {benchmark_metrics_df.fragment_tol_unit[idx]}<br>Enzyme: {benchmark_metrics_df.enzyme_name[idx]} <br>Missed Cleavages: {benchmark_metrics_df.missed_cleavages[idx]}<br>FDR psm: {benchmark_metrics_df.fdr_psm[idx]}<br>FDR Peptide: {benchmark_metrics_df.fdr_peptide[idx]}<br>FRD Protein: {benchmark_metrics_df.fdr_protein[idx]}"
+            f"Search Engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.software_version[idx]}<br>FDR psm: {benchmark_metrics_df.fdr_psm[idx]}<br>FDR Peptide: {benchmark_metrics_df.fdr_peptide[idx]}<br>FRD Protein: {benchmark_metrics_df.fdr_protein[idx]}<br>MBR: {benchmark_metrics_df.MBR[idx]}<br>Precursor Tolerance: {benchmark_metrics_df.precursor_tol[idx]} {benchmark_metrics_df.precursor_tol_unit[idx]}<br>Fragment Tolerance: {benchmark_metrics_df.fragment_tol_unit[idx]}<br>Enzyme: {benchmark_metrics_df.enzyme_name[idx]} <br>Missed Cleavages: {benchmark_metrics_df.missed_cleavages[idx]}<br>Min peptide length: {benchmark_metrics_df.min_pep_length[idx]}<br>Max peptide length: {benchmark_metrics_df.max_pep_length[idx]}"
             for idx, row in benchmark_metrics_df.iterrows()
         ]
 

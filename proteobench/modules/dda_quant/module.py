@@ -15,6 +15,7 @@ from proteobench.modules.dda_quant.parse_settings import (
     ParseSettings,
 )
 
+
 class Module(ModuleInterface):
     """Object is used as a main interface with the Proteobench library within the module."""
 
@@ -162,7 +163,7 @@ class Module(ModuleInterface):
         return input_data_frame
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
-        """Add current data point to all data points and load them from file if empty"""
+        """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
         else:

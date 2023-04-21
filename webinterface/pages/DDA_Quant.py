@@ -90,14 +90,13 @@ class StreamlitUI:
 
             with st.expander("Additional parameters"):
 
-                with open("webinterface/configuration/dda_quant.json") as file:
+                with open("../webinterface/configuration/dda_quant.json") as file:
                     config = json.load(file)
 
                 for key, value in config.items():
                     self.user_input[key] = self.generate_input_field(
                         self.user_input["input_format"], value
                     )
-
             submit_button = st.form_submit_button("Parse and bench")
 
         # if st.session_state[SUBMIT]:

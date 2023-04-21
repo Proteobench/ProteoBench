@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from pandas import read_json
+import pandas as pd
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
@@ -129,9 +129,9 @@ class TestPlot(unittest.TestCase):
 
     def test_plot_metric(self):
 
-        df = read_json(DDA_QUANT_RESULTS_PATH)
+        all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH).T
 
-        fig = PlotDataPoint().plot_metric(df)
+        fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)
 
 

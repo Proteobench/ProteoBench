@@ -80,7 +80,7 @@ class StreamlitUI:
             )
 
             self.user_input["input_format"] = st.selectbox(
-                "Search engine", INPUT_FORMATS
+                "Search engine", INPUT_FORMATS, help=self.texts.Help.input_format
             )
 
             # self.user_input["pull_req"] = st.text_input(
@@ -97,7 +97,7 @@ class StreamlitUI:
                     self.user_input[key] = self.generate_input_field(
                         self.user_input["input_format"], value
                     )
-            submit_button = st.form_submit_button("Parse and bench")
+            submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.additional_parameters)
 
         # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
@@ -242,6 +242,26 @@ class WebpageTexts:
         pull_req = """
             It is open to the public indefinitely.
             """
+        
+        input_format = """
+            Please select the software you used to generate the search engine results. 
+            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings 
+            for more details. 
+            Additionally, you can use the tab-delimited Custom format containing the following columns:
+            Sequence: peptide sequence
+            Proteins: Protein accessions according to fasta file
+            Charge (optional): Charge state of measured peptide
+            FQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
+            LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
+            LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
+            LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01: Quantitative column sample 4
+            LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02: Quantitative column sample 5
+            LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+        """
+
+        additional_parameters = """
+            Please provide all details about the used parameter for the database search. They will facilitate the comparison.
+        """
 
     class Errors:
         missing_peptide_csv = """

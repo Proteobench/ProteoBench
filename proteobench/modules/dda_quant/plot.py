@@ -61,6 +61,8 @@ class PlotDataPoint:
             "AlphaPept": "#2ca02c",
             "MSFragger": "#ff7f0e",
             "WOMBAT": "#7f7f7f",
+            "Proline": "#d62728",
+            "Custom": "#9467bd",
         }
 
         # Color plot based on search engine

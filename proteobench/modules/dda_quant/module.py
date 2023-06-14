@@ -6,6 +6,7 @@ import re
 from dataclasses import asdict
 
 import pandas as pd
+import streamlit as st
 
 from proteobench.modules.dda_quant.__init__ import ModuleInterface
 from proteobench.modules.dda_quant.datapoint import Datapoint
@@ -29,9 +30,7 @@ class Module(ModuleInterface):
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
 
         # Summarize values of the same peptide using mean
-        quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"]).mean()[
-            "Intensity"
-        ]
+        quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"]).Intensity.mean()
         quant_df = quant_raw_df.unstack(level=1)
 
         # Count number of values per peptidoform and Raw file
@@ -159,6 +158,11 @@ class Module(ModuleInterface):
             input_data_frame["Sequence"] = input_data_frame["modified_peptide"].apply(
                 self.strip_sequence_wombat
             )
+        elif input_format == "Proline":
+            input_data_frame = pd.read_excel(input_csv, sheet_name="Best PSM from protein sets")
+        elif input_format == "Custom":
+            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+
 
         return input_data_frame
 

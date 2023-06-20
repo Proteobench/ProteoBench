@@ -1,13 +1,17 @@
 """ All formats available for the module """
 import os
-from dataclasses import dataclass
+from pathlib import Path
 from typing import List
 
 import toml
 
+from ..interfaces import Settings
+
 #import proteobench.modules.dda_quant.p
 
 PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), 'io_parse_settings')
+
+MapSettingFiles: dict[str, Path]
 
 PARSE_SETTINGS_FILES = { "WOMBAT"     : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_wombat.toml'),
                          "MaxQuant"         : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_maxquant.toml'),
@@ -16,6 +20,7 @@ PARSE_SETTINGS_FILES = { "WOMBAT"     : os.path.join(PARSE_SETTINGS_DIR, 'parse_
                         "AlphaPept"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_alphapept.toml')
             }
 
+# ! Could be created from keys of PARSE_SETTINGS_FILES
 INPUT_FORMATS = ("MaxQuant", 
                 "AlphaPept",
                 "MSFragger",
@@ -41,3 +46,7 @@ class ParseSettings:
         self.min_count_multispec = parse_settings["general"]["min_count_multispec"]
         self.species_expected_ratio = parse_settings["species_expected_ratio"]
     
+
+def parse_settings(input_format:str) -> Settings:
+    """load settings from toml file"""
+    raise NotImplementedError

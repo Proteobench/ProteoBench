@@ -27,9 +27,9 @@ class Module(ModuleInterface):
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
 
         # Summarize values of the same peptide using mean
-        quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"]).mean()[
+        quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"])[
             "Intensity"
-        ]
+        ].mean()
         quant_df = quant_raw_df.unstack(level=1)
 
         # Count number of values per peptidoform and Raw file

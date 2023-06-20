@@ -1,7 +1,8 @@
 """ All formats available for the module """
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from typing import List
 
 import toml
 

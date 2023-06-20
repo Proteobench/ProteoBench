@@ -1,12 +1,14 @@
 import numpy as np
+import pandas as pd
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
 
+# ! This class does not use any instance attributes.
 class PlotDataPoint:
-    def plot_bench(self, result_df):
+    def plot_bench(self, result_df: pd.DataFrame) -> go.Figure:
         """Plot results with Plotly Express."""
 
         hist_data = [
@@ -41,7 +43,7 @@ class PlotDataPoint:
 
         return fig
 
-    def plot_metric(self, benchmark_metrics_df):
+    def plot_metric(self, benchmark_metrics_df: pd.DataFrame) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
 

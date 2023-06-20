@@ -47,8 +47,8 @@ class PlotDataPoint:
         """
         Plot mean metrics in a scatterplot with plotly.
 
-        x = median absolute precentage error between all meansured and expected ratio
-        y = total number of precursours quantified in all raw files
+        x = median absolute precentage error between all measured and expected ratio
+        y = total number of precursors quantified in all raw files
 
         Input: meta_data
 
@@ -96,12 +96,12 @@ class PlotDataPoint:
             width=700,
             height=700,
             xaxis=dict(
-                title="Median absolute precentage error between all meansured ratios and expected ratio",
+                title="Median absolute precentage error between all measured ratios and expected ratio",
                 gridcolor="white",
                 gridwidth=2,
             ),
             yaxis=dict(
-                title="Total number of precursours quantified in all raw files",
+                title="Total number of precursors quantified in all raw files",
                 gridcolor="white",
                 gridwidth=2,
             ),

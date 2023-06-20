@@ -10,9 +10,8 @@ import uuid
 import zipfile
 from typing import BinaryIO
 
-from typing_extensions import get_origin
-
 import streamlit as st
+from typing_extensions import get_origin
 
 
 class StreamlitLogger:
@@ -90,4 +89,4 @@ def hide_streamlit_menu():
 @st.cache
 def save_dataframe(df):
     """Save dataframe to file object, with streamlit cache."""
-    return df.to_csv().encode('utf-8')
+    return df.to_csv().encode("utf-8")

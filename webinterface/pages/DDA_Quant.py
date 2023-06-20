@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 
 from proteobench.modules.dda_quant.module import Module
-from proteobench.modules.dda_quant.parse_settings import INPUT_FORMATS
+from proteobench.modules.dda_quant.parse_settings import INPUT_FORMATS, LOCAL_DEVELOPMENT, DDA_QUANT_RESULTS_PATH
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 try:
@@ -17,7 +17,7 @@ import streamlit as st
 from streamlit_extras.let_it_rain import rain
 from streamlit_utils import hide_streamlit_menu, save_dataframe
 
-from proteobench.github.gh import clone_pr
+from proteobench.github.gh import clone_pr, write_json_local_development
 
 logger = logging.getLogger(__name__)
 
@@ -90,14 +90,13 @@ class StreamlitUI:
 
             with st.expander("Additional parameters"):
 
-                with open("webinterface/configuration/dda_quant.json") as file:
+                with open("../webinterface/configuration/dda_quant.json") as file:
                     config = json.load(file)
 
                 for key, value in config.items():
                     self.user_input[key] = self.generate_input_field(
                         self.user_input["input_format"], value
                     )
-
             submit_button = st.form_submit_button("Parse and bench")
 
         # if st.session_state[SUBMIT]:
@@ -209,13 +208,18 @@ class StreamlitUI:
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
-                clone_pr(
-                    st.session_state[ALL_DATAPOINTS],
-                    st.secrets["gh"]["token"],
-                    username="Proteobot",
-                    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                    branch_name="new_branch",
-                )
+                if not LOCAL_DEVELOPMENT:
+                    clone_pr(
+                        st.session_state[ALL_DATAPOINTS],
+                        st.secrets["gh"]["token"],
+                        username="Proteobot",
+                        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                        branch_name="new_branch",
+                    )
+                else:
+                    DDA_QUANT_RESULTS_PATH = write_json_local_development(
+                        st.session_state[ALL_DATAPOINTS]
+                    )
         if SUBMIT in st.session_state:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")

@@ -7,13 +7,11 @@ from dataclasses import asdict
 
 import pandas as pd
 
-from proteobench.modules.dda_quant.__init__ import ModuleInterface
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    ParseSettings,
-)
+    DDA_QUANT_RESULTS_PATH, ParseSettings)
+from proteobench.modules.interfaces import ModuleInterface
 
 
 class Module(ModuleInterface):
@@ -29,9 +27,9 @@ class Module(ModuleInterface):
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
 
         # Summarize values of the same peptide using mean
-        quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"]).mean()[
+        quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"])[
             "Intensity"
-        ]
+        ].mean()
         quant_df = quant_raw_df.unstack(level=1)
 
         # Count number of values per peptidoform and Raw file

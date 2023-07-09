@@ -42,7 +42,11 @@ def clone_pr(
     # do the pd.write_json() here!!!
     print(os.path.join(t_dir, "results.json"))
     f = open(os.path.join(t_dir, "results.json"), "w")
-    all_datapoints.T.to_json(f)
+    all_datapoints.to_json(
+        f,
+        lines=True,
+        orient="records"
+    )
     f.close()
     commit_message = "Added new run with id " + branch_name
 

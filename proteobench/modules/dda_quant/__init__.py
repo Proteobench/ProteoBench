@@ -24,6 +24,7 @@ class ModuleInterface(ABC):
 
     @abstractmethod
     def add_current_data_point(self):
+        """Method used to add the current data point to the collected benchmarks."""
         pass
 
 

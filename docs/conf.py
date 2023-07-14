@@ -1,55 +1,34 @@
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-from proteobench import __version__
+project = "ProteoBench"
+copyright = "2023, EuBIC-MS"
+author = "EuBIC-MS"
 
-project = 'ProteoBench'
-author = 'EuBIC-MS'
-release = __version__
-github_project_url = "https://github.com/proteobench/proteobench/"
-github_doc_root = "https://github.com/proteobench/proteobench/tree/main/docs/"
+# Add source folder to path for autodoc
+sys.path.insert(0, os.path.abspath(".."))
 
-extensions = [
-    'sphinx.ext.autodoc',
-    "sphinx.ext.autosectionlabel",
-    'sphinx.ext.autosummary',
-    "sphinx.ext.napoleon",
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode',
-    "sphinx_rtd_theme",
-    'sphinx_autodoc_typehints',
-    "sphinx_mdinclude",
-]
-source_suffix = [".rst", ".md"]
-master_doc = "index"
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ('https://numpy.org/doc/stable/', None),
-    "pandas": ('https://pandas.pydata.org/docs/', None),
-}
+extensions = []
 
-autosummary_generate = True
-autoclass_content = "both"
-html_show_sourcelink = False
-autodoc_inherit_docstrings = True
-set_type_checking_flag = True
-add_module_names = False
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-templates_path = ['_templates']
-exclude_patterns = ["_build"]
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
-html_css_files = ["css/custom.css"]
 
-autodoc_member_order = "bysource"
-autoclass_content = "init"
-
-
-def setup(app):
-    config = {
-        "enable_eval_rst": True,
-    }
+extensions = ["sphinx.ext.napoleon", "sphinx.ext.autodoc", "sphinx.ext.autosummary"]

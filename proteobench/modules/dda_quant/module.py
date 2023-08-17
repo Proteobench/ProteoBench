@@ -8,13 +8,11 @@ from dataclasses import asdict
 import pandas as pd
 import streamlit as st
 
-from proteobench.modules.dda_quant.__init__ import ModuleInterface
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    ParseSettings,
-)
+    DDA_QUANT_RESULTS_PATH, ParseSettings)
+from proteobench.modules.interfaces import ModuleInterface
 
 
 class Module(ModuleInterface):

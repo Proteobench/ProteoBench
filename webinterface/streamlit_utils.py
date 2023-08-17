@@ -86,7 +86,7 @@ def hide_streamlit_menu():
     st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 
-@st.cache
+@st.cache_data
 def save_dataframe(df):
     """Save dataframe to file object, with streamlit cache."""
     return df.to_csv().encode("utf-8")

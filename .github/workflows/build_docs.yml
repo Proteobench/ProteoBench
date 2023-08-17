@@ -1,0 +1,37 @@
+name: Build and Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your default branch
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x  # Use the appropriate Python version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r docs/requirements.txt  # Adjust path if needed
+
+      - name: Build documentation
+        run: |
+          cd docs
+          make html  # Or your Sphinx build command
+        env:
+          READTHEDOCS: 'True'
+
+      - name: Deploy to Read the Docs
+        uses: readthedocs/github-action@master
+        with:
+          sphinx-version: latest  # Use the appropriate version
+

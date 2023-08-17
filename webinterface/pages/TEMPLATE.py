@@ -208,11 +208,10 @@ class StreamlitUI:
         st.subheader("Download calculated ratios")
         st.download_button(
             label="Download",
-            data=save_dataframe(result_performance),
+            data=streamlit_utils.save_dataframe(result_performance),
             file_name=f"{sample_name}.csv",
             mime="text/csv",
         )
-
         st.subheader("Add results to online repository")
         st.session_state[FIG1] = fig
         st.session_state[FIG2] = fig2

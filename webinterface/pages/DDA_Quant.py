@@ -18,8 +18,8 @@ except ImportError:
     from importlib_metadata import version
 
 import streamlit as st
+import streamlit_utils
 from streamlit_extras.let_it_rain import rain
-from streamlit_utils import save_dataframe
 
 from proteobench.github.gh import clone_pr, write_json_local_development
 

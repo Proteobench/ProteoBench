@@ -19,11 +19,9 @@ except ImportError:
 
 import streamlit as st
 from streamlit_extras.let_it_rain import rain
+from streamlit_utils import save_dataframe
 
 from proteobench.github.gh import clone_pr, write_json_local_development
-
-# Does not seem to exist or become part of st: from streamlit_utils import save_dataframe
-
 
 logger = logging.getLogger(__name__)
 

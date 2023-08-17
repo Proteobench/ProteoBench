@@ -19,20 +19,18 @@ except ImportError:
 
 import streamlit as st
 from streamlit_extras.let_it_rain import rain
+from streamlit_utils import save_dataframe
 
 from proteobench.github.gh import clone_pr, write_json_local_development
-
-# Does not seem to exist or become part of st: from streamlit_utils import save_dataframe
-
 
 logger = logging.getLogger(__name__)
 
 ## Different parts of the web application
 # Data for generating the figures
 # This is usually
-# a) a plot of the datapoint itself
+# a) The result of the given datapoint
 RESULT_PERF = "result_perf"
-# b) a generic plots of comparing a datapoint to the general population
+# b) All datapoints read from a json file or downloaded from the web
 ALL_DATAPOINTS = "all_datapoints"
 SUBMIT = "submit"
 # Add your figures here

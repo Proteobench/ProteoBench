@@ -4,13 +4,13 @@ import json
 import logging
 from datetime import datetime
 
-from proteobench.modules.dda_quant.module import Module
-from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
+from proteobench.modules.template.module import Module
+from proteobench.modules.template.parse_settings import (
     INPUT_FORMATS,
     LOCAL_DEVELOPMENT,
+    TEMPLATE_RESULTS_PATH,
 )
-from proteobench.modules.dda_quant.plot import PlotDataPoint
+from proteobench.modules.template.plot import PlotDataPoint
 
 try:
     from importlib.metadata import version
@@ -27,11 +27,17 @@ from proteobench.github.gh import clone_pr, write_json_local_development
 
 logger = logging.getLogger(__name__)
 
+## Different parts of the web application
+# Data for generating the figures
+# This is usually
+# a) a plot of the datapoint itself
+RESULT_PERF = "result_perf"
+# b) a generic plots of comparing a datapoint to the general population
 ALL_DATAPOINTS = "all_datapoints"
 SUBMIT = "submit"
+# Add your figures here
 FIG1 = "fig1"
 FIG2 = "fig2"
-RESULT_PERF = "result_perf"
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -56,6 +62,8 @@ class StreamlitUI:
         self._main_page()
         self._sidebar()
 
+    # Here the user can select the input file format. This is defined in the
+    # modules folder in the io_parse_settings folder
     def generate_input_field(self, input_format: str, content: dict):
         if content["type"] == "text_input":
             return st.text_input(content["label"], content["value"][input_format])
@@ -95,7 +103,8 @@ class StreamlitUI:
             # )
 
             with st.expander("Additional parameters"):
-                with open("../webinterface/configuration/dda_quant.json") as file:
+                # Here the user enters metadata about the data analysis
+                with open("../webinterface/configuration/template.json") as file:
                     config = json.load(file)
 
                 for key, value in config.items():
@@ -168,23 +177,28 @@ class StreamlitUI:
         st.dataframe(result_performance.head(100))
 
         # Plot results
-        st.subheader("Ratio between conditions")
+        # set your title
+        st.subheader("TITLE FOR FIGURE 1")
         if recalculate:
-            fig = PlotDataPoint().plot_bench(result_performance)
+            # calling the plot functions in modules/template/plot.py
+            fig = PlotDataPoint().plot_fig1(result_performance)
         else:
             fig = st.session_state[FIG1]
         st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Mean error between conditions")
+        # set your title
+        st.subheader("TITLE FOR FIGURE 2")
         # show metadata
         # st.text(all_datapoints.head(100))
 
         if recalculate:
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            # calling the plot functions in modules/template/plot.py
+            fig2 = PlotDataPoint().plot_fig2(all_datapoints)
         else:
             fig2 = st.session_state[FIG2]
         st.plotly_chart(fig2, use_container_width=True)
 
+        # Naming the sample with specifics about input and analysis
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
             self.user_input["version"],
@@ -235,6 +249,7 @@ class StreamlitUI:
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 
 
+## Inline documentation. This is the one for the DDA_Quant module
 class WebpageTexts:
     class Sidebar:
         about = f"""

@@ -7,7 +7,7 @@ from datetime import datetime
 class Datapoint:
     """Data used to store the experimental metadata and data analysis settings.
 
-    Attributes:
+    Example for attributes:
         id: A unique identifier for the datapoint.
         is_temporary: A boolean flag indicating whether the datapoint is temporary or not.
         search_engine: The name of the search engine used for the experiment.
@@ -18,7 +18,7 @@ class Datapoint:
         MBR: A boolean flag indicating whether match-between-runs was enabled or not.
         precursor_tol: The precursor mass tolerance in units specified by precursor_tol_unit.
         precursor_tol_unit: The unit of the precursor mass tolerance. Either "Da" or "ppm".
-        fragmnent_tol: The fragment mass tolerance in units specified by fragment_tol_unit.
+        fragment_tol: The fragment mass tolerance in units specified by fragment_tol_unit.
         fragment_tol_unit: The unit of the fragment mass tolerance. Either "Da" or "ppm".
         enzyme_name: The name of the enzyme used for digestion.
         missed_cleavages: The number of allowed missed cleavages during digestion.

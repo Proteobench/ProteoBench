@@ -4,8 +4,8 @@ from typing import Dict, List
 
 import pandas as pd
 
-from proteobench.modules.dda_quant.__init__ import ParseInputsInterface
 from proteobench.modules.dda_quant.parse_settings import ParseSettings
+from proteobench.modules.interfaces import ParseInputsInterface
 
 
 class ParseInputs(ParseInputsInterface):

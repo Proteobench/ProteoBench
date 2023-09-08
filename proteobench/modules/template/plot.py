@@ -6,17 +6,16 @@ import streamlit as st
 from streamlit_plotly_events import plotly_events
 
 
-class PlotDataPoint:
-    def plot_bench1(result_df):
-        """Plot results with Plotly Express."""
-        # TODO create (plotly) figure object
-        fig = go.Figure()
+def plot_bench1(result_df):
+    """Plot results with Plotly Express."""
+    # TODO create (plotly) figure object
+    raise NotImplementedError()
+    fig = go.Figure()
+    return fig
 
-        return fig
-
-    def plot_bench2(result_df):
-        """Plot results with Plotly Express."""
-        # TODO create (plotly) figure object
-        fig = go.Figure()
-
-        return fig
+def plot_bench2(result_df):
+    """Plot results with Plotly Express."""
+    # TODO create (plotly) figure object
+    raise NotImplementedError()
+    fig = go.Figure()
+    return fig

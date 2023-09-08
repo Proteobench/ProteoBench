@@ -20,7 +20,12 @@ def write_json_local_development(
     print(f"Writing the json to: {fname}")
 
     f = open(os.path.join(t_dir, "results.json"), "w")
-    all_datapoints.T.to_json(f)
+    
+    all_datapoints.to_json(
+        f,
+        orient="records",
+        indent=2
+    )
 
     return os.path.join(t_dir, "results.json")
 
@@ -42,7 +47,13 @@ def clone_pr(
     # do the pd.write_json() here!!!
     print(os.path.join(t_dir, "results.json"))
     f = open(os.path.join(t_dir, "results.json"), "w")
-    all_datapoints.T.to_json(f)
+    
+    all_datapoints.to_json(
+        f,
+        orient="records",
+        indent=2
+    )
+
     f.close()
     commit_message = "Added new run with id " + branch_name
 

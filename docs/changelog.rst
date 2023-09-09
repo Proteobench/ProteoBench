@@ -1,1 +1,5 @@
-.. mdinclude:: ../CHANGELOG.md
+=================
+Change log
+=================
+
+TODO

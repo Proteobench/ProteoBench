@@ -2,9 +2,12 @@
     "[python]": {
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {"source.organizeImports": true},
-        "editor.rulers": [88]
+        "editor.rulers": [
+            88
+        ],
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.testing.unittestArgs": [
         "-v",
         "-s",

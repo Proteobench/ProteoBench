@@ -1,8 +1,0 @@
-sphinx
-sphinx-rtd-theme
-sphinx.ext.napoleon
-sphinx.ext.autodoc
-sphinx.ext.autosummary
-sphinx.ext.viewcode
-sphinx.ext.todo
-sphinx.ext.githubpages

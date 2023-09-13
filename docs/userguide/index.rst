@@ -15,20 +15,20 @@ ProteoBench can be installed as Python package using the usual pip command:
 
     pip install proteobench
 
-or, without pip, by cloning the repository and running the setup script:
+or by cloning the repository and installing in editable mode:
 
 .. code-block:: bash
 
     git clone https://github.com/Proteobench/ProteoBench
     cd proteobench
-    python setup.py install
+    pip install --editable .[dev]
 
 
 ********************************
 Local usage
 ********************************
 
-Start the streamlit GUI from your terminal with the following commands. 
+Start the streamlit GUI from your terminal with the following commands.
 
 .. code-block:: bash
 
@@ -58,18 +58,18 @@ We suggest to understand the following terms as they are crucial components:
 
     **Module**: All code and definitions for creating and comparing benchmarks of a new data type
 
-    **Intermediate data structure** (`DataFrame`): Data structure needed for the calculation of the `datapoint`. It contains 
+    **Intermediate data structure** (`DataFrame`): Data structure needed for the calculation of the `datapoint`. It contains
     the transformed and annotated data of an uploaded data file.
 
-    **Datapoint**: Metadata and benchmarking metrics for a given data set. A `datapoint` is the 
+    **Datapoint**: Metadata and benchmarking metrics for a given data set. A `datapoint` is the
     data needed for the benchmarking and should also be represented by a json object.
 
 -----------------------
 Programmatic structure
 -----------------------
 
-The modules are located in the `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_ directory. We separated the benchmarking modules into a different steps 
-that allow for a more modular and portable implementation. 
+The modules are located in the `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_ directory. We separated the benchmarking modules into a different steps
+that allow for a more modular and portable implementation.
 
 **Backend**
 
@@ -84,19 +84,19 @@ Each module implementation should contain the following classes:
 **Web interface**
 
 The web interface is written in Streamlit. Each module gets assigned a specific "page".
-There are only few changes necessary as the main calculations are done in 
+There are only few changes necessary as the main calculations are done in
 
   :func:`~webinterface.pages.TEMPLATE.StreamlitUI` contains the functions to create the web interface for the module.
 
 *Relevant functions:*
 
   :func:`~webinterface.pages.TEMPLATE.StreamlitUI.generate_input_field` creates the input fields for the metadate and the
-  input file format and type. They are given by in the `proteobench/modules/template/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/template/io_parse_settings>`_ folder, 
+  input file format and type. They are given by in the `proteobench/modules/template/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/template/io_parse_settings>`_ folder,
   same as for the backend of the module.
 
   :func:`webinterface.pages.TEMPLATE.StreamlitUI.generate_results` gathers the data from the backend
   and displays them in several figures. Here you will need to edit and adapt the code
-  to show the respective figures with the right metadata. 
+  to show the respective figures with the right metadata.
 
   :func:`webinterface.pages.TEMPLATE.WebpageTexts` contains the text for the different parts of the web interface.
 
@@ -104,7 +104,7 @@ Change the text and the field names accordingly
 
 **Documentation**
 
-We strongly recommend to keep documenting your code. The documentation is written in Sphinx and 
+We strongly recommend to keep documenting your code. The documentation is written in Sphinx and
 can be found in the `docs <https://github.com/Proteobench/ProteoBench/tree/main/docs>`_ folder.
 
 1.  `docs/proteobench/modules.rst <https://github.com/Proteobench/ProteoBench/tree/main/docs/proteobench/modules.rst>`_ Here you can add a link to your new module
@@ -112,18 +112,20 @@ can be found in the `docs <https://github.com/Proteobench/ProteoBench/tree/main/
 3.  `docs/webinterface/webinterface.rst <https://github.com/Proteobench/ProteoBench/tree/main/docs/webinterface/webinterface.rst>`_ Here you should add a link to the new page in the web interface.
 
 
-You can regenerate the documentation by running the following command in the `docs` folder
+To work on the documentation and get a live preview, install the requirements and run
+``sphinx-autobuild``:
 
-.. code-block:: bash
+.. code-block:: sh
 
-    make clean
-    make html
+    pip install .[docs]
+    sphinx-autobuild  --watch ./ms2rescore ./docs/source/ ./docs/_build/html/
+
+Then browse to http://localhost:8000 to watch the live preview.
 
 
-**Notes**
+.. note::
 
-
-Ensure to have changes all "template" to the name of your module.
+    Ensure to have changed all occurrences of ``template`` to the name of your new module.
 
 
 -----------------------
@@ -133,7 +135,7 @@ Checklist
 This checklist is meant to help you add a new module to ProteoBench. It is not
 meant to be exhaustive, but it should cover the most important steps.
 
-1. Copy the `template <<https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>template>`_ folder in the `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_ directory to a new folder in the same directory. The name of the new directory should be the name of the module. 
+1. Copy the `template <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modulestemplate>`_ folder in the `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_ directory to a new folder in the same directory. The name of the new directory should be the name of the module.
 2. Define the input formats in the toml files of the `proteobench/modules/my_module/io_parse_settings` directory and  `proteobench.modules.my_module.parse_settings.py`.
 3. Modify the upload prodecures in the `proteobench/modules/my_module/parse.py`. This will ensure a standardized data structure for the benchmarking independently from the input file format.
 4. Modify `proteobench/modules/my_module/datapoint.py` to define the requested metadata about the data acquisition and the benchmarking metrics, all to be stored in a datapoint. You might need to add some function(s) for further processing the standardized data structure.
@@ -146,12 +148,12 @@ meant to be exhaustive, but it should cover the most important steps.
 Modifying an existing module
 ================================
 
-We recommend keeping the given structure in a module. 
+We recommend keeping the given structure in a module.
 
 *For adding new input file types*: Use the :func:`~proteobench.modules.template.ParseInputs` class to define the parsing of the input files and a specific toml file for its layout.
 
-*For adding new benchmarking metrics*: Add the new metrics to the `datapoint.py` file and the `plot.py` file for visualization. 
+*For adding new benchmarking metrics*: Add the new metrics to the `datapoint.py` file and the `plot.py` file for visualization.
 
-*Note* that changing the intermediate format and the data point structure might have an impact on the other modules. Therefore we recommend 
+*Note* that changing the intermediate format and the data point structure might have an impact on the other modules. Therefore we recommend
 to define them stringently from the start.
 

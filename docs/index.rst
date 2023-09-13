@@ -8,11 +8,13 @@ Welcome
 
 .. toctree::
     :maxdepth: 1
+    :hidden:
 
-    user_guide/index
-    changelog
+    Home <self>
+    userguide/index
     proteobench/modules
     webinterface/webinterface
+    changelog
 
 Project Overview
 ------------------

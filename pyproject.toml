@@ -1,19 +1,19 @@
 [project]
 name = "proteobench"
-authors = [{name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be"}]
+authors = [
+    { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
+] # TODO: Add others
 readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
-    "Development Status :: 4 - Beta"
+    "Development Status :: 4 - Beta",
 ]
-keywords=[
-    'proteomics', 'peptides', 'retention time', 'mass spectrometry'
-]
+keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
 requires-python = ">=3.7"
 dynamic = ["version", "description"]
 dependencies = [
@@ -24,31 +24,17 @@ dependencies = [
     "streamlit-plotly-events",
     "matplotlib",
     "importlib-metadata; python_version < '3.8'",
-    "toml"
+    "toml",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "black",
-]
-docs = [
-    "numpydoc>=1,<2",
-    "recommonmark",
-    "sphinx",
-    "sphinx-autobuild",
-    "sphinx-autodoc-typehints",
-    "sphinx-mdinclude",
-    "sphinx-rtd-theme",
-]
-web = [
-    "streamlit",
-    "scipy"
-]
+dev = ["black"]
+docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser"]
+web = ["streamlit", "scipy"]
 
 [project.urls]
-"Home" = "https://github.com/RobbinBouwmeester"
-"Homepage" = "https://github.com/RobbinBouwmeester/"
-"Bug Tracker" = "https://github.com/RobbinBouwmeester/"
+"Homepage" = "https://github.com/ProteoBench"
+"Bug Tracker" = "https://github.com/ProteoBench/ProteoBench/issues/"
 
 [build-system]
 requires = ["flit_core >=3.2,<4"]

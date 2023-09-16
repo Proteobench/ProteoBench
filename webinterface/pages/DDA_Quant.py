@@ -74,7 +74,44 @@ class StreamlitUI:
 
     def _main_page(self):
         """Format main page."""
-        st.title("Proteobench")
+        st.title("Module 2: DDA quantification")
+        st.header("Description of the module")
+        st.markdown("This module compares the MS1-level quantification tools for \
+                    data-dependent acquisition (DDA). The raw files provided for \
+                    this module are presented in the comprehensive LFQ benchmark \
+                    dataset from [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6).  \n\
+                    The samples contain tryptic peptides from Homo sapiens, \
+                    Saccharomyces cerevisiae, and Escherichia coli, mixed in different \
+                    ratios (condition A and condition B), with three replicates of each \
+                    condition. With these samples, we calculate three metrics:  \n\
+                    * To estimate the sensitivity of the workflows, we report the \
+                    number of unique precursors (charged modified sequence) quantified \
+                    in all 6 runs.  \n\
+                    * To estimate the accuracy of the workflows, we report the weighted \
+                    sum of precursor deviation from expected ratios.  \n\
+                    * To estimate the precision of the workflows, we report the weighted\
+                     average of the interquartile range (IQR) of the precursors ratio.\n\
+                    ProteoBench plots these three metrics to visualize workflow outputs\
+                     from different tools, with different versions, and/or different \
+                    sets of parameters for the search and quantification. \n\
+                    The full description of the pre-processing steps and metrics \
+                    calculation is available here: LINK.")
+        st.header("Downloading associated files")
+        st.markdown("The raw files used for this module were acquired on an Orbitrap \
+                    Q-Ex H-FX (ThermoScientific). They can be downloaded from the \
+                    proteomeXchange repository PXD028735. You can download them here:  \n\
+                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw)  \n\
+                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw)  \n\
+                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw)  \n\
+                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw)  \n\
+                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)  \n\
+                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)  \n\
+                    **It is imperative not to rename the files once downloaded!**")
+        st.markdown("Download the fasta file here: [TODO]  \n\
+                    The fasta file provided for this module contains the three species \
+                    present in the samples and contaminant proteins \
+                    ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))")
+
         st.header("Input and configuration")
 
         with st.form(key="main_form"):

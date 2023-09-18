@@ -2,24 +2,24 @@
 "samesets_accessions" = "Proteins"
 sequence = "Sequence"
 "modifications" = "Modifications"
-charge = "Charge"
+"master_quant_peptide_ion_charge" = "Charge"
 
 
 [replicate_mapper]
-abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 = 1
-abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 = 1
-abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 = 1
-abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 = 2
-abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 = 2
-abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = 2
+abundance_DDA_Condition_A_Sample_Alpha_01 = 1
+abundance_DDA_Condition_A_Sample_Alpha_02 = 1
+abundance_DDA_Condition_A_Sample_Alpha_03 = 1
+abundance_DDA_Condition_B_Sample_Alpha_01 = 2
+abundance_DDA_Condition_B_Sample_Alpha_02 = 2
+abundance_DDA_Condition_B_Sample_Alpha_03 = 2
 
 [run_mapper]
-"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"
-"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02"
-"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03"
-"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"
-"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02"
-"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03"
+"abundance_DDA_Condition_A_Sample_Alpha_01" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"
+"abundance_DDA_Condition_A_Sample_Alpha_02" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02"
+"abundance_DDA_Condition_A_Sample_Alpha_03" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03"
+"abundance_DDA_Condition_B_Sample_Alpha_01" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"
+"abundance_DDA_Condition_B_Sample_Alpha_02" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02"
+"abundance_DDA_Condition_B_Sample_Alpha_03" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03"
 
 [species_dict]
 "YEAST" = "_YEAST"

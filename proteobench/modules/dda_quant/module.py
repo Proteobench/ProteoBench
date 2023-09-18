@@ -157,7 +157,7 @@ class Module(ModuleInterface):
                 self.strip_sequence_wombat
             )
         elif input_format == "Proline":
-            input_data_frame = pd.read_excel(input_csv, sheet_name="Best PSM from protein sets")
+            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 

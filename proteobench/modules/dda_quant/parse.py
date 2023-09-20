@@ -56,7 +56,7 @@ class ParseInputs(ParseInputsInterface):
 
         df.loc[df.index, "peptidoform"] = df.loc[df.index, "Sequence"]
         count_non_zero = (
-            df.groupby(["Sequence", "Raw file"]).sum()["Intensity"] > 0.0
+            df.groupby(["Sequence", "Raw file"])["Intensity"].sum() > 0.0
         ).groupby(level=[0]).sum() == 6
 
         allowed_peptidoforms = list(count_non_zero.index[count_non_zero])

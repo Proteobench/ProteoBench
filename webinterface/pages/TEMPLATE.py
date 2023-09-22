@@ -5,12 +5,10 @@ import logging
 from datetime import datetime
 
 from proteobench.modules.template.module import Module
-from proteobench.modules.template.parse_settings import (
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-    TEMPLATE_RESULTS_PATH,
-)
-from proteobench.modules.template.plot import PlotDataPoint
+from proteobench.modules.template.parse_settings import (INPUT_FORMATS,
+                                                         LOCAL_DEVELOPMENT,
+                                                         TEMPLATE_RESULTS_PATH)
+from proteobench.modules.template.plot import plot_bench1, plot_bench2
 
 try:
     from importlib.metadata import version
@@ -179,7 +177,7 @@ class StreamlitUI:
         st.subheader("TITLE FOR FIGURE 1")
         if recalculate:
             # calling the plot functions in modules/template/plot.py
-            fig = PlotDataPoint().plot_fig1(result_performance)
+            fig = plot_bench1(result_performance)
         else:
             fig = st.session_state[FIG1]
         st.plotly_chart(fig, use_container_width=True)
@@ -191,7 +189,7 @@ class StreamlitUI:
 
         if recalculate:
             # calling the plot functions in modules/template/plot.py
-            fig2 = PlotDataPoint().plot_fig2(all_datapoints)
+            fig2 = plot_bench1(all_datapoints)
         else:
             fig2 = st.session_state[FIG2]
         st.plotly_chart(fig2, use_container_width=True)

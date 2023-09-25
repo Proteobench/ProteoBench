@@ -168,8 +168,7 @@ class Module(ModuleInterface):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-        else:
-            all_datapoints = all_datapoints.T
+        all_datapoints = all_datapoints.T
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
         all_datapoints = all_datapoints.T.reset_index(drop=True)
         return all_datapoints

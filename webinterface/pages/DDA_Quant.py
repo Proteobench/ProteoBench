@@ -6,10 +6,7 @@ from datetime import datetime
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-)
+    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 try:
@@ -21,7 +18,7 @@ import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.github.gh import clone_pr, write_json_local_development
+#from proteobench.github.gh import clone_pr, write_json_local_development
 
 logger = logging.getLogger(__name__)
 
@@ -259,7 +256,7 @@ class StreamlitUI:
             if submit_pr:
                 st.session_state[SUBMIT] = True
                 if not LOCAL_DEVELOPMENT:
-                    clone_pr(
+                    Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
                         st.secrets["gh"]["token"],
                         username="Proteobot",
@@ -267,7 +264,7 @@ class StreamlitUI:
                         branch_name="new_branch",
                     )
                 else:
-                    DDA_QUANT_RESULTS_PATH = write_json_local_development(
+                    DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
                         st.session_state[ALL_DATAPOINTS]
                     )
         if SUBMIT in st.session_state:

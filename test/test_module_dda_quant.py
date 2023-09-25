@@ -3,7 +3,7 @@ import unittest
 
 import pandas as pd
 
-from proteobench.github.gh import read_json_repo
+from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
@@ -128,7 +128,7 @@ class TestPlot(unittest.TestCase):
     def test_plot_metric(self):
 
         #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-        all_datapoints = read_json_repo(DDA_QUANT_RESULTS_REPO)
+        all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
 
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)

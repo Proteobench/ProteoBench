@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import datetime
 import itertools
+import os
 import re
 from dataclasses import asdict
+from tempfile import TemporaryDirectory
 
 import pandas as pd
 import streamlit as st
 
-import proteobench.github.gh as gh
+from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
@@ -169,7 +171,7 @@ class Module(ModuleInterface):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-            all_datapoints = gh.read_json_repo(DDA_QUANT_RESULTS_REPO)
+            all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
         all_datapoints = all_datapoints.T
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
         all_datapoints = all_datapoints.T.reset_index(drop=True)
@@ -199,3 +201,70 @@ class Module(ModuleInterface):
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
         return intermediate_data_structure, all_datapoints
+
+
+    def clone_pr(
+        self,
+        temporary_datapoints,
+        token,
+        username="Proteobot",
+        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+        branch_name="new_branch",
+    ):
+        t_dir = TemporaryDirectory().name
+
+        clone_repo(clone_dir=t_dir, token=token, remote_git=remote_git, username=username)
+        current_datapoint = temporary_datapoints.iloc[-1]
+        current_datapoint["is_temporary"] = False
+        all_datapoints = self.add_current_data_point(None, current_datapoint)
+        branch_name = current_datapoint["id"]
+
+        # do the pd.write_json() here!!!
+        print(os.path.join(t_dir, "results.json"))
+        f = open(os.path.join(t_dir, "results.json"), "w")
+        
+        all_datapoints.to_json(
+            f,
+            orient="records",
+            indent=2
+        )
+
+        f.close()
+        commit_message = "Added new run with id " + branch_name
+
+        pr_github(
+            clone_dir=t_dir,
+            token=token,
+            remote_git=remote_git,
+            username=username,
+            branch_name=branch_name,
+            commit_message=commit_message,
+        )
+
+
+    def write_json_local_development(
+        self, 
+        temporary_datapoints
+    ):  
+        t_dir = TemporaryDirectory().name
+        os.mkdir(t_dir)
+
+        current_datapoint = temporary_datapoints.iloc[-1]
+        current_datapoint["is_temporary"] = False
+        all_datapoints = self.add_current_data_point(None, current_datapoint)
+
+        # TODO write below to logger instead of std.out
+        fname = os.path.join(t_dir, "results.json")
+        print(f"Writing the json to: {fname}")
+
+        f = open(os.path.join(t_dir, "results.json"), "w")
+        
+        all_datapoints.to_json(
+            f,
+            orient="records",
+            indent=2
+        )
+
+        return os.path.join(t_dir, "results.json")
+
+    

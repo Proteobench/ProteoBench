@@ -27,6 +27,7 @@ SUBMIT = "submit"
 FIG1 = "fig1"
 FIG2 = "fig2"
 RESULT_PERF = "result_perf"
+META_DATA = "meta_data"
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -53,12 +54,17 @@ class StreamlitUI:
 
     def generate_input_field(self, input_format: str, content: dict):
         if content["type"] == "text_input":
-            return st.text_input(content["label"], content["value"][input_format])
+            if "placeholder" in content:
+                return st.text_input(content["label"], placeholder=content["placeholder"])
+            elif "value" in content:
+                return st.text_input(content["label"], content["value"][input_format])
         if content["type"] == "number_input":
             return st.number_input(
                 content["label"],
-                value=content["value"][input_format],
+                value=None,
                 format=content["format"],
+                min_value=content["min_value"],
+                max_value=content["max_value"]
             )
         if content["type"] == "selectbox":
             return st.selectbox(
@@ -148,6 +154,7 @@ class StreamlitUI:
                     self.user_input[key] = self.generate_input_field(
                         self.user_input["input_format"], value
                     )
+            
             submit_button = st.form_submit_button(
                 "Parse and bench", help=self.texts.Help.additional_parameters
             )
@@ -157,7 +164,11 @@ class StreamlitUI:
             self._populate_results()
 
         if submit_button:
-            self._run_proteobench()
+            if self.user_input["input_csv"]:
+                self._run_proteobench()
+            else:
+                 error_message = st.error(":x: Please provide a result file")
+                 print(":x: Proteobench ran into a problem")
 
     def _populate_results(self):
         self.generate_results("", None, None, False)
@@ -253,11 +264,18 @@ class StreamlitUI:
         st.session_state[RESULT_PERF] = result_performance
         st.session_state[ALL_DATAPOINTS] = all_datapoints
 
+        self.user_input[META_DATA] = st.file_uploader(
+                "Meta data for searches", help=self.texts.Help.meta_data_file
+            )
+        self.user_input["comments_for_submission"] = st.text_area("Comments for submission", 
+            placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
+            height=200)
         checkbox = st.checkbox("I confirm that the metadata is correct")
-        if checkbox:
+        
+        if checkbox and self.user_input[META_DATA]:
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
-            # TODO: check if parameters are filled
+            # TODO: update parameters of point to submit with parsed metadata parameters
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
@@ -313,6 +331,10 @@ class WebpageTexts:
 
         additional_parameters = """
             Please provide all details about the used parameter for the database search. They will facilitate the comparison.
+        """
+
+        meta_data_file = """
+            Please add a file with meta data that contains all relevant information about your search parameters
         """
 
     class Errors:

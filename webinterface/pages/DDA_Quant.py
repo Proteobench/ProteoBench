@@ -6,10 +6,7 @@ from datetime import datetime
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-)
+    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 try:
@@ -30,6 +27,7 @@ SUBMIT = "submit"
 FIG1 = "fig1"
 FIG2 = "fig2"
 RESULT_PERF = "result_perf"
+META_DATA = "meta_data"
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -260,11 +258,18 @@ class StreamlitUI:
         st.session_state[RESULT_PERF] = result_performance
         st.session_state[ALL_DATAPOINTS] = all_datapoints
 
+        self.user_input[META_DATA] = st.file_uploader(
+                "Meta data for searches", help=self.texts.Help.meta_data_file
+            )
+        self.user_input["comments_for_submission"] = st.text_area("Comments for submission", 
+            placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
+            height=200)
         checkbox = st.checkbox("I confirm that the metadata is correct")
-        if checkbox:
+        
+        if checkbox and self.user_input[META_DATA]:
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
-            # TODO: check if parameters are filled
+            # TODO: update parameters of point to submit with parsed metadata parameters
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
@@ -320,6 +325,10 @@ class WebpageTexts:
 
         additional_parameters = """
             Please provide all details about the used parameter for the database search. They will facilitate the comparison.
+        """
+
+        meta_data_file = """
+            Please add a file with meta data that contains all relevant information about your search parameters
         """
 
     class Errors:

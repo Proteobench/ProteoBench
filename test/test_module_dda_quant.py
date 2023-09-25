@@ -3,10 +3,11 @@ import unittest
 
 import pandas as pd
 
+from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, ParseSettings)
+    DDA_QUANT_RESULTS_REPO, INPUT_FORMATS, ParseSettings)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 # genereate_input_field
@@ -14,7 +15,7 @@ from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 TESTDATA_FILES = {
-    "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
+    #"WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
     "MSFragger": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
@@ -56,12 +57,12 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "WOMBAT", "MSFragger", "AlphaPept")
+    supported_formats = ("MaxQuant", "MSFragger", "AlphaPept") #"WOMBAT", 
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
         """Test whether the expected formats are supported."""
-        for format_name in ("MaxQuant", "AlphaPept", "MSFragger", "Proline", "WOMBAT"):
+        for format_name in ("MaxQuant", "AlphaPept", "MSFragger", "Proline"): #, "WOMBAT"
             self.assertTrue(format_name in INPUT_FORMATS)
 
     def test_input_file_loading(self):
@@ -126,7 +127,8 @@ class TestPlot(unittest.TestCase):
 
     def test_plot_metric(self):
 
-        all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+        #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+        all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
 
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)

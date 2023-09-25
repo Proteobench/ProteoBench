@@ -7,6 +7,7 @@ import re
 from dataclasses import asdict
 from tempfile import TemporaryDirectory
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -198,9 +199,11 @@ class Module(ModuleInterface):
         current_datapoint = self.generate_datapoint(
             intermediate_data_structure, input_format, user_input
         )
+
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
-        return intermediate_data_structure, all_datapoints
+        # TODO check why there are NA and inf/-inf values
+        return intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0), all_datapoints
 
 
     def clone_pr(
@@ -266,5 +269,3 @@ class Module(ModuleInterface):
         )
 
         return os.path.join(t_dir, "results.json")
-
-    

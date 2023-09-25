@@ -7,10 +7,7 @@ from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    INPUT_FORMATS,
-    ParseSettings,
-)
+    DDA_QUANT_RESULTS_REPO, INPUT_FORMATS, ParseSettings)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 # genereate_input_field

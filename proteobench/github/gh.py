@@ -1,9 +1,35 @@
 import os
 from tempfile import TemporaryDirectory
 
+import pandas as pd
 from git import Repo
 
-from proteobench.modules.dda_quant.module import Module
+import proteobench.modules.dda_quant.module as dda_quant_module
+
+
+def clone_repo_anon(
+    clone_dir="K:/pb/",
+    remote_git="https://github.com/Proteobench/Results_Module2_quant_DDA.git",
+):
+    repo = Repo.clone_from(remote_git, clone_dir)
+    return clone_dir
+
+
+def read_json_repo(
+    remote_git_repo= "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
+):
+    t_dir = TemporaryDirectory().name
+    os.mkdir(t_dir)
+    clone_repo_anon(
+        t_dir,
+        remote_git_repo
+    )
+    fname = os.path.join(t_dir, "results.json")
+    print(fname)
+    all_datapoints = pd.read_json(fname)
+    print(all_datapoints)
+    return all_datapoints
+
 
 def write_json_local_development(
     temporary_datapoints
@@ -13,7 +39,7 @@ def write_json_local_development(
 
     current_datapoint = temporary_datapoints.iloc[-1]
     current_datapoint["is_temporary"] = False
-    all_datapoints = Module().add_current_data_point(None, current_datapoint)
+    all_datapoints = dda_quant_module.add_current_data_point(None, current_datapoint)
 
     # TODO write below to logger instead of std.out
     fname = os.path.join(t_dir, "results.json")
@@ -41,7 +67,7 @@ def clone_pr(
     clone_repo(clone_dir=t_dir, token=token, remote_git=remote_git, username=username)
     current_datapoint = temporary_datapoints.iloc[-1]
     current_datapoint["is_temporary"] = False
-    all_datapoints = Module().add_current_data_point(None, current_datapoint)
+    all_datapoints = dda_quant_module.add_current_data_point(None, current_datapoint)
     branch_name = current_datapoint["id"]
 
     # do the pd.write_json() here!!!

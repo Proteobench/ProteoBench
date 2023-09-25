@@ -8,10 +8,11 @@ from dataclasses import asdict
 import pandas as pd
 import streamlit as st
 
+import proteobench.github.gh as gh
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH, ParseSettings)
+    DDA_QUANT_RESULTS_REPO, ParseSettings)
 from proteobench.modules.interfaces import ModuleInterface
 
 
@@ -167,7 +168,8 @@ class Module(ModuleInterface):
     def add_current_data_point(self, all_datapoints, current_datapoint):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+            #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+            all_datapoints = gh.read_json_repo(DDA_QUANT_RESULTS_REPO)
         all_datapoints = all_datapoints.T
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
         all_datapoints = all_datapoints.T.reset_index(drop=True)

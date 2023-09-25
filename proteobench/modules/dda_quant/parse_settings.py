@@ -19,6 +19,7 @@ PARSE_SETTINGS_FILES = { "WOMBAT"     : os.path.join(PARSE_SETTINGS_DIR, 'parse_
                         "MSFragger"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_msfragger.toml'),
                         "Proline"         : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_proline.toml'),
                         "AlphaPept"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_alphapept.toml'),
+                        "Sage"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_sage.toml'),
                         "Custom"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_custom.toml')
             }
 
@@ -28,9 +29,10 @@ INPUT_FORMATS = ("MaxQuant",
                 "MSFragger",
                 "Proline",
                 "WOMBAT",
+                "Sage",
                 "Custom")
 
-LOCAL_DEVELOPMENT = False
+LOCAL_DEVELOPMENT = True
 
 # For local development change below to the json and path, if you do not want to download it from github
 DDA_QUANT_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json" #e.g., K:/results.json

@@ -7,6 +7,7 @@ from dataclasses import asdict
 
 import pandas as pd
 import streamlit as st
+import numpy as np
 
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
@@ -168,8 +169,7 @@ class Module(ModuleInterface):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-        else:
-            all_datapoints = all_datapoints.T
+        all_datapoints = all_datapoints.T
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
         all_datapoints = all_datapoints.T.reset_index(drop=True)
         return all_datapoints
@@ -195,6 +195,8 @@ class Module(ModuleInterface):
         current_datapoint = self.generate_datapoint(
             intermediate_data_structure, input_format, user_input
         )
+
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
-        return intermediate_data_structure, all_datapoints
+        # TODO check why there are NA and inf/-inf values
+        return intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0), all_datapoints

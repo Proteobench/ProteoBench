@@ -17,7 +17,7 @@ jobs:
     - uses: psf/black@stable
       with:
         src: "proteobench"
-        version: "~=23"
+        version: "~=23.0"
 
   lint-and-test:
     runs-on: ubuntu-latest

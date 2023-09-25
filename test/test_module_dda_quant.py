@@ -6,10 +6,7 @@ import pandas as pd
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    INPUT_FORMATS,
-    ParseSettings,
-)
+    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, ParseSettings)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 # genereate_input_field
@@ -129,7 +126,7 @@ class TestPlot(unittest.TestCase):
 
     def test_plot_metric(self):
 
-        all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH).T
+        all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
 
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)

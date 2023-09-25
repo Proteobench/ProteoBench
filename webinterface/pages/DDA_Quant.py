@@ -43,8 +43,8 @@ class StreamlitUI:
         st.set_page_config(
             page_title="Proteobench web server",
             page_icon=":rocket:",
-            layout="centered",
-            initial_sidebar_state="expanded",
+            layout="wide",
+            initial_sidebar_state="expanded"
         )
         if SUBMIT not in st.session_state:
             st.session_state[SUBMIT] = False

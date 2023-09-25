@@ -10,7 +10,6 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
-
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
@@ -173,7 +172,11 @@ class Module(ModuleInterface):
         if not isinstance(all_datapoints, pd.DataFrame):
             #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+        
+        all_datapoints["old_new"] = "old"
         all_datapoints = all_datapoints.T
+        
+        current_datapoint["old_new"] = "new"
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
         all_datapoints = all_datapoints.T.reset_index(drop=True)
         return all_datapoints

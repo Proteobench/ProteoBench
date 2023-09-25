@@ -3,10 +3,11 @@ import unittest
 
 import pandas as pd
 
+from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, ParseSettings)
+    DDA_QUANT_RESULTS_REPO, INPUT_FORMATS, ParseSettings)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 # genereate_input_field
@@ -125,9 +126,9 @@ class TestPlot(unittest.TestCase):
     """Test if the plots return a figure."""
 
     def test_plot_metric(self):
-
-        all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-
+        #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+        all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+        all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)
 

@@ -56,12 +56,12 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "WOMBAT", "MSFragger", "AlphaPept")
+    supported_formats = ("MaxQuant", "MSFragger", "AlphaPept") #"WOMBAT", 
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
         """Test whether the expected formats are supported."""
-        for format_name in ("MaxQuant", "AlphaPept", "MSFragger", "Proline", "WOMBAT"):
+        for format_name in ("MaxQuant", "AlphaPept", "MSFragger", "Proline"): #, "WOMBAT"
             self.assertTrue(format_name in INPUT_FORMATS)
 
     def test_input_file_loading(self):

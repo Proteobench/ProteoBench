@@ -6,10 +6,7 @@ from datetime import datetime
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-)
+    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 try:
@@ -222,6 +219,7 @@ class StreamlitUI:
         # show metadata
         # st.text(all_datapoints.head(100))
 
+        
         if recalculate:
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:

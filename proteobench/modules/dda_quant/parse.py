@@ -55,7 +55,8 @@ class ParseInputs(ParseInputsInterface):
 
         df = df[df["MULTI_SPEC"] == False]
 
-        df.loc[df.index, "peptidoform"] = df.loc[df.index, "Sequence"]
+        # TODO, if "Charge" is not available return a sensible error
+        df.loc[df.index, "peptidoform"] = df.loc[df.index, "Sequence"]+"|Z="+df.loc[df.index, "Charge"].map(str)
         count_non_zero = (
             df.groupby(["Sequence", "Raw file"])["Intensity"].sum() > 0.0
         ).groupby(level=[0]).sum() == 6

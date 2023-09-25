@@ -36,6 +36,8 @@ DDA_QUANT_RESULTS_PATH = (
 )  # e.g., K:/results.json
 
 
+DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
+
 class ParseSettings:
     """Structure that contains all the parameters used to parse
     the given database search output."""

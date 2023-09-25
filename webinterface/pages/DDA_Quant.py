@@ -12,10 +12,6 @@ from proteobench.modules.dda_quant.parse_settings import (
 )
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
-try:
-    from importlib.metadata import version
-except ImportError:
-    from importlib_metadata import version
 
 import streamlit as st
 import streamlit_utils
@@ -84,15 +80,15 @@ class StreamlitUI:
                     The samples contain tryptic peptides from Homo sapiens,
                     Saccharomyces cerevisiae, and Escherichia coli, mixed in different
                     ratios (condition A and condition B), with three replicates of each
-                    condition. With these samples, we calculate three metrics:  
+                    condition. With these samples, we calculate three metrics:
                     - To estimate the sensitivity of the workflows, we report the
                     number of unique precursors (charged modified sequence) quantified
-                    in all 6 runs.  
+                    in all 6 runs.
                     - To estimate the accuracy of the workflows, we report the weighted
-                    sum of precursor deviation from expected ratios.  
+                    sum of precursor deviation from expected ratios.
                     - To estimate the precision of the workflows, we report the weighted
-                     average of the interquartile range (IQR) of the precursors ratio.  
-                    
+                     average of the interquartile range (IQR) of the precursors ratio.
+
                     ProteoBench plots these three metrics to visualize workflow outputs
                      from different tools, with different versions, and/or different
                     sets of parameters for the search and quantification.
@@ -109,12 +105,12 @@ class StreamlitUI:
                     [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw)
                     [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw)
                     [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)  
+                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
 
                     **It is imperative not to rename the files once downloaded!**
                     """)
         st.markdown("""
-                    Download the fasta file here: [TODO]  
+                    Download the fasta file here: [TODO]
                     The fasta file provided for this module contains the three species
                     present in the samples and contaminant proteins
                     ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
@@ -293,9 +289,9 @@ class WebpageTexts:
             """
 
         input_format = """
-            Please select the software you used to generate the search engine results. 
-            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings 
-            for more details. 
+            Please select the software you used to generate the search engine results.
+            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings
+            for more details.
             Additionally, you can use the tab-delimited Custom format containing the following columns:
             Sequence: peptide sequence
             Proteins: Protein accessions according to fasta file

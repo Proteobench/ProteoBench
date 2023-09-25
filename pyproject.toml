@@ -14,7 +14,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
 ]
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dynamic = ["version", "description"]
 dependencies = [
     "pandas",
@@ -23,7 +23,6 @@ dependencies = [
     "streamlit_extras",
     "streamlit-plotly-events",
     "matplotlib",
-    "importlib-metadata; python_version < '3.8'",
     "toml",
 ]
 
@@ -39,3 +38,10 @@ web = ["streamlit", "scipy"]
 [build-system]
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 120
+target-version = ['py38']

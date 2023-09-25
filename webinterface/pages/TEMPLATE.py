@@ -10,11 +10,6 @@ from proteobench.modules.template.parse_settings import (INPUT_FORMATS,
                                                          TEMPLATE_RESULTS_PATH)
 from proteobench.modules.template.plot import plot_bench1, plot_bench2
 
-try:
-    from importlib.metadata import version
-except ImportError:
-    from importlib_metadata import version
-
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
@@ -260,9 +255,9 @@ class WebpageTexts:
             """
 
         input_format = """
-            Please select the software you used to generate the search engine results. 
-            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings 
-            for more details. 
+            Please select the software you used to generate the search engine results.
+            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings
+            for more details.
             Additionally, you can use the tab-delimited Custom format containing the following columns:
             Sequence: peptide sequence
             Proteins: Protein accessions according to fasta file

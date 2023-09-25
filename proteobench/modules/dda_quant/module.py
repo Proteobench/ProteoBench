@@ -7,6 +7,7 @@ from dataclasses import asdict
 
 import pandas as pd
 import streamlit as st
+import numpy as np
 
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
@@ -194,6 +195,8 @@ class Module(ModuleInterface):
         current_datapoint = self.generate_datapoint(
             intermediate_data_structure, input_format, user_input
         )
+
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
-        return intermediate_data_structure, all_datapoints
+        # TODO check why there are NA and inf/-inf values
+        return intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0), all_datapoints

@@ -56,12 +56,17 @@ class StreamlitUI:
 
     def generate_input_field(self, input_format: str, content: dict):
         if content["type"] == "text_input":
-            return st.text_input(content["label"], content["value"][input_format])
+            if "placeholder" in content:
+                return st.text_input(content["label"], placeholder=content["placeholder"])
+            elif "value" in content:
+                return st.text_input(content["label"], content["value"][input_format])
         if content["type"] == "number_input":
             return st.number_input(
                 content["label"],
-                value=content["value"][input_format],
+                value=None,
                 format=content["format"],
+                min_value=content["min_value"],
+                max_value=content["max_value"]
             )
         if content["type"] == "selectbox":
             return st.selectbox(
@@ -145,6 +150,7 @@ class StreamlitUI:
                     self.user_input[key] = self.generate_input_field(
                         self.user_input["input_format"], value
                     )
+            
             submit_button = st.form_submit_button(
                 "Parse and bench", help=self.texts.Help.additional_parameters
             )
@@ -154,7 +160,11 @@ class StreamlitUI:
             self._populate_results()
 
         if submit_button:
-            self._run_proteobench()
+            if self.user_input["input_csv"]:
+                self._run_proteobench()
+            else:
+                 error_message = st.error(":x: Please provide a result file")
+                 print(":x: Proteobench ran into a problem")
 
     def _populate_results(self):
         self.generate_results("", None, None, False)

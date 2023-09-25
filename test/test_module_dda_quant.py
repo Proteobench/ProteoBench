@@ -126,10 +126,9 @@ class TestPlot(unittest.TestCase):
     """Test if the plots return a figure."""
 
     def test_plot_metric(self):
-
         #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
         all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
-
+        all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)
 

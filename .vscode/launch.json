@@ -3,18 +3,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: A Streamlit",
-            "type": "python",
-            "request": "launch",
-            "program": "/Users/witoldwolski/anaconda3/envs/proteobench/bin/streamlit",
-            "args": ["run", "Home.py"],
-            "cwd": "${workspaceFolder}/webinterface/",
-            "env": {},
-            "stopOnEntry": false,
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
-        },
-        {
             "name": "Python: BStreamlit",
             "type": "python",
             "request": "launch",

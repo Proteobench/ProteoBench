@@ -49,8 +49,8 @@ python -m unittest test/test_module_dda_quant.py
 Start the web server locally with:
 
 ```
-cd ./ProteoBench/
-streamlit run ./Home.py
+cd ./webinterface/
+streamlit run Home.py
 ```
 
 This will launch the Proteobench application in your web browser.

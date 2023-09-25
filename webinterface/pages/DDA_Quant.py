@@ -6,7 +6,10 @@ from datetime import datetime
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT)
+    DDA_QUANT_RESULTS_PATH,
+    INPUT_FORMATS,
+    LOCAL_DEVELOPMENT,
+)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 try:
@@ -73,7 +76,8 @@ class StreamlitUI:
         """Format main page."""
         st.title("Module 2: DDA quantification")
         st.header("Description of the module")
-        st.markdown("""
+        st.markdown(
+            """
                     This module compares the MS1-level quantification tools for
                     data-dependent acquisition (DDA). The raw files provided for
                     this module are presented in the comprehensive LFQ benchmark
@@ -95,9 +99,11 @@ class StreamlitUI:
                     sets of parameters for the search and quantification.
                     The full description of the pre-processing steps and metrics
                     calculation is available here: LINK.
-                    """)
+                    """
+        )
         st.header("Downloading associated files")
-        st.markdown("""
+        st.markdown(
+            """
                     The raw files used for this module were acquired on an Orbitrap
                     Q-Exactive H-FX (ThermoScientific). They can be downloaded from the
                     proteomeXchange repository PXD028735. You can download them here:
@@ -109,13 +115,16 @@ class StreamlitUI:
                     [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)  
 
                     **It is imperative not to rename the files once downloaded!**
-                    """)
-        st.markdown("""
+                    """
+        )
+        st.markdown(
+            """
                     Download the fasta file here: [TODO]  
                     The fasta file provided for this module contains the three species
                     present in the samples and contaminant proteins
                     ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
-                    """)
+                    """
+        )
 
         st.header("Input and configuration")
 
@@ -219,7 +228,6 @@ class StreamlitUI:
         # show metadata
         # st.text(all_datapoints.head(100))
 
-        
         if recalculate:
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:

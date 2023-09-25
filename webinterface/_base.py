@@ -36,7 +36,7 @@ class StreamlitPage(ABC):
             unsafe_allow_html=True,
         )
 
-    @abstractmethod 
+    @abstractmethod
     def _main_page(self):
         raise NotImplementedError()
 

@@ -75,11 +75,24 @@ class PlotDataPoint:
 
         # Add hover text
         hover_texts = [
-            f"Search Engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.software_version[idx]}<br>FDR psm: {benchmark_metrics_df.fdr_psm[idx]}<br>FDR Peptide: {benchmark_metrics_df.fdr_peptide[idx]}<br>FRD Protein: {benchmark_metrics_df.fdr_protein[idx]}<br>MBR: {benchmark_metrics_df.MBR[idx]}<br>Precursor Tolerance: {benchmark_metrics_df.precursor_tol[idx]} {benchmark_metrics_df.precursor_tol_unit[idx]}<br>Fragment Tolerance: {benchmark_metrics_df.fragment_tol_unit[idx]}<br>Enzyme: {benchmark_metrics_df.enzyme_name[idx]} <br>Missed Cleavages: {benchmark_metrics_df.missed_cleavages[idx]}<br>Min peptide length: {benchmark_metrics_df.min_pep_length[idx]}<br>Max peptide length: {benchmark_metrics_df.max_pep_length[idx]}"
+            f"Search Engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.software_version[idx]}<br>" + 
+            f"FDR psm: {benchmark_metrics_df.fdr_psm[idx]}<br>" +
+            f"FDR Peptide: {benchmark_metrics_df.fdr_peptide[idx]}<br>" + 
+            f"FRD Protein: {benchmark_metrics_df.fdr_protein[idx]}<br>" +
+            f"MBR: {benchmark_metrics_df.MBR[idx]}<br>" + 
+            f"Precursor Tolerance: {benchmark_metrics_df.precursor_tol[idx]} {benchmark_metrics_df.precursor_tol_unit[idx]}<br>" + 
+            f"Fragment Tolerance: {benchmark_metrics_df.fragment_tol_unit[idx]}<br>" + 
+            f"Enzyme: {benchmark_metrics_df.enzyme_name[idx]} <br>" + 
+            f"Missed Cleavages: {benchmark_metrics_df.missed_cleavages[idx]}<br>" + 
+            f"Min peptide length: {benchmark_metrics_df.min_pep_length[idx]}<br>" + 
+            f"Max peptide length: {benchmark_metrics_df.max_pep_length[idx]}"
+                    
             for idx, row in benchmark_metrics_df.iterrows()
         ]
 
         #  spellerror {meta_data.fragmnent_tol[idx]}
+
+        mapping = {"old": 10, "new": 20}
 
         fig = go.Figure(
             data=[
@@ -89,6 +102,7 @@ class PlotDataPoint:
                     mode="markers",
                     text=hover_texts,
                     marker=dict(color=colors, showscale=True, size=20),
+                    marker_size=[mapping[item] for item in benchmark_metrics_df["old_new"]]
                 )
             ]
         )
@@ -107,6 +121,8 @@ class PlotDataPoint:
                 gridcolor="white",
                 gridwidth=2,
             ),
+            paper_bgcolor='rgb(243, 243, 243)',
+            plot_bgcolor='rgb(243, 243, 243)'
         )
 
         # selected_points = plotly_events(

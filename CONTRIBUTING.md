@@ -39,8 +39,10 @@ Using a virtual environment is recommended.
 
 To run the tests run the command:
 
+> We use pytest which also supports unittest if you prefer that.
+
 ```
-python -m unittest test/test_module_dda_quant.py
+pytest
 ```
 
 

@@ -24,17 +24,6 @@
 "ECOLI" = "_ECOLI"
 "HUMAN" = "_HUMAN"
 
-[species_expected_ratio]
-[species_expected_ratio.YEAST]
-"1|2" = 2.0
-
-[species_expected_ratio.ECOLI]
-"1|2" = 0.25
-    
-[species_expected_ratio.HUMAN]
-"1|2" = 1.0
-
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = false
-min_count_multispec = 1

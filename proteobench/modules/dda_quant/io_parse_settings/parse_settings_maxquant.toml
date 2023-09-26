@@ -26,26 +26,6 @@ LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = 2
 "ECOLI" = "_ECOLI"
 "HUMAN" = "_HUMAN"
 
-[species_expected_ratio]
-[species_expected_ratio.YEAST]
-"1|2" = 2.0
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01" = 2.0
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02" = 2.0
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03" = 2.0
-
-[species_expected_ratio.ECOLI]
-"1|2" = 0.25
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01" = 0.25
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02" = 0.25
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03" = 0.25
-    
-[species_expected_ratio.HUMAN]
-"1|2" = 1.0
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01" = 1.0
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02" = 1.0
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03|LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03" = 1.0
-
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = true
-min_count_multispec = 1

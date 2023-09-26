@@ -1,4 +1,5 @@
 import json
+import numpy as np
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
@@ -44,7 +45,7 @@ class Datapoint:
         nr_missing_0 = 0
         for spec in species:
             f = len(df[df[spec] == True])
-            sum_s = (df[df[spec] == True]["1|2_expected_ratio_diff"]).sum()
+            sum_s = np.nan_to_num(df[df[spec] == True]["1|2_expected_ratio_diff"], nan=0, neginf=-1000, posinf=1000).sum()
             ratio = sum_s / f
             prop_ratio = (f / len(df)) * ratio
             prop_ratios.append(prop_ratio)

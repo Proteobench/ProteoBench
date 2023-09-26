@@ -7,7 +7,7 @@ from datetime import datetime
 @dataclass
 class Datapoint:
     """Data used to stored the"""
-
+    # TODO add threshold value used for presence ion/peptidoform
     id: str = None
     search_engine: str = None
     software_version: int = 0
@@ -51,7 +51,8 @@ class Datapoint:
             prop_ratios.append(prop_ratio)
             sum_ratios += prop_ratio
             nr_missing_0 += f
-
+        
+        # TODO rename/document code
         self.weighted_sum = round(sum_ratios, ndigits=3)
         self.nr_prec = len(df)
 
@@ -65,6 +66,7 @@ class Datapoint:
         )
         print(self.id)
 
+    # TODO, not used? Can be removed?
     def dump_json_object(self, file_name):
         f = open(file_name, "a")
         f.write(json.dumps(asdict(self)))

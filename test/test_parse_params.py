@@ -1,6 +1,8 @@
+import io
 import json
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 import proteobench.io.params.maxquant as mq_params
@@ -44,3 +46,64 @@ def test_file_reading(file, json_expected):
     dict_expected = json.loads(json_expected.read_text())
     dict_actual = mq_params.read_file(file)
     assert dict_actual == dict_expected
+
+
+parameters = [
+    ({"k": "v"}, [(("k",), "v")]),
+    ({"k1": {"k2": "v1", "k3": "v2"}}, [(("k1", "k2"), "v1"), (("k1", "k3"), "v2")]),
+    (
+        {"k1": {"k2": [{"k4": "v1"}, {"k4": "v2"}]}},
+        [(("k1", "k2", "k4"), "v1"), (("k1", "k2", "k4"), "v2")],
+    ),
+    (
+        {"k1": [{"k2": {"k4": "v1", "k5": "v2"}}, {"k2": {"k4": "v1", "k5": "v2"}}]},
+        [
+            (("k1", "k2", "k4"), "v1"),
+            (("k1", "k2", "k5"), "v2"),
+            (("k1", "k2", "k4"), "v1"),
+            (("k1", "k2", "k5"), "v2"),
+        ],
+    ),
+    (
+        {
+            "restrictMods": [
+                {"string": "Oxidation (M)"},
+                {"string": "Acetyl (Protein N-term)"},
+            ]
+        },
+        [
+            (("restrictMods", "string"), "Oxidation (M)"),
+            (("restrictMods", "string"), "Acetyl (Protein N-term)"),
+        ],
+    ),
+    (
+        {
+            "variableModifications": {
+                "string": ["Oxidation (M)", "Acetyl (Protein N-term)"]
+            }
+        },
+        [
+            (("variableModifications", "string"), "Oxidation (M)"),
+            (("variableModifications", "string"), "Acetyl (Protein N-term)"),
+        ],
+    ),
+]
+
+
+@pytest.mark.parametrize("dict_in,list_expected", parameters)
+def test_flatten_of_dicts(dict_in, list_expected):
+    actual = mq_params.flatten_dict_of_dicts(dict_in)
+    assert actual == list_expected
+
+
+parameters = [(fname, Path(fname).with_suffix(".csv")) for fname in mq_paras]
+
+
+@pytest.mark.parametrize("file,csv_expected", parameters)
+def test_file_parsing_to_csv(file, csv_expected):
+    expected = pd.read_csv(csv_expected, index_col=[0, 1, 2, 3])
+    actual = mq_params.read_file(file)
+    actual = mq_params.build_Series_from_records(actual, 4)
+    actual = actual.to_frame("run_identifier")
+    actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=[0, 1, 2, 3])
+    assert actual.equals(expected)

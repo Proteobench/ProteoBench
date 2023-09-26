@@ -216,6 +216,7 @@ class Module(ModuleInterface):
         username="Proteobot",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         branch_name="new_branch",
+        submission_comments="no comments",
     ):
         t_dir = TemporaryDirectory().name
 
@@ -236,7 +237,7 @@ class Module(ModuleInterface):
         )
 
         f.close()
-        commit_message = "Added new run with id " + branch_name
+        commit_message = 'Added new run with id ' + str(branch_name) + '\n user comments: ' + submission_comments
 
         pr_github(
             clone_dir=t_dir,
@@ -244,7 +245,7 @@ class Module(ModuleInterface):
             remote_git=remote_git,
             username=username,
             branch_name=branch_name,
-            commit_message=commit_message,
+            commit_message=commit_message
         )
 
 

@@ -140,12 +140,9 @@ class TestPlot(unittest.TestCase):
         Nyeast = 1000
         Necoli = 500
         Nhuman = 2000
-        yeastRatio = np.random.normal(loc=-1, scale=1, size=Nyeast)
-        # Create the DataFrame
         
-        # Generate 1000 random values from a normal distribution with mean -1 and variance 1
+        yeastRatio = np.random.normal(loc=-1, scale=1, size=Nyeast)
         humanRatio = np.random.normal(loc=0, scale=1, size=Nhuman)
-        # Create the DataFrame
         ecoliRatio = np.random.normal(loc=2, scale=1, size=Necoli)
         combined_ratios = np.concatenate([yeastRatio, humanRatio, ecoliRatio])
         
@@ -160,7 +157,7 @@ class TestPlot(unittest.TestCase):
         combineddf['HUMAN'] = combineddf['SPECIES'] == 'HUMAN'
         combineddf['ECOLI'] = combineddf['SPECIES'] == 'ECOLI'
         combineddf['YEAST'] = combineddf['SPECIES'] == 'YEAST'
-        #
+        
 
 
         fig = PlotDataPoint().plot_bench(combineddf)

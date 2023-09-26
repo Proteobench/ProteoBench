@@ -34,8 +34,7 @@ class PlotDataPoint:
             xaxis=dict(
                 title="1|2_ratio",
                 color="white",
-                title="1|2_ratio",
-                gridwidth=2)
+                gridwidth=2))
           
         fig.update_yaxes(title="Density",
                 color="white",

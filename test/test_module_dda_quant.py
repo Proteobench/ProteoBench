@@ -164,7 +164,7 @@ class TestPlot(unittest.TestCase):
 
 
         fig = PlotDataPoint().plot_bench(combineddf)
-        fig.write_html("dummy.html")
+        #fig.write_html("dummy.html")
         self.assertIsNotNone(fig)
 
 

@@ -50,7 +50,7 @@ class Module(ModuleInterface):
             missing_series = replicate_quant_df.isna().groupby(["peptidoform"]).sum()
             quant_df["missing_values_" + str(replicate)] = missing_series
 
-        species_peptidoform = list(parse_settings.species_dict.keys())
+        species_peptidoform = list(parse_settings.species_dict.values())
         species_peptidoform.append("peptidoform")
         peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
         peptidoform_to_species.index = peptidoform_to_species["peptidoform"]
@@ -66,7 +66,7 @@ class Module(ModuleInterface):
         cv_replicate_quant_species_df = pd.concat([quant_df, species_quant_df], axis=1)
 
         ratio_dict = {}
-        for species in parse_settings.species_dict.keys():
+        for species in parse_settings.species_dict.values():
             species_df_slice = cv_replicate_quant_species_df[
                 cv_replicate_quant_species_df[species] == True
             ]
@@ -105,6 +105,8 @@ class Module(ModuleInterface):
         ratio_df = pd.DataFrame(ratio_dict)
 
         intermediate = pd.concat([cv_replicate_quant_species_df, ratio_df], axis=1)
+
+        intermediate.rename(columns=parse_settings.run_mapper, inplace=True)
 
         return intermediate
 

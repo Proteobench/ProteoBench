@@ -13,18 +13,18 @@ Charge = "Charge"
 "B_3 Intensity" = 2
 
 [run_mapper]
-"A_1 Intensity" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"
-"A_2 Intensity" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02"
-"A_3 Intensity" = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03"
-"B_1 Intensity" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"
-"B_2 Intensity" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02"
-"B_3 Intensity" = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03"
+"A_1 Intensity" = "Condition_A_Sample_Alpha_01"
+"A_2 Intensity" = "Condition_A_Sample_Alpha_02"
+"A_3 Intensity" = "Condition_A_Sample_Alpha_03"
+"B_1 Intensity" = "Condition_B_Sample_Alpha_01"
+"B_2 Intensity" = "Condition_B_Sample_Alpha_02"
+"B_3 Intensity" = "Condition_B_Sample_Alpha_03"
 
 
-[species_dict]
-"YEAST" = "_YEAST"
-"ECOLI" = "_ECOLI"
-"HUMAN" = "_HUMAN"
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
 
 [species_expected_ratio]
 [species_expected_ratio.YEAST]

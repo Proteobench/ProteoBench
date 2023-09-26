@@ -152,6 +152,8 @@ class Module(ModuleInterface):
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
+        elif input_format == "Sage":
+            input_data_frame = pd.read_csv(input_csv, sep='\t', low_memory=False)
         elif input_format == "MSFragger":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "WOMBAT":

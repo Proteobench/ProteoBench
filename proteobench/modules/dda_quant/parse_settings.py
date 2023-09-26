@@ -19,6 +19,7 @@ PARSE_SETTINGS_FILES = { "WOMBAT"     : os.path.join(PARSE_SETTINGS_DIR, 'parse_
                         "MSFragger"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_msfragger.toml'),
                         "Proline"         : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_proline.toml'),
                         "AlphaPept"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_alphapept.toml'),
+                        "Sage"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_sage.toml'),
                         "Custom"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_custom.toml')
             }
 
@@ -28,6 +29,7 @@ INPUT_FORMATS = ("MaxQuant",
                 "MSFragger",
                 "Proline",
                 "WOMBAT",
+                "Sage",
                 "Custom")
 
 LOCAL_DEVELOPMENT = False

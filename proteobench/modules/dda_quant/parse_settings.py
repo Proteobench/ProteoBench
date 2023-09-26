@@ -32,7 +32,7 @@ INPUT_FORMATS = ("MaxQuant",
                 "Sage",
                 "Custom")
 
-LOCAL_DEVELOPMENT = True
+LOCAL_DEVELOPMENT = False
 
 # For local development change below to the json and path, if you do not want to download it from github
 DDA_QUANT_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json" #e.g., K:/results.json

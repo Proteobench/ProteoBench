@@ -52,8 +52,6 @@ class ParseSettings:
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
         self.species_dict = parse_settings["species_dict"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
-        self.min_count_multispec = parse_settings["general"]["min_count_multispec"]
-        self.species_expected_ratio = parse_settings["species_expected_ratio"]
 
         parse_settings_module = toml.load(PARSE_SETTINGS_FILES_MODULE)
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]

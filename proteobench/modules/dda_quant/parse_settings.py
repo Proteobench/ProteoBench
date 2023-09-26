@@ -47,8 +47,9 @@ class ParseSettings:
 
         self.mapper = parse_settings["mapper"]
         self.replicate_mapper = parse_settings["replicate_mapper"]
+        self.run_mapper = parse_settings["run_mapper"]
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
-        self.species_dict = parse_settings["species_dict"]
+        self.species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
         self.min_count_multispec = parse_settings["general"]["min_count_multispec"]
         self.species_expected_ratio = parse_settings["species_expected_ratio"]

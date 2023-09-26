@@ -26,17 +26,6 @@ abundance_DDA_Condition_B_Sample_Alpha_03 = 2
 "_ECOLI" = "ECOLI"
 "_HUMAN" = "HUMAN"
 
-[species_expected_ratio]
-[species_expected_ratio.YEAST]
-"1|2" = 2.0
-
-[species_expected_ratio.ECOLI]
-"1|2" = 0.25
-    
-[species_expected_ratio.HUMAN]
-"1|2" = 1.0
-
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = true
-min_count_multispec = 1

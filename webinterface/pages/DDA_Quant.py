@@ -278,7 +278,7 @@ class StreamlitUI:
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
-                test = self.user_input["comments_for_submission"]
+                user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
                     Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
@@ -286,7 +286,7 @@ class StreamlitUI:
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
                         branch_name="new_branch",
-                        submission_comments=test
+                        submission_comments=user_comments
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(

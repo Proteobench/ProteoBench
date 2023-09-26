@@ -237,7 +237,7 @@ class Module(ModuleInterface):
         )
 
         f.close()
-        commit_message = 'Added new run with id ' + str(branch_name) + '\n user comments: ' + submission_comments
+        commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
 
         pr_github(
             clone_dir=t_dir,

@@ -2,6 +2,7 @@ import os
 import unittest
 
 import pandas as pd
+import numpy as np
 
 from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant.module import Module
@@ -130,6 +131,40 @@ class TestPlot(unittest.TestCase):
         all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
         all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
+        self.assertIsNotNone(fig)
+
+    def test_plot_bench(self):
+        np.random.seed(0)
+
+        # Generate 1000 random values from a normal distribution with mean -1 and variance 1
+        Nyeast = 1000
+        Necoli = 500
+        Nhuman = 2000
+        yeastRatio = np.random.normal(loc=-1, scale=1, size=Nyeast)
+        # Create the DataFrame
+        
+        # Generate 1000 random values from a normal distribution with mean -1 and variance 1
+        humanRatio = np.random.normal(loc=0, scale=1, size=Nhuman)
+        # Create the DataFrame
+        ecoliRatio = np.random.normal(loc=2, scale=1, size=Necoli)
+        combined_ratios = np.concatenate([yeastRatio, humanRatio, ecoliRatio])
+        
+        human_strings = ["HUMAN"] * Nhuman
+        ecoli_strings = ["ECOLI"] * Necoli
+        yeast_strings = ["YEAST"] * Nyeast
+
+        # Concatenate the lists to create a single list
+        combined_list = human_strings + ecoli_strings + yeast_strings
+
+        combineddf = pd.DataFrame({'SPECIES': combined_list, '1|2_ratio': combined_ratios})
+        combineddf['HUMAN'] = combineddf['SPECIES'] == 'HUMAN'
+        combineddf['ECOLI'] = combineddf['SPECIES'] == 'ECOLI'
+        combineddf['YEAST'] = combineddf['SPECIES'] == 'YEAST'
+        #
+
+
+        fig = PlotDataPoint().plot_bench(combineddf)
+        fig.write_html("dummy.html")
         self.assertIsNotNone(fig)
 
 

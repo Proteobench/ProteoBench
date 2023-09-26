@@ -23,22 +23,18 @@ class PlotDataPoint:
         ]
 
         fig = ff.create_distplot(hist_data, group_labels, show_hist=False)
-
+        fig.update_xaxes(title="1|2_ratio",
+                color="white",
+                gridwidth=2)
+        fig.update_yaxes(title="Density",
+                color="white",
+                gridwidth=2)
+        
         fig.update_layout(
             width=700,
-            height=700,
-            # title="Distplot",
-            xaxis=dict(
-                title="1|2_ratio",
-                color="white",
-                gridwidth=2,
-            ),
-            yaxis=dict(
-                title="Density",
-                color="white",
-                gridwidth=2,
-            ),
+            height=700
         )
+
         fig.update_xaxes(range=[0, 4])
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
         # fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)

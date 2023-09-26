@@ -169,7 +169,6 @@ class StreamlitUI:
                 self._run_proteobench()
             else:
                  error_message = st.error(":x: Please provide a result file")
-                 print(":x: Proteobench ran into a problem")
 
     def _populate_results(self):
         self.generate_results("", None, None, False)
@@ -282,6 +281,7 @@ class StreamlitUI:
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
+                user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
                     Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
@@ -289,6 +289,7 @@ class StreamlitUI:
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
                         branch_name="new_branch",
+                        submission_comments=user_comments
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(

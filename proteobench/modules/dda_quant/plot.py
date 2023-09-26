@@ -34,14 +34,17 @@ class PlotDataPoint:
             xaxis=dict(
                 title="1|2_ratio",
                 color="white",
-                gridwidth=2,
-            ),
-            yaxis=dict(
-                title="Density",
+                gridwidth=2))
+          
+        fig.update_yaxes(title="Density",
                 color="white",
-                gridwidth=2,
-            ),
+                gridwidth=2)
+        
+        fig.update_layout(
+            width=700,
+            height=700
         )
+
         fig.update_xaxes(range=[-4, 4])
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)

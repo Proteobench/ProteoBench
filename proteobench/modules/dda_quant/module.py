@@ -152,6 +152,8 @@ class Module(ModuleInterface):
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
+        elif input_format == "Sage":
+            input_data_frame = pd.read_csv(input_csv, sep='\t', low_memory=False)
         elif input_format == "MSFragger":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "WOMBAT":
@@ -216,6 +218,7 @@ class Module(ModuleInterface):
         username="Proteobot",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         branch_name="new_branch",
+        submission_comments="no comments",
     ):
         t_dir = TemporaryDirectory().name
 
@@ -236,7 +239,7 @@ class Module(ModuleInterface):
         )
 
         f.close()
-        commit_message = "Added new run with id " + branch_name
+        commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
 
         pr_github(
             clone_dir=t_dir,
@@ -244,7 +247,7 @@ class Module(ModuleInterface):
             remote_git=remote_git,
             username=username,
             branch_name=branch_name,
-            commit_message=commit_message,
+            commit_message=commit_message
         )
 
 

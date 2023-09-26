@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import plotly.figure_factory as ff
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
@@ -11,21 +11,32 @@ class PlotDataPoint:
     def plot_bench(self, result_df: pd.DataFrame) -> go.Figure:
         """Plot results with Plotly Express."""
 
-        hist_data = [
-            np.array(result_df[result_df["YEAST"] == True]["1|2_ratio"]),
-            np.array(result_df[result_df["HUMAN"] == True]["1|2_ratio"]),
-            np.array(result_df[result_df["ECOLI"] == True]["1|2_ratio"]),
-        ]
-        group_labels = [
-            "YEAST",
-            "HUMAN",
-            "ECOLI",
-        ]
+        # Remove any precursors not arising from a known organism... contaminants?
+        result_df = result_df[result_df[["YEAST", "ECOLI", "HUMAN"]].any(axis=1)]
+        result_df["kind"] = result_df[["YEAST", "ECOLI", "HUMAN"]].apply(
+            lambda x: ["YEAST", "ECOLI", "HUMAN"][np.argmax(x)], axis=1
+        )
+        fig = px.histogram(
+            result_df,
+            x=np.log2(result_df["1|2_ratio"]),
+            color="kind",
+            marginal="rug",
+            histnorm="probability density",
+            barmode="overlay",
+            opacity=0.7,
+            nbins=100
+        )
 
-        fig = ff.create_distplot(hist_data, group_labels, show_hist=False)
-        fig.update_xaxes(title="1|2_ratio",
+        fig.update_layout(
+            width=700,
+            height=700,
+            # title="Distplot",
+            xaxis=dict(
+                title="1|2_ratio",
                 color="white",
+                title="1|2_ratio",
                 gridwidth=2)
+          
         fig.update_yaxes(title="Density",
                 color="white",
                 gridwidth=2)
@@ -35,9 +46,9 @@ class PlotDataPoint:
             height=700
         )
 
-        fig.update_xaxes(range=[0, 4])
+        fig.update_xaxes(range=[-4, 4])
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
-        # fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
+        fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
 
         return fig
 
@@ -62,6 +73,7 @@ class PlotDataPoint:
             "MSFragger": "#ff7f0e",
             "WOMBAT": "#7f7f7f",
             "Proline": "#d62728",
+            "Sage": "#f74c00",
             "Custom": "#9467bd",
         }
 

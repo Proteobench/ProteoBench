@@ -17,6 +17,7 @@ except ImportError:
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
+import uuid
 
 #from proteobench.github.gh import clone_pr, write_json_local_development
 
@@ -251,11 +252,13 @@ class StreamlitUI:
 
         # Download link
         st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
         st.download_button(
             label="Download",
             data=streamlit_utils.save_dataframe(result_performance),
             file_name=f"{sample_name}.csv",
             mime="text/csv",
+            key=f"{random_uuid}"
         )
 
         st.subheader("Add results to online repository")

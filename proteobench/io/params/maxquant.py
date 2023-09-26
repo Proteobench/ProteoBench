@@ -1,4 +1,6 @@
 """Functionality to parse Maxqunt mqpar.xml parameter files"""
+from __future__ import annotations
+
 import json
 import logging
 import xml.etree.ElementTree as ET

@@ -35,6 +35,7 @@ class StreamlitPage(ABC):
             """,
             unsafe_allow_html=True,
         )
+        st.image("https://github.com/Proteobench/ProteoBench/blob/Add-logos/webinterface/logos/logo_participants/logos_all_20230926.png?raw=true")
 
     @abstractmethod
     def _main_page(self):
@@ -52,5 +53,5 @@ class StreamlitPage(ABC):
         for i in range(0,len(mainlogo_list),3):
             st.sidebar.image(
                 mainlogo_list[i:i+3],
-                width=300,
+                width=140,
             )

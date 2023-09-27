@@ -178,7 +178,7 @@ class StreamlitUI:
         """Format sidebar."""
         st.sidebar.image("https://github.com/Proteobench/ProteoBench/raw/Add-logos/webinterface/logos/logo_proteobench/proteobench-logo-horizontal.svg",
                 width=300)
-        st.sidebar.image("https://github.com/Proteobench/ProteoBench/raw/Add-logos/webinterface/logos/logo_unding/DDSA_PrimaryLogo_Screen_Black.pdf",
+        st.sidebar.image("https://github.com/Proteobench/ProteoBench/raw/Add-logos/webinterface/logos/logo_funding/DDSA_PrimaryLogo_Screen_Black.svg",
                 width=300)
         mainlogo_list = [
             "https://github.com/Proteobench/ProteoBench/blob/Add-logos/webinterface/logos/logo_funding/eubic_logo_transparent.png?raw=true",

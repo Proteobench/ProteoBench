@@ -35,7 +35,7 @@ class StreamlitPage(ABC):
             """,
             unsafe_allow_html=True,
         )
-        st.image("https://github.com/Proteobench/ProteoBench/blob/Add-logos/webinterface/logos/logo_participants/logos_all_20230926.png?raw=true")
+        st.image("webinterface/logos/logo_participants/logos_all_20230926.png")
 
     @abstractmethod
     def _main_page(self):

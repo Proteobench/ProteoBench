@@ -35,7 +35,7 @@ class StreamlitPage(ABC):
             """,
             unsafe_allow_html=True,
         )
-        st.image("webinterface/logos/logo_participants/logos_all_20230926.png")
+        st.image("logos/logo_participants/logos_all_20230926.png")
 
     @abstractmethod
     def _main_page(self):
@@ -43,13 +43,13 @@ class StreamlitPage(ABC):
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.image("https://github.com/Proteobench/ProteoBench/raw/Add-logos/webinterface/logos/logo_proteobench/proteobench-logo-horizontal.svg",
+        st.sidebar.image("logos/logo_proteobench/proteobench-logo-horizontal.svg",
                 width=300)
-        st.sidebar.image("https://raw.githubusercontent.com/Proteobench/ProteoBench/b6d40e853df10e486e0000aed9fe7b5ddc3f9286/webinterface/logos/logo_funding/DDSA_PrimaryLogo_Screen_Black.svg",
+        st.sidebar.image("logos/logo_funding/DDSA_PrimaryLogo_Screen_Black.svg",
                 width=300)
         mainlogo_list = [
-            "https://github.com/Proteobench/ProteoBench/blob/Add-logos/webinterface/logos/logo_funding/eubic_logo_transparent.png?raw=true",
-            "https://github.com/Proteobench/ProteoBench/blob/Add-logos/webinterface/logos/logo_funding/eupa-logo-transparent.png?raw=true"
+            "logos/logo_funding/eubic_logo_transparent.png",
+            "logos/logo_funding/eupa-logo-transparent.png"
         ]
         for i in range(0,len(mainlogo_list),3):
             st.sidebar.image(

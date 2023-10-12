@@ -31,11 +31,12 @@ class Module(ModuleInterface):
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
 
         # Summarize values of the same peptide using mean
+        # TODO should we take the mean or sum of the same peptidoform/peptideions same raw file multiple intensities
         quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"]).Intensity.mean()
         quant_df = quant_raw_df.unstack(level=1)
 
         # Count number of values per peptidoform and Raw file
-
+        # TODO calculate this on the log2 transformed values
         for replicate, replicate_runs in replicate_to_raw.items():
             selected_replicate_df = quant_raw_df.index.get_level_values(
                 "Raw file"
@@ -47,11 +48,13 @@ class Module(ModuleInterface):
             quant_df["mean_of_" + str(replicate)] = mean_series
 
             ## Add number of missing values per row of replicate
+            # TODO keep missing values, filter later for calculation of ratios
             missing_series = replicate_quant_df.isna().groupby(["peptidoform"]).sum()
             quant_df["missing_values_" + str(replicate)] = missing_series
 
-        species_peptidoform = list(parse_settings.species_dict.keys())
+        species_peptidoform = list(parse_settings.species_dict.values())
         species_peptidoform.append("peptidoform")
+        # TODO check, do we need to drop_duplicates? When?
         peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
         peptidoform_to_species.index = peptidoform_to_species["peptidoform"]
         peptidoform_to_species_dict = peptidoform_to_species.T.to_dict()
@@ -66,10 +69,12 @@ class Module(ModuleInterface):
         cv_replicate_quant_species_df = pd.concat([quant_df, species_quant_df], axis=1)
 
         ratio_dict = {}
-        for species in parse_settings.species_dict.keys():
+        for species in parse_settings.species_dict.values():
             species_df_slice = cv_replicate_quant_species_df[
                 cv_replicate_quant_species_df[species] == True
             ]
+            # TODO add cutoffs for different thresholds presence of peptide ion
+            # TODO do substraction for log2 transformed
             for conditions in itertools.combinations(
                 set(parse_settings.replicate_mapper.values()), 2
             ):
@@ -89,6 +94,9 @@ class Module(ModuleInterface):
                     * 100
                 )
 
+                # There is a loop that adds resulting ratios, if already
+                # exists than concat to the existing DF, otherwise
+                # keyexception and make df
                 try:
                     ratio_dict[condition_comp_id + "_ratio"] = pd.concat(
                         [ratio, ratio_dict[condition_comp_id + "_ratio"]]
@@ -105,6 +113,8 @@ class Module(ModuleInterface):
         ratio_df = pd.DataFrame(ratio_dict)
 
         intermediate = pd.concat([cv_replicate_quant_species_df, ratio_df], axis=1)
+
+        intermediate.rename(columns=parse_settings.run_mapper, inplace=True)
 
         return intermediate
 
@@ -152,6 +162,8 @@ class Module(ModuleInterface):
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
+        elif input_format == "Sage":
+            input_data_frame = pd.read_csv(input_csv, sep='\t', low_memory=False)
         elif input_format == "MSFragger":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "WOMBAT":
@@ -216,6 +228,7 @@ class Module(ModuleInterface):
         username="Proteobot",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         branch_name="new_branch",
+        submission_comments="no comments",
     ):
         t_dir = TemporaryDirectory().name
 
@@ -236,7 +249,7 @@ class Module(ModuleInterface):
         )
 
         f.close()
-        commit_message = "Added new run with id " + branch_name
+        commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
 
         pr_github(
             clone_dir=t_dir,
@@ -244,7 +257,7 @@ class Module(ModuleInterface):
             remote_git=remote_git,
             username=username,
             branch_name=branch_name,
-            commit_message=commit_message,
+            commit_message=commit_message
         )
 
 

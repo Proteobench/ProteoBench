@@ -1,4 +1,5 @@
 import json
+import numpy as np
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
@@ -6,7 +7,7 @@ from datetime import datetime
 @dataclass
 class Datapoint:
     """Data used to stored the"""
-
+    # TODO add threshold value used for presence ion/peptidoform
     id: str = None
     search_engine: str = None
     software_version: int = 0
@@ -44,13 +45,14 @@ class Datapoint:
         nr_missing_0 = 0
         for spec in species:
             f = len(df[df[spec] == True])
-            sum_s = (df[df[spec] == True]["1|2_expected_ratio_diff"]).sum()
+            sum_s = np.nan_to_num(df[df[spec] == True]["1|2_expected_ratio_diff"], nan=0, neginf=-1000, posinf=1000).sum()
             ratio = sum_s / f
             prop_ratio = (f / len(df)) * ratio
             prop_ratios.append(prop_ratio)
             sum_ratios += prop_ratio
             nr_missing_0 += f
-
+        
+        # TODO rename/document code
         self.weighted_sum = round(sum_ratios, ndigits=3)
         self.nr_prec = len(df)
 
@@ -64,6 +66,7 @@ class Datapoint:
         )
         print(self.id)
 
+    # TODO, not used? Can be removed?
     def dump_json_object(self, file_name):
         f = open(file_name, "a")
         f.write(json.dumps(asdict(self)))

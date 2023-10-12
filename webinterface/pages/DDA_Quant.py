@@ -17,6 +17,7 @@ except ImportError:
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
+import uuid
 
 #from proteobench.github.gh import clone_pr, write_json_local_development
 
@@ -110,12 +111,12 @@ class StreamlitUI:
                     The raw files used for this module were acquired on an Orbitrap
                     Q-Exactive H-FX (ThermoScientific). They can be downloaded from the
                     proteomeXchange repository PXD028735. You can download them here:
-                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw)
-                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)  
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw)
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw)
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw)
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw)
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw)
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)  
 
                     **It is imperative not to rename the files once downloaded!**
                     """
@@ -168,7 +169,6 @@ class StreamlitUI:
                 self._run_proteobench()
             else:
                  error_message = st.error(":x: Please provide a result file")
-                 print(":x: Proteobench ran into a problem")
 
     def _populate_results(self):
         self.generate_results("", None, None, False)
@@ -251,11 +251,13 @@ class StreamlitUI:
 
         # Download link
         st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
         st.download_button(
             label="Download",
             data=streamlit_utils.save_dataframe(result_performance),
             file_name=f"{sample_name}.csv",
             mime="text/csv",
+            key=f"{random_uuid}"
         )
 
         st.subheader("Add results to online repository")
@@ -279,6 +281,7 @@ class StreamlitUI:
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
+                user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
                     Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
@@ -286,6 +289,7 @@ class StreamlitUI:
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
                         branch_name="new_branch",
+                        submission_comments=user_comments
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(

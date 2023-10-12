@@ -13,6 +13,7 @@ class ParseInputs(ParseInputsInterface):
         self, df: pd.DataFrame, parse_settings: ParseSettings
     ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """Convert a search engine output into a generic format supported by the module."""
+        #TODO add functionality/steps in docstring
 
         for k, v in parse_settings.mapper.items():
             if k not in df.columns:
@@ -34,14 +35,17 @@ class ParseInputs(ParseInputsInterface):
             df = df[df["Reverse"] != parse_settings.decoy_flag]
 
         df["contaminant"] = df["Proteins"].str.contains(parse_settings.contaminant_flag)
-        for species, flag in parse_settings.species_dict.items():
+        for flag, species in parse_settings.species_dict.items():
             df[species] = df["Proteins"].str.contains(flag)
         df["MULTI_SPEC"] = (
-            df[list(parse_settings.species_dict.keys())].sum(axis=1)
+            df[list(parse_settings.species_dict.values())].sum(axis=1)
             > parse_settings.min_count_multispec
         )
 
+        df = df[df["MULTI_SPEC"] == False]
+
         # If there is "Raw file" then it is a long format, otherwise short format
+        # TODO we might need to generalize this with toml
         if "Raw file" not in parse_settings.mapper.values():
             meltvars = parse_settings.replicate_mapper.keys()
             df = df.melt(
@@ -50,13 +54,17 @@ class ParseInputs(ParseInputsInterface):
                 var_name="Raw file",
                 value_name="Intensity",
             )
+
+        # TODO replace with condition_mapper
         df["replicate"] = df["Raw file"].map(parse_settings.replicate_mapper)
         df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)
 
-        df = df[df["MULTI_SPEC"] == False]
-
         # TODO, if "Charge" is not available return a sensible error
+        # TODO, include modifications for ion
         df.loc[df.index, "peptidoform"] = df.loc[df.index, "Sequence"]+"|Z="+df.loc[df.index, "Charge"].map(str)
+
+        # TODO use peptide_ion or peptidoform here
+        # TODO move this to datapoint, keep a count here of quantified AA
         count_non_zero = (
             df.groupby(["Sequence", "Raw file"])["Intensity"].sum() > 0.0
         ).groupby(level=[0]).sum() == 6

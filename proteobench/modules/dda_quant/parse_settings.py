@@ -14,25 +14,28 @@ PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), "io_parse_settings"
 
 MapSettingFiles: dict[str, Path]
 
-PARSE_SETTINGS_FILES = { "WOMBAT"     : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_wombat.toml'),
-                         "MaxQuant"         : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_maxquant.toml'),
-                        "MSFragger"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_msfragger.toml'),
-                        "Proline"         : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_proline.toml'),
-                        "AlphaPept"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_alphapept.toml'),
-                        "Sage"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_sage.toml'),
-                        "Custom"        : os.path.join(PARSE_SETTINGS_DIR, 'parse_settings_custom.toml')
-            }
+PARSE_SETTINGS_FILES = {
+    "WOMBAT": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_wombat.toml"),
+    "MaxQuant": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_maxquant.toml"),
+    "MSFragger": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_msfragger.toml"),
+    "Proline": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_proline.toml"),
+    "AlphaPept": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_alphapept.toml"),
+    "Sage": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_sage.toml"),
+    "Custom": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_custom.toml"),
+}
 
-PARSE_SETTINGS_FILES_MODULE = os.path.join(PARSE_SETTINGS_DIR, 'module_settings.toml')
+PARSE_SETTINGS_FILES_MODULE = os.path.join(PARSE_SETTINGS_DIR, "module_settings.toml")
 
 # ! Could be created from keys of PARSE_SETTINGS_FILES
-INPUT_FORMATS = ("MaxQuant", 
-                "AlphaPept",
-                "MSFragger",
-                "Proline",
-                "WOMBAT",
-                "Sage",
-                "Custom")
+INPUT_FORMATS = (
+    "MaxQuant",
+    "AlphaPept",
+    "MSFragger",
+    "Proline",
+    "WOMBAT",
+    "Sage",
+    "Custom",
+)
 
 LOCAL_DEVELOPMENT = False
 
@@ -45,6 +48,7 @@ DDA_QUANT_RESULTS_PATH = (
 
 
 DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
+
 
 class ParseSettings:
     """Structure that contains all the parameters used to parse
@@ -61,9 +65,10 @@ class ParseSettings:
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
 
         parse_settings_module = toml.load(PARSE_SETTINGS_FILES_MODULE)
-        self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
+        self.min_count_multispec = parse_settings_module["general"][
+            "min_count_multispec"
+        ]
         self.species_expected_ratio = parse_settings_module["species_expected_ratio"]
-    
 
 
 def parse_settings(input_format: str) -> Settings:

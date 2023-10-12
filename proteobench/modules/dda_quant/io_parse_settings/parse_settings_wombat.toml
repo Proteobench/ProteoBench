@@ -2,7 +2,6 @@
 protein_group = "Proteins"
 "modified_peptide" = "Modified sequence"
 
-
 [replicate_mapper]
 abundance_A_1 = 1
 abundance_A_2 = 1
@@ -12,29 +11,18 @@ abundance_B_2 = 2
 abundance_B_3 = 2
 
 [run_mapper]
-abundance_A_1 = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"
-abundance_A_2 = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02"
-abundance_A_3 = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03"
-abundance_B_1 = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"
-abundance_B_2 = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02"
-abundance_B_3 = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03"
+abundance_A_1 = "Condition_A_Sample_Alpha_01"
+abundance_A_2 = "Condition_A_Sample_Alpha_02"
+abundance_A_3 = "Condition_A_Sample_Alpha_03"
+abundance_B_1 = "Condition_B_Sample_Alpha_01"
+abundance_B_2 = "Condition_B_Sample_Alpha_02"
+abundance_B_3 = "Condition_B_Sample_Alpha_03"
 
-[species_dict]
-"YEAST" = "_YEAST"
-"ECOLI" = "_ECOLI"
-"HUMAN" = "_HUMAN"
-
-[species_expected_ratio]
-[species_expected_ratio.YEAST]
-"1|2" = 2.0
-
-[species_expected_ratio.ECOLI]
-"1|2" = 0.25
-    
-[species_expected_ratio.HUMAN]
-"1|2" = 1.0
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
 
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = true
-min_count_multispec = 1

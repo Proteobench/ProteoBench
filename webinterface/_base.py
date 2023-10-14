@@ -43,16 +43,6 @@ class StreamlitPage(ABC):
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.image("logos/logo_proteobench/proteobench-logo-horizontal.svg",
-                width=300)
-        st.sidebar.image("logos/logo_funding/DDSA_PrimaryLogo_Screen_Black.svg",
-                width=300)
-        mainlogo_list = [
-            "logos/logo_funding/eubic_logo_transparent.png",
-            "logos/logo_funding/eupa-logo-transparent.png"
-        ]
-        for i in range(0,len(mainlogo_list),3):
-            st.sidebar.image(
-                mainlogo_list[i:i+3],
-                width=140,
-            )
+        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png",
+                         width=300)
+        

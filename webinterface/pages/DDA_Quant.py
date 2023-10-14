@@ -111,11 +111,11 @@ class StreamlitUI:
                     The raw files used for this module were acquired on an Orbitrap
                     Q-Exactive H-FX (ThermoScientific). They can be downloaded from the
                     proteomeXchange repository PXD028735. You can download them here:
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw)
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw)
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw),
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw),
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw),
                     [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
 
                     **It is imperative not to rename the files once downloaded!**
@@ -175,19 +175,9 @@ class StreamlitUI:
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.image("https://github.com/Proteobench/ProteoBench/raw/Add-logos/webinterface/logos/logo_proteobench/proteobench-logo-horizontal.svg",
+        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png",
                          width=300)
-        st.sidebar.image("https://raw.githubusercontent.com/Proteobench/ProteoBench/b6d40e853df10e486e0000aed9fe7b5ddc3f9286/webinterface/logos/logo_funding/DDSA_PrimaryLogo_Screen_Black.svg",
-                         width=300)
-        mainlogo_list = [
-            "https://github.com/Proteobench/ProteoBench/blob/Add-logos/webinterface/logos/logo_funding/eubic_logo_transparent.png?raw=true",
-            "https://github.com/Proteobench/ProteoBench/blob/Add-logos/webinterface/logos/logo_funding/eupa-logo-transparent.png?raw=true"
-        ]
-        for i in range(0, len(mainlogo_list), 3):
-            st.sidebar.image(
-                mainlogo_list[i:i+3],
-                width=140,
-            )
+        
         # st.sidebar.markdown(self.texts.Sidebar.badges)
         st.sidebar.header("About")
         st.sidebar.markdown(self.texts.Sidebar.about, unsafe_allow_html=True)

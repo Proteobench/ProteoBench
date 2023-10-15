@@ -35,6 +35,7 @@ class StreamlitPage(ABC):
             """,
             unsafe_allow_html=True,
         )
+        st.image("logos/logo_participants/logos_all_20230926.png")
 
     @abstractmethod
     def _main_page(self):
@@ -42,8 +43,6 @@ class StreamlitPage(ABC):
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.markdown(
-            """
-            # Proteobench
-            """
-        )
+        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png",
+                         width=300)
+        

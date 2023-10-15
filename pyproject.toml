@@ -29,7 +29,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["black"]
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser"]
-web = ["streamlit", "scipy"]
+web = ["streamlit>1.27", "scipy"]
 
 [project.urls]
 "Homepage" = "https://github.com/ProteoBench"

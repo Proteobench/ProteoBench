@@ -13,8 +13,9 @@ from proteobench.modules.dda_quant.plot import PlotDataPoint
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
+import uuid
 
-#from proteobench.github.gh import clone_pr, write_json_local_development
+# from proteobench.github.gh import clone_pr, write_json_local_development
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ SUBMIT = "submit"
 FIG1 = "fig1"
 FIG2 = "fig2"
 RESULT_PERF = "result_perf"
+META_DATA = "meta_data"
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -49,12 +51,17 @@ class StreamlitUI:
 
     def generate_input_field(self, input_format: str, content: dict):
         if content["type"] == "text_input":
-            return st.text_input(content["label"], content["value"][input_format])
+            if "placeholder" in content:
+                return st.text_input(content["label"], placeholder=content["placeholder"])
+            elif "value" in content:
+                return st.text_input(content["label"], content["value"][input_format])
         if content["type"] == "number_input":
             return st.number_input(
                 content["label"],
-                value=content["value"][input_format],
+                value=None,
                 format=content["format"],
+                min_value=content["min_value"],
+                max_value=content["max_value"]
             )
         if content["type"] == "selectbox":
             return st.selectbox(
@@ -99,12 +106,13 @@ class StreamlitUI:
                     The raw files used for this module were acquired on an Orbitrap
                     Q-Exactive H-FX (ThermoScientific). They can be downloaded from the
                     proteomeXchange repository PXD028735. You can download them here:
-                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw)
-                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
+
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw),
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw),
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
 
                     **It is imperative not to rename the files once downloaded!**
                     """
@@ -142,6 +150,7 @@ class StreamlitUI:
                     self.user_input[key] = self.generate_input_field(
                         self.user_input["input_format"], value
                     )
+
             submit_button = st.form_submit_button(
                 "Parse and bench", help=self.texts.Help.additional_parameters
             )
@@ -151,17 +160,19 @@ class StreamlitUI:
             self._populate_results()
 
         if submit_button:
-            self._run_proteobench()
+            if self.user_input["input_csv"]:
+                self._run_proteobench()
+            else:
+                error_message = st.error(":x: Please provide a result file")
 
     def _populate_results(self):
         self.generate_results("", None, None, False)
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.image(
-            "https://upload.wikimedia.org/wikipedia/commons/8/85/Garden_bench_001.jpg",
-            width=150,
-        )
+        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png",
+                         width=300)
+        
         # st.sidebar.markdown(self.texts.Sidebar.badges)
         st.sidebar.header("About")
         st.sidebar.markdown(self.texts.Sidebar.about, unsafe_allow_html=True)
@@ -170,7 +181,8 @@ class StreamlitUI:
         # Run Proteobench
         st.header("Running Proteobench")
         status_placeholder = st.empty()
-        status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
+        status_placeholder.info(
+            ":hourglass_flowing_sand: Running Proteobench...")
 
         if ALL_DATAPOINTS not in st.session_state:
             st.session_state[ALL_DATAPOINTS] = None
@@ -234,11 +246,13 @@ class StreamlitUI:
 
         # Download link
         st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
         st.download_button(
             label="Download",
             data=streamlit_utils.save_dataframe(result_performance),
             file_name=f"{sample_name}.csv",
             mime="text/csv",
+            key=f"{random_uuid}"
         )
 
         st.subheader("Add results to online repository")
@@ -247,14 +261,23 @@ class StreamlitUI:
         st.session_state[RESULT_PERF] = result_performance
         st.session_state[ALL_DATAPOINTS] = all_datapoints
 
+        self.user_input[META_DATA] = st.file_uploader(
+            "Meta data for searches", help=self.texts.Help.meta_data_file
+        )
+        self.user_input["comments_for_submission"] = st.text_area(
+            "Comments for submission",
+            placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
+            height=200)
         checkbox = st.checkbox("I confirm that the metadata is correct")
-        if checkbox:
+
+        if checkbox and self.user_input[META_DATA]:
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
-            # TODO: check if parameters are filled
+            # TODO: update parameters of point to submit with parsed metadata parameters
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
+                user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
                     Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
@@ -262,6 +285,7 @@ class StreamlitUI:
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
                         branch_name="new_branch",
+                        submission_comments=user_comments
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
@@ -307,6 +331,10 @@ class WebpageTexts:
 
         additional_parameters = """
             Please provide all details about the used parameter for the database search. They will facilitate the comparison.
+        """
+
+        meta_data_file = """
+            Please add a file with meta data that contains all relevant information about your search parameters
         """
 
     class Errors:

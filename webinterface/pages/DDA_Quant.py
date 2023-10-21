@@ -19,7 +19,7 @@ import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 import uuid
 
-#from proteobench.github.gh import clone_pr, write_json_local_development
+# from proteobench.github.gh import clone_pr, write_json_local_development
 
 logger = logging.getLogger(__name__)
 
@@ -111,12 +111,12 @@ class StreamlitUI:
                     The raw files used for this module were acquired on an Orbitrap
                     Q-Exactive H-FX (ThermoScientific). They can be downloaded from the
                     proteomeXchange repository PXD028735. You can download them here:
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw)
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw)
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw)
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)  
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw),
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw),
+                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw),
+                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
 
                     **It is imperative not to rename the files once downloaded!**
                     """
@@ -155,7 +155,7 @@ class StreamlitUI:
                     self.user_input[key] = self.generate_input_field(
                         self.user_input["input_format"], value
                     )
-            
+
             submit_button = st.form_submit_button(
                 "Parse and bench", help=self.texts.Help.additional_parameters
             )
@@ -168,17 +168,16 @@ class StreamlitUI:
             if self.user_input["input_csv"]:
                 self._run_proteobench()
             else:
-                 error_message = st.error(":x: Please provide a result file")
+                error_message = st.error(":x: Please provide a result file")
 
     def _populate_results(self):
         self.generate_results("", None, None, False)
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.image(
-            "https://upload.wikimedia.org/wikipedia/commons/8/85/Garden_bench_001.jpg",
-            width=150,
-        )
+        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png",
+                         width=300)
+        
         # st.sidebar.markdown(self.texts.Sidebar.badges)
         st.sidebar.header("About")
         st.sidebar.markdown(self.texts.Sidebar.about, unsafe_allow_html=True)
@@ -187,7 +186,8 @@ class StreamlitUI:
         # Run Proteobench
         st.header("Running Proteobench")
         status_placeholder = st.empty()
-        status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
+        status_placeholder.info(
+            ":hourglass_flowing_sand: Running Proteobench...")
 
         if ALL_DATAPOINTS not in st.session_state:
             st.session_state[ALL_DATAPOINTS] = None
@@ -267,13 +267,14 @@ class StreamlitUI:
         st.session_state[ALL_DATAPOINTS] = all_datapoints
 
         self.user_input[META_DATA] = st.file_uploader(
-                "Meta data for searches", help=self.texts.Help.meta_data_file
-            )
-        self.user_input["comments_for_submission"] = st.text_area("Comments for submission", 
+            "Meta data for searches", help=self.texts.Help.meta_data_file
+        )
+        self.user_input["comments_for_submission"] = st.text_area(
+            "Comments for submission",
             placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
             height=200)
         checkbox = st.checkbox("I confirm that the metadata is correct")
-        
+
         if checkbox and self.user_input[META_DATA]:
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")

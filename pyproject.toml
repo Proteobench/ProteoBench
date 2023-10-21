@@ -12,6 +12,7 @@ classifiers = [
 ]
 dependencies = [
   "pandas",
+  "openpyxl",
   "numpy",
   "plotly",
   "streamlit_extras",

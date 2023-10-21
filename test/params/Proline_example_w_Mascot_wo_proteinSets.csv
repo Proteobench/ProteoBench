@@ -1,0 +1,19 @@
+,0
+search_engine,Mascot
+software_version,2.8.0.1
+fdr_psm,1
+fdr_peptide,
+fdr_protein,
+MBR,False
+precursor_tol,10.0
+precursor_tol_unit,ppm
+fragment_tol,0.02
+fragment_tol_unit,Da
+enzyme_name,Trypsin/P
+missed_cleavages,2
+min_pep_length,7
+max_pep_length,
+fixed_modifications,Carbamidomethyl (C)
+variable_modifications,Acetyl (Protein N-term); Oxidation (M)
+max_num_modifications,
+precursor_charge,

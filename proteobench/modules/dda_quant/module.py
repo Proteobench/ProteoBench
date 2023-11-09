@@ -24,15 +24,63 @@ class Module(ModuleInterface):
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
         return True
+    
+    def generate_intermediate_V2(
+        self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
+    ) -> pd.DataFrame:
+        
+
+        filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
+        
+        #convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
+        replicate_to_raw_df = pd.DataFrame(replicate_to_raw.items(), columns=['Group', 'Raw file'])
+        # since there are several Raw files per Group we need to split them into different rows
+        replicate_to_raw_df = replicate_to_raw_df.explode('Raw file')
+        
+                # add column "Group" to filtered_df_p1
+        filtered_df_p1 = pd.merge(filtered_df_p1, replicate_to_raw_df, on="Raw file", how="left")
+        # how many disinct combinations by row of distinct peptidoform, "Raw file" and "Group" in filtered_df_p1
+        
+        filtered_df_p1_check = filtered_df_p1[["Raw file", "peptidoform", "Group"]].copy()
+        filtered_df_p1_check = filtered_df_p1_check.drop_duplicates()
+        filtered_df_p1_check = filtered_df_p1_check.shape[0]
+
+
+        # sum intensity values of the same peptide and "Raw file" using the sum
+        quant_raw_df_int = (
+            filtered_df_p1.groupby(["peptidoform", "Raw file", "Group"])["Intensity"]
+            .agg(Intensity = 'sum', Count = 'size')
+            .reset_index()
+        )
+
+        
+        # add column "log_Intensity" to quant_raw_df
+        quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
+        # comopute the mean of the log_Intensity per peptidoform and "Group"
+        quant_raw_df = quant_raw_df_int.groupby(["peptidoform", "Group"]).agg(log_Intensity_mean = ('log_Intensity', 'mean'),
+                                                                              log_Intensity_std = ('log_Intensity', 'std'),
+                                                                              Intensity_mean = ('Intensity', 'mean'),
+                                                                              Intensity_std = ('Intensity', 'std')).reset_index()
+        
+        
+        return quant_raw_df
+    
+
+
 
     def generate_intermediate(
         self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
     ) -> pd.DataFrame:
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
+        
+        species_peptidoform = list(parse_settings.species_dict.values())
+        #species_peptidoform.append("peptidoform")
+        
+        filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
 
         # Summarize values of the same peptide using mean
         # TODO should we take the mean or sum of the same peptidoform/peptideions same raw file multiple intensities
-        quant_raw_df = filtered_df.groupby(["peptidoform", "Raw file"]).Intensity.mean()
+        quant_raw_df = filtered_df_p1.groupby(["peptidoform", "Raw file"]).Intensity.mean()
         quant_df = quant_raw_df.unstack(level=1)
 
         # Count number of values per peptidoform and Raw file

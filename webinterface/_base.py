@@ -35,7 +35,7 @@ class StreamlitPage(ABC):
             """,
             unsafe_allow_html=True,
         )
-        st.image("logos/logo_participants/logos_all_20230926.png")
+        st.image("logos/logo_participants/logos_all.png")
 
     @abstractmethod
     def _main_page(self):

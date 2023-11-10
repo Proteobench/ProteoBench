@@ -120,12 +120,14 @@ class TestOutputFileReading(unittest.TestCase):
                 input_df, parse_settings
             )
 
-            # Get quantification data
-            Module.generate_intermediate_V3(prepared_df,parse_settings)
-
+            
             intermediate = Module.generate_intermediate_V2(
                 prepared_df, replicate_to_raw, parse_settings
             )
+
+            # Get quantification data
+            Module.generate_intermediate_V3(prepared_df, intermediate, parse_settings)
+
             self.assertFalse(intermediate.empty)
 
 class TestWrongFormatting(unittest.TestCase):

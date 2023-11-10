@@ -34,14 +34,6 @@ class Module(ModuleInterface):
         parse_settings: ParseSettings,
         min_intensity=0,
     ) -> pd.DataFrame:
-        filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
-        # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
-        intensities_wide = filtered_df_p1.pivot(
-            index="peptidoform", columns="Raw file", values="Intensity"
-        ).reset_index()
-
-        # remove all rows where Intensity below min_intensity
-        filtered_df_p1 = filtered_df_p1[filtered_df_p1["Intensity"] >= min_intensity]
 
         # convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
         replicate_to_raw_df = pd.DataFrame(
@@ -50,11 +42,18 @@ class Module(ModuleInterface):
         # since there are several Raw files per Group we need to split them into different rows
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
 
+
+        filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
+        # remove all rows where Intensity below min_intensity
+        filtered_df_p1 = filtered_df_p1[filtered_df_p1["Intensity"] >= min_intensity]
+
+
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
         filtered_df_p1 = pd.merge(
             filtered_df_p1, replicate_to_raw_df, on="Raw file", how="inner"
         )
 
+        
         # how many disinct combinations by row of distinct peptidoform, "Raw file" and "Group" in filtered_df_p1
         filtered_df_p1_check = filtered_df_p1[
             ["Raw file", "peptidoform", "Group"]
@@ -67,6 +66,13 @@ class Module(ModuleInterface):
             .agg(Intensity="sum", Count="size")
             .reset_index()
         )
+
+        # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
+        
+        intensities_wide = quant_raw_df_int.pivot(
+            index="peptidoform", columns="Raw file", values="Intensity"
+        ).reset_index()
+
 
         # add column "log_Intensity" to quant_raw_df
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
@@ -122,10 +128,24 @@ class Module(ModuleInterface):
         withspecies = pd.merge(
             quant_df, peptidoform_to_species, on="peptidoform", how="inner"
         )
+        species_expected_ratio = parse_settings.species_expected_ratio
+        # for all columns named parse_settings.species_dict.values() compute the sum over the rows and add it to a new column "unique"
+        withspecies["unique"] = withspecies[parse_settings.species_dict.values()].sum(
+            axis=1
+        )
+        # create a list tabulating how many entries in withspecies["unique"] are 1,2,3,4,5,6
+        unique_counts = withspecies["unique"].value_counts()
+        
+        # now remove all rows with withspecies["unique"] > 1
+        withspecies = withspecies[withspecies["unique"] == 1]
 
-        parse_settings.species_expected_ratio
-    
-
+        # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
+        for species in parse_settings.species_dict.values():
+            withspecies.loc[withspecies[species] == True, "species"] = species
+            withspecies.loc[withspecies[species] == True, "expectedRatio"] = species_expected_ratio[species]["1|2"]
+        
+        withspecies["1|2_expected_ratio_diff"] = abs(withspecies["1|2_ratio"] - withspecies["expectedRatio"]) * 100
+        return withspecies
             
 
     def generate_intermediate(

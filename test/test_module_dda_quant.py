@@ -106,8 +106,8 @@ class TestOutputFileReading(unittest.TestCase):
                 prepared_df, replicate_to_raw, parse_settings
             )
             
-            intermediate = Module().generate_intermediate(
-                prepared_df, replicate_to_raw, parse_settings
+            intermediate = Module.generate_intermediate_V4(
+                prepared_df, intermediate, parse_settings
             )
             self.assertFalse(intermediate.empty)
 
@@ -121,7 +121,9 @@ class TestOutputFileReading(unittest.TestCase):
             )
 
             # Get quantification data
-            intermediate = Module().generate_intermediate_V2(
+            Module.generate_intermediate_V3(prepared_df,parse_settings)
+
+            intermediate = Module.generate_intermediate_V2(
                 prepared_df, replicate_to_raw, parse_settings
             )
             self.assertFalse(intermediate.empty)

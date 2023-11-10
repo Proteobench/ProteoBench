@@ -14,7 +14,9 @@ from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_REPO, ParseSettings)
+    DDA_QUANT_RESULTS_REPO,
+    ParseSettings,
+)
 from proteobench.modules.interfaces import ModuleInterface
 
 
@@ -24,63 +26,123 @@ class Module(ModuleInterface):
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
         return True
-    
-    def generate_intermediate_V2(
-        self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
-    ) -> pd.DataFrame:
-        
 
+    @staticmethod
+    def generate_intermediate_V2(
+        filtered_df,
+        replicate_to_raw: dict,
+        parse_settings: ParseSettings,
+        min_intensity=0,
+    ) -> pd.DataFrame:
         filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
-        
-        #convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
-        replicate_to_raw_df = pd.DataFrame(replicate_to_raw.items(), columns=['Group', 'Raw file'])
+        # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
+        intensities_wide = filtered_df_p1.pivot(
+            index="peptidoform", columns="Raw file", values="Intensity"
+        ).reset_index()
+
+        # remove all rows where Intensity below min_intensity
+        filtered_df_p1 = filtered_df_p1[filtered_df_p1["Intensity"] >= min_intensity]
+
+        # convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
+        replicate_to_raw_df = pd.DataFrame(
+            replicate_to_raw.items(), columns=["Group", "Raw file"]
+        )
         # since there are several Raw files per Group we need to split them into different rows
-        replicate_to_raw_df = replicate_to_raw_df.explode('Raw file')
-        
-                # add column "Group" to filtered_df_p1
-        filtered_df_p1 = pd.merge(filtered_df_p1, replicate_to_raw_df, on="Raw file", how="left")
+        replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
+
+        # add column "Group" to filtered_df_p1 using inner join on "Raw file"
+        filtered_df_p1 = pd.merge(
+            filtered_df_p1, replicate_to_raw_df, on="Raw file", how="inner"
+        )
+
         # how many disinct combinations by row of distinct peptidoform, "Raw file" and "Group" in filtered_df_p1
-        
-        filtered_df_p1_check = filtered_df_p1[["Raw file", "peptidoform", "Group"]].copy()
+        filtered_df_p1_check = filtered_df_p1[
+            ["Raw file", "peptidoform", "Group"]
+        ].copy()
         filtered_df_p1_check = filtered_df_p1_check.drop_duplicates()
         filtered_df_p1_check = filtered_df_p1_check.shape[0]
-
-
         # sum intensity values of the same peptide and "Raw file" using the sum
         quant_raw_df_int = (
             filtered_df_p1.groupby(["peptidoform", "Raw file", "Group"])["Intensity"]
-            .agg(Intensity = 'sum', Count = 'size')
+            .agg(Intensity="sum", Count="size")
             .reset_index()
         )
 
-        
         # add column "log_Intensity" to quant_raw_df
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
         # comopute the mean of the log_Intensity per peptidoform and "Group"
-        quant_raw_df = quant_raw_df_int.groupby(["peptidoform", "Group"]).agg(log_Intensity_mean = ('log_Intensity', 'mean'),
-                                                                              log_Intensity_std = ('log_Intensity', 'std'),
-                                                                              Intensity_mean = ('Intensity', 'mean'),
-                                                                              Intensity_std = ('Intensity', 'std')).reset_index()
-        
-        
+        quant_raw_df = (
+            quant_raw_df_int.groupby(["peptidoform", "Group"])
+            .agg(
+                log_Intensity_mean=("log_Intensity", "mean"),
+                log_Intensity_std=("log_Intensity", "std"),
+                Intensity_mean=("Intensity", "mean"),
+                Intensity_std=("Intensity", "std"),
+            )
+            .reset_index()
+        )
+
+        # compute coefficient of variation (CV) of the log_Intensity_mean and log_Intensity_std
+        quant_raw_df["CV"] = (
+            quant_raw_df["Intensity_std"] / quant_raw_df["Intensity_mean"]
+        )
+        # pivot dataframe wider so for each Group variable there is a column with log_Intensity_mean, log_Intensity_std, Intensity_mean, Intensity_std and CV
+        quant_raw_df = quant_raw_df.pivot(
+            index="peptidoform",
+            columns="Group",
+            values=[
+                "log_Intensity_mean",
+                "log_Intensity_std",
+                "Intensity_mean",
+                "Intensity_std",
+                "CV",
+            ],
+        ).reset_index()
+
+        quant_raw_df.columns = [
+            f"{x[0]}_{x[1]}" if len(str(x[1])) > 0 else x[0]
+            for x in quant_raw_df.columns
+        ]
+
+        quant_raw_df["1|2_ratio"] = (
+            quant_raw_df["log_Intensity_mean_1"] / quant_raw_df["log_Intensity_mean_2"]
+        )
+        quant_raw_df = pd.merge(
+            quant_raw_df, intensities_wide, on="peptidoform", how="inner"
+        )
         return quant_raw_df
+
+    @staticmethod
+    def generate_intermediate_V3(filtered_df, quant_df, parse_settings):
+        species_peptidoform = list(parse_settings.species_dict.values())
+        species_peptidoform.append("peptidoform")
+        peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
+
+        # merge dataframes quant_df and species_quant_df and peptidoform_to_species using pepdidoform as index
+        withspecies = pd.merge(
+            quant_df, peptidoform_to_species, on="peptidoform", how="inner"
+        )
+
+        parse_settings.species_expected_ratio
     
 
-
+            
 
     def generate_intermediate(
         self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
     ) -> pd.DataFrame:
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
-        
+
         species_peptidoform = list(parse_settings.species_dict.values())
-        #species_peptidoform.append("peptidoform")
-        
+        # species_peptidoform.append("peptidoform")
+
         filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
 
         # Summarize values of the same peptide using mean
         # TODO should we take the mean or sum of the same peptidoform/peptideions same raw file multiple intensities
-        quant_raw_df = filtered_df_p1.groupby(["peptidoform", "Raw file"]).Intensity.mean()
+        quant_raw_df = filtered_df_p1.groupby(
+            ["peptidoform", "Raw file"]
+        ).Intensity.mean()
         quant_df = quant_raw_df.unstack(level=1)
 
         # Count number of values per peptidoform and Raw file
@@ -99,11 +161,19 @@ class Module(ModuleInterface):
             # TODO keep missing values, filter later for calculation of ratios
             missing_series = replicate_quant_df.isna().groupby(["peptidoform"]).sum()
             quant_df["missing_values_" + str(replicate)] = missing_series
+        return quant_df
 
+    @staticmethod
+    def generate_intermediate_V4(filtered_df, quant_df, parse_settings):
         species_peptidoform = list(parse_settings.species_dict.values())
         species_peptidoform.append("peptidoform")
         # TODO check, do we need to drop_duplicates? When?
         peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
+        # merge dataframes quant_df and species_quant_df and peptidoform_to_species
+        withspecies = pd.merge(
+            quant_df, peptidoform_to_species, on="peptidoform", how="inner"
+        )
+
         peptidoform_to_species.index = peptidoform_to_species["peptidoform"]
         peptidoform_to_species_dict = peptidoform_to_species.T.to_dict()
 
@@ -111,9 +181,7 @@ class Module(ModuleInterface):
             [peptidoform_to_species_dict[idx] for idx in quant_df.index]
         )
         species_quant_df.set_index("peptidoform", drop=True, inplace=True)
-
         """Calculate the quantification ratios and compare them to the expected ratios."""
-
         cv_replicate_quant_species_df = pd.concat([quant_df, species_quant_df], axis=1)
 
         ratio_dict = {}
@@ -174,6 +242,7 @@ class Module(ModuleInterface):
         self, intermediate: pd.DataFrame, input_format: str, user_input: dict
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
+            
         result_datapoint = Datapoint(
             id=input_format
             + "_"
@@ -211,7 +280,7 @@ class Module(ModuleInterface):
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
         elif input_format == "Sage":
-            input_data_frame = pd.read_csv(input_csv, sep='\t', low_memory=False)
+            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
         elif input_format == "MSFragger":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "WOMBAT":
@@ -224,18 +293,17 @@ class Module(ModuleInterface):
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 
-
         return input_data_frame
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
-            #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+            # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
-        
+
         all_datapoints["old_new"] = "old"
         all_datapoints = all_datapoints.T
-        
+
         current_datapoint["old_new"] = "new"
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
         all_datapoints = all_datapoints.T.reset_index(drop=True)
@@ -266,8 +334,10 @@ class Module(ModuleInterface):
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
         # TODO check why there are NA and inf/-inf values
-        return intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0), all_datapoints
-
+        return (
+            intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0),
+            all_datapoints,
+        )
 
     def clone_pr(
         self,
@@ -280,7 +350,9 @@ class Module(ModuleInterface):
     ):
         t_dir = TemporaryDirectory().name
 
-        clone_repo(clone_dir=t_dir, token=token, remote_git=remote_git, username=username)
+        clone_repo(
+            clone_dir=t_dir, token=token, remote_git=remote_git, username=username
+        )
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         all_datapoints = self.add_current_data_point(None, current_datapoint)
@@ -289,12 +361,8 @@ class Module(ModuleInterface):
         # do the pd.write_json() here!!!
         print(os.path.join(t_dir, "results.json"))
         f = open(os.path.join(t_dir, "results.json"), "w")
-        
-        all_datapoints.to_json(
-            f,
-            orient="records",
-            indent=2
-        )
+
+        all_datapoints.to_json(f, orient="records", indent=2)
 
         f.close()
         commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
@@ -305,14 +373,10 @@ class Module(ModuleInterface):
             remote_git=remote_git,
             username=username,
             branch_name=branch_name,
-            commit_message=commit_message
+            commit_message=commit_message,
         )
 
-
-    def write_json_local_development(
-        self, 
-        temporary_datapoints
-    ):  
+    def write_json_local_development(self, temporary_datapoints):
         t_dir = TemporaryDirectory().name
         os.mkdir(t_dir)
 
@@ -325,11 +389,7 @@ class Module(ModuleInterface):
         print(f"Writing the json to: {fname}")
 
         f = open(os.path.join(t_dir, "results.json"), "w")
-        
-        all_datapoints.to_json(
-            f,
-            orient="records",
-            indent=2
-        )
+
+        all_datapoints.to_json(f, orient="records", indent=2)
 
         return os.path.join(t_dir, "results.json")

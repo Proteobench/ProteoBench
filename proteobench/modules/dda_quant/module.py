@@ -144,7 +144,7 @@ class Module(ModuleInterface):
             withspecies.loc[withspecies[species] == True, "species"] = species
             withspecies.loc[withspecies[species] == True, "expectedRatio"] = species_expected_ratio[species]["1|2"]
         
-        withspecies["1|2_expected_ratio_diff"] = abs(withspecies["1|2_ratio"] - withspecies["expectedRatio"]) * 100
+        withspecies["expected_ratio_diff"] = abs(withspecies["1|2_ratio"] - withspecies["expectedRatio"]) * 100
         return withspecies
             
 

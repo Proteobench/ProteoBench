@@ -55,18 +55,15 @@ def extract_params(fname) -> ProteoBenchParameters:
     assert all(stats.loc["unique", cols] == 1), "Not all columns are unique"
     sheet = sheet[cols].drop_duplicates().reset_index(drop=True)
     # Extract
-    params.search_engine = sheet.loc[0, "software_name"]
+    params.software_name = "Proline"
     params.software_version = sheet.loc[0, "software_version"]
-    params.enzyme_name = sheet.loc[0, "enzymes"]
-    params.missed_cleavages = sheet.loc[0, "max_missed_cleavages"]
-    params.fixed_modifications = sheet.loc[0, "fixed_ptms"]
-    params.variable_modifications = sheet.loc[0, "variable_ptms"]
-    level, unit = sheet.loc[0, "peptide_mass_error_tolerance"].split()
-    params.precursor_tol = level
-    params.precursor_tol_unit = unit
-    level, unit = sheet.loc[0, "fragment_mass_error_tolerance"].split()
-    params.fragment_tol = level
-    params.fragment_tol_unit = unit
+    params.search_engine = sheet.loc[0, "software_name"]
+    params.enzyme = sheet.loc[0, "enzymes"]
+    params.allowed_miscleavages = sheet.loc[0, "max_missed_cleavages"]
+    params.fixed_mods = sheet.loc[0, "fixed_ptms"]
+    params.variable_mods = sheet.loc[0, "variable_ptms"]
+    params.precursor_mass_tolerance = sheet.loc[0, "peptide_mass_error_tolerance"]
+    params.fragment_mass_tolerance = sheet.loc[0, "fragment_mass_error_tolerance"]
 
     # ! Second sheet contains information about the import and filters
     sheet_name = "Import and filters"
@@ -77,20 +74,20 @@ def extract_params(fname) -> ProteoBenchParameters:
     assert all(stats.loc["unique", cols] == 1), "Not all columns are unique"
     sheet = sheet[cols].drop_duplicates().reset_index(drop=True)
     # Extract
-    params.fdr_psm = sheet.loc[0, "psm_filter_expected_fdr"]  # ! 1 stands for 1% FDR
-    params.min_pep_length = find_min_pep_length(sheet.loc[0, "psm_filter_2"])
+    params.ident_fdr_psm = sheet.loc[
+        0, "psm_filter_expected_fdr"
+    ]  # ! 1 stands for 1% FDR
+    params.min_peptide_length = find_min_pep_length(sheet.loc[0, "psm_filter_2"])
 
     # ! Third sheet only contains match between runs (MBR) information indirectly
     sheet = excel.parse(sheet_name, dtype="object", index_col=0)
-    MBR = sheet.index.str.contains("cross assignment").any()
-    params.MBR = MBR
+    enable_match_between_runs = sheet.index.str.contains("cross assignment").any()
+    params.enable_match_between_runs = enable_match_between_runs
     return params
 
 
 if __name__ == "__main__":
-    file = pathlib.Path(
-        "../../../test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx"
-    )
+    file = pathlib.Path("test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx")
     params = extract_params(file)
     data_dict = params.__dict__
     series = pd.Series(data_dict)

@@ -130,7 +130,6 @@ def build_Series_from_records(records, index_length=4):
     return pd.Series((v for (k, v) in records), index=idx)
 
 
-# %%
 def extract_params(fname) -> ProteoBenchParameters:
     params = ProteoBenchParameters()
 
@@ -166,9 +165,7 @@ def extract_params(fname) -> ProteoBenchParameters:
         else:
             params.fixed_mods = ",".join(fixed_mods)
     else:
-        fixed_mods = record.loc[
-            pd.IndexSlice["fixedModifications", :]
-        ].squeeze()
+        fixed_mods = record.loc[pd.IndexSlice["fixedModifications", :]].squeeze()
         if isinstance(fixed_mods, str):
             params.fixed_mods = fixed_mods
         else:
@@ -214,6 +211,6 @@ if __name__ == "__main__":
         )
         record = build_Series_from_records(record, 4)
         record = record.to_frame("run_identifier")
-        # flattend.to_csv(Path(test_file).with_suffix(".csv"))
+        record.to_csv(Path(test_file).with_suffix(".csv"))
         params = extract_params(test_file)
         pprint(params.__dict__)

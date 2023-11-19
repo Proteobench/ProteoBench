@@ -132,10 +132,15 @@ def build_Series_from_records(records, index_length=4):
     return pd.Series((v for (k, v) in records), index=idx)
 
 
-def extract_params(fname) -> ProteoBenchParameters:
+def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     params = ProteoBenchParameters()
 
     record = read_file(fname)
+    # select ms2 fragmentation method specified by parameter
+    # MaxQuant does this to our knowledge based on the binary rawfile metadata
+    record["msmsParamsArray"] = [
+        d for d in record["msmsParamsArray"] if d["msmsParams"]["Name"] == ms2frac
+    ]
     record = build_Series_from_records(record, 4).sort_index()
     params.search_engine = "Andromeda"
     params.software_version = record.loc["maxQuantVersion"].squeeze()
@@ -147,7 +152,17 @@ def extract_params(fname) -> ProteoBenchParameters:
         pd.IndexSlice["parameterGroups", "parameterGroup", "mainSearchTol", :]
     ].squeeze()
     params.precursor_mass_tolerance = f"{precursor_mass_tolerance} ppm"
-    fragment_mass_tolerance = None  # ! differences between version >1.6 and <=1.5
+    # ! differences between version >1.6 and <=1.5
+    fragment_mass_tolerance = record.loc[
+        pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchTolerance", :]
+    ].squeeze()
+    in_ppm = bool(
+        record.loc[
+            pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchToleranceInPpm", :]
+        ].squeeze()
+    )
+    if in_ppm:
+        fragment_mass_tolerance = f"{fragment_mass_tolerance} ppm"
     params.fragment_mass_tolerance = fragment_mass_tolerance
     params.enzyme = record.loc[
         ("parameterGroups", "parameterGroup", "enzymes", "string")
@@ -214,5 +229,5 @@ if __name__ == "__main__":
         record = build_Series_from_records(record, 4)
         record = record.to_frame("run_identifier")
         record.to_csv(Path(test_file).with_suffix(".csv"))
-        params = extract_params(test_file)
+        params = extract_params(test_file, ms2frac="FTMS")
         pprint(params.__dict__)

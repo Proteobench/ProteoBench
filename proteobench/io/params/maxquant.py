@@ -54,6 +54,8 @@ def add_record(data: dict, tag: str, record) -> dict:
 def read_xml_record(element: ET.Element) -> dict:
     """Read entire record in a nested dict structure."""
     data = dict()
+    if element.attrib:
+        data.update(element.attrib)
     for child in element:
         if len(child) > 1 and child.tag:
             # if there is a list, process each element one by one
@@ -125,7 +127,7 @@ def flatten_dict_of_dicts(d: dict, parent_key: str = "") -> dict:
 def build_Series_from_records(records, index_length=4):
     records = flatten_dict_of_dicts(records)
     idx = pd.MultiIndex.from_tuples(
-        (extend_tuple(k, index_length) for (k, v) in records)
+        (extend_tuple(k, index_length) for (k, _) in records)
     )
     return pd.Series((v for (k, v) in records), index=idx)
 

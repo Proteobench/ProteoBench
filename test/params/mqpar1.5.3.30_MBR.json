@@ -1,4 +1,20 @@
 {
+    "aifSilWeight": "0",
+    "aifIsoWeight": "0",
+    "aifTopx": "0",
+    "aifCorrelation": "0",
+    "aifCorrelationFirstPass": "0",
+    "aifMinMass": "0",
+    "aifMsmsTol": "0",
+    "aifSecondPass": "false",
+    "aifIterative": "false",
+    "aifThresholdFdr": "0",
+    "writeMsScansTable": "true",
+    "writeMsmsScansTable": "true",
+    "writeMs3ScansTable": "true",
+    "writeAllPeptidesTable": "true",
+    "writeMzRangeTable": "true",
+    "disableMd5": "false",
     "name": "Session1",
     "maxQuantVersion": "1.5.3.30",
     "tempFolder": null,
@@ -425,6 +441,17 @@
     "msmsParamsArray": [
         {
             "msmsParams": {
+                "Name": "FTMS",
+                "MatchToleranceInPpm": "true",
+                "DeisotopeToleranceInPpm": "true",
+                "DeNovoToleranceInPpm": "true",
+                "Deisotope": "true",
+                "Topx": "12",
+                "HigherCharges": "true",
+                "IncludeWater": "true",
+                "IncludeAmmonia": "true",
+                "DependentLosses": "true",
+                "Recalibration": "false",
                 "MatchTolerance": "20",
                 "DeisotopeTolerance": "7",
                 "DeNovoTolerance": "10"
@@ -432,6 +459,17 @@
         },
         {
             "msmsParams": {
+                "Name": "ITMS",
+                "MatchToleranceInPpm": "false",
+                "DeisotopeToleranceInPpm": "false",
+                "DeNovoToleranceInPpm": "false",
+                "Deisotope": "false",
+                "Topx": "8",
+                "HigherCharges": "true",
+                "IncludeWater": "true",
+                "IncludeAmmonia": "true",
+                "DependentLosses": "true",
+                "Recalibration": "false",
                 "MatchTolerance": "0.5",
                 "DeisotopeTolerance": "0.15",
                 "DeNovoTolerance": "0.25"
@@ -439,6 +477,17 @@
         },
         {
             "msmsParams": {
+                "Name": "TOF",
+                "MatchToleranceInPpm": "true",
+                "DeisotopeToleranceInPpm": "false",
+                "DeNovoToleranceInPpm": "false",
+                "Deisotope": "true",
+                "Topx": "10",
+                "HigherCharges": "true",
+                "IncludeWater": "true",
+                "IncludeAmmonia": "true",
+                "DependentLosses": "true",
+                "Recalibration": "false",
                 "MatchTolerance": "40",
                 "DeisotopeTolerance": "0.01",
                 "DeNovoTolerance": "0.02"
@@ -446,6 +495,17 @@
         },
         {
             "msmsParams": {
+                "Name": "Unknown",
+                "MatchToleranceInPpm": "false",
+                "DeisotopeToleranceInPpm": "false",
+                "DeNovoToleranceInPpm": "false",
+                "Deisotope": "false",
+                "Topx": "8",
+                "HigherCharges": "true",
+                "IncludeWater": "true",
+                "IncludeAmmonia": "true",
+                "DependentLosses": "true",
+                "Recalibration": "false",
                 "MatchTolerance": "0.5",
                 "DeisotopeTolerance": "0.15",
                 "DeNovoTolerance": "0.25"

@@ -1,30 +1,36 @@
 [project]
-name = "proteobench"
 authors = [
-    { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
+  {name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be"},
 ] # TODO: Add others
-readme = "README.md"
-license = { file = "LICENSE" }
 classifiers = [
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Topic :: Scientific/Engineering :: Bio-Informatics",
-    "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Development Status :: 4 - Beta",
 ]
+
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
 requires-python = ">=3.8"
 dynamic = ["version", "description"]
 dependencies = [
-    "pandas",
-    "numpy",
-    "plotly",
-    "streamlit_extras",
-    "streamlit-plotly-events",
-    "matplotlib",
-    "toml",
+  "pandas",
+  "openpyxl",
+  "numpy",
+  "plotly",
+  "streamlit_extras",
+  "streamlit-plotly-events",
+  "matplotlib",
+  "importlib-metadata; python_version < '3.8'", # ? can be removed?
+  "toml",
 ]
+dynamic = ["version", "description"]
+keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
+license = {file = "LICENSE"}
+name = "proteobench"
+readme = "README.md"
+requires-python = ">=3.7"
 
 [project.optional-dependencies]
 dev = ["black"]
@@ -32,12 +38,12 @@ docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser"]
 web = ["streamlit>1.27", "scipy"]
 
 [project.urls]
-"Homepage" = "https://github.com/ProteoBench"
 "Bug Tracker" = "https://github.com/ProteoBench/ProteoBench/issues/"
+"Homepage" = "https://github.com/ProteoBench"
 
 [build-system]
-requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.2,<4"]
 
 [tool.isort]
 profile = "black"
@@ -45,3 +51,6 @@ profile = "black"
 [tool.black]
 line-length = 120
 target-version = ['py38']
+
+[tool.flake8]
+max-line-length = 120

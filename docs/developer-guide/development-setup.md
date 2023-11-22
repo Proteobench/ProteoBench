@@ -1,27 +1,3 @@
-# Contributing
-
-This document briefly describes how to contribute to
-[ProteoBench](https://github.com/proteobench/proteobench).
-
-
-
-## Before you begin
-
-If you have an idea for a feature, use case to add or an approach for a bugfix,
-you are welcome to communicate it with the community by opening a
-thread in
-[GitHub Discussions](https://github.com/proteobench/proteobench/discussions)
-or in [GitHub Issues](https://github.com/proteobench/proteobench/issues).
-
-Not sure where to start? Great contributions to
-[ProteoBench](https://github.com/proteobench/proteobench) include:
-
-[TODO]
-
-Also check out the [open issues](https://github.com/proteobench/proteobench/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+label%3A%22help+wanted%22)
-that carry the `good first issue` or `help wanted` labels.
-
-
 ## Development setup
 
 ### Local installation
@@ -32,17 +8,21 @@ pip install flit
 flit install -s
 ```
 
-Using a virtual environment is recommended.
+Alternatively, use pip directly:
+
+```
+pip install --editable .
+```
+
+Using a virtual environment is highly recommended.
 
 
 ### Unit tests
 
 To run the tests run the command:
 
-> We use pytest which also supports unittest if you prefer that.
-
 ```
-pytest
+python -m unittest test/test_module_dda_quant.py
 ```
 
 

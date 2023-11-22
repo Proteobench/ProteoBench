@@ -98,7 +98,6 @@ class PlotDataPoint:
             for idx, row in benchmark_metrics_df.iterrows()
         ]
 
-        #  spellerror {meta_data.fragmnent_tol[idx]}
 
         mapping = {"old": 10, "new": 20}
 

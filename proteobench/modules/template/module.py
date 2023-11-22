@@ -52,7 +52,7 @@ class Module(ModuleInterface):
             MBR=user_input["mbr"],
             precursor_tol=user_input["precursor_mass_tolerance"],
             precursor_tol_unit=user_input["precursor_mass_tolerance_unit"],
-            fragmnent_tol=user_input["fragment_mass_tolerance"],
+            fragment_tol=user_input["fragment_mass_tolerance"],
             fragment_tol_unit=user_input["fragment_mass_tolerance_unit"],
             enzyme_name=user_input["search_enzyme_name"],
             missed_cleavages=user_input["allowed_missed_cleavage"],

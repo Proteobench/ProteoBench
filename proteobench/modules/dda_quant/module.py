@@ -126,12 +126,16 @@ class Module(ModuleInterface):
         self, intermediate: pd.DataFrame, input_format: str, user_input: dict
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
+        current_datetime = datetime.datetime.now()
+        formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
+
+    
         result_datapoint = Datapoint(
             id=input_format
             + "_"
             + user_input["version"]
             + "_"
-            + str(datetime.datetime.now()),
+            + formatted_datetime,
             search_engine=input_format,
             software_version=user_input["version"],
             fdr_psm=user_input["fdr_psm"],
@@ -140,7 +144,7 @@ class Module(ModuleInterface):
             MBR=user_input["mbr"],
             precursor_tol=user_input["precursor_mass_tolerance"],
             precursor_tol_unit=user_input["precursor_mass_tolerance_unit"],
-            fragmnent_tol=user_input["fragment_mass_tolerance"],
+            fragment_tol=user_input["fragment_mass_tolerance"],
             fragment_tol_unit=user_input["fragment_mass_tolerance_unit"],
             enzyme_name=user_input["search_enzyme_name"],
             missed_cleavages=user_input["allowed_missed_cleavage"],

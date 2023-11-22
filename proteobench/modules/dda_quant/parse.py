@@ -18,7 +18,8 @@ class ParseInputs(ParseInputsInterface):
         for k, v in parse_settings.mapper.items():
             if k not in df.columns:
                 raise ImportError(
-                    f"Column {k} not found in input dataframe. Please check input file and selected search engine."
+                    f"Column {k} not found in input dataframe."
+                    " Please check input file and selected search engine."
                 )
 
         df.rename(columns=parse_settings.mapper, inplace=True)

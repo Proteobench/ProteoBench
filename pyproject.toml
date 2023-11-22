@@ -25,12 +25,9 @@ dependencies = [
   "importlib-metadata; python_version < '3.8'", # ? can be removed?
   "toml",
 ]
-dynamic = ["version", "description"]
-keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
 license = {file = "LICENSE"}
 name = "proteobench"
 readme = "README.md"
-requires-python = ">=3.7"
 
 [project.optional-dependencies]
 dev = ["black"]

@@ -40,7 +40,7 @@ class Datapoint:
     MBR: bool = False
     precursor_tol: int = 0
     precursor_tol_unit: str = "Da"
-    fragmnent_tol: int = 0
+    fragment_tol: int = 0
     fragment_tol_unit: str = "Da"
     enzyme_name: str = None
     missed_cleavages: int = 0

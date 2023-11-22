@@ -2,11 +2,11 @@ import datetime
 import os
 import unittest
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from proteobench.github.gh import read_results_json_repo
-from proteobench.modules.dda_quant.module import Module
+from proteobench.modules.dda_quant.module import Datapoint, Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
@@ -14,7 +14,6 @@ from proteobench.modules.dda_quant.parse_settings import (
     ParseSettings,
 )
 from proteobench.modules.dda_quant.plot import PlotDataPoint
-from proteobench.modules.dda_quant.module import Datapoint
 
 # genereate_input_field
 
@@ -210,14 +209,14 @@ class TestDatapoint(unittest.TestCase):
             MBR=user_input["mbr"],
             precursor_tol=user_input["precursor_mass_tolerance"],
             precursor_tol_unit=user_input["precursor_mass_tolerance_unit"],
-            fragmnent_tol=user_input["fragment_mass_tolerance"],
+            fragment_tol=user_input["fragment_mass_tolerance"],
             fragment_tol_unit=user_input["fragment_mass_tolerance_unit"],
             enzyme_name=user_input["search_enzyme_name"],
             missed_cleavages=user_input["allowed_missed_cleavage"],
             min_pep_length=user_input["min_peptide_length"],
             max_pep_length=user_input["max_peptide_length"],
         )
-        
+
 
 if __name__ == "__main__":
     unittest.main()

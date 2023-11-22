@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import collections
-import json
 import logging
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -207,6 +206,7 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
 
 # create a first version of json files to match
 if __name__ == "__main__":
+    import json
     from pprint import pprint
 
     for test_file in [
@@ -231,3 +231,8 @@ if __name__ == "__main__":
         record.to_csv(Path(test_file).with_suffix(".csv"))
         params = extract_params(test_file, ms2frac="FTMS")
         pprint(params.__dict__)
+        test_file = Path(test_file)
+        fname = test_file.with_suffix(".json").with_stem(test_file.stem + "_sel")
+
+        with open(fname, "w") as f:
+            json.dump(params.__dict__, f, indent=4)

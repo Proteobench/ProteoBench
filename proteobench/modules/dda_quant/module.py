@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import hashlib
 import itertools
 import os
 import re
@@ -10,11 +11,14 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
+
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_REPO, ParseSettings)
+    DDA_QUANT_RESULTS_REPO,
+    ParseSettings,
+)
 from proteobench.modules.interfaces import ModuleInterface
 
 
@@ -129,13 +133,8 @@ class Module(ModuleInterface):
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
-    
         result_datapoint = Datapoint(
-            id=input_format
-            + "_"
-            + user_input["version"]
-            + "_"
-            + formatted_datetime,
+            id=input_format + "_" + user_input["version"] + "_" + formatted_datetime,
             search_engine=input_format,
             software_version=user_input["version"],
             fdr_psm=user_input["fdr_psm"],
@@ -150,6 +149,9 @@ class Module(ModuleInterface):
             missed_cleavages=user_input["allowed_missed_cleavage"],
             min_pep_length=user_input["min_peptide_length"],
             max_pep_length=user_input["max_peptide_length"],
+            intermediate_hash=int(
+                hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
+            ),
         )
         result_datapoint.generate_id()
         result_datapoint.calculate_plot_data(intermediate)
@@ -167,7 +169,7 @@ class Module(ModuleInterface):
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
         elif input_format == "Sage":
-            input_data_frame = pd.read_csv(input_csv, sep='\t', low_memory=False)
+            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
         elif input_format == "MSFragger":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "WOMBAT":
@@ -180,18 +182,17 @@ class Module(ModuleInterface):
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 
-
         return input_data_frame
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
-            #all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+            # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
-        
+
         all_datapoints["old_new"] = "old"
         all_datapoints = all_datapoints.T
-        
+
         current_datapoint["old_new"] = "new"
         all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
         all_datapoints = all_datapoints.T.reset_index(drop=True)
@@ -222,8 +223,27 @@ class Module(ModuleInterface):
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
         # TODO check why there are NA and inf/-inf values
-        return intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0), all_datapoints
+        return (
+            intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0),
+            all_datapoints,
+        )
 
+    def check_new_unique_hash(self, datapoints):
+        current_datapoint = datapoints[datapoints["old_new"] == "new"]
+        all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
+
+        set_current_datapoint = set(list(current_datapoint["intermediate_hash"]))
+        set_all_datapoints_old = set(list(all_datapoints_old["intermediate_hash"]))
+
+        overlap = set_current_datapoint.intersection(set_all_datapoints_old)
+
+        if len(overlap) > 0:
+            st.error(
+                f"The run you want to submit has been previously submitted \
+                 under the identifier: {overlap}"
+            )
+            return False
+        return True
 
     def clone_pr(
         self,
@@ -236,21 +256,22 @@ class Module(ModuleInterface):
     ):
         t_dir = TemporaryDirectory().name
 
-        clone_repo(clone_dir=t_dir, token=token, remote_git=remote_git, username=username)
+        clone_repo(
+            clone_dir=t_dir, token=token, remote_git=remote_git, username=username
+        )
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         all_datapoints = self.add_current_data_point(None, current_datapoint)
+
+        if not self.check_new_unique_hash(all_datapoints):
+            return
+
         branch_name = current_datapoint["id"]
 
-        # do the pd.write_json() here!!!
         print(os.path.join(t_dir, "results.json"))
         f = open(os.path.join(t_dir, "results.json"), "w")
-        
-        all_datapoints.to_json(
-            f,
-            orient="records",
-            indent=2
-        )
+
+        all_datapoints.to_json(f, orient="records", indent=2)
 
         f.close()
         commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
@@ -261,14 +282,10 @@ class Module(ModuleInterface):
             remote_git=remote_git,
             username=username,
             branch_name=branch_name,
-            commit_message=commit_message
+            commit_message=commit_message,
         )
 
-
-    def write_json_local_development(
-        self, 
-        temporary_datapoints
-    ):  
+    def write_json_local_development(self, temporary_datapoints):
         t_dir = TemporaryDirectory().name
         os.mkdir(t_dir)
 
@@ -281,11 +298,7 @@ class Module(ModuleInterface):
         print(f"Writing the json to: {fname}")
 
         f = open(os.path.join(t_dir, "results.json"), "w")
-        
-        all_datapoints.to_json(
-            f,
-            orient="records",
-            indent=2
-        )
+
+        all_datapoints.to_json(f, orient="records", indent=2)
 
         return os.path.join(t_dir, "results.json")

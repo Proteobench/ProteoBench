@@ -33,6 +33,7 @@ class Module(ModuleInterface):
         replicate_to_raw: dict,
         parse_settings: ParseSettings,
         min_intensity=0,
+        precursor = "peptidoform"
     ) -> pd.DataFrame:
 
         # convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
@@ -43,7 +44,7 @@ class Module(ModuleInterface):
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
 
 
-        filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
+        filtered_df_p1 = filtered_df[["Raw file", precursor, "Intensity"]].copy()
         # remove all rows where Intensity below min_intensity
         filtered_df_p1 = filtered_df_p1[filtered_df_p1["Intensity"] >= min_intensity]
 
@@ -54,15 +55,15 @@ class Module(ModuleInterface):
         )
 
         
-        # how many disinct combinations by row of distinct peptidoform, "Raw file" and "Group" in filtered_df_p1
+        # how many disinct combinations by row of distinct precursor, "Raw file" and "Group" in filtered_df_p1
         filtered_df_p1_check = filtered_df_p1[
-            ["Raw file", "peptidoform", "Group"]
+            ["Raw file", precursor, "Group"]
         ].copy()
         filtered_df_p1_check = filtered_df_p1_check.drop_duplicates()
         filtered_df_p1_check = filtered_df_p1_check.shape[0]
         # sum intensity values of the same peptide and "Raw file" using the sum
         quant_raw_df_int = (
-            filtered_df_p1.groupby(["peptidoform", "Raw file", "Group"])["Intensity"]
+            filtered_df_p1.groupby([precursor, "Raw file", "Group"])["Intensity"]
             .agg(Intensity="sum", Count="size")
             .reset_index()
         )
@@ -70,15 +71,15 @@ class Module(ModuleInterface):
         # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
         
         intensities_wide = quant_raw_df_int.pivot(
-            index="peptidoform", columns="Raw file", values="Intensity"
+            index=precursor, columns="Raw file", values="Intensity"
         ).reset_index()
 
 
         # add column "log_Intensity" to quant_raw_df
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
-        # comopute the mean of the log_Intensity per peptidoform and "Group"
+        # comopute the mean of the log_Intensity per precursor and "Group"
         quant_raw_df = (
-            quant_raw_df_int.groupby(["peptidoform", "Group"])
+            quant_raw_df_int.groupby([precursor, "Group"])
             .agg(
                 log_Intensity_mean=("log_Intensity", "mean"),
                 log_Intensity_std=("log_Intensity", "std"),
@@ -144,24 +145,24 @@ class Module(ModuleInterface):
             withspecies.loc[withspecies[species] == True, "species"] = species
             withspecies.loc[withspecies[species] == True, "expectedRatio"] = species_expected_ratio[species]["1|2"]
         
-        withspecies["expected_ratio_diff"] = abs(withspecies["1|2_ratio"] - withspecies["expectedRatio"]) * 100
+        
         return withspecies
             
 
     def generate_intermediate(
-        self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
+        self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings, precursor = "peptidoform"
     ) -> pd.DataFrame:
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
 
         species_peptidoform = list(parse_settings.species_dict.values())
         # species_peptidoform.append("peptidoform")
 
-        filtered_df_p1 = filtered_df[["Raw file", "peptidoform", "Intensity"]].copy()
+        filtered_df_p1 = filtered_df[["Raw file",precursor , "Intensity"]].copy()
 
         # Summarize values of the same peptide using mean
         # TODO should we take the mean or sum of the same peptidoform/peptideions same raw file multiple intensities
         quant_raw_df = filtered_df_p1.groupby(
-            ["peptidoform", "Raw file"]
+            [precursor, "Raw file"]
         ).Intensity.mean()
         quant_df = quant_raw_df.unstack(level=1)
 
@@ -173,13 +174,13 @@ class Module(ModuleInterface):
             ).isin(replicate_runs)
             replicate_quant_df = quant_raw_df[selected_replicate_df]
             ## Add means of replicates
-            mean_series = replicate_quant_df.groupby(["peptidoform"]).mean()
+            mean_series = replicate_quant_df.groupby([precursor]).mean()
             # change indices of mean_series from peptidoform to multiindices containing peptidoform,replicate
             quant_df["mean_of_" + str(replicate)] = mean_series
 
             ## Add number of missing values per row of replicate
             # TODO keep missing values, filter later for calculation of ratios
-            missing_series = replicate_quant_df.isna().groupby(["peptidoform"]).sum()
+            missing_series = replicate_quant_df.isna().groupby([precursor]).sum()
             quant_df["missing_values_" + str(replicate)] = missing_series
         return quant_df
 

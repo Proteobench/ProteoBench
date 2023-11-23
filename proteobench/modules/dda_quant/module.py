@@ -10,11 +10,17 @@ from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
+import psm_utils.io.maxquant as maxquant
 import streamlit as st
 
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import ParseInputs
+from proteobench.modules.dda_quant.parse import (
+    ParseInputs,
+    get_proforma_alphapept,
+    get_proforma_msfragger,
+    get_proforma_sage,
+)
 from proteobench.modules.dda_quant.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     ParseSettings,
@@ -166,14 +172,33 @@ class Module(ModuleInterface):
 
         if input_format == "MaxQuant":
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
+            input_data_frame["proforma"] = [
+                maxquant.MSMSReader._parse_peptidoform(mod_seq, z).proforma.split("/")[
+                    0
+                ]
+                for mod_seq, z in input_data_frame[
+                    ["Modified sequence", "Charge"]
+                ].values.tolist()
+            ]
+
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
+            input_data_frame["proforma"] = input_data_frame["sequence"].apply(
+                get_proforma_alphapept
+            )
         elif input_format == "Sage":
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
+            input_data_frame["proforma"] = input_data_frame["peptide"].apply(
+                get_proforma_sage
+            )
         elif input_format == "MSFragger":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["Modified Sequence"].apply(
+                get_proforma_msfragger
+            )
         elif input_format == "WOMBAT":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+            input_data_frame["proforma"] = input_data_frame["modified_peptide"]
             input_data_frame["Sequence"] = input_data_frame["modified_peptide"].apply(
                 self.strip_sequence_wombat
             )

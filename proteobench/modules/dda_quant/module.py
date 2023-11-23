@@ -10,6 +10,7 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
+
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import ParseInputs
@@ -33,9 +34,8 @@ class Module(ModuleInterface):
         replicate_to_raw: dict,
         parse_settings: ParseSettings,
         min_intensity=0,
-        precursor = "peptidoform"
+        precursor="peptidoform",
     ) -> pd.DataFrame:
-
         # convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
         replicate_to_raw_df = pd.DataFrame(
             replicate_to_raw.items(), columns=["Group", "Raw file"]
@@ -43,22 +43,17 @@ class Module(ModuleInterface):
         # since there are several Raw files per Group we need to split them into different rows
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
 
-
         filtered_df_p1 = filtered_df[["Raw file", precursor, "Intensity"]].copy()
         # remove all rows where Intensity below min_intensity
         filtered_df_p1 = filtered_df_p1[filtered_df_p1["Intensity"] >= min_intensity]
-
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
         filtered_df_p1 = pd.merge(
             filtered_df_p1, replicate_to_raw_df, on="Raw file", how="inner"
         )
 
-        
         # how many disinct combinations by row of distinct precursor, "Raw file" and "Group" in filtered_df_p1
-        filtered_df_p1_check = filtered_df_p1[
-            ["Raw file", precursor, "Group"]
-        ].copy()
+        filtered_df_p1_check = filtered_df_p1[["Raw file", precursor, "Group"]].copy()
         filtered_df_p1_check = filtered_df_p1_check.drop_duplicates()
         filtered_df_p1_check = filtered_df_p1_check.shape[0]
         # sum intensity values of the same peptide and "Raw file" using the sum
@@ -69,11 +64,10 @@ class Module(ModuleInterface):
         )
 
         # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
-        
+
         intensities_wide = quant_raw_df_int.pivot(
             index=precursor, columns="Raw file", values="Intensity"
         ).reset_index()
-
 
         # add column "log_Intensity" to quant_raw_df
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
@@ -136,34 +130,36 @@ class Module(ModuleInterface):
         )
         # create a list tabulating how many entries in withspecies["unique"] are 1,2,3,4,5,6
         unique_counts = withspecies["unique"].value_counts()
-        
+
         # now remove all rows with withspecies["unique"] > 1
         withspecies = withspecies[withspecies["unique"] == 1]
 
         # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
         for species in parse_settings.species_dict.values():
             withspecies.loc[withspecies[species] == True, "species"] = species
-            withspecies.loc[withspecies[species] == True, "expectedRatio"] = species_expected_ratio[species]["1|2"]
-        
-        
+            withspecies.loc[
+                withspecies[species] == True, "expectedRatio"
+            ] = species_expected_ratio[species]["1|2"]
+
         return withspecies
-            
 
     def generate_intermediate(
-        self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings, precursor = "peptidoform"
+        self,
+        filtered_df,
+        replicate_to_raw: dict,
+        parse_settings: ParseSettings,
+        precursor="peptidoform",
     ) -> pd.DataFrame:
         """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
 
         species_peptidoform = list(parse_settings.species_dict.values())
         # species_peptidoform.append("peptidoform")
 
-        filtered_df_p1 = filtered_df[["Raw file",precursor , "Intensity"]].copy()
+        filtered_df_p1 = filtered_df[["Raw file", precursor, "Intensity"]].copy()
 
         # Summarize values of the same peptide using mean
         # TODO should we take the mean or sum of the same peptidoform/peptideions same raw file multiple intensities
-        quant_raw_df = filtered_df_p1.groupby(
-            [precursor, "Raw file"]
-        ).Intensity.mean()
+        quant_raw_df = filtered_df_p1.groupby([precursor, "Raw file"]).Intensity.mean()
         quant_df = quant_raw_df.unstack(level=1)
 
         # Count number of values per peptidoform and Raw file
@@ -263,13 +259,10 @@ class Module(ModuleInterface):
         self, intermediate: pd.DataFrame, input_format: str, user_input: dict
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
-            
+        current_datetime = datetime.datetime.now()
+        formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
         result_datapoint = Datapoint(
-            id=input_format
-            + "_"
-            + user_input["version"]
-            + "_"
-            + str(datetime.datetime.now()),
+            id=input_format + "_" + user_input["version"] + "_" + formatted_datetime,
             search_engine=input_format,
             software_version=user_input["version"],
             fdr_psm=user_input["fdr_psm"],
@@ -278,7 +271,7 @@ class Module(ModuleInterface):
             MBR=user_input["mbr"],
             precursor_tol=user_input["precursor_mass_tolerance"],
             precursor_tol_unit=user_input["precursor_mass_tolerance_unit"],
-            fragmnent_tol=user_input["fragment_mass_tolerance"],
+            fragment_tol=user_input["fragment_mass_tolerance"],
             fragment_tol_unit=user_input["fragment_mass_tolerance_unit"],
             enzyme_name=user_input["search_enzyme_name"],
             missed_cleavages=user_input["allowed_missed_cleavage"],

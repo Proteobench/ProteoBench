@@ -20,6 +20,7 @@ dependencies = [
   "matplotlib",
   "importlib-metadata; python_version < '3.8'",
   "toml",
+  "psm_utils",
 ]
 dynamic = ["version", "description"]
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']

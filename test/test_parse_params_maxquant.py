@@ -110,8 +110,7 @@ def test_file_parsing_to_csv(file, csv_expected):
 
 
 parameters = [
-    (fname, fname.with_suffix(".json").with_stem(fname.stem + "_sel"))
-    for fname in mqpar_fnames
+    (fname, (fname.parent / (fname.stem + "_sel.json"))) for fname in mqpar_fnames
 ]
 
 

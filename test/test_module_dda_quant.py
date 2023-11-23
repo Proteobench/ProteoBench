@@ -184,7 +184,7 @@ class TestPlot(unittest.TestCase):
         combined_list = human_strings + ecoli_strings + yeast_strings
 
         combineddf = pd.DataFrame(
-            {"SPECIES": combined_list, "1|2_ratio": combined_ratios}
+            {"SPECIES": combined_list, "log2_A_vs_B": combined_ratios}
         )
         combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
         combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"

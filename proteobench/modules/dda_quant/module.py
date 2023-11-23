@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import hashlib
 import itertools
 import os
 import re
@@ -154,6 +155,9 @@ class Module(ModuleInterface):
             missed_cleavages=user_input["allowed_missed_cleavage"],
             min_pep_length=user_input["min_peptide_length"],
             max_pep_length=user_input["max_peptide_length"],
+            intermediate_hash=int(
+                hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
+            ),
         )
         result_datapoint.generate_id()
         result_datapoint.calculate_plot_data(intermediate)
@@ -249,6 +253,23 @@ class Module(ModuleInterface):
             all_datapoints,
         )
 
+    def check_new_unique_hash(self, datapoints):
+        current_datapoint = datapoints[datapoints["old_new"] == "new"]
+        all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
+
+        set_current_datapoint = set(list(current_datapoint["intermediate_hash"]))
+        set_all_datapoints_old = set(list(all_datapoints_old["intermediate_hash"]))
+
+        overlap = set_current_datapoint.intersection(set_all_datapoints_old)
+
+        if len(overlap) > 0:
+            st.error(
+                f"The run you want to submit has been previously submitted \
+                 under the identifier: {overlap}"
+            )
+            return False
+        return True
+
     def clone_pr(
         self,
         temporary_datapoints,
@@ -266,9 +287,12 @@ class Module(ModuleInterface):
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         all_datapoints = self.add_current_data_point(None, current_datapoint)
+
+        if not self.check_new_unique_hash(all_datapoints):
+            return
+
         branch_name = current_datapoint["id"]
 
-        # do the pd.write_json() here!!!
         print(os.path.join(t_dir, "results.json"))
         f = open(os.path.join(t_dir, "results.json"), "w")
 

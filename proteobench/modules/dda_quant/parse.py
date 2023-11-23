@@ -12,14 +12,14 @@ class ParseInputs(ParseInputsInterface):
     def convert_to_standard_format(
         self, df: pd.DataFrame, parse_settings: ParseSettings
     ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
-        """Convert a search engine output into a generic format supported by the module."""
-        #TODO add functionality/steps in docstring
+        """Convert a software tool output into a generic format supported by the module."""
+        # TODO add functionality/steps in docstring
 
         for k, v in parse_settings.mapper.items():
             if k not in df.columns:
                 raise ImportError(
                     f"Column {k} not found in input dataframe."
-                    " Please check input file and selected search engine."
+                    " Please check input file and selected software tool."
                 )
 
         df.rename(columns=parse_settings.mapper, inplace=True)
@@ -61,7 +61,9 @@ class ParseInputs(ParseInputsInterface):
 
         # TODO, if "Charge" is not available return a sensible error
         # TODO, include modifications for ion
-        df.loc[df.index, "peptidoform"] = df.loc[df.index, "Sequence"]+"|Z="+df.loc[df.index, "Charge"].map(str)
+        df.loc[df.index, "peptidoform"] = (
+            df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
+        )
 
         # TODO use peptide_ion or peptidoform here
         # TODO move this to datapoint, keep a count here of quantified AA

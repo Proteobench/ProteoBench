@@ -28,6 +28,7 @@ class Datapoint:
     weighted_sum: int = 0
     nr_prec: int = 0
     is_temporary: bool = True
+    intermediate_hash: str = ""
     # fixed_mods: [],
     # variable_mods: [],
     # max_number_mods_pep: int = 0,

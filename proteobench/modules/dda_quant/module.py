@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import hashlib
 import itertools
 import os
 import re
@@ -9,11 +10,17 @@ from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
+import psm_utils.io.maxquant as maxquant
 import streamlit as st
 
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import ParseInputs
+from proteobench.modules.dda_quant.parse import (
+    ParseInputs,
+    get_proforma_alphapept,
+    get_proforma_msfragger,
+    get_proforma_sage,
+)
 from proteobench.modules.dda_quant.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     ParseSettings,
@@ -181,6 +188,9 @@ class Module(ModuleInterface):
             missed_cleavages=user_input["allowed_missed_cleavage"],
             min_pep_length=user_input["min_peptide_length"],
             max_pep_length=user_input["max_peptide_length"],
+            intermediate_hash=int(
+                hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
+            ),
         )
         result_datapoint.generate_id()
         result_datapoint.calculate_plot_data(intermediate)
@@ -195,14 +205,33 @@ class Module(ModuleInterface):
 
         if input_format == "MaxQuant":
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
+            input_data_frame["proforma"] = [
+                maxquant.MSMSReader._parse_peptidoform(mod_seq, z).proforma.split("/")[
+                    0
+                ]
+                for mod_seq, z in input_data_frame[
+                    ["Modified sequence", "Charge"]
+                ].values.tolist()
+            ]
+
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
+            input_data_frame["proforma"] = input_data_frame["sequence"].apply(
+                get_proforma_alphapept
+            )
         elif input_format == "Sage":
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
+            input_data_frame["proforma"] = input_data_frame["peptide"].apply(
+                get_proforma_sage
+            )
         elif input_format == "MSFragger":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["Modified Sequence"].apply(
+                get_proforma_msfragger
+            )
         elif input_format == "WOMBAT":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+            input_data_frame["proforma"] = input_data_frame["modified_peptide"]
             input_data_frame["Sequence"] = input_data_frame["modified_peptide"].apply(
                 self.strip_sequence_wombat
             )
@@ -257,6 +286,23 @@ class Module(ModuleInterface):
             all_datapoints,
         )
 
+    def check_new_unique_hash(self, datapoints):
+        current_datapoint = datapoints[datapoints["old_new"] == "new"]
+        all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
+
+        set_current_datapoint = set(list(current_datapoint["intermediate_hash"]))
+        set_all_datapoints_old = set(list(all_datapoints_old["intermediate_hash"]))
+
+        overlap = set_current_datapoint.intersection(set_all_datapoints_old)
+
+        if len(overlap) > 0:
+            st.error(
+                f"The run you want to submit has been previously submitted \
+                 under the identifier: {overlap}"
+            )
+            return False
+        return True
+
     def clone_pr(
         self,
         temporary_datapoints,
@@ -274,9 +320,12 @@ class Module(ModuleInterface):
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         all_datapoints = self.add_current_data_point(None, current_datapoint)
+
+        if not self.check_new_unique_hash(all_datapoints):
+            return
+
         branch_name = current_datapoint["id"]
 
-        # do the pd.write_json() here!!!
         print(os.path.join(t_dir, "results.json"))
         f = open(os.path.join(t_dir, "results.json"), "w")
 

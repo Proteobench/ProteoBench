@@ -115,7 +115,26 @@ class TestOutputFileReading(unittest.TestCase):
             intermediate = Module().generate_intermediate(
                 prepared_df, replicate_to_raw, parse_settings
             )
+
             self.assertFalse(intermediate.empty)
+
+    def test_benchmarking(self):
+        user_input = {
+            "version": "1.0",
+            "fdr_psm": 0.01,
+            "fdr_peptide": 0.05,
+            "fdr_protein": 0.1,
+            "mbr": 1,
+            "precursor_mass_tolerance": 0.02,
+            "precursor_mass_tolerance_unit": "Da",
+            "fragment_mass_tolerance": 0.02,
+            "fragment_mass_tolerance_unit": "Da",
+            "search_enzyme_name": "Trypsin",
+            "allowed_missed_cleavage": 1,
+            "min_peptide_length": 6,
+            "max_peptide_length": 30,
+        }
+        Module().benchmarking(TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None)
 
 
 class TestWrongFormatting(unittest.TestCase):
@@ -165,7 +184,7 @@ class TestPlot(unittest.TestCase):
         combined_list = human_strings + ecoli_strings + yeast_strings
 
         combineddf = pd.DataFrame(
-            {"SPECIES": combined_list, "1|2_ratio": combined_ratios}
+            {"SPECIES": combined_list, "log2_A_vs_B": combined_ratios}
         )
         combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
         combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
@@ -18,32 +18,25 @@ class PlotDataPoint:
         )
         fig = px.histogram(
             result_df,
-            x=np.log2(result_df["1|2_ratio"]),
+            x=result_df["log2_A_vs_B"],
             color="kind",
             marginal="rug",
             histnorm="probability density",
             barmode="overlay",
             opacity=0.7,
-            nbins=100
+            nbins=100,
         )
 
         fig.update_layout(
             width=700,
             height=700,
             # title="Distplot",
-            xaxis=dict(
-                title="1|2_ratio",
-                color="white",
-                gridwidth=2))
-          
-        fig.update_yaxes(title="Density",
-                color="white",
-                gridwidth=2)
-        
-        fig.update_layout(
-            width=700,
-            height=700
+            xaxis=dict(title="log2_A_vs_B", color="white", gridwidth=2),
         )
+
+        fig.update_yaxes(title="Density", color="white", gridwidth=2)
+
+        fig.update_layout(width=700, height=700)
 
         fig.update_xaxes(range=[-4, 4])
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
@@ -97,7 +90,6 @@ class PlotDataPoint:
             + f"Max peptide length: {benchmark_metrics_df.max_pep_length[idx]}"
             for idx, row in benchmark_metrics_df.iterrows()
         ]
-
 
         mapping = {"old": 10, "new": 20}
 

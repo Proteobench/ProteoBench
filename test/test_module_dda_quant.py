@@ -115,30 +115,27 @@ class TestOutputFileReading(unittest.TestCase):
             intermediate = Module().generate_intermediate(
                 prepared_df, replicate_to_raw, parse_settings
             )
-            
-            intermediate = Module.generate_intermediate_V4(
-                prepared_df, intermediate, parse_settings
-            )
-            self.assertFalse(intermediate.empty)
-
-    def test_input_file_processing_V2(self):
-        """Test the processing of the input files."""
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-                input_df, parse_settings
-            )
-
-            
-            intermediate = Module.generate_intermediate_V2(
-                prepared_df, replicate_to_raw, parse_settings
-            )
-
-            # Get quantification data
-            Module.generate_intermediate_V3(prepared_df, intermediate, parse_settings)
 
             self.assertFalse(intermediate.empty)
+
+    def test_benchmarking(self):
+        user_input = {
+            "version": "1.0",
+            "fdr_psm": 0.01,
+            "fdr_peptide": 0.05,
+            "fdr_protein": 0.1,
+            "mbr": 1,
+            "precursor_mass_tolerance": 0.02,
+            "precursor_mass_tolerance_unit": "Da",
+            "fragment_mass_tolerance": 0.02,
+            "fragment_mass_tolerance_unit": "Da",
+            "search_enzyme_name": "Trypsin",
+            "allowed_missed_cleavage": 1,
+            "min_peptide_length": 6,
+            "max_peptide_length": 30,
+        }
+        Module().benchmarking(TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None)
+
 
 class TestWrongFormatting(unittest.TestCase):
     """Simple tests that should break if the ."""

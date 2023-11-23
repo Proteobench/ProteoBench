@@ -105,8 +105,8 @@ class Module(ModuleInterface):
             for x in quant_raw_df.columns
         ]
 
-        quant_raw_df["1|2_ratio"] = (
-            quant_raw_df["log_Intensity_mean_1"] / quant_raw_df["log_Intensity_mean_2"]
+        quant_raw_df["log2_A_vs_B"] = (
+            quant_raw_df["log_Intensity_mean_A"] - quant_raw_df["log_Intensity_mean_B"]
         )
         quant_raw_df = pd.merge(
             quant_raw_df, intensities_wide, on="peptidoform", how="inner"
@@ -139,117 +139,21 @@ class Module(ModuleInterface):
             withspecies.loc[withspecies[species] == True, "species"] = species
             withspecies.loc[
                 withspecies[species] == True, "expectedRatio"
-            ] = species_expected_ratio[species]["1|2"]
+            ] = species_expected_ratio[species]["A_vs_B"]
 
+        withspecies["epsilon"] = (
+            withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
+        )
         return withspecies
 
     def generate_intermediate(
-        self,
-        filtered_df,
-        replicate_to_raw: dict,
-        parse_settings: ParseSettings,
-        precursor="peptidoform",
+        self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
     ) -> pd.DataFrame:
-        """Take the generic format of data search output and convert it to get the quantification data (a tuple, the quantification measure and the reliability of it)."""
-
-        species_peptidoform = list(parse_settings.species_dict.values())
-        # species_peptidoform.append("peptidoform")
-
-        filtered_df_p1 = filtered_df[["Raw file", precursor, "Intensity"]].copy()
-
-        # Summarize values of the same peptide using mean
-        # TODO should we take the mean or sum of the same peptidoform/peptideions same raw file multiple intensities
-        quant_raw_df = filtered_df_p1.groupby([precursor, "Raw file"]).Intensity.mean()
-        quant_df = quant_raw_df.unstack(level=1)
-
-        # Count number of values per peptidoform and Raw file
-        # TODO calculate this on the log2 transformed values
-        for replicate, replicate_runs in replicate_to_raw.items():
-            selected_replicate_df = quant_raw_df.index.get_level_values(
-                "Raw file"
-            ).isin(replicate_runs)
-            replicate_quant_df = quant_raw_df[selected_replicate_df]
-            ## Add means of replicates
-            mean_series = replicate_quant_df.groupby([precursor]).mean()
-            # change indices of mean_series from peptidoform to multiindices containing peptidoform,replicate
-            quant_df["mean_of_" + str(replicate)] = mean_series
-
-            ## Add number of missing values per row of replicate
-            # TODO keep missing values, filter later for calculation of ratios
-            missing_series = replicate_quant_df.isna().groupby([precursor]).sum()
-            quant_df["missing_values_" + str(replicate)] = missing_series
-        return quant_df
-
-    @staticmethod
-    def generate_intermediate_V4(filtered_df, quant_df, parse_settings):
-        species_peptidoform = list(parse_settings.species_dict.values())
-        species_peptidoform.append("peptidoform")
-        # TODO check, do we need to drop_duplicates? When?
-        peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
-        # merge dataframes quant_df and species_quant_df and peptidoform_to_species
-        withspecies = pd.merge(
-            quant_df, peptidoform_to_species, on="peptidoform", how="inner"
+        res = Module.generate_intermediate_V2(
+            filtered_df, replicate_to_raw, parse_settings
         )
-
-        peptidoform_to_species.index = peptidoform_to_species["peptidoform"]
-        peptidoform_to_species_dict = peptidoform_to_species.T.to_dict()
-
-        species_quant_df = pd.DataFrame(
-            [peptidoform_to_species_dict[idx] for idx in quant_df.index]
-        )
-        species_quant_df.set_index("peptidoform", drop=True, inplace=True)
-        """Calculate the quantification ratios and compare them to the expected ratios."""
-        cv_replicate_quant_species_df = pd.concat([quant_df, species_quant_df], axis=1)
-
-        ratio_dict = {}
-        for species in parse_settings.species_dict.values():
-            species_df_slice = cv_replicate_quant_species_df[
-                cv_replicate_quant_species_df[species] == True
-            ]
-            # TODO add cutoffs for different thresholds presence of peptide ion
-            # TODO do substraction for log2 transformed
-            for conditions in itertools.combinations(
-                set(parse_settings.replicate_mapper.values()), 2
-            ):
-                condition_comp_id = "|".join(map(str, conditions))
-
-                ratio = (
-                    species_df_slice["mean_of_" + str(conditions[0])]
-                    / species_df_slice["mean_of_" + str(conditions[1])]
-                )
-                ratio_diff = (
-                    abs(
-                        ratio
-                        - parse_settings.species_expected_ratio[species][
-                            condition_comp_id
-                        ]
-                    )
-                    * 100
-                )
-
-                # There is a loop that adds resulting ratios, if already
-                # exists than concat to the existing DF, otherwise
-                # keyexception and make df
-                try:
-                    ratio_dict[condition_comp_id + "_ratio"] = pd.concat(
-                        [ratio, ratio_dict[condition_comp_id + "_ratio"]]
-                    )
-                    ratio_dict[condition_comp_id + "_expected_ratio_diff"] = pd.concat(
-                        [
-                            ratio_dict[condition_comp_id + "_expected_ratio_diff"],
-                            ratio_diff,
-                        ]
-                    )
-                except KeyError:
-                    ratio_dict[condition_comp_id + "_ratio"] = ratio
-                    ratio_dict[condition_comp_id + "_expected_ratio_diff"] = ratio_diff
-        ratio_df = pd.DataFrame(ratio_dict)
-
-        intermediate = pd.concat([cv_replicate_quant_species_df, ratio_df], axis=1)
-
-        intermediate.rename(columns=parse_settings.run_mapper, inplace=True)
-
-        return intermediate
+        res = Module.generate_intermediate_V3(filtered_df, res, parse_settings)
+        return res
 
     def strip_sequence_wombat(self, seq: str) -> str:
         """Remove parts of the peptide sequence that contain modifications."""

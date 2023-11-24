@@ -1,0 +1,21 @@
+{
+    "software_name": null,
+    "software_version": "1.5.3.30",
+    "search_engine": "Andromeda",
+    "search_engine_version": null,
+    "ident_fdr_psm": null,
+    "ident_fdr_peptide": "0.01",
+    "ident_fdr_protein": "0.01",
+    "enable_match_between_runs": "true",
+    "precursor_mass_tolerance": "4.5 ppm",
+    "fragment_mass_tolerance": "20 ppm",
+    "enzyme": "Trypsin/P",
+    "allowed_miscleavages": "2",
+    "min_peptide_length": "7",
+    "max_peptide_length": null,
+    "fixed_mods": "Carbamidomethyl (C)",
+    "variable_mods": "Oxidation (M),Acetyl (Protein N-term)",
+    "max_mods": "5",
+    "min_precursor_charge": null,
+    "max_precursor_charge": "7"
+}

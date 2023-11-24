@@ -5,12 +5,12 @@ Protein = "Proteins"
 Charge = "Charge"
 
 [replicate_mapper]
-"A_1 Intensity" = 1
-"A_2 Intensity" = 1
-"A_3 Intensity" = 1
-"B_1 Intensity" = 2
-"B_2 Intensity" = 2
-"B_3 Intensity" = 2
+"A_1 Intensity" = "A"
+"A_2 Intensity" = "A"
+"A_3 Intensity" = "A"
+"B_1 Intensity" = "B"
+"B_2 Intensity" = "B"
+"B_3 Intensity" = "B"
 
 [run_mapper]
 "A_1 Intensity" = "Condition_A_Sample_Alpha_01"

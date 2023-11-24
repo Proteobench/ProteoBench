@@ -6,12 +6,12 @@ Proteins = "Proteins"
 Charge = "Charge"
 
 [replicate_mapper]
-LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 = 1
-LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 = 1
-LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 = 1
-LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 = 2
-LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 = 2
-LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = 2
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 = "A"
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 = "A"
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 = "A"
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 = "B"
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 = "B"
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = "B"
 
 [run_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01" = "Condition_A_Sample_Alpha_01"

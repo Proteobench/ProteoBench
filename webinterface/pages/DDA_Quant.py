@@ -33,6 +33,7 @@ FIG1 = "fig1"
 FIG2 = "fig2"
 RESULT_PERF = "result_perf"
 META_DATA = "meta_data"
+INPUT_DF = "input_df"
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -177,7 +178,7 @@ class StreamlitUI:
                 error_message = st.error(":x: Please provide a result file")
 
     def _populate_results(self):
-        self.generate_results("", None, None, False)
+        self.generate_results("", None, None, False, None)
 
     def _sidebar(self):
         """Format sidebar."""
@@ -197,7 +198,7 @@ class StreamlitUI:
             st.session_state[ALL_DATAPOINTS] = None
 
         try:
-            result_performance, all_datapoints = Module().benchmarking(
+            result_performance, all_datapoints, input_df = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
@@ -209,11 +210,16 @@ class StreamlitUI:
             st.exception(e)
         else:
             self.generate_results(
-                status_placeholder, result_performance, all_datapoints, True
+                status_placeholder, result_performance, all_datapoints, True, input_df
             )
 
     def generate_results(
-        self, status_placeholder, result_performance, all_datapoints, recalculate
+        self,
+        status_placeholder,
+        result_performance,
+        all_datapoints,
+        recalculate,
+        input_df,
     ):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -226,6 +232,7 @@ class StreamlitUI:
         if not recalculate:
             result_performance = st.session_state[RESULT_PERF]
             all_datapoints = st.session_state[ALL_DATAPOINTS]
+            input_df = st.session_state[INPUT_DF]
         st.dataframe(result_performance.head(100))
 
         # Plot results
@@ -269,10 +276,12 @@ class StreamlitUI:
         st.session_state[FIG2] = fig2
         st.session_state[RESULT_PERF] = result_performance
         st.session_state[ALL_DATAPOINTS] = all_datapoints
+        st.session_state[INPUT_DF] = input_df
 
         self.user_input[META_DATA] = st.file_uploader(
             "Meta data for searches", help=self.texts.Help.meta_data_file
         )
+
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
             placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
@@ -301,6 +310,20 @@ class StreamlitUI:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
                         st.session_state[ALL_DATAPOINTS]
                     )
+
+                id = str(
+                    all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :][
+                        "intermediate_hash"
+                    ]
+                )
+
+                Module().write_intermediate_raw(
+                    st.secrets["storage"]["dir"],
+                    id,
+                    input_df,
+                    result_performance,
+                    self.user_input[META_DATA],
+                )
         if SUBMIT in st.session_state:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")

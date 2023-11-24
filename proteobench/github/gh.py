@@ -14,14 +14,11 @@ def clone_repo_anon(
 
 
 def read_results_json_repo(
-    remote_git_repo= "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
+    remote_git_repo="https://github.com/Proteobench/Results_Module2_quant_DDA.git",
 ):
     t_dir = TemporaryDirectory().name
     os.mkdir(t_dir)
-    clone_repo_anon(
-        t_dir,
-        remote_git_repo
-    )
+    clone_repo_anon(t_dir, remote_git_repo)
     fname = os.path.join(t_dir, "results.json")
     all_datapoints = pd.read_json(fname)
     return all_datapoints

@@ -2,8 +2,6 @@
 "proteins" = "Proteins"
 "peptide" = "Sequence"
 "charge" = "Charge"
-"filename" = "Raw file"
-"ms1_intensity" = "Intensity"
 
 [replicate_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML.gz" = "A"

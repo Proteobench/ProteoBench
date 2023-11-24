@@ -317,13 +317,14 @@ class StreamlitUI:
                     ]
                 )
 
-                Module().write_intermediate_raw(
-                    st.secrets["storage"]["dir"],
-                    id,
-                    input_df,
-                    result_performance,
-                    self.user_input[META_DATA],
-                )
+                if "storage" in st.secrets.keys():
+                    Module().write_intermediate_raw(
+                        st.secrets["storage"]["dir"],
+                        id,
+                        input_df,
+                        result_performance,
+                        self.user_input[META_DATA],
+                    )
         if SUBMIT in st.session_state:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")

@@ -64,6 +64,30 @@ class ParseSettings:
         self.species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
 
+        if "modifications_parser" in parse_settings.keys():
+            self.apply_modifications_parser = True
+            self.modifications_mapper = parse_settings["modifications_parser"][
+                "modification_dict"
+            ]
+            self.modifications_isalpha = parse_settings["modifications_parser"][
+                "isalpha"
+            ]
+            self.modifications_isupper = parse_settings["modifications_parser"][
+                "isupper"
+            ]
+            self.modifications_before_aa = parse_settings["modifications_parser"][
+                "before_aa"
+            ]
+            self.modifications_pattern = parse_settings["modifications_parser"][
+                "pattern"
+            ]
+            self.modifications_pattern = rf"{self.modifications_pattern}"
+            self.modifications_parse_column = parse_settings["modifications_parser"][
+                "parse_column"
+            ]
+        else:
+            self.apply_modifications_parser = False
+
         parse_settings_module = toml.load(PARSE_SETTINGS_FILES_MODULE)
         self.min_count_multispec = parse_settings_module["general"][
             "min_count_multispec"

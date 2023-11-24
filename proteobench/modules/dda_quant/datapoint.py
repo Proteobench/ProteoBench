@@ -1,12 +1,14 @@
 import json
-import numpy as np
 from dataclasses import asdict, dataclass
 from datetime import datetime
+
+import numpy as np
 
 
 @dataclass
 class Datapoint:
     """Data used to stored the"""
+
     # TODO add threshold value used for presence ion/peptidoform
     id: str = None
     search_engine: str = None
@@ -26,6 +28,7 @@ class Datapoint:
     weighted_sum: int = 0
     nr_prec: int = 0
     is_temporary: bool = True
+    intermediate_hash: str = ""
     # fixed_mods: [],
     # variable_mods: [],
     # max_number_mods_pep: int = 0,
@@ -39,21 +42,9 @@ class Datapoint:
         return nr_quan_prec_missing
 
     def calculate_plot_data(self, df):
-        species = ["YEAST", "HUMAN", "ECOLI"]
-        prop_ratios = []
-        sum_ratios = 0
-        nr_missing_0 = 0
-        for spec in species:
-            f = len(df[df[spec] == True])
-            sum_s = np.nan_to_num(df[df[spec] == True]["1|2_expected_ratio_diff"], nan=0, neginf=-1000, posinf=1000).sum()
-            ratio = sum_s / f
-            prop_ratio = (f / len(df)) * ratio
-            prop_ratios.append(prop_ratio)
-            sum_ratios += prop_ratio
-            nr_missing_0 += f
-        
-        # TODO rename/document code
-        self.weighted_sum = round(sum_ratios, ndigits=3)
+        # compute mean of epsilon column in df
+        # take abs value of df["epsilon"]
+        self.weighted_sum = round(df["epsilon"].abs().mean(), ndigits=3)
         self.nr_prec = len(df)
 
     def generate_id(self):

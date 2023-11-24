@@ -6,14 +6,18 @@ from datetime import datetime
 
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT)
+    DDA_QUANT_RESULTS_PATH,
+    INPUT_FORMATS,
+    LOCAL_DEVELOPMENT,
+)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
+
+import uuid
 
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
-import uuid
 
 # from proteobench.github.gh import clone_pr, write_json_local_development
 
@@ -42,7 +46,7 @@ class StreamlitUI:
             page_title="Proteobench web server",
             page_icon=":rocket:",
             layout="wide",
-            initial_sidebar_state="expanded"
+            initial_sidebar_state="expanded",
         )
         if SUBMIT not in st.session_state:
             st.session_state[SUBMIT] = False
@@ -52,7 +56,9 @@ class StreamlitUI:
     def generate_input_field(self, input_format: str, content: dict):
         if content["type"] == "text_input":
             if "placeholder" in content:
-                return st.text_input(content["label"], placeholder=content["placeholder"])
+                return st.text_input(
+                    content["label"], placeholder=content["placeholder"]
+                )
             elif "value" in content:
                 return st.text_input(content["label"], content["value"][input_format])
         if content["type"] == "number_input":
@@ -61,7 +67,7 @@ class StreamlitUI:
                 value=None,
                 format=content["format"],
                 min_value=content["min_value"],
-                max_value=content["max_value"]
+                max_value=content["max_value"],
             )
         if content["type"] == "selectbox":
             return st.selectbox(
@@ -130,11 +136,11 @@ class StreamlitUI:
         with st.form(key="main_form"):
             st.subheader("Input files")
             self.user_input["input_csv"] = st.file_uploader(
-                "Search engine result file", help=self.texts.Help.input_file
+                "Software tool result file", help=self.texts.Help.input_file
             )
 
             self.user_input["input_format"] = st.selectbox(
-                "Search engine", INPUT_FORMATS, help=self.texts.Help.input_format
+                "Software tool", INPUT_FORMATS, help=self.texts.Help.input_format
             )
 
             # self.user_input["pull_req"] = st.text_input(
@@ -170,9 +176,8 @@ class StreamlitUI:
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png",
-                         width=300)
-        
+        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png", width=300)
+
         # st.sidebar.markdown(self.texts.Sidebar.badges)
         st.sidebar.header("About")
         st.sidebar.markdown(self.texts.Sidebar.about, unsafe_allow_html=True)
@@ -181,8 +186,7 @@ class StreamlitUI:
         # Run Proteobench
         st.header("Running Proteobench")
         status_placeholder = st.empty()
-        status_placeholder.info(
-            ":hourglass_flowing_sand: Running Proteobench...")
+        status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
         if ALL_DATAPOINTS not in st.session_state:
             st.session_state[ALL_DATAPOINTS] = None
@@ -252,7 +256,7 @@ class StreamlitUI:
             data=streamlit_utils.save_dataframe(result_performance),
             file_name=f"{sample_name}.csv",
             mime="text/csv",
-            key=f"{random_uuid}"
+            key=f"{random_uuid}",
         )
 
         st.subheader("Add results to online repository")
@@ -267,7 +271,8 @@ class StreamlitUI:
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
             placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
-            height=200)
+            height=200,
+        )
         checkbox = st.checkbox("I confirm that the metadata is correct")
 
         if checkbox and self.user_input[META_DATA]:
@@ -285,7 +290,7 @@ class StreamlitUI:
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
                         branch_name="new_branch",
-                        submission_comments=user_comments
+                        submission_comments=user_comments,
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
@@ -306,7 +311,7 @@ class WebpageTexts:
 
     class Help:
         input_file = """
-            Output file of the search engine
+            Output file of the software tool
             """
 
         pull_req = """
@@ -314,9 +319,10 @@ class WebpageTexts:
             """
 
         input_format = """
-            Please select the software you used to generate the search engine results.
-            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings
-            for more details.
+            Please select the software you used to generate the software tool results. 
+            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings 
+            for more details. 
+
             Additionally, you can use the tab-delimited Custom format containing the following columns:
             Sequence: peptide sequence
             Proteins: Protein accessions according to fasta file

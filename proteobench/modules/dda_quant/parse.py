@@ -9,10 +9,6 @@ from proteobench.modules.dda_quant.parse_settings import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 
-def count_upper_chars(input_string):
-    return sum(1 for char in input_string if char.isupper())
-
-
 def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):
     if isalpha and isupper:
         return sum(1 for char in input_string if char.isalpha() and char.isupper())
@@ -33,28 +29,30 @@ def get_stripped_seq(input_string: str, isalpha: bool = True, isupper: bool = Tr
         return "".join(char for char in input_string if char.isupper())
 
 
-def match_seq(input_string: str, pattern=re.compile(r"([a-z]+)")):
-    matches = [
-        (match.group(1), match.start(1), match.end(1))
-        for match in pattern.finditer(input_string)
-    ]
-    positions = (count_upper_chars(input_string[0 : m[1]]) for m in matches)
-    mods = (m[0] for m in matches)
-    return mods, positions
-
-
-def match_brackets(input_string: str, pattern=r"\[([^]]+)\]"):
+def match_brackets(
+    input_string: str,
+    pattern: str = r"\[([^]]+)\]",
+    isalpha: bool = True,
+    isupper: bool = True,
+):
     matches = [
         (match.group(1), match.start(1), match.end(1))
         for match in re.finditer(pattern, input_string)
     ]
-    positions = (count_chars(input_string[0 : m[1]]) for m in matches)
+    positions = (
+        count_chars(input_string[0 : m[1]], isalpha=isalpha, isupper=isupper)
+        for m in matches
+    )
     mods = (m[0] for m in matches)
     return mods, positions
 
 
-def get_proforma_sage(
+def get_proforma_bracketed(
     input_string,
+    before_aa: bool = True,
+    isalpha: bool = True,
+    isupper: bool = True,
+    pattern: str = r"\[([^]]+)\]",
     modification_dict: dict = {
         "+57.0215": "Carbamidomethyl",
         "+15.9949": "Oxidation",
@@ -63,7 +61,9 @@ def get_proforma_sage(
         "+42": "Acetyl",
     },
 ):
-    modifications, positions = match_brackets(input_string)
+    modifications, positions = match_brackets(
+        input_string, pattern=pattern, isalpha=isalpha, isupper=isupper
+    )
 
     new_modifications = []
     for m in modifications:
@@ -75,74 +75,22 @@ def get_proforma_sage(
 
     pos_mod_dict = dict(zip(positions, modifications))
 
-    stripped_seq = "".join(
-        char for char in input_string if char.isalpha() and char.isupper()
-    )
+    stripped_seq = get_stripped_seq(input_string, isalpha=isalpha, isupper=isupper)
 
     new_seq = ""
     for idx, aa in enumerate(stripped_seq):
+        if before_aa:
+            new_seq += aa
         if idx in pos_mod_dict.keys():
-            new_seq += f"[{pos_mod_dict[idx]}]"
-        new_seq += aa
+            if idx == 0:
+                new_seq += f"[{pos_mod_dict[idx]}]-"
+            elif idx == len(stripped_seq) - 1:
+                new_seq += f"-[{pos_mod_dict[idx]}]"
+            else:
+                new_seq += f"[{pos_mod_dict[idx]}]"
+        if not before_aa:
+            new_seq += aa
 
-    return new_seq
-
-
-def get_proforma_msfragger(
-    input_string,
-    modification_dict={
-        "57.0215": "Carbamidomethyl",
-        "15.9949": "Oxidation",
-        "-17.026548": "Gln->pyro-Glu",
-        "-18.010565": "Glu->pyro-Glu",
-        "42.0106": "Acetyl",
-    },
-):
-    modifications, positions = match_brackets(input_string)
-
-    new_modifications = []
-    for m in modifications:
-        try:
-            new_modifications.append(modification_dict[m])
-        except KeyError:
-            new_modifications.append(m)
-    modifications = new_modifications
-
-    pos_mod_dict = dict(zip(positions, modifications))
-
-    stripped_seq = "".join(
-        char for char in input_string if char.isalpha() and char.isupper()
-    )
-
-    new_seq = ""
-    for idx, aa in enumerate(stripped_seq):
-        if idx in pos_mod_dict.keys():
-            new_seq += f"[{pos_mod_dict[idx]}]"
-        new_seq += aa
-
-    return new_seq
-
-
-def get_proforma_alphapept(
-    input_string,
-    modification_dict={
-        "ox": "Oxidation",
-        "c": "Carbamidomethyl",
-        "a": "Acetyl",
-        "decoy": "",
-    },
-):
-    modifications, positions = match_seq(input_string, pattern=re.compile(r"([a-z]+)"))
-    modifications = (modification_dict[m] for m in modifications)
-    pos_mod_dict = dict(zip(positions, modifications))
-
-    stripped_seq = "".join(char for char in input_string if not char.islower())
-
-    new_seq = ""
-    for idx, aa in enumerate(stripped_seq):
-        new_seq += aa
-        if idx in pos_mod_dict.keys():
-            new_seq += f"[{pos_mod_dict[idx]}]"
     return new_seq
 
 
@@ -196,6 +144,16 @@ class ParseInputs(ParseInputsInterface):
         # TODO replace with condition_mapper
         df["replicate"] = df["Raw file"].map(parse_settings.replicate_mapper)
         df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)
+
+        if parse_settings.apply_modifications_parser:
+            df["proforma"] = df[parse_settings.modifications_parse_column].apply(
+                get_proforma_bracketed,
+                before_aa=parse_settings.modifications_before_aa,
+                isalpha=parse_settings.modifications_isalpha,
+                isupper=parse_settings.modifications_isupper,
+                pattern=parse_settings.modifications_pattern,
+                modification_dict=parse_settings.modifications_mapper,
+            )
 
         # TODO, if "Charge" is not available return a sensible error
         try:

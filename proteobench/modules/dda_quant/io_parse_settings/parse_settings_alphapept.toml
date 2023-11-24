@@ -28,6 +28,14 @@ LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = "Condition_B_Sample_Alpha_03"
 "_ECOLI" = "ECOLI"
 "_HUMAN" = "HUMAN"
 
+[modifications_parser]
+"parse_column" = "Modified sequence"
+"before_aa" = true
+"isalpha" = true
+"isupper" = true
+"pattern"="([a-z]+)"
+"modification_dict" = {"ox" = "Oxidation", "c" = "Carbamidomethyl", "a" = "Acetyl", "decoy" = ""}
+
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = true

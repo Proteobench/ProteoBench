@@ -9,12 +9,41 @@ from proteobench.modules.dda_quant.parse_settings import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 
-def count_chars(input_string):
-    return sum(1 for char in input_string if char.isalpha() and char.isupper())
+def count_upper_chars(input_string):
+    return sum(1 for char in input_string if char.isupper())
 
 
-def match_brackets(input_string):
-    pattern = r"\[([^]]+)\]"
+def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):
+    if isalpha and isupper:
+        return sum(1 for char in input_string if char.isalpha() and char.isupper())
+    if isalpha:
+        return sum(1 for char in input_string if char.isalpha())
+    if isupper:
+        return sum(1 for char in input_string if char.isupper())
+
+
+def get_stripped_seq(input_string: str, isalpha: bool = True, isupper: bool = True):
+    if isalpha and isupper:
+        return "".join(
+            char for char in input_string if char.isalpha() and char.isupper()
+        )
+    if isalpha:
+        return "".join(char for char in input_string if char.isalpha())
+    if isupper:
+        return "".join(char for char in input_string if char.isupper())
+
+
+def match_seq(input_string: str, pattern=re.compile(r"([a-z]+)")):
+    matches = [
+        (match.group(1), match.start(1), match.end(1))
+        for match in pattern.finditer(input_string)
+    ]
+    positions = (count_upper_chars(input_string[0 : m[1]]) for m in matches)
+    mods = (m[0] for m in matches)
+    return mods, positions
+
+
+def match_brackets(input_string: str, pattern=r"\[([^]]+)\]"):
     matches = [
         (match.group(1), match.start(1), match.end(1))
         for match in re.finditer(pattern, input_string)
@@ -26,7 +55,7 @@ def match_brackets(input_string):
 
 def get_proforma_sage(
     input_string,
-    modification_dict={
+    modification_dict: dict = {
         "+57.0215": "Carbamidomethyl",
         "+15.9949": "Oxidation",
         "-17.026548": "Gln->pyro-Glu",
@@ -41,7 +70,7 @@ def get_proforma_sage(
         try:
             new_modifications.append(modification_dict[m])
         except KeyError:
-            new_modifications.append("")
+            new_modifications.append(m)
     modifications = new_modifications
 
     pos_mod_dict = dict(zip(positions, modifications))
@@ -76,7 +105,7 @@ def get_proforma_msfragger(
         try:
             new_modifications.append(modification_dict[m])
         except KeyError:
-            new_modifications.append("")
+            new_modifications.append(m)
     modifications = new_modifications
 
     pos_mod_dict = dict(zip(positions, modifications))
@@ -115,20 +144,6 @@ def get_proforma_alphapept(
         if idx in pos_mod_dict.keys():
             new_seq += f"[{pos_mod_dict[idx]}]"
     return new_seq
-
-
-def count_upper_chars(input_string):
-    return sum(1 for char in input_string if char.isupper())
-
-
-def match_seq(input_string, pattern=re.compile(r"([a-z]+)")):
-    matches = [
-        (match.group(1), match.start(1), match.end(1))
-        for match in pattern.finditer(input_string)
-    ]
-    positions = (count_upper_chars(input_string[0 : m[1]]) for m in matches)
-    mods = (m[0] for m in matches)
-    return mods, positions
 
 
 class ParseInputs(ParseInputsInterface):

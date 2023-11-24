@@ -5,6 +5,7 @@ import hashlib
 import itertools
 import os
 import re
+import shutil
 from dataclasses import asdict
 from tempfile import TemporaryDirectory
 
@@ -257,6 +258,7 @@ class Module(ModuleInterface):
         return (
             intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0),
             all_datapoints,
+            input_df,
         )
 
     def check_new_unique_hash(self, datapoints):
@@ -333,3 +335,19 @@ class Module(ModuleInterface):
         all_datapoints.to_json(f, orient="records", indent=2)
 
         return os.path.join(t_dir, "results.json")
+
+    def write_intermediate_raw(
+        self, dir, ident, input_df, result_performance, param_loc
+    ):
+        path_write = os.path.join(dir, ident)
+        try:
+            os.mkdir(path_write)
+        except:
+            print("Could not make directory")
+
+        outfile_param = open(os.path.join(path_write, "params.csv"), "w")
+        outfile_param.write(str(param_loc.getvalue()))
+        outfile_param.close()
+
+        input_df.to_csv(os.path.join(path_write, "input_df.csv"))
+        result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))

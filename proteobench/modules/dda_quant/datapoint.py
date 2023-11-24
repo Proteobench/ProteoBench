@@ -43,7 +43,8 @@ class Datapoint:
 
     def calculate_plot_data(self, df):
         # compute mean of epsilon column in df
-        self.weighted_sum = round(df["epsilon"].mean(), ndigits=3)
+        # take abs value of df["epsilon"]
+        self.weighted_sum = round(df["epsilon"].abs().mean(), ndigits=3)
         self.nr_prec = len(df)
 
     def generate_id(self):

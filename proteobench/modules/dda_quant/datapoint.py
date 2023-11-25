@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 
@@ -48,16 +49,16 @@ class Datapoint:
         self.nr_prec = len(df)
 
     def generate_id(self):
+        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.id = (
             self.search_engine
             + "_"
             + str(self.software_version)
             + "_"
-            + str(datetime.timestamp(datetime.now()))
+            + str(time_stamp)
         )
-        print(self.id)
+        logging.info(f"Assigned the following ID to this run: {self.id}")
 
-    # TODO, not used? Can be removed?
     def dump_json_object(self, file_name):
         f = open(file_name, "a")
         f.write(json.dumps(asdict(self)))

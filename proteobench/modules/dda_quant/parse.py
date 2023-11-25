@@ -131,7 +131,6 @@ class ParseInputs(ParseInputsInterface):
         df = df[df["MULTI_SPEC"] == False]
 
         # If there is "Raw file" then it is a long format, otherwise short format
-        # TODO we might need to generalize this with toml
         if "Raw file" not in parse_settings.mapper.values():
             meltvars = parse_settings.replicate_mapper.keys()
             df = df.melt(
@@ -155,7 +154,6 @@ class ParseInputs(ParseInputsInterface):
                 modification_dict=parse_settings.modifications_mapper,
             )
 
-        # TODO, if "Charge" is not available return a sensible error
         try:
             df.loc[df.index, "peptidoform"] = (
                 df.loc[df.index, "proforma"]
@@ -163,16 +161,17 @@ class ParseInputs(ParseInputsInterface):
                 + df.loc[df.index, "Charge"].map(str)
             )
         except KeyError:
-            # TODO if charge is not available it is now replaced with 2
-            df.loc[df.index, "peptidoform"] = df.loc[df.index, "proforma"] + "|Z=2"
+            raise KeyError(
+                f"Not all columns required for making the ion are available."
+                "Is the charge available in the input file?"
+            )
 
-        # TODO use peptide_ion or peptidoform here
         # TODO move this to datapoint, keep a count here of quantified AA
         count_non_zero = (
-            df.groupby(["Sequence", "Raw file"])["Intensity"].sum() > 0.0
+            df.groupby(["peptidoform", "Raw file"])["Intensity"].sum() > 0.0
         ).groupby(level=[0]).sum() == 6
 
         allowed_peptidoforms = list(count_non_zero.index[count_non_zero])
-        filtered_df = df[df["Sequence"].isin(allowed_peptidoforms)]
+        filtered_df = df[df["peptidoform"].isin(allowed_peptidoforms)]
 
         return filtered_df, replicate_to_raw

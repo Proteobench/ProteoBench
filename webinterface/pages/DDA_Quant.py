@@ -23,8 +23,6 @@ import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
-# from proteobench.github.gh import clone_pr, write_json_local_development
-
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
@@ -394,4 +392,5 @@ class WebpageTexts:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
     StreamlitUI()

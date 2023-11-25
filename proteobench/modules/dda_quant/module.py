@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import datetime
 import hashlib
-import itertools
+import logging
 import os
 import re
-import shutil
 from dataclasses import asdict
 from tempfile import TemporaryDirectory
 
@@ -189,7 +188,6 @@ class Module(ModuleInterface):
         )
         result_datapoint.generate_id()
         result_datapoint.calculate_plot_data(intermediate)
-        # result_metadata.dump_json_object(json_dump_path)
         df = pd.Series(asdict(result_datapoint))
 
         return df
@@ -301,8 +299,9 @@ class Module(ModuleInterface):
 
         branch_name = current_datapoint["id"]
 
-        print(os.path.join(t_dir, "results.json"))
-        f = open(os.path.join(t_dir, "results.json"), "w")
+        path_write = os.path.join(t_dir, "results.json")
+        logging.info(f"Writing the json to: {path_write}")
+        f = open(path_write, "w")
 
         all_datapoints.to_json(f, orient="records", indent=2)
 
@@ -328,7 +327,7 @@ class Module(ModuleInterface):
 
         # TODO write below to logger instead of std.out
         fname = os.path.join(t_dir, "results.json")
-        print(f"Writing the json to: {fname}")
+        logging.info(f"Writing the json to: {fname}")
 
         f = open(os.path.join(t_dir, "results.json"), "w")
 
@@ -343,7 +342,7 @@ class Module(ModuleInterface):
         try:
             os.mkdir(path_write)
         except:
-            print("Could not make directory")
+            logging.warning(f"Could not make directory: {path_write}")
 
         outfile_param = open(os.path.join(path_write, "params.csv"), "w")
         outfile_param.write(str(param_loc.getvalue()))

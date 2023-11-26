@@ -139,6 +139,11 @@ class StreamlitUI:
 
         with st.form(key="main_form"):
             st.subheader("Input files")
+            st.markdown(
+            """
+                    Remember: contaminant sequences are already present in the fasta file associated to this module. **Do not add other contaminants** to your search. This is important when using MaxQuant and MSFragger, among other tools.
+                    """
+            )
             self.user_input["input_csv"] = st.file_uploader(
                 "Software tool result file", help=self.texts.Help.input_file
             )

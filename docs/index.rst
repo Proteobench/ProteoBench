@@ -8,7 +8,6 @@ Overview of ProteoBench
 
     About <self>
     Modules <modules/index.rst>
-    User guide <user-guide/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
     Changelog <changelog.rst>

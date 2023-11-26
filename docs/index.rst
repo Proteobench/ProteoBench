@@ -47,17 +47,3 @@ ProteoBench:
 5. **DOES NOT** point to a single best one-fits-all data analysis workflow
 6. **SHOULD NOT**  be used as evidence for generalized statements about a workflow’s performance
 7. **SHOULD NOT**  be used by developers as single performance measure of their workflow
-
-Organization
-============
-
-The ProteoBench project is divided into two main parts:
-
-Modules for Data Processing and Reporting
------------------------------------------
-These :doc:`developer-guide/api/proteobench/modules/index` process the data and generate reports.
-
-Web Interface for Result Visualization
---------------------------------------
-The :doc:`developer-guide/api/webinterface/index` displays the results and allows
-comparison with publicly available data.

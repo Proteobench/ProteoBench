@@ -47,3 +47,12 @@ ProteoBench:
 5. **DOES NOT** point to a single best one-fits-all data analysis workflow
 6. **SHOULD NOT**  be used as evidence for generalized statements about a workflow’s performance
 7. **SHOULD NOT**  be used by developers as single performance measure of their workflow
+
+Organization
+============
+
+ProteoBench documentation is divided into two main parts:
+
+The different :doc:`modules/index` that exist, how they evolve and how to used them.
+
+The :doc:`developer-guide/index` provides information on the structure of the project and how to contribute.

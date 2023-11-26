@@ -1,5 +1,14 @@
 # Benchmark module life cycle
 
+Anybody can propose a new benchmark module, and discuss on the validity of current modules. There are 6 phases in the benchmark modules life cycle:
+1. Module proposal
+2. Implementation
+3. Beta 
+4. Live
+5. Archived
+6. Withdrawn
+
+
 ## Proposal
 
 *Module proposals are not accepted yet. If you are interested, stay tuned.*

@@ -27,7 +27,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 |Fragment mass tolerance|0.02 Da|
 |Minimum peptide length|7 residues|
 
-### Important Tool-dependent settings
+### Important Tool-specific settings
 
 #### MaxQuant
 By default, MaxQuant uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**

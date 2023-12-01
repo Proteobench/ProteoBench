@@ -10,7 +10,7 @@ charge = "Charge"
 decoy = "Reverse"
 
 # Map numeric columns to experimental designu
-[replicate_mapper]
+[condition_mapper]
 STANDARD_NAME_1 = 1
 STANDARD_NAME_2 = 2
 STANDARD_NAME_3 = 3

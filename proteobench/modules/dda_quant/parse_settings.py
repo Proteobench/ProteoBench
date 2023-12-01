@@ -58,7 +58,7 @@ class ParseSettings:
         parse_settings = toml.load(PARSE_SETTINGS_FILES[input_format])
 
         self.mapper = parse_settings["mapper"]
-        self.replicate_mapper = parse_settings["replicate_mapper"]
+        self.condition_mapper = parse_settings["condition_mapper"]
         self.run_mapper = parse_settings["run_mapper"]
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
         self.species_dict = parse_settings["species_mapper"]

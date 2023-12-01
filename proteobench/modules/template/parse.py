@@ -23,7 +23,7 @@ class ParseInputs(ParseInputsInterface):
         df.rename(columns=parse_settings.mapper, inplace=True)
 
         standard_structure = {}
-        for k, v in parse_settings.replicate_mapper.items():
+        for k, v in parse_settings.condition_mapper.items():
             try:
                 standard_structure[v].append(k)
             except KeyError:

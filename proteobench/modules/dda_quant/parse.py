@@ -111,7 +111,7 @@ class ParseInputs(ParseInputsInterface):
         df.rename(columns=parse_settings.mapper, inplace=True)
 
         replicate_to_raw = {}
-        for k, v in parse_settings.replicate_mapper.items():
+        for k, v in parse_settings.condition_mapper.items():
             try:
                 replicate_to_raw[v].append(k)
             except KeyError:
@@ -132,7 +132,7 @@ class ParseInputs(ParseInputsInterface):
 
         # If there is "Raw file" then it is a long format, otherwise short format
         if "Raw file" not in parse_settings.mapper.values():
-            meltvars = parse_settings.replicate_mapper.keys()
+            meltvars = parse_settings.condition_mapper.keys()
             df = df.melt(
                 id_vars=list(set(df.columns).difference(set(meltvars))),
                 value_vars=meltvars,
@@ -140,8 +140,7 @@ class ParseInputs(ParseInputsInterface):
                 value_name="Intensity",
             )
 
-        # TODO replace with condition_mapper
-        df["replicate"] = df["Raw file"].map(parse_settings.replicate_mapper)
+        df["replicate"] = df["Raw file"].map(parse_settings.condition_mapper)
         df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)
 
         if parse_settings.apply_modifications_parser:

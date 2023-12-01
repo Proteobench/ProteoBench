@@ -5,7 +5,7 @@ sequence = "Sequence"
 "master_quant_peptide_ion_charge" = "Charge"
 
 
-[replicate_mapper]
+[condition_mapper]
 abundance_DDA_Condition_A_Sample_Alpha_01 = "A"
 abundance_DDA_Condition_A_Sample_Alpha_02 = "A"
 abundance_DDA_Condition_A_Sample_Alpha_03 = "A"

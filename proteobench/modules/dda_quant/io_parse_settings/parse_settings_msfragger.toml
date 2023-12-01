@@ -3,7 +3,7 @@
 Protein = "Proteins"
 Charge = "Charge"
 
-[replicate_mapper]
+[condition_mapper]
 "A_1 Intensity" = "A"
 "A_2 Intensity" = "A"
 "A_3 Intensity" = "A"

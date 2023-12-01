@@ -10,7 +10,7 @@ Please refer to the original publication for the full description of sample prep
 
 ## Metric calculation
 
-For each precursor ion (modified sequence + charge), we calculate the average signal per condition ("0" are replaced by NAs and missing values are ignored). The total number of unique precursor ions is reported on the *y*-axis, and the weighted sum of the mean absolute error from the expected ratio is reported on the *x*-axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation.
+For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file and condition. Then, we calculate the average signal per condition ("0" are replaced by NAs and missing values are ignored). The total number of unique precursor ions is reported on the *y*-axis, and the weighted sum of the mean absolute error from the expected ratio is reported on the *x*-axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation.
 
 ## How to use
 

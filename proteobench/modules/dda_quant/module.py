@@ -228,6 +228,16 @@ class Module(ModuleInterface):
         all_datapoints = all_datapoints.T.reset_index(drop=True)
         return all_datapoints
 
+    def obtain_all_data_point(self, all_datapoints):
+        """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
+        if not isinstance(all_datapoints, pd.DataFrame):
+            # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+            all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+
+        all_datapoints["old_new"] = "old"
+
+        return all_datapoints
+
     def benchmarking(
         self, input_file: str, input_format: str, user_input: dict, all_datapoints
     ) -> pd.DataFrame:

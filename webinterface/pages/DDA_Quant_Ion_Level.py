@@ -83,7 +83,7 @@ class StreamlitUI:
 
     def _main_page(self):
         """Format main page."""
-        st.title("Module 2: DDA quantification")
+        st.title("Module 1: DDA quantification - precursor ions")
         st.header("Description of the module")
         st.markdown(
             """
@@ -140,7 +140,7 @@ class StreamlitUI:
         with st.form(key="main_form"):
             st.subheader("Input files")
             st.markdown(
-            """
+                """
                     Remember: contaminant sequences are already present in the fasta file associated to this module. **Do not add other contaminants** to your search. This is important when using MaxQuant and MSFragger, among other tools.
                     """
             )

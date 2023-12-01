@@ -1,0 +1,8 @@
+[[pages]]
+path = "Home.py"
+name = "Home"
+icon = "🏠"
+
+[[pages]]
+path = "pages/DDA_Quant.py"
+name = "DDA Quant Ion Level"

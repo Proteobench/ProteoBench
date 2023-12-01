@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 
 import streamlit as st
+from st_pages import show_pages_from_config
 
 
 class StreamlitPage(ABC):
@@ -21,6 +22,7 @@ class StreamlitPage(ABC):
         self._preface()
         self._main_page()
         self._sidebar()
+        show_pages_from_config()
 
     def _preface(self):
         st.markdown(
@@ -43,6 +45,4 @@ class StreamlitPage(ABC):
 
     def _sidebar(self):
         """Format sidebar."""
-        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png",
-                         width=300)
-        
+        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png", width=300)

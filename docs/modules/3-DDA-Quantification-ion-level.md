@@ -1,4 +1,4 @@
-# Module 1: DDA quantification - precursor-ions
+# Module 1: DDA quantification - precursor ions
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the sassociated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
@@ -35,7 +35,8 @@ For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant s
 
 #### Proline
 Use the raw file names as sample names. In the output, it will automatically remove "LFQ_Orbitrap_". 
-For this module, use the .tsv exports “Quantified peptide ions”.
+For this module, use the excel exports. Make sure that the “Quantified peptide ions” tab contains the columns "samesets_accessions".
+The "Quantified peptide ions" tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation.
 
 #### AlphaPept
 1. Load folder that contains the data files.

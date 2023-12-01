@@ -174,6 +174,13 @@ class StreamlitUI:
         if FIG1 in st.session_state:
             self._populate_results()
 
+        if ALL_DATAPOINTS not in st.session_state:
+            st.session_state[ALL_DATAPOINTS] = None
+            all_datapoints = st.session_state[ALL_DATAPOINTS]
+            all_datapoints = Module().obtain_all_data_point(all_datapoints)
+            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            st.plotly_chart(fig2, use_container_width=True)
+
         if submit_button:
             if self.user_input["input_csv"]:
                 self._run_proteobench()

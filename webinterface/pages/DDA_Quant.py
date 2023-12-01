@@ -140,7 +140,7 @@ class StreamlitUI:
         with st.form(key="main_form"):
             st.subheader("Input files")
             st.markdown(
-            """
+                """
                     Remember: contaminant sequences are already present in the fasta file associated to this module. **Do not add other contaminants** to your search. This is important when using MaxQuant and MSFragger, among other tools.
                     """
             )
@@ -173,6 +173,13 @@ class StreamlitUI:
         # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
             self._populate_results()
+
+        if ALL_DATAPOINTS not in st.session_state:
+            st.session_state[ALL_DATAPOINTS] = None
+            all_datapoints = st.session_state[ALL_DATAPOINTS]
+            all_datapoints = Module().obtain_all_data_point(all_datapoints)
+            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            st.plotly_chart(fig2, use_container_width=True)
 
         if submit_button:
             if self.user_input["input_csv"]:

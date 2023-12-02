@@ -9,6 +9,40 @@ from proteobench.modules.dda_quant.parse_settings import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 
+def aggregate_modification_column(
+    input_string_seq: str,
+    input_string_modifications: str,
+    special_locations: dict = {
+        "Any N-term": 0,
+        "Any C-term": -1,
+        "Protein N-term": 0,
+        "Protein C-term": -1,
+    },
+):
+    all_mods = []
+    for m in input_string_modifications.split("; "):
+        if len(m) == 0:
+            continue
+        m_stripped = m.split(" (")[1].rstrip(")")
+        m_name = m.split(" (")[0]
+
+        if m_stripped in special_locations.keys():
+            if special_locations[m_stripped] == -1:
+                all_mods.append((m_name, len(input_string_seq)))
+            else:
+                all_mods.append((m_name, special_locations[m_stripped]))
+            continue
+
+        all_mods.append((m_name, int(m_stripped[1:])))
+
+    all_mods.sort(key=lambda x: x[1], reverse=True)
+
+    for name, loc in all_mods:
+        input_string_seq = input_string_seq[:loc] + f"[{name}]" + input_string_seq[loc:]
+
+    return input_string_seq
+
+
 def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):
     if isalpha and isupper:
         return sum(1 for char in input_string if char.isalpha() and char.isupper())

@@ -14,7 +14,10 @@ import streamlit as st
 
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import ParseInputs
+from proteobench.modules.dda_quant.parse import (
+    ParseInputs,
+    aggregate_modification_column,
+)
 from proteobench.modules.dda_quant.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     ParseSettings,
@@ -208,7 +211,17 @@ class Module(ModuleInterface):
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
             input_data_frame["proforma"] = input_data_frame["modified_peptide"]
         elif input_format == "Proline":
-            input_data_frame = pd.read_excel(input_csv, sheet_name="Quantified peptide ions", header = 0, index_col = None)
+            input_data_frame = pd.read_excel(
+                input_csv,
+                sheet_name="Quantified peptide ions",
+                header=0,
+                index_col=None,
+            )
+            input_data_frame["modifications"].fillna("", inplace=True)
+            input_data_frame["proforma"] = input_data_frame.apply(
+                lambda x: aggregate_modification_column(x.sequence, x.modifications),
+                axis=1,
+            )
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 

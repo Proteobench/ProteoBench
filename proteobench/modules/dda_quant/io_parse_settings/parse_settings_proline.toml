@@ -26,14 +26,6 @@ abundance_DDA_Condition_B_Sample_Alpha_03 = "B"
 "_ECOLI" = "ECOLI"
 "_HUMAN" = "HUMAN"
 
-[modifications_parser]
-"parse_column" = "Modified Sequence"
-"before_aa" = false
-"isalpha" = true
-"isupper" = true
-"pattern"="\\((.*?)\\)"
-"modification_dict" = {}
-
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = true

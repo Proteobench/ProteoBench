@@ -3,7 +3,7 @@
 "peptide" = "Sequence"
 "charge" = "Charge"
 
-[replicate_mapper]
+[condition_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML.gz" = "A"
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mzML.gz" = "A"
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.mzML.gz" = "A"

@@ -9,6 +9,41 @@ from proteobench.modules.dda_quant.parse_settings import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 
+# TODO this should be generalized further
+def aggregate_modification_column(
+    input_string_seq: str,
+    input_string_modifications: str,
+    special_locations: dict = {
+        "Any N-term": 0,
+        "Any C-term": -1,
+        "Protein N-term": 0,
+        "Protein C-term": -1,
+    },
+):
+    all_mods = []
+    for m in input_string_modifications.split("; "):
+        if len(m) == 0:
+            continue
+        m_stripped = m.split(" (")[1].rstrip(")")
+        m_name = m.split(" (")[0]
+
+        if m_stripped in special_locations.keys():
+            if special_locations[m_stripped] == -1:
+                all_mods.append((m_name, len(input_string_seq)))
+            else:
+                all_mods.append((m_name, special_locations[m_stripped]))
+            continue
+
+        all_mods.append((m_name, int(m_stripped[1:])))
+
+    all_mods.sort(key=lambda x: x[1], reverse=True)
+
+    for name, loc in all_mods:
+        input_string_seq = input_string_seq[:loc] + f"[{name}]" + input_string_seq[loc:]
+
+    return input_string_seq
+
+
 def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):
     if isalpha and isupper:
         return sum(1 for char in input_string if char.isalpha() and char.isupper())
@@ -111,7 +146,7 @@ class ParseInputs(ParseInputsInterface):
         df.rename(columns=parse_settings.mapper, inplace=True)
 
         replicate_to_raw = {}
-        for k, v in parse_settings.replicate_mapper.items():
+        for k, v in parse_settings.condition_mapper.items():
             try:
                 replicate_to_raw[v].append(k)
             except KeyError:
@@ -132,7 +167,7 @@ class ParseInputs(ParseInputsInterface):
 
         # If there is "Raw file" then it is a long format, otherwise short format
         if "Raw file" not in parse_settings.mapper.values():
-            meltvars = parse_settings.replicate_mapper.keys()
+            meltvars = parse_settings.condition_mapper.keys()
             df = df.melt(
                 id_vars=list(set(df.columns).difference(set(meltvars))),
                 value_vars=meltvars,
@@ -140,8 +175,7 @@ class ParseInputs(ParseInputsInterface):
                 value_name="Intensity",
             )
 
-        # TODO replace with condition_mapper
-        df["replicate"] = df["Raw file"].map(parse_settings.replicate_mapper)
+        df["replicate"] = df["Raw file"].map(parse_settings.condition_mapper)
         df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)
 
         if parse_settings.apply_modifications_parser:

@@ -49,7 +49,7 @@ class PlotDataPoint(ABC):
 @dataclass
 class Settings:
     mapper: str
-    replicate_mapper: str
+    condition_mapper: str
     decoy_flag: str
     species_dict: str
     contaminant_flag: str

@@ -2,7 +2,7 @@
 protein_group = "Proteins"
 "modified_peptide" = "Modified sequence"
 
-[replicate_mapper]
+[condition_mapper]
 abundance_A_1 = "A"
 abundance_A_2 = "A"
 abundance_A_3 = "A"

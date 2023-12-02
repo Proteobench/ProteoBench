@@ -9,6 +9,7 @@ from proteobench.modules.dda_quant.parse_settings import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 
+# TODO this should be generalized further
 def aggregate_modification_column(
     input_string_seq: str,
     input_string_modifications: str,

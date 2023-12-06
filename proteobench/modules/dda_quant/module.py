@@ -13,6 +13,7 @@ import pandas as pd
 import streamlit as st
 
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
+from proteobench.io.params import ProteoBenchParameters, fragger, maxquant, proline
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import (
     ParseInputs,
@@ -303,6 +304,7 @@ class Module(ModuleInterface):
     def clone_pr(
         self,
         temporary_datapoints,
+        datapoint_params,
         token,
         username="Proteobot",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
@@ -316,6 +318,7 @@ class Module(ModuleInterface):
         )
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
+        # TODO merge datapoint_params and current_datapoint
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         if not self.check_new_unique_hash(all_datapoints):
@@ -341,12 +344,16 @@ class Module(ModuleInterface):
             commit_message=commit_message,
         )
 
-    def write_json_local_development(self, temporary_datapoints):
+    def write_json_local_development(self, temporary_datapoints, datapoint_params):
         t_dir = TemporaryDirectory().name
         os.mkdir(t_dir)
 
         current_datapoint = temporary_datapoints.iloc[-1]
+        # print(current_datapoint)
+        # print("-----")
+        # print(datapoint_params.__dict__)
         current_datapoint["is_temporary"] = False
+        # TODO merge datapoint_params and current_datapoint
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         # TODO write below to logger instead of std.out
@@ -368,9 +375,33 @@ class Module(ModuleInterface):
         except:
             logging.warning(f"Could not make directory: {path_write}")
 
+        # TODO: save parameters file "locally" together with the raw and intermediate?
         outfile_param = open(os.path.join(path_write, "params.csv"), "w")
         outfile_param.write(str(param_loc.getvalue()))
         outfile_param.close()
 
         input_df.to_csv(os.path.join(path_write, "input_df.csv"))
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
+
+    def load_params_file(
+        self, input_file: str, input_format: str
+    ) -> ProteoBenchParameters:
+        """Method loads parameters from a metadata file depending on its format. TODO: Currently only supports MaxQuant, MSFragger, and Proline"""
+        params = ProteoBenchParameters()
+
+        if input_format == "MaxQuant":
+            params = maxquant.extract_params(input_file)
+        # elif input_format == "AlphaPept":
+        # params = alphapept.extract_params(input_file)
+        # elif input_format == "Sage":
+        # params = sage.extract_params(input_file)
+        elif input_format == "MSFragger":
+            params = fragger.extract_params(input_file)
+        # elif input_format == "WOMBAT":
+        # params = wombat.extract_params(input_file)
+        elif input_format == "Proline":
+            params = proline.extract_params(input_file)
+        # elif input_format == "Custom":
+        # input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+
+        return params

@@ -4,6 +4,7 @@ import json
 import logging
 from datetime import datetime
 
+from proteobench.io.params.maxquant import extract_params
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
     DDA_QUANT_RESULTS_PATH,
@@ -212,7 +213,7 @@ class StreamlitUI:
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
-                st.session_state["all_datapoints"],
+                st.session_state[ALL_DATAPOINTS],
             )
             st.session_state[ALL_DATAPOINTS] = all_datapoints
         except Exception as e:
@@ -303,6 +304,9 @@ class StreamlitUI:
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
             # TODO: update parameters of point to submit with parsed metadata parameters
+            params = Module().load_params_file(
+                self.user_input[META_DATA], self.user_input["input_format"]
+            )
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
@@ -310,6 +314,7 @@ class StreamlitUI:
                 if not LOCAL_DEVELOPMENT:
                     Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
+                        params,
                         st.secrets["gh"]["token"],
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
@@ -318,7 +323,7 @@ class StreamlitUI:
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
-                        st.session_state[ALL_DATAPOINTS]
+                        st.session_state[ALL_DATAPOINTS], params
                     )
 
                 id = str(

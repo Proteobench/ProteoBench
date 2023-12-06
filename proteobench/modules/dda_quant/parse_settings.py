@@ -37,7 +37,7 @@ INPUT_FORMATS = (
     "Custom",
 )
 
-LOCAL_DEVELOPMENT = False
+LOCAL_DEVELOPMENT = True
 
 # For local development change below to the json and path,
 # if you do not want to download it from github

@@ -22,6 +22,7 @@ dependencies = [
   "toml",
   "PyGithub",
   "GitPython",
+  "st-pages",
 ]
 dynamic = ["version", "description"]
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']

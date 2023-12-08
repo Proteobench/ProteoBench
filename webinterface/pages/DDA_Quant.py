@@ -312,7 +312,7 @@ class StreamlitUI:
                 st.session_state[SUBMIT] = True
                 user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
-                    Module().clone_pr(
+                    pr_url = Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
                         params,
                         st.secrets["gh"]["token"],
@@ -344,6 +344,8 @@ class StreamlitUI:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
+                st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
+
                 st.session_state[SUBMIT] = False
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 

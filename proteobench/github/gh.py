@@ -4,6 +4,8 @@ from tempfile import TemporaryDirectory
 import pandas as pd
 from git import Repo
 
+from github import Github
+
 
 def clone_repo_anon(
     clone_dir="K:/pb/",
@@ -37,20 +39,50 @@ def clone_repo(
 
 def pr_github(
     clone_dir="K:/pb/",
-    token="",
-    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+    token="YOUR_GITHUB_TOKEN",
+    remote_git="Proteobot/Results_Module2_quant_DDA",
     username="Proteobot",
     branch_name="test",
     commit_message="New commit",
+    repo_name="Proteobot/Results_Module2_quant_DDA",
 ):
-    remote = f"https://{username}:{token}@{remote_git}"
-    repo = Repo(clone_dir)
+    # Construct the remote URL with the token
+    remote_url = f"https://{username}:{token}@{remote_git}"
 
-    repo.git.pull()
+    # Clone the repository if it doesn't exist
+    try:
+        repo = Repo(clone_dir)
+    except:
+        repo = Repo.clone_from(remote_url, clone_dir)
 
-    current = repo.create_head(branch_name)
-    current.checkout()
+    # Fetch the latest changes from the remote
+    origin = repo.remote(name="origin")
+    origin.fetch()
 
+    # Create and checkout the new branch
+    current_branch = repo.create_head(branch_name)
+    current_branch.checkout()
+
+    # Stage all changes, commit, and push to the new branch
     repo.git.add(A=True)
-    repo.git.commit(m=commit_message)
-    repo.git.push("--set-upstream", "origin", current)
+    repo.index.commit(commit_message)
+    repo.git.push("--set-upstream", "origin", current_branch)
+
+    # Create a pull request using PyGithub
+    g = Github(token)
+    repo = g.get_repo(repo_name)
+    base = repo.get_branch("master")
+    head = f"{username}:{branch_name}"
+    title = commit_message
+    body = "Pull request body"
+
+    pr = repo.create_pull(
+        title=title,
+        body=body,
+        base=base.name,
+        head=head,
+    )
+
+    pr_number = pr.number
+    print(pr_number)
+    return pr_number

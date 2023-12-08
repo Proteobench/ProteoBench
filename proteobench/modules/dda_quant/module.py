@@ -335,7 +335,7 @@ class Module(ModuleInterface):
         f.close()
         commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
 
-        pr_github(
+        pr_id = pr_github(
             clone_dir=t_dir,
             token=token,
             remote_git=remote_git,
@@ -343,6 +343,8 @@ class Module(ModuleInterface):
             branch_name=branch_name,
             commit_message=commit_message,
         )
+
+        return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
 
     def write_json_local_development(self, temporary_datapoints, datapoint_params):
         t_dir = TemporaryDirectory().name

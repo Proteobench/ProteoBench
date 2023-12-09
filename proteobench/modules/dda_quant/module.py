@@ -40,6 +40,7 @@ class Module(ModuleInterface):
         min_intensity=0,
         precursor="peptidoform",
     ) -> pd.DataFrame:
+        """Method used to compute intermediate data structure for the provided result."""
         # convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
         replicate_to_raw_df = pd.DataFrame(
             replicate_to_raw.items(), columns=["Group", "Raw file"]
@@ -83,6 +84,8 @@ class Module(ModuleInterface):
                 log_Intensity_std=("log_Intensity", "std"),
                 Intensity_mean=("Intensity", "mean"),
                 Intensity_std=("Intensity", "std"),
+                Sum=("Intensity", "sum"),
+                Count=("Intensity", "size"),
             )
             .reset_index()
         )

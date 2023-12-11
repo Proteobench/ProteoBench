@@ -169,7 +169,6 @@ class Module(ModuleInterface):
         intermediate: pd.DataFrame,
         input_format: str,
         user_input: dict,
-        param_dict: dict = {},
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
@@ -194,8 +193,6 @@ class Module(ModuleInterface):
                 hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
             ),
         )
-
-        result_datapoint.change_vals(param_dict)
 
         result_datapoint.generate_id()
         result_datapoint.calculate_plot_data(intermediate)

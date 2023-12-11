@@ -165,7 +165,11 @@ class Module(ModuleInterface):
         return re.sub("([\(\[]).*?([\)\]])", "", seq)
 
     def generate_datapoint(
-        self, intermediate: pd.DataFrame, input_format: str, user_input: dict
+        self,
+        intermediate: pd.DataFrame,
+        input_format: str,
+        user_input: dict,
+        param_dict: dict = {},
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
@@ -190,6 +194,9 @@ class Module(ModuleInterface):
                 hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
             ),
         )
+
+        result_datapoint.change_vals(param_dict)
+
         result_datapoint.generate_id()
         result_datapoint.calculate_plot_data(intermediate)
         df = pd.Series(asdict(result_datapoint))
@@ -318,7 +325,9 @@ class Module(ModuleInterface):
         )
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
-        # TODO merge datapoint_params and current_datapoint
+        for k, v in datapoint_params.__dict__.items():
+            current_datapoint[k] = v
+
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         if not self.check_new_unique_hash(all_datapoints):
@@ -351,11 +360,12 @@ class Module(ModuleInterface):
         os.mkdir(t_dir)
 
         current_datapoint = temporary_datapoints.iloc[-1]
-        # print(current_datapoint)
-        # print("-----")
-        # print(datapoint_params.__dict__)
+
+        # Update parameters based on parsed params
+        for k, v in datapoint_params.__dict__.items():
+            current_datapoint[k] = v
+
         current_datapoint["is_temporary"] = False
-        # TODO merge datapoint_params and current_datapoint
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         # TODO write below to logger instead of std.out

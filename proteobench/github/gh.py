@@ -3,7 +3,6 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 from git import Repo
-
 from github import Github
 
 
@@ -84,5 +83,4 @@ def pr_github(
     )
 
     pr_number = pr.number
-    print(pr_number)
     return pr_number

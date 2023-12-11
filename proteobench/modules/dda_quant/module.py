@@ -13,13 +13,17 @@ import pandas as pd
 import streamlit as st
 
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
-from proteobench.io.params import ProteoBenchParameters, fragger, maxquant, proline
+from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
+from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import (
     ParseInputs,
     aggregate_modification_column,
 )
 from proteobench.modules.dda_quant.parse_settings import (
+    DDA_QUANT_RESULTS_PATH,
     DDA_QUANT_RESULTS_REPO,
     ParseSettings,
 )
@@ -32,6 +36,12 @@ class Module(ModuleInterface):
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
         return True
+
+    EXTRACT_PARAMS_DICT = {
+        "MaxQuant": extract_params_maxquant,
+        "Proline": extract_params_proline,
+        "AlphaPept": extract_params_alphapept,
+    }
 
     @staticmethod
     def generate_intermediate_V2(
@@ -174,21 +184,27 @@ class Module(ModuleInterface):
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
         result_datapoint = Datapoint(
-            id=input_format + "_" + user_input["version"] + "_" + formatted_datetime,
-            search_engine=input_format,
-            software_version=user_input["version"],
-            fdr_psm=user_input["fdr_psm"],
-            fdr_peptide=user_input["fdr_peptide"],
-            fdr_protein=user_input["fdr_protein"],
-            MBR=user_input["mbr"],
-            precursor_tol=user_input["precursor_mass_tolerance"],
-            precursor_tol_unit=user_input["precursor_mass_tolerance_unit"],
-            fragment_tol=user_input["fragment_mass_tolerance"],
-            fragment_tol_unit=user_input["fragment_mass_tolerance_unit"],
-            enzyme_name=user_input["search_enzyme_name"],
-            missed_cleavages=user_input["allowed_missed_cleavage"],
-            min_pep_length=user_input["min_peptide_length"],
-            max_pep_length=user_input["max_peptide_length"],
+            id=input_format
+            + "_"
+            + user_input["software_version"]
+            + "_"
+            + formatted_datetime,
+            software_name=input_format,
+            software_version=user_input["software_version"],
+            search_engine=user_input["search_engine"],
+            search_engine_version=user_input["search_engine_version"],
+            ident_fdr_psm=user_input["ident_fdr_psm"],
+            ident_fdr_peptide=user_input["ident_fdr_peptide"],
+            ident_fdr_protein=user_input["ident_fdr_protein"],
+            enable_match_between_runs=user_input["enable_match_between_runs"],
+            precursor_mass_tolerance=user_input["precursor_mass_tolerance"],
+            precursor_mass_tolerance_unit=user_input["precursor_mass_tolerance_unit"],
+            fragment_mass_tolerance=user_input["fragment_mass_tolerance"],
+            fragment_mass_tolerance_unit=user_input["fragment_mass_tolerance_unit"],
+            enzyme=user_input["enzyme"],
+            allowed_miscleavages=user_input["allowed_miscleavages"],
+            min_peptide_length=user_input["min_peptide_length"],
+            max_peptide_length=user_input["max_peptide_length"],
             intermediate_hash=int(
                 hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
             ),
@@ -323,6 +339,8 @@ class Module(ModuleInterface):
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
+            if k == "software_name":
+                continue
             current_datapoint[k] = v
 
         all_datapoints = self.add_current_data_point(None, current_datapoint)
@@ -360,6 +378,8 @@ class Module(ModuleInterface):
 
         # Update parameters based on parsed params
         for k, v in datapoint_params.__dict__.items():
+            if k == "software_name":
+                continue
             current_datapoint[k] = v
 
         current_datapoint["is_temporary"] = False
@@ -396,21 +416,5 @@ class Module(ModuleInterface):
         self, input_file: str, input_format: str
     ) -> ProteoBenchParameters:
         """Method loads parameters from a metadata file depending on its format. TODO: Currently only supports MaxQuant, MSFragger, and Proline"""
-        params = ProteoBenchParameters()
-
-        if input_format == "MaxQuant":
-            params = maxquant.extract_params(input_file)
-        # elif input_format == "AlphaPept":
-        # params = alphapept.extract_params(input_file)
-        # elif input_format == "Sage":
-        # params = sage.extract_params(input_file)
-        elif input_format == "MSFragger":
-            params = fragger.extract_params(input_file)
-        # elif input_format == "WOMBAT":
-        # params = wombat.extract_params(input_file)
-        elif input_format == "Proline":
-            params = proline.extract_params(input_file)
-        # elif input_format == "Custom":
-        # input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-
+        params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
         return params

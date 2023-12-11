@@ -4,7 +4,6 @@ import json
 import logging
 from datetime import datetime
 
-from proteobench.io.params.maxquant import extract_params
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
     DDA_QUANT_RESULTS_PATH,
@@ -266,8 +265,8 @@ class StreamlitUI:
 
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
-            self.user_input["version"],
-            self.user_input["mbr"],
+            self.user_input["software_version"],
+            self.user_input["enable_match_between_runs"],
             time_stamp,
         )
 
@@ -300,13 +299,24 @@ class StreamlitUI:
         )
         checkbox = st.checkbox("I confirm that the metadata is correct")
 
-        if checkbox and self.user_input[META_DATA]:
+        if (
+            checkbox
+            and self.user_input[META_DATA]
+            # TODO: how to handle missing parsers for meta files
+            and self.user_input["input_format"] in Module().EXTRACT_PARAMS_DICT
+        ):
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
             # TODO: update parameters of point to submit with parsed metadata parameters
-            params = Module().load_params_file(
-                self.user_input[META_DATA], self.user_input["input_format"]
-            )
+            # TODO: How to handle issues with the meta file?
+            try:
+                params = Module().load_params_file(
+                    self.user_input[META_DATA], self.user_input["input_format"]
+                )
+            except KeyError as e:
+                # status_placeholder.error(":x: Meta parameter file cannot be read")
+                st.exception(e)
+
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True

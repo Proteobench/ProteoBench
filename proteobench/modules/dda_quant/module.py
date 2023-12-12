@@ -33,40 +33,76 @@ class Module(ModuleInterface):
         return True
 
     @staticmethod
-    def generate_intermediate_V2(
-        filtered_df,
-        replicate_to_raw: dict,
-        parse_settings: ParseSettings,
-        min_intensity=0,
-        precursor="peptidoform",
-    ) -> pd.DataFrame:
-        """Method used to compute intermediate data structure for the provided result."""
-        # convert replicate_to_raw into dataframe where key values are in a column "Group" and values are in another column "Raw file"
+    def convert_replicate_to_raw(replicate_to_raw: dict) -> pd.DataFrame:
+        """Converts replicate_to_raw dictionary into a dataframe."""
         replicate_to_raw_df = pd.DataFrame(
             replicate_to_raw.items(), columns=["Group", "Raw file"]
         )
-        # since there are several Raw files per Group we need to split them into different rows
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
+        return replicate_to_raw_df
 
-        filtered_df_p1 = filtered_df[["Raw file", precursor, "Intensity"]].copy()
-        # remove all rows where Intensity below min_intensity
-        filtered_df_p1 = filtered_df_p1[filtered_df_p1["Intensity"] >= min_intensity]
+    def generate_intermediate(
+        self,
+        filtered_df: pd.DataFrame,
+        replicate_to_raw: dict,
+        parse_settings: ParseSettings,
+    ) -> pd.DataFrame:
+        # select columns which are relavant for the statistics
+        precursor = "peptidoform"
+        relevant_columns_df = filtered_df[["Raw file", precursor, "Intensity"]].copy()
+        replicate_to_raw_df = Module.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
-        filtered_df_p1 = pd.merge(
-            filtered_df_p1, replicate_to_raw_df, on="Raw file", how="inner"
+        relevant_columns_df = pd.merge(
+            relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner"
         )
 
-        # how many disinct combinations by row of distinct precursor, "Raw file" and "Group" in filtered_df_p1
-        filtered_df_p1_check = filtered_df_p1[["Raw file", precursor, "Group"]].copy()
-        filtered_df_p1_check = filtered_df_p1_check.drop_duplicates()
-        filtered_df_p1_check = filtered_df_p1_check.shape[0]
-        # sum intensity values of the same peptide and "Raw file" using the sum
+        quant_df = Module.compute_group_stats(
+            relevant_columns_df,
+            min_intensity=0,
+            precursor=precursor,
+        )
+
+        species_peptidoform = list(parse_settings.species_dict.values())
+        species_peptidoform.append(precursor)
+        peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
+        # merge dataframes quant_df and species_quant_df and peptidoform_to_species using pepdidoform as index
+        quant_df_withspecies = pd.merge(
+            quant_df, peptidoform_to_species, on="peptidoform", how="inner"
+        )
+        species_expected_ratio = parse_settings.species_expected_ratio
+        res = Module.compute_epsilon(quant_df_withspecies, species_expected_ratio)
+        return res
+
+    @staticmethod
+    def compute_group_stats(
+        relevant_columns_df: pd.DataFrame,
+        min_intensity=0,
+        precursor="peptidoform",
+    ) -> pd.DataFrame:
+        """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
+
+        # fiter for min_intensity
+        relevant_columns_df = relevant_columns_df[
+            relevant_columns_df["Intensity"] >= min_intensity
+        ]
+
+        # TODO: check if this is still needed
+        # sum intensity values of the same precursor and "Raw file" using the sum
         quant_raw_df_int = (
-            filtered_df_p1.groupby([precursor, "Raw file", "Group"])["Intensity"]
+            relevant_columns_df.groupby([precursor, "Raw file", "Group"])["Intensity"]
             .agg(Intensity="sum", Count="size")
             .reset_index()
         )
+
+        # add column "log_Intensity" to quant_raw_df
+        quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
+
+        # compute the mean of the log_Intensity per precursor and "Group"
+        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(
+            Count=("Raw file", "size")
+        )
+        count_frequencies = quant_raw_df_count["Count"].value_counts()
 
         # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
 
@@ -74,9 +110,6 @@ class Module(ModuleInterface):
             index=precursor, columns="Raw file", values="Intensity"
         ).reset_index()
 
-        # add column "log_Intensity" to quant_raw_df
-        quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
-        # comopute the mean of the log_Intensity per precursor and "Group"
         quant_raw_df = (
             quant_raw_df_int.groupby([precursor, "Group"])
             .agg(
@@ -115,26 +148,19 @@ class Module(ModuleInterface):
         quant_raw_df["log2_A_vs_B"] = (
             quant_raw_df["log_Intensity_mean_A"] - quant_raw_df["log_Intensity_mean_B"]
         )
+
         quant_raw_df = pd.merge(
             quant_raw_df, intensities_wide, on="peptidoform", how="inner"
+        )
+        quant_raw_df = pd.merge(
+            quant_raw_df, count_frequencies, on="peptidoform", how="inner"
         )
         return quant_raw_df
 
     @staticmethod
-    def generate_intermediate_V3(filtered_df, quant_df, parse_settings):
-        species_peptidoform = list(parse_settings.species_dict.values())
-        species_peptidoform.append("peptidoform")
-        peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
-
-        # merge dataframes quant_df and species_quant_df and peptidoform_to_species using pepdidoform as index
-        withspecies = pd.merge(
-            quant_df, peptidoform_to_species, on="peptidoform", how="inner"
-        )
-        species_expected_ratio = parse_settings.species_expected_ratio
+    def compute_epsilon(withspecies, species_expected_ratio):
         # for all columns named parse_settings.species_dict.values() compute the sum over the rows and add it to a new column "unique"
-        withspecies["unique"] = withspecies[parse_settings.species_dict.values()].sum(
-            axis=1
-        )
+        withspecies["unique"] = withspecies[species_expected_ratio.keys()].sum(axis=1)
         # create a list tabulating how many entries in withspecies["unique"] are 1,2,3,4,5,6
         unique_counts = withspecies["unique"].value_counts()
 
@@ -142,7 +168,7 @@ class Module(ModuleInterface):
         withspecies = withspecies[withspecies["unique"] == 1]
 
         # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
-        for species in parse_settings.species_dict.values():
+        for species in species_expected_ratio.keys():
             withspecies.loc[withspecies[species] == True, "species"] = species
             withspecies.loc[
                 withspecies[species] == True, "expectedRatio"
@@ -152,15 +178,6 @@ class Module(ModuleInterface):
             withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
         )
         return withspecies
-
-    def generate_intermediate(
-        self, filtered_df, replicate_to_raw: dict, parse_settings: ParseSettings
-    ) -> pd.DataFrame:
-        res = Module.generate_intermediate_V2(
-            filtered_df, replicate_to_raw, parse_settings
-        )
-        res = Module.generate_intermediate_V3(filtered_df, res, parse_settings)
-        return res
 
     def strip_sequence_wombat(self, seq: str) -> str:
         """Remove parts of the peptide sequence that contain modifications."""

@@ -299,23 +299,26 @@ class StreamlitUI:
         )
         checkbox = st.checkbox("I confirm that the metadata is correct")
 
-        if (
-            checkbox
-            and self.user_input[META_DATA]
-            # TODO: how to handle missing parsers for meta files
-            and self.user_input["input_format"] in Module().EXTRACT_PARAMS_DICT
-        ):
-            st.session_state["submission_ready"] = True
-            submit_pr = st.button("I really want to upload it")
-            # TODO: update parameters of point to submit with parsed metadata parameters
-            # TODO: How to handle issues with the meta file?
+        # TODO: do we need a better handling of this?
+        params = None
+        if self.user_input[META_DATA]:
             try:
                 params = Module().load_params_file(
                     self.user_input[META_DATA], self.user_input["input_format"]
                 )
             except KeyError as e:
-                # status_placeholder.error(":x: Meta parameter file cannot be read")
-                st.exception(e)
+                st.error(
+                    "Parsing of meta parameters file for this software is not supported yet."
+                )
+            except Exception as err:
+                input_f = self.user_input["input_format"]
+                st.error(
+                    f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
+                )
+
+        if checkbox and params != None:
+            st.session_state["submission_ready"] = True
+            submit_pr = st.button("I really want to upload it")
 
             # submit_pr = False
             if submit_pr:

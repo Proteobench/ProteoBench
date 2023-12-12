@@ -1,0 +1,393 @@
+calibration:
+  calib_mob_range: 0.3
+  calib_mz_range: 2000
+  calib_n_neighbors: 100
+  calib_rt_range: 0.5
+  outlier_std: 3
+experiment:
+  database_path: /home/alphapept/processing_challenge/database.hdf
+  fasta_paths:
+  - /home/alphapept/processing_challenge/combinedForSearch_ModuleDDA_quan.fasta
+  file_paths:
+  - /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw
+  - /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw
+  - /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw
+  - /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw
+  - /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw
+  - /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw
+  fraction:
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  matching_group:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  results_path: /home/alphapept/processing_challenge/results.hdf
+  sample_group:
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03
+  shortnames:
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03
+failed:
+  calibrate_hdf: []
+  find_features: []
+  raw_conversion: []
+  score_hdf: []
+  search_db: []
+  search_db_2: []
+fasta:
+  AL_swap: false
+  KR_swap: false
+  fasta_block: 1000
+  fasta_size_max: 100
+  isoforms_max: 1024
+  mods_fixed:
+  - cC
+  mods_fixed_terminal: []
+  mods_fixed_terminal_prot: []
+  mods_variable:
+  - oxM
+  mods_variable_terminal: []
+  mods_variable_terminal_prot:
+  - a<^
+  n_missed_cleavages: 2
+  n_modifications_max: 3
+  pep_length_max: 27
+  pep_length_min: 7
+  protease: trypsin
+  pseudo_reverse: true
+  save_db: true
+  spectra_block: 100000
+features:
+  centroid_tol: 8
+  hill_check_large: 40
+  hill_length_min: 3
+  hill_nboot: 150
+  hill_nboot_max: 300
+  hill_smoothing: 1
+  hill_split_level: 1.3
+  iso_charge_max: 6
+  iso_charge_min: 1
+  iso_corr_min: 0.6
+  iso_mass_range: 5
+  iso_n_seeds: 100
+  iso_split_level: 1.3
+  map_mob_range: 0.3
+  map_mz_range: 1.5
+  map_n_neighbors: 5
+  map_rt_range: 0.5
+  max_gap: 2
+  search_unidentified: false
+general:
+  modfile_hash: c5a35c77af837322c672586ce65695c9
+  n_processes: 60
+matching:
+  match_d_min: 3
+  match_group_tol: 0
+  match_p_min: 0.05
+quantification:
+  lfq_ratio_min: 1
+  max_lfq: true
+  mode: ms1_int_sum_apex
+raw:
+  n_most_abundant: 400
+  use_profile_ms1: false
+score:
+  method: random_forest
+search:
+  calibrate: true
+  calibration_std_frag: 5
+  calibration_std_prec: 5
+  frag_tol: 50
+  min_frag_hits: 7
+  parallel: true
+  peptide_fdr: 0.01
+  ppm: true
+  prec_tol: 20
+  protein_fdr: 0.01
+  recalibration_min: 100
+summary:
+  LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01:
+    acquisition_date_time: '2021-02-15T21:12:15.1229978Z'
+    feature_cluster_mapping (n in table): 438670
+    feature_table (n in table): 165602
+    feature_table_idx (n in table): 37641628
+    features (n in table): 267813
+    first_search (n in table): 454194
+    fragment_ions (n in table): 2148384
+    fwhm (feature_table, median): 0.12623177777778238
+    fwhm (peptide_fdr, median): 0.20272416161616036
+    fwhm (protein_fdr, median): 0.20314581818182376
+    id_rate (0.01): 0.16
+    identifications (n in table): 90666
+    ms1_int_max_apex (feature_table, median): 844654.0
+    ms1_int_max_apex (peptide_fdr, median): 2336117.0
+    ms1_int_max_apex (protein_fdr, median): 2362316.0
+    ms1_int_max_area (feature_table, median): 112547.37615274914
+    ms1_int_max_area (peptide_fdr, median): 500624.62272100535
+    ms1_int_max_area (protein_fdr, median): 507627.9758549973
+    ms1_int_sum_apex (feature_table, median): 1396117.0101404912
+    ms1_int_sum_apex (peptide_fdr, median): 4623983.026912997
+    ms1_int_sum_apex (protein_fdr, median): 4700047.711603966
+    ms1_int_sum_area (feature_table, median): 179186.34458981827
+    ms1_int_sum_area (peptide_fdr, median): 987189.932214783
+    ms1_int_sum_area (protein_fdr, median): 1006590.1215038294
+    peptide_fdr (n in table): 35060
+    prec_offset_ppm (peptide_fdr, median): -5.89969033626403e-07
+    prec_offset_ppm (protein_fdr, median): -5.895853973925114e-07
+    prec_offset_raw_ppm (peptide_fdr, median): 0.44801682233810425
+    prec_offset_raw_ppm (protein_fdr, median): 0.454866498708725
+    precursor (protein_fdr, n unique): 33307
+    protein (protein_fdr, n unique): 5279
+    protein_group (protein_fdr, n unique): 5279
+    rt_length (feature_table, median): 0.26126634343434674
+    rt_tail (feature_table, median): 1.1590909090909585
+    second_search (n in table): 137437
+    sequence (protein_fdr, n unique): 30242
+    sequence_naked (protein_fdr, n unique): 29434
+  LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02:
+    acquisition_date_time: '2021-02-17T05:58:09.9313599Z'
+    feature_cluster_mapping (n in table): 490116
+    feature_table (n in table): 182019
+    feature_table_idx (n in table): 36934614
+    features (n in table): 269330
+    first_search (n in table): 588859
+    fragment_ions (n in table): 2868074
+    fwhm (feature_table, median): 0.10678636363637395
+    fwhm (peptide_fdr, median): 0.2029154343434385
+    fwhm (protein_fdr, median): 0.20294414141415018
+    id_rate (0.01): 0.23
+    identifications (n in table): 105131
+    ms1_int_max_apex (feature_table, median): 1091019.0
+    ms1_int_max_apex (peptide_fdr, median): 2947208.0
+    ms1_int_max_apex (protein_fdr, median): 2969663.0
+    ms1_int_max_area (feature_table, median): 124483.75116599361
+    ms1_int_max_area (peptide_fdr, median): 619675.2671249988
+    ms1_int_max_area (protein_fdr, median): 624143.199694999
+    ms1_int_sum_apex (feature_table, median): 1846733.9274262264
+    ms1_int_sum_apex (peptide_fdr, median): 5814098.347923319
+    ms1_int_sum_apex (protein_fdr, median): 5885988.774501283
+    ms1_int_sum_area (feature_table, median): 202082.9838195806
+    ms1_int_sum_area (peptide_fdr, median): 1205227.0687600963
+    ms1_int_sum_area (protein_fdr, median): 1220265.7854634204
+    peptide_fdr (n in table): 35725
+    prec_offset_ppm (peptide_fdr, median): -5.982350899103039e-07
+    prec_offset_ppm (protein_fdr, median): -5.976991133138654e-07
+    prec_offset_raw_ppm (peptide_fdr, median): 0.4017564058303833
+    prec_offset_raw_ppm (protein_fdr, median): 0.4127162992954254
+    precursor (protein_fdr, n unique): 34284
+    protein (protein_fdr, n unique): 5319
+    protein_group (protein_fdr, n unique): 5319
+    rt_length (feature_table, median): 0.22284888888888332
+    rt_tail (feature_table, median): 1.1521739130434867
+    second_search (n in table): 181774
+    sequence (protein_fdr, n unique): 30654
+    sequence_naked (protein_fdr, n unique): 29768
+  LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03:
+    acquisition_date_time: '2021-02-18T22:31:16.2898136Z'
+    feature_cluster_mapping (n in table): 388797
+    feature_table (n in table): 144932
+    feature_table_idx (n in table): 36996665
+    features (n in table): 298727
+    first_search (n in table): 642138
+    fragment_ions (n in table): 3252433
+    fwhm (feature_table, median): 0.18050616161616517
+    fwhm (peptide_fdr, median): 0.23415876767676735
+    fwhm (protein_fdr, median): 0.2344743232323232
+    id_rate (0.01): 0.26
+    identifications (n in table): 117226
+    ms1_int_max_apex (feature_table, median): 1226170.0
+    ms1_int_max_apex (peptide_fdr, median): 2952926.0
+    ms1_int_max_apex (protein_fdr, median): 2974708.5
+    ms1_int_max_area (feature_table, median): 214662.9903085017
+    ms1_int_max_area (peptide_fdr, median): 732499.0719202487
+    ms1_int_max_area (protein_fdr, median): 739024.1325862431
+    ms1_int_sum_apex (feature_table, median): 2024339.101863
+    ms1_int_sum_apex (peptide_fdr, median): 5788108.372898562
+    ms1_int_sum_apex (protein_fdr, median): 5870760.345829593
+    ms1_int_sum_area (feature_table, median): 348704.6126305632
+    ms1_int_sum_area (peptide_fdr, median): 1449997.8613120955
+    ms1_int_sum_area (protein_fdr, median): 1472705.9034050903
+    peptide_fdr (n in table): 37100
+    prec_offset_ppm (peptide_fdr, median): -6.529426173074171e-07
+    prec_offset_ppm (protein_fdr, median): -6.512607910735824e-07
+    prec_offset_raw_ppm (peptide_fdr, median): 0.48788803815841675
+    prec_offset_raw_ppm (protein_fdr, median): 0.49879640340805054
+    precursor (protein_fdr, n unique): 35645
+    protein (protein_fdr, n unique): 5416
+    protein_group (protein_fdr, n unique): 5416
+    rt_length (feature_table, median): 0.33942324242423894
+    rt_tail (feature_table, median): 1.1707317073170755
+    second_search (n in table): 207722
+    sequence (protein_fdr, n unique): 31579
+    sequence_naked (protein_fdr, n unique): 30644
+  LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01:
+    acquisition_date_time: '2021-02-16T00:35:33.4711979Z'
+    feature_cluster_mapping (n in table): 422957
+    feature_table (n in table): 159696
+    feature_table_idx (n in table): 38266599
+    features (n in table): 282141
+    first_search (n in table): 472753
+    fragment_ions (n in table): 2339045
+    fwhm (feature_table, median): 0.1479760151515137
+    fwhm (peptide_fdr, median): 0.22121849494948975
+    fwhm (protein_fdr, median): 0.2216950909090869
+    id_rate (0.01): 0.17
+    identifications (n in table): 97913
+    ms1_int_max_apex (feature_table, median): 761059.0
+    ms1_int_max_apex (peptide_fdr, median): 2168794.0
+    ms1_int_max_apex (protein_fdr, median): 2192301.0
+    ms1_int_max_area (feature_table, median): 113011.02941624864
+    ms1_int_max_area (peptide_fdr, median): 507020.0490622483
+    ms1_int_max_area (protein_fdr, median): 515177.21989950276
+    ms1_int_sum_apex (feature_table, median): 1240894.3861163845
+    ms1_int_sum_apex (peptide_fdr, median): 4309569.974162634
+    ms1_int_sum_apex (protein_fdr, median): 4386704.252986056
+    ms1_int_sum_area (feature_table, median): 178141.18505316257
+    ms1_int_sum_area (peptide_fdr, median): 1008435.8474547872
+    ms1_int_sum_area (protein_fdr, median): 1027178.6029087919
+    peptide_fdr (n in table): 35860
+    prec_offset_ppm (peptide_fdr, median): -5.915183010074543e-07
+    prec_offset_ppm (protein_fdr, median): -5.871704047422099e-07
+    prec_offset_raw_ppm (peptide_fdr, median): 0.43428438901901245
+    prec_offset_raw_ppm (protein_fdr, median): 0.44429290294647217
+    precursor (protein_fdr, n unique): 34304
+    protein (protein_fdr, n unique): 5277
+    protein_group (protein_fdr, n unique): 5277
+    rt_length (feature_table, median): 0.28941702020201454
+    rt_tail (feature_table, median): 1.1818181818181683
+    second_search (n in table): 150560
+    sequence (protein_fdr, n unique): 30830
+    sequence_naked (protein_fdr, n unique): 29841
+  LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02:
+    acquisition_date_time: '2021-02-17T17:08:43.6657345Z'
+    feature_cluster_mapping (n in table): 420122
+    feature_table (n in table): 160015
+    feature_table_idx (n in table): 43445155
+    features (n in table): 297720
+    first_search (n in table): 546310
+    fragment_ions (n in table): 2640669
+    fwhm (feature_table, median): 0.1657121616161703
+    fwhm (peptide_fdr, median): 0.2420684848484811
+    fwhm (protein_fdr, median): 0.24239437373737616
+    id_rate (0.01): 0.2
+    identifications (n in table): 105030
+    ms1_int_max_apex (feature_table, median): 804525.0
+    ms1_int_max_apex (peptide_fdr, median): 2287129.0
+    ms1_int_max_apex (protein_fdr, median): 2309060.0
+    ms1_int_max_area (feature_table, median): 127269.71073899744
+    ms1_int_max_area (peptide_fdr, median): 589055.1713864943
+    ms1_int_max_area (protein_fdr, median): 596105.1278289948
+    ms1_int_sum_apex (feature_table, median): 1320877.302977677
+    ms1_int_sum_apex (peptide_fdr, median): 4494544.66858951
+    ms1_int_sum_apex (protein_fdr, median): 4564185.635985839
+    ms1_int_sum_area (feature_table, median): 202527.9342573708
+    ms1_int_sum_area (peptide_fdr, median): 1155869.2869869529
+    ms1_int_sum_area (protein_fdr, median): 1177593.0371076728
+    peptide_fdr (n in table): 35375
+    prec_offset_ppm (peptide_fdr, median): -6.740981461916817e-07
+    prec_offset_ppm (protein_fdr, median): -6.74145837820106e-07
+    prec_offset_raw_ppm (peptide_fdr, median): 0.49986252188682556
+    prec_offset_raw_ppm (protein_fdr, median): 0.510723352432251
+    precursor (protein_fdr, n unique): 34164
+    protein (protein_fdr, n unique): 5192
+    protein_group (protein_fdr, n unique): 5192
+    rt_length (feature_table, median): 0.3026909090909129
+    rt_tail (feature_table, median): 1.1500000000000123
+    second_search (n in table): 170273
+    sequence (protein_fdr, n unique): 30330
+    sequence_naked (protein_fdr, n unique): 29299
+  LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03:
+    acquisition_date_time: '2021-02-19T01:54:34.5516971Z'
+    feature_cluster_mapping (n in table): 399472
+    feature_table (n in table): 148953
+    feature_table_idx (n in table): 37870929
+    features (n in table): 303009
+    first_search (n in table): 620353
+    fragment_ions (n in table): 3129119
+    fwhm (feature_table, median): 0.1805095959595988
+    fwhm (peptide_fdr, median): 0.237176969696975
+    fwhm (protein_fdr, median): 0.23747596969697327
+    id_rate (0.01): 0.25
+    identifications (n in table): 117036
+    ms1_int_max_apex (feature_table, median): 1071251.0
+    ms1_int_max_apex (peptide_fdr, median): 2711603.0
+    ms1_int_max_apex (protein_fdr, median): 2730784.0
+    ms1_int_max_area (feature_table, median): 188128.80485600044
+    ms1_int_max_area (peptide_fdr, median): 682523.0138275052
+    ms1_int_max_area (protein_fdr, median): 688575.141182492
+    ms1_int_sum_apex (feature_table, median): 1774145.218433667
+    ms1_int_sum_apex (peptide_fdr, median): 5378542.6572872065
+    ms1_int_sum_apex (protein_fdr, median): 5446152.496879385
+    ms1_int_sum_area (feature_table, median): 305880.1365647374
+    ms1_int_sum_area (peptide_fdr, median): 1355160.395593183
+    ms1_int_sum_area (protein_fdr, median): 1375114.4792273701
+    peptide_fdr (n in table): 38249
+    prec_offset_ppm (peptide_fdr, median): -6.402689791684679e-07
+    prec_offset_ppm (protein_fdr, median): -6.399289986802614e-07
+    prec_offset_raw_ppm (peptide_fdr, median): 0.5020662546157837
+    prec_offset_raw_ppm (protein_fdr, median): 0.5113118290901184
+    precursor (protein_fdr, n unique): 36192
+    protein (protein_fdr, n unique): 5415
+    protein_group (protein_fdr, n unique): 5415
+    rt_length (feature_table, median): 0.33933919191917994
+    rt_tail (feature_table, median): 1.1666666666666436
+    second_search (n in table): 202816
+    sequence (protein_fdr, n unique): 32135
+    sequence_naked (protein_fdr, n unique): 30873
+  file_sizes:
+    files:
+      /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.ms_data.hdf: 2294.0040550231934
+      /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.ms_data.hdf: 2556.17316532135
+      /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.ms_data.hdf: 2664.7953567504883
+      /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.ms_data.hdf: 2352.241373062134
+      /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.ms_data.hdf: 2659.7218141555786
+      /home/alphapept/processing_challenge/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.ms_data.hdf: 2636.2522497177124
+    results: 375.19372272491455
+  processed_files:
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw
+  - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw
+  - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw
+  time: '2023-02-07 12:17:58.889918'
+  timing:
+    create_database (min): 3.5521597623825074
+    feature_finding (min): 8.045105290412902
+    import_raw_data (min): 5.708554915587107
+    isobaric_labeling (min): 2.094109853108724e-06
+    protein_grouping (min): 0.10644924640655518
+    quantification (min): 1.845250387986501
+    recalibrate_data (min): 2.120876407623291
+    score (min): 2.3479329705238343
+    search_data (min): 4.872584227720896
+    search_data_2 (min): 2.499837418397268
+    total (min): 31.098779396216074
+  version: 0.4.9
+workflow:
+  align: false
+  continue_runs: false
+  create_database: true
+  find_features: true
+  import_raw_data: true
+  lfq_quantification: true
+  match: false
+  recalibrate_data: true
+  search_data: true

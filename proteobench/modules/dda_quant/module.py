@@ -11,6 +11,7 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
+
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import (
@@ -47,8 +48,10 @@ class Module(ModuleInterface):
         parse_settings: ParseSettings,
     ) -> pd.DataFrame:
         # select columns which are relavant for the statistics
-        precursor = "peptidoform"
-        relevant_columns_df = filtered_df[["Raw file", precursor, "Intensity"]].copy()
+        PRECURSOR_NAME = "peptidoform"
+        relevant_columns_df = filtered_df[
+            ["Raw file", PRECURSOR_NAME, "Intensity"]
+        ].copy()
         replicate_to_raw_df = Module.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
@@ -59,11 +62,11 @@ class Module(ModuleInterface):
         quant_df = Module.compute_group_stats(
             relevant_columns_df,
             min_intensity=0,
-            precursor=precursor,
+            precursor=PRECURSOR_NAME,
         )
 
         species_peptidoform = list(parse_settings.species_dict.values())
-        species_peptidoform.append(precursor)
+        species_peptidoform.append(PRECURSOR_NAME)
         peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and peptidoform_to_species using pepdidoform as index
         quant_df_withspecies = pd.merge(

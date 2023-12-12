@@ -11,7 +11,6 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
-
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import (
@@ -299,7 +298,7 @@ class Module(ModuleInterface):
 
         # TODO check why there are NA and inf/-inf values
         return (
-            intermediate_data_structure.fillna(0.0).replace([np.inf, -np.inf], 0),
+            intermediate_data_structure,
             all_datapoints,
             input_df,
         )

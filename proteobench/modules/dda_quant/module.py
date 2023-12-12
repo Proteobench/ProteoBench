@@ -11,7 +11,6 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
-
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.modules.dda_quant.datapoint import Datapoint
 from proteobench.modules.dda_quant.parse import (
@@ -102,7 +101,6 @@ class Module(ModuleInterface):
         quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(
             Count=("Raw file", "size")
         )
-        count_frequencies = quant_raw_df_count["Count"].value_counts()
 
         # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
 
@@ -129,7 +127,7 @@ class Module(ModuleInterface):
         )
         # pivot dataframe wider so for each Group variable there is a column with log_Intensity_mean, log_Intensity_std, Intensity_mean, Intensity_std and CV
         quant_raw_df = quant_raw_df.pivot(
-            index="peptidoform",
+            index=precursor,
             columns="Group",
             values=[
                 "log_Intensity_mean",
@@ -150,10 +148,10 @@ class Module(ModuleInterface):
         )
 
         quant_raw_df = pd.merge(
-            quant_raw_df, intensities_wide, on="peptidoform", how="inner"
+            quant_raw_df, intensities_wide, on=precursor, how="inner"
         )
         quant_raw_df = pd.merge(
-            quant_raw_df, count_frequencies, on="peptidoform", how="inner"
+            quant_raw_df, quant_raw_df_count, on=precursor, how="inner"
         )
         return quant_raw_df
 

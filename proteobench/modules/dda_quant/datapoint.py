@@ -10,7 +10,6 @@ import numpy as np
 class Datapoint:
     """Data used to stored the"""
 
-    # TODO add threshold value used for presence ion/peptidoform
     id: str = None
     search_engine: str = None
     software_version: int = 0
@@ -30,6 +29,8 @@ class Datapoint:
     nr_prec: int = 0
     is_temporary: bool = True
     intermediate_hash: str = ""
+    # TODO add threshold value used for presence ion/peptidoform
+    nr_missing: int = 0
     # fixed_mods: [],
     # variable_mods: [],
     # max_number_mods_pep: int = 0,
@@ -38,13 +39,17 @@ class Datapoint:
     # mean_reproducibility: int = 0,
 
     def calculate_missing_quan_prec(self, df, nr_missing_0):
+        # TODO: unclear what this function does
+        # should we compute ratio of removed features when filtering for nr_missing?
         nr_quan_prec_missing = []
 
         return nr_quan_prec_missing
 
+    # TODO rename to be more specific what function computes?
     def calculate_plot_data(self, df):
         # compute mean of epsilon column in df
         # take abs value of df["epsilon"]
+        # TODO use nr_missing to filter df before computing stats.
         self.weighted_sum = round(df["epsilon"].abs().mean(), ndigits=3)
         self.nr_prec = len(df)
 

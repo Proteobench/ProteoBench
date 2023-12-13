@@ -53,6 +53,15 @@ class Datapoint:
         self.weighted_sum = round(df["epsilon"].abs().mean(), ndigits=3)
         self.nr_prec = len(df)
 
+    def cv_summary(self, df):
+        """Calculate the coefficient of variation for a given dataframe."""
+
+    def partial_area_under_ROC(self, df):
+        """Calculate the partial area under the ROC curve for a given dataframe."""
+
+    def area_under_PR(self, df):
+        """Calculate the area under the precision-recall curve for a given dataframe."""
+
     def generate_id(self):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.id = (
@@ -64,6 +73,7 @@ class Datapoint:
         )
         logging.info(f"Assigned the following ID to this run: {self.id}")
 
+    # TODO no references of this function.
     def dump_json_object(self, file_name):
         f = open(file_name, "a")
         f.write(json.dumps(asdict(self)))

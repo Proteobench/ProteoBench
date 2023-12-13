@@ -11,6 +11,7 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
+
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
@@ -359,8 +360,6 @@ class Module(ModuleInterface):
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
-            if k == "software_name":
-                continue
             current_datapoint[k] = v
 
         all_datapoints = self.add_current_data_point(None, current_datapoint)
@@ -398,8 +397,6 @@ class Module(ModuleInterface):
 
         # Update parameters based on parsed params
         for k, v in datapoint_params.__dict__.items():
-            if k == "software_name":
-                continue
             current_datapoint[k] = v
 
         current_datapoint["is_temporary"] = False
@@ -437,4 +434,5 @@ class Module(ModuleInterface):
     ) -> ProteoBenchParameters:
         """Method loads parameters from a metadata file depending on its format. TODO: Currently only supports MaxQuant, MSFragger, and Proline"""
         params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
+        params.software_name = input_format
         return params

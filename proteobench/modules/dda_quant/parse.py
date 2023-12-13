@@ -200,12 +200,13 @@ class ParseInputs(ParseInputsInterface):
                 "Is the charge available in the input file?"
             )
 
-        # TODO move this to datapoint, keep a count here of quantified AA
-        count_non_zero = (
-            df.groupby(["peptidoform", "Raw file"])["Intensity"].sum() > 0.0
-        ).groupby(level=[0]).sum() == 6
+        # TODO remove this, keep missing values, do statsitics later.
+        if False:
+            count_non_zero = (
+                df.groupby(["peptidoform", "Raw file"])["Intensity"].sum() > 0.0
+            ).groupby(level=[0]).sum() == 6
 
-        allowed_peptidoforms = list(count_non_zero.index[count_non_zero])
-        filtered_df = df[df["peptidoform"].isin(allowed_peptidoforms)]
+            allowed_peptidoforms = list(count_non_zero.index[count_non_zero])
+            filtered_df = df[df["peptidoform"].isin(allowed_peptidoforms)]
 
-        return filtered_df, replicate_to_raw
+        return df, replicate_to_raw

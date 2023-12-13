@@ -225,8 +225,8 @@ class Module(ModuleInterface):
             allowed_miscleavages=user_input["allowed_miscleavages"],
             min_peptide_length=user_input["min_peptide_length"],
             max_peptide_length=user_input["max_peptide_length"],
-            intermediate_hash=int(
-                hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
+            intermediate_hash=str(
+                hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()
             ),
         )
 

@@ -54,13 +54,7 @@ class Datapoint:
 
     def generate_id(self):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.id = (
-            self.search_engine
-            + "_"
-            + str(self.software_version)
-            + "_"
-            + str(time_stamp)
-        )
+        self.id = self.search_engine + "_" + str(self.software_version) + "_" + str(time_stamp)
         logging.info(f"Assigned the following ID to this run: {self.id}")
 
     def dump_json_object(self, file_name):

@@ -4,15 +4,13 @@ import json
 import logging
 from datetime import datetime
 
-from proteobench.modules.template.module import Module
-from proteobench.modules.template.parse_settings import (INPUT_FORMATS,
-                                                         LOCAL_DEVELOPMENT,
-                                                         TEMPLATE_RESULTS_PATH)
-from proteobench.modules.template.plot import plot_bench1, plot_bench2
-
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
+
+from proteobench.modules.template.module import Module
+from proteobench.modules.template.parse_settings import INPUT_FORMATS, LOCAL_DEVELOPMENT, TEMPLATE_RESULTS_PATH
+from proteobench.modules.template.plot import plot_bench1, plot_bench2
 
 logger = logging.getLogger(__name__)
 
@@ -97,12 +95,8 @@ class StreamlitUI:
                     config = json.load(file)
 
                 for key, value in config.items():
-                    self.user_input[key] = self.generate_input_field(
-                        self.user_input["input_format"], value
-                    )
-            submit_button = st.form_submit_button(
-                "Parse and bench", help=self.texts.Help.additional_parameters
-            )
+                    self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+            submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.additional_parameters)
 
         # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
@@ -145,13 +139,9 @@ class StreamlitUI:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)
         else:
-            self.generate_results(
-                status_placeholder, result_performance, all_datapoints, True
-            )
+            self.generate_results(status_placeholder, result_performance, all_datapoints, True)
 
-    def generate_results(
-        self, status_placeholder, result_performance, all_datapoints, recalculate
-    ):
+    def generate_results(self, status_placeholder, result_performance, all_datapoints, recalculate):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if recalculate:
@@ -226,9 +216,7 @@ class StreamlitUI:
                         branch_name="new_branch",
                     )
                 else:
-                    DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
-                        st.session_state[ALL_DATAPOINTS]
-                    )
+                    DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(st.session_state[ALL_DATAPOINTS])
         if SUBMIT in st.session_state:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")

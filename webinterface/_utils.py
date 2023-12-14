@@ -65,9 +65,7 @@ def pp_plot(psm_df):
     target_scores = psm_df["score"][~psm_df["is_decoy"]]
     decoy_scores = psm_df["score"][psm_df["is_decoy"]]
     if len(psm_df) > 1000:
-        target_scores_quantiles = psm_df["score"][~psm_df["is_decoy"]].quantile(
-            np.linspace(0, 1, 1000)
-        )
+        target_scores_quantiles = psm_df["score"][~psm_df["is_decoy"]].quantile(np.linspace(0, 1, 1000))
     else:
         target_scores_quantiles = target_scores
     target_ecdf = ECDF(target_scores)(target_scores_quantiles)
@@ -101,12 +99,7 @@ def pp_plot(psm_df):
 
 def fdr_plot(psm_df, fdr_threshold):
     """Plot number of identifications in function of FDR threshold."""
-    df = (
-        psm_df[~psm_df["is_decoy"]]
-        .reset_index(drop=True)
-        .sort_values("qvalue", ascending=True)
-        .copy()
-    )
+    df = psm_df[~psm_df["is_decoy"]].reset_index(drop=True).sort_values("qvalue", ascending=True).copy()
     df["count"] = (~df["is_decoy"]).cumsum()
     fig = px.line(
         df,

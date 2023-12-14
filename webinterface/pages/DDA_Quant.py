@@ -2,26 +2,16 @@
 
 import json
 import logging
-from datetime import datetime
-
-from proteobench.modules.dda_quant.module import Module
-from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-)
-from proteobench.modules.dda_quant.plot import PlotDataPoint
-
-try:
-    from importlib.metadata import version
-except ImportError:
-    from importlib_metadata import version
-
 import uuid
+from datetime import datetime
 
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
+
+from proteobench.modules.dda_quant.module import Module
+from proteobench.modules.dda_quant.parse_settings import DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT
+from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 logger = logging.getLogger(__name__)
 
@@ -59,9 +49,7 @@ class StreamlitUI:
     def generate_input_field(self, input_format: str, content: dict):
         if content["type"] == "text_input":
             if "placeholder" in content:
-                return st.text_input(
-                    content["label"], placeholder=content["placeholder"]
-                )
+                return st.text_input(content["label"], placeholder=content["placeholder"])
             elif "value" in content:
                 return st.text_input(content["label"], content["value"][input_format])
         if content["type"] == "number_input":
@@ -94,15 +82,15 @@ class StreamlitUI:
                     The samples contain tryptic peptides from Homo sapiens,
                     Saccharomyces cerevisiae, and Escherichia coli, mixed in different
                     ratios (condition A and condition B), with three replicates of each
-                    condition. With these samples, we calculate three metrics:  
+                    condition. With these samples, we calculate three metrics:
                     - To estimate the sensitivity of the workflows, we report the
                     number of unique precursors (charged modified sequence) quantified
-                    in all 6 runs.  
+                    in all 6 runs.
                     - To estimate the accuracy of the workflows, we report the weighted
-                    sum of precursor deviation from expected ratios.  
+                    sum of precursor deviation from expected ratios.
                     - To estimate the precision of the workflows, we report the weighted
-                     average of the interquartile range (IQR) of the precursors ratio.  
-                    
+                     average of the interquartile range (IQR) of the precursors ratio.
+
                     ProteoBench plots these three metrics to visualize workflow outputs
                      from different tools, with different versions, and/or different
                     sets of parameters for the search and quantification.
@@ -116,6 +104,7 @@ class StreamlitUI:
                     The raw files used for this module were acquired on an Orbitrap
                     Q-Exactive H-FX (ThermoScientific). They can be downloaded from the
                     proteomeXchange repository PXD028735. You can download them here:
+
                     [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw),
                     [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw),
                     [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw),
@@ -128,7 +117,7 @@ class StreamlitUI:
         )
         st.markdown(
             """
-                    Download the fasta file here: [TODO]  
+                    Download the fasta file here: [TODO]
                     The fasta file provided for this module contains the three species
                     present in the samples and contaminant proteins
                     ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
@@ -162,13 +151,9 @@ class StreamlitUI:
                     config = json.load(file)
 
                 for key, value in config.items():
-                    self.user_input[key] = self.generate_input_field(
-                        self.user_input["input_format"], value
-                    )
+                    self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
-            submit_button = st.form_submit_button(
-                "Parse and bench", help=self.texts.Help.additional_parameters
-            )
+            submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.additional_parameters)
 
         # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
@@ -219,9 +204,7 @@ class StreamlitUI:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)
         else:
-            self.generate_results(
-                status_placeholder, result_performance, all_datapoints, True, input_df
-            )
+            self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
 
     def generate_results(
         self,
@@ -288,9 +271,7 @@ class StreamlitUI:
         st.session_state[ALL_DATAPOINTS] = all_datapoints
         st.session_state[INPUT_DF] = input_df
 
-        self.user_input[META_DATA] = st.file_uploader(
-            "Meta data for searches", help=self.texts.Help.meta_data_file
-        )
+        self.user_input[META_DATA] = st.file_uploader("Meta data for searches", help=self.texts.Help.meta_data_file)
 
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
@@ -303,13 +284,9 @@ class StreamlitUI:
         params = None
         if self.user_input[META_DATA]:
             try:
-                params = Module().load_params_file(
-                    self.user_input[META_DATA], self.user_input["input_format"]
-                )
+                params = Module().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
             except KeyError as e:
-                st.error(
-                    "Parsing of meta parameters file for this software is not supported yet."
-                )
+                st.error("Parsing of meta parameters file for this software is not supported yet.")
             except Exception as err:
                 input_f = self.user_input["input_format"]
                 st.error(
@@ -339,11 +316,7 @@ class StreamlitUI:
                         st.session_state[ALL_DATAPOINTS], params
                     )
 
-                id = str(
-                    all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :][
-                        "intermediate_hash"
-                    ]
-                )
+                id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
 
                 if "storage" in st.secrets.keys():
                     Module().write_intermediate_raw(
@@ -358,9 +331,7 @@ class StreamlitUI:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
                 try:
-                    st.write(
-                        f"Follow your submission approval here: [{pr_url}]({pr_url})"
-                    )
+                    st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
                 except UnboundLocalError:
                     # Happens when pr_url is not defined, e.g., local dev
                     pass
@@ -387,6 +358,7 @@ class WebpageTexts:
             Please select the software you used to generate the software tool results. 
             You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings 
             for more details. 
+
             Additionally, you can use the tab-delimited Custom format containing the following columns:
             Sequence: peptide sequence
             Proteins: Protein accessions according to fasta file

@@ -74,9 +74,7 @@ def extract_params(fname) -> ProteoBenchParameters:
     assert all(stats.loc["unique", cols] == 1), "Not all columns are unique"
     sheet = sheet[cols].drop_duplicates().reset_index(drop=True)
     # Extract
-    params.ident_fdr_psm = sheet.loc[
-        0, "psm_filter_expected_fdr"
-    ]  # ! 1 stands for 1% FDR
+    params.ident_fdr_psm = sheet.loc[0, "psm_filter_expected_fdr"]  # ! 1 stands for 1% FDR
     params.min_peptide_length = find_min_pep_length(sheet.loc[0, "psm_filter_2"])
 
     # ! Third sheet only contains match between runs (MBR) information indirectly
@@ -87,9 +85,7 @@ def extract_params(fname) -> ProteoBenchParameters:
 
 
 if __name__ == "__main__":
-    file = pathlib.Path(
-        "../../../test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx"
-    )
+    file = pathlib.Path("../../../test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx")
     params = extract_params(file)
     data_dict = params.__dict__
     series = pd.Series(data_dict)

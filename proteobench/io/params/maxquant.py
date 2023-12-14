@@ -19,9 +19,7 @@ def extend_tuple(t, target_length: int):
     if not isinstance(t, tuple):
         raise TypeError(f"Wrong type provided. Expected tuple, got {type(t)} : {t!r}")
     if len(t) > target_length:
-        raise ValueError(
-            f"Tuple is too long (got {len(t)}, expected {target_length}: {t!r}"
-        )
+        raise ValueError(f"Tuple is too long (got {len(t)}, expected {target_length}: {t!r}")
     return t + (None,) * (target_length - len(t))
 
 
@@ -63,9 +61,7 @@ def read_xml_record(element: ET.Element) -> dict:
                 add_record(
                     dict(),
                     tag=child.tag,
-                    record=read_xml_record(child)
-                    if not (child.text and child.text.strip())
-                    else child.text.strip(),
+                    record=read_xml_record(child) if not (child.text and child.text.strip()) else child.text.strip(),
                 )
                 for child in child
             ]
@@ -125,9 +121,7 @@ def flatten_dict_of_dicts(d: dict, parent_key: str = "") -> dict:
 
 def build_Series_from_records(records, index_length=4):
     records = flatten_dict_of_dicts(records)
-    idx = pd.MultiIndex.from_tuples(
-        (extend_tuple(k, index_length) for (k, _) in records)
-    )
+    idx = pd.MultiIndex.from_tuples((extend_tuple(k, index_length) for (k, _) in records))
     return pd.Series((v for (k, v) in records), index=idx)
 
 
@@ -137,9 +131,7 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     record = read_file(fname)
     # select ms2 fragmentation method specified by parameter
     # MaxQuant does this to our knowledge based on the binary rawfile metadata
-    record["msmsParamsArray"] = [
-        d for d in record["msmsParamsArray"] if d["msmsParams"]["Name"] == ms2frac
-    ]
+    record["msmsParamsArray"] = [d for d in record["msmsParamsArray"] if d["msmsParams"]["Name"] == ms2frac]
     record = build_Series_from_records(record, 4).sort_index()
     params.search_engine = "Andromeda"
     params.software_version = record.loc["maxQuantVersion"].squeeze()
@@ -152,20 +144,12 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     ].squeeze()
     params.precursor_mass_tolerance = f"{precursor_mass_tolerance} ppm"
     # ! differences between version >1.6 and <=1.5
-    fragment_mass_tolerance = record.loc[
-        pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchTolerance", :]
-    ].squeeze()
-    in_ppm = bool(
-        record.loc[
-            pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchToleranceInPpm", :]
-        ].squeeze()
-    )
+    fragment_mass_tolerance = record.loc[pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchTolerance", :]].squeeze()
+    in_ppm = bool(record.loc[pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchToleranceInPpm", :]].squeeze())
     if in_ppm:
         fragment_mass_tolerance = f"{fragment_mass_tolerance} ppm"
     params.fragment_mass_tolerance = fragment_mass_tolerance
-    params.enzyme = record.loc[
-        ("parameterGroups", "parameterGroup", "enzymes", "string")
-    ].squeeze()
+    params.enzyme = record.loc[("parameterGroups", "parameterGroup", "enzymes", "string")].squeeze()
     params.allowed_miscleavages = record.loc[
         pd.IndexSlice["parameterGroups", "parameterGroup", "maxMissedCleavages", :]
     ].squeeze()
@@ -173,9 +157,7 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     params.max_peptide_length = None
     # fixed mods
     if params.software_version > "1.6.0.0":
-        fixed_mods = record.loc[
-            pd.IndexSlice["parameterGroups", "parameterGroup", "fixedModifications", :]
-        ].squeeze()
+        fixed_mods = record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "fixedModifications", :]].squeeze()
         if isinstance(fixed_mods, str):
             params.fixed_mods = fixed_mods
         else:
@@ -187,16 +169,12 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
         else:
             params.fixed_mods = ",".join(fixed_mods)
 
-    variable_mods = record.loc[
-        pd.IndexSlice["parameterGroups", "parameterGroup", "variableModifications", :]
-    ].squeeze()
+    variable_mods = record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "variableModifications", :]].squeeze()
     if isinstance(variable_mods, str):
         params.variable_mods = variable_mods
     else:
         params.variable_mods = ",".join(variable_mods)
-    params.max_mods = record.loc[
-        ("parameterGroups", "parameterGroup", "maxNmods")
-    ].squeeze()
+    params.max_mods = record.loc[("parameterGroups", "parameterGroup", "maxNmods")].squeeze()
     params.min_precursor_charge = None
     params.max_precursor_charge = record.loc[
         pd.IndexSlice["parameterGroups", "parameterGroup", "maxCharge", :]

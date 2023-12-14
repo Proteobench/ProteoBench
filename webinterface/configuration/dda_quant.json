@@ -1,10 +1,10 @@
 {
-    "version": {
+    "software_version": {
         "type": "text_input",
-        "label": "Search engine version",
+        "label": "Software tool version",
         "placeholder": "1.0"
     },
-    "software_name": {
+    "search_engine": {
         "type": "text_input",
         "label": "Search engine name",
         "value": {
@@ -16,21 +16,26 @@
             "WOMBAT": "WOMBAT"
         }
     },
-    "fdr_psm": {
+    "search_engine_version": {
+        "type": "text_input",
+        "label": "Search engine version",
+        "placeholder": "1.0"
+    },
+    "ident_fdr_psm": {
         "type": "number_input",
         "label": "FDR psm",
         "min_value": 0.0,
         "max_value": 1.0,
         "format": "%.4f"
     },
-    "fdr_peptide": {
+    "ident_fdr_peptide": {
         "type": "number_input",
         "label": "FDR peptide",
         "min_value": 0.0,
         "max_value": 1.0,
         "format": "%.4f"
     },
-    "fdr_protein": {
+    "ident_fdr_protein": {
         "type": "number_input",
         "label": "FDR protein",
         "min_value": 0.0,
@@ -85,7 +90,7 @@
             "Da"
         ]
     },
-    "search_enzyme_name": {
+    "enzyme": {
         "type": "selectbox",
         "label": "Enzyme",
         "value": {
@@ -102,7 +107,7 @@
             "Chemotrypsin"
         ]
     },
-    "allowed_missed_cleavage": {
+    "allowed_miscleavages": {
         "type": "number_input",
         "label": "Maximum allowed number of missed cleavage",
         "min_value": 0,
@@ -119,12 +124,21 @@
         "label": "Specify the variable mods that were set (separated by a comma)",
         "placeholder": "MOxid, N-term Acetyl"
     },
-    "precursor_charge": {
-        "type": "text_input",
-        "label": "Possible charge states (separated by a comma)",
-        "placeholder": "2,3,4,5,6"
+    "min_precursor_charge": {
+        "type": "number_input",
+        "label": "Minimum precursor charge allowed",
+        "min_value": 0,
+        "max_value": 10,
+        "format": "%d"
     },
-    "max_num_mods_on_peptide": {
+    "max_precursor_charge": {
+        "type": "number_input",
+        "label": "Maximum precursor charge allowed",
+        "min_value": 0,
+        "max_value": 100,
+        "format": "%d"
+    },
+    "max_mods": {
         "type": "number_input",
         "label": "Maximum number of modifications on peptides",
         "min_value": 0,
@@ -145,7 +159,7 @@
         "max_value": 1000,
         "format": "%d"
     },
-    "mbr": {
+    "enable_match_between_runs": {
         "type": "checkbox",
         "label": "Quantified with MBR",
         "value": {

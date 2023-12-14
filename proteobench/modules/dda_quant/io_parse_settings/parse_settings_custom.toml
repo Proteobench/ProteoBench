@@ -4,7 +4,7 @@ Sequence = "Sequence"
 Charge = "Charge"
 
 
-[replicate_mapper]
+[condition_mapper]
 LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 = "A"
 LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 = "A"
 LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 = "A"

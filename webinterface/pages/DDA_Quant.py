@@ -19,8 +19,6 @@ import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
-# from proteobench.github.gh import clone_pr, write_json_local_development
-
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
@@ -29,6 +27,7 @@ FIG1 = "fig1"
 FIG2 = "fig2"
 RESULT_PERF = "result_perf"
 META_DATA = "meta_data"
+INPUT_DF = "input_df"
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -135,6 +134,11 @@ class StreamlitUI:
 
         with st.form(key="main_form"):
             st.subheader("Input files")
+            st.markdown(
+                """
+                    Remember: contaminant sequences are already present in the fasta file associated to this module. **Do not add other contaminants** to your search. This is important when using MaxQuant and MSFragger, among other tools.
+                    """
+            )
             self.user_input["input_csv"] = st.file_uploader(
                 "Software tool result file", help=self.texts.Help.input_file
             )
@@ -165,6 +169,13 @@ class StreamlitUI:
         if FIG1 in st.session_state:
             self._populate_results()
 
+        if ALL_DATAPOINTS not in st.session_state:
+            st.session_state[ALL_DATAPOINTS] = None
+            all_datapoints = st.session_state[ALL_DATAPOINTS]
+            all_datapoints = Module().obtain_all_data_point(all_datapoints)
+            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            st.plotly_chart(fig2, use_container_width=True)
+
         if submit_button:
             if self.user_input["input_csv"]:
                 self._run_proteobench()
@@ -172,7 +183,7 @@ class StreamlitUI:
                 error_message = st.error(":x: Please provide a result file")
 
     def _populate_results(self):
-        self.generate_results("", None, None, False)
+        self.generate_results("", None, None, False, None)
 
     def _sidebar(self):
         """Format sidebar."""
@@ -192,11 +203,11 @@ class StreamlitUI:
             st.session_state[ALL_DATAPOINTS] = None
 
         try:
-            result_performance, all_datapoints = Module().benchmarking(
+            result_performance, all_datapoints, input_df = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
-                st.session_state["all_datapoints"],
+                st.session_state[ALL_DATAPOINTS],
             )
             st.session_state[ALL_DATAPOINTS] = all_datapoints
         except Exception as e:
@@ -204,11 +215,16 @@ class StreamlitUI:
             st.exception(e)
         else:
             self.generate_results(
-                status_placeholder, result_performance, all_datapoints, True
+                status_placeholder, result_performance, all_datapoints, True, input_df
             )
 
     def generate_results(
-        self, status_placeholder, result_performance, all_datapoints, recalculate
+        self,
+        status_placeholder,
+        result_performance,
+        all_datapoints,
+        recalculate,
+        input_df,
     ):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -221,6 +237,7 @@ class StreamlitUI:
         if not recalculate:
             result_performance = st.session_state[RESULT_PERF]
             all_datapoints = st.session_state[ALL_DATAPOINTS]
+            input_df = st.session_state[INPUT_DF]
         st.dataframe(result_performance.head(100))
 
         # Plot results
@@ -243,8 +260,8 @@ class StreamlitUI:
 
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
-            self.user_input["version"],
-            self.user_input["mbr"],
+            self.user_input["software_version"],
+            self.user_input["enable_match_between_runs"],
             time_stamp,
         )
 
@@ -264,10 +281,12 @@ class StreamlitUI:
         st.session_state[FIG2] = fig2
         st.session_state[RESULT_PERF] = result_performance
         st.session_state[ALL_DATAPOINTS] = all_datapoints
+        st.session_state[INPUT_DF] = input_df
 
         self.user_input[META_DATA] = st.file_uploader(
             "Meta data for searches", help=self.texts.Help.meta_data_file
         )
+
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
             placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
@@ -275,17 +294,35 @@ class StreamlitUI:
         )
         checkbox = st.checkbox("I confirm that the metadata is correct")
 
-        if checkbox and self.user_input[META_DATA]:
+        # TODO: do we need a better handling of this?
+        params = None
+        if self.user_input[META_DATA]:
+            try:
+                params = Module().load_params_file(
+                    self.user_input[META_DATA], self.user_input["input_format"]
+                )
+            except KeyError as e:
+                st.error(
+                    "Parsing of meta parameters file for this software is not supported yet."
+                )
+            except Exception as err:
+                input_f = self.user_input["input_format"]
+                st.error(
+                    f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
+                )
+
+        if checkbox and params != None:
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
-            # TODO: update parameters of point to submit with parsed metadata parameters
+
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
                 user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
-                    Module().clone_pr(
+                    pr_url = Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
+                        params,
                         st.secrets["gh"]["token"],
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
@@ -294,12 +331,35 @@ class StreamlitUI:
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
-                        st.session_state[ALL_DATAPOINTS]
+                        st.session_state[ALL_DATAPOINTS], params
+                    )
+
+                id = str(
+                    all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :][
+                        "intermediate_hash"
+                    ]
+                )
+
+                if "storage" in st.secrets.keys():
+                    Module().write_intermediate_raw(
+                        st.secrets["storage"]["dir"],
+                        id,
+                        input_df,
+                        result_performance,
+                        self.user_input[META_DATA],
                     )
         if SUBMIT in st.session_state:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
+                try:
+                    st.write(
+                        f"Follow your submission approval here: [{pr_url}]({pr_url})"
+                    )
+                except UnboundLocalError:
+                    # Happens when pr_url is not defined, e.g., local dev
+                    pass
+
                 st.session_state[SUBMIT] = False
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 
@@ -366,4 +426,5 @@ class WebpageTexts:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
     StreamlitUI()

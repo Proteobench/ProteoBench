@@ -7,7 +7,7 @@ charge = "Charge"
 decoy = "Reverse"
 ms1_int_sum_apex_dn = "Intensity"
 
-[replicate_mapper]
+[condition_mapper]
 LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 = "A"
 LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 = "A"
 LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 = "A"
@@ -27,6 +27,14 @@ LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = "Condition_B_Sample_Alpha_03"
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"
 "_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Modified sequence"
+"before_aa" = true
+"isalpha" = true
+"isupper" = true
+"pattern"="([a-z]+)"
+"modification_dict" = {"ox" = "Oxidation", "c" = "Carbamidomethyl", "a" = "Acetyl", "decoy" = ""}
 
 [general]
 contaminant_flag = "Cont_"

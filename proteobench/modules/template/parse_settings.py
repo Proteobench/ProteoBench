@@ -30,4 +30,4 @@ class ParseSettings:
         # They need to be defined in the different formats' .toml files
         # e.g.
         self.mapper = parse_settings["mapper"]
-        self.replicate_mapper = parse_settings["replicate_mapper"]
+        self.condition_mapper = parse_settings["condition_mapper"]

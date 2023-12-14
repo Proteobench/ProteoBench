@@ -1,5 +1,4 @@
 import io
-import json
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +7,12 @@ import pytest
 import proteobench.io.params.proline as proline_params
 
 TESTDATA_DIR = Path(__file__).parent / "params"
+
+fnames = [
+    "Proline_example_w_Mascot_wo_proteinSets.xlsx",
+    "Proline_example_2.xlsx",
+]
+fnames = [TESTDATA_DIR / f for f in fnames]
 
 parameters = [
     (
@@ -27,8 +32,11 @@ def test_find_pep_length(string, expected_min_pep):
     assert actual_min_pep == expected_min_pep
 
 
-def test_extract_params():
-    file = TESTDATA_DIR / "Proline_example_w_Mascot_wo_proteinSets.xlsx"
+# parameters = [(fname, fname.with_suffix(".csv")) for fname in fnames]
+
+
+@pytest.mark.parametrize("file", fnames)
+def test_extract_params(file):
     expected = pd.read_csv(file.with_suffix(".csv"), index_col=0).squeeze("columns")
     actual = proline_params.extract_params(file)
     actual = pd.Series(actual.__dict__)

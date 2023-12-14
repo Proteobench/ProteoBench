@@ -15,7 +15,7 @@ PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), "io_parse_settings"
 MapSettingFiles: dict[str, Path]
 
 PARSE_SETTINGS_FILES = {
-    "WOMBAT": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_wombat.toml"),
+    # "WOMBAT": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_wombat.toml"), # Wombat is not compatible with the module precursor ions
     "MaxQuant": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_maxquant.toml"),
     "MSFragger": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_msfragger.toml"),
     "Proline": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_proline.toml"),
@@ -32,7 +32,7 @@ INPUT_FORMATS = (
     "AlphaPept",
     "MSFragger",
     "Proline",
-    "WOMBAT",
+    # "WOMBAT",
     "Sage",
     "Custom",
 )
@@ -52,17 +52,41 @@ DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_Module2_quant_D
 
 class ParseSettings:
     """Structure that contains all the parameters used to parse
-    the given database search output."""
+    the given benchmark run output depending on the software tool used."""
 
     def __init__(self, input_format: str):
         parse_settings = toml.load(PARSE_SETTINGS_FILES[input_format])
 
         self.mapper = parse_settings["mapper"]
-        self.replicate_mapper = parse_settings["replicate_mapper"]
+        self.condition_mapper = parse_settings["condition_mapper"]
         self.run_mapper = parse_settings["run_mapper"]
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
         self.species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
+
+        if "modifications_parser" in parse_settings.keys():
+            self.apply_modifications_parser = True
+            self.modifications_mapper = parse_settings["modifications_parser"][
+                "modification_dict"
+            ]
+            self.modifications_isalpha = parse_settings["modifications_parser"][
+                "isalpha"
+            ]
+            self.modifications_isupper = parse_settings["modifications_parser"][
+                "isupper"
+            ]
+            self.modifications_before_aa = parse_settings["modifications_parser"][
+                "before_aa"
+            ]
+            self.modifications_pattern = parse_settings["modifications_parser"][
+                "pattern"
+            ]
+            self.modifications_pattern = rf"{self.modifications_pattern}"
+            self.modifications_parse_column = parse_settings["modifications_parser"][
+                "parse_column"
+            ]
+        else:
+            self.apply_modifications_parser = False
 
         parse_settings_module = toml.load(PARSE_SETTINGS_FILES_MODULE)
         self.min_count_multispec = parse_settings_module["general"][
@@ -72,5 +96,5 @@ class ParseSettings:
 
 
 def parse_settings(input_format: str) -> Settings:
-    """load settings from toml file"""
+    """load settings from toml file corresponding to the software tool."""
     raise NotImplementedError

@@ -62,9 +62,10 @@ class ProteoBenchParameters:
     search_engine: Optional[str] = None
     search_engine_version: Optional[str] = None
     ident_fdr_psm: Optional[str] = None  # fdr_psm
-    ident_fdr_peptide: Optional[str] = None
+    ident_fdr_peptide: Optional[str] = None  # fdr_peptide
     ident_fdr_protein: Optional[str] = None  # fdr_protein
     enable_match_between_runs: Optional[bool] = None  # MBR
+    # TODO: either add the units for the tolerance here or remove them from the webpage/plot/etc.
     precursor_mass_tolerance: Optional[str] = None  # precursor_tol, precursor_tol_unit
     fragment_mass_tolerance: Optional[str] = None  # fragment_tol, fragment_tol_unit
     enzyme: Optional[str] = None  # enzyme_name

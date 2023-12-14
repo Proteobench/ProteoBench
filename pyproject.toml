@@ -24,7 +24,9 @@ dependencies = [
   "matplotlib",
   "importlib-metadata; python_version < '3.8'", # ? can be removed?
   "toml",
-  "psm_utils",
+  "PyGithub",
+  "GitPython",
+  "st-pages",
 ]
 license = {file = "LICENSE"}
 name = "proteobench"

@@ -8,7 +8,6 @@ Overview of ProteoBench
 
     About <self>
     Modules <modules/index.rst>
-    User guide <user-guide/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
     Changelog <changelog.rst>
@@ -52,13 +51,8 @@ ProteoBench:
 Organization
 ============
 
-The ProteoBench project is divided into two main parts:
+ProteoBench documentation is divided into two main parts:
 
-Modules for Data Processing and Reporting
------------------------------------------
-These :doc:`developer-guide/api/proteobench/modules/index` process the data and generate reports.
+The different :doc:`modules/index` that exist, how they evolve and how to used them.
 
-Web Interface for Result Visualization
---------------------------------------
-The :doc:`developer-guide/api/webinterface/index` displays the results and allows
-comparison with publicly available data.
+The :doc:`developer-guide/index` provides information on the structure of the project and how to contribute.

@@ -70,10 +70,7 @@ class PlotDataPoint:
         }
 
         # Color plot based on software tool
-        colors = [
-            software_colors[software]
-            for software in benchmark_metrics_df["software_name"]
-        ]
+        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
 
         # Add hover text
         hover_texts = [
@@ -101,9 +98,7 @@ class PlotDataPoint:
                     mode="markers",
                     text=hover_texts,
                     marker=dict(color=colors, showscale=False, size=20),
-                    marker_size=[
-                        mapping[item] for item in benchmark_metrics_df["old_new"]
-                    ],
+                    marker_size=[mapping[item] for item in benchmark_metrics_df["old_new"]],
                 )
             ]
         )

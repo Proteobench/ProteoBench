@@ -86,13 +86,7 @@ class Datapoint:
         Sets the id attribute to a string composed of the search engine name, software version number,
         and current timestamp separated by underscores. Prints the id to stdout.
         """
-        self.id = (
-            self.search_engine
-            + "_"
-            + str(self.software_version)
-            + "_"
-            + str(datetime.timestamp(datetime.now()))
-        )
+        self.id = self.search_engine + "_" + str(self.software_version) + "_" + str(datetime.timestamp(datetime.now()))
         print(self.id)
 
     def dump_json_object(self, file_name):

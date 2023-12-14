@@ -39,12 +39,8 @@ def load__local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-        input_df, parse_settings
-    )
-    intermediate = Module().generate_intermediate(
-        prepared_df, replicate_to_raw, parse_settings
-    )
+    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+    intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
@@ -53,12 +49,8 @@ def process_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-        input_df, parse_settings
-    )
-    intermediate = Module().generate_intermediate(
-        prepared_df, replicate_to_raw, parse_settings
-    )
+    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+    intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
@@ -96,9 +88,7 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-                input_df, parse_settings
-            )
+            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
             self.assertFalse(prepared_df.empty)
             self.assertFalse(replicate_to_raw == {})
@@ -108,14 +98,10 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-                input_df, parse_settings
-            )
+            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
             # Get quantification data
-            intermediate = Module().generate_intermediate(
-                prepared_df, replicate_to_raw, parse_settings
-            )
+            intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
             self.assertFalse(intermediate.empty)
 
@@ -152,9 +138,7 @@ class TestWrongFormatting(unittest.TestCase):
         user_input["input_format"] = format_name
 
         with self.assertRaises(KeyError) as context:
-            Module().benchmarking(
-                user_input["input_csv"], user_input["input_format"], {}, None
-            )
+            Module().benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
 
 
 class TestPlot(unittest.TestCase):
@@ -187,9 +171,7 @@ class TestPlot(unittest.TestCase):
         # Concatenate the lists to create a single list
         combined_list = human_strings + ecoli_strings + yeast_strings
 
-        combineddf = pd.DataFrame(
-            {"SPECIES": combined_list, "log2_A_vs_B": combined_ratios}
-        )
+        combineddf = pd.DataFrame({"SPECIES": combined_list, "log2_A_vs_B": combined_ratios})
         combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
         combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"
         combineddf["YEAST"] = combineddf["SPECIES"] == "YEAST"
@@ -226,11 +208,7 @@ class TestDatapoint(unittest.TestCase):
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
         result_datapoint = Datapoint(
-            id=input_format
-            + "_"
-            + user_input["software_version"]
-            + "_"
-            + formatted_datetime,
+            id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],
             search_engine=user_input["search_engine"],

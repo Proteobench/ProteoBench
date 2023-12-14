@@ -59,7 +59,7 @@ class PlotDataPoint:
         """
 
         # Define search colors for each search engine
-        search_engine_colors = {
+        software_colors = {
             "MaxQuant": "#1f77b4",
             "AlphaPept": "#2ca02c",
             "MSFragger": "#ff7f0e",
@@ -69,25 +69,25 @@ class PlotDataPoint:
             "Custom": "#9467bd",
         }
 
-        # Color plot based on search engine
+        # Color plot based on software tool
         colors = [
-            search_engine_colors[engine]
-            for engine in benchmark_metrics_df["search_engine"]
+            software_colors[software]
+            for software in benchmark_metrics_df["software_name"]
         ]
 
         # Add hover text
         hover_texts = [
-            f"Search Engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
-            + f"FDR psm: {benchmark_metrics_df.fdr_psm[idx]}<br>"
-            + f"FDR Peptide: {benchmark_metrics_df.fdr_peptide[idx]}<br>"
-            + f"FRD Protein: {benchmark_metrics_df.fdr_protein[idx]}<br>"
-            + f"MBR: {benchmark_metrics_df.MBR[idx]}<br>"
-            + f"Precursor Tolerance: {benchmark_metrics_df.precursor_tol[idx]} {benchmark_metrics_df.precursor_tol_unit[idx]}<br>"
-            + f"Fragment Tolerance: {benchmark_metrics_df.fragment_tol_unit[idx]}<br>"
-            + f"Enzyme: {benchmark_metrics_df.enzyme_name[idx]} <br>"
-            + f"Missed Cleavages: {benchmark_metrics_df.missed_cleavages[idx]}<br>"
-            + f"Min peptide length: {benchmark_metrics_df.min_pep_length[idx]}<br>"
-            + f"Max peptide length: {benchmark_metrics_df.max_pep_length[idx]}"
+            f"Search Engine: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
+            + f"FDR psm: {benchmark_metrics_df.ident_fdr_psm[idx]}<br>"
+            + f"FDR Peptide: {benchmark_metrics_df.ident_fdr_peptide[idx]}<br>"
+            + f"FRD Protein: {benchmark_metrics_df.ident_fdr_protein[idx]}<br>"
+            + f"MBR: {benchmark_metrics_df.enable_match_between_runs[idx]}<br>"
+            + f"Precursor Tolerance: {benchmark_metrics_df.precursor_mass_tolerance[idx]} {benchmark_metrics_df.precursor_mass_tolerance_unit[idx]}<br>"
+            + f"Fragment Tolerance: {benchmark_metrics_df.fragment_mass_tolerance[idx]} {benchmark_metrics_df.fragment_mass_tolerance_unit[idx]}<br>"
+            + f"Enzyme: {benchmark_metrics_df.enzyme[idx]} <br>"
+            + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
+            + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
+            + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}"
             for idx, row in benchmark_metrics_df.iterrows()
         ]
 

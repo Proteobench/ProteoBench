@@ -212,7 +212,7 @@ class StreamlitUI:
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
-                st.session_state["all_datapoints"],
+                st.session_state[ALL_DATAPOINTS],
             )
             st.session_state[ALL_DATAPOINTS] = all_datapoints
         except Exception as e:
@@ -265,8 +265,8 @@ class StreamlitUI:
 
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
-            self.user_input["version"],
-            self.user_input["mbr"],
+            self.user_input["software_version"],
+            self.user_input["enable_match_between_runs"],
             time_stamp,
         )
 
@@ -299,10 +299,27 @@ class StreamlitUI:
         )
         checkbox = st.checkbox("I confirm that the metadata is correct")
 
-        if checkbox and self.user_input[META_DATA]:
+        # TODO: do we need a better handling of this?
+        params = None
+        if self.user_input[META_DATA]:
+            try:
+                params = Module().load_params_file(
+                    self.user_input[META_DATA], self.user_input["input_format"]
+                )
+            except KeyError as e:
+                st.error(
+                    "Parsing of meta parameters file for this software is not supported yet."
+                )
+            except Exception as err:
+                input_f = self.user_input["input_format"]
+                st.error(
+                    f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
+                )
+
+        if checkbox and params != None:
             st.session_state["submission_ready"] = True
             submit_pr = st.button("I really want to upload it")
-            # TODO: update parameters of point to submit with parsed metadata parameters
+
             # submit_pr = False
             if submit_pr:
                 st.session_state[SUBMIT] = True
@@ -310,6 +327,7 @@ class StreamlitUI:
                 if not LOCAL_DEVELOPMENT:
                     pr_url = Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
+                        params,
                         st.secrets["gh"]["token"],
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
@@ -318,7 +336,7 @@ class StreamlitUI:
                     )
                 else:
                     DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
-                        st.session_state[ALL_DATAPOINTS]
+                        st.session_state[ALL_DATAPOINTS], params
                     )
 
                 id = str(
@@ -339,7 +357,13 @@ class StreamlitUI:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
-                st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
+                try:
+                    st.write(
+                        f"Follow your submission approval here: [{pr_url}]({pr_url})"
+                    )
+                except UnboundLocalError:
+                    # Happens when pr_url is not defined, e.g., local dev
+                    pass
 
                 st.session_state[SUBMIT] = False
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)

@@ -36,52 +36,14 @@
         "format": "%.4f"
     },
     "precursor_mass_tolerance": {
-        "type": "number_input",
-        "label": "Precursor mass tolerance",
-        "min_value": 0.0,
-        "max_value": 200.0,
-        "format": "%.4f"
-    },
-    "precursor_mass_tolerance_unit": {
-        "type": "selectbox",
-        "label": "Precursor tolerance unit",
-        "value": {
-            "MaxQuant": "-",
-            "AlphaPept": "-",
-            "MSFragger": "-",
-            "Proline": "-",
-            "WOMBAT": "-",
-            "Sage": "-"
-        },
-        "options": [
-            "-",
-            "PPM",
-            "Da"
-        ]
+        "type": "text_input",
+        "label": "Precursor mass tolerance (including unit ppm, PPM or Da)",
+        "placeholder": "4.5 ppm"
     },
     "fragment_mass_tolerance": {
-        "type": "number_input",
-        "label": "Fragment mass tolerance",
-        "min_value": 0.0,
-        "max_value": 100.0,
-        "format": "%.4f"
-    },
-    "fragment_mass_tolerance_unit": {
-        "type": "selectbox",
-        "label": "Fragment mass tolerance unit",
-        "value": {
-            "MaxQuant": "-",
-            "AlphaPept": "-",
-            "MSFragger": "-",
-            "Proline": "-",
-            "WOMBAT": "-",
-            "Sage": "-"
-        },
-        "options": [
-            "-",
-            "PPM",
-            "Da"
-        ]
+        "type": "text_input",
+        "label": "Fragment mass tolerance (including unit ppm, PPM or Da)",
+        "placeholder": "20 ppm"
     },
     "enzyme": {
         "type": "selectbox",

@@ -17,7 +17,7 @@ MapSettingFiles: dict[str, Path]
 PARSE_SETTINGS_FILES = {
     # "WOMBAT": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_wombat.toml"), # Wombat is not compatible with the module precursor ions
     "MaxQuant": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_maxquant.toml"),
-    "MSFragger": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_msfragger.toml"),
+    "FragPipe": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_fragpipe.toml"),
     "Proline": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_proline.toml"),
     "AlphaPept": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_alphapept.toml"),
     "Sage": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_sage.toml"),
@@ -30,7 +30,7 @@ PARSE_SETTINGS_FILES_MODULE = os.path.join(PARSE_SETTINGS_DIR, "module_settings.
 INPUT_FORMATS = (
     "MaxQuant",
     "AlphaPept",
-    "MSFragger",
+    "FragPipe",
     "Proline",
     # "WOMBAT",
     "Sage",

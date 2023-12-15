@@ -81,7 +81,7 @@ class Module(ModuleInterface):
         """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
 
         # fiter for min_intensity
-        relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] >= min_intensity]
+        relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] > min_intensity]
 
         # TODO: check if this is still needed
         # sum intensity values of the same precursor and "Raw file" using the sum
@@ -205,7 +205,7 @@ class Module(ModuleInterface):
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
         elif input_format == "Sage":
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-        elif input_format == "MSFragger":
+        elif input_format == "FragPipe":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "WOMBAT":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
@@ -376,7 +376,7 @@ class Module(ModuleInterface):
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 
     def load_params_file(self, input_file: str, input_format: str) -> ProteoBenchParameters:
-        """Method loads parameters from a metadata file depending on its format. TODO: Currently only supports MaxQuant, MSFragger, and Proline"""
+        """Method loads parameters from a metadata file depending on its format."""
         params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
         params.software_name = input_format
         return params

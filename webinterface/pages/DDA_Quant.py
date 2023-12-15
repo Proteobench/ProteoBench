@@ -277,7 +277,7 @@ class StreamlitUI:
                    - unique = TRUE if the sequence is species-specific
                    - species
                    - expected ratio for the given species
-                   - epsilon = [TODO]
+                   - epsilon = difference of the observed and expected log2-transformed fold change
                     """
         )
         # Plot results

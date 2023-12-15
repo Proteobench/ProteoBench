@@ -62,7 +62,7 @@ class PlotDataPoint:
         software_colors = {
             "MaxQuant": "#1f77b4",
             "AlphaPept": "#2ca02c",
-            "MSFragger": "#ff7f0e",
+            "FragPipe": "#ff7f0e",
             "WOMBAT": "#7f7f7f",
             "Proline": "#d62728",
             "Sage": "#f74c00",

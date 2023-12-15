@@ -124,7 +124,7 @@ class TestOutputFileReading(unittest.TestCase):
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
-        Module().benchmarking(TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None)
+        res = Module().benchmarking(TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None)
 
 
 class TestWrongFormatting(unittest.TestCase):
@@ -145,10 +145,27 @@ class TestPlot(unittest.TestCase):
     """Test if the plots return a figure."""
 
     def test_plot_metric(self):
-        # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-        all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
-        all_datapoints["old_new"] = "old"
-        fig = PlotDataPoint().plot_metric(all_datapoints)
+        user_input = {
+            "software_name": "MaxQuant",
+            "software_version": "1.0",
+            "search_engine_version": "1.0",
+            "search_engine": "MaxQuant",
+            "ident_fdr_psm": 0.01,
+            "ident_fdr_peptide": 0.05,
+            "ident_fdr_protein": 0.1,
+            "enable_match_between_runs": 1,
+            "precursor_mass_tolerance": 0.02,
+            "precursor_mass_tolerance_unit": "Da",
+            "fragment_mass_tolerance": 0.02,
+            "fragment_mass_tolerance_unit": "Da",
+            "enzyme": "Trypsin",
+            "allowed_miscleavages": 1,
+            "min_peptide_length": 6,
+            "max_peptide_length": 30,
+        }
+        res = Module().benchmarking(TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None)
+
+        fig = PlotDataPoint().plot_metric(res[1])
         self.assertIsNotNone(fig)
 
     def test_plot_bench(self):

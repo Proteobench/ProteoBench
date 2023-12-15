@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 
 
 @dataclass
@@ -42,29 +43,20 @@ class Datapoint:
     # reproducibility: int = 0,
     # mean_reproducibility: int = 0,
 
-    def calculate_missing_quan_prec(self, df, nr_missing_0):
-        # TODO: unclear what this function does
-        # should we compute ratio of removed features when filtering for nr_missing?
-        nr_quan_prec_missing = []
-
-        return nr_quan_prec_missing
-
-    def cv_summary(self, df):
-        """Calculate the coefficient of variation for a given dataframe."""
-
-    def partial_area_under_ROC(self, df):
-        """Calculate the partial area under the ROC curve for a given dataframe."""
-
-    def area_under_PR(self, df):
-        """Calculate the area under the precision-recall curve for a given dataframe."""
-
     def generate_id(self):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.id = self.search_engine + "_" + str(self.software_version) + "_" + str(time_stamp)
         logging.info(f"Assigned the following ID to this run: {self.id}")
 
-    # TODO no references of this function.
-    def dump_json_object(self, file_name):
-        f = open(file_name, "a")
-        f.write(json.dumps(asdict(self)))
-        f.close()
+    def to_plot_df(self):
+        """Converts the datapoint to a pandas dataframe for plotting"""
+        results_pd = pd.DataFrame(self.results).transpose()
+        results_pd["nr_observed"] = results_pd.index
+        results_pd = results_pd.reset_index(drop=True)
+
+        df = pd.DataFrame([asdict(self)])
+        xx = pd.concat([df] * len(results_pd))
+        xx = xx.reset_index(drop=True)
+
+        res = pd.concat([xx, results_pd], axis=1)
+        return res

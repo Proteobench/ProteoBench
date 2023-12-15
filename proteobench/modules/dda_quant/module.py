@@ -163,17 +163,17 @@ class Module(ModuleInterface):
         withspecies["epsilon"] = withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
         return withspecies
 
+    # TODO seems not to be referenced anywhere
     def strip_sequence_wombat(self, seq: str) -> str:
         """Remove parts of the peptide sequence that contain modifications."""
         return re.sub("([\(\[]).*?([\)\]])", "", seq)
 
-    # TODO move to module
     @staticmethod
     def get_metrics(df, min_nr_observed=1):
         # compute mean of epsilon column in df
         # take abs value of df["epsilon"]
         # TODO use nr_missing to filter df before computing stats.
-        df_slice = df[df["Count"] > min_nr_observed]
+        df_slice = df[df["Count"] >= min_nr_observed]
         weighted_sum = round(df_slice["epsilon"].abs().mean(), ndigits=3)
         nr_prec = len(df_slice)
 
@@ -208,12 +208,10 @@ class Module(ModuleInterface):
             max_peptide_length=user_input["max_peptide_length"],
             intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
         )
-
         result_datapoint.generate_id()
         results = dict(ChainMap(*[Module.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
-        df = pd.Series(asdict(result_datapoint))
-
-        return df
+        result_datapoint.results = results
+        return result_datapoint
 
     def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
         """Method loads dataframe from a csv depending on its format."""
@@ -248,19 +246,20 @@ class Module(ModuleInterface):
 
         return input_data_frame
 
-    def add_current_data_point(self, all_datapoints, current_datapoint):
+    def add_current_data_point(self, all_datapoints: pd.DataFrame, current_datapoint: Datapoint):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
 
         all_datapoints["old_new"] = "old"
-        all_datapoints = all_datapoints.T
+        current_datapoint_df = current_datapoint.to_plot_df()
 
-        current_datapoint["old_new"] = "new"
-        all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
-        all_datapoints = all_datapoints.T.reset_index(drop=True)
-        return all_datapoints
+        current_datapoint_df["old_new"] = "new"
+        df1 = all_datapoints.reset_index(drop=True)
+        df2 = current_datapoint_df.reset_index(drop=True)
+        res = pd.concat([df2, df1], axis=0, ignore_index=True)
+        return res
 
     def obtain_all_data_point(self, all_datapoints):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""

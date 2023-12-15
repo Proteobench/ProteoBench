@@ -103,7 +103,7 @@ class Module(ModuleInterface):
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
 
         # compute the mean of the log_Intensity per precursor and "Group"
-        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(Count=("Raw file", "size"))
+        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(nr_observed=("Raw file", "size"))
 
         # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
 
@@ -117,7 +117,7 @@ class Module(ModuleInterface):
                 Intensity_mean=("Intensity", "mean"),
                 Intensity_std=("Intensity", "std"),
                 Sum=("Intensity", "sum"),
-                Count=("Intensity", "size"),
+                nr_obs_group=("Intensity", "size"),
             )
             .reset_index()
         )
@@ -173,7 +173,7 @@ class Module(ModuleInterface):
         # compute mean of epsilon column in df
         # take abs value of df["epsilon"]
         # TODO use nr_missing to filter df before computing stats.
-        df_slice = df[df["Count"] >= min_nr_observed]
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
         weighted_sum = round(df_slice["epsilon"].abs().mean(), ndigits=3)
         nr_prec = len(df_slice)
 
@@ -258,7 +258,11 @@ class Module(ModuleInterface):
         current_datapoint_df["old_new"] = "new"
         df1 = all_datapoints.reset_index(drop=True)
         df2 = current_datapoint_df.reset_index(drop=True)
-        res = pd.concat([df2, df1], axis=0, ignore_index=True)
+
+        if df1.columns.equals(df2.columns):
+            res = pd.concat([df2, df1], axis=0, ignore_index=True)
+        else:
+            res = df2
         return res
 
     def obtain_all_data_point(self, all_datapoints):
@@ -286,13 +290,8 @@ class Module(ModuleInterface):
         current_datapoint = self.generate_datapoint(intermediate_data_structure, input_format, user_input)
 
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
-
-        # TODO check why there are NA and inf/-inf values
-        return (
-            intermediate_data_structure,
-            all_datapoints,
-            input_df,
-        )
+        res = (intermediate_data_structure, all_datapoints, input_df)
+        return res
 
     def check_new_unique_hash(self, datapoints):
         current_datapoint = datapoints[datapoints["old_new"] == "new"]

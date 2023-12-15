@@ -55,6 +55,7 @@ class Datapoint:
         results_pd = results_pd.reset_index(drop=True)
 
         df = pd.DataFrame([asdict(self)])
+        df.drop("results", axis=1, inplace=True)
         xx = pd.concat([df] * len(results_pd))
         xx = xx.reset_index(drop=True)
 

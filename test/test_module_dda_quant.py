@@ -165,7 +165,7 @@ class TestPlot(unittest.TestCase):
         }
         res = Module().benchmarking(TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None)
 
-        fig = PlotDataPoint().plot_metric(res[1])
+        fig = PlotDataPoint().plot_metric(res[1], nr_observed=1)
         self.assertIsNotNone(fig)
 
     def test_plot_bench(self):
@@ -192,8 +192,8 @@ class TestPlot(unittest.TestCase):
         combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
         combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"
         combineddf["YEAST"] = combineddf["SPECIES"] == "YEAST"
-
-        fig = PlotDataPoint().plot_bench(combineddf)
+        combineddf["nr_observed"] = [3] * combineddf.shape[0]
+        fig = PlotDataPoint().plot_bench(combineddf, nr_observed=1)
         # fig.write_html("dummy.html")
         self.assertIsNotNone(fig)
 

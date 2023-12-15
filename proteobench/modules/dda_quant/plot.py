@@ -8,9 +8,10 @@ from streamlit_plotly_events import plotly_events
 
 # ! This class does not use any instance attributes.
 class PlotDataPoint:
-    def plot_bench(self, result_df: pd.DataFrame) -> go.Figure:
+    def plot_bench(self, result_df: pd.DataFrame, nr_observed: int) -> go.Figure:
         """Plot results with Plotly Express."""
-
+        # filter result_df to only include datapoints with at least nr_observed
+        result_df = result_df[result_df["nr_observed"] >= nr_observed]
         # Remove any precursors not arising from a known organism... contaminants?
         result_df = result_df[result_df[["YEAST", "ECOLI", "HUMAN"]].any(axis=1)]
         result_df["kind"] = result_df[["YEAST", "ECOLI", "HUMAN"]].apply(
@@ -44,7 +45,7 @@ class PlotDataPoint:
 
         return fig
 
-    def plot_metric(self, benchmark_metrics_df: pd.DataFrame) -> go.Figure:
+    def plot_metric(self, benchmark_metrics_df: pd.DataFrame, nr_observed: int) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
 
@@ -57,6 +58,8 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
+        # select the rews that have at least the number of nr_observed
+        benchmark_metrics_df = benchmark_metrics_df[benchmark_metrics_df["nr_observed"] >= nr_observed]
 
         # Define search colors for each search engine
         software_colors = {

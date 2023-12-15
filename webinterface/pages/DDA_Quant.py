@@ -10,7 +10,11 @@ import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.modules.dda_quant.module import Module
-from proteobench.modules.dda_quant.parse_settings import DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT
+from proteobench.modules.dda_quant.parse_settings import (
+    DDA_QUANT_RESULTS_PATH,
+    INPUT_FORMATS,
+    LOCAL_DEVELOPMENT,
+)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 logger = logging.getLogger(__name__)
@@ -163,7 +167,12 @@ class StreamlitUI:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
             all_datapoints = Module().obtain_all_data_point(all_datapoints)
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            # TODO: retrieve real all_datapoints
+            if "nr_observed" not in all_datapoints.columns:
+                # If not, add the column and set default value to 3
+                all_datapoints["nr_observed"] = 3
+
+            fig2 = PlotDataPoint().plot_metric(all_datapoints, nr_observed=1)
             st.plotly_chart(fig2, use_container_width=True)
 
         if submit_button:
@@ -231,7 +240,7 @@ class StreamlitUI:
         # Plot results
         st.subheader("Ratio between conditions")
         if recalculate:
-            fig = PlotDataPoint().plot_bench(result_performance)
+            fig = PlotDataPoint().plot_bench(result_performance, nr_observed=1)
         else:
             fig = st.session_state[FIG1]
         st.plotly_chart(fig, use_container_width=True)
@@ -241,7 +250,7 @@ class StreamlitUI:
         # st.text(all_datapoints.head(100))
 
         if recalculate:
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            fig2 = PlotDataPoint().plot_metric(all_datapoints, nr_observed=1)
         else:
             fig2 = st.session_state[FIG2]
         st.plotly_chart(fig2, use_container_width=True)

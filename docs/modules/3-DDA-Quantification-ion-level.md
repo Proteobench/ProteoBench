@@ -48,7 +48,7 @@ The "Quantified peptide ions" tab reports validated PSMs, so precursor ion quant
 1. Select the LFQ-MBR workflow (using only 1 enzyme).
 2. Assign experiments in the workflow tab corresponding with the corresponding experimental condition("A", "B").
 3. **Make sure contaminants are not added when you add decoys to the database**. 
-4. Upload "combined_ion/modified_peptides.tsv" in order for Proteobench to calculate the ion ratios, combined with the used parameter file which is stored by MSFragger under the name "fragger.params".
+4. Upload "combined_ion/modified_peptides.tsv" in order for Proteobench to calculate the ion ratios, combined with the used parameter file which is stored by FragPipe under the name "fragger.params".
 
 #### Sage
 

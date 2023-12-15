@@ -34,7 +34,7 @@ readme = "README.md"
 
 [project.optional-dependencies]
 dev = ["black"]
-docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser"]
+docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser", "pydata-sphinx-theme"]
 web = ["streamlit>1.27", "scipy"]
 
 [project.urls]

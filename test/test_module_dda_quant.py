@@ -9,6 +9,7 @@ from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant.module import Datapoint, Module
 from proteobench.modules.dda_quant.parse import ParseInputs
 from proteobench.modules.dda_quant.parse_settings import (
+    DDA_QUANT_RESULTS_PATH,
     DDA_QUANT_RESULTS_REPO,
     INPUT_FORMATS,
     ParseSettings,
@@ -38,12 +39,8 @@ def load__local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-        input_df, parse_settings
-    )
-    intermediate = Module().generate_intermediate(
-        prepared_df, replicate_to_raw, parse_settings
-    )
+    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+    intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
@@ -52,12 +49,8 @@ def process_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-        input_df, parse_settings
-    )
-    intermediate = Module().generate_intermediate(
-        prepared_df, replicate_to_raw, parse_settings
-    )
+    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+    intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
@@ -95,9 +88,7 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-                input_df, parse_settings
-            )
+            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
             self.assertFalse(prepared_df.empty)
             self.assertFalse(replicate_to_raw == {})
@@ -107,30 +98,29 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(
-                input_df, parse_settings
-            )
+            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
             # Get quantification data
-            intermediate = Module().generate_intermediate(
-                prepared_df, replicate_to_raw, parse_settings
-            )
+            intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
             self.assertFalse(intermediate.empty)
 
     def test_benchmarking(self):
         user_input = {
-            "version": "1.0",
-            "fdr_psm": 0.01,
-            "fdr_peptide": 0.05,
-            "fdr_protein": 0.1,
-            "mbr": 1,
+            "software_name": "MaxQuant",
+            "software_version": "1.0",
+            "search_engine_version": "1.0",
+            "search_engine": "MaxQuant",
+            "ident_fdr_psm": 0.01,
+            "ident_fdr_peptide": 0.05,
+            "ident_fdr_protein": 0.1,
+            "enable_match_between_runs": 1,
             "precursor_mass_tolerance": 0.02,
             "precursor_mass_tolerance_unit": "Da",
             "fragment_mass_tolerance": 0.02,
             "fragment_mass_tolerance_unit": "Da",
-            "search_enzyme_name": "Trypsin",
-            "allowed_missed_cleavage": 1,
+            "enzyme": "Trypsin",
+            "allowed_miscleavages": 1,
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
@@ -148,9 +138,7 @@ class TestWrongFormatting(unittest.TestCase):
         user_input["input_format"] = format_name
 
         with self.assertRaises(KeyError) as context:
-            Module().benchmarking(
-                user_input["input_csv"], user_input["input_format"], {}, None
-            )
+            Module().benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
 
 
 class TestPlot(unittest.TestCase):
@@ -183,9 +171,7 @@ class TestPlot(unittest.TestCase):
         # Concatenate the lists to create a single list
         combined_list = human_strings + ecoli_strings + yeast_strings
 
-        combineddf = pd.DataFrame(
-            {"SPECIES": combined_list, "log2_A_vs_B": combined_ratios}
-        )
+        combineddf = pd.DataFrame({"SPECIES": combined_list, "log2_A_vs_B": combined_ratios})
         combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
         combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"
         combineddf["YEAST"] = combineddf["SPECIES"] == "YEAST"
@@ -201,17 +187,20 @@ class TestDatapoint(unittest.TestCase):
     def test_Datapoint_constructor(self):
         input_format = "MaxQuant"
         user_input = {
-            "version": "1.0",
-            "fdr_psm": 0.01,
-            "fdr_peptide": 0.05,
-            "fdr_protein": 0.1,
-            "mbr": 1,
+            "software_name": "MaxQuant",
+            "software_version": "1.0",
+            "search_engine_version": "1.0",
+            "search_engine": "MaxQuant",
+            "ident_fdr_psm": 0.01,
+            "ident_fdr_peptide": 0.05,
+            "ident_fdr_protein": 0.1,
+            "enable_match_between_runs": 1,
             "precursor_mass_tolerance": 0.02,
             "precursor_mass_tolerance_unit": "Da",
             "fragment_mass_tolerance": 0.02,
             "fragment_mass_tolerance_unit": "Da",
-            "search_enzyme_name": "Trypsin",
-            "allowed_missed_cleavage": 1,
+            "enzyme": "Trypsin",
+            "allowed_miscleavages": 1,
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
@@ -219,21 +208,23 @@ class TestDatapoint(unittest.TestCase):
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
         result_datapoint = Datapoint(
-            id=input_format + "_" + user_input["version"] + "_" + formatted_datetime,
-            search_engine=input_format,
-            software_version=user_input["version"],
-            fdr_psm=user_input["fdr_psm"],
-            fdr_peptide=user_input["fdr_peptide"],
-            fdr_protein=user_input["fdr_protein"],
-            MBR=user_input["mbr"],
-            precursor_tol=user_input["precursor_mass_tolerance"],
-            precursor_tol_unit=user_input["precursor_mass_tolerance_unit"],
-            fragment_tol=user_input["fragment_mass_tolerance"],
-            fragment_tol_unit=user_input["fragment_mass_tolerance_unit"],
-            enzyme_name=user_input["search_enzyme_name"],
-            missed_cleavages=user_input["allowed_missed_cleavage"],
-            min_pep_length=user_input["min_peptide_length"],
-            max_pep_length=user_input["max_peptide_length"],
+            id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
+            software_name=input_format,
+            software_version=user_input["software_version"],
+            search_engine=user_input["search_engine"],
+            search_engine_version=user_input["search_engine_version"],
+            ident_fdr_psm=user_input["ident_fdr_psm"],
+            ident_fdr_peptide=user_input["ident_fdr_peptide"],
+            ident_fdr_protein=user_input["ident_fdr_protein"],
+            enable_match_between_runs=user_input["enable_match_between_runs"],
+            precursor_mass_tolerance=user_input["precursor_mass_tolerance"],
+            precursor_mass_tolerance_unit=user_input["precursor_mass_tolerance_unit"],
+            fragment_mass_tolerance=user_input["fragment_mass_tolerance"],
+            fragment_mass_tolerance_unit=user_input["fragment_mass_tolerance_unit"],
+            enzyme=user_input["enzyme"],
+            allowed_miscleavages=user_input["allowed_miscleavages"],
+            min_peptide_length=user_input["min_peptide_length"],
+            max_peptide_length=user_input["max_peptide_length"],
         )
 
 

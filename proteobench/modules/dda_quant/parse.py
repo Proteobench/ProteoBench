@@ -55,9 +55,7 @@ def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):
 
 def get_stripped_seq(input_string: str, isalpha: bool = True, isupper: bool = True):
     if isalpha and isupper:
-        return "".join(
-            char for char in input_string if char.isalpha() and char.isupper()
-        )
+        return "".join(char for char in input_string if char.isalpha() and char.isupper())
     if isalpha:
         return "".join(char for char in input_string if char.isalpha())
     if isupper:
@@ -70,14 +68,8 @@ def match_brackets(
     isalpha: bool = True,
     isupper: bool = True,
 ):
-    matches = [
-        (match.group(1), match.start(1), match.end(1))
-        for match in re.finditer(pattern, input_string)
-    ]
-    positions = (
-        count_chars(input_string[0 : m[1]], isalpha=isalpha, isupper=isupper)
-        for m in matches
-    )
+    matches = [(match.group(1), match.start(1), match.end(1)) for match in re.finditer(pattern, input_string)]
+    positions = (count_chars(input_string[0 : m[1]], isalpha=isalpha, isupper=isupper) for m in matches)
     mods = (m[0] for m in matches)
     return mods, positions
 
@@ -96,9 +88,7 @@ def get_proforma_bracketed(
         "+42": "Acetyl",
     },
 ):
-    modifications, positions = match_brackets(
-        input_string, pattern=pattern, isalpha=isalpha, isupper=isupper
-    )
+    modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
 
     new_modifications = []
     for m in modifications:
@@ -139,8 +129,7 @@ class ParseInputs(ParseInputsInterface):
         for k, v in parse_settings.mapper.items():
             if k not in df.columns:
                 raise ImportError(
-                    f"Column {k} not found in input dataframe."
-                    " Please check input file and selected software tool."
+                    f"Column {k} not found in input dataframe." " Please check input file and selected software tool."
                 )
 
         df.rename(columns=parse_settings.mapper, inplace=True)
@@ -159,8 +148,7 @@ class ParseInputs(ParseInputsInterface):
         for flag, species in parse_settings.species_dict.items():
             df[species] = df["Proteins"].str.contains(flag)
         df["MULTI_SPEC"] = (
-            df[list(parse_settings.species_dict.values())].sum(axis=1)
-            > parse_settings.min_count_multispec
+            df[list(parse_settings.species_dict.values())].sum(axis=1) > parse_settings.min_count_multispec
         )
 
         df = df[df["MULTI_SPEC"] == False]
@@ -189,11 +177,7 @@ class ParseInputs(ParseInputsInterface):
             )
 
         try:
-            df.loc[df.index, "peptidoform"] = (
-                df.loc[df.index, "proforma"]
-                + "|Z="
-                + df.loc[df.index, "Charge"].map(str)
-            )
+            df.loc[df.index, "peptidoform"] = df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
         except KeyError:
             raise KeyError(
                 f"Not all columns required for making the ion are available."
@@ -202,9 +186,9 @@ class ParseInputs(ParseInputsInterface):
 
         # TODO remove this, keep missing values, do statsitics later.
         if False:
-            count_non_zero = (
-                df.groupby(["peptidoform", "Raw file"])["Intensity"].sum() > 0.0
-            ).groupby(level=[0]).sum() == 6
+            count_non_zero = (df.groupby(["peptidoform", "Raw file"])["Intensity"].sum() > 0.0).groupby(
+                level=[0]
+            ).sum() == 6
 
             allowed_peptidoforms = list(count_non_zero.index[count_non_zero])
             filtered_df = df[df["peptidoform"].isin(allowed_peptidoforms)]

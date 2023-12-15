@@ -11,8 +11,7 @@ import toml
 from proteobench.modules.dda_quant import ModuleInterface
 from proteobench.modules.template.datapoint import Datapoint
 from proteobench.modules.template.parse import ParseInputs
-from proteobench.modules.template.parse_settings import (TEMPLATE_RESULTS_PATH,
-                                                         ParseSettings)
+from proteobench.modules.template.parse_settings import TEMPLATE_RESULTS_PATH, ParseSettings
 
 
 class Module(ModuleInterface):
@@ -22,9 +21,7 @@ class Module(ModuleInterface):
         """Returns whether the module is fully implemented."""
         return True
 
-    def generate_intermediate(
-        standard_format: dict, parse_settings: ParseSettings
-    ) -> pd.DataFrame:
+    def generate_intermediate(standard_format: dict, parse_settings: ParseSettings) -> pd.DataFrame:
         """Calculate intermediate values from the uploaded file."""
 
         # TODO calculate intermediate values
@@ -32,17 +29,11 @@ class Module(ModuleInterface):
 
         return intermediate
 
-    def generate_datapoint(
-        intermediate: pd.DataFrame, input_format: str, user_input: dict
-    ) -> Datapoint:
+    def generate_datapoint(intermediate: pd.DataFrame, input_format: str, user_input: dict) -> Datapoint:
         """Method used to compute benchmarks for the provided intermediate structure."""
         # Leave these lines as they are
         result_datapoint = Datapoint(
-            id=input_format
-            + "_"
-            + user_input["version"]
-            + "_"
-            + str(datetime.datetime.now()),
+            id=input_format + "_" + user_input["version"] + "_" + str(datetime.datetime.now()),
             # Add/remove your own metadata here
             search_engine=input_format,
             software_version=user_input["version"],
@@ -88,9 +79,7 @@ class Module(ModuleInterface):
         all_datapoints = all_datapoints.T.reset_index(drop=True)
         return all_datapoints
 
-    def benchmarking(
-        self, input_file: str, input_format: str, user_input: dict, all_datapoints
-    ) -> pd.DataFrame:
+    def benchmarking(self, input_file: str, input_format: str, user_input: dict, all_datapoints) -> pd.DataFrame:
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Read input file
@@ -101,19 +90,13 @@ class Module(ModuleInterface):
         parse_settings = ParseSettings(input_format)
 
         # Converte uploaded data to standard format
-        standard_format = ParseInputs().convert_to_standard_format(
-            input_df, parse_settings
-        )
+        standard_format = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
         # Create intermediate data structure for benchmarking
-        intermediate_data_structure = self.generate_intermediate(
-            standard_format, parse_settings
-        )
+        intermediate_data_structure = self.generate_intermediate(standard_format, parse_settings)
 
         # Compute performance metrics
-        current_datapoint = self.generate_datapoint(
-            intermediate_data_structure, input_format, user_input
-        )
+        current_datapoint = self.generate_datapoint(intermediate_data_structure, input_format, user_input)
 
         # Add data point to all data points
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)

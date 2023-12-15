@@ -77,11 +77,7 @@ parameters = [
         ],
     ),
     (
-        {
-            "variableModifications": {
-                "string": ["Oxidation (M)", "Acetyl (Protein N-term)"]
-            }
-        },
+        {"variableModifications": {"string": ["Oxidation (M)", "Acetyl (Protein N-term)"]}},
         [
             (("variableModifications", "string"), "Oxidation (M)"),
             (("variableModifications", "string"), "Acetyl (Protein N-term)"),
@@ -109,9 +105,7 @@ def test_file_parsing_to_csv(file, csv_expected):
     assert actual.equals(expected)
 
 
-parameters = [
-    (fname, (fname.parent / (fname.stem + "_sel.json"))) for fname in mqpar_fnames
-]
+parameters = [(fname, (fname.parent / (fname.stem + "_sel.json"))) for fname in mqpar_fnames]
 
 
 @pytest.mark.parametrize("file,json_expected", parameters)

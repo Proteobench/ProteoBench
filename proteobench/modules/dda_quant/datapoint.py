@@ -11,20 +11,22 @@ class Datapoint:
     """Data used to stored the"""
 
     id: str = None
-    search_engine: str = None
+    software_name: str = None
     software_version: int = 0
-    fdr_psm: int = 0
-    fdr_peptide: int = 0
-    fdr_protein: int = 0
-    MBR: bool = False
-    precursor_tol: int = 0
-    precursor_tol_unit: str = "Da"
-    fragment_tol: int = 0
-    fragment_tol_unit: str = "Da"
-    enzyme_name: str = None
-    missed_cleavages: int = 0
-    min_pep_length: int = 0
-    max_pep_length: int = 0
+    search_engine: str = None
+    search_engine_version: int = 0
+    ident_fdr_psm: int = 0
+    ident_fdr_peptide: int = 0
+    ident_fdr_protein: int = 0
+    enable_match_between_runs: bool = False
+    precursor_mass_tolerance: int = 0
+    precursor_mass_tolerance_unit: str = "Da"
+    fragment_mass_tolerance: int = 0
+    fragment_mass_tolerance_unit: str = "Da"
+    enzyme: str = None
+    allowed_miscleavages: int = 0
+    min_peptide_length: int = 0
+    max_peptide_length: int = 0
     weighted_sum: int = 0
     nr_prec: int = 0
     is_temporary: bool = True
@@ -33,8 +35,9 @@ class Datapoint:
     nr_missing: int = 0
     # fixed_mods: [],
     # variable_mods: [],
-    # max_number_mods_pep: int = 0,
-    # precursor_charge: int = 0,
+    # max_mods: int = 0,
+    # min_precursor_charge: int = 0,
+    # max_precursor_charge: int = 0,
     # reproducibility: int = 0,
     # mean_reproducibility: int = 0,
 
@@ -64,13 +67,7 @@ class Datapoint:
 
     def generate_id(self):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.id = (
-            self.search_engine
-            + "_"
-            + str(self.software_version)
-            + "_"
-            + str(time_stamp)
-        )
+        self.id = self.search_engine + "_" + str(self.software_version) + "_" + str(time_stamp)
         logging.info(f"Assigned the following ID to this run: {self.id}")
 
     # TODO no references of this function.

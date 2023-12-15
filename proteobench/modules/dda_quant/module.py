@@ -11,16 +11,15 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 import streamlit as st
+
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
+from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
+from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import (
-    ParseInputs,
-    aggregate_modification_column,
-)
-from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_REPO,
-    ParseSettings,
-)
+from proteobench.modules.dda_quant.parse import ParseInputs, aggregate_modification_column
+from proteobench.modules.dda_quant.parse_settings import DDA_QUANT_RESULTS_PATH, DDA_QUANT_RESULTS_REPO, ParseSettings
 from proteobench.modules.interfaces import ModuleInterface
 
 
@@ -31,12 +30,16 @@ class Module(ModuleInterface):
         """Returns whether the module is fully implemented."""
         return True
 
+    EXTRACT_PARAMS_DICT = {
+        "MaxQuant": extract_params_maxquant,
+        "Proline": extract_params_proline,
+        "AlphaPept": extract_params_alphapept,
+    }
+
     @staticmethod
     def convert_replicate_to_raw(replicate_to_raw: dict) -> pd.DataFrame:
         """Converts replicate_to_raw dictionary into a dataframe."""
-        replicate_to_raw_df = pd.DataFrame(
-            replicate_to_raw.items(), columns=["Group", "Raw file"]
-        )
+        replicate_to_raw_df = pd.DataFrame(replicate_to_raw.items(), columns=["Group", "Raw file"])
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
         return replicate_to_raw_df
 
@@ -48,15 +51,11 @@ class Module(ModuleInterface):
     ) -> pd.DataFrame:
         # select columns which are relavant for the statistics
         PRECURSOR_NAME = "peptidoform"
-        relevant_columns_df = filtered_df[
-            ["Raw file", PRECURSOR_NAME, "Intensity"]
-        ].copy()
+        relevant_columns_df = filtered_df[["Raw file", PRECURSOR_NAME, "Intensity"]].copy()
         replicate_to_raw_df = Module.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
-        relevant_columns_df = pd.merge(
-            relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner"
-        )
+        relevant_columns_df = pd.merge(relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner")
 
         quant_df = Module.compute_group_stats(
             relevant_columns_df,
@@ -68,9 +67,7 @@ class Module(ModuleInterface):
         species_peptidoform.append(PRECURSOR_NAME)
         peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and peptidoform_to_species using pepdidoform as index
-        quant_df_withspecies = pd.merge(
-            quant_df, peptidoform_to_species, on="peptidoform", how="inner"
-        )
+        quant_df_withspecies = pd.merge(quant_df, peptidoform_to_species, on="peptidoform", how="inner")
         species_expected_ratio = parse_settings.species_expected_ratio
         res = Module.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res
@@ -84,9 +81,7 @@ class Module(ModuleInterface):
         """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
 
         # fiter for min_intensity
-        relevant_columns_df = relevant_columns_df[
-            relevant_columns_df["Intensity"] >= min_intensity
-        ]
+        relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] >= min_intensity]
 
         # TODO: check if this is still needed
         # sum intensity values of the same precursor and "Raw file" using the sum
@@ -100,15 +95,11 @@ class Module(ModuleInterface):
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
 
         # compute the mean of the log_Intensity per precursor and "Group"
-        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(
-            Count=("Raw file", "size")
-        )
+        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(Count=("Raw file", "size"))
 
         # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
 
-        intensities_wide = quant_raw_df_int.pivot(
-            index=precursor, columns="Raw file", values="Intensity"
-        ).reset_index()
+        intensities_wide = quant_raw_df_int.pivot(index=precursor, columns="Raw file", values="Intensity").reset_index()
 
         quant_raw_df = (
             quant_raw_df_int.groupby([precursor, "Group"])
@@ -124,9 +115,7 @@ class Module(ModuleInterface):
         )
 
         # compute coefficient of variation (CV) of the log_Intensity_mean and log_Intensity_std
-        quant_raw_df["CV"] = (
-            quant_raw_df["Intensity_std"] / quant_raw_df["Intensity_mean"]
-        )
+        quant_raw_df["CV"] = quant_raw_df["Intensity_std"] / quant_raw_df["Intensity_mean"]
         # pivot dataframe wider so for each Group variable there is a column with log_Intensity_mean, log_Intensity_std, Intensity_mean, Intensity_std and CV
         quant_raw_df = quant_raw_df.pivot(
             index=precursor,
@@ -140,21 +129,12 @@ class Module(ModuleInterface):
             ],
         ).reset_index()
 
-        quant_raw_df.columns = [
-            f"{x[0]}_{x[1]}" if len(str(x[1])) > 0 else x[0]
-            for x in quant_raw_df.columns
-        ]
+        quant_raw_df.columns = [f"{x[0]}_{x[1]}" if len(str(x[1])) > 0 else x[0] for x in quant_raw_df.columns]
 
-        quant_raw_df["log2_A_vs_B"] = (
-            quant_raw_df["log_Intensity_mean_A"] - quant_raw_df["log_Intensity_mean_B"]
-        )
+        quant_raw_df["log2_A_vs_B"] = quant_raw_df["log_Intensity_mean_A"] - quant_raw_df["log_Intensity_mean_B"]
 
-        quant_raw_df = pd.merge(
-            quant_raw_df, intensities_wide, on=precursor, how="inner"
-        )
-        quant_raw_df = pd.merge(
-            quant_raw_df, quant_raw_df_count, on=precursor, how="inner"
-        )
+        quant_raw_df = pd.merge(quant_raw_df, intensities_wide, on=precursor, how="inner")
+        quant_raw_df = pd.merge(quant_raw_df, quant_raw_df_count, on=precursor, how="inner")
         return quant_raw_df
 
     @staticmethod
@@ -170,13 +150,9 @@ class Module(ModuleInterface):
         # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
         for species in species_expected_ratio.keys():
             withspecies.loc[withspecies[species] == True, "species"] = species
-            withspecies.loc[
-                withspecies[species] == True, "expectedRatio"
-            ] = species_expected_ratio[species]["A_vs_B"]
+            withspecies.loc[withspecies[species] == True, "expectedRatio"] = species_expected_ratio[species]["A_vs_B"]
 
-        withspecies["epsilon"] = (
-            withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
-        )
+        withspecies["epsilon"] = withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
         return withspecies
 
     def strip_sequence_wombat(self, seq: str) -> str:
@@ -184,31 +160,35 @@ class Module(ModuleInterface):
         return re.sub("([\(\[]).*?([\)\]])", "", seq)
 
     def generate_datapoint(
-        self, intermediate: pd.DataFrame, input_format: str, user_input: dict
+        self,
+        intermediate: pd.DataFrame,
+        input_format: str,
+        user_input: dict,
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
         result_datapoint = Datapoint(
-            id=input_format + "_" + user_input["version"] + "_" + formatted_datetime,
-            search_engine=input_format,
-            software_version=user_input["version"],
-            fdr_psm=user_input["fdr_psm"],
-            fdr_peptide=user_input["fdr_peptide"],
-            fdr_protein=user_input["fdr_protein"],
-            MBR=user_input["mbr"],
-            precursor_tol=user_input["precursor_mass_tolerance"],
-            precursor_tol_unit=user_input["precursor_mass_tolerance_unit"],
-            fragment_tol=user_input["fragment_mass_tolerance"],
-            fragment_tol_unit=user_input["fragment_mass_tolerance_unit"],
-            enzyme_name=user_input["search_enzyme_name"],
-            missed_cleavages=user_input["allowed_missed_cleavage"],
-            min_pep_length=user_input["min_peptide_length"],
-            max_pep_length=user_input["max_peptide_length"],
-            intermediate_hash=int(
-                hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest(), 16
-            ),
+            id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
+            software_name=input_format,
+            software_version=user_input["software_version"],
+            search_engine=user_input["search_engine"],
+            search_engine_version=user_input["search_engine_version"],
+            ident_fdr_psm=user_input["ident_fdr_psm"],
+            ident_fdr_peptide=user_input["ident_fdr_peptide"],
+            ident_fdr_protein=user_input["ident_fdr_protein"],
+            enable_match_between_runs=user_input["enable_match_between_runs"],
+            precursor_mass_tolerance=user_input["precursor_mass_tolerance"],
+            precursor_mass_tolerance_unit=user_input["precursor_mass_tolerance_unit"],
+            fragment_mass_tolerance=user_input["fragment_mass_tolerance"],
+            fragment_mass_tolerance_unit=user_input["fragment_mass_tolerance_unit"],
+            enzyme=user_input["enzyme"],
+            allowed_miscleavages=user_input["allowed_miscleavages"],
+            min_peptide_length=user_input["min_peptide_length"],
+            max_peptide_length=user_input["max_peptide_length"],
+            intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
         )
+
         result_datapoint.generate_id()
         result_datapoint.calculate_plot_data(intermediate)
         df = pd.Series(asdict(result_datapoint))
@@ -272,27 +252,19 @@ class Module(ModuleInterface):
 
         return all_datapoints
 
-    def benchmarking(
-        self, input_file: str, input_format: str, user_input: dict, all_datapoints
-    ) -> pd.DataFrame:
+    def benchmarking(self, input_file: str, input_format: str, user_input: dict, all_datapoints) -> pd.DataFrame:
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Parse user config
         input_df = self.load_input_file(input_file, input_format)
         parse_settings = ParseSettings(input_format)
 
-        standard_format, replicate_to_raw = ParseInputs().convert_to_standard_format(
-            input_df, parse_settings
-        )
+        standard_format, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
         # Get quantification data
-        intermediate_data_structure = self.generate_intermediate(
-            standard_format, replicate_to_raw, parse_settings
-        )
+        intermediate_data_structure = self.generate_intermediate(standard_format, replicate_to_raw, parse_settings)
 
-        current_datapoint = self.generate_datapoint(
-            intermediate_data_structure, input_format, user_input
-        )
+        current_datapoint = self.generate_datapoint(intermediate_data_structure, input_format, user_input)
 
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 
@@ -323,6 +295,7 @@ class Module(ModuleInterface):
     def clone_pr(
         self,
         temporary_datapoints,
+        datapoint_params,
         token,
         username="Proteobot",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
@@ -331,11 +304,12 @@ class Module(ModuleInterface):
     ):
         t_dir = TemporaryDirectory().name
 
-        clone_repo(
-            clone_dir=t_dir, token=token, remote_git=remote_git, username=username
-        )
+        clone_repo(clone_dir=t_dir, token=token, remote_git=remote_git, username=username)
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
+        for k, v in datapoint_params.__dict__.items():
+            current_datapoint[k] = v
+
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         if not self.check_new_unique_hash(all_datapoints):
@@ -363,11 +337,16 @@ class Module(ModuleInterface):
 
         return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
 
-    def write_json_local_development(self, temporary_datapoints):
+    def write_json_local_development(self, temporary_datapoints, datapoint_params):
         t_dir = TemporaryDirectory().name
         os.mkdir(t_dir)
 
         current_datapoint = temporary_datapoints.iloc[-1]
+
+        # Update parameters based on parsed params
+        for k, v in datapoint_params.__dict__.items():
+            current_datapoint[k] = v
+
         current_datapoint["is_temporary"] = False
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
@@ -381,18 +360,23 @@ class Module(ModuleInterface):
 
         return os.path.join(t_dir, "results.json")
 
-    def write_intermediate_raw(
-        self, dir, ident, input_df, result_performance, param_loc
-    ):
+    def write_intermediate_raw(self, dir, ident, input_df, result_performance, param_loc):
         path_write = os.path.join(dir, ident)
         try:
             os.mkdir(path_write)
         except:
             logging.warning(f"Could not make directory: {path_write}")
 
+        # TODO: save parameters file "locally" together with the raw and intermediate?
         outfile_param = open(os.path.join(path_write, "params.csv"), "w")
         outfile_param.write(str(param_loc.getvalue()))
         outfile_param.close()
 
         input_df.to_csv(os.path.join(path_write, "input_df.csv"))
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
+
+    def load_params_file(self, input_file: str, input_format: str) -> ProteoBenchParameters:
+        """Method loads parameters from a metadata file depending on its format. TODO: Currently only supports MaxQuant, MSFragger, and Proline"""
+        params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
+        params.software_name = input_format
+        return params

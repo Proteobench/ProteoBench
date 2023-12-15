@@ -53,8 +53,6 @@ if __name__ == "__main__":
 
     file = pathlib.Path("../../../test/params/fragger.params")
     data = read_file(file)
-    df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(
-        Parameter._fields[0]
-    )
+    df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
     df
     df.to_csv(file.with_suffix(".csv"))

@@ -34,6 +34,8 @@ class StreamlitPage(ABC):
             [proteobench.readthedocs.io](https://proteobench.readthedocs.io/en/latest/)**<br>
             **💻 Find the source code on
             [github.com](https://github.com/Proteobench/Proteobench)**<br>
+
+            **ProteoBench is a project initiated and maintained by [EuBIC-MS](https://eubic-ms.org/). Please [join us](https://eubic-ms.org/become-a-member/) and contribute!**
             """,
             unsafe_allow_html=True,
         )

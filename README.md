@@ -2,10 +2,6 @@
 
 [TODO]
 
-Learn about the ProteoBench project on [proteobench.github.io](https://proteobench.github.io/).
+Learn about the ProteoBench project on [proteobench.readthedocs.io](https://proteobench.readthedocs.io/en/latest/).
 
-See **Contributing** for installation instructions
-
-## Developer-oriented documentation
-
-You find the Python package documentation on [proteobench.readthedocs.io](https://proteobench.readthedocs.io/).
+See [here](https://proteobench.readthedocs.io/en/latest/developer-guide/development-setup/) for how to use ProteoBench locally, and how to contribute.

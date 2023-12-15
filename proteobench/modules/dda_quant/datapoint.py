@@ -32,7 +32,8 @@ class Datapoint:
     is_temporary: bool = True
     intermediate_hash: str = ""
     # TODO add threshold value used for presence ion/peptidoform
-    nr_missing: int = 0
+    # nr_missing: int = 0
+    results: dict = None
     # fixed_mods: [],
     # variable_mods: [],
     # max_mods: int = 0,
@@ -47,14 +48,6 @@ class Datapoint:
         nr_quan_prec_missing = []
 
         return nr_quan_prec_missing
-
-    # TODO rename to be more specific what function computes?
-    def calculate_plot_data(self, df):
-        # compute mean of epsilon column in df
-        # take abs value of df["epsilon"]
-        # TODO use nr_missing to filter df before computing stats.
-        self.weighted_sum = round(df["epsilon"].abs().mean(), ndigits=3)
-        self.nr_prec = len(df)
 
     def cv_summary(self, df):
         """Calculate the coefficient of variation for a given dataframe."""

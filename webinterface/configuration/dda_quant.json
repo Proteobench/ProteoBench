@@ -7,14 +7,7 @@
     "search_engine": {
         "type": "text_input",
         "label": "Search engine name",
-        "value": {
-            "MaxQuant": "MaxQuant",
-            "AlphaPept": "AlphaPept",
-            "MSFragger": "MSFragger",
-            "Proline": "Proline",
-            "Sage": "Sage",
-            "WOMBAT": "WOMBAT"
-        }
+        "placeholder": "-"
     },
     "search_engine_version": {
         "type": "text_input",

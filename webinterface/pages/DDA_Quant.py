@@ -71,7 +71,7 @@ class StreamlitUI:
 
     def _main_page(self):
         """Format main page."""
-        st.title("Module 2: DDA quantification")
+        st.title("DDA quantification - precursor ions")
         st.header("Description of the module")
         st.markdown(
             """
@@ -126,11 +126,25 @@ class StreamlitUI:
 
         st.header("Input and configuration")
 
+        st.markdown(
+                """
+                   Scroll down if you want to see the public benchmark runs publicly available
+                   today.
+                    """
+            )
+        
         with st.form(key="main_form"):
             st.subheader("Input files")
             st.markdown(
                 """
-                    Remember: contaminant sequences are already present in the fasta file associated to this module. **Do not add other contaminants** to your search. This is important when using MaxQuant and MSFragger, among other tools.
+                    Please upload the ouput of your analysis, and indicate what software 
+                    tool it comes from (this is necessary to correctly parse your table - find 
+                    more information in the "[How to use](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)" 
+                    section of this module).
+
+                    Remember: contaminant sequences are already present in the fasta file 
+                    associated to this module. **Do not add other contaminants** to your 
+                    search. This is important when using MaxQuant and MSFragger, among other tools.
                     """
             )
             self.user_input["input_csv"] = st.file_uploader(
@@ -145,15 +159,29 @@ class StreamlitUI:
             #     "Open pull request to make results available to everyone (type \"YES\" to enable)",
             #     "NO"
             # )
-
+            st.markdown(
+                """
+                    Additionally, you can fill out some information on the paramters that 
+                    were used for this benchmark run bellow. These will be printed when 
+                    hovering on your point.
+                    """
+            )
             with st.expander("Additional parameters"):
                 with open("../webinterface/configuration/dda_quant.json") as file:
                     config = json.load(file)
 
                 for key, value in config.items():
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+            
+            st.markdown(
+                """
+                    Now, press `Parse and Bench` to calculate the metrics from your input. 
+                    The point corresponding to your upload will appear bigger than the 
+                    public data sets already available in ProteoBench.
+                    """
+            )
 
-            submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.additional_parameters)
+            submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.parse_button)
 
         # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
@@ -222,6 +250,30 @@ class StreamlitUI:
             # Show head of result DataFrame
         st.header("Results")
         st.subheader("Sample of the processed file")
+        st.markdown(
+                """
+                   Here are the data from your benchmark run. The table contains the 
+                   precursor ion MS signal calculated from your input data. You can download 
+                   this table from `Download calculated ratios` below.
+
+                   It contains the following columns:
+
+                   - precursor ion = concatenation of the modified sequence en charge
+                   - mean log2-transformed intensities for condition A and B
+                   - standard deviations calculated for the log2-transformed values in condition A and B
+                   - mean intensity for condition A and B
+                   - standard deviations calculated for the intensity values in condition A and B
+                   - coefficient of variation (CV) for condition A and B
+                   - differences of the mean log2-transformed values between condition A and B
+                   - MS signal from the input table ("abundance_DDA_Condition_A_Sample_Alpha_01" to "abundance_DDA_Condition_B_Sample_Alpha_03")
+                   - Count = number of runs with non-missing values
+                   - species the sequence matches to
+                   - unique = TRUE if the sequence is species-specific
+                   - species
+                   - expected ratio for the given species
+                   - epsilon = [TODO]
+                    """
+            )
         if not recalculate:
             result_performance = st.session_state[RESULT_PERF]
             all_datapoints = st.session_state[ALL_DATAPOINTS]
@@ -347,7 +399,8 @@ class WebpageTexts:
 
     class Help:
         input_file = """
-            Output file of the software tool
+            Output file of the software tool. More information on the accepted format can 
+            be found [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
             """
 
         pull_req = """
@@ -355,28 +408,19 @@ class WebpageTexts:
             """
 
         input_format = """
-            Please select the software you used to generate the software tool results. 
-            You can check the toml files at https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/dda_quant/io_parse_settings 
-            for more details. 
-
-            Additionally, you can use the tab-delimited Custom format containing the following columns:
-            Sequence: peptide sequence
-            Proteins: Protein accessions according to fasta file
-            Charge (optional): Charge state of measured peptide
-            FQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
-            LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
-            LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
-            LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01: Quantitative column sample 4
-            LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02: Quantitative column sample 5
-            LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+            Please select the software you used to generate the results. If it is not yet 
+            implemented in ProteoBench, you can use a tab-delimited format that is described 
+            further [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
         """
 
-        additional_parameters = """
-            Please provide all details about the used parameter for the database search. They will facilitate the comparison.
+        parse_button = """
+            Click here to see the output of your benchmark run
         """
 
         meta_data_file = """
-            Please add a file with meta data that contains all relevant information about your search parameters
+            Please add a file with meta data that contains all relevant information about 
+            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
+            for all compatible parameter files.
         """
 
     class Errors:

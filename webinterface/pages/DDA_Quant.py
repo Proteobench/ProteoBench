@@ -176,8 +176,6 @@ class StreamlitUI:
             st.markdown(
                 """
                     Now, press `Parse and Bench` to calculate the metrics from your input. 
-                    The point corresponding to your upload will appear bigger than the 
-                    public data sets already available in ProteoBench.
                     """
             )
 
@@ -255,7 +253,15 @@ class StreamlitUI:
                    Here are the data from your benchmark run. The table contains the 
                    precursor ion MS signal calculated from your input data. You can download 
                    this table from `Download calculated ratios` below.
-
+                    """
+        )
+        if not recalculate:
+            result_performance = st.session_state[RESULT_PERF]
+            all_datapoints = st.session_state[ALL_DATAPOINTS]
+            input_df = st.session_state[INPUT_DF]
+        st.dataframe(result_performance.head(100))
+        st.markdown(
+                """
                    It contains the following columns:
 
                    - precursor ion = concatenation of the modified sequence en charge
@@ -273,15 +279,14 @@ class StreamlitUI:
                    - expected ratio for the given species
                    - epsilon = [TODO]
                     """
-            )
-        if not recalculate:
-            result_performance = st.session_state[RESULT_PERF]
-            all_datapoints = st.session_state[ALL_DATAPOINTS]
-            input_df = st.session_state[INPUT_DF]
-        st.dataframe(result_performance.head(100))
-
+        )
         # Plot results
         st.subheader("Ratio between conditions")
+        st.markdown(
+                """
+                   Ratios calculated from your data:
+                    """
+        )
         if recalculate:
             fig = PlotDataPoint().plot_bench(result_performance)
         else:
@@ -289,6 +294,13 @@ class StreamlitUI:
         st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("Mean error between conditions")
+        st.markdown(
+                """
+                   New figure including your benchmark run. The point corresponding to 
+                   your data will appear bigger than the public data sets already available 
+                   in ProteoBench.
+                    """
+        )
         # show metadata
         # st.text(all_datapoints.head(100))
 
@@ -316,7 +328,44 @@ class StreamlitUI:
             key=f"{random_uuid}",
         )
 
-        st.subheader("Add results to online repository")
+        st.subheader("Add results to online repository")            
+        st.markdown(
+                """
+                    **Please make these results available to the entire community!**
+
+                    To do so, you need to provide the parameter file that corresponds to 
+                    your analysis. You can upload it in the drag and drop area below. 
+                    See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
+                    for all compatible parameter files.
+                    In this module, we keep track of the following parameters, if you feel 
+                    that some important information is missing, please add it in the 
+                    `Comments for submission` field. 
+                    - software tool name and version
+                    - search engine name and version
+                    - FDR threshold for PSM, peptide and protein level
+                    - match between run (or not)
+                    - precursor mass tolerance
+                    - enzyme (although for these data it should be Trypsin)
+                    - number of missed-cleavages
+                    - minimum and maximum peptide length
+                    - fixed and variable modifications
+                    - maximum number of modifications
+                    - minimum and maximum precursor charge
+
+                    Once you confirm that the metadata is correct (and corresponds to the 
+                    table you uploaded before generating the plot), a button will appear.
+                    Press it to submit. 
+
+                    Once submitted, you will see a weblink that will prompt you to a 
+                    pull request on the github repository of the module. Please write down
+                    its number to keep track of your submission. If it looks good, one of 
+                    us will accept it and make your data public. 
+
+                    Please contact us if you have any issue. To do so, you can create an 
+                    [issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
+                    github, or send us an email [TODO].
+                    """
+        )
         st.session_state[FIG1] = fig
         st.session_state[FIG2] = fig2
         st.session_state[RESULT_PERF] = result_performance

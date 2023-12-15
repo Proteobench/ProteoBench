@@ -72,8 +72,6 @@ class PlotDataPoint:
         # Color plot based on software tool
         colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
 
-        print(benchmark_metrics_df)
-
         # Add hover text
         hover_texts = [
             f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"

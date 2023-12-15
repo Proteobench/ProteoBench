@@ -48,7 +48,7 @@
         "value": {
             "MaxQuant": "-",
             "AlphaPept": "-",
-            "MSFragger": "-",
+            "FragPipe": "-",
             "Proline": "-",
             "WOMBAT": "-",
             "Sage": "-"
@@ -72,7 +72,7 @@
         "value": {
             "MaxQuant": "-",
             "AlphaPept": "-",
-            "MSFragger": "-",
+            "FragPipe": "-",
             "Proline": "-",
             "WOMBAT": "-",
             "Sage": "-"
@@ -89,7 +89,7 @@
         "value": {
             "MaxQuant": "-",
             "AlphaPept": "-",
-            "MSFragger": "-",
+            "FragPipe": "-",
             "Proline": "-",
             "WOMBAT": "-",
             "Sage": "-"
@@ -158,7 +158,7 @@
         "value": {
             "MaxQuant": false,
             "AlphaPept": false,
-            "MSFragger": false,
+            "FragPipe": false,
             "Proline": false,
             "WOMBAT": false,
             "Sage": true

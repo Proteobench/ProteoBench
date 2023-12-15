@@ -1,6 +1,6 @@
-"""Functionality to parse MSFragger fragger.params parameter files.
+"""Functionality to parse FragPipe fragger.params parameter files.
 
-MSFragger has a text based paramter file format which 
+FragPipe has a text based paramter file format which 
 separates paramters and their value using an equal sign. Optional comments are 
 expressed with a hash sign.
 """
@@ -15,7 +15,7 @@ Parameter = namedtuple("Parameter", ["name", "value", "comment"])
 
 
 def read_file(file: str) -> list[Parameter]:
-    """Read MSFragger parameter file as list of records."""
+    """Read FragPipe parameter file as list of records."""
     with open(file) as f:
         data = []
         for line in f:

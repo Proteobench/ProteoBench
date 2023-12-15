@@ -27,11 +27,11 @@ class StreamlitPage(ABC):
     def _preface(self):
         st.markdown(
             """
-            # Proteobench
+            # Welcome to ProteoBench
 
             **👈 Select a page from the sidebar to get started!**<br>
             **📖 Learn more about Proteobench on
-            [Proteobench.io](https://github.com/Proteobench/Proteobench)**<br>
+            [proteobench.readthedocs.io](https://proteobench.readthedocs.io/en/latest/)**<br>
             **💻 Find the source code on
             [github.com](https://github.com/Proteobench/Proteobench)**<br>
             """,

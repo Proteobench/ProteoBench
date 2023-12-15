@@ -81,7 +81,7 @@ class Module(ModuleInterface):
         """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
 
         # fiter for min_intensity
-        relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] >= min_intensity]
+        relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] > min_intensity]
 
         # TODO: check if this is still needed
         # sum intensity values of the same precursor and "Raw file" using the sum

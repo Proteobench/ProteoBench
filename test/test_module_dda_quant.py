@@ -23,7 +23,7 @@ TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
-    "MSFragger": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
+    "FragPipe": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
     "Sage": os.path.join(TESTDATA_DIR, "lfq.tsv"),
 }
@@ -56,7 +56,7 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "MSFragger", "AlphaPept", "Sage")  # "WOMBAT",
+    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage")  # "WOMBAT",
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
@@ -64,7 +64,7 @@ class TestOutputFileReading(unittest.TestCase):
         for format_name in (
             "MaxQuant",
             "AlphaPept",
-            "MSFragger",
+            "FragPipe",
             "Proline",
             "Sage",
         ):  # , "WOMBAT"

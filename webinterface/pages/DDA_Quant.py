@@ -127,12 +127,12 @@ class StreamlitUI:
         st.header("Input and configuration")
 
         st.markdown(
-                """
+            """
                    Scroll down if you want to see the public benchmark runs publicly available
                    today.
                     """
-            )
-        
+        )
+
         with st.form(key="main_form"):
             st.subheader("Input files")
             st.markdown(
@@ -144,7 +144,7 @@ class StreamlitUI:
 
                     Remember: contaminant sequences are already present in the fasta file 
                     associated to this module. **Do not add other contaminants** to your 
-                    search. This is important when using MaxQuant and MSFragger, among other tools.
+                    search. This is important when using MaxQuant and FragPipe, among other tools.
                     """
             )
             self.user_input["input_csv"] = st.file_uploader(
@@ -172,7 +172,7 @@ class StreamlitUI:
 
                 for key, value in config.items():
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
-            
+
             st.markdown(
                 """
                     Now, press `Parse and Bench` to calculate the metrics from your input. 
@@ -249,7 +249,7 @@ class StreamlitUI:
         st.header("Results")
         st.subheader("Sample of the processed file")
         st.markdown(
-                """
+            """
                    Here are the data from your benchmark run. The table contains the 
                    precursor ion MS signal calculated from your input data. You can download 
                    this table from `Download calculated ratios` below.
@@ -261,7 +261,7 @@ class StreamlitUI:
             input_df = st.session_state[INPUT_DF]
         st.dataframe(result_performance.head(100))
         st.markdown(
-                """
+            """
                    It contains the following columns:
 
                    - precursor ion = concatenation of the modified sequence en charge
@@ -277,13 +277,13 @@ class StreamlitUI:
                    - unique = TRUE if the sequence is species-specific
                    - species
                    - expected ratio for the given species
-                   - epsilon = [TODO]
+                   - epsilon = difference of the observed and expected log2-transformed fold change
                     """
         )
         # Plot results
         st.subheader("Ratio between conditions")
         st.markdown(
-                """
+            """
                    Ratios calculated from your data:
                     """
         )
@@ -295,7 +295,7 @@ class StreamlitUI:
 
         st.subheader("Mean error between conditions")
         st.markdown(
-                """
+            """
                    New figure including your benchmark run. The point corresponding to 
                    your data will appear bigger than the public data sets already available 
                    in ProteoBench.
@@ -328,9 +328,9 @@ class StreamlitUI:
             key=f"{random_uuid}",
         )
 
-        st.subheader("Add results to online repository")            
+        st.subheader("Add results to online repository")
         st.markdown(
-                """
+            """
                     **Please make these results available to the entire community!**
 
                     To do so, you need to provide the parameter file that corresponds to 

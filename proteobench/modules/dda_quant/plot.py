@@ -48,7 +48,7 @@ class PlotDataPoint:
         """
         Plot mean metrics in a scatterplot with plotly.
 
-        x = median absolute precentage error between all measured and expected ratio
+        x = Mean absolute difference between measured and expected log2-transformed fold change
         y = total number of precursors quantified in all raw files
 
         Input: meta_data
@@ -62,7 +62,7 @@ class PlotDataPoint:
         software_colors = {
             "MaxQuant": "#1f77b4",
             "AlphaPept": "#2ca02c",
-            "MSFragger": "#ff7f0e",
+            "FragPipe": "#ff7f0e",
             "WOMBAT": "#7f7f7f",
             "Proline": "#d62728",
             "Sage": "#f74c00",
@@ -108,7 +108,7 @@ class PlotDataPoint:
             width=700,
             height=700,
             xaxis=dict(
-                title="Median absolute precentage error between all measured ratios and expected ratio",
+                title="Mean absolute difference between measured and expected log2-transformed fold change",
                 gridcolor="white",
                 gridwidth=2,
             ),

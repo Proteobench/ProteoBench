@@ -376,7 +376,7 @@ class Module(ModuleInterface):
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 
     def load_params_file(self, input_file: str, input_format: str) -> ProteoBenchParameters:
-        """Method loads parameters from a metadata file depending on its format. TODO: Currently only supports MaxQuant, MSFragger, and Proline"""
+        """Method loads parameters from a metadata file depending on its format."""
         params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
         params.software_name = input_format
         return params

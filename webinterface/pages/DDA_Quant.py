@@ -130,7 +130,7 @@ class StreamlitUI:
             st.subheader("Input files")
             st.markdown(
                 """
-                    Remember: contaminant sequences are already present in the fasta file associated to this module. **Do not add other contaminants** to your search. This is important when using MaxQuant and MSFragger, among other tools.
+                    Remember: contaminant sequences are already present in the fasta file associated to this module. **Do not add other contaminants** to your search. This is important when using MaxQuant and FragPipe, among other tools.
                     """
             )
             self.user_input["input_csv"] = st.file_uploader(

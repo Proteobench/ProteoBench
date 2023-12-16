@@ -8,21 +8,15 @@ import pandas as pd
 
 
 def filter_df_numquant_weighted_sum(row, min_quant=3):
-    try:
-        return row[min_quant]["weighted_sum"]
-    except KeyError:
-        return None
-    except TypeError:
-        return None
+    if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
+        return row[min_quant].get("weighted_sum")
+    return None
 
 
-def filter_df_numquant_nr_prec(row, min_quant=3):
-    try:
-        return row[min_quant]["nr_prec"]
-    except KeyError:
-        return None
-    except TypeError:
-        return None
+def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
+    if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
+        return row[min_quant].get("nr_prec")
+    return None
 
 
 @dataclass

@@ -61,3 +61,7 @@ class Datapoint:
 
         res = pd.concat([xx, results_pd], axis=1)
         return res
+
+    def to_df(self):
+        """Converts the datapoint to a pandas dataframe for storing"""
+        return pd.Series(asdict(self))

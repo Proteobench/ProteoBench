@@ -246,7 +246,7 @@ class Module(ModuleInterface):
 
         return input_data_frame
 
-    def add_current_data_point(self, all_datapoints: pd.DataFrame, current_datapoint: Datapoint):
+    def add_current_data_point_plot_df(self, all_datapoints: pd.DataFrame, current_datapoint: Datapoint):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
@@ -264,6 +264,22 @@ class Module(ModuleInterface):
         else:
             res = df2
         return res
+
+    def add_current_data_point(self, all_datapoints: pd.DataFrame, current_datapoint: Datapoint):
+        """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
+        if not isinstance(all_datapoints, pd.DataFrame):
+            # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
+            all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+
+        all_datapoints["old_new"] = "old"
+        all_datapoints = all_datapoints.T
+
+        current_datapoint = current_datapoint.to_df()
+        current_datapoint["old_new"] = "new"
+
+        all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
+        all_datapoints = all_datapoints.T.reset_index(drop=True)
+        return all_datapoints
 
     def obtain_all_data_point(self, all_datapoints):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
@@ -289,8 +305,10 @@ class Module(ModuleInterface):
 
         current_datapoint = self.generate_datapoint(intermediate_data_structure, input_format, user_input)
 
-        all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
-        res = (intermediate_data_structure, all_datapoints, input_df)
+        all_datapoints_plot = self.add_current_data_point_plot_df(all_datapoints, current_datapoint)
+        all_datapoints_store = self.add_current_data_point(all_datapoints, current_datapoint)
+
+        res = (intermediate_data_structure, all_datapoints_plot, all_datapoints_store, input_df)
         return res
 
     def check_new_unique_hash(self, datapoints):

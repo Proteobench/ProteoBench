@@ -20,6 +20,7 @@ from proteobench.modules.dda_quant.plot import PlotDataPoint
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
+ALL_DATAPOINTS_PLOT = "all_datapoints_plot"
 SUBMIT = "submit"
 FIG1 = "fig1"
 FIG2 = "fig2"
@@ -165,8 +166,12 @@ class StreamlitUI:
 
         if ALL_DATAPOINTS not in st.session_state:
             st.session_state[ALL_DATAPOINTS] = None
+            st.session_state[ALL_DATAPOINTS_PLOT] = None
+
             all_datapoints = st.session_state[ALL_DATAPOINTS]
+
             all_datapoints = Module().obtain_all_data_point(all_datapoints)
+
             # TODO: retrieve real all_datapoints
             if "nr_observed" not in all_datapoints.columns:
                 # If not, add the column and set default value to 3
@@ -200,15 +205,17 @@ class StreamlitUI:
 
         if ALL_DATAPOINTS not in st.session_state:
             st.session_state[ALL_DATAPOINTS] = None
+            st.session_state[ALL_DATAPOINTS_PLOT] = None
 
         try:
-            result_performance, all_datapoints, input_df = Module().benchmarking(
+            result_performance, all_datapoints_plot, all_datapoints, input_df = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
                 st.session_state[ALL_DATAPOINTS],
             )
             st.session_state[ALL_DATAPOINTS] = all_datapoints
+            st.session_state[ALL_DATAPOINTS_PLOT] = all_datapoints_plot
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)

@@ -9,8 +9,16 @@ import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
+from proteobench.modules.dda_quant.datapoint import (
+    filter_df_numquant_nr_prec,
+    filter_df_numquant_weighted_sum,
+)
 from proteobench.modules.dda_quant.module import Module
-from proteobench.modules.dda_quant.parse_settings import DDA_QUANT_RESULTS_PATH, INPUT_FORMATS, LOCAL_DEVELOPMENT
+from proteobench.modules.dda_quant.parse_settings import (
+    DDA_QUANT_RESULTS_PATH,
+    INPUT_FORMATS,
+    LOCAL_DEVELOPMENT,
+)
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
 logger = logging.getLogger(__name__)
@@ -189,6 +197,10 @@ class StreamlitUI:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
             all_datapoints = Module().obtain_all_data_point(all_datapoints)
+
+            all_datapoints["weighted_sum"] = all_datapoints.apply(filter_df_numquant_weighted_sum, min_quant=3)
+            all_datapoints["nr_prec"] = all_datapoints.apply(filter_df_numquant_nr_prec, min_quant=3)
+
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
             st.plotly_chart(fig2, use_container_width=True)
 
@@ -305,6 +317,14 @@ class StreamlitUI:
         # st.text(all_datapoints.head(100))
 
         if recalculate:
+            for idx, row in all_datapoints.iterrows():
+                print(filter_df_numquant_weighted_sum(row), "test")
+
+            all_datapoints["weighted_sum"] = [
+                filter_df_numquant_weighted_sum(v, min_quant=3) for v in all_datapoints["results"]
+            ]
+            all_datapoints["nr_prec"] = [filter_df_numquant_nr_prec(v, min_quant=3) for v in all_datapoints["results"]]
+
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:
             fig2 = st.session_state[FIG2]

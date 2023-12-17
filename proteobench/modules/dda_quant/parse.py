@@ -177,20 +177,13 @@ class ParseInputs(ParseInputsInterface):
             )
 
         try:
-            df.loc[df.index, "peptidoform"] = df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
+            df.loc[df.index, "precursor ion"] = (
+                df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
+            )
         except KeyError:
             raise KeyError(
                 f"Not all columns required for making the ion are available."
                 "Is the charge available in the input file?"
             )
-
-        # TODO remove this, keep missing values, do statsitics later.
-        if False:
-            count_non_zero = (df.groupby(["peptidoform", "Raw file"])["Intensity"].sum() > 0.0).groupby(
-                level=[0]
-            ).sum() == 6
-
-            allowed_peptidoforms = list(count_non_zero.index[count_non_zero])
-            filtered_df = df[df["peptidoform"].isin(allowed_peptidoforms)]
 
         return df, replicate_to_raw

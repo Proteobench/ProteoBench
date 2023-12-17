@@ -170,18 +170,26 @@ class Module(ModuleInterface):
         # take abs value of df["epsilon"]
         # TODO use nr_missing to filter df before computing stats.
         df_slice = df[df["nr_observed"] >= min_nr_observed]
-        weighted_sum = round(df_slice["epsilon"].abs().mean(), ndigits=3)
         nr_prec = len(df_slice)
-        median_cv = round((df_slice["CV_A"].median() + df_slice["CV_B"].median()) / 2, ndigits=3)
-        q90_cv = round((df_slice["CV_A"].quantile(0.9) + df_slice["CV_B"].quantile(0.9)) / 2, ndigits=3)
-        q75_cv = round((df_slice["CV_A"].quantile(0.75) + df_slice["CV_B"].quantile(0.75)) / 2, ndigits=3)
+        # median abs unafected by outliers
+        median_abs_epsilon = df_slice["epsilon"].abs().mean()
+        # variance affected by outliers
+        variance_epsilon = df_slice["epsilon"].var()
+        # TODO more concise way to describe distribution of CV's
+        cv_median = (df_slice["CV_A"].median() + df_slice["CV_B"].median()) / 2
+        cv_q75 = (df_slice["CV_A"].quantile(0.75) + df_slice["CV_B"].quantile(0.75)) / 2
+        cv_q90 = (df_slice["CV_A"].quantile(0.9) + df_slice["CV_B"].quantile(0.9)) / 2
+        cv_q95 = (df_slice["CV_A"].quantile(0.95) + df_slice["CV_B"].quantile(0.95)) / 2
+
         return {
             min_nr_observed: {
-                "weighted_sum": weighted_sum,
+                "median_abs_epsilon": median_abs_epsilon,
+                "variance_epsilon": variance_epsilon,
                 "nr_prec": nr_prec,
-                "median_CV": median_cv,
-                "q90_CV": q90_cv,
-                "q75_CV": q75_cv,
+                "CV_median": cv_median,
+                "CV_q90": cv_q90,
+                "CV_q75": cv_q75,
+                "CV_q95": cv_q95,
             }
         }
 

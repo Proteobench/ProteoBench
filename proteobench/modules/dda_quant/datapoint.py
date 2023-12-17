@@ -7,9 +7,9 @@ import numpy as np
 import pandas as pd
 
 
-def filter_df_numquant_weighted_sum(row, min_quant=3):
+def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("weighted_sum")
+        return row[min_quant].get("median_abs_epsilon")
     return None
 
 
@@ -41,8 +41,6 @@ class Datapoint:
     allowed_miscleavages: int = 0
     min_peptide_length: int = 0
     max_peptide_length: int = 0
-    weighted_sum: int = 0
-    nr_prec: int = 0
     is_temporary: bool = True
     intermediate_hash: str = ""
     results: dict = None

@@ -46,8 +46,6 @@ class Datapoint:
     missed_cleavages: int = 0
     min_pep_length: int = 0
     max_pep_length: int = 0
-    weighted_sum: int = 0
-    nr_prec: int = 0
 
     def calculate_benchmarking_metric_1(self, intermediate_data):
         """Calculates the first benchmarking metric based on the intermediate data.

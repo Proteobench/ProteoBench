@@ -345,6 +345,14 @@ class StreamlitUI:
             default_val_slider = 3
 
         st.session_state["slider_id"] = uuid.uuid4()
+        st.markdown(
+            """
+                   Choose with the slider below the minimum number of quantification value 
+                   per raw file.  
+                   Example: when 3 is selected, only the precursor ions quantified in 
+                   3 or more raw files will be considered for the plot. 
+                    """
+        )
 
         f = st.select_slider(
             label="Minimal ion quantifications (# samples)",
@@ -523,27 +531,6 @@ class WebpageTexts:
             your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
             for all compatible parameter files.
         """
-
-    class Errors:
-        missing_peptide_csv = """
-            Upload a peptide CSV file or select the _Use example data_ checkbox.
-            """
-        missing_calibration_peptide_csv = """
-            Upload a calibration peptide CSV file or select another _Calibration
-            peptides_ option.
-            """
-        missing_calibration_column = """
-            Upload a peptide CSV file with a `tr` column or select another _Calibration
-            peptides_ option.
-            """
-        invalid_peptide_csv = """
-            Uploaded peptide CSV file could not be read. Click on _Info about peptide
-            CSV formatting_ for more info on the correct input format.
-            """
-        invalid_calibration_peptide_csv = """
-            Uploaded calibration peptide CSV file could not be read. Click on _Info
-            about peptide CSV formatting_ for more info on the correct input format.
-            """
 
 
 if __name__ == "__main__":

@@ -74,10 +74,10 @@ class PlotDataPoint:
 
         # Add hover text
         hover_texts = [
-            f"Search Engine: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
+            f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
+            + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
+            + f"Search engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.search_engine_version[idx]}<br>"
             + f"FDR psm: {benchmark_metrics_df.ident_fdr_psm[idx]}<br>"
-            + f"FDR Peptide: {benchmark_metrics_df.ident_fdr_peptide[idx]}<br>"
-            + f"FRD Protein: {benchmark_metrics_df.ident_fdr_protein[idx]}<br>"
             + f"MBR: {benchmark_metrics_df.enable_match_between_runs[idx]}<br>"
             + f"Precursor Tolerance: {benchmark_metrics_df.precursor_mass_tolerance[idx]}<br>"
             + f"Fragment Tolerance: {benchmark_metrics_df.fragment_mass_tolerance[idx]}<br>"

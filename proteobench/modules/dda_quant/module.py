@@ -5,6 +5,7 @@ import hashlib
 import logging
 import os
 import re
+from collections import ChainMap
 from dataclasses import asdict
 from tempfile import TemporaryDirectory
 
@@ -18,8 +19,16 @@ from proteobench.io.params.alphapept import extract_params as extract_params_alp
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import ParseInputs, aggregate_modification_column
-from proteobench.modules.dda_quant.parse_settings import DDA_QUANT_RESULTS_PATH, DDA_QUANT_RESULTS_REPO, ParseSettings
+from proteobench.modules.dda_quant.parse import (
+    ParseInputs,
+    aggregate_modification_column,
+)
+from proteobench.modules.dda_quant.parse_settings import (
+    DDA_QUANT_RESULTS_PATH,
+    DDA_QUANT_RESULTS_REPO,
+    PRECURSOR_NAME,
+    ParseSettings,
+)
 from proteobench.modules.interfaces import ModuleInterface
 
 
@@ -50,7 +59,7 @@ class Module(ModuleInterface):
         parse_settings: ParseSettings,
     ) -> pd.DataFrame:
         # select columns which are relavant for the statistics
-        PRECURSOR_NAME = "peptidoform"
+        # TODO, this should be handled different, probably in the parse settings
         relevant_columns_df = filtered_df[["Raw file", PRECURSOR_NAME, "Intensity"]].copy()
         replicate_to_raw_df = Module.convert_replicate_to_raw(replicate_to_raw)
 
@@ -63,11 +72,11 @@ class Module(ModuleInterface):
             precursor=PRECURSOR_NAME,
         )
 
-        species_peptidoform = list(parse_settings.species_dict.values())
-        species_peptidoform.append(PRECURSOR_NAME)
-        peptidoform_to_species = filtered_df[species_peptidoform].drop_duplicates()
-        # merge dataframes quant_df and species_quant_df and peptidoform_to_species using pepdidoform as index
-        quant_df_withspecies = pd.merge(quant_df, peptidoform_to_species, on="peptidoform", how="inner")
+        species_prec_ion = list(parse_settings.species_dict.values())
+        species_prec_ion.append(PRECURSOR_NAME)
+        prec_ion_to_species = filtered_df[species_prec_ion].drop_duplicates()
+        # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
+        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=PRECURSOR_NAME, how="inner")
         species_expected_ratio = parse_settings.species_expected_ratio
         res = Module.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res
@@ -76,7 +85,7 @@ class Module(ModuleInterface):
     def compute_group_stats(
         relevant_columns_df: pd.DataFrame,
         min_intensity=0,
-        precursor="peptidoform",
+        precursor=PRECURSOR_NAME,
     ) -> pd.DataFrame:
         """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
 
@@ -95,9 +104,9 @@ class Module(ModuleInterface):
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
 
         # compute the mean of the log_Intensity per precursor and "Group"
-        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(Count=("Raw file", "size"))
+        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(nr_observed=("Raw file", "size"))
 
-        # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
+        # pivot filtered_df_p1 to wide where index peptide ion, columns Raw file and values Intensity
 
         intensities_wide = quant_raw_df_int.pivot(index=precursor, columns="Raw file", values="Intensity").reset_index()
 
@@ -109,7 +118,7 @@ class Module(ModuleInterface):
                 Intensity_mean=("Intensity", "mean"),
                 Intensity_std=("Intensity", "std"),
                 Sum=("Intensity", "sum"),
-                Count=("Intensity", "size"),
+                nr_obs_group=("Intensity", "size"),
             )
             .reset_index()
         )
@@ -155,9 +164,16 @@ class Module(ModuleInterface):
         withspecies["epsilon"] = withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
         return withspecies
 
-    def strip_sequence_wombat(self, seq: str) -> str:
-        """Remove parts of the peptide sequence that contain modifications."""
-        return re.sub("([\(\[]).*?([\)\]])", "", seq)
+    @staticmethod
+    def get_metrics(df, min_nr_observed=1):
+        # compute mean of epsilon column in df
+        # take abs value of df["epsilon"]
+        # TODO use nr_missing to filter df before computing stats.
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        weighted_sum = round(df_slice["epsilon"].abs().mean(), ndigits=3)
+        nr_prec = len(df_slice)
+
+        return {min_nr_observed: {"weighted_sum": weighted_sum, "nr_prec": nr_prec}}
 
     def generate_datapoint(
         self,
@@ -188,10 +204,12 @@ class Module(ModuleInterface):
         )
 
         result_datapoint.generate_id()
-        result_datapoint.calculate_plot_data(intermediate)
-        df = pd.Series(asdict(result_datapoint))
+        results = dict(ChainMap(*[Module.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
+        result_datapoint.results = results
 
-        return df
+        results_series = pd.Series(asdict(result_datapoint))
+
+        return results_series
 
     def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
         """Method loads dataframe from a csv depending on its format."""

@@ -244,6 +244,19 @@ class StreamlitUI:
         else:
             self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
 
+    def slider_callback(self):
+        min_quant = st.session_state[st.session_state["slider_id"]]
+        st.session_state[ALL_DATAPOINTS]["weighted_sum"] = [
+            filter_df_numquant_weighted_sum(v, min_quant=min_quant) for v in st.session_state[ALL_DATAPOINTS]["results"]
+        ]
+        st.session_state[ALL_DATAPOINTS]["nr_prec"] = [
+            filter_df_numquant_nr_prec(v, min_quant=min_quant) for v in st.session_state[ALL_DATAPOINTS]["results"]
+        ]
+
+        fig2 = PlotDataPoint().plot_metric(st.session_state[ALL_DATAPOINTS])
+        st.session_state[FIG2].data[0].x = fig2.data[0].x
+        st.session_state[FIG2].data[0].y = fig2.data[0].y
+
     def generate_results(
         self,
         status_placeholder,
@@ -317,9 +330,6 @@ class StreamlitUI:
         # st.text(all_datapoints.head(100))
 
         if recalculate:
-            for idx, row in all_datapoints.iterrows():
-                print(filter_df_numquant_weighted_sum(row), "test")
-
             all_datapoints["weighted_sum"] = [
                 filter_df_numquant_weighted_sum(v, min_quant=3) for v in all_datapoints["results"]
             ]
@@ -328,6 +338,22 @@ class StreamlitUI:
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:
             fig2 = st.session_state[FIG2]
+
+        if "slider_id" in st.session_state.keys():
+            default_val_slider = st.session_state[st.session_state["slider_id"]]
+        else:
+            default_val_slider = 3
+
+        st.session_state["slider_id"] = uuid.uuid4()
+
+        f = st.select_slider(
+            label="Minimal ion quantifications (# samples)",
+            options=[1, 2, 3, 4, 5, 6],
+            value=default_val_slider,
+            on_change=self.slider_callback,
+            key=st.session_state["slider_id"],
+        )
+
         st.plotly_chart(fig2, use_container_width=True)
 
         sample_name = "%s-%s-%s-%s" % (
@@ -392,14 +418,20 @@ class StreamlitUI:
         st.session_state[ALL_DATAPOINTS] = all_datapoints
         st.session_state[INPUT_DF] = input_df
 
-        self.user_input[META_DATA] = st.file_uploader("Meta data for searches", help=self.texts.Help.meta_data_file)
+        self.user_input[META_DATA] = st.file_uploader(
+            "Meta data for searches", help=self.texts.Help.meta_data_file, key=uuid.uuid4()
+        )
 
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
             placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
             height=200,
+            key=uuid.uuid4(),
         )
-        checkbox = st.checkbox("I confirm that the metadata is correct")
+        checkbox = st.checkbox(
+            "I confirm that the metadata is correct",
+            key=uuid.uuid4(),
+        )
 
         # TODO: do we need a better handling of this?
         params = None
@@ -416,7 +448,7 @@ class StreamlitUI:
 
         if checkbox and params != None:
             st.session_state["submission_ready"] = True
-            submit_pr = st.button("I really want to upload it")
+            submit_pr = st.button("I really want to upload it", key=uuid.uuid4())
 
             # submit_pr = False
             if submit_pr:

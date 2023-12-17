@@ -171,8 +171,18 @@ class Module(ModuleInterface):
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         weighted_sum = round(df_slice["epsilon"].abs().mean(), ndigits=3)
         nr_prec = len(df_slice)
-
-        return {min_nr_observed: {"weighted_sum": weighted_sum, "nr_prec": nr_prec}}
+        median_cv = round((df_slice["CV_A"].median() + df_slice["CV_B"].median()) / 2, ndigits=3)
+        q90_cv = round((df_slice["CV_A"].quantile(0.9) + df_slice["CV_B"].quantile(0.9)) / 2, ndigits=3)
+        q75_cv = round((df_slice["CV_A"].quantile(0.75) + df_slice["CV_B"].quantile(0.75)) / 2, ndigits=3)
+        return {
+            min_nr_observed: {
+                "weighted_sum": weighted_sum,
+                "nr_prec": nr_prec,
+                "median_CV": median_cv,
+                "q90_CV": q90_cv,
+                "q75_CV": q75_cv,
+            }
+        }
 
     def generate_datapoint(
         self,

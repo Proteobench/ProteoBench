@@ -524,27 +524,6 @@ class WebpageTexts:
             for all compatible parameter files.
         """
 
-    class Errors:
-        missing_peptide_csv = """
-            Upload a peptide CSV file or select the _Use example data_ checkbox.
-            """
-        missing_calibration_peptide_csv = """
-            Upload a calibration peptide CSV file or select another _Calibration
-            peptides_ option.
-            """
-        missing_calibration_column = """
-            Upload a peptide CSV file with a `tr` column or select another _Calibration
-            peptides_ option.
-            """
-        invalid_peptide_csv = """
-            Uploaded peptide CSV file could not be read. Click on _Info about peptide
-            CSV formatting_ for more info on the correct input format.
-            """
-        invalid_calibration_peptide_csv = """
-            Uploaded calibration peptide CSV file could not be read. Click on _Info
-            about peptide CSV formatting_ for more info on the correct input format.
-            """
-
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)

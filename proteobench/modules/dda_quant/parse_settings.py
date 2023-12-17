@@ -45,6 +45,7 @@ DDA_QUANT_RESULTS_PATH = (
     "https://raw.githubusercontent.com/Proteobench/" "Results_Module2_quant_DDA/main/results.json"
 )  # e.g., K:/results.json
 
+PRECURSOR_NAME = "precursor ion"
 
 DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
 

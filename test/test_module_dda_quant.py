@@ -128,7 +128,6 @@ class TestOutputFileReading(unittest.TestCase):
             TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None
         )
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
-        result = all_datapoints.results[len(all_datapoints.results) - 1]
         self.assertEqual(len(all_datapoints.results[len(all_datapoints.results) - 1]), 6)
 
 

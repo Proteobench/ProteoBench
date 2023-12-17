@@ -5,6 +5,7 @@ import hashlib
 import logging
 import os
 import re
+from collections import ChainMap
 from dataclasses import asdict
 from tempfile import TemporaryDirectory
 
@@ -18,8 +19,15 @@ from proteobench.io.params.alphapept import extract_params as extract_params_alp
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import ParseInputs, aggregate_modification_column
-from proteobench.modules.dda_quant.parse_settings import DDA_QUANT_RESULTS_PATH, DDA_QUANT_RESULTS_REPO, ParseSettings
+from proteobench.modules.dda_quant.parse import (
+    ParseInputs,
+    aggregate_modification_column,
+)
+from proteobench.modules.dda_quant.parse_settings import (
+    DDA_QUANT_RESULTS_PATH,
+    DDA_QUANT_RESULTS_REPO,
+    ParseSettings,
+)
 from proteobench.modules.interfaces import ModuleInterface
 
 
@@ -95,7 +103,7 @@ class Module(ModuleInterface):
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
 
         # compute the mean of the log_Intensity per precursor and "Group"
-        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(Count=("Raw file", "size"))
+        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(nr_observed=("Raw file", "size"))
 
         # pivot filtered_df_p1 to wide where index peptideform, columns Raw file and values Intensity
 
@@ -109,7 +117,7 @@ class Module(ModuleInterface):
                 Intensity_mean=("Intensity", "mean"),
                 Intensity_std=("Intensity", "std"),
                 Sum=("Intensity", "sum"),
-                Count=("Intensity", "size"),
+                nr_obs_group=("Intensity", "size"),
             )
             .reset_index()
         )
@@ -155,9 +163,16 @@ class Module(ModuleInterface):
         withspecies["epsilon"] = withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
         return withspecies
 
-    def strip_sequence_wombat(self, seq: str) -> str:
-        """Remove parts of the peptide sequence that contain modifications."""
-        return re.sub("([\(\[]).*?([\)\]])", "", seq)
+    @staticmethod
+    def get_metrics(df, min_nr_observed=1):
+        # compute mean of epsilon column in df
+        # take abs value of df["epsilon"]
+        # TODO use nr_missing to filter df before computing stats.
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        weighted_sum = round(df_slice["epsilon"].abs().mean(), ndigits=3)
+        nr_prec = len(df_slice)
+
+        return {min_nr_observed: {"weighted_sum": weighted_sum, "nr_prec": nr_prec}}
 
     def generate_datapoint(
         self,
@@ -190,10 +205,12 @@ class Module(ModuleInterface):
         )
 
         result_datapoint.generate_id()
-        result_datapoint.calculate_plot_data(intermediate)
-        df = pd.Series(asdict(result_datapoint))
+        results = dict(ChainMap(*[Module.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
+        result_datapoint.results = results
 
-        return df
+        results_series = pd.Series(asdict(result_datapoint))
+
+        return results_series
 
     def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
         """Method loads dataframe from a csv depending on its format."""

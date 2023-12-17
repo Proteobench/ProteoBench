@@ -4,6 +4,19 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
+
+
+def filter_df_numquant_weighted_sum(row, min_quant=3):
+    if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
+        return row[min_quant].get("weighted_sum")
+    return None
+
+
+def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
+    if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
+        return row[min_quant].get("nr_prec")
+    return None
 
 
 @dataclass
@@ -32,6 +45,7 @@ class Datapoint:
     nr_prec: int = 0
     is_temporary: bool = True
     intermediate_hash: str = ""
+    results: dict = None
     # TODO do we want to save these values in the json?
     # fixed_mods: [],
     # variable_mods: [],
@@ -41,23 +55,7 @@ class Datapoint:
     # reproducibility: int = 0,
     # mean_reproducibility: int = 0,
 
-    def calculate_missing_quan_prec(self, df, nr_missing_0):
-        nr_quan_prec_missing = []
-
-        return nr_quan_prec_missing
-
-    def calculate_plot_data(self, df):
-        # compute mean of epsilon column in df
-        # take abs value of df["epsilon"]
-        self.weighted_sum = round(df["epsilon"].abs().mean(), ndigits=3)
-        self.nr_prec = len(df)
-
     def generate_id(self):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.id = self.software_name + "_" + str(self.software_version) + "_" + str(time_stamp)
         logging.info(f"Assigned the following ID to this run: {self.id}")
-
-    def dump_json_object(self, file_name):
-        f = open(file_name, "a")
-        f.write(json.dumps(asdict(self)))
-        f.close()

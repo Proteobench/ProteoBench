@@ -124,7 +124,11 @@ class TestOutputFileReading(unittest.TestCase):
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
-        Module().benchmarking(TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None)
+        result_performance, all_datapoints, input_df = Module().benchmarking(
+            TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None
+        )
+        self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
+        self.assertEqual(len(all_datapoints.results[1]), 6)
 
 
 class TestWrongFormatting(unittest.TestCase):

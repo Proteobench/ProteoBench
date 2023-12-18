@@ -93,7 +93,7 @@ class PlotDataPoint:
         fig = go.Figure(
             data=[
                 go.Scatter(
-                    x=benchmark_metrics_df["weighted_sum"],
+                    x=benchmark_metrics_df["median_abs_epsilon"],
                     y=benchmark_metrics_df["nr_prec"],
                     mode="markers",
                     text=hover_texts,

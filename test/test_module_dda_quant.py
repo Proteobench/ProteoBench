@@ -179,8 +179,12 @@ class TestPlot(unittest.TestCase):
         combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
         combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"
         combineddf["YEAST"] = combineddf["SPECIES"] == "YEAST"
-
-        fig = PlotDataPoint().plot_bench(combineddf)
+        species_dict = {
+            "YEAST": {"A_vs_B": 2.0, "color": "red"},
+            "ECOLI": {"A_vs_B": 0.25, "color": "blue"},
+            "HUMAN": {"A_vs_B": 1.0, "color": "green"},
+        }
+        fig = PlotDataPoint().plot_fold_change_histogram(combineddf, species_dict)
         # fig.write_html("dummy.html")
         self.assertIsNotNone(fig)
 

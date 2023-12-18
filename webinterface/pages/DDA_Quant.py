@@ -15,9 +15,9 @@ from proteobench.modules.dda_quant.datapoint import (
 )
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
     INPUT_FORMATS,
     LOCAL_DEVELOPMENT,
+    ParseSettings,
 )
 from proteobench.modules.dda_quant.plot import PlotDataPoint
 
@@ -316,7 +316,8 @@ class StreamlitUI:
                     """
         )
         if recalculate:
-            fig = PlotDataPoint().plot_bench(result_performance)
+            parse_settings = ParseSettings(self.user_input["input_format"])
+            fig = PlotDataPoint().plot_fold_change_histogram(result_performance, parse_settings.species_expected_ratio)
         else:
             fig = st.session_state[FIG1]
         st.plotly_chart(fig, use_container_width=True)

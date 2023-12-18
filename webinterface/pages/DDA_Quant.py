@@ -10,8 +10,8 @@ import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.modules.dda_quant.datapoint import (
+    filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
-    filter_df_numquant_weighted_sum,
 )
 from proteobench.modules.dda_quant.module import Module
 from proteobench.modules.dda_quant.parse_settings import (
@@ -198,7 +198,9 @@ class StreamlitUI:
             all_datapoints = st.session_state[ALL_DATAPOINTS]
             all_datapoints = Module().obtain_all_data_point(all_datapoints)
 
-            all_datapoints["weighted_sum"] = all_datapoints.apply(filter_df_numquant_weighted_sum, min_quant=3)
+            all_datapoints["median_abs_epsilon"] = all_datapoints.apply(
+                filter_df_numquant_median_abs_epsilon, min_quant=3
+            )
             all_datapoints["nr_prec"] = all_datapoints.apply(filter_df_numquant_nr_prec, min_quant=3)
 
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
@@ -246,8 +248,9 @@ class StreamlitUI:
 
     def slider_callback(self):
         min_quant = st.session_state[st.session_state["slider_id"]]
-        st.session_state[ALL_DATAPOINTS]["weighted_sum"] = [
-            filter_df_numquant_weighted_sum(v, min_quant=min_quant) for v in st.session_state[ALL_DATAPOINTS]["results"]
+        st.session_state[ALL_DATAPOINTS]["median_abs_epsilon"] = [
+            filter_df_numquant_median_abs_epsilon(v, min_quant=min_quant)
+            for v in st.session_state[ALL_DATAPOINTS]["results"]
         ]
         st.session_state[ALL_DATAPOINTS]["nr_prec"] = [
             filter_df_numquant_nr_prec(v, min_quant=min_quant) for v in st.session_state[ALL_DATAPOINTS]["results"]
@@ -331,7 +334,7 @@ class StreamlitUI:
 
         if recalculate:
             all_datapoints["weighted_sum"] = [
-                filter_df_numquant_weighted_sum(v, min_quant=3) for v in all_datapoints["results"]
+                filter_df_numquant_median_abs_epsilon(v, min_quant=3) for v in all_datapoints["results"]
             ]
             all_datapoints["nr_prec"] = [filter_df_numquant_nr_prec(v, min_quant=3) for v in all_datapoints["results"]]
 

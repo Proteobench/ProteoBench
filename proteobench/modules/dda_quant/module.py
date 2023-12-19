@@ -159,9 +159,11 @@ class Module(ModuleInterface):
         # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
         for species in species_expected_ratio.keys():
             withspecies.loc[withspecies[species] == True, "species"] = species
-            withspecies.loc[withspecies[species] == True, "expectedRatio"] = species_expected_ratio[species]["A_vs_B"]
+            withspecies.loc[withspecies[species] == True, "log2_expectedRatio"] = np.log2(
+                species_expected_ratio[species]["A_vs_B"]
+            )
 
-        withspecies["epsilon"] = withspecies["log2_A_vs_B"] - withspecies["expectedRatio"]
+        withspecies["epsilon"] = withspecies["log2_A_vs_B"] - withspecies["log2_expectedRatio"]
         return withspecies
 
     @staticmethod

@@ -42,6 +42,9 @@ class Datapoint:
     is_temporary: bool = True
     intermediate_hash: str = ""
     results: dict = None
+    median_abs_epsilon: int = 0
+    nr_prec: int = 0
+
     # TODO do we want to save these values in the json?
     # fixed_mods: [],
     # variable_mods: [],

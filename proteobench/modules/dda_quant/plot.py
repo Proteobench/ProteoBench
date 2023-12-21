@@ -8,7 +8,7 @@ from streamlit_plotly_events import plotly_events
 
 # ! This class does not use any instance attributes.
 class PlotDataPoint:
-    def plot_bench(self, result_df: pd.DataFrame) -> go.Figure:
+    def plot_fold_change_histogram(self, result_df: pd.DataFrame, species_ratio: dict) -> go.Figure:
         """Plot results with Plotly Express."""
 
         # Remove any precursors not arising from a known organism... contaminants?
@@ -16,6 +16,7 @@ class PlotDataPoint:
         result_df["kind"] = result_df[["YEAST", "ECOLI", "HUMAN"]].apply(
             lambda x: ["YEAST", "ECOLI", "HUMAN"][np.argmax(x)], axis=1
         )
+        color_map = {species: data["color"] for species, data in species_ratio.items()}
         fig = px.histogram(
             result_df,
             x=result_df["log2_A_vs_B"],
@@ -25,6 +26,7 @@ class PlotDataPoint:
             barmode="overlay",
             opacity=0.7,
             nbins=100,
+            color_discrete_map=color_map,
         )
 
         fig.update_layout(
@@ -35,12 +37,18 @@ class PlotDataPoint:
         )
 
         fig.update_yaxes(title="Density", color="white", gridwidth=2)
-
         fig.update_layout(width=700, height=700)
-
         fig.update_xaxes(range=[-4, 4])
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
+
+        # Add vertical lines for expected ratios, log2 tranformed
+
+        ratio_map = {species: np.log2(data["A_vs_B"]) for species, data in species_ratio.items()}
+        # "YEAST", "ECOLI", "HUMAN"
+        fig.add_vline(x=ratio_map["YEAST"], line_dash="dash", line_color=color_map["YEAST"], annotation_text="YEAST")
+        fig.add_vline(x=ratio_map["ECOLI"], line_dash="dash", line_color=color_map["ECOLI"], annotation_text="ECOLI")
+        fig.add_vline(x=ratio_map["HUMAN"], line_dash="dash", line_color=color_map["HUMAN"], annotation_text="HUMAN")
 
         return fig
 

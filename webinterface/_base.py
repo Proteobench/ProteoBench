@@ -42,6 +42,11 @@ class StreamlitPage(ABC):
             unsafe_allow_html=True,
         )
         st.image("logos/logo_participants/logos_all.png")
+        st.markdown(
+            """
+            This site is hosted by the BMBF-funded de.NBI Cloud within the German Network for Bioinformatics Infrastructure (de.NBI)
+            """
+        )
 
     @abstractmethod
     def _main_page(self):

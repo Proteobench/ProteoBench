@@ -196,10 +196,7 @@ class Module(ModuleInterface):
         }
 
     def generate_datapoint(
-        self,
-        intermediate: pd.DataFrame,
-        input_format: str,
-        user_input: dict,
+        self, intermediate: pd.DataFrame, input_format: str, user_input: dict, default_cutoff_min_prec=3
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
@@ -228,6 +225,7 @@ class Module(ModuleInterface):
         result_datapoint.generate_id()
         results = dict(ChainMap(*[Module.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
         result_datapoint.results = results
+        result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
 
         results_series = pd.Series(asdict(result_datapoint))
 

@@ -33,10 +33,8 @@ class Datapoint:
     ident_fdr_peptide: int = 0
     ident_fdr_protein: int = 0
     enable_match_between_runs: bool = False
-    precursor_mass_tolerance: int = 0
-    precursor_mass_tolerance_unit: str = "Da"
-    fragment_mass_tolerance: int = 0
-    fragment_mass_tolerance_unit: str = "Da"
+    precursor_mass_tolerance: str = None
+    fragment_mass_tolerance: str = None
     enzyme: str = None
     allowed_miscleavages: int = 0
     min_peptide_length: int = 0

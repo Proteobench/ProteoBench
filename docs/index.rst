@@ -51,6 +51,8 @@ ProteoBench:
 Organization
 ============
 
+The github repository for ProteoBench can be found `here <https://github.com/Proteobench/Proteobench>`_.
+
 ProteoBench documentation is divided into two main parts:
 
 The different :doc:`modules/index` that exist, how they evolve and how to used them.

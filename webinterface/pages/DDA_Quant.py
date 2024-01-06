@@ -30,6 +30,10 @@ FIG2 = "fig2"
 RESULT_PERF = "result_perf"
 META_DATA = "meta_data"
 INPUT_DF = "input_df"
+META_FILE_UPLOADER_UUID = "meta_file_uploader_uuid"
+COMMENTS_SUBMISSION_UUID = "comments_submission_uuid"
+CHECK_SUBMISSION_UUID = "check_submission_uuid"
+BUTTON_SUBMISSION_UUID = "button_submission_uuid"
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -80,7 +84,9 @@ class StreamlitUI:
     def _main_page(self):
         """Format main page."""
         st.title("DDA quantification - precursor ions")
-        st.warning("This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future.")
+        st.warning(
+            "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+        )
         st.header("Description of the module")
         st.markdown(
             """
@@ -209,6 +215,15 @@ class StreamlitUI:
 
         if submit_button:
             if self.user_input["input_csv"]:
+                if META_FILE_UPLOADER_UUID in st.session_state.keys():
+                    del st.session_state[META_FILE_UPLOADER_UUID]
+                if COMMENTS_SUBMISSION_UUID in st.session_state.keys():
+                    del st.session_state[COMMENTS_SUBMISSION_UUID]
+                if CHECK_SUBMISSION_UUID in st.session_state.keys():
+                    del st.session_state[CHECK_SUBMISSION_UUID]
+                if BUTTON_SUBMISSION_UUID in st.session_state.keys():
+                    del st.session_state[BUTTON_SUBMISSION_UUID]
+
                 self._run_proteobench()
             else:
                 error_message = st.error(":x: Please provide a result file")
@@ -431,19 +446,39 @@ class StreamlitUI:
         st.session_state[ALL_DATAPOINTS] = all_datapoints
         st.session_state[INPUT_DF] = input_df
 
+        # Create unique element IDs
+        if META_FILE_UPLOADER_UUID in st.session_state.keys():
+            meta_file_uploader_uuid = st.session_state[META_FILE_UPLOADER_UUID]
+        else:
+            meta_file_uploader_uuid = uuid.uuid4()
+            st.session_state[META_FILE_UPLOADER_UUID] = meta_file_uploader_uuid
+        if COMMENTS_SUBMISSION_UUID in st.session_state.keys():
+            comments_submission_uuid = st.session_state[COMMENTS_SUBMISSION_UUID]
+        else:
+            comments_submission_uuid = uuid.uuid4()
+            st.session_state[COMMENTS_SUBMISSION_UUID] = comments_submission_uuid
+        if CHECK_SUBMISSION_UUID in st.session_state.keys():
+            check_submission_uuid = st.session_state[CHECK_SUBMISSION_UUID]
+        else:
+            check_submission_uuid = uuid.uuid4()
+            st.session_state[CHECK_SUBMISSION_UUID] = check_submission_uuid
+
         self.user_input[META_DATA] = st.file_uploader(
-            "Meta data for searches", help=self.texts.Help.meta_data_file, key=uuid.uuid4()
+            "Meta data for searches",
+            help=self.texts.Help.meta_data_file,
+            key=meta_file_uploader_uuid,
         )
 
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
             placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
             height=200,
-            key=uuid.uuid4(),
+            key=comments_submission_uuid,
         )
+
         checkbox = st.checkbox(
             "I confirm that the metadata is correct",
-            key=uuid.uuid4(),
+            key=check_submission_uuid,
         )
 
         # TODO: do we need a better handling of this?
@@ -461,7 +496,13 @@ class StreamlitUI:
 
         if checkbox and params != None:
             st.session_state["submission_ready"] = True
-            submit_pr = st.button("I really want to upload it", key=uuid.uuid4())
+
+            if BUTTON_SUBMISSION_UUID in st.session_state.keys():
+                button_submission_uuid = st.session_state[BUTTON_SUBMISSION_UUID]
+            else:
+                button_submission_uuid = uuid.uuid4()
+                st.session_state[BUTTON_SUBMISSION_UUID] = button_submission_uuid
+            submit_pr = st.button("I really want to upload it", key=button_submission_uuid)
 
             # submit_pr = False
             if submit_pr:

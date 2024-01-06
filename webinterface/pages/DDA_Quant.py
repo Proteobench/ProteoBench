@@ -35,6 +35,8 @@ COMMENTS_SUBMISSION_UUID = "comments_submission_uuid"
 CHECK_SUBMISSION_UUID = "check_submission_uuid"
 BUTTON_SUBMISSION_UUID = "button_submission_uuid"
 
+DEFAULT_VAL_SLIDER = 3
+
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
 
@@ -205,10 +207,15 @@ class StreamlitUI:
             all_datapoints = st.session_state[ALL_DATAPOINTS]
             all_datapoints = Module().obtain_all_data_point(all_datapoints)
 
+            if "slider_id" in st.session_state.keys():
+                default_val_slider = st.session_state[st.session_state["slider_id"]]
+            else:
+                default_val_slider = DEFAULT_VAL_SLIDER
+
             all_datapoints["median_abs_epsilon"] = all_datapoints.apply(
-                filter_df_numquant_median_abs_epsilon, min_quant=3
+                filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
             )
-            all_datapoints["nr_prec"] = all_datapoints.apply(filter_df_numquant_nr_prec, min_quant=3)
+            all_datapoints["nr_prec"] = all_datapoints.apply(filter_df_numquant_nr_prec, min_quant=default_val_slider)
 
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
             st.plotly_chart(fig2, use_container_width=True)
@@ -249,11 +256,16 @@ class StreamlitUI:
             st.session_state[ALL_DATAPOINTS] = None
 
         try:
+            if "slider_id" in st.session_state.keys():
+                default_val_slider = st.session_state[st.session_state["slider_id"]]
+            else:
+                default_val_slider = DEFAULT_VAL_SLIDER
             result_performance, all_datapoints, input_df = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
                 st.session_state[ALL_DATAPOINTS],
+                default_cutoff_min_prec=default_val_slider,
             )
             st.session_state[ALL_DATAPOINTS] = all_datapoints
         except Exception as e:
@@ -349,20 +361,23 @@ class StreamlitUI:
         # show metadata
         # st.text(all_datapoints.head(100))
 
+        if "slider_id" in st.session_state.keys():
+            default_val_slider = st.session_state[st.session_state["slider_id"]]
+        else:
+            default_val_slider = DEFAULT_VAL_SLIDER
+
         if recalculate:
             all_datapoints["weighted_sum"] = [
-                filter_df_numquant_median_abs_epsilon(v, min_quant=3) for v in all_datapoints["results"]
+                filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider)
+                for v in all_datapoints["results"]
             ]
-            all_datapoints["nr_prec"] = [filter_df_numquant_nr_prec(v, min_quant=3) for v in all_datapoints["results"]]
+            all_datapoints["nr_prec"] = [
+                filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+            ]
 
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
         else:
             fig2 = st.session_state[FIG2]
-
-        if "slider_id" in st.session_state.keys():
-            default_val_slider = st.session_state[st.session_state["slider_id"]]
-        else:
-            default_val_slider = 3
 
         st.session_state["slider_id"] = uuid.uuid4()
         st.markdown(

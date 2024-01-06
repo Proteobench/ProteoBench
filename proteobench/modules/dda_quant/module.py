@@ -196,7 +196,7 @@ class Module(ModuleInterface):
         }
 
     def generate_datapoint(
-        self, intermediate: pd.DataFrame, input_format: str, user_input: dict, default_cutoff_min_prec=3
+        self, intermediate: pd.DataFrame, input_format: str, user_input: dict, default_cutoff_min_prec: int = 3
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
@@ -286,7 +286,9 @@ class Module(ModuleInterface):
 
         return all_datapoints
 
-    def benchmarking(self, input_file: str, input_format: str, user_input: dict, all_datapoints) -> pd.DataFrame:
+    def benchmarking(
+        self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
+    ) -> pd.DataFrame:
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Parse user config
@@ -298,7 +300,9 @@ class Module(ModuleInterface):
         # Get quantification data
         intermediate_data_structure = self.generate_intermediate(standard_format, replicate_to_raw, parse_settings)
 
-        current_datapoint = self.generate_datapoint(intermediate_data_structure, input_format, user_input)
+        current_datapoint = self.generate_datapoint(
+            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        )
 
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
 

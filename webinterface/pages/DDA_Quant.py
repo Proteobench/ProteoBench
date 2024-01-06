@@ -80,6 +80,7 @@ class StreamlitUI:
     def _main_page(self):
         """Format main page."""
         st.title("DDA quantification - precursor ions")
+        st.warning("This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future.")
         st.header("Description of the module")
         st.markdown(
             """
@@ -103,7 +104,7 @@ class StreamlitUI:
                      from different tools, with different versions, and/or different
                     sets of parameters for the search and quantification.
                     The full description of the pre-processing steps and metrics
-                    calculation is available here: LINK.
+                    calculation is available [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/).
                     """
         )
         st.header("Downloading associated files")

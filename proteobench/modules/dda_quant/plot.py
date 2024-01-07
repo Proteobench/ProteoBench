@@ -57,7 +57,7 @@ class PlotDataPoint:
         Plot mean metrics in a scatterplot with plotly.
 
         x = Mean absolute difference between measured and expected log2-transformed fold change
-        y = total number of precursors quantified in all raw files
+        y = total number of precursor ions quantified in the selected number of raw files
 
         Input: meta_data
 
@@ -121,7 +121,7 @@ class PlotDataPoint:
                 gridwidth=2,
             ),
             yaxis=dict(
-                title="Total number of precursors quantified in all raw files",
+                title="Total number of precursor ions quantified in the selected number of raw files",
                 gridcolor="white",
                 gridwidth=2,
             ),

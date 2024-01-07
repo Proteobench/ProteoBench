@@ -202,23 +202,47 @@ class StreamlitUI:
         if FIG1 in st.session_state:
             self._populate_results()
 
+        if "slider_id" in st.session_state.keys():
+            default_val_slider = st.session_state[st.session_state["slider_id"]]
+        else:
+            default_val_slider = DEFAULT_VAL_SLIDER
+
         if ALL_DATAPOINTS not in st.session_state:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
             all_datapoints = Module().obtain_all_data_point(all_datapoints)
 
-            if "slider_id" in st.session_state.keys():
-                default_val_slider = st.session_state[st.session_state["slider_id"]]
-            else:
-                default_val_slider = DEFAULT_VAL_SLIDER
-
-            all_datapoints["median_abs_epsilon"] = all_datapoints.apply(
+            all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
                 filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
             )
-            all_datapoints["nr_prec"] = all_datapoints.apply(filter_df_numquant_nr_prec, min_quant=default_val_slider)
+            all_datapoints["nr_prec"] = all_datapoints["results"].apply(
+                filter_df_numquant_nr_prec, min_quant=default_val_slider
+            )
 
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
-            st.plotly_chart(fig2, use_container_width=True)
+
+            st.session_state[ALL_DATAPOINTS] = all_datapoints
+            st.session_state[FIG2] = fig2
+
+        st.session_state["slider_id"] = uuid.uuid4()
+        st.markdown(
+            """
+                Choose with the slider below the minimum number of quantification value 
+                per raw file.  
+                Example: when 3 is selected, only the precursor ions quantified in 
+                3 or more raw files will be considered for the plot. 
+                    """
+        )
+
+        f = st.select_slider(
+            label="Minimal ion quantifications (# samples)",
+            options=[1, 2, 3, 4, 5, 6],
+            value=default_val_slider,
+            on_change=self.slider_callback,
+            key=st.session_state["slider_id"],
+        )
+
+        st.plotly_chart(st.session_state[FIG2], use_container_width=True)
 
         if submit_button:
             if self.user_input["input_csv"]:
@@ -285,6 +309,8 @@ class StreamlitUI:
         ]
 
         fig2 = PlotDataPoint().plot_metric(st.session_state[ALL_DATAPOINTS])
+
+        st.session_state[FIG2] = fig2
         st.session_state[FIG2].data[0].x = fig2.data[0].x
         st.session_state[FIG2].data[0].y = fig2.data[0].y
 

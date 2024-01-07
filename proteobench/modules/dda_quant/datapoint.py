@@ -8,12 +8,16 @@ import pandas as pd
 
 
 def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
+    if isinstance(list(row.keys())[0], str):
+        min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
         return row[min_quant].get("median_abs_epsilon")
     return None
 
 
 def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
+    if isinstance(list(row.keys())[0], str):
+        min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
         return row[min_quant].get("nr_prec")
     return None

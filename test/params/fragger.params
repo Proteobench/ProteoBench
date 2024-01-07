@@ -1,10 +1,10 @@
-database_name = Q:\MISC_PERSONAL\Bart\Benchmark_experiment_EuBIC\Shared\2023-01-30-decoys-BenchmarkFASTAModule1_DDA.fasta.fas			# Path to the protein database file in FASTA format.
-num_threads = 47			# Number of CPU threads to use.
+database_name = /mnt/PUMA/ProjectSQ/ASchmidt/KlemensErwinFrohlich_568/20230131-143622_Analysis/ProteoBench/proteobench/Module_2_DDA_quantification/FASTA/2023-12-16-decoys-BenchmarkFASTAModule2_DDA.fasta.fas			# Path to the protein database file in FASTA format.
+num_threads = 50			# Number of CPU threads to use.
 
-precursor_mass_lower = -10			# Lower bound of the precursor mass window.
-precursor_mass_upper = 10			# Upper bound of the precursor mass window.
+precursor_mass_lower = -20			# Lower bound of the precursor mass window.
+precursor_mass_upper = 20			# Upper bound of the precursor mass window.
 precursor_mass_units = 1			# Precursor mass tolerance units (0 for Da, 1 for ppm).
-data_type = 0			# Data type (0 for DDA, 1 for DIA, 2 for gas-phase fractionation DIA).
+data_type = 0			# Data type (0 for DDA, 1 for DIA, 2 for gas-phase fractionation DIA, 3 for wide-window acquisition DDA).
 precursor_true_tolerance = 20			# True precursor mass tolerance (window is +/- this value).
 precursor_true_units = 1			# True precursor mass tolerance units (0 for Da, 1 for ppm).
 fragment_mass_tolerance = 20			# Fragment mass tolerance (window is +/- this value).
@@ -17,15 +17,21 @@ deisotope = 1			# Perform deisotoping or not (0=no, 1=yes and assume singleton p
 deneutralloss = 1			# Perform deneutrallossing or not (0=no, 1=yes).
 isotope_error = 0/1/2			# Also search for MS/MS events triggered on specified isotopic peaks.
 mass_offsets = 0.0			# Creates multiple precursor tolerance windows with specified mass offsets.
+mass_offsets_detailed = 			# Optional detailed mass offset list. Overrides mass_offsets if use_detailed_offsets = 1.
+use_detailed_offsets = 0			# Whether to use the regular (0) or detailed (1) mass offset list.
 precursor_mass_mode = selected			# One of isolated/selected/corrected.
 
 remove_precursor_peak = 1			#  Remove precursor peaks from tandem mass spectra. 0 = not remove; 1 = remove the peak with precursor charge; 2 = remove the peaks with all charge states (only for DDA mode).
 remove_precursor_range = -1.500000,1.500000			# m/z range in removing precursor peaks. Only for DDA mode. Unit: Th.
 intensity_transform = 0			# Transform peaks intensities with sqrt root. 0 = not transform; 1 = transform using sqrt root.
 activation_types = all			# Filter to only search scans of provided activation type(s). Allowed: All, HCD, CID, ETD, ECD.
+group_variable = 0			# Specify the variable used to decide the PSM group in the group FDR estimation. 0 = no group FDR; 1 = num_enzyme_termini; 2 = PE from protein header.
+require_precursor = 1			# If required, PSMs with no precursor peaks will be discarded. For DIA data type only. 0 = no, 1 = yes.
+reuse_dia_fragment_peaks = 0			# Allow the same peak matches to multiple peptides. For DIA data type only. 0 = no, 1 = yes.
 
 write_calibrated_mzml = 0			# Write calibrated MS2 scan to a mzML file (0 for No, 1 for Yes).
 write_uncalibrated_mgf = 0			# Write uncalibrated MS2 scan to a MGF file (0 for No, 1 for Yes). Only for .raw and .d formats.
+write_mzbin_all = 0
 mass_diff_to_variable_mod = 0			# Put mass diff as a variable modification. 0 for no; 1 for yes and remove delta mass; 2 for yes and keep delta mass.
 
 localize_delta_mass = 0			# Include fragment ions mass-shifted by unknown modifications (recommended for open and mass offset searches) (0 for OFF, 1 for ON).
@@ -78,7 +84,7 @@ allow_multiple_variable_mods_on_residue = 0
 max_variable_mods_per_peptide = 3			# Maximum total number of variable modifications per peptide.
 max_variable_mods_combinations = 5000			# Maximum number of modified forms allowed for each peptide (up to 65534).
 
-output_format = tsv_pepXML_pin			# File format of output files (tsv, pin, pepxml, tsv_pin, tsv_pepxml, pepxml_pin, or tsv_pepxml_pin).
+output_format = pepXML_pin			# File format of output files (tsv, pin, pepxml, tsv_pin, tsv_pepxml, pepxml_pin, or tsv_pepxml_pin).
 output_report_topN = 1			# Reports top N PSMs per input spectrum.
 output_max_expect = 50			# Suppresses reporting of PSM if top hit has expectation value greater than this threshold.
 report_alternative_proteins = 1			# Report alternative proteins for peptides that are found in multiple proteins (0 for no, 1 for yes).
@@ -94,7 +100,6 @@ max_fragment_charge = 2			# Maximum charge state for theoretical fragments to ma
 track_zero_topN = 0			# Track top N unmodified peptide results separately from main results internally for boosting features.
 zero_bin_accept_expect = 0			# Ranks a zero-bin hit above all non-zero-bin hit if it has expectation less than this value.
 zero_bin_mult_expect = 1			# Multiplies expect value of PSMs in the zero-bin during  results ordering (set to less than 1 for boosting).
-add_topN_complementary = 0			# Inserts complementary ions corresponding to the top N most intense fragments in each experimental spectra.
 
 check_spectral_files = 1			# Checking spectral files before searching.
 minimum_peaks = 15			# Minimum number of peaks in experimental spectrum for matching.

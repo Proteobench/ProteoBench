@@ -6,7 +6,7 @@ search_engine_version,
 ident_fdr_psm,1
 ident_fdr_peptide,
 ident_fdr_protein,
-enable_match_between_runs,False
+enable_match_between_runs,True
 precursor_mass_tolerance,10.0 ppm
 fragment_mass_tolerance,0.02 Da
 enzyme,Trypsin/P

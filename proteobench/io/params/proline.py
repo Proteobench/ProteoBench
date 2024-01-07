@@ -78,6 +78,7 @@ def extract_params(fname) -> ProteoBenchParameters:
     params.min_peptide_length = find_min_pep_length(sheet.loc[0, "psm_filter_2"])
 
     # ! Third sheet only contains match between runs (MBR) information indirectly
+    sheet_name = "Quant config"
     sheet = excel.parse(sheet_name, dtype="object", index_col=0)
     enable_match_between_runs = sheet.index.str.contains("cross assignment").any()
     params.enable_match_between_runs = enable_match_between_runs

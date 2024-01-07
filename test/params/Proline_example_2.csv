@@ -1,8 +1,8 @@
 ,0
 software_name,Proline
-software_version,X! Tandem Vengeance (2015.12.15.2)
+software_version,
 search_engine,XTandem
-search_engine_version,
+search_engine_version,X! Tandem Vengeance (2015.12.15.2)
 ident_fdr_psm,1
 ident_fdr_peptide,
 ident_fdr_protein,

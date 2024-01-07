@@ -56,8 +56,8 @@ def extract_params(fname) -> ProteoBenchParameters:
     sheet = sheet[cols].drop_duplicates().reset_index(drop=True)
     # Extract
     params.software_name = "Proline"
-    params.software_version = sheet.loc[0, "software_version"]
     params.search_engine = sheet.loc[0, "software_name"]
+    params.search_engine_version = sheet.loc[0, "software_version"]
     params.enzyme = sheet.loc[0, "enzymes"]
     params.allowed_miscleavages = sheet.loc[0, "max_missed_cleavages"]
     params.fixed_mods = sheet.loc[0, "fixed_ptms"]

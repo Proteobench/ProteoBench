@@ -7,7 +7,6 @@ Relevant information in sheets:
 - "Import and filters"
 - "Quant config"
 """
-import pathlib
 import re
 
 import pandas as pd
@@ -86,13 +85,14 @@ def extract_params(fname) -> ProteoBenchParameters:
 
 
 if __name__ == "__main__":
-    file = pathlib.Path("../../../test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx")
+    from pathlib import Path
+
+    file = Path("../../../test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx")
     params = extract_params(file)
     data_dict = params.__dict__
     series = pd.Series(data_dict)
     series.to_csv(file.with_suffix(".csv"))
-
-    file = pathlib.Path("../../../test/params/Proline_example_2.xlsx")
+    file = Path("../../../test/params/Proline_example_2.xlsx")
     params = extract_params(file)
     data_dict = params.__dict__
     series = pd.Series(data_dict)

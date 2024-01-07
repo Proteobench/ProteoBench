@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 Parameter = namedtuple("Parameter", ["name", "value", "comment"])
 
-FLOAT_PATTERN = r"\d+\.\d+"
+VERSION_NO_PATTERN = r"\d+(\.\d+)*"
 
 
 def read_file(file: str, sep: str = " = ") -> list[Parameter]:
@@ -54,9 +54,6 @@ def read_file(file: str, sep: str = " = ") -> list[Parameter]:
     return data
 
 
-# fragpipe.workflow (fr)
-
-
 def extract_params(file: str, f_fragpipe_workflow) -> ProteoBenchParameters:
     msfragger_params = read_file(file)
     msfragger_params = pd.DataFrame.from_records(msfragger_params, columns=Parameter._fields).set_index(
@@ -71,7 +68,7 @@ def extract_params(file: str, f_fragpipe_workflow) -> ProteoBenchParameters:
     with open(f_fragpipe_workflow) as f:
         header = next(iter(f))[1:].strip()
 
-    match = re.search(FLOAT_PATTERN, header)
+    match = re.search(VERSION_NO_PATTERN, header)
 
     if match:
         header = match.group()
@@ -83,7 +80,7 @@ def extract_params(file: str, f_fragpipe_workflow) -> ProteoBenchParameters:
 
     msfragger_executaable = fragpipe_params.loc["fragpipe-config.bin-msfragger", "value"]
     msfragger_executaable = Path(msfragger_executaable).name
-    match = re.search(FLOAT_PATTERN, msfragger_executaable)
+    match = re.search(VERSION_NO_PATTERN, msfragger_executaable)
 
     if match:
         msfragger_executaable = match.group()

@@ -73,7 +73,7 @@ You can use the tab-delimited Custom format containing the following columns:
 - Sequence: peptide sequence
 - Proteins: Protein accessions according to fasta file
 - Charge: Charge state of measured peptide
-- FQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
+- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
 - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
 - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
 - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01: Quantitative column sample 4

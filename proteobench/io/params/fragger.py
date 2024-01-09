@@ -112,7 +112,7 @@ def extract_params(file: str, f_fragpipe_workflow) -> ProteoBenchParameters:
     min_precursor_charge, max_precursor_charge = msfragger_params.loc["precursor_charge", "value"].split(" ")
     params.min_precursor_charge = int(min_precursor_charge)
     params.max_precursor_charge = int(max_precursor_charge)
-    # params.enable_match_between_runs =   # ! check
+    params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr", "value"])
     return params
 
 

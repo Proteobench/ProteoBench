@@ -6,7 +6,7 @@ search_engine_version,4.0
 ident_fdr_psm,0.01
 ident_fdr_peptide,0.01
 ident_fdr_protein,0.01
-enable_match_between_runs,
+enable_match_between_runs,True
 precursor_mass_tolerance,20
 fragment_mass_tolerance,20
 enzyme,stricttrypsin

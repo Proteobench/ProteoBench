@@ -134,11 +134,12 @@ class StreamlitUI:
         )
         st.markdown(
             """
-                    Download the zipped FASTA file here: [ProteoBenchFASTA_DDAQuantification.zip](app/static/ProteoBenchFASTA_DDAQuantification.zip).
+                    Download the zipped FASTA file here: <a href="/app/static/ProteoBenchFASTA_DDAQuantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
                     The fasta file provided for this module contains the three species
                     present in the samples and contaminant proteins
                     ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
-                    """
+                    """,
+            unsafe_allow_html=True
         )
 
         st.header("Input and configuration")

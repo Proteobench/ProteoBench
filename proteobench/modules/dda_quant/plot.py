@@ -135,21 +135,9 @@ class PlotDataPoint:
                 gridcolor="white",
                 gridwidth=2,
             ),
-            # paper_bgcolor='rgb(243, 243, 243)',
-            # plot_bgcolor="rgb(243, 243, 243)",
         )
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
-        # selected_points = plotly_events(
-        #    fig,
-        #    select_event=True,
-        #    key='Smth'
-        # )
-
-        # if len(selected_points) == 0:
-        #    st.warning('Please select a data point')
-        # else:
-        #    st.write(selected_points)
 
         fig.add_annotation(
             x=0.5,

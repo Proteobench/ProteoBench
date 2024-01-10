@@ -50,6 +50,16 @@ class PlotDataPoint:
         fig.add_vline(x=ratio_map["ECOLI"], line_dash="dash", line_color=color_map["ECOLI"], annotation_text="ECOLI")
         fig.add_vline(x=ratio_map["HUMAN"], line_dash="dash", line_color=color_map["HUMAN"], annotation_text="HUMAN")
 
+        fig.add_annotation(
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            text="-Beta-",
+            font=dict(size=50, color="rgba(0,0,0,0.1)"),
+            showarrow=False,
+        )
+
         return fig
 
     def plot_metric(self, benchmark_metrics_df: pd.DataFrame) -> go.Figure:
@@ -140,5 +150,15 @@ class PlotDataPoint:
         #    st.warning('Please select a data point')
         # else:
         #    st.write(selected_points)
+
+        fig.add_annotation(
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            text="-Beta-",
+            font=dict(size=50, color="rgba(0,0,0,0.1)"),
+            showarrow=False,
+        )
 
         return fig

@@ -78,14 +78,14 @@ def extract_params(file: str, f_fragpipe_workflow) -> ProteoBenchParameters:
     params.software_version = header
     params.search_engine = "MSFragger"
 
-    msfragger_executaable = fragpipe_params.loc["fragpipe-config.bin-msfragger", "value"]
-    msfragger_executaable = Path(msfragger_executaable).name
-    match = re.search(VERSION_NO_PATTERN, msfragger_executaable)
+    msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger", "value"]
+    msfragger_executable = Path(msfragger_executable).name
+    match = re.search(VERSION_NO_PATTERN, msfragger_executable)
 
     if match:
-        msfragger_executaable = match.group()
+        msfragger_executable = match.group()
 
-    params.search_engine_version = msfragger_executaable
+    params.search_engine_version = msfragger_executable
     params.enzyme = msfragger_params.loc["search_enzyme_name_1", "value"]
     params.allowed_miscleavages = msfragger_params.loc["allowed_missed_cleavage_1", "value"]
     params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods", "value"]
@@ -119,8 +119,6 @@ def extract_params(file: str, f_fragpipe_workflow) -> ProteoBenchParameters:
 if __name__ == "__main__":
     import pathlib
     from pprint import pprint
-
-    import pandas as pd
 
     file = pathlib.Path("../../../test/params/fragger.params")
     data = read_file(file)

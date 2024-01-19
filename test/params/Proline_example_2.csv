@@ -1,12 +1,12 @@
 ,0
 software_name,Proline
-software_version,X! Tandem Vengeance (2015.12.15.2)
+software_version,
 search_engine,XTandem
-search_engine_version,
-ident_fdr_psm,1
+search_engine_version,X! Tandem Vengeance (2015.12.15.2)
+ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,
-enable_match_between_runs,False
+enable_match_between_runs,True
 precursor_mass_tolerance,10.0 ppm
 fragment_mass_tolerance,0.02 Da
 enzyme,Trypsin

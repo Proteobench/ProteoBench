@@ -579,11 +579,17 @@ class StreamlitUI:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
+                st.markdown(
+                    """
+                    **It will take a few working days for your point to be added to the plot**
+                    """
+                )
                 try:
                     st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
                 except UnboundLocalError:
                     # Happens when pr_url is not defined, e.g., local dev
                     pass
+                
 
                 st.session_state[SUBMIT] = False
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)

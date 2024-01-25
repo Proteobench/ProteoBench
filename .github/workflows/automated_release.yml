@@ -6,34 +6,22 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  git-release:
     runs-on: ubuntu-latest
+    needs: [python-package, windows-installer]
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Configure Git
-      run: |
-        git config --local user.name "Your Name"
-        git config --local user.email "your-email@example.com"
-
-    - name: Automatic Tagging
-      id: tag_version
-      uses: "anothrNick/github-tag-action@1.36.0"
+    - name: Download installer
+      uses: actions/download-artifact@v2
       with:
-        default_bump: patch
-        release_branches: main
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+        name: dist
+        path: dist
     - name: Create GitHub Release
-      if: steps.tag_version.outputs.new_tag != ''
-      uses: actions/create-release@v1
+      uses: docker://antonyurchenko/git-release:v4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DRAFT_RELEASE: "false"
+        PRE_RELEASE: "false"
+        CHANGELOG_FILE: "CHANGELOG.md"
       with:
-        tag_name: ${{ steps.tag_version.outputs.new_tag }}
-        release_name: Release ${{ steps.tag_version.outputs.new_tag }}
-        body: 'New release'
-        draft: false
-        prerelease: false
+        args: |
+          dist/*

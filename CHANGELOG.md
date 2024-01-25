@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## ["0.1.0-beta"] - 2024-01-25
 
+### Changed
+
+- Changed release on GH
+
+## ["0.1.0-beta"] - 2024-01-25
+
 ### Added
 
 - Initial release

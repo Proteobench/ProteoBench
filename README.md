@@ -1,6 +1,8 @@
 # ProteoBench
 
-[TODO]
+Website: https://proteobench.cubimed.rub.de/
+
+PyPI: https://pypi.org/project/proteobench/
 
 Learn about the ProteoBench project on [proteobench.readthedocs.io](https://proteobench.readthedocs.io/en/latest/).
 

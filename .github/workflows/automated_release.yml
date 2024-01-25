@@ -2,8 +2,6 @@ name: Automated Release
 
 on:
   push:
-    branches:
-      - main
     tags:
       - 'v*'
 

@@ -8,7 +8,6 @@ on:
 jobs:
   git-release:
     runs-on: ubuntu-latest
-    needs: [python-package, windows-installer]
     steps:
     - name: Download installer
       uses: actions/download-artifact@v2

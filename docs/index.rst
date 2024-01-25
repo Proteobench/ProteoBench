@@ -58,3 +58,8 @@ ProteoBench documentation is divided into two main parts:
 The different :doc:`modules/index` that exist, how they evolve and how to used them.
 
 The :doc:`developer-guide/index` provides information on the structure of the project and how to contribute.
+
+Contact us
+==========
+
+email us `here <mailto:proteobench@eubic-ms.org?subject=ProteoBench_query>`_.

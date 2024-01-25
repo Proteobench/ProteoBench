@@ -60,6 +60,6 @@ jobs:
 
     - name: Publish to PyPI
       env:
-        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        PYPI_USERNAME: __token__
         PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: flit publish --repository pypi

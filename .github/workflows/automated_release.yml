@@ -6,14 +6,32 @@ on:
       - 'v*'
 
 jobs:
-  git-release:
+  build-and-release:
     runs-on: ubuntu-latest
     steps:
-    - name: Download installer
-      uses: actions/download-artifact@v2
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
+
+    - name: Build wheel
+      run: |
+        python -m build --wheel
+
+    - name: Upload wheel to artifacts
+      uses: actions/upload-artifact@v2
       with:
         name: dist
-        path: dist
+        path: dist/*.whl
+
     - name: Create GitHub Release
       uses: docker://antonyurchenko/git-release:v4
       env:
@@ -23,4 +41,4 @@ jobs:
         CHANGELOG_FILE: "CHANGELOG.md"
       with:
         args: |
-          dist/*
+          dist/*.whl

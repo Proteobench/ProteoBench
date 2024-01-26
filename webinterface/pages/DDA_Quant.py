@@ -102,11 +102,10 @@ class StreamlitUI:
                     condition. With these samples, we calculate three metrics:
                     - To estimate the sensitivity of the workflows, we report the
                     number of unique precursors (charged modified sequence) quantified
-                    in all 6 runs.
-                    - To estimate the accuracy of the workflows, we report the weighted
-                    sum of precursor deviation from expected ratios.
-                    - To estimate the precision of the workflows, we report the weighted
-                     average of the interquartile range (IQR) of the precursors ratio.
+                    in a minimum of 1 to 6 runs.
+                    - To estimate the accuracy of the workflows, we report the mean 
+                    absolute difference between measured and expected log2-transformed 
+                    fold changes between conditions for proteins of the same species.
 
                     ProteoBench plots these three metrics to visualize workflow outputs
                      from different tools, with different versions, and/or different

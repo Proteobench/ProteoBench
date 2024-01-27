@@ -38,6 +38,7 @@ CHECK_SUBMISSION = "heck_submission"
 BUTTON_SUBMISSION_UUID = "button_submission_uuid"
 DF_HEAD = "df_head"
 PLACEHOLDER_FIG_COMPARE = "placeholder_fig_compare"
+PLACEHOLDER_SLIDER = "placeholder_slider"
 FIRST_NEW_PLOT = True
 
 DEFAULT_VAL_SLIDER = 3
@@ -203,6 +204,22 @@ class StreamlitUI:
 
             submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.parse_button)
 
+        if submit_button:
+            print("wrong5")
+            if self.user_input["input_csv"]:
+                if META_FILE_UPLOADER_UUID in st.session_state.keys():
+                    del st.session_state[META_FILE_UPLOADER_UUID]
+                if COMMENTS_SUBMISSION_UUID in st.session_state.keys():
+                    del st.session_state[COMMENTS_SUBMISSION_UUID]
+                if CHECK_SUBMISSION_UUID in st.session_state.keys():
+                    del st.session_state[CHECK_SUBMISSION_UUID]
+                if BUTTON_SUBMISSION_UUID in st.session_state.keys():
+                    del st.session_state[BUTTON_SUBMISSION_UUID]
+
+                self._run_proteobench()
+            else:
+                error_message = st.error(":x: Please provide a result file")
+
         # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
             self._populate_results()
@@ -212,7 +229,7 @@ class StreamlitUI:
         else:
             default_val_slider = DEFAULT_VAL_SLIDER
 
-        if ALL_DATAPOINTS not in st.session_state:
+        if ALL_DATAPOINTS not in st.session_state or FIRST_NEW_PLOT == True:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
             all_datapoints = Module().obtain_all_data_point(all_datapoints)
@@ -233,9 +250,12 @@ class StreamlitUI:
                         """
             )
 
+            st.session_state[PLACEHOLDER_SLIDER] = st.empty()
+            st.session_state[PLACEHOLDER_FIG_COMPARE] = st.empty()
+
             st.session_state["slider_id"] = uuid.uuid4()
 
-            f = st.select_slider(
+            st.session_state[PLACEHOLDER_SLIDER].select_slider(
                 label="Minimal ion quantifications (# samples)",
                 options=[1, 2, 3, 4, 5, 6],
                 value=default_val_slider,
@@ -248,22 +268,7 @@ class StreamlitUI:
             st.session_state[ALL_DATAPOINTS] = all_datapoints
             st.session_state[FIG2] = fig2
 
-            st.plotly_chart(st.session_state[FIG2], use_container_width=True)
-
-        if submit_button:
-            if self.user_input["input_csv"]:
-                if META_FILE_UPLOADER_UUID in st.session_state.keys():
-                    del st.session_state[META_FILE_UPLOADER_UUID]
-                if COMMENTS_SUBMISSION_UUID in st.session_state.keys():
-                    del st.session_state[COMMENTS_SUBMISSION_UUID]
-                if CHECK_SUBMISSION_UUID in st.session_state.keys():
-                    del st.session_state[CHECK_SUBMISSION_UUID]
-                if BUTTON_SUBMISSION_UUID in st.session_state.keys():
-                    del st.session_state[BUTTON_SUBMISSION_UUID]
-
-                self._run_proteobench()
-            else:
-                error_message = st.error(":x: Please provide a result file")
+            st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(st.session_state[FIG2], use_container_width=True)
 
     def _populate_results(self):
         self.generate_results("", None, None, False, None)

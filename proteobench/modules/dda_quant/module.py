@@ -348,6 +348,7 @@ class Module(ModuleInterface):
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
             current_datapoint[k] = v
+        current_datapoint["submission_comments"] = submission_comments
 
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 

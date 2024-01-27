@@ -205,7 +205,6 @@ class StreamlitUI:
             submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.parse_button)
 
         if submit_button:
-            print("wrong5")
             if self.user_input["input_csv"]:
                 if META_FILE_UPLOADER_UUID in st.session_state.keys():
                     del st.session_state[META_FILE_UPLOADER_UUID]

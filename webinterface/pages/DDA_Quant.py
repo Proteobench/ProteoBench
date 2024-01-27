@@ -33,7 +33,13 @@ INPUT_DF = "input_df"
 META_FILE_UPLOADER_UUID = "meta_file_uploader_uuid"
 COMMENTS_SUBMISSION_UUID = "comments_submission_uuid"
 CHECK_SUBMISSION_UUID = "check_submission_uuid"
+META_DATA_TEXT = "comments_for_submission"
+CHECK_SUBMISSION = "heck_submission"
 BUTTON_SUBMISSION_UUID = "button_submission_uuid"
+DF_HEAD = "df_head"
+PLACEHOLDER_FIG_COMPARE = "placeholder_fig_compare"
+PLACEHOLDER_SLIDER = "placeholder_slider"
+FIRST_NEW_PLOT = True
 
 DEFAULT_VAL_SLIDER = 3
 
@@ -138,7 +144,7 @@ class StreamlitUI:
                     present in the samples and contaminant proteins
                     ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
                     """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
         st.header("Input and configuration")
@@ -198,52 +204,6 @@ class StreamlitUI:
 
             submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.parse_button)
 
-        # if st.session_state[SUBMIT]:
-        if FIG1 in st.session_state:
-            self._populate_results()
-
-        if "slider_id" in st.session_state.keys():
-            default_val_slider = st.session_state[st.session_state["slider_id"]]
-        else:
-            default_val_slider = DEFAULT_VAL_SLIDER
-
-        if ALL_DATAPOINTS not in st.session_state:
-            st.session_state[ALL_DATAPOINTS] = None
-            all_datapoints = st.session_state[ALL_DATAPOINTS]
-            all_datapoints = Module().obtain_all_data_point(all_datapoints)
-
-            all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
-                filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
-            )
-            all_datapoints["nr_prec"] = all_datapoints["results"].apply(
-                filter_df_numquant_nr_prec, min_quant=default_val_slider
-            )
-
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
-
-            st.session_state[ALL_DATAPOINTS] = all_datapoints
-            st.session_state[FIG2] = fig2
-
-        st.session_state["slider_id"] = uuid.uuid4()
-        st.markdown(
-            """
-                Choose with the slider below the minimum number of quantification value 
-                per raw file.  
-                Example: when 3 is selected, only the precursor ions quantified in 
-                3 or more raw files will be considered for the plot. 
-                    """
-        )
-
-        f = st.select_slider(
-            label="Minimal ion quantifications (# samples)",
-            options=[1, 2, 3, 4, 5, 6],
-            value=default_val_slider,
-            on_change=self.slider_callback,
-            key=st.session_state["slider_id"],
-        )
-
-        st.plotly_chart(st.session_state[FIG2], use_container_width=True)
-
         if submit_button:
             if self.user_input["input_csv"]:
                 if META_FILE_UPLOADER_UUID in st.session_state.keys():
@@ -258,6 +218,56 @@ class StreamlitUI:
                 self._run_proteobench()
             else:
                 error_message = st.error(":x: Please provide a result file")
+
+        # if st.session_state[SUBMIT]:
+        if FIG1 in st.session_state:
+            self._populate_results()
+
+        if "slider_id" in st.session_state.keys():
+            default_val_slider = st.session_state[st.session_state["slider_id"]]
+        else:
+            default_val_slider = DEFAULT_VAL_SLIDER
+
+        if ALL_DATAPOINTS not in st.session_state or FIRST_NEW_PLOT == True:
+            st.session_state[ALL_DATAPOINTS] = None
+            all_datapoints = st.session_state[ALL_DATAPOINTS]
+            all_datapoints = Module().obtain_all_data_point(all_datapoints)
+
+            all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
+                filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
+            )
+            all_datapoints["nr_prec"] = all_datapoints["results"].apply(
+                filter_df_numquant_nr_prec, min_quant=default_val_slider
+            )
+
+            st.markdown(
+                """
+                    Choose with the slider below the minimum number of quantification value 
+                    per raw file.  
+                    Example: when 3 is selected, only the precursor ions quantified in 
+                    3 or more raw files will be considered for the plot. 
+                        """
+            )
+
+            st.session_state[PLACEHOLDER_SLIDER] = st.empty()
+            st.session_state[PLACEHOLDER_FIG_COMPARE] = st.empty()
+
+            st.session_state["slider_id"] = uuid.uuid4()
+
+            st.session_state[PLACEHOLDER_SLIDER].select_slider(
+                label="Minimal ion quantifications (# samples)",
+                options=[1, 2, 3, 4, 5, 6],
+                value=default_val_slider,
+                on_change=self.slider_callback,
+                key=st.session_state["slider_id"],
+            )
+
+            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+
+            st.session_state[ALL_DATAPOINTS] = all_datapoints
+            st.session_state[FIG2] = fig2
+
+            st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(st.session_state[FIG2], use_container_width=True)
 
     def _populate_results(self):
         self.generate_results("", None, None, False, None)
@@ -322,68 +332,82 @@ class StreamlitUI:
         recalculate,
         input_df,
     ):
+        global FIRST_NEW_PLOT
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if recalculate:
             status_placeholder.success(":heavy_check_mark: Finished!")
 
             # Show head of result DataFrame
-        st.header("Results")
-        st.subheader("Sample of the processed file")
-        st.markdown(
-            """
-                   Here are the data from your benchmark run. The table contains the 
-                   precursor ion MS signal calculated from your input data. You can download 
-                   this table from `Download calculated ratios` below.
-                    """
-        )
+        if FIRST_NEW_PLOT:
+            st.header("Results")
+            st.subheader("Sample of the processed file")
+            st.markdown(
+                """
+                    Here are the data from your benchmark run. The table contains the 
+                    precursor ion MS signal calculated from your input data. You can download 
+                    this table from `Download calculated ratios` below.
+                        """
+            )
         if not recalculate:
             result_performance = st.session_state[RESULT_PERF]
             all_datapoints = st.session_state[ALL_DATAPOINTS]
             input_df = st.session_state[INPUT_DF]
-        st.dataframe(result_performance.head(100))
-        st.markdown(
-            """
-                   It contains the following columns:
+        if FIRST_NEW_PLOT:
+            st.session_state[DF_HEAD] = st.dataframe(result_performance.head(100))
+        else:
+            st.session_state[DF_HEAD] = result_performance.head(100)
 
-                   - precursor ion = concatenation of the modified sequence en charge
-                   - mean log2-transformed intensities for condition A and B
-                   - standard deviations calculated for the log2-transformed values in condition A and B
-                   - mean intensity for condition A and B
-                   - standard deviations calculated for the intensity values in condition A and B
-                   - coefficient of variation (CV) for condition A and B
-                   - differences of the mean log2-transformed values between condition A and B
-                   - MS signal from the input table ("abundance_DDA_Condition_A_Sample_Alpha_01" to "abundance_DDA_Condition_B_Sample_Alpha_03")
-                   - Count = number of runs with non-missing values
-                   - species the sequence matches to
-                   - unique = TRUE if the sequence is species-specific
-                   - species
-                   - expected ratio for the given species
-                   - epsilon = difference of the observed and expected log2-transformed fold change
-                    """
-        )
-        # Plot results
-        st.subheader("Ratio between conditions")
-        st.markdown(
-            """
-                   Ratios calculated from your data:
-                    """
-        )
+        if FIRST_NEW_PLOT:
+            st.markdown(
+                """
+                    It contains the following columns:
+
+                    - precursor ion = concatenation of the modified sequence en charge
+                    - mean log2-transformed intensities for condition A and B
+                    - standard deviations calculated for the log2-transformed values in condition A and B
+                    - mean intensity for condition A and B
+                    - standard deviations calculated for the intensity values in condition A and B
+                    - coefficient of variation (CV) for condition A and B
+                    - differences of the mean log2-transformed values between condition A and B
+                    - MS signal from the input table ("abundance_DDA_Condition_A_Sample_Alpha_01" to "abundance_DDA_Condition_B_Sample_Alpha_03")
+                    - Count = number of runs with non-missing values
+                    - species the sequence matches to
+                    - unique = TRUE if the sequence is species-specific
+                    - species
+                    - expected ratio for the given species
+                    - epsilon = difference of the observed and expected log2-transformed fold change
+                        """
+            )
+            # Plot results
+            st.subheader("Ratio between conditions")
+            st.markdown(
+                """
+                    Ratios calculated from your data:
+                        """
+            )
         if recalculate:
             parse_settings = ParseSettings(self.user_input["input_format"])
             fig = PlotDataPoint().plot_fold_change_histogram(result_performance, parse_settings.species_expected_ratio)
+            st.session_state[FIG1] = fig
         else:
             fig = st.session_state[FIG1]
-        st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Mean error between conditions")
-        st.markdown(
-            """
-                   New figure including your benchmark run. The point corresponding to 
-                   your data will appear bigger than the public data sets already available 
-                   in ProteoBench.
-                    """
-        )
+        if FIRST_NEW_PLOT:
+            st.plotly_chart(st.session_state[FIG1], use_container_width=True)
+        else:
+            pass
+
+        if FIRST_NEW_PLOT:
+            st.subheader("Mean error between conditions")
+            st.markdown(
+                """
+                    New figure including your benchmark run. The point corresponding to 
+                    your data will appear bigger than the public data sets already available 
+                    in ProteoBench.
+                        """
+            )
+
         # show metadata
         # st.text(all_datapoints.head(100))
 
@@ -402,28 +426,41 @@ class StreamlitUI:
             ]
 
             fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            st.session_state[FIG2] = fig2
+            # st.plotly_chart(st.session_state[FIG2], use_container_width=True)
         else:
             fig2 = st.session_state[FIG2]
+            # st.plotly_chart(st.session_state[FIG2], use_container_width=True)
 
-        st.session_state["slider_id"] = uuid.uuid4()
-        st.markdown(
-            """
-                   Choose with the slider below the minimum number of quantification value 
-                   per raw file.  
-                   Example: when 3 is selected, only the precursor ions quantified in 
-                   3 or more raw files will be considered for the plot. 
-                    """
-        )
+        if FIRST_NEW_PLOT:
+            st.markdown(
+                """
+                    Choose with the slider below the minimum number of quantification value 
+                    per raw file.  
+                    Example: when 3 is selected, only the precursor ions quantified in 
+                    3 or more raw files will be considered for the plot. 
+                        """
+            )
 
-        f = st.select_slider(
-            label="Minimal ion quantifications (# samples)",
-            options=[1, 2, 3, 4, 5, 6],
-            value=default_val_slider,
-            on_change=self.slider_callback,
-            key=st.session_state["slider_id"],
-        )
+        if FIRST_NEW_PLOT:
+            st.session_state["slider_id"] = uuid.uuid4()
+            f = st.select_slider(
+                label="Minimal ion quantifications (# samples)",
+                options=[1, 2, 3, 4, 5, 6],
+                value=default_val_slider,
+                on_change=self.slider_callback,
+                key=st.session_state["slider_id"],
+            )
 
-        st.plotly_chart(fig2, use_container_width=True)
+        if FIRST_NEW_PLOT:
+            placeholder_fig_compare = st.empty()
+            placeholder_fig_compare.plotly_chart(st.session_state[FIG2], use_container_width=True)
+            st.session_state[PLACEHOLDER_FIG_COMPARE] = placeholder_fig_compare
+        else:
+            fig2 = st.session_state[FIG2]
+            st.session_state[FIG2].data[0].x = fig2.data[0].x
+            st.session_state[FIG2].data[0].y = fig2.data[0].y
+            st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(st.session_state[FIG2], use_container_width=True)
 
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
@@ -433,54 +470,55 @@ class StreamlitUI:
         )
 
         # Download link
-        st.subheader("Download calculated ratios")
-        random_uuid = uuid.uuid4()
-        st.download_button(
-            label="Download",
-            data=streamlit_utils.save_dataframe(result_performance),
-            file_name=f"{sample_name}.csv",
-            mime="text/csv",
-            key=f"{random_uuid}",
-        )
+        if FIRST_NEW_PLOT:
+            st.subheader("Download calculated ratios")
+            random_uuid = uuid.uuid4()
+            st.download_button(
+                label="Download",
+                data=streamlit_utils.save_dataframe(result_performance),
+                file_name=f"{sample_name}.csv",
+                mime="text/csv",
+                key=f"{random_uuid}",
+            )
 
-        st.subheader("Add results to online repository")
-        st.markdown(
-            """
-                    **Please make these results available to the entire community!**
+            st.subheader("Add results to online repository")
+            st.markdown(
+                """
+                        **Please make these results available to the entire community!**
 
-                    To do so, you need to provide the parameter file that corresponds to 
-                    your analysis. You can upload it in the drag and drop area below. 
-                    See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
-                    for all compatible parameter files.
-                    In this module, we keep track of the following parameters, if you feel 
-                    that some important information is missing, please add it in the 
-                    `Comments for submission` field. 
-                    - software tool name and version
-                    - search engine name and version
-                    - FDR threshold for PSM, peptide and protein level
-                    - match between run (or not)
-                    - precursor mass tolerance
-                    - enzyme (although for these data it should be Trypsin)
-                    - number of missed-cleavages
-                    - minimum and maximum peptide length
-                    - fixed and variable modifications
-                    - maximum number of modifications
-                    - minimum and maximum precursor charge
+                        To do so, you need to provide the parameter file that corresponds to 
+                        your analysis. You can upload it in the drag and drop area below. 
+                        See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
+                        for all compatible parameter files.
+                        In this module, we keep track of the following parameters, if you feel 
+                        that some important information is missing, please add it in the 
+                        `Comments for submission` field. 
+                        - software tool name and version
+                        - search engine name and version
+                        - FDR threshold for PSM, peptide and protein level
+                        - match between run (or not)
+                        - precursor mass tolerance
+                        - enzyme (although for these data it should be Trypsin)
+                        - number of missed-cleavages
+                        - minimum and maximum peptide length
+                        - fixed and variable modifications
+                        - maximum number of modifications
+                        - minimum and maximum precursor charge
 
-                    Once you confirm that the metadata is correct (and corresponds to the 
-                    table you uploaded before generating the plot), a button will appear.
-                    Press it to submit. 
+                        Once you confirm that the metadata is correct (and corresponds to the 
+                        table you uploaded before generating the plot), a button will appear.
+                        Press it to submit. 
 
-                    Once submitted, you will see a weblink that will prompt you to a 
-                    pull request on the github repository of the module. Please write down
-                    its number to keep track of your submission. If it looks good, one of 
-                    us will accept it and make your data public. 
+                        Once submitted, you will see a weblink that will prompt you to a 
+                        pull request on the github repository of the module. Please write down
+                        its number to keep track of your submission. If it looks good, one of 
+                        us will accept it and make your data public. 
 
-                    Please contact us if you have any issue. To do so, you can create an 
-                    [issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
-                    github, or send us an email [TODO].
-                    """
-        )
+                        Please contact us if you have any issue. To do so, you can create an 
+                        [issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
+                        github, or send us an email [TODO].
+                        """
+            )
         st.session_state[FIG1] = fig
         st.session_state[FIG2] = fig2
         st.session_state[RESULT_PERF] = result_performance
@@ -504,23 +542,26 @@ class StreamlitUI:
             check_submission_uuid = uuid.uuid4()
             st.session_state[CHECK_SUBMISSION_UUID] = check_submission_uuid
 
-        self.user_input[META_DATA] = st.file_uploader(
-            "Meta data for searches",
-            help=self.texts.Help.meta_data_file,
-            key=meta_file_uploader_uuid,
-        )
+        if FIRST_NEW_PLOT:
+            self.user_input[META_DATA] = st.file_uploader(
+                "Meta data for searches",
+                help=self.texts.Help.meta_data_file,
+                key=meta_file_uploader_uuid,
+            )
 
-        self.user_input["comments_for_submission"] = st.text_area(
-            "Comments for submission",
-            placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
-            height=200,
-            key=comments_submission_uuid,
-        )
+            self.user_input["comments_for_submission"] = st.text_area(
+                "Comments for submission",
+                placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
+                height=200,
+                key=comments_submission_uuid,
+            )
 
-        checkbox = st.checkbox(
-            "I confirm that the metadata is correct",
-            key=check_submission_uuid,
-        )
+            st.session_state[META_DATA_TEXT] = self.user_input["comments_for_submission"]
+
+            st.session_state[CHECK_SUBMISSION] = st.checkbox(
+                "I confirm that the metadata is correct",
+                key=check_submission_uuid,
+            )
 
         # TODO: do we need a better handling of this?
         params = None
@@ -535,7 +576,7 @@ class StreamlitUI:
                     f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
                 )
 
-        if checkbox and params != None:
+        if st.session_state[CHECK_SUBMISSION] and params != None:
             st.session_state["submission_ready"] = True
 
             if BUTTON_SUBMISSION_UUID in st.session_state.keys():
@@ -588,10 +629,10 @@ class StreamlitUI:
                 except UnboundLocalError:
                     # Happens when pr_url is not defined, e.g., local dev
                     pass
-                
 
                 st.session_state[SUBMIT] = False
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
+        FIRST_NEW_PLOT = False
 
 
 class WebpageTexts:

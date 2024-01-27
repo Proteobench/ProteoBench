@@ -323,9 +323,10 @@ class Module(ModuleInterface):
         overlap = set_current_datapoint.intersection(set_all_datapoints_old)
 
         if len(overlap) > 0:
+            overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == overlap, "id"]
             st.error(
                 f"The run you want to submit has been previously submitted \
-                 under the identifier: {overlap}"
+                 under the identifier: {overlap_name}"
             )
             return False
         return True
@@ -351,7 +352,7 @@ class Module(ModuleInterface):
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         if not self.check_new_unique_hash(all_datapoints):
-            return
+            return False
 
         branch_name = current_datapoint["id"]
 

@@ -379,26 +379,8 @@ class StreamlitUI:
                     - epsilon = difference of the observed and expected log2-transformed fold change
                         """
             )
-            # Plot results
-            st.subheader("Ratio between conditions")
-            st.markdown(
-                """
-                    Ratios calculated from your data:
-                        """
-            )
-        if recalculate:
-            parse_settings = ParseSettings(self.user_input["input_format"])
-            fig_logfc = PlotDataPoint.plot_fold_change_histogram(
-                result_performance, parse_settings.species_expected_ratio
-            )
-            st.session_state[FIG_LOGFC] = fig_logfc
-        else:
-            fig_logfc = st.session_state[FIG_LOGFC]
 
-        if FIRST_NEW_PLOT:
-            st.plotly_chart(st.session_state[FIG_LOGFC], use_container_width=True)
-        else:
-            pass
+        fig_logfc = self.plots_for_current_data(result_performance, recalculate, FIRST_NEW_PLOT)
 
         if FIRST_NEW_PLOT:
             st.subheader("Mean error between conditions")
@@ -409,9 +391,6 @@ class StreamlitUI:
                     in ProteoBench.
                         """
             )
-
-        # show metadata
-        # st.text(all_datapoints.head(100))
 
         if "slider_id" in st.session_state.keys():
             default_val_slider = st.session_state[st.session_state["slider_id"]]
@@ -641,6 +620,44 @@ class StreamlitUI:
                 st.session_state[SUBMIT] = False
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
         FIRST_NEW_PLOT = False
+
+    def plots_for_current_data(self, result_performance, recalculate, FIRST_NEW_PLOT):
+        if recalculate:
+            parse_settings = ParseSettings(self.user_input["input_format"])
+            fig_logfc = PlotDataPoint.plot_fold_change_histogram(
+                result_performance, parse_settings.species_expected_ratio
+            )
+            fig_CV = PlotDataPoint.plot_CV_violinplot(result_performance)
+            st.session_state[FIG_CV] = fig_CV
+            st.session_state[FIG_LOGFC] = fig_logfc
+        else:
+            fig_logfc = st.session_state[FIG_LOGFC]
+            fig_CV = st.session_state[FIG_CV]
+
+        if FIRST_NEW_PLOT:
+            # Use st.beta_columns to arrange the figures side by side
+            col1, col2 = st.columns(2)
+            col1.subheader("Log2 Fold Change distributions by species.")
+            col1.markdown(
+                """
+                    Left Panel : log2 fold changes calculated from your data
+                """
+            )
+            col1.plotly_chart(fig_logfc)
+
+            col2.subheader("Coefficient of variation distribution in Group A and B.")
+            col2.markdown(
+                """
+                    Right Panel Panel : CV calculated from your data
+                """
+            )
+            col2.plotly_chart(fig_CV)
+
+            # st.plotly_chart(st.session_state[FIG_LOGFC], use_container_width=True)
+
+        else:
+            pass
+        return fig_logfc
 
 
 class WebpageTexts:

@@ -261,7 +261,7 @@ class StreamlitUI:
                 key=st.session_state["slider_id"],
             )
 
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            fig2 = PlotDataPoint.plot_metric(all_datapoints)
 
             st.session_state[ALL_DATAPOINTS] = all_datapoints
             st.session_state[FIG2] = fig2
@@ -317,11 +317,9 @@ class StreamlitUI:
             filter_df_numquant_nr_prec(v, min_quant=min_quant) for v in st.session_state[ALL_DATAPOINTS]["results"]
         ]
 
-        fig2 = PlotDataPoint().plot_metric(st.session_state[ALL_DATAPOINTS])
+        fig2 = PlotDataPoint.plot_metric(st.session_state[ALL_DATAPOINTS])
 
         st.session_state[FIG2] = fig2
-        st.session_state[FIG2].data[0].x = fig2.data[0].x
-        st.session_state[FIG2].data[0].y = fig2.data[0].y
 
     def generate_results(
         self,
@@ -387,7 +385,7 @@ class StreamlitUI:
             )
         if recalculate:
             parse_settings = ParseSettings(self.user_input["input_format"])
-            fig = PlotDataPoint().plot_fold_change_histogram(result_performance, parse_settings.species_expected_ratio)
+            fig = PlotDataPoint.plot_fold_change_histogram(result_performance, parse_settings.species_expected_ratio)
             st.session_state[FIG1] = fig
         else:
             fig = st.session_state[FIG1]
@@ -424,7 +422,7 @@ class StreamlitUI:
                 filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
             ]
 
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            fig2 = PlotDataPoint.plot_metric(all_datapoints)
             st.session_state[FIG2] = fig2
             # st.plotly_chart(st.session_state[FIG2], use_container_width=True)
         else:

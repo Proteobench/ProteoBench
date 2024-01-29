@@ -219,7 +219,6 @@ class StreamlitUI:
             else:
                 error_message = st.error(":x: Please provide a result file")
 
-        # if st.session_state[SUBMIT]:
         if FIG1 in st.session_state:
             self._populate_results()
 
@@ -605,16 +604,19 @@ class StreamlitUI:
                         st.session_state[ALL_DATAPOINTS], params
                     )
 
-                id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
+                if not pr_url:
+                    del st.session_state[SUBMIT]
+                else:
+                    id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
 
-                if "storage" in st.secrets.keys():
-                    Module().write_intermediate_raw(
-                        st.secrets["storage"]["dir"],
-                        id,
-                        input_df,
-                        result_performance,
-                        self.user_input[META_DATA],
-                    )
+                    if "storage" in st.secrets.keys():
+                        Module().write_intermediate_raw(
+                            st.secrets["storage"]["dir"],
+                            id,
+                            input_df,
+                            result_performance,
+                            self.user_input[META_DATA],
+                        )
         if SUBMIT in st.session_state:
             if st.session_state[SUBMIT]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")

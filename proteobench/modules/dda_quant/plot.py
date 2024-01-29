@@ -8,7 +8,8 @@ from streamlit_plotly_events import plotly_events
 
 # ! This class does not use any instance attributes.
 class PlotDataPoint:
-    def plot_fold_change_histogram(self, result_df: pd.DataFrame, species_ratio: dict) -> go.Figure:
+    @staticmethod
+    def plot_fold_change_histogram(result_df: pd.DataFrame, species_ratio: dict) -> go.Figure:
         """Plot results with Plotly Express."""
 
         # Remove any precursors not arising from a known organism... contaminants?
@@ -33,7 +34,8 @@ class PlotDataPoint:
             width=700,
             height=700,
             # title="Distplot",
-            xaxis=dict(title="log2_A_vs_B", color="white", gridwidth=2),
+            xaxis=dict(title="log2_A_vs_B", color="white", gridwidth=2, linecolor="black"),
+            yaxis=dict(linecolor="black"),
         )
 
         fig.update_yaxes(title="Density", color="white", gridwidth=2)
@@ -62,7 +64,8 @@ class PlotDataPoint:
 
         return fig
 
-    def plot_metric(self, benchmark_metrics_df: pd.DataFrame) -> go.Figure:
+    @staticmethod
+    def plot_metric(benchmark_metrics_df: pd.DataFrame) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
 
@@ -129,11 +132,13 @@ class PlotDataPoint:
                 title="Mean absolute difference between measured and expected log2-transformed fold change",
                 gridcolor="white",
                 gridwidth=2,
+                linecolor="black",
             ),
             yaxis=dict(
                 title="Total number of precursor ions quantified in the selected number of raw files",
                 gridcolor="white",
                 gridwidth=2,
+                linecolor="black",
             ),
         )
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
@@ -147,6 +152,19 @@ class PlotDataPoint:
             text="-Beta-",
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
+        )
+
+        return fig
+
+    @staticmethod
+    def plot_CV_violinplot(result_df: pd.DataFrame) -> go.Figure:
+        # Create a violin plot with median points using plotly.express
+        fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points="all")
+        fig.update_layout(
+            xaxis_title="Group",
+            yaxis_title="CV",
+            xaxis=dict(linecolor="black"),  # Set the X axis line color to black
+            yaxis=dict(linecolor="black"),  # Set the Y axis line color to black
         )
 
         return fig

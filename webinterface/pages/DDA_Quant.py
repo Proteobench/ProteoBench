@@ -643,7 +643,7 @@ class StreamlitUI:
                     Left Panel : log2 fold changes calculated from your data
                 """
             )
-            col1.plotly_chart(fig_logfc)
+            col1.plotly_chart(fig_logfc, use_container_width=True)
 
             col2.subheader("Coefficient of variation distribution in Group A and B.")
             col2.markdown(
@@ -651,7 +651,7 @@ class StreamlitUI:
                     Right Panel Panel : CV calculated from your data
                 """
             )
-            col2.plotly_chart(fig_CV)
+            col2.plotly_chart(fig_CV, use_container_width=True)
 
             # st.plotly_chart(st.session_state[FIG_LOGFC], use_container_width=True)
 

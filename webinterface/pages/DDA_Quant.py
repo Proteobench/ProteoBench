@@ -25,8 +25,9 @@ logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
 SUBMIT = "submit"
-FIG1 = "fig1"
-FIG2 = "fig2"
+FIG_LOGFC = "fig_logfc"
+FIG_METRIC = "fig_metric"
+FIG_CV = "fig_CV_violinplot"
 RESULT_PERF = "result_perf"
 META_DATA = "meta_data"
 INPUT_DF = "input_df"
@@ -219,7 +220,7 @@ class StreamlitUI:
             else:
                 error_message = st.error(":x: Please provide a result file")
 
-        if FIG1 in st.session_state:
+        if FIG_LOGFC in st.session_state:
             self._populate_results()
 
         if "slider_id" in st.session_state.keys():
@@ -261,12 +262,14 @@ class StreamlitUI:
                 key=st.session_state["slider_id"],
             )
 
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
+            fig_metric = PlotDataPoint.plot_metric(all_datapoints)
 
             st.session_state[ALL_DATAPOINTS] = all_datapoints
-            st.session_state[FIG2] = fig2
+            st.session_state[FIG_METRIC] = fig_metric
 
-            st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(st.session_state[FIG2], use_container_width=True)
+            st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(
+                st.session_state[FIG_METRIC], use_container_width=True
+            )
 
     def _populate_results(self):
         self.generate_results("", None, None, False, None)
@@ -317,11 +320,9 @@ class StreamlitUI:
             filter_df_numquant_nr_prec(v, min_quant=min_quant) for v in st.session_state[ALL_DATAPOINTS]["results"]
         ]
 
-        fig2 = PlotDataPoint().plot_metric(st.session_state[ALL_DATAPOINTS])
+        fig_metric = PlotDataPoint.plot_metric(st.session_state[ALL_DATAPOINTS])
 
-        st.session_state[FIG2] = fig2
-        st.session_state[FIG2].data[0].x = fig2.data[0].x
-        st.session_state[FIG2].data[0].y = fig2.data[0].y
+        st.session_state[FIG_METRIC] = fig_metric
 
     def generate_results(
         self,
@@ -378,24 +379,8 @@ class StreamlitUI:
                     - epsilon = difference of the observed and expected log2-transformed fold change
                         """
             )
-            # Plot results
-            st.subheader("Ratio between conditions")
-            st.markdown(
-                """
-                    Ratios calculated from your data:
-                        """
-            )
-        if recalculate:
-            parse_settings = ParseSettings(self.user_input["input_format"])
-            fig = PlotDataPoint().plot_fold_change_histogram(result_performance, parse_settings.species_expected_ratio)
-            st.session_state[FIG1] = fig
-        else:
-            fig = st.session_state[FIG1]
 
-        if FIRST_NEW_PLOT:
-            st.plotly_chart(st.session_state[FIG1], use_container_width=True)
-        else:
-            pass
+        fig_logfc = self.plots_for_current_data(result_performance, recalculate, FIRST_NEW_PLOT)
 
         if FIRST_NEW_PLOT:
             st.subheader("Mean error between conditions")
@@ -406,9 +391,6 @@ class StreamlitUI:
                     in ProteoBench.
                         """
             )
-
-        # show metadata
-        # st.text(all_datapoints.head(100))
 
         if "slider_id" in st.session_state.keys():
             default_val_slider = st.session_state[st.session_state["slider_id"]]
@@ -424,12 +406,12 @@ class StreamlitUI:
                 filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
             ]
 
-            fig2 = PlotDataPoint().plot_metric(all_datapoints)
-            st.session_state[FIG2] = fig2
-            # st.plotly_chart(st.session_state[FIG2], use_container_width=True)
+            fig_metric = PlotDataPoint.plot_metric(all_datapoints)
+            st.session_state[FIG_METRIC] = fig_metric
+            # st.plotly_chart(st.session_state[FIG_METRIC], use_container_width=True)
         else:
-            fig2 = st.session_state[FIG2]
-            # st.plotly_chart(st.session_state[FIG2], use_container_width=True)
+            fig_metric = st.session_state[FIG_METRIC]
+            # st.plotly_chart(st.session_state[FIG_METRIC], use_container_width=True)
 
         if FIRST_NEW_PLOT:
             st.markdown(
@@ -453,13 +435,16 @@ class StreamlitUI:
 
         if FIRST_NEW_PLOT:
             placeholder_fig_compare = st.empty()
-            placeholder_fig_compare.plotly_chart(st.session_state[FIG2], use_container_width=True)
+            placeholder_fig_compare.plotly_chart(st.session_state[FIG_METRIC], use_container_width=True)
             st.session_state[PLACEHOLDER_FIG_COMPARE] = placeholder_fig_compare
         else:
-            fig2 = st.session_state[FIG2]
-            st.session_state[FIG2].data[0].x = fig2.data[0].x
-            st.session_state[FIG2].data[0].y = fig2.data[0].y
-            st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(st.session_state[FIG2], use_container_width=True)
+            fig_metric = st.session_state[FIG_METRIC]
+            st.session_state[FIG_METRIC].data[0].x = fig_metric.data[0].x
+            st.session_state[FIG_METRIC].data[0].y = fig_metric.data[0].y
+
+            st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(
+                st.session_state[FIG_METRIC], use_container_width=True
+            )
 
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
@@ -518,8 +503,8 @@ class StreamlitUI:
                         github, or send us an email [TODO].
                         """
             )
-        st.session_state[FIG1] = fig
-        st.session_state[FIG2] = fig2
+        st.session_state[FIG_LOGFC] = fig_logfc
+        st.session_state[FIG_METRIC] = fig_metric
         st.session_state[RESULT_PERF] = result_performance
         st.session_state[ALL_DATAPOINTS] = all_datapoints
         st.session_state[INPUT_DF] = input_df
@@ -635,6 +620,44 @@ class StreamlitUI:
                 st.session_state[SUBMIT] = False
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
         FIRST_NEW_PLOT = False
+
+    def plots_for_current_data(self, result_performance, recalculate, FIRST_NEW_PLOT):
+        if recalculate:
+            parse_settings = ParseSettings(self.user_input["input_format"])
+            fig_logfc = PlotDataPoint.plot_fold_change_histogram(
+                result_performance, parse_settings.species_expected_ratio
+            )
+            fig_CV = PlotDataPoint.plot_CV_violinplot(result_performance)
+            st.session_state[FIG_CV] = fig_CV
+            st.session_state[FIG_LOGFC] = fig_logfc
+        else:
+            fig_logfc = st.session_state[FIG_LOGFC]
+            fig_CV = st.session_state[FIG_CV]
+
+        if FIRST_NEW_PLOT:
+            # Use st.beta_columns to arrange the figures side by side
+            col1, col2 = st.columns(2)
+            col1.subheader("Log2 Fold Change distributions by species.")
+            col1.markdown(
+                """
+                    Left Panel : log2 fold changes calculated from your data
+                """
+            )
+            col1.plotly_chart(fig_logfc, use_container_width=True)
+
+            col2.subheader("Coefficient of variation distribution in Group A and B.")
+            col2.markdown(
+                """
+                    Right Panel Panel : CV calculated from your data
+                """
+            )
+            col2.plotly_chart(fig_CV, use_container_width=True)
+
+            # st.plotly_chart(st.session_state[FIG_LOGFC], use_container_width=True)
+
+        else:
+            pass
+        return fig_logfc
 
 
 class WebpageTexts:

@@ -323,6 +323,7 @@ class StreamlitUI:
         fig_metric = PlotDataPoint.plot_metric(st.session_state[ALL_DATAPOINTS])
 
         st.session_state[FIG_METRIC] = fig_metric
+        self.plots_for_current_data(st.session_state[RESULT_PERF], True, False, min_quant)
 
     def generate_results(
         self,
@@ -380,7 +381,14 @@ class StreamlitUI:
                         """
             )
 
-        fig_logfc = self.plots_for_current_data(result_performance, recalculate, FIRST_NEW_PLOT)
+        if "slider_id" in st.session_state.keys():
+            default_val_slider = st.session_state[st.session_state["slider_id"]]
+        else:
+            default_val_slider = DEFAULT_VAL_SLIDER
+
+        fig_logfc = self.plots_for_current_data(
+            result_performance, recalculate, FIRST_NEW_PLOT, slider_value=default_val_slider
+        )
 
         if FIRST_NEW_PLOT:
             st.subheader("Mean error between conditions")
@@ -391,11 +399,6 @@ class StreamlitUI:
                     in ProteoBench.
                         """
             )
-
-        if "slider_id" in st.session_state.keys():
-            default_val_slider = st.session_state[st.session_state["slider_id"]]
-        else:
-            default_val_slider = DEFAULT_VAL_SLIDER
 
         if recalculate:
             all_datapoints["weighted_sum"] = [
@@ -621,9 +624,13 @@ class StreamlitUI:
                 rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
         FIRST_NEW_PLOT = False
 
-    def plots_for_current_data(self, result_performance, recalculate, FIRST_NEW_PLOT):
+    def plots_for_current_data(self, result_performance, recalculate, FIRST_NEW_PLOT, slider_value):
+        # filter result_performance datafremae on nr_observed column
+        result_performance = result_performance[result_performance["nr_observed"] >= slider_value]
+
         if recalculate:
             parse_settings = ParseSettings(self.user_input["input_format"])
+
             fig_logfc = PlotDataPoint.plot_fold_change_histogram(
                 result_performance, parse_settings.species_expected_ratio
             )
@@ -652,8 +659,6 @@ class StreamlitUI:
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
-
-            # st.plotly_chart(st.session_state[FIG_LOGFC], use_container_width=True)
 
         else:
             pass

@@ -20,7 +20,7 @@ proteomics data analysis workflows.
 ProteoBench provides a centralized web platform for developers and end-users to compare proteomics 
 data analysis pipelines. This community-curated effort will allow for an easy and controlled comparison 
 of tools developed or used by the participants to other state-of-the-art pipelines for specific 
-applications. The goal is not to select a single best one-fits-all data analysis workflow, but to allow:\\
+applications. The goal is not to select a single best one-fits-all data analysis workflow, but to allow:
 
 1. **end-users** to identify a good workflow to fulfill their specific needs
 2. **developers** to identify the specific strengths and weaknesses in their workflows, guiding the development process

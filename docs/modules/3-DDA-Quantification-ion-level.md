@@ -2,6 +2,12 @@
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the sassociated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
+**This module is not design to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data after replacement of missing values.**  
+We think that this module is more suited to the impact of:
+- search engines
+- peak picking
+- match between run
+- signal normalisation
 
 ## Data set
 

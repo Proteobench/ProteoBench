@@ -78,6 +78,10 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
+        edited_df = benchmark_metrics_df.drop(columns=["results", "old_new", "is_temporary", "intermediate_hash"])
+        edited_df["Selected"] = False
+        edited_df = edited_df.reindex(columns=["Selected"] + [col for col in edited_df.columns if col != "Selected"])
+        edited_df_in_gui = st.data_editor(edited_df)
 
         # Define search colors for each search engine
         software_colors = {
@@ -106,7 +110,7 @@ class PlotDataPoint:
             + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
             + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
             + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}"
-            for idx, row in benchmark_metrics_df.iterrows()
+            for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
         mapping = {"old": 10, "new": 20}
@@ -118,14 +122,25 @@ class PlotDataPoint:
                     y=benchmark_metrics_df["nr_prec"],
                     mode="markers",
                     text=hover_texts,
-                    marker=dict(color=colors, showscale=False, size=20),
+                    marker=dict(color=colors, showscale=False),
                     marker_size=[mapping[item] for item in benchmark_metrics_df["old_new"]],
                 )
             ]
         )
+        selected_data = edited_df_in_gui[edited_df_in_gui["Selected"] == True]
+
+        if not selected_data.empty:
+            fig.add_trace(
+                go.Scatter(
+                    x=selected_data["median_abs_epsilon"],
+                    y=selected_data["nr_prec"],
+                    mode="markers",
+                    text=hover_texts,
+                    marker=dict(color="darkred", showscale=False, size=25),
+                )
+            )
 
         fig.update_layout(
-            # title="Metric",
             width=700,
             height=700,
             xaxis=dict(

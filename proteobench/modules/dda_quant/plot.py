@@ -1,3 +1,5 @@
+import uuid
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -86,7 +88,7 @@ class PlotDataPoint:
         edited_df = benchmark_metrics_df.drop(columns=["results", "old_new", "is_temporary", "intermediate_hash"])
         edited_df["Selected"] = False
         edited_df = edited_df.reindex(columns=["Selected"] + [col for col in edited_df.columns if col != "Selected"])
-        edited_df_in_gui = st.data_editor(edited_df)
+        edited_df_in_gui = st.data_editor(edited_df, key=uuid.uuid4())
 
         # Define search colors for each search engine
         software_colors = {

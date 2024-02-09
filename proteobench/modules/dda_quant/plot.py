@@ -78,10 +78,16 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
+
         edited_df = benchmark_metrics_df.drop(columns=["results", "old_new", "is_temporary", "intermediate_hash"])
         edited_df["Selected"] = False
         edited_df = edited_df.reindex(columns=["Selected"] + [col for col in edited_df.columns if col != "Selected"])
         edited_df_in_gui = st.data_editor(edited_df)
+
+        all_median_abs_epsilon = [
+            v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
+        ]
+        all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Define search colors for each search engine
         software_colors = {
@@ -125,7 +131,12 @@ class PlotDataPoint:
                     marker=dict(color=colors, showscale=False),
                     marker_size=[mapping[item] for item in benchmark_metrics_df["old_new"]],
                 )
-            ]
+            ],
+            layout_yaxis_range=[min(all_nr_prec) - min(all_nr_prec) * 0.05, max(all_nr_prec) + min(all_nr_prec) * 0.05],
+            layout_xaxis_range=[
+                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
+                max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
+            ],
         )
         selected_data = edited_df_in_gui[edited_df_in_gui["Selected"] == True]
 

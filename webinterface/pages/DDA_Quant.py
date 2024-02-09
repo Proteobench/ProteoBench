@@ -498,6 +498,9 @@ class StreamlitUI:
                         table you uploaded before generating the plot), a button will appear.
                         Press it to submit. 
 
+                        **If some parameters are not in your parameter file, it is important that 
+                        you provide them in the "comments" section.**
+
                         Once submitted, you will see a weblink that will prompt you to a 
                         pull request on the github repository of the module. Please write down
                         its number to keep track of your submission. If it looks good, one of 
@@ -505,7 +508,7 @@ class StreamlitUI:
 
                         Please contact us if you have any issue. To do so, you can create an 
                         [issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
-                        github, or send us an email [TODO].
+                        github, or [send us an email](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
                         """
             )
         st.session_state[FIG_LOGFC] = fig_logfc

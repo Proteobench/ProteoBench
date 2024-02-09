@@ -108,7 +108,7 @@ Each software tool produces specific output files formats. We made ``.toml`` fil
 
 [general] = contaminant and decoy flags used for filtering out precursor ions matched to decoy or contaminant sequences.
 
-[modifications_parser] = information necessary for parsing the modification and their localisation when the input table contains a columns with modified sequences.
+[modifications_parser] = information necessary for parsing the modification and their localisation when the input table contains a columns with modified sequences. When the input contains a column  with stripped sequences and a column with the localised modification, this part is not needed.
 
 "parse_column" = "Modified Sequence" / Indicates the name of the column that should be parsed (i.e. that contains the sequence and localised modifications).
 

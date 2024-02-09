@@ -323,7 +323,9 @@ class StreamlitUI:
         fig_metric = PlotDataPoint.plot_metric(st.session_state[ALL_DATAPOINTS])
 
         st.session_state[FIG_METRIC] = fig_metric
-        self.plots_for_current_data(st.session_state[RESULT_PERF], True, False, min_quant)
+
+        if RESULT_PERF in st.session_state.keys():
+            self.plots_for_current_data(st.session_state[RESULT_PERF], True, False, min_quant)
 
     def generate_results(
         self,

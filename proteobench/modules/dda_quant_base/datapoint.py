@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 
 
-# TODO move to general folder
 def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
@@ -16,7 +15,6 @@ def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
     return None
 
 
-# TODO move to general folder
 def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
@@ -25,7 +23,6 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
     return None
 
 
-# TODO move to general folder
 @dataclass
 class Datapoint:
     """Data used to stored the"""

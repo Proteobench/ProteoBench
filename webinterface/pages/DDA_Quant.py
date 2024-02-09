@@ -625,7 +625,7 @@ class StreamlitUI:
         FIRST_NEW_PLOT = False
 
     def plots_for_current_data(self, result_performance, recalculate, FIRST_NEW_PLOT, slider_value):
-        # filter result_performance datafremae on nr_observed column
+        # filter result_performance dataframe on nr_observed column
         result_performance = result_performance[result_performance["nr_observed"] >= slider_value]
 
         if recalculate:

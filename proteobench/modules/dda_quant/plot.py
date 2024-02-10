@@ -7,6 +7,18 @@ import plotly.graph_objects as go
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
+TABLE_DATA = "table_data"
+TABLE_DF = "table_df"
+SCATTER_SIZE = "scatter_size"
+
+
+def handle_click(trace, points, state):
+    # Get indices of clicked points
+    indices = [p.point_inds[0] for p in points]
+    # Update size of clicked points
+    for idx in indices:
+        st.session_state[SCATTER_SIZE][idx] += 5  # Increase size by 5
+
 
 # ! This class does not use any instance attributes.
 class PlotDataPoint:
@@ -67,7 +79,7 @@ class PlotDataPoint:
         return fig
 
     @staticmethod
-    def plot_metric(benchmark_metrics_df: pd.DataFrame) -> go.Figure:
+    def plot_metric(benchmark_metrics_df: pd.DataFrame, reinitialize_table=False) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
 
@@ -84,11 +96,6 @@ class PlotDataPoint:
             v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
         ]
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
-
-        edited_df = benchmark_metrics_df.drop(columns=["results", "old_new", "is_temporary", "intermediate_hash"])
-        edited_df["Selected"] = False
-        edited_df = edited_df.reindex(columns=["Selected"] + [col for col in edited_df.columns if col != "Selected"])
-        edited_df_in_gui = st.data_editor(edited_df, key=uuid.uuid4())
 
         # Define search colors for each search engine
         software_colors = {
@@ -122,6 +129,8 @@ class PlotDataPoint:
 
         mapping = {"old": 10, "new": 20}
 
+        st.session_state[SCATTER_SIZE] = [mapping[item] for item in benchmark_metrics_df["old_new"]]
+
         fig = go.Figure(
             data=[
                 go.Scatter(
@@ -130,7 +139,7 @@ class PlotDataPoint:
                     mode="markers",
                     text=hover_texts,
                     marker=dict(color=colors, showscale=False),
-                    marker_size=[mapping[item] for item in benchmark_metrics_df["old_new"]],
+                    marker_size=st.session_state[SCATTER_SIZE],
                 )
             ],
             layout_yaxis_range=[min(all_nr_prec) - min(all_nr_prec) * 0.05, max(all_nr_prec) + min(all_nr_prec) * 0.05],
@@ -139,18 +148,6 @@ class PlotDataPoint:
                 max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
             ],
         )
-        selected_data = edited_df_in_gui[edited_df_in_gui["Selected"] == True]
-
-        if not selected_data.empty:
-            fig.add_trace(
-                go.Scatter(
-                    x=selected_data["median_abs_epsilon"],
-                    y=selected_data["nr_prec"],
-                    mode="markers",
-                    text=hover_texts,
-                    marker=dict(color="darkred", showscale=False, size=25),
-                )
-            )
 
         fig.update_layout(
             width=700,
@@ -180,6 +177,10 @@ class PlotDataPoint:
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )
+
+        fig.update_layout(clickmode="event+select")
+        # Register click event handler
+        fig.data[0].on_click(handle_click)
 
         return fig
 

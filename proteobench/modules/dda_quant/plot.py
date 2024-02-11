@@ -79,7 +79,21 @@ class PlotDataPoint:
         return fig
 
     @staticmethod
-    def plot_metric(benchmark_metrics_df: pd.DataFrame, reinitialize_table=False) -> go.Figure:
+    def plot_metric(
+        benchmark_metrics_df: pd.DataFrame,
+        reinitialize_table: bool = False,
+        software_colors: dict = {
+            "MaxQuant": "#1f77b4",
+            "AlphaPept": "#2ca02c",
+            "FragPipe": "#ff7f0e",
+            "WOMBAT": "#7f7f7f",
+            "Proline": "#d62728",
+            "Sage": "#f74c00",
+            "Custom": "#9467bd",
+        },
+        mapping={"old": 10, "new": 20},
+        highlight_color: str = "#d30067",
+    ) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
 
@@ -97,20 +111,6 @@ class PlotDataPoint:
         ]
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
-        # Define search colors for each search engine
-        software_colors = {
-            "MaxQuant": "#1f77b4",
-            "AlphaPept": "#2ca02c",
-            "FragPipe": "#ff7f0e",
-            "WOMBAT": "#7f7f7f",
-            "Proline": "#d62728",
-            "Sage": "#f74c00",
-            "Custom": "#9467bd",
-        }
-
-        # Color plot based on software tool
-        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
-
         # Add hover text
         hover_texts = [
             f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
@@ -127,9 +127,17 @@ class PlotDataPoint:
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
-        mapping = {"old": 10, "new": 20}
-
         st.session_state[SCATTER_SIZE] = [mapping[item] for item in benchmark_metrics_df["old_new"]]
+        st.session_state[SCATTER_SIZE] = [
+            item * 2 if highlight else item
+            for item, highlight in zip(st.session_state[SCATTER_SIZE], benchmark_metrics_df["Highlight"])
+        ]
+
+        # Color plot based on software tool
+        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        colors = [
+            highlight_color if highlight else item for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
+        ]
 
         fig = go.Figure(
             data=[

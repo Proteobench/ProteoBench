@@ -613,8 +613,6 @@ class StreamlitUI:
         if self.user_input[META_DATA]:
             try:
                 params = Module().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
-                print(params)
-                # input()
             except KeyError as e:
                 st.error("Parsing of meta parameters file for this software is not supported yet.")
             except Exception as err:

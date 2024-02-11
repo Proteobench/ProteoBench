@@ -301,9 +301,6 @@ class Module(ModuleInterface):
         # Get quantification data
         intermediate_data_structure = self.generate_intermediate(standard_format, replicate_to_raw, parse_settings)
 
-        print(user_input)
-        input()
-
         current_datapoint = self.generate_datapoint(
             intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )

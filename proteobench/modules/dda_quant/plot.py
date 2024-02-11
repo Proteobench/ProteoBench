@@ -24,7 +24,8 @@ class PlotDataPoint:
             result_df,
             x=result_df["log2_A_vs_B"],
             color="kind",
-            marginal="rug",
+            # Turned of marginal as it slows the interface considerably
+            # marginal="rug",
             histnorm="probability density",
             barmode="overlay",
             opacity=0.7,
@@ -77,6 +78,7 @@ class PlotDataPoint:
             "WOMBAT": "#7f7f7f",
             "Proline": "#d62728",
             "Sage": "#f74c00",
+            "i2MassChroQ": "#5ce681",
             "Custom": "#9467bd",
         },
         mapping={"old": 10, "new": 20},
@@ -189,7 +191,7 @@ class PlotDataPoint:
     @staticmethod
     def plot_CV_violinplot(result_df: pd.DataFrame) -> go.Figure:
         # Create a violin plot with median points using plotly.express
-        fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points="all")
+        fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points=False)
         fig.update_layout(
             xaxis_title="Group",
             yaxis_title="CV",

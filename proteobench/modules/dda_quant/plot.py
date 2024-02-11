@@ -116,15 +116,19 @@ class PlotDataPoint:
         ]
 
         scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
-        scatter_size = [
-            item * 2 if highlight else item for item, highlight in zip(scatter_size, benchmark_metrics_df["Highlight"])
-        ]
+        if "Highlight" in benchmark_metrics_df.columns:
+            scatter_size = [
+                item * 2 if highlight else item
+                for item, highlight in zip(scatter_size, benchmark_metrics_df["Highlight"])
+            ]
 
         # Color plot based on software tool
         colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
-        colors = [
-            highlight_color if highlight else item for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
-        ]
+        if "Highlight" in benchmark_metrics_df.columns:
+            colors = [
+                highlight_color if highlight else item
+                for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
+            ]
 
         fig = go.Figure(
             data=[

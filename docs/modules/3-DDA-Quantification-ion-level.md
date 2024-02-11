@@ -113,7 +113,7 @@ mapping between the headers in the input file (left-hand side) and the header of
  
   - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
  
-  - "Intensity" = field containing the intensities utilised to calculate the module metrics.
+  - "Intensity" = field containing the intensities utilised to calculate the module metrics. Used for long-format input.
 
 - **[condition_mapper]**
 mapping between the headers of the quantification values in the input file (left-hand side) and the condition (Condition A and Condition B). 

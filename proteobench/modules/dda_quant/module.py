@@ -201,6 +201,10 @@ class Module(ModuleInterface):
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
+
+        if "comments_for_submission" not in user_input.keys():
+            user_input["comments_for_submission"] = ""
+
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,

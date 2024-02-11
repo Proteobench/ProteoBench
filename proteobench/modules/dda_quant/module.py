@@ -257,6 +257,8 @@ class Module(ModuleInterface):
                 lambda x: aggregate_modification_column(x.sequence, x.modifications),
                 axis=1,
             )
+        elif input_format == "i2MassChroQ":
+            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 

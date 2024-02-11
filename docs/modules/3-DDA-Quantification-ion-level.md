@@ -125,7 +125,7 @@ mapping between the headers of the quantification values in the input file (left
 suffix corresponding to the species in the input table (left-hand side), and corresponding species (right-hand side) for ratio calculation. 
 
 - **[general]**
-contaminant and decoy flags used for filtering out precursor ions matched to decoy or contaminant sequences.
+contaminant and decoy flags used for filtering out precursor ions matched to decoy or contaminant sequences. The contaminant flag in this module should be "Cont_" to correspond to the contaminants as labelled in the provided fasta file. The decoy flag is only used to filter out rows that do not pass the validation step but are reported in the table.
 
 - **[modifications_parser]**
 information necessary for parsing the modification and their localisation when the input table contains a columns with modified sequences. When the input contains a column  with stripped sequences and a column with the localised modification, this part is not needed.

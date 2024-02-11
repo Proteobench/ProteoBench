@@ -5,6 +5,8 @@ import logging
 import uuid
 from datetime import datetime
 
+import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
@@ -39,9 +41,10 @@ CHECK_SUBMISSION = "heck_submission"
 BUTTON_SUBMISSION_UUID = "button_submission_uuid"
 DF_HEAD = "df_head"
 PLACEHOLDER_FIG_COMPARE = "placeholder_fig_compare"
+PLACEHOLDER_TABLE = "placeholder_table"
 PLACEHOLDER_SLIDER = "placeholder_slider"
+HIGHLIGHT_LIST = "highlight_list"
 FIRST_NEW_PLOT = True
-
 DEFAULT_VAL_SLIDER = 3
 
 if "submission_ready" not in st.session_state:
@@ -68,6 +71,11 @@ class StreamlitUI:
         self._sidebar()
 
     def generate_input_field(self, input_format: str, content: dict):
+        if content["type"] == "text_area":
+            if "placeholder" in content:
+                return st.text_area(content["label"], placeholder=content["placeholder"], height=content["height"])
+            elif "value" in content:
+                return st.text_area(content["label"], content["value"][input_format], height=content["height"])
         if content["type"] == "text_input":
             if "placeholder" in content:
                 return st.text_input(content["label"], placeholder=content["placeholder"])
@@ -195,6 +203,7 @@ class StreamlitUI:
                     config = json.load(file)
 
                 for key, value in config.items():
+                    print(key, value)
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
             st.markdown(
@@ -240,6 +249,11 @@ class StreamlitUI:
                 filter_df_numquant_nr_prec, min_quant=default_val_slider
             )
 
+            if HIGHLIGHT_LIST not in st.session_state.keys():
+                all_datapoints.insert(0, "Highlight", [False] * len(all_datapoints.index))
+            else:
+                all_datapoints.insert(0, "Highlight", st.session_state[HIGHLIGHT_LIST])
+
             st.markdown(
                 """
                     Choose with the slider below the minimum number of quantification value 
@@ -251,8 +265,10 @@ class StreamlitUI:
 
             st.session_state[PLACEHOLDER_SLIDER] = st.empty()
             st.session_state[PLACEHOLDER_FIG_COMPARE] = st.empty()
+            st.session_state[PLACEHOLDER_TABLE] = st.empty()
 
             st.session_state["slider_id"] = uuid.uuid4()
+            st.session_state["table_id"] = uuid.uuid4()
 
             st.session_state[PLACEHOLDER_SLIDER].select_slider(
                 label="Minimal ion quantifications (# samples)",
@@ -269,6 +285,10 @@ class StreamlitUI:
 
             st.session_state[PLACEHOLDER_FIG_COMPARE].plotly_chart(
                 st.session_state[FIG_METRIC], use_container_width=True
+            )
+
+            st.session_state[PLACEHOLDER_TABLE].data_editor(
+                st.session_state[ALL_DATAPOINTS], key=st.session_state["table_id"], on_change=self.table_callback
             )
 
     def _populate_results(self):
@@ -296,6 +316,8 @@ class StreamlitUI:
                 default_val_slider = st.session_state[st.session_state["slider_id"]]
             else:
                 default_val_slider = DEFAULT_VAL_SLIDER
+
+            print(self.user_input)
             result_performance, all_datapoints, input_df = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
@@ -303,12 +325,39 @@ class StreamlitUI:
                 st.session_state[ALL_DATAPOINTS],
                 default_cutoff_min_prec=default_val_slider,
             )
+
             st.session_state[ALL_DATAPOINTS] = all_datapoints
+
+            if "Highlight" not in st.session_state[ALL_DATAPOINTS].columns:
+                st.session_state[ALL_DATAPOINTS].insert(
+                    0, "Highlight", [False] * len(st.session_state[ALL_DATAPOINTS].index)
+                )
+            else:
+                st.session_state[ALL_DATAPOINTS]["Highlight"] = [False] * len(st.session_state[ALL_DATAPOINTS].index)
+
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.exception(e)
         else:
             self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
+
+    def table_callback(self):
+        min_quant = st.session_state[st.session_state["slider_id"]]
+        edits = st.session_state[st.session_state["table_id"]]["edited_rows"].items()
+        for k, v in edits:
+            try:
+                st.session_state[ALL_DATAPOINTS][list(v.keys())[0]].iloc[k] = list(v.values())[0]
+            except TypeError:
+                return
+        st.session_state[HIGHLIGHT_LIST] = list(st.session_state[ALL_DATAPOINTS]["Highlight"])
+        st.session_state[PLACEHOLDER_TABLE] = st.session_state[ALL_DATAPOINTS]
+
+        fig_metric = PlotDataPoint.plot_metric(st.session_state[ALL_DATAPOINTS])
+
+        st.session_state[FIG_METRIC] = fig_metric
+
+        if RESULT_PERF in st.session_state.keys():
+            self.plots_for_current_data(st.session_state[RESULT_PERF], True, False, min_quant)
 
     def slider_callback(self):
         min_quant = st.session_state[st.session_state["slider_id"]]
@@ -412,6 +461,7 @@ class StreamlitUI:
             ]
 
             fig_metric = PlotDataPoint.plot_metric(all_datapoints)
+            st.session_state[ALL_DATAPOINTS] = all_datapoints
             st.session_state[FIG_METRIC] = fig_metric
             # st.plotly_chart(st.session_state[FIG_METRIC], use_container_width=True)
         else:
@@ -427,8 +477,6 @@ class StreamlitUI:
                     3 or more raw files will be considered for the plot. 
                         """
             )
-
-        if FIRST_NEW_PLOT:
             st.session_state["slider_id"] = uuid.uuid4()
             f = st.select_slider(
                 label="Minimal ion quantifications (# samples)",
@@ -438,10 +486,15 @@ class StreamlitUI:
                 key=st.session_state["slider_id"],
             )
 
-        if FIRST_NEW_PLOT:
             placeholder_fig_compare = st.empty()
             placeholder_fig_compare.plotly_chart(st.session_state[FIG_METRIC], use_container_width=True)
             st.session_state[PLACEHOLDER_FIG_COMPARE] = placeholder_fig_compare
+
+            st.session_state["table_id"] = uuid.uuid4()
+
+            st.data_editor(
+                st.session_state[ALL_DATAPOINTS], key=st.session_state["table_id"], on_change=self.table_callback
+            )
         else:
             fig_metric = st.session_state[FIG_METRIC]
             st.session_state[FIG_METRIC].data[0].x = fig_metric.data[0].x

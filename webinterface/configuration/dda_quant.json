@@ -128,10 +128,10 @@
             "Sage": true
         }
     },
-    "workflow_description": {
+    "comments_for_submission": {
         "type": "text_area",
         "label": "Fill in details not specified above",
         "placeholder": "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...'",
-        "height": 275
+        "height": 200
     }
 }

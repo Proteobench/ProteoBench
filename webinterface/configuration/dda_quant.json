@@ -53,6 +53,7 @@
             "AlphaPept": "-",
             "FragPipe": "-",
             "Proline": "-",
+            "i2MassChroQ": "-",
             "WOMBAT": "-",
             "Sage": "-"
         },
@@ -122,6 +123,7 @@
             "AlphaPept": false,
             "FragPipe": false,
             "Proline": false,
+            "i2MassChroQ": false,
             "WOMBAT": false,
             "Sage": true
         }

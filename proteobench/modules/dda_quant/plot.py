@@ -174,8 +174,6 @@ class PlotDataPoint:
         )
 
         fig.update_layout(clickmode="event+select")
-        # Register click event handler
-        fig.data[0].on_click(handle_click)
 
         return fig
 

@@ -1,3 +1,5 @@
+import uuid
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -65,7 +67,21 @@ class PlotDataPoint:
         return fig
 
     @staticmethod
-    def plot_metric(benchmark_metrics_df: pd.DataFrame) -> go.Figure:
+    def plot_metric(
+        benchmark_metrics_df: pd.DataFrame,
+        reinitialize_table: bool = False,
+        software_colors: dict = {
+            "MaxQuant": "#1f77b4",
+            "AlphaPept": "#2ca02c",
+            "FragPipe": "#ff7f0e",
+            "WOMBAT": "#7f7f7f",
+            "Proline": "#d62728",
+            "Sage": "#f74c00",
+            "Custom": "#9467bd",
+        },
+        mapping={"old": 10, "new": 20},
+        highlight_color: str = "#d30067",
+    ) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
 
@@ -83,25 +99,6 @@ class PlotDataPoint:
         ]
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
-        edited_df = benchmark_metrics_df.drop(columns=["results", "old_new", "is_temporary", "intermediate_hash"])
-        edited_df["Selected"] = False
-        edited_df = edited_df.reindex(columns=["Selected"] + [col for col in edited_df.columns if col != "Selected"])
-        edited_df_in_gui = st.data_editor(edited_df)
-
-        # Define search colors for each search engine
-        software_colors = {
-            "MaxQuant": "#1f77b4",
-            "AlphaPept": "#2ca02c",
-            "FragPipe": "#ff7f0e",
-            "WOMBAT": "#7f7f7f",
-            "Proline": "#d62728",
-            "Sage": "#f74c00",
-            "Custom": "#9467bd",
-        }
-
-        # Color plot based on software tool
-        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
-
         # Add hover text
         hover_texts = [
             f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
@@ -118,7 +115,20 @@ class PlotDataPoint:
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
-        mapping = {"old": 10, "new": 20}
+        scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
+        if "Highlight" in benchmark_metrics_df.columns:
+            scatter_size = [
+                item * 2 if highlight else item
+                for item, highlight in zip(scatter_size, benchmark_metrics_df["Highlight"])
+            ]
+
+        # Color plot based on software tool
+        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        if "Highlight" in benchmark_metrics_df.columns:
+            colors = [
+                highlight_color if highlight else item
+                for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
+            ]
 
         fig = go.Figure(
             data=[
@@ -128,7 +138,7 @@ class PlotDataPoint:
                     mode="markers",
                     text=hover_texts,
                     marker=dict(color=colors, showscale=False),
-                    marker_size=[mapping[item] for item in benchmark_metrics_df["old_new"]],
+                    marker_size=scatter_size,
                 )
             ],
             layout_yaxis_range=[min(all_nr_prec) - min(all_nr_prec) * 0.05, max(all_nr_prec) + min(all_nr_prec) * 0.05],
@@ -137,18 +147,6 @@ class PlotDataPoint:
                 max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
             ],
         )
-        selected_data = edited_df_in_gui[edited_df_in_gui["Selected"] == True]
-
-        if not selected_data.empty:
-            fig.add_trace(
-                go.Scatter(
-                    x=selected_data["median_abs_epsilon"],
-                    y=selected_data["nr_prec"],
-                    mode="markers",
-                    text=hover_texts,
-                    marker=dict(color="darkred", showscale=False, size=25),
-                )
-            )
 
         fig.update_layout(
             width=700,
@@ -178,6 +176,8 @@ class PlotDataPoint:
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )
+
+        fig.update_layout(clickmode="event+select")
 
         return fig
 

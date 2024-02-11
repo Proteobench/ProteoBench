@@ -7,19 +7,6 @@ import plotly.graph_objects as go
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
-TABLE_DATA = "table_data"
-TABLE_DF = "table_df"
-SCATTER_SIZE = "scatter_size"
-st.session_state[SCATTER_SIZE] = {}
-
-
-def handle_click(trace, points, state):
-    # Get indices of clicked points
-    indices = [p.point_inds[0] for p in points]
-    # Update size of clicked points
-    for idx in indices:
-        st.session_state[SCATTER_SIZE][idx] += 5  # Increase size by 5
-
 
 # ! This class does not use any instance attributes.
 class PlotDataPoint:
@@ -128,10 +115,9 @@ class PlotDataPoint:
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
-        st.session_state[SCATTER_SIZE] = [mapping[item] for item in benchmark_metrics_df["old_new"]]
-        st.session_state[SCATTER_SIZE] = [
-            item * 2 if highlight else item
-            for item, highlight in zip(st.session_state[SCATTER_SIZE], benchmark_metrics_df["Highlight"])
+        scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
+        scatter_size = [
+            item * 2 if highlight else item for item, highlight in zip(scatter_size, benchmark_metrics_df["Highlight"])
         ]
 
         # Color plot based on software tool
@@ -148,7 +134,7 @@ class PlotDataPoint:
                     mode="markers",
                     text=hover_texts,
                     marker=dict(color=colors, showscale=False),
-                    marker_size=st.session_state[SCATTER_SIZE],
+                    marker_size=scatter_size,
                 )
             ],
             layout_yaxis_range=[min(all_nr_prec) - min(all_nr_prec) * 0.05, max(all_nr_prec) + min(all_nr_prec) * 0.05],

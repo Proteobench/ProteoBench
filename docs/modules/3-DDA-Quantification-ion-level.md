@@ -49,6 +49,21 @@ After upload, you will get a link to the pull request associated with your data.
 
 ## Important Tool-specific settings
 
+### AlphaPept
+1. Load folder that contains the data files.
+2. Define parameters 
+-> For Match Between runs, please select “Match”
+3. The input files for ProteoBench are "result_peptides.tsv" (peptide identification) and "results.yaml" (parameter files)
+
+### FragPipe
+1. Select the LFQ-MBR workflow (using only 1 enzyme).
+2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
+3. **Make sure contaminants are not added when you add decoys to the database**. 
+4. Upload "combined_ion/modified_peptides.tsv" in order for Proteobench to calculate the ion ratios. Parameter files are not yet implemented in ProteoBench, but we are working on it.
+
+### i2MassChroQ
+-- available soon --
+
 ### MaxQuant
 By default, MaxQuant uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
@@ -62,18 +77,6 @@ Use the raw file names as sample names. In the output, it will automatically rem
 For this module, use the excel exports. Make sure that the “Quantified peptide ions” tab contains the columns "samesets_accessions".
 The "Quantified peptide ions" tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation.
 For public submission, you can upload the same excel export, just make sure to have the tabs "Search settings and infos", "Import and filters", "Quant config". 
-
-### AlphaPept
-1. Load folder that contains the data files.
-2. Define parameters 
--> For Match Between runs, please select “Match”
-3. The input files for ProteoBench are "result_peptides.tsv" (peptide identification) and "results.yaml" (parameter files)
-
-### FragPipe
-1. Select the LFQ-MBR workflow (using only 1 enzyme).
-2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
-3. **Make sure contaminants are not added when you add decoys to the database**. 
-4. Upload "combined_ion/modified_peptides.tsv" in order for Proteobench to calculate the ion ratios. Parameter files are not yet implemented in ProteoBench, but we are working on it.
 
 ### Sage
 

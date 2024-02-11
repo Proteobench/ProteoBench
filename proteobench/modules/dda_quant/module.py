@@ -218,6 +218,7 @@ class Module(ModuleInterface):
             min_peptide_length=user_input["min_peptide_length"],
             max_peptide_length=user_input["max_peptide_length"],
             intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
+            comments=user_input["comments_for_submission"],
         )
 
         result_datapoint.generate_id()
@@ -299,6 +300,9 @@ class Module(ModuleInterface):
 
         # Get quantification data
         intermediate_data_structure = self.generate_intermediate(standard_format, replicate_to_raw, parse_settings)
+
+        print(user_input)
+        input()
 
         current_datapoint = self.generate_datapoint(
             intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec

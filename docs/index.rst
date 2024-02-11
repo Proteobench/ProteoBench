@@ -13,7 +13,7 @@ Overview of ProteoBench
     Changelog <changelog.rst>
 
 
-ProteoBench is an open and collaborative platform for community-curated benchmarks for proteomics 
+`ProteoBench <https://proteobench.cubimed.rub.de/>`_ is an open and collaborative platform for community-curated benchmarks for proteomics 
 data analysis pipelines. Our goal is to allow a continuous, easy, and controlled comparison of 
 proteomics data analysis workflows.
 

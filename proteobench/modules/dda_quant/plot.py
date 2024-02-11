@@ -97,6 +97,7 @@ class PlotDataPoint:
             "FragPipe": "#ff7f0e",
             "WOMBAT": "#7f7f7f",
             "Proline": "#d62728",
+            "i2MassChroQ": "#5ce681", # we may want to change this color
             "Sage": "#f74c00",
             "Custom": "#9467bd",
         }

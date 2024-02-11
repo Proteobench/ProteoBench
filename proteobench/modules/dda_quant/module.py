@@ -267,6 +267,7 @@ class Module(ModuleInterface):
             input_data_frame["proforma"] = input_data_frame["ProForma"]
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["Modified sequence"]
 
         return input_data_frame
 

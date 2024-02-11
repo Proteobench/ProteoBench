@@ -10,6 +10,7 @@ from streamlit_plotly_events import plotly_events
 TABLE_DATA = "table_data"
 TABLE_DF = "table_df"
 SCATTER_SIZE = "scatter_size"
+st.session_state[SCATTER_SIZE] = {}
 
 
 def handle_click(trace, points, state):

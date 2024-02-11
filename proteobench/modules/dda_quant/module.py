@@ -264,6 +264,7 @@ class Module(ModuleInterface):
             )
         elif input_format == "i2MassChroQ":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["ProForma"]
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 

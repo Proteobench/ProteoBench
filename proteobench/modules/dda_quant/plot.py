@@ -111,9 +111,14 @@ class PlotDataPoint:
             + f"Enzyme: {benchmark_metrics_df.enzyme[idx]} <br>"
             + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
             + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
-            + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}"
+            + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
+
+        if "comments" in benchmark_metrics_df.columns:
+            hover_texts = [
+                v + f"Comment: {c[0:75]}" for v, c in zip(hover_texts, benchmark_metrics_df.comments.fillna(""))
+            ]
 
         scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
         if "Highlight" in benchmark_metrics_df.columns:

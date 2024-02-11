@@ -71,6 +71,11 @@ class StreamlitUI:
         self._sidebar()
 
     def generate_input_field(self, input_format: str, content: dict):
+        if content["type"] == "text_area":
+            if "placeholder" in content:
+                return st.text_area(content["label"], placeholder=content["placeholder"], height=content["height"])
+            elif "value" in content:
+                return st.text_area(content["label"], content["value"][input_format], height=content["height"])
         if content["type"] == "text_input":
             if "placeholder" in content:
                 return st.text_input(content["label"], placeholder=content["placeholder"])
@@ -198,6 +203,7 @@ class StreamlitUI:
                     config = json.load(file)
 
                 for key, value in config.items():
+                    print(key, value)
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
             st.markdown(
@@ -310,6 +316,8 @@ class StreamlitUI:
                 default_val_slider = st.session_state[st.session_state["slider_id"]]
             else:
                 default_val_slider = DEFAULT_VAL_SLIDER
+
+            print(self.user_input)
             result_performance, all_datapoints, input_df = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],

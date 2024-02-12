@@ -203,7 +203,6 @@ class StreamlitUI:
                     config = json.load(file)
 
                 for key, value in config.items():
-                    print(key, value)
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
             st.markdown(
@@ -317,7 +316,6 @@ class StreamlitUI:
             else:
                 default_val_slider = DEFAULT_VAL_SLIDER
 
-            print(self.user_input)
             result_performance, all_datapoints, input_df = Module().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],

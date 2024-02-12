@@ -34,6 +34,10 @@ from proteobench.modules.interfaces import ModuleInterface
 class Module(ModuleInterface):
     """Object is used as a main interface with the Proteobench library within the module."""
 
+    def __init__(self):
+        self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
+        self.precursor_name = PRECURSOR_NAME
+
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
         return True
@@ -59,7 +63,7 @@ class Module(ModuleInterface):
     ) -> pd.DataFrame:
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
-        relevant_columns_df = filtered_df[["Raw file", PRECURSOR_NAME, "Intensity"]].copy()
+        relevant_columns_df = filtered_df[["Raw file", self.precursor_name, "Intensity"]].copy()
         replicate_to_raw_df = Module.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
@@ -68,14 +72,14 @@ class Module(ModuleInterface):
         quant_df = Module.compute_group_stats(
             relevant_columns_df,
             min_intensity=0,
-            precursor=PRECURSOR_NAME,
+            precursor=self.precursor_name,
         )
 
         species_prec_ion = list(parse_settings.species_dict.values())
-        species_prec_ion.append(PRECURSOR_NAME)
+        species_prec_ion.append(self.precursor_name)
         prec_ion_to_species = filtered_df[species_prec_ion].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
-        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=PRECURSOR_NAME, how="inner")
+        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_name, how="inner")
         species_expected_ratio = parse_settings.species_expected_ratio
         res = Module.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res
@@ -84,7 +88,7 @@ class Module(ModuleInterface):
     def compute_group_stats(
         relevant_columns_df: pd.DataFrame,
         min_intensity=0,
-        precursor=PRECURSOR_NAME,
+        precursor="precursor ion",
     ) -> pd.DataFrame:
         """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
 
@@ -274,7 +278,7 @@ class Module(ModuleInterface):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-            all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+            all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
 
         all_datapoints["old_new"] = "old"
         all_datapoints = all_datapoints.T
@@ -288,7 +292,7 @@ class Module(ModuleInterface):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-            all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+            all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
 
         all_datapoints["old_new"] = "old"
 

@@ -15,13 +15,13 @@ from proteobench.modules.dda_quant_base.datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.modules.dda_quant_base.module import Module
 from proteobench.modules.dda_quant_base.parse_settings import (
     INPUT_FORMATS,
     LOCAL_DEVELOPMENT,
     ParseSettings,
 )
 from proteobench.modules.dda_quant_base.plot import PlotDataPoint
+from proteobench.modules.dda_quant_peptidoform.module import PeptidoformModule
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +239,7 @@ class StreamlitUI:
         if ALL_DATAPOINTS not in st.session_state or FIRST_NEW_PLOT == True:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
-            all_datapoints = Module().obtain_all_data_point(all_datapoints)
+            all_datapoints = PeptidoformModule().obtain_all_data_point(all_datapoints)
 
             all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
                 filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
@@ -316,13 +316,16 @@ class StreamlitUI:
             else:
                 default_val_slider = DEFAULT_VAL_SLIDER
 
-            result_performance, all_datapoints, input_df = Module().benchmarking(
+            result_performance, all_datapoints, input_df = PeptidoformModule().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
                 st.session_state[ALL_DATAPOINTS],
                 default_cutoff_min_prec=default_val_slider,
             )
+
+            print(result_performance)
+            input()
 
             st.session_state[ALL_DATAPOINTS] = all_datapoints
 
@@ -610,7 +613,9 @@ class StreamlitUI:
         params = None
         if self.user_input[META_DATA]:
             try:
-                params = Module().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
+                params = PeptidoformModule().load_params_file(
+                    self.user_input[META_DATA], self.user_input["input_format"]
+                )
             except KeyError as e:
                 st.error("Parsing of meta parameters file for this software is not supported yet.")
             except Exception as err:
@@ -634,17 +639,17 @@ class StreamlitUI:
                 st.session_state[SUBMIT] = True
                 user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
-                    pr_url = Module().clone_pr(
+                    pr_url = PeptidoformModule().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
                         params,
                         st.secrets["gh"]["token"],
                         username="Proteobot",
-                        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                        remote_git="github.com/Proteobot/Results_quant_peptidoform_DDA.git",
                         branch_name="new_branch",
                         submission_comments=user_comments,
                     )
                 else:
-                    DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
+                    DDA_QUANT_RESULTS_PATH = PeptidoformModule().write_json_local_development(
                         st.session_state[ALL_DATAPOINTS], params
                     )
 
@@ -654,7 +659,7 @@ class StreamlitUI:
                     id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
 
                     if "storage" in st.secrets.keys():
-                        Module().write_intermediate_raw(
+                        PeptidoformModule().write_intermediate_raw(
                             st.secrets["storage"]["dir"],
                             id,
                             input_df,

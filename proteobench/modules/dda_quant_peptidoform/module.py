@@ -18,21 +18,21 @@ from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
-from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import (
+from proteobench.modules.dda_quant_base.datapoint import Datapoint
+from proteobench.modules.dda_quant_base.module import Module
+from proteobench.modules.dda_quant_peptidoform.parse import (
     ParseInputs,
     aggregate_modification_column,
 )
-from proteobench.modules.dda_quant.parse_settings import (
+from proteobench.modules.dda_quant_peptidoform.parse_settings import (
     DDA_QUANT_RESULTS_PATH,
     DDA_QUANT_RESULTS_REPO,
     PRECURSOR_NAME,
     ParseSettings,
 )
-from proteobench.modules.interfaces import ModuleInterface
 
 
-class Module(ModuleInterface):
+class PeptidoformModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def is_implemented(self) -> bool:
@@ -347,7 +347,7 @@ class Module(ModuleInterface):
         datapoint_params,
         token,
         username="Proteobot",
-        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+        remote_git="github.com/Proteobot/Results_quant_peptidoform_DDA.git",
         branch_name="new_branch",
         submission_comments="no comments",
     ):

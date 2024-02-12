@@ -50,7 +50,7 @@ DDA_QUANT_RESULTS_PATH = (
 
 PRECURSOR_NAME = "precursor ion"
 
-DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
+DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_quant_ion_DDA.git"
 
 
 class ParseSettings:

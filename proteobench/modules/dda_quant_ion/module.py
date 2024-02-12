@@ -9,11 +9,19 @@ from proteobench.io.params.proline import extract_params as extract_params_proli
 from proteobench.modules.dda_quant_base.module import Module
 from proteobench.modules.dda_quant_base.parse import aggregate_modification_column
 from proteobench.modules.dda_quant_ion.parse import ParseInputs
-from proteobench.modules.dda_quant_ion.parse_settings import ParseSettings
+from proteobench.modules.dda_quant_ion.parse_settings import (
+    DDA_QUANT_RESULTS_REPO,
+    PRECURSOR_NAME,
+    ParseSettings,
+)
 
 
 class IonModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
+
+    def __init__(self):
+        self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
+        self.precursor_name = PRECURSOR_NAME
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""

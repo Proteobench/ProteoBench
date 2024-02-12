@@ -1,7 +1,8 @@
 [mapper]
 "Proteins" = "Proteins"
-Sequence = "Sequence"
-Charge = "Charge"
+"Sequence" = "Sequence"
+"Charge" = "Charge"
+"Modified sequence" = "Modified sequence"
 
 
 [condition_mapper]

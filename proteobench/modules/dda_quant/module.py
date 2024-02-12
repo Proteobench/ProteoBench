@@ -201,6 +201,10 @@ class Module(ModuleInterface):
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
+
+        if "comments_for_submission" not in user_input.keys():
+            user_input["comments_for_submission"] = ""
+
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
@@ -218,6 +222,7 @@ class Module(ModuleInterface):
             min_peptide_length=user_input["min_peptide_length"],
             max_peptide_length=user_input["max_peptide_length"],
             intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
+            comments=user_input["comments_for_submission"],
         )
 
         result_datapoint.generate_id()
@@ -257,8 +262,12 @@ class Module(ModuleInterface):
                 lambda x: aggregate_modification_column(x.sequence, x.modifications),
                 axis=1,
             )
+        elif input_format == "i2MassChroQ":
+            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["ProForma"]
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["Modified sequence"]
 
         return input_data_frame
 
@@ -349,6 +358,7 @@ class Module(ModuleInterface):
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
             current_datapoint[k] = v
+        current_datapoint["submission_comments"] = submission_comments
 
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 

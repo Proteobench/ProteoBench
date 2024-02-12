@@ -3,5 +3,5 @@ path = "Home.py"
 name = "Home"
 
 [[pages]]
-path = "pages/DDA_Quant.py"
+path = "pages/DDA_Quant_ion.py"
 name = "DDA Quant Ion Level -BETA-"

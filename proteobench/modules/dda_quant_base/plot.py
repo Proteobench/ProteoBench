@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import streamlit as st
-from streamlit_plotly_events import plotly_events
 
 
 # ! This class does not use any instance attributes.
@@ -22,7 +20,8 @@ class PlotDataPoint:
             result_df,
             x=result_df["log2_A_vs_B"],
             color="kind",
-            marginal="rug",
+            # Turned of marginal as it slows the interface considerably
+            # marginal="rug",
             histnorm="probability density",
             barmode="overlay",
             opacity=0.7,
@@ -65,7 +64,22 @@ class PlotDataPoint:
         return fig
 
     @staticmethod
-    def plot_metric(benchmark_metrics_df: pd.DataFrame) -> go.Figure:
+    def plot_metric(
+        benchmark_metrics_df: pd.DataFrame,
+        reinitialize_table: bool = False,
+        software_colors: dict = {
+            "MaxQuant": "#1f77b4",
+            "AlphaPept": "#2ca02c",
+            "FragPipe": "#ff7f0e",
+            "WOMBAT": "#7f7f7f",
+            "Proline": "#d62728",
+            "Sage": "#f74c00",
+            "i2MassChroQ": "#5ce681",
+            "Custom": "#9467bd",
+        },
+        mapping={"old": 10, "new": 20},
+        highlight_color: str = "#d30067",
+    ) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
 
@@ -78,20 +92,10 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
-
-        # Define search colors for each search engine
-        software_colors = {
-            "MaxQuant": "#1f77b4",
-            "AlphaPept": "#2ca02c",
-            "FragPipe": "#ff7f0e",
-            "WOMBAT": "#7f7f7f",
-            "Proline": "#d62728",
-            "Sage": "#f74c00",
-            "Custom": "#9467bd",
-        }
-
-        # Color plot based on software tool
-        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        all_median_abs_epsilon = [
+            v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
+        ]
+        all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text
         hover_texts = [
@@ -105,11 +109,29 @@ class PlotDataPoint:
             + f"Enzyme: {benchmark_metrics_df.enzyme[idx]} <br>"
             + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
             + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
-            + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}"
-            for idx, row in benchmark_metrics_df.iterrows()
+            + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
+            for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
-        mapping = {"old": 10, "new": 20}
+        if "comments" in benchmark_metrics_df.columns:
+            hover_texts = [
+                v + f"Comment: {c[0:75]}" for v, c in zip(hover_texts, benchmark_metrics_df.comments.fillna(""))
+            ]
+
+        scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
+        if "Highlight" in benchmark_metrics_df.columns:
+            scatter_size = [
+                item * 2 if highlight else item
+                for item, highlight in zip(scatter_size, benchmark_metrics_df["Highlight"])
+            ]
+
+        # Color plot based on software tool
+        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        if "Highlight" in benchmark_metrics_df.columns:
+            colors = [
+                highlight_color if highlight else item
+                for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
+            ]
 
         fig = go.Figure(
             data=[
@@ -118,14 +140,18 @@ class PlotDataPoint:
                     y=benchmark_metrics_df["nr_prec"],
                     mode="markers",
                     text=hover_texts,
-                    marker=dict(color=colors, showscale=False, size=20),
-                    marker_size=[mapping[item] for item in benchmark_metrics_df["old_new"]],
+                    marker=dict(color=colors, showscale=False),
+                    marker_size=scatter_size,
                 )
-            ]
+            ],
+            layout_yaxis_range=[min(all_nr_prec) - min(all_nr_prec) * 0.05, max(all_nr_prec) + min(all_nr_prec) * 0.05],
+            layout_xaxis_range=[
+                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
+                max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
+            ],
         )
 
         fig.update_layout(
-            # title="Metric",
             width=700,
             height=700,
             xaxis=dict(
@@ -154,12 +180,14 @@ class PlotDataPoint:
             showarrow=False,
         )
 
+        fig.update_layout(clickmode="event+select")
+
         return fig
 
     @staticmethod
     def plot_CV_violinplot(result_df: pd.DataFrame) -> go.Figure:
         # Create a violin plot with median points using plotly.express
-        fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points="all")
+        fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points=False)
         fig.update_layout(
             xaxis_title="Group",
             yaxis_title="CV",

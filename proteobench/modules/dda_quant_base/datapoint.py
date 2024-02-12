@@ -1,9 +1,7 @@
-import json
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 
 
@@ -48,6 +46,7 @@ class Datapoint:
     results: dict = None
     median_abs_epsilon: int = 0
     nr_prec: int = 0
+    comments: str = ""
 
     # TODO do we want to save these values in the json?
     # fixed_mods: [],

@@ -86,16 +86,20 @@ For public submission, you can upload the same excel export, just make sure to h
 
 ### Custom format
 
-You can use the tab-delimited Custom format containing the following columns:
-- Sequence: peptide sequence
-- Proteins: Protein accessions according to fasta file
-- Charge: Charge state of measured peptide
+If you do not use a tool that is compatible with ProteoBench, you can upload a tab-delimited table format containing the following columns:
+
+- Sequence: peptide sequence without the modification(s)
+- Proteins: column containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
+- Charge: Charge state of measured peptide ions
+- Modified sequence: column containing the sequences and the localised modifications in the [ProForma standard](https://www.psidev.info/proforma) format. 
 - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
 - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
 - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
 - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01: Quantitative column sample 4
 - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02: Quantitative column sample 5
 - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+
+the table must not contain non-validated ions. If you have any issue, contact us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
 
 ## toml file description
 

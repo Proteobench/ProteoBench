@@ -55,7 +55,8 @@
             "Proline": "-",
             "i2MassChroQ": "-",
             "WOMBAT": "-",
-            "Sage": "-"
+            "Sage": "-",
+            "Custom": "-"
         },
         "options": [
             "-",
@@ -125,7 +126,8 @@
             "Proline": false,
             "i2MassChroQ": false,
             "WOMBAT": false,
-            "Sage": true
+            "Sage": true,
+            "Custom": false
         }
     },
     "comments_for_submission": {

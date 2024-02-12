@@ -1,7 +1,6 @@
 [mapper]
 "Proteins" = "Proteins"
 "Sequence" = "Sequence"
-"Charge" = "Charge"
 "Modified sequence" = "Modified sequence"
 
 

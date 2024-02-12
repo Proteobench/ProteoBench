@@ -177,9 +177,7 @@ class ParseInputs(ParseInputsInterface):
             )
 
         try:
-            df.loc[df.index, "precursor ion"] = (
-                df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
-            )
+            df.loc[df.index, "precursor ion"] = df.loc[df.index, "proforma"]
         except KeyError:
             raise KeyError(
                 f"Not all columns required for making the ion are available."

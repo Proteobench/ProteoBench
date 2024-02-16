@@ -1,6 +1,6 @@
 [mapper]
-"samesets_accessions" = "Proteins"
-sequence = "Sequence"
+"proteins" = "Proteins"
+"sequence" = "Sequence"
 "modifications" = "Modifications"
 "master_quant_peptide_ion_charge" = "Charge"
 

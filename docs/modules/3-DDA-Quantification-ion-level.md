@@ -73,11 +73,10 @@ In the recent versions of MaxQuant, the default settings work perfectly (`Identi
 Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.
 
 ### Proline
-<!-- Use the raw file names as sample names. In the output, it will automatically remove "LFQ_Orbitrap_". -->
-<!-- For this module, use the excel exports. Make sure that the “Quantified peptide ions” tab contains the columns "samesets_accessions". -->
-<!-- The "Quantified peptide ions" tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation. -->
-<!-- For public submission, you can upload the same excel export, just make sure to have the tabs "Search settings and infos", "Import and filters", "Quant config". -->
--- work in progress --
+Use the raw file names as sample names. In the output, it will automatically remove "LFQ_Orbitrap_".
+For this module, use the excel exports. Make sure that the “Quantified peptide ions” tab contains the columns "samesets_accessions" and "subsets_accessions". The accessions in these two field are combined to determine what species a peptide sequence matches to.
+The "Quantified peptide ions" tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation.
+For public submission, you can upload the same excel export, just make sure to have the tabs "Search settings and infos", "Import and filters", "Quant config".
 
 ### Sage
 

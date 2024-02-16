@@ -1,7 +1,6 @@
 [mapper]
 "Peptide Sequence" = "Sequence"
 Protein = "Proteins"
-Charge = "Charge"
 
 [condition_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 Intensity" = "A"

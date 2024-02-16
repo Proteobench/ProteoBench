@@ -3,7 +3,6 @@
 "Raw file" = "Raw file"
 Proteins = "Proteins"
 "Modified sequence" = "Modified sequence"
-Charge = "Charge"
 
 [condition_mapper]
 LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 = "A"

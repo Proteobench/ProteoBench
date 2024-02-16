@@ -3,7 +3,6 @@
 "rawfile" = "Raw file"
 "proteins" = "Proteins"
 "ProForma" = "Modified sequence"
-"charge" = "Charge"
 "areanorm" = "Intensity"
 
 [condition_mapper]

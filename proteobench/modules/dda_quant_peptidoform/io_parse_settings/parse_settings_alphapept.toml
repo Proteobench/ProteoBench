@@ -3,7 +3,6 @@ sequence_naked = "Sequence"
 shortname = "Raw file"
 protein = "Proteins"
 sequence = "Modified sequence"
-charge = "Charge"
 decoy = "Reverse"
 ms1_int_sum_apex_dn = "Intensity"
 

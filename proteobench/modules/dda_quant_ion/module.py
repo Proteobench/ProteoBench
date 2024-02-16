@@ -3,9 +3,6 @@ from __future__ import annotations
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
-from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
-from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
-from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.modules.dda_quant_base.module import Module
 from proteobench.modules.dda_quant_base.parse import aggregate_modification_column
 from proteobench.modules.dda_quant_ion.parse import ParseInputs
@@ -26,12 +23,6 @@ class IonModule(Module):
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
         return True
-
-    EXTRACT_PARAMS_DICT = {
-        "MaxQuant": extract_params_maxquant,
-        "Proline": extract_params_proline,
-        "AlphaPept": extract_params_alphapept,
-    }
 
     def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
         """Method loads dataframe from a csv depending on its format."""

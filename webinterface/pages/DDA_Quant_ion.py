@@ -610,14 +610,15 @@ class StreamlitUI:
         params = None
         if self.user_input[META_DATA]:
             try:
+                print(self.user_input["input_format"])
                 params = IonModule().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
             except KeyError as e:
                 st.error("Parsing of meta parameters file for this software is not supported yet.")
-            except Exception as err:
-                input_f = self.user_input["input_format"]
-                st.error(
-                    f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
-                )
+            # except Exception as err:
+            #    input_f = self.user_input["input_format"]
+            #    st.error(
+            #        f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
+            #    )
 
         if st.session_state[CHECK_SUBMISSION] and params != None:
             st.session_state["submission_ready"] = True

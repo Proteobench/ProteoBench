@@ -2,7 +2,6 @@
 "samesets_accessions" = "Proteins"
 sequence = "Sequence"
 "modifications" = "Modifications"
-"master_quant_peptide_ion_charge" = "Charge"
 
 
 [condition_mapper]

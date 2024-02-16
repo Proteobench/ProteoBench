@@ -18,6 +18,7 @@ from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
+from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.modules.dda_quant_base.datapoint import Datapoint
 from proteobench.modules.dda_quant_base.parse import (
     ParseInputs,
@@ -46,6 +47,7 @@ class Module(ModuleInterface):
         "MaxQuant": extract_params_maxquant,
         "Proline": extract_params_proline,
         "AlphaPept": extract_params_alphapept,
+        "Sage": extract_params_sage,
     }
 
     @staticmethod
@@ -430,6 +432,7 @@ class Module(ModuleInterface):
 
     def load_params_file(self, input_file: str, input_format: str) -> ProteoBenchParameters:
         """Method loads parameters from a metadata file depending on its format."""
+        print(self.EXTRACT_PARAMS_DICT)
         params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
         params.software_name = input_format
         return params

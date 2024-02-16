@@ -4,12 +4,12 @@
 "charge" = "Charge"
 
 [condition_mapper]
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML" = "A"
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mzML" = "A"
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.mzML" = "A"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.mzML" = "B"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.mzML" = "B"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mzML" = "B"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML.gz" = "A"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mzML.gz" = "A"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.mzML.gz" = "A"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.mzML.gz" = "B"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.mzML.gz" = "B"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mzML.gz" = "B"
 
 [run_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML" = "Condition_A_Sample_Alpha_01"

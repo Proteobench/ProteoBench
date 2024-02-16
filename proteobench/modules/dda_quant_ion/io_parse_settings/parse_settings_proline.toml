@@ -1,6 +1,6 @@
 [mapper]
-"samesets_accessions" = "Proteins"
-sequence = "Sequence"
+"proteins" = "Proteins" # from the intermediate file where "proteins" will contain the concatenation of all accessions from "samesets_accessions" and "subsets_accessions" reported for every ion in Proline input.
+"sequence" = "Sequence"
 "modifications" = "Modifications"
 "master_quant_peptide_ion_charge" = "Charge"
 

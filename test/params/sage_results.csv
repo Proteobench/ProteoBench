@@ -1,0 +1,20 @@
+,0
+software_name,SAGE
+software_version,
+search_engine,SAGE
+search_engine_version,0.14.6
+ident_fdr_psm,
+ident_fdr_peptide,
+ident_fdr_protein,
+enable_match_between_runs,True
+precursor_mass_tolerance,"[-20.0, 20.0]"
+fragment_mass_tolerance,"[-10.0, 10.0]"
+enzyme,KR
+allowed_miscleavages,1
+min_peptide_length,50
+max_peptide_length,
+fixed_mods,{'C': 57.0215}
+variable_mods,"{'$': [49.2, 22.9], '^Q': [-17.026548], '[': [42.0], ']': [111.0], '^E': [-18.010565], 'M': [15.9949]}"
+max_mods,1
+min_precursor_charge,2
+max_precursor_charge,4

@@ -1,4 +1,5 @@
 """ All formats available for the module """
+
 from __future__ import annotations
 
 import os
@@ -43,13 +44,11 @@ LOCAL_DEVELOPMENT = False
 
 # For local development change below to the json and path,
 # if you do not want to download it from github
-DDA_QUANT_RESULTS_PATH = (
-    "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json"  # e.g., K:/results.json
-)
+DDA_QUANT_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_quant_peptidoform_DDA/main/results.json"  # e.g., K:/results.json
 
 PRECURSOR_NAME = "precursor ion"
 
-DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
+DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_quant_peptidoform_DDA.git"
 
 
 class ParseSettings:

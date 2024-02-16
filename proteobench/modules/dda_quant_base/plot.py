@@ -1,11 +1,7 @@
-import uuid
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import streamlit as st
-from streamlit_plotly_events import plotly_events
 
 
 # ! This class does not use any instance attributes.

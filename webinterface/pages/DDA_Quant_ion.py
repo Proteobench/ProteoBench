@@ -11,17 +11,17 @@ import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.modules.dda_quant.datapoint import (
+from proteobench.modules.dda_quant_base.datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.modules.dda_quant.module import Module
-from proteobench.modules.dda_quant.parse_settings import (
+from proteobench.modules.dda_quant_base.parse_settings import (
     INPUT_FORMATS,
     LOCAL_DEVELOPMENT,
     ParseSettings,
 )
-from proteobench.modules.dda_quant.plot import PlotDataPoint
+from proteobench.modules.dda_quant_base.plot import PlotDataPoint
+from proteobench.modules.dda_quant_ion.module import IonModule
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +239,7 @@ class StreamlitUI:
         if ALL_DATAPOINTS not in st.session_state or FIRST_NEW_PLOT == True:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
-            all_datapoints = Module().obtain_all_data_point(all_datapoints)
+            all_datapoints = IonModule().obtain_all_data_point(all_datapoints)
 
             all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
                 filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
@@ -316,7 +316,7 @@ class StreamlitUI:
             else:
                 default_val_slider = DEFAULT_VAL_SLIDER
 
-            result_performance, all_datapoints, input_df = Module().benchmarking(
+            result_performance, all_datapoints, input_df = IonModule().benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
@@ -610,14 +610,15 @@ class StreamlitUI:
         params = None
         if self.user_input[META_DATA]:
             try:
-                params = Module().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
+                print(self.user_input["input_format"])
+                params = IonModule().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
             except KeyError as e:
                 st.error("Parsing of meta parameters file for this software is not supported yet.")
-            except Exception as err:
-                input_f = self.user_input["input_format"]
-                st.error(
-                    f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
-                )
+            # except Exception as err:
+            #    input_f = self.user_input["input_format"]
+            #    st.error(
+            #        f"Unexpected error while parsing file. Make sure you privded a meta parameters file produced by {input_f}."
+            #    )
 
         if st.session_state[CHECK_SUBMISSION] and params != None:
             st.session_state["submission_ready"] = True
@@ -634,7 +635,7 @@ class StreamlitUI:
                 st.session_state[SUBMIT] = True
                 user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
-                    pr_url = Module().clone_pr(
+                    pr_url = IonModule().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
                         params,
                         st.secrets["gh"]["token"],
@@ -644,7 +645,7 @@ class StreamlitUI:
                         submission_comments=user_comments,
                     )
                 else:
-                    DDA_QUANT_RESULTS_PATH = Module().write_json_local_development(
+                    DDA_QUANT_RESULTS_PATH = IonModule().write_json_local_development(
                         st.session_state[ALL_DATAPOINTS], params
                     )
 
@@ -654,7 +655,7 @@ class StreamlitUI:
                     id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
 
                     if "storage" in st.secrets.keys():
-                        Module().write_intermediate_raw(
+                        IonModule().write_intermediate_raw(
                             st.secrets["storage"]["dir"],
                             id,
                             input_df,
@@ -681,7 +682,7 @@ class StreamlitUI:
         FIRST_NEW_PLOT = False
 
     def plots_for_current_data(self, result_performance, recalculate, FIRST_NEW_PLOT, slider_value):
-        # filter result_performance datafremae on nr_observed column
+        # filter result_performance dataframe on nr_observed column
         result_performance = result_performance[result_performance["nr_observed"] >= slider_value]
 
         if recalculate:

@@ -6,15 +6,14 @@ import numpy as np
 import pandas as pd
 
 from proteobench.github.gh import read_results_json_repo
-from proteobench.modules.dda_quant.module import Datapoint, Module
-from proteobench.modules.dda_quant.parse import ParseInputs
-from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
+from proteobench.modules.dda_quant_base.module import Datapoint, Module
+from proteobench.modules.dda_quant_base.parse import ParseInputs
+from proteobench.modules.dda_quant_base.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     INPUT_FORMATS,
     ParseSettings,
 )
-from proteobench.modules.dda_quant.plot import PlotDataPoint
+from proteobench.modules.dda_quant_base.plot import PlotDataPoint
 
 # genereate_input_field
 

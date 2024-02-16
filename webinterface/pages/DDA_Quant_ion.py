@@ -248,9 +248,9 @@ class StreamlitUI:
                 filter_df_numquant_nr_prec, min_quant=default_val_slider
             )
 
-            if HIGHLIGHT_LIST not in st.session_state.keys():
+            if HIGHLIGHT_LIST not in st.session_state.keys() and "Highlight" not in all_datapoints.columns:
                 all_datapoints.insert(0, "Highlight", [False] * len(all_datapoints.index))
-            else:
+            elif "Highlight" not in all_datapoints.columns:
                 all_datapoints.insert(0, "Highlight", st.session_state[HIGHLIGHT_LIST])
 
             st.markdown(
@@ -635,8 +635,12 @@ class StreamlitUI:
                 st.session_state[SUBMIT] = True
                 user_comments = self.user_input["comments_for_submission"]
                 if not LOCAL_DEVELOPMENT:
+                    submit_df = st.session_state[ALL_DATAPOINTS]
+                    if "Highlight" in submit_df.columns:
+                        submit_df.drop("Highlight", inplace=True)
+
                     pr_url = IonModule().clone_pr(
-                        st.session_state[ALL_DATAPOINTS],
+                        submit_df,
                         params,
                         st.secrets["gh"]["token"],
                         username="Proteobot",

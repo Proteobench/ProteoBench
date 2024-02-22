@@ -1,3 +1,3 @@
 """ProteoBench"""
 
-__version__ = "0.2.2-beta"
+__version__ = "0.2.3-beta"

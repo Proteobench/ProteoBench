@@ -47,12 +47,22 @@ class ParseInputs(ParseInputsInterface):
         # If there is "Raw file" then it is a long format, otherwise short format
         if "Raw file" not in parse_settings.mapper.values():
             meltvars = parse_settings.condition_mapper.keys()
-            df = df.melt(
-                id_vars=list(set(df.columns).difference(set(meltvars))),
-                value_vars=meltvars,
-                var_name="Raw file",
-                value_name="Intensity",
-            )
+            # Should be handled more elegant
+            try:
+                df = df.melt(
+                    id_vars=list(set(df.columns).difference(set(meltvars))),
+                    value_vars=meltvars,
+                    var_name="Raw file",
+                    value_name="Intensity",
+                )
+            except KeyError:
+                df.columns = [c.replace(".mzML", ".mzML.gz") for c in df.columns]
+                df = df.melt(
+                    id_vars=list(set(df.columns).difference(set(meltvars))),
+                    value_vars=meltvars,
+                    var_name="Raw file",
+                    value_name="Intensity",
+                )
 
         df["replicate"] = df["Raw file"].map(parse_settings.condition_mapper)
         df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)

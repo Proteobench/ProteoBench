@@ -637,7 +637,11 @@ class StreamlitUI:
                 if not LOCAL_DEVELOPMENT:
                     submit_df = st.session_state[ALL_DATAPOINTS]
                     if "Highlight" in submit_df.columns:
-                        submit_df.drop("Highlight", inplace=True)
+                        # TODO it seems that pandas trips over this sometime, even though it is present...
+                        try:
+                            submit_df.drop("Highlight", inplace=True, axis=1)
+                        except:
+                            pass
 
                     pr_url = IonModule().clone_pr(
                         submit_df,

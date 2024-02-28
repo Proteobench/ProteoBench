@@ -73,7 +73,7 @@ class PlotDataPoint:
             "FragPipe": "#ff7f0e",
             "WOMBAT": "#7f7f7f",
             "Proline": "#d62728",
-            "Sage": "#f74c00",
+            "Sage": "#80ffe5",
             "i2MassChroQ": "#5ce681",
             "Custom": "#9467bd",
         },

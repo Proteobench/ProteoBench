@@ -32,12 +32,14 @@ class PeptidoformModule(Module):
 
         if input_format == "MaxQuant":
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
+            input_data_frame["proforma"] = input_data_frame["Sequence"]
         elif input_format == "AlphaPept":
             input_data_frame = pd.read_csv(input_csv, low_memory=False)
         elif input_format == "Sage":
             input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
         elif input_format == "FragPipe":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["Peptide Sequence"]
         elif input_format == "WOMBAT":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
             input_data_frame["proforma"] = input_data_frame["modified_peptide"]

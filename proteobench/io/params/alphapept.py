@@ -1,4 +1,5 @@
 """Alphapept uses the yaml format to save configuration."""
+
 import pathlib
 
 import pandas as pd
@@ -8,8 +9,12 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(fname) -> ProteoBenchParameters:
-    with open(fname) as f:
-        record = yaml.safe_load(f)
+    try:
+        record = yaml.safe_load(fname.read().decode("utf-8"))
+    except:
+        with open(fname) as f:
+            record = yaml.safe_load(f)
+
     summary = record["summary"]
     params = ProteoBenchParameters()
     params.software_name = "AlphaPept"

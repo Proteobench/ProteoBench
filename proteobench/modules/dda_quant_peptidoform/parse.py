@@ -155,6 +155,7 @@ class ParseInputs(ParseInputsInterface):
 
         # If there is "Raw file" then it is a long format, otherwise short format
         if "Raw file" not in parse_settings.mapper.values():
+
             meltvars = parse_settings.condition_mapper.keys()
             df = df.melt(
                 id_vars=list(set(df.columns).difference(set(meltvars))),
@@ -177,7 +178,7 @@ class ParseInputs(ParseInputsInterface):
             )
 
         try:
-            df.loc[df.index, "precursor ion"] = df.loc[df.index, "proforma"]
+            df.loc[df.index, "peptidoform"] = df.loc[df.index, "proforma"]
         except KeyError:
             raise KeyError(
                 f"Not all columns required for making the ion are available."

@@ -36,6 +36,7 @@ class ParseInputs(ParseInputsInterface):
             df = df[df["Reverse"] != parse_settings.decoy_flag]
 
         df["contaminant"] = df["Proteins"].str.contains(parse_settings.contaminant_flag)
+
         for flag, species in parse_settings.species_dict.items():
             df[species] = df["Proteins"].str.contains(flag)
         df["MULTI_SPEC"] = (

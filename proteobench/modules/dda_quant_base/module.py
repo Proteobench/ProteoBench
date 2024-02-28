@@ -379,7 +379,7 @@ class Module(ModuleInterface):
         all_datapoints.to_json(f, orient="records", indent=2)
 
         f.close()
-        commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
+        commit_message = f"Added new run with id {branch_name}"
 
         pr_id = pr_github(
             clone_dir=t_dir,

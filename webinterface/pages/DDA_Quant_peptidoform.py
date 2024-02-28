@@ -324,9 +324,6 @@ class StreamlitUI:
                 default_cutoff_min_prec=default_val_slider,
             )
 
-            print(result_performance)
-            input()
-
             st.session_state[ALL_DATAPOINTS] = all_datapoints
 
             if "Highlight" not in st.session_state[ALL_DATAPOINTS].columns:

@@ -7,18 +7,18 @@ import pandas as pd
 
 from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant_base.module import Datapoint, Module
-from proteobench.modules.dda_quant_base.parse import ParseInputs
-from proteobench.modules.dda_quant_base.parse_settings import (
+from proteobench.modules.dda_quant_base.plot import PlotDataPoint
+from proteobench.modules.dda_quant_ion.parse import ParseInputs
+from proteobench.modules.dda_quant_ion.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     INPUT_FORMATS,
     ParseSettings,
 )
-from proteobench.modules.dda_quant_base.plot import PlotDataPoint
 
 # genereate_input_field
 
 
-TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data", "dda_quant_ion")
 TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
@@ -122,7 +122,7 @@ class TestOutputFileReading(unittest.TestCase):
             "max_peptide_length": 30,
         }
         result_performance, all_datapoints, input_df = Module().benchmarking(
-            TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None
+            TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None, parse_settings=ParseSettings("MaxQuant")
         )
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
         self.assertEqual(len(all_datapoints.results[len(all_datapoints.results) - 1]), 6)

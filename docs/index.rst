@@ -85,6 +85,11 @@ People who contributed to ProteoBench (in alphabetical order)
     *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
 
+.. line-block::
+    **Julian Uszkoreit**
+    *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
+
+
 
 
 

@@ -10,6 +10,7 @@ Marie Locard-Paulet
 
 
 
-
+--------
+*If you want your name to be removed from this list, please send an email [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query) 
 
 

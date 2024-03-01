@@ -75,6 +75,11 @@ People who contributed to ProteoBench (in alphabetical order)
     **Robbin Bouwmeester**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block:: 
+    **Caroline Lennartsson**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
 .. line-block::
     **Marie Locard-Paulet**
     *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*

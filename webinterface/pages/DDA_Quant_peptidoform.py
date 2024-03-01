@@ -100,7 +100,7 @@ class StreamlitUI:
 
     def _main_page(self):
         """Format main page."""
-        st.title("DDA quantification - precursor ions")
+        st.title("DDA quantification - peptidoforms")
         st.warning(
             "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
         )
@@ -116,7 +116,7 @@ class StreamlitUI:
                     ratios (condition A and condition B), with three replicates of each
                     condition. With these samples, we calculate three metrics:
                     - To estimate the sensitivity of the workflows, we report the
-                    number of unique precursors (charged modified sequence) quantified
+                    number of unique peptidoforms (modified sequence) quantified
                     in a minimum of 1 to 6 runs.
                     - To estimate the accuracy of the workflows, we report the mean 
                     absolute difference between measured and expected log2-transformed 
@@ -126,7 +126,13 @@ class StreamlitUI:
                      from different tools, with different versions, and/or different
                     sets of parameters for the search and quantification.
                     The full description of the pre-processing steps and metrics
-                    calculation is available [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/).
+                    calculation is available [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-peptidoforms/).
+
+                    This module is very similar to the module `DDA quantification - precursor ions` 
+                    ("DDA Quant Ion Level" on the side bar). Both have the same raw files 
+                    and fasta file. It is thus possible to compare the performances of the 
+                    same workflow (with the same parameters) before and after peptide ion 
+                    aggregation. 
                     """
         )
         st.header("Downloading associated files")
@@ -395,7 +401,7 @@ class StreamlitUI:
             st.markdown(
                 """
                     Here are the data from your benchmark run. The table contains the 
-                    precursor ion MS signal calculated from your input data. You can download 
+                    peptidoforms MS signal calculated from your input data. You can download 
                     this table from `Download calculated ratios` below.
                         """
             )
@@ -413,7 +419,7 @@ class StreamlitUI:
                 """
                     It contains the following columns:
 
-                    - precursor ion = concatenation of the modified sequence en charge
+                    - peptidoform = modified sequence
                     - mean log2-transformed intensities for condition A and B
                     - standard deviations calculated for the log2-transformed values in condition A and B
                     - mean intensity for condition A and B

@@ -127,6 +127,12 @@ class StreamlitUI:
                     sets of parameters for the search and quantification.
                     The full description of the pre-processing steps and metrics
                     calculation is available [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/).
+
+                    This module is very similar to the module `DDA quantification - peptidoforms` 
+                    ("DDA Quant Peptidoform Level" on the side bar). Both have the same raw files 
+                    and fasta file. It is thus possible to compare the performances of the 
+                    same workflow (with the same parameters) before and after peptide ion 
+                    aggregation. 
                     """
         )
         st.header("Downloading associated files")
@@ -413,7 +419,7 @@ class StreamlitUI:
                 """
                     It contains the following columns:
 
-                    - precursor ion = concatenation of the modified sequence en charge
+                    - precursor ion = concatenation of the modified sequence and charge
                     - mean log2-transformed intensities for condition A and B
                     - standard deviations calculated for the log2-transformed values in condition A and B
                     - mean intensity for condition A and B

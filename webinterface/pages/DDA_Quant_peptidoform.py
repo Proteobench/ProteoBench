@@ -4,6 +4,7 @@ import json
 import logging
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -106,64 +107,15 @@ class StreamlitUI:
         )
         st.header("Description of the module")
         st.markdown(
-            """
-                    This module compares the MS1-level quantification tools for
-                    data-dependent acquisition (DDA). The raw files provided for
-                    this module are presented in the comprehensive LFQ benchmark
-                    dataset from [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6).
-                    The samples contain tryptic peptides from Homo sapiens,
-                    Saccharomyces cerevisiae, and Escherichia coli, mixed in different
-                    ratios (condition A and condition B), with three replicates of each
-                    condition. With these samples, we calculate three metrics:
-                    - To estimate the sensitivity of the workflows, we report the
-                    number of unique peptidoforms (modified sequence) quantified
-                    in a minimum of 1 to 6 runs.
-                    - To estimate the accuracy of the workflows, we report the mean 
-                    absolute difference between measured and expected log2-transformed 
-                    fold changes between conditions for proteins of the same species.
-
-                    ProteoBench plots these three metrics to visualize workflow outputs
-                     from different tools, with different versions, and/or different
-                    sets of parameters for the search and quantification.
-                    The full description of the pre-processing steps and metrics
-                    calculation is available [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-peptidoforms/).
-
-                    This module is very similar to the module `DDA quantification - precursor ions` 
-                    ("DDA Quant Ion Level" on the side bar). Both have the same raw files 
-                    and fasta file. It is thus possible to compare the performances of the 
-                    same workflow (with the same parameters) before and after peptide ion 
-                    aggregation. 
-                    """
+            Path("pages/markdown_files/dda_quant_peptidoform/module_description.md").read_text()
         )
         st.header("Downloading associated files")
         st.markdown(
-            """
-                    The raw files used for this module were acquired on an Orbitrap
-                    Q-Exactive H-FX (ThermoScientific). They can be downloaded from the
-                    proteomeXchange repository PXD028735. You can download them here:
-
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw),
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw),
-                    [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw),
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw),
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw),
-                    [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
-
-                    **It is imperative not to rename the files once downloaded!**
-                    """
-        )
-        st.markdown(
-            """
-                    Download the zipped FASTA file here: <a href="/app/static/ProteoBenchFASTA_DDAQuantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
-                    The fasta file provided for this module contains the three species
-                    present in the samples and contaminant proteins
-                    ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
-                    """,
-            unsafe_allow_html=True,
+            Path("pages/markdown_files/dda_quant_base/raw_file_download.md").read_text(),
+            unsafe_allow_html=True
         )
 
         st.header("Input and configuration")
-
         st.markdown(
             """
                    Scroll down if you want to see the public benchmark runs publicly available
@@ -174,16 +126,7 @@ class StreamlitUI:
         with st.form(key="main_form"):
             st.subheader("Input files")
             st.markdown(
-                """
-                    Please upload the ouput of your analysis, and indicate what software 
-                    tool it comes from (this is necessary to correctly parse your table - find 
-                    more information in the "[How to use](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)" 
-                    section of this module).
-
-                    Remember: contaminant sequences are already present in the fasta file 
-                    associated to this module. **Do not add other contaminants** to your 
-                    search. This is important when using MaxQuant and FragPipe, among other tools.
-                    """
+                Path("pages/markdown_files/dda_quant_base/input_file_button.md").read_text()
             )
             self.user_input["input_csv"] = st.file_uploader(
                 "Software tool result file", help=self.texts.Help.input_file
@@ -198,11 +141,7 @@ class StreamlitUI:
             #     "NO"
             # )
             st.markdown(
-                """
-                    Additionally, you can fill out some information on the paramters that 
-                    were used for this benchmark run bellow. These will be printed when 
-                    hovering on your point.
-                    """
+                Path("pages/markdown_files/dda_quant_base/input_customParam_button.md").read_text()
             )
             with st.expander("Additional parameters"):
                 with open("../webinterface/configuration/dda_quant.json") as file:
@@ -399,11 +338,7 @@ class StreamlitUI:
             st.header("Results")
             st.subheader("Sample of the processed file")
             st.markdown(
-                """
-                    Here are the data from your benchmark run. The table contains the 
-                    peptidoforms MS signal calculated from your input data. You can download 
-                    this table from `Download calculated ratios` below.
-                        """
+                Path("pages/markdown_files/dda_quant_peptidoform/intermediate_file_description.md").read_text()
             )
         if not recalculate:
             result_performance = st.session_state[RESULT_PERF]
@@ -413,28 +348,7 @@ class StreamlitUI:
             st.session_state[DF_HEAD] = st.dataframe(result_performance.head(100))
         else:
             st.session_state[DF_HEAD] = result_performance.head(100)
-
-        if FIRST_NEW_PLOT:
-            st.markdown(
-                """
-                    It contains the following columns:
-
-                    - peptidoform = modified sequence
-                    - mean log2-transformed intensities for condition A and B
-                    - standard deviations calculated for the log2-transformed values in condition A and B
-                    - mean intensity for condition A and B
-                    - standard deviations calculated for the intensity values in condition A and B
-                    - coefficient of variation (CV) for condition A and B
-                    - differences of the mean log2-transformed values between condition A and B
-                    - MS signal from the input table ("abundance_DDA_Condition_A_Sample_Alpha_01" to "abundance_DDA_Condition_B_Sample_Alpha_03")
-                    - Count = number of runs with non-missing values
-                    - species the sequence matches to
-                    - unique = TRUE if the sequence is species-specific
-                    - species
-                    - expected ratio for the given species
-                    - epsilon = difference of the observed and expected log2-transformed fold change
-                        """
-            )
+            
 
         if "slider_id" in st.session_state.keys():
             default_val_slider = st.session_state[st.session_state["slider_id"]]
@@ -529,44 +443,7 @@ class StreamlitUI:
 
             st.subheader("Add results to online repository")
             st.markdown(
-                """
-                        **Please make these results available to the entire community!**
-
-                        To do so, you need to provide the parameter file that corresponds to 
-                        your analysis. You can upload it in the drag and drop area below. 
-                        See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
-                        for all compatible parameter files.
-                        In this module, we keep track of the following parameters, if you feel 
-                        that some important information is missing, please add it in the 
-                        `Comments for submission` field. 
-                        - software tool name and version
-                        - search engine name and version
-                        - FDR threshold for PSM, peptide and protein level
-                        - match between run (or not)
-                        - precursor mass tolerance
-                        - enzyme (although for these data it should be Trypsin)
-                        - number of missed-cleavages
-                        - minimum and maximum peptide length
-                        - fixed and variable modifications
-                        - maximum number of modifications
-                        - minimum and maximum precursor charge
-
-                        Once you confirm that the metadata is correct (and corresponds to the 
-                        table you uploaded before generating the plot), a button will appear.
-                        Press it to submit. 
-
-                        **If some parameters are not in your parameter file, it is important that 
-                        you provide them in the "comments" section.**
-
-                        Once submitted, you will see a weblink that will prompt you to a 
-                        pull request on the github repository of the module. Please write down
-                        its number to keep track of your submission. If it looks good, one of 
-                        us will accept it and make your data public. 
-
-                        Please contact us if you have any issue. To do so, you can create an 
-                        [issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
-                        github, or [send us an email](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
-                        """
+                Path("pages/markdown_files/dda_quant_base/make_results_public.md").read_text()
             )
         st.session_state[FIG_LOGFC] = fig_logfc
         st.session_state[FIG_METRIC] = fig_metric
@@ -735,30 +612,19 @@ class WebpageTexts:
             """
 
     class Help:
-        input_file = """
-            Output file of the software tool. More information on the accepted format can 
-            be found [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
-            """
+        input_file = Path("pages/markdown_files/dda_quant_peptidoform/help_input.md").read_text()
 
         pull_req = """
             It is open to the public indefinitely.
             """
 
-        input_format = """
-            Please select the software you used to generate the results. If it is not yet 
-            implemented in ProteoBench, you can use a tab-delimited format that is described 
-            further [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
-        """
+        input_format = Path("pages/markdown_files/dda_quant_peptidoform/help_implementedTools.md").read_text()
 
         parse_button = """
             Click here to see the output of your benchmark run
         """
 
-        meta_data_file = """
-            Please add a file with meta data that contains all relevant information about 
-            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DDA-Quantification-ion-level/)
-            for all compatible parameter files.
-        """
+        meta_data_file =  Path("pages/markdown_files/dda_quant_peptidoform/help_metadata.md").read_text()
 
 
 if __name__ == "__main__":

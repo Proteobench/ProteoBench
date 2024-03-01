@@ -1,12 +1,12 @@
 
 Here are the data from your benchmark run. The table contains the 
-peptidoforms MS signal calculated from your input data. You can download 
+MS signal of the precursor ions calculated from your input data. You can download 
 this table from `Download calculated ratios` below.
 
 
 It contains the following columns:
 
-- peptidoform = modified sequence
+- precursor ion = modified sequence and charge
 - mean log2-transformed intensities for condition A and B
 - standard deviations calculated for the log2-transformed values in condition A and B
 - mean intensity for condition A and B

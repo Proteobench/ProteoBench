@@ -443,7 +443,7 @@ class StreamlitUI:
 
             st.subheader("Add results to online repository")
             st.markdown(
-                Path("pages/markdown_files/dda_quant_base/make_results_public.md").read_text()
+                Path("pages/markdown_files/dda_quant_peptidoform/make_results_public.md").read_text()
             )
         st.session_state[FIG_LOGFC] = fig_logfc
         st.session_state[FIG_METRIC] = fig_metric

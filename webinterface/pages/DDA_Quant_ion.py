@@ -590,6 +590,7 @@ class StreamlitUI:
                 "Meta data for searches",
                 help=self.texts.Help.meta_data_file,
                 key=meta_file_uploader_uuid,
+                accept_multiple_files=True,
             )
 
             self.user_input["comments_for_submission"] = st.text_area(

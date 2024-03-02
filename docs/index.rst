@@ -89,7 +89,11 @@ People who contributed to ProteoBench (in alphabetical order)
     **Julian Uszkoreit**
     *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
 
+.. line-block::
+    **Tim Van Den Bossche**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
 
-
-
-
+.. line-block::
+    **Bart Van Puyvelde**
+    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*

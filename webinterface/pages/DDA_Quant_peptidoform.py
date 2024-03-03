@@ -10,17 +10,15 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
+from proteobench.modules.dda_quant_peptidoform.parse_settings import ModuleSettings
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.modules.dda_quant_base.datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.modules.dda_quant_base.parse_settings import (
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-    ParseSettings,
-)
+from proteobench.modules.dda_quant_base.parse_settings import ParseSettings
+
 from proteobench.modules.dda_quant_base.plot import PlotDataPoint
 from proteobench.modules.dda_quant_peptidoform.module import PeptidoformModule
 
@@ -133,7 +131,7 @@ class StreamlitUI:
             )
 
             self.user_input["input_format"] = st.selectbox(
-                "Software tool", INPUT_FORMATS, help=self.texts.Help.input_format
+                "Software tool", ParseSettings.module_settings.INPUT_FORMATS, help=self.texts.Help.input_format
             )
 
             # self.user_input["pull_req"] = st.text_input(
@@ -184,7 +182,7 @@ class StreamlitUI:
         if ALL_DATAPOINTS not in st.session_state or FIRST_NEW_PLOT == True:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
-            all_datapoints = PeptidoformModule().obtain_all_data_point(all_datapoints)
+            all_datapoints = PeptidoformModule(ModuleSettings).obtain_all_data_point(all_datapoints)
 
             all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
                 filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
@@ -260,10 +258,11 @@ class StreamlitUI:
                 default_val_slider = st.session_state[st.session_state["slider_id"]]
             else:
                 default_val_slider = DEFAULT_VAL_SLIDER
+            parse_settings = ParseSettings(self.user_input["input_format"])
 
-            result_performance, all_datapoints, input_df = PeptidoformModule().benchmarking(
+            result_performance, all_datapoints, input_df = PeptidoformModule(ModuleSettings).benchmarking(
+                parse_settings,
                 self.user_input["input_csv"],
-                self.user_input["input_format"],
                 self.user_input,
                 st.session_state[ALL_DATAPOINTS],
                 default_cutoff_min_prec=default_val_slider,
@@ -493,7 +492,7 @@ class StreamlitUI:
         params = None
         if self.user_input[META_DATA]:
             try:
-                params = PeptidoformModule().load_params_file(
+                params = PeptidoformModule.load_params_file(
                     self.user_input[META_DATA], self.user_input["input_format"]
                 )
             except KeyError as e:
@@ -539,7 +538,7 @@ class StreamlitUI:
                     id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
 
                     if "storage" in st.secrets.keys():
-                        PeptidoformModule().write_intermediate_raw(
+                        PeptidoformModule.write_intermediate_raw(
                             st.secrets["storage"]["dir"],
                             id,
                             input_df,

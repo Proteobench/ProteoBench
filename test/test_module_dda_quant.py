@@ -9,14 +9,7 @@ from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant_base.module import Datapoint, Module
 from proteobench.modules.dda_quant_base.plot import PlotDataPoint
 from proteobench.modules.dda_quant_ion.parse import ParseInputs
-from proteobench.modules.dda_quant_ion.parse_settings import (
-    DDA_QUANT_RESULTS_REPO,
-    INPUT_FORMATS,
-    ParseSettings,
-)
-
-# genereate_input_field
-
+from proteobench.modules.dda_quant_ion.parse_settings import ParseSettings, ModuleSettings
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data", "dda_quant_ion")
 TESTDATA_FILES = {
@@ -28,16 +21,16 @@ TESTDATA_FILES = {
 }
 
 
-def load_file(format_name: str):
+def load_file(format_name: str, parse_settings):
     """Method used to load the input file of a given format."""
-    input_df = Module().load_input_file(TESTDATA_FILES[format_name], format_name)
+    input_df = Module.load_input_file(TESTDATA_FILES[format_name], format_name)
     return input_df
 
 
 def load__local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
-    input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
+    input_df = load_file(format_name, parse_settings)
     prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
     intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
@@ -46,8 +39,8 @@ def load__local_parsing_configuration_file(format_name: str):
 
 def process_file(format_name: str):
     """Method used to load the input file of a given format."""
-    input_df = load_file(format_name)
     parse_settings = ParseSettings(format_name)
+    input_df = load_file(format_name,parse_settings)
     prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
     intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
@@ -67,12 +60,13 @@ class TestOutputFileReading(unittest.TestCase):
             "Proline",
             "Sage",
         ):  # , "WOMBAT"
-            self.assertTrue(format_name in INPUT_FORMATS)
+            self.assertTrue(format_name in ParseSettings.module_settings.INPUT_FORMATS)
 
     def test_input_file_loading(self):
         """Test whether the inputs input are loaded successfully."""
         for format_name in self.supported_formats:
-            input_df = load_file(format_name)
+            parse_settings = ParseSettings(format_name)
+            input_df = load_file(format_name, parse_settings)
             self.assertFalse(input_df.empty)
 
     def test_local_parsing_configuration_file(self):
@@ -84,9 +78,10 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_input_file_initial_parsing(self):
         """Test the initial parsing of the input file."""
+
         for format_name in self.supported_formats:
-            input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
+            input_df = load_file(format_name, parse_settings)
             prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
             self.assertFalse(prepared_df.empty)
@@ -95,12 +90,12 @@ class TestOutputFileReading(unittest.TestCase):
     def test_input_file_processing(self):
         """Test the processing of the input files."""
         for format_name in self.supported_formats:
-            input_df = load_file(format_name)
             parse_settings = ParseSettings(format_name)
+            input_df = load_file(format_name, parse_settings)
             prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
             # Get quantification data
-            intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
+            intermediate = Module.generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
             self.assertFalse(intermediate.empty)
 
@@ -121,8 +116,10 @@ class TestOutputFileReading(unittest.TestCase):
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
-        result_performance, all_datapoints, input_df = Module().benchmarking(
-            TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None, parse_settings=ParseSettings("MaxQuant")
+        parse_settings = ParseSettings("MaxQuant")
+        module_settings = ModuleSettings()
+        result_performance, all_datapoints, input_df = Module(module_settings).benchmarking(
+            parse_settings, TESTDATA_FILES["MaxQuant"], user_input, None
         )
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
         self.assertEqual(len(all_datapoints.results[len(all_datapoints.results) - 1]), 6)
@@ -137,9 +134,9 @@ class TestWrongFormatting(unittest.TestCase):
         user_input = dict()
         user_input["input_csv"] = TESTDATA_FILES[format_name]
         user_input["input_format"] = format_name
-
+        parse_settings = ParseSettings(format_name)
         with self.assertRaises(KeyError) as context:
-            Module().benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
+            Module(ModuleSettings).benchmarking(parse_settings, user_input["input_csv"], {}, None)
 
 
 class TestPlot(unittest.TestCase):
@@ -147,7 +144,7 @@ class TestPlot(unittest.TestCase):
 
     def test_plot_metric(self):
         # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-        all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+        all_datapoints = read_results_json_repo(ParseSettings.module_settings.DDA_QUANT_RESULTS_REPO)
         all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)

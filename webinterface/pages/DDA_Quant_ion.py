@@ -9,18 +9,17 @@ from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+
 import streamlit_utils
+from proteobench.modules.dda_quant_ion.parse_settings import ModuleSettings
+
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.modules.dda_quant_base.datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.modules.dda_quant_base.parse_settings import (
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-    ParseSettings,
-)
+from proteobench.modules.dda_quant_base.parse_settings import ParseSettings
 from proteobench.modules.dda_quant_base.plot import PlotDataPoint
 from proteobench.modules.dda_quant_ion.module import IonModule
 
@@ -106,13 +105,10 @@ class StreamlitUI:
             "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
         )
         st.header("Description of the module")
-        st.markdown(
-            Path("pages/markdown_files/dda_quant_ion/module_description.md").read_text()
-        )
+        st.markdown(Path("pages/markdown_files/dda_quant_ion/module_description.md").read_text())
         st.header("Downloading associated files")
         st.markdown(
-             Path("pages/markdown_files/dda_quant_base/raw_file_download.md").read_text(),
-            unsafe_allow_html=True
+            Path("pages/markdown_files/dda_quant_base/raw_file_download.md").read_text(), unsafe_allow_html=True
         )
 
         st.header("Input and configuration")
@@ -126,24 +122,20 @@ class StreamlitUI:
 
         with st.form(key="main_form"):
             st.subheader("Input files")
-            st.markdown(
-                Path("pages/markdown_files/dda_quant_base/input_file_button.md").read_text()
-            )
+            st.markdown(Path("pages/markdown_files/dda_quant_base/input_file_button.md").read_text())
             self.user_input["input_csv"] = st.file_uploader(
                 "Software tool result file", help=self.texts.Help.input_file
             )
 
             self.user_input["input_format"] = st.selectbox(
-                "Software tool", INPUT_FORMATS, help=self.texts.Help.input_format
+                "Software tool", ParseSettings.module_settings.INPUT_FORMATS, help=self.texts.Help.input_format
             )
 
             # self.user_input["pull_req"] = st.text_input(
             #     "Open pull request to make results available to everyone (type \"YES\" to enable)",
             #     "NO"
             # )
-            st.markdown(
-                 Path("pages/markdown_files/dda_quant_base/input_customParam_button.md").read_text()
-            )
+            st.markdown(Path("pages/markdown_files/dda_quant_base/input_customParam_button.md").read_text())
             with st.expander("Additional parameters"):
                 with open("../webinterface/configuration/dda_quant.json") as file:
                     config = json.load(file)
@@ -185,7 +177,8 @@ class StreamlitUI:
         if ALL_DATAPOINTS not in st.session_state or FIRST_NEW_PLOT == True:
             st.session_state[ALL_DATAPOINTS] = None
             all_datapoints = st.session_state[ALL_DATAPOINTS]
-            all_datapoints = IonModule().obtain_all_data_point(all_datapoints)
+
+            all_datapoints = IonModule(ModuleSettings).obtain_all_data_point(all_datapoints)
 
             all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
                 filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
@@ -261,10 +254,10 @@ class StreamlitUI:
                 default_val_slider = st.session_state[st.session_state["slider_id"]]
             else:
                 default_val_slider = DEFAULT_VAL_SLIDER
-
-            result_performance, all_datapoints, input_df = IonModule().benchmarking(
+            parse_settings = ParseSettings(self.user_input["input_format"])
+            result_performance, all_datapoints, input_df = IonModule(ModuleSettings).benchmarking(
+                parse_settings,
                 self.user_input["input_csv"],
-                self.user_input["input_format"],
                 self.user_input,
                 st.session_state[ALL_DATAPOINTS],
                 default_cutoff_min_prec=default_val_slider,
@@ -338,9 +331,7 @@ class StreamlitUI:
         if FIRST_NEW_PLOT:
             st.header("Results")
             st.subheader("Sample of the processed file")
-            st.markdown(
-                Path("pages/markdown_files/dda_quant_ion/intermediate_file_description.md").read_text()
-            )
+            st.markdown(Path("pages/markdown_files/dda_quant_ion/intermediate_file_description.md").read_text())
         if not recalculate:
             result_performance = st.session_state[RESULT_PERF]
             all_datapoints = st.session_state[ALL_DATAPOINTS]
@@ -442,9 +433,7 @@ class StreamlitUI:
             )
 
             st.subheader("Add results to online repository")
-            st.markdown(
-                Path("pages/markdown_files/dda_quant_ion/make_results_public.md").read_text()
-            )
+            st.markdown(Path("pages/markdown_files/dda_quant_ion/make_results_public.md").read_text())
         st.session_state[FIG_LOGFC] = fig_logfc
         st.session_state[FIG_METRIC] = fig_metric
         st.session_state[RESULT_PERF] = result_performance
@@ -494,7 +483,7 @@ class StreamlitUI:
         if self.user_input[META_DATA]:
             try:
                 print(self.user_input["input_format"])
-                params = IonModule().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
+                params = IonModule.load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
             except KeyError as e:
                 st.error("Parsing of meta parameters file for this software is not supported yet.")
             # except Exception as err:
@@ -546,7 +535,7 @@ class StreamlitUI:
                     id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
 
                     if "storage" in st.secrets.keys():
-                        IonModule().write_intermediate_raw(
+                        IonModule.write_intermediate_raw(
                             st.secrets["storage"]["dir"],
                             id,
                             input_df,
@@ -631,7 +620,7 @@ class WebpageTexts:
             Click here to see the output of your benchmark run
         """
 
-        meta_data_file =  Path("pages/markdown_files/dda_quant_peptidoform/help_metadata.md").read_text()
+        meta_data_file = Path("pages/markdown_files/dda_quant_peptidoform/help_metadata.md").read_text()
 
 
 if __name__ == "__main__":

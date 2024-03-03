@@ -37,7 +37,7 @@ class IonModule(Module):
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
             input_data_frame["proforma"] = input_data_frame["modified_peptide"]
         elif input_format == "Proline":
-            input_data_frame = self.load_input_file_Proline(input_csv)
+            input_data_frame = IonModule.load_input_file_Proline(input_csv)
 
         elif input_format == "i2MassChroQ":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")

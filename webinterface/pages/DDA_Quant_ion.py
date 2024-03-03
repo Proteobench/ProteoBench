@@ -506,7 +506,7 @@ class StreamlitUI:
             if submit_pr:
                 st.session_state[SUBMIT] = True
                 user_comments = self.user_input["comments_for_submission"]
-                if not LOCAL_DEVELOPMENT:
+                if not ModuleSettings.LOCAL_DEVELOPMENT:
                     submit_df = st.session_state[ALL_DATAPOINTS]
                     if "Highlight" in submit_df.columns:
                         # TODO it seems that pandas trips over this sometime, even though it is present...

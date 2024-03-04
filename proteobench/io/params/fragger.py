@@ -4,11 +4,13 @@ FragPipe has a text based paramter file format which
 separates paramters and their value using an equal sign. Optional comments are 
 expressed with a hash sign.
 """
+
 from __future__ import annotations
 
 import logging
 import re
 from collections import namedtuple
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
@@ -22,51 +24,73 @@ Parameter = namedtuple("Parameter", ["name", "value", "comment"])
 VERSION_NO_PATTERN = r"\d+(\.\d+)*"
 
 
-def read_file(file: str, sep: str = " = ") -> list[Parameter]:
+def parse_params(l_of_str: list[str], sep: str = " = ") -> list[Parameter]:
     """Read FragPipe parameter file as list of records."""
-    with open(file) as f:
-        data = []
-        for line in f:
-            line = line.strip()
-            logger.debug(line)
-            # ! logic below also allows to keep the comments as comments
-            if line.startswith("#"):
-                continue
-            if not line:
-                continue
-            if "#" in line:
-                res = line.split("#")
-                if len(res) == 1:
-                    comment = res[0]
-                    data.append(Parameter(None, None, comment.strip()))
-                    continue
-                param, comment = [x.strip() for x in res]
-            else:
-                param = line
-                comment = None
-            res = param.strip().split(sep, maxsplit=1)
+    data = []
+    for line in l_of_str:
+        line = line.strip()
+        logger.debug(line)
+        # ! logic below also allows to keep the comments as comments
+        if line.startswith("#"):
+            continue
+        if not line:
+            continue
+        if "#" in line:
+            res = line.split("#")
             if len(res) == 1:
-                param = res[0].strip()
-                data.append(Parameter(param, None, comment))
+                comment = res[0]
+                data.append(Parameter(None, None, comment.strip()))
                 continue
-            param, value = [x.strip() for x in res]
-            data.append(Parameter(param, value, comment))
+            param, comment = [x.strip() for x in res]
+        else:
+            param = line
+            comment = None
+        res = param.strip().split(sep, maxsplit=1)
+        if len(res) == 1:
+            param = res[0].strip()
+            data.append(Parameter(param, None, comment))
+            continue
+        param, value = [x.strip() for x in res]
+        data.append(Parameter(param, value, comment))
     return data
 
 
-def extract_params(file: str, f_fragpipe_workflow) -> ProteoBenchParameters:
-    msfragger_params = read_file(file)
+def read_msfragger_params(file: BytesIO, sep: str = " = ") -> list[Parameter]:
+    l_of_str = file.read().decode("utf-8").splitlines()
+    return parse_params(l_of_str, sep=sep)
+
+
+def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> list[Parameter]:
+    l_of_str = file.read().decode("utf-8").splitlines()
+    header = l_of_str[0][1:].strip()
+    return header, parse_params(l_of_str, sep=sep)
+
+
+def extract_params(file: str, file1) -> ProteoBenchParameters:
+    # ! make it possible to pass files in both orders
+    msfragger_params, fragpipe_params = None, None
+    for f_ in [file, file1]:
+        print("file:", f_)
+        f_suffix = Path(f_.name).suffix
+        if f_suffix == ".params":
+            if msfragger_params is not None:
+                raise ValueError("MSFragger params file already parsed.")
+            msfragger_params = read_msfragger_params(f_)
+        elif f_suffix == ".workflow":
+            if fragpipe_params is not None:
+                raise ValueError("FragPipe workflow file already parsed.")
+            header, fragpipe_params = read_fragpipe_workflow(f_)
+        else:
+            raise ValueError("File extension not recognized.")
+
+    print("MSFragger params:\n", repr(msfragger_params))
     msfragger_params = pd.DataFrame.from_records(msfragger_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
     )
-    fragpipe_params = read_file(f_fragpipe_workflow, sep="=")
+    print("fragpipe params:\n", repr(fragpipe_params))
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
     )
-
-    # FragPipe version in first line
-    with open(f_fragpipe_workflow) as f:
-        header = next(iter(f))[1:].strip()
 
     match = re.search(VERSION_NO_PATTERN, header)
 
@@ -121,16 +145,19 @@ if __name__ == "__main__":
     from pprint import pprint
 
     file = pathlib.Path("../../../test/params/fragger.params")
-    data = read_file(file)
+    with open(file, "rb") as f:
+        data = read_msfragger_params(f)
     df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
     df.to_csv(file.with_suffix(".csv"))
 
     file_fragpipe = pathlib.Path("../../../test/params/fragpipe.workflow")
-    data = read_file(file_fragpipe, sep="=")
+    with open(file_fragpipe, "rb") as f:
+        _, data = read_fragpipe_workflow(f)
     df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
     df.to_csv(file_fragpipe.with_suffix(".csv"))
 
-    params = extract_params(file, file_fragpipe)
+    with open(file, "rb") as f, open(file_fragpipe, "rb") as f2:
+        params = extract_params(f, f2)
     pprint(params.__dict__)
     series = pd.Series(params.__dict__)
     series.to_csv(file.parent / "fragger_extracted_params.csv")

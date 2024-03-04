@@ -16,6 +16,7 @@ import streamlit as st
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
+from proteobench.io.params.fragger import extract_params as extract_params_fragger
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
@@ -48,6 +49,7 @@ class Module(ModuleInterface):
         "Proline": extract_params_proline,
         "AlphaPept": extract_params_alphapept,
         "Sage": extract_params_sage,
+        "FragPipe": extract_params_fragger,
     }
 
     @staticmethod

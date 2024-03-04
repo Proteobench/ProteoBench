@@ -77,6 +77,10 @@ People who contributed to ProteoBench (in alphabetical order)
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block:: 
+    **Viktoria Dorfer**
+    *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Linz, Austria*
+
+.. line-block:: 
     **Caroline Lennartsson**
     *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
@@ -97,3 +101,8 @@ People who contributed to ProteoBench (in alphabetical order)
 .. line-block::
     **Bart Van Puyvelde**
     *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
+
+.. line-block::
+    **Witold E. Wolski**
+    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
+    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*

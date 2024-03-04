@@ -1,7 +1,7 @@
 """Functionality to parse FragPipe fragger.params parameter files.
 
-FragPipe has a text based paramter file format which 
-separates paramters and their value using an equal sign. Optional comments are 
+FragPipe has a text based paramter file format which
+separates paramters and their value using an equal sign. Optional comments are
 expressed with a hash sign.
 """
 
@@ -83,11 +83,9 @@ def extract_params(file: str, file1) -> ProteoBenchParameters:
         else:
             raise ValueError("File extension not recognized.")
 
-    print("MSFragger params:\n", repr(msfragger_params))
     msfragger_params = pd.DataFrame.from_records(msfragger_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
     )
-    print("fragpipe params:\n", repr(fragpipe_params))
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
     )
@@ -118,8 +116,17 @@ def extract_params(file: str, file1) -> ProteoBenchParameters:
     params.min_peptide_length = msfragger_params.loc["digest_min_length", "value"]
     params.max_peptide_length = msfragger_params.loc["digest_max_length", "value"]
 
-    params.precursor_mass_tolerance = msfragger_params.loc["precursor_true_tolerance", "value"]
-    params.fragment_mass_tolerance = msfragger_params.loc["fragment_mass_tolerance", "value"]
+    precursor_mass_units = "Da"
+    if int(msfragger_params.loc["precursor_mass_units", "value"]):
+        precursor_mass_units = "ppm"
+    params.precursor_mass_tolerance = (
+        f'{msfragger_params.loc["precursor_true_tolerance", "value"]} {precursor_mass_units}'
+    )
+
+    fragment_mass_units = "Da"
+    if int(msfragger_params.loc["fragment_mass_units", "value"]):
+        fragment_mass_units = "ppm"
+    params.fragment_mass_tolerance = f'{msfragger_params.loc["fragment_mass_tolerance", "value"]} {fragment_mass_units}'
     # ! ionquant is not necessarily fixed?
     params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr", "value"]
     params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr", "value"]

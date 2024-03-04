@@ -78,7 +78,7 @@ People who contributed to ProteoBench (in alphabetical order)
 
 .. line-block:: 
     **Viktoria Dorfer**
-    *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Linz, Austria*
+    *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Hagenberg, Austria*
 
 .. line-block:: 
     **Caroline Lennartsson**

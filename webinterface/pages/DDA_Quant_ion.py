@@ -19,7 +19,7 @@ from proteobench.modules.dda_quant_base.datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.modules.dda_quant_base.parse_settings import ParseSettings
+from proteobench.modules.dda_quant_ion.parse_settings import ParseSettings
 from proteobench.modules.dda_quant_base.plot import PlotDataPoint
 from proteobench.modules.dda_quant_ion.module import IonModule
 

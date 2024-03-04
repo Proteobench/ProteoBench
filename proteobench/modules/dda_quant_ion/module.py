@@ -12,16 +12,16 @@ from proteobench.modules.dda_quant_ion.parse_settings import ParseSettings
 class IonModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self, parse_settings):
-        super().__init__(parse_settings)
+    def __init__(self, module_settings):
+        super().__init__(module_settings)
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
         return True
 
 
-    @staticmethod
-    def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
+
+    def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
         """Method loads dataframe from a csv depending on its format."""
         input_data_frame: pd.DataFrame
 

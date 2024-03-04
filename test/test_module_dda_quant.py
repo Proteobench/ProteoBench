@@ -4,6 +4,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
+from proteobench.modules.dda_quant_ion.module import IonModule
 
 from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant_base.module import Datapoint, Module
@@ -23,7 +24,7 @@ TESTDATA_FILES = {
 
 def load_file(format_name: str, parse_settings):
     """Method used to load the input file of a given format."""
-    input_df = Module.load_input_file(TESTDATA_FILES[format_name], format_name)
+    input_df = IonModule(ModuleSettings).load_input_file(TESTDATA_FILES[format_name], format_name)
     return input_df
 
 
@@ -118,7 +119,7 @@ class TestOutputFileReading(unittest.TestCase):
         }
         parse_settings = ParseSettings("MaxQuant")
         module_settings = ModuleSettings()
-        result_performance, all_datapoints, input_df = Module(module_settings).benchmarking(
+        result_performance, all_datapoints, input_df = IonModule(module_settings).benchmarking(
             parse_settings, TESTDATA_FILES["MaxQuant"], user_input, None
         )
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
@@ -136,7 +137,7 @@ class TestWrongFormatting(unittest.TestCase):
         user_input["input_format"] = format_name
         parse_settings = ParseSettings(format_name)
         with self.assertRaises(KeyError) as context:
-            Module(ModuleSettings).benchmarking(parse_settings, user_input["input_csv"], {}, None)
+            IonModule(ModuleSettings).benchmarking(parse_settings, user_input["input_csv"], {}, None)
 
 
 class TestPlot(unittest.TestCase):

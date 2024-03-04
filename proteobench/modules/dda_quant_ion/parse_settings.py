@@ -65,6 +65,7 @@ class ParseSettings:
         self.species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
 
+        # TODO create class with modificiation parse settings
         if "modifications_parser" in parse_settings.keys():
             self.apply_modifications_parser = True
             self.modifications_mapper = parse_settings["modifications_parser"]["modification_dict"]

@@ -42,6 +42,10 @@ class ModuleSettings:
     DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_quant_ion_DDA.git"
 
 
+# TODO write static class method which takes as argument
+#      PARSE_SETTINGS_FILES[input_format] and returns an
+#      initialized ParseSettings instance
+# TODO create specialized class for modifications
 class ParseSettings:
     """Structure that contains all the parameters used to parse
     the given benchmark run output depending on the software tool used."""

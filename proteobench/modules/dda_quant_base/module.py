@@ -241,45 +241,12 @@ class Module(ModuleInterface):
 
         return results_series
 
-    @staticmethod
-    def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
+
+    def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
         """Method loads dataframe from a csv depending on its format."""
-        input_data_frame: pd.DataFrame
-
-        if input_format == "MaxQuant":
-            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-            input_data_frame["proforma"] = input_data_frame["Sequence"]
-        elif input_format == "AlphaPept":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False)
-        elif input_format == "Sage":
-            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-        elif input_format == "FragPipe":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-            input_data_frame["proforma"] = input_data_frame["Peptide Sequence"]
-        elif input_format == "WOMBAT":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-            input_data_frame["proforma"] = input_data_frame["modified_peptide"]
-        elif input_format == "Proline":
-            input_data_frame = pd.read_excel(
-                input_csv,
-                sheet_name="Quantified peptide ions",
-                header=0,
-                index_col=None,
-            )
-            # TODO this should be generalized further, maybe even moved to parsing param in toml
-            input_data_frame["modifications"].fillna("", inplace=True)
-            input_data_frame["proforma"] = input_data_frame.apply(
-                lambda x: aggregate_modification_column(x.sequence, x.modifications),
-                axis=1,
-            )
-        elif input_format == "i2MassChroQ":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-            input_data_frame["proforma"] = input_data_frame["ProForma"]
-        elif input_format == "Custom":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-            input_data_frame["proforma"] = input_data_frame["Modified sequence"]
-
-        return input_data_frame
+        # throw a not implemented exception
+        #self.concreteparser.load_input_file(input_csv, input_format)
+        raise NotImplementedError
 
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
@@ -313,7 +280,7 @@ class Module(ModuleInterface):
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Parse user config
-        input_df = Module.load_input_file(input_file, parse_settings.input_format)
+        input_df = self.load_input_file(input_file, parse_settings.input_format)
 
         standard_format, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 

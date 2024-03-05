@@ -81,6 +81,11 @@ People who contributed to ProteoBench (in alphabetical order)
     *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Hagenberg, Austria*
 
 .. line-block:: 
+    **Ralf Gabriels**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block:: 
     **Caroline Lennartsson**
     *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 

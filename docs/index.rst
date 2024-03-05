@@ -90,6 +90,10 @@ People who contributed to ProteoBench (in alphabetical order)
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
 
 .. line-block::
+    **Matthias Mattanovich**
+    *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
     **Emmanuelle Mouton-Barbosa**
     *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*

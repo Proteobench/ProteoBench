@@ -1,6 +1,5 @@
 """psm_utils Streamlit-based web server."""
 
-import streamlit as st
 from _base import StreamlitPage
 
 

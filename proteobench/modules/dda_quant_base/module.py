@@ -157,8 +157,6 @@ class Module(ModuleInterface):
     def compute_epsilon(withspecies, species_expected_ratio):
         # for all columns named parse_settings.species_dict.values() compute the sum over the rows and add it to a new column "unique"
         withspecies["unique"] = withspecies[species_expected_ratio.keys()].sum(axis=1)
-        # create a list tabulating how many entries in withspecies["unique"] are 1,2,3,4,5,6
-        unique_counts = withspecies["unique"].value_counts()
 
         # now remove all rows with withspecies["unique"] > 1
         withspecies = withspecies[withspecies["unique"] == 1]

@@ -66,7 +66,7 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> list[Parameter]:
     return header, parse_params(l_of_str, sep=sep)
 
 
-def extract_params(file: str, file1) -> ProteoBenchParameters:
+def extract_params(file: BytesIO, file1: BytesIO) -> ProteoBenchParameters:
     # ! make it possible to pass files in both orders
     msfragger_params, fragpipe_params = None, None
     for f_ in [file, file1]:

@@ -117,7 +117,7 @@ People who contributed to ProteoBench (in alphabetical order)
 
 .. line-block::
     **Henry Webel**
-    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+    *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
 .. line-block::
     **Witold E. Wolski**

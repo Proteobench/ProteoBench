@@ -95,6 +95,10 @@ People who contributed to ProteoBench (in alphabetical order)
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
 
 .. line-block::
+    **Martin Rykær**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
     **Julian Uszkoreit**
     *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
 

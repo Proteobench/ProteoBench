@@ -180,12 +180,12 @@ class StreamlitUI:
                     search. This is important when using MaxQuant and FragPipe, among other tools.
                     """
             )
-            self.user_input["input_csv"] = st.file_uploader(
-                "Software tool result file", help=self.texts.Help.input_file
-            )
-
             self.user_input["input_format"] = st.selectbox(
                 "Software tool", INPUT_FORMATS, help=self.texts.Help.input_format
+            )
+
+            self.user_input["input_csv"] = st.file_uploader(
+                "Software tool result file", help=self.texts.Help.input_file
             )
 
             # self.user_input["pull_req"] = st.text_input(

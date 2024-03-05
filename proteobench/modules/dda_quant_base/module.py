@@ -24,20 +24,17 @@ from proteobench.modules.dda_quant_base.parse import (
     ParseInputs,
     aggregate_modification_column,
 )
-from proteobench.modules.dda_quant_base.parse_settings import (
-    DDA_QUANT_RESULTS_REPO,
-    PRECURSOR_NAME,
-    ParseSettings,
-)
+# from proteobench.modules.dda_quant_base.parse_settings import ParseSettings
 from proteobench.modules.interfaces import ModuleInterface
-
+# from proteobench.modules.dda_quant_base.parse_settings import ModuleSettings
 
 class Module(ModuleInterface):
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self):
-        self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
-        self.precursor_name = PRECURSOR_NAME
+    def __init__(self, module_settings):
+        self.module_settings = module_settings
+        self.dda_quant_results_repo = module_settings.DDA_QUANT_RESULTS_REPO
+        self.precursor_name = module_settings.PRECURSOR_NAME
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
@@ -57,15 +54,16 @@ class Module(ModuleInterface):
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
         return replicate_to_raw_df
 
+    @staticmethod
     def generate_intermediate(
-        self,
         filtered_df: pd.DataFrame,
         replicate_to_raw: dict,
-        parse_settings: ParseSettings,
+        parse_settings
     ) -> pd.DataFrame:
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
-        relevant_columns_df = filtered_df[["Raw file", self.precursor_name, "Intensity"]].copy()
+        precursor_name = parse_settings.module_settings.PRECURSOR_NAME
+        relevant_columns_df = filtered_df[["Raw file", precursor_name, "Intensity"]].copy()
         replicate_to_raw_df = Module.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
@@ -74,14 +72,14 @@ class Module(ModuleInterface):
         quant_df = Module.compute_group_stats(
             relevant_columns_df,
             min_intensity=0,
-            precursor=self.precursor_name,
+            precursor=precursor_name,
         )
 
         species_prec_ion = list(parse_settings.species_dict.values())
-        species_prec_ion.append(self.precursor_name)
+        species_prec_ion.append(precursor_name)
         prec_ion_to_species = filtered_df[species_prec_ion].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
-        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_name, how="inner")
+        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=precursor_name, how="inner")
         species_expected_ratio = parse_settings.species_expected_ratio
         res = Module.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res
@@ -200,8 +198,12 @@ class Module(ModuleInterface):
             }
         }
 
+    @staticmethod
     def generate_datapoint(
-        self, intermediate: pd.DataFrame, input_format: str, user_input: dict, default_cutoff_min_prec: int = 3
+        intermediate: pd.DataFrame,
+        input_format: str,
+        user_input: dict,
+        default_cutoff_min_prec: int = 3
     ) -> Datapoint:
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
@@ -239,42 +241,13 @@ class Module(ModuleInterface):
 
         return results_series
 
+
     def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
         """Method loads dataframe from a csv depending on its format."""
-        input_data_frame: pd.DataFrame
+        # throw a not implemented exception
+        #self.concreteparser.load_input_file(input_csv, input_format)
+        raise NotImplementedError
 
-        if input_format == "MaxQuant":
-            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-        elif input_format == "AlphaPept":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False)
-        elif input_format == "Sage":
-            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-        elif input_format == "FragPipe":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        elif input_format == "WOMBAT":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-            input_data_frame["proforma"] = input_data_frame["modified_peptide"]
-        elif input_format == "Proline":
-            input_data_frame = pd.read_excel(
-                input_csv,
-                sheet_name="Quantified peptide ions",
-                header=0,
-                index_col=None,
-            )
-            # TODO this should be generalized further, maybe even moved to parsing param in toml
-            input_data_frame["modifications"].fillna("", inplace=True)
-            input_data_frame["proforma"] = input_data_frame.apply(
-                lambda x: aggregate_modification_column(x.sequence, x.modifications),
-                axis=1,
-            )
-        elif input_format == "i2MassChroQ":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-            input_data_frame["proforma"] = input_data_frame["ProForma"]
-        elif input_format == "Custom":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-            input_data_frame["proforma"] = input_data_frame["Modified sequence"]
-
-        return input_data_frame
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
@@ -290,6 +263,7 @@ class Module(ModuleInterface):
         all_datapoints = all_datapoints.T.reset_index(drop=True)
         return all_datapoints
 
+
     def obtain_all_data_point(self, all_datapoints):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
@@ -301,21 +275,23 @@ class Module(ModuleInterface):
         return all_datapoints
 
     def benchmarking(
-        self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
+        self, parse_settings, input_file: str,  user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> pd.DataFrame:
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Parse user config
-        input_df = self.load_input_file(input_file, input_format)
-        parse_settings = ParseSettings(input_format)
+        input_df = self.load_input_file(input_file, parse_settings.input_format)
 
         standard_format, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
 
         # Get quantification data
-        intermediate_data_structure = self.generate_intermediate(standard_format, replicate_to_raw, parse_settings)
+        intermediate_data_structure = Module.generate_intermediate(standard_format, replicate_to_raw, parse_settings)
 
-        current_datapoint = self.generate_datapoint(
-            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        current_datapoint = Module.generate_datapoint(
+            intermediate_data_structure,
+            parse_settings.input_format,
+            user_input,
+            default_cutoff_min_prec=default_cutoff_min_prec
         )
 
         all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
@@ -327,7 +303,8 @@ class Module(ModuleInterface):
             input_df,
         )
 
-    def check_new_unique_hash(self, datapoints):
+    @staticmethod
+    def check_new_unique_hash(datapoints):
         current_datapoint = datapoints[datapoints["old_new"] == "new"]
         all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
 
@@ -367,7 +344,7 @@ class Module(ModuleInterface):
 
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
-        if not self.check_new_unique_hash(all_datapoints):
+        if not Module.check_new_unique_hash(all_datapoints):
             return False
 
         branch_name = current_datapoint["id"]
@@ -379,7 +356,7 @@ class Module(ModuleInterface):
         all_datapoints.to_json(f, orient="records", indent=2)
 
         f.close()
-        commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
+        commit_message = f"Added new run with id {branch_name}"
 
         pr_id = pr_github(
             clone_dir=t_dir,
@@ -415,7 +392,8 @@ class Module(ModuleInterface):
 
         return os.path.join(t_dir, "results.json")
 
-    def write_intermediate_raw(self, dir, ident, input_df, result_performance, param_loc):
+    @staticmethod
+    def write_intermediate_raw(dir, ident, input_df, result_performance, param_loc):
         path_write = os.path.join(dir, ident)
         try:
             os.mkdir(path_write)
@@ -430,9 +408,10 @@ class Module(ModuleInterface):
         input_df.to_csv(os.path.join(path_write, "input_df.csv"))
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 
+    @staticmethod
     def load_params_file(self, input_file: str, input_format: str) -> ProteoBenchParameters:
         """Method loads parameters from a metadata file depending on its format."""
-        print(self.EXTRACT_PARAMS_DICT)
-        params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
+        print(Module.EXTRACT_PARAMS_DICT)
+        params = Module.EXTRACT_PARAMS_DICT[input_format](input_file)
         params.software_name = input_format
         return params

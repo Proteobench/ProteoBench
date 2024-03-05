@@ -4,6 +4,7 @@ import json
 import logging
 import uuid
 from datetime import datetime
+from pprint import pformat
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -613,6 +614,7 @@ class StreamlitUI:
             try:
                 print(self.user_input["input_format"])
                 params = IonModule().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
+                st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
             except KeyError as e:
                 st.error("Parsing of meta parameters file for this software is not supported yet.")
             # except Exception as err:

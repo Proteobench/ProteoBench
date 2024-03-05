@@ -112,6 +112,10 @@ People who contributed to ProteoBench (in alphabetical order)
     *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
 
 .. line-block::
+    **Maximilian T. Strauss**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
     **Henry Webel**
     *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 

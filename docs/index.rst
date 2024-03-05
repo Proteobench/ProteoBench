@@ -112,6 +112,10 @@ People who contributed to ProteoBench (in alphabetical order)
     *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
 
 .. line-block::
+    **Henry Webel**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
     **Witold E. Wolski**
     *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
     *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*

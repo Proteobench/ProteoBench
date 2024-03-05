@@ -1,4 +1,5 @@
 """Alphapept uses the yaml format to save configuration."""
+
 import pathlib
 
 import pandas as pd
@@ -25,8 +26,11 @@ def extract_params(fname) -> ProteoBenchParameters:
     params.min_peptide_length = fasta["pep_length_min"]
     params.max_peptide_length = fasta["pep_length_max"]
     search = record["search"]
-    params.precursor_mass_tolerance = search["prec_tol"]
-    params.fragment_mass_tolerance = search["frag_tol"]
+    _tolerance_unit = "Da"  # default
+    if search["ppm"]:
+        _tolerance_unit = "ppm"
+    params.precursor_mass_tolerance = f'{search["prec_tol"]} {_tolerance_unit}'
+    params.fragment_mass_tolerance = f'{search["frag_tol"]} {_tolerance_unit}'
     params.ident_fdr_protein = search["protein_fdr"]
     params.ident_fdr_peptide = search["peptide_fdr"]
     # params.ident_fdr_psm = search

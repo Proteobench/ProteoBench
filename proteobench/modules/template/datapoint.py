@@ -85,7 +85,6 @@ class Datapoint:
         and current timestamp separated by underscores. Prints the id to stdout.
         """
         self.id = self.search_engine + "_" + str(self.software_version) + "_" + str(datetime.timestamp(datetime.now()))
-        print(self.id)
 
     def dump_json_object(self, file_name):
         """Dumps the datapoint as a JSON object to a file.

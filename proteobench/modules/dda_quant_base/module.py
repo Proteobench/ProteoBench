@@ -18,13 +18,13 @@ from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
-from proteobench.modules.dda_quant.datapoint import Datapoint
-from proteobench.modules.dda_quant.parse import (
+from proteobench.io.params.sage import extract_params as extract_params_sage
+from proteobench.modules.dda_quant_base.datapoint import Datapoint
+from proteobench.modules.dda_quant_base.parse import (
     ParseInputs,
     aggregate_modification_column,
 )
-from proteobench.modules.dda_quant.parse_settings import (
-    DDA_QUANT_RESULTS_PATH,
+from proteobench.modules.dda_quant_base.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     PRECURSOR_NAME,
     ParseSettings,
@@ -35,6 +35,10 @@ from proteobench.modules.interfaces import ModuleInterface
 class Module(ModuleInterface):
     """Object is used as a main interface with the Proteobench library within the module."""
 
+    def __init__(self):
+        self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
+        self.precursor_name = PRECURSOR_NAME
+
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
         return True
@@ -43,6 +47,7 @@ class Module(ModuleInterface):
         "MaxQuant": extract_params_maxquant,
         "Proline": extract_params_proline,
         "AlphaPept": extract_params_alphapept,
+        "Sage": extract_params_sage,
     }
 
     @staticmethod
@@ -60,7 +65,7 @@ class Module(ModuleInterface):
     ) -> pd.DataFrame:
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
-        relevant_columns_df = filtered_df[["Raw file", PRECURSOR_NAME, "Intensity"]].copy()
+        relevant_columns_df = filtered_df[["Raw file", self.precursor_name, "Intensity"]].copy()
         replicate_to_raw_df = Module.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
@@ -69,14 +74,14 @@ class Module(ModuleInterface):
         quant_df = Module.compute_group_stats(
             relevant_columns_df,
             min_intensity=0,
-            precursor=PRECURSOR_NAME,
+            precursor=self.precursor_name,
         )
 
         species_prec_ion = list(parse_settings.species_dict.values())
-        species_prec_ion.append(PRECURSOR_NAME)
+        species_prec_ion.append(self.precursor_name)
         prec_ion_to_species = filtered_df[species_prec_ion].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
-        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=PRECURSOR_NAME, how="inner")
+        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_name, how="inner")
         species_expected_ratio = parse_settings.species_expected_ratio
         res = Module.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res
@@ -85,7 +90,7 @@ class Module(ModuleInterface):
     def compute_group_stats(
         relevant_columns_df: pd.DataFrame,
         min_intensity=0,
-        precursor=PRECURSOR_NAME,
+        precursor="precursor ion",
     ) -> pd.DataFrame:
         """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
 
@@ -201,6 +206,10 @@ class Module(ModuleInterface):
         """Method used to compute metadata for the provided result."""
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
+
+        if "comments_for_submission" not in user_input.keys():
+            user_input["comments_for_submission"] = ""
+
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
@@ -218,6 +227,7 @@ class Module(ModuleInterface):
             min_peptide_length=user_input["min_peptide_length"],
             max_peptide_length=user_input["max_peptide_length"],
             intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
+            comments=user_input["comments_for_submission"],
         )
 
         result_datapoint.generate_id()
@@ -257,8 +267,12 @@ class Module(ModuleInterface):
                 lambda x: aggregate_modification_column(x.sequence, x.modifications),
                 axis=1,
             )
+        elif input_format == "i2MassChroQ":
+            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["ProForma"]
         elif input_format == "Custom":
             input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+            input_data_frame["proforma"] = input_data_frame["Modified sequence"]
 
         return input_data_frame
 
@@ -266,7 +280,7 @@ class Module(ModuleInterface):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-            all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+            all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
 
         all_datapoints["old_new"] = "old"
         all_datapoints = all_datapoints.T
@@ -280,7 +294,7 @@ class Module(ModuleInterface):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-            all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+            all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
 
         all_datapoints["old_new"] = "old"
 
@@ -323,9 +337,11 @@ class Module(ModuleInterface):
         overlap = set_current_datapoint.intersection(set_all_datapoints_old)
 
         if len(overlap) > 0:
+            overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
+
             st.error(
                 f"The run you want to submit has been previously submitted \
-                 under the identifier: {overlap}"
+                 under the identifier: {str(overlap_name)}"
             )
             return False
         return True
@@ -347,11 +363,12 @@ class Module(ModuleInterface):
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
             current_datapoint[k] = v
+        current_datapoint["submission_comments"] = submission_comments
 
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         if not self.check_new_unique_hash(all_datapoints):
-            return
+            return False
 
         branch_name = current_datapoint["id"]
 
@@ -415,6 +432,7 @@ class Module(ModuleInterface):
 
     def load_params_file(self, input_file: str, input_format: str) -> ProteoBenchParameters:
         """Method loads parameters from a metadata file depending on its format."""
+        print(self.EXTRACT_PARAMS_DICT)
         params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
         params.software_name = input_format
         return params

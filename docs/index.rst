@@ -13,14 +13,14 @@ Overview of ProteoBench
     Changelog <changelog.rst>
 
 
-ProteoBench is an open and collaborative platform for community-curated benchmarks for proteomics 
+`ProteoBench <https://proteobench.cubimed.rub.de/>`_ is an open and collaborative platform for community-curated benchmarks for proteomics 
 data analysis pipelines. Our goal is to allow a continuous, easy, and controlled comparison of 
 proteomics data analysis workflows.
 
 ProteoBench provides a centralized web platform for developers and end-users to compare proteomics 
 data analysis pipelines. This community-curated effort will allow for an easy and controlled comparison 
 of tools developed or used by the participants to other state-of-the-art pipelines for specific 
-applications. The goal is not to select a single best one-fits-all data analysis workflow, but to allow:\\
+applications. The goal is not to select a single best one-fits-all data analysis workflow, but to allow:
 
 1. **end-users** to identify a good workflow to fulfill their specific needs
 2. **developers** to identify the specific strengths and weaknesses in their workflows, guiding the development process
@@ -63,3 +63,76 @@ Contact us
 ==========
 
 email us `here <mailto:proteobench@eubic-ms.org?subject=ProteoBench_query>`_.
+
+
+----------
+
+Contribution
+============
+People who contributed to ProteoBench (in alphabetical order)
+
+.. line-block:: 
+    **Robbin Bouwmeester**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block:: 
+    **Viktoria Dorfer**
+    *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Hagenberg, Austria*
+
+.. line-block:: 
+    **Ralf Gabriels**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block:: 
+    **Caroline Lennartsson**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Marie Locard-Paulet**
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
+    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+
+.. line-block::
+    **Matthias Mattanovich**
+    *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Emmanuelle Mouton-Barbosa**
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
+    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+
+.. line-block::
+    **Martin Rykær**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Julian Uszkoreit**
+    *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
+
+.. line-block::
+    **Tim Van Den Bossche**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+
+.. line-block::
+    **Bart Van Puyvelde**
+    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
+
+.. line-block::
+    **Veit Schwämmle**
+    *Department of Biochemistry and Molecular Biology, University of Southern Denmark, Odense, Denmark*
+
+.. line-block::
+    **Maximilian T. Strauss**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Henry Webel**
+    *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Witold E. Wolski**
+    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
+    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*

@@ -1,4 +1,5 @@
 """ All formats available for the module """
+
 from __future__ import annotations
 
 import os
@@ -19,6 +20,7 @@ PARSE_SETTINGS_FILES = {
     "MaxQuant": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_maxquant.toml"),
     "FragPipe": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_fragpipe.toml"),
     "Proline": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_proline.toml"),
+    "i2MassChroQ": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_i2masschroq.toml"),
     "AlphaPept": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_alphapept.toml"),
     "Sage": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_sage.toml"),
     "Custom": os.path.join(PARSE_SETTINGS_DIR, "parse_settings_custom.toml"),
@@ -32,6 +34,7 @@ INPUT_FORMATS = (
     "AlphaPept",
     "FragPipe",
     "Proline",
+    "i2MassChroQ",
     # "WOMBAT",
     "Sage",
     "Custom",
@@ -41,13 +44,11 @@ LOCAL_DEVELOPMENT = False
 
 # For local development change below to the json and path,
 # if you do not want to download it from github
-DDA_QUANT_RESULTS_PATH = (
-    "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json"  # e.g., K:/results.json
-)
+DDA_QUANT_RESULTS_PATH = "https://raw.githubusercontent.com/Proteobench/Results_quant_peptidoform_DDA/main/results.json"  # e.g., K:/results.json
 
 PRECURSOR_NAME = "precursor ion"
 
-DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_Module2_quant_DDA.git"
+DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_quant_peptidoform_DDA.git"
 
 
 class ParseSettings:

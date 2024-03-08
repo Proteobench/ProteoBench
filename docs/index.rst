@@ -77,6 +77,10 @@ People who contributed to ProteoBench (in alphabetical order)
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block:: 
+    **Nadezhda T. Doncheva**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block:: 
     **Viktoria Dorfer**
     *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Hagenberg, Austria*
 

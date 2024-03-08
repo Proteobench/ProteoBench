@@ -63,3 +63,17 @@ jobs:
         FLIT_USERNAME: __token__
         FLIT_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: flit publish --repository pypi
+  
+  update-server:
+    name: Update on server
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing update script on server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_KEY }}
+        script_stop: true
+        script: |
+          sudo ~/callupdate.sh

@@ -16,6 +16,7 @@ import streamlit as st
 from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
+from proteobench.io.params.fragger import extract_params as extract_params_fragger
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
@@ -48,6 +49,7 @@ class Module(ModuleInterface):
         "Proline": extract_params_proline,
         "AlphaPept": extract_params_alphapept,
         "Sage": extract_params_sage,
+        "FragPipe": extract_params_fragger,
     }
 
     @staticmethod
@@ -155,8 +157,6 @@ class Module(ModuleInterface):
     def compute_epsilon(withspecies, species_expected_ratio):
         # for all columns named parse_settings.species_dict.values() compute the sum over the rows and add it to a new column "unique"
         withspecies["unique"] = withspecies[species_expected_ratio.keys()].sum(axis=1)
-        # create a list tabulating how many entries in withspecies["unique"] are 1,2,3,4,5,6
-        unique_counts = withspecies["unique"].value_counts()
 
         # now remove all rows with withspecies["unique"] > 1
         withspecies = withspecies[withspecies["unique"] == 1]
@@ -430,9 +430,10 @@ class Module(ModuleInterface):
         input_df.to_csv(os.path.join(path_write, "input_df.csv"))
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 
-    def load_params_file(self, input_file: str, input_format: str) -> ProteoBenchParameters:
+    def load_params_file(self, input_file: list[str], input_format: str) -> ProteoBenchParameters:
         """Method loads parameters from a metadata file depending on its format."""
-        print(self.EXTRACT_PARAMS_DICT)
-        params = self.EXTRACT_PARAMS_DICT[input_format](input_file)
+        # ! adapted to be able to parse more than one file.
+        # ! how to ensure orrect order?
+        params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
         params.software_name = input_format
         return params

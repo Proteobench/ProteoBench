@@ -4,6 +4,7 @@ import json
 import logging
 import uuid
 from datetime import datetime
+from pprint import pformat
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -179,12 +180,12 @@ class StreamlitUI:
                     search. This is important when using MaxQuant and FragPipe, among other tools.
                     """
             )
-            self.user_input["input_csv"] = st.file_uploader(
-                "Software tool result file", help=self.texts.Help.input_file
-            )
-
             self.user_input["input_format"] = st.selectbox(
                 "Software tool", INPUT_FORMATS, help=self.texts.Help.input_format
+            )
+
+            self.user_input["input_csv"] = st.file_uploader(
+                "Software tool result file", help=self.texts.Help.input_file
             )
 
             # self.user_input["pull_req"] = st.text_input(
@@ -590,6 +591,7 @@ class StreamlitUI:
                 "Meta data for searches",
                 help=self.texts.Help.meta_data_file,
                 key=meta_file_uploader_uuid,
+                accept_multiple_files=True,
             )
 
             self.user_input["comments_for_submission"] = st.text_area(
@@ -612,6 +614,7 @@ class StreamlitUI:
             try:
                 print(self.user_input["input_format"])
                 params = IonModule().load_params_file(self.user_input[META_DATA], self.user_input["input_format"])
+                st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
             except KeyError as e:
                 st.error("Parsing of meta parameters file for this software is not supported yet.")
             # except Exception as err:

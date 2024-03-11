@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections import defaultdict
 from typing import Dict, List
 
 import pandas as pd
@@ -126,21 +127,18 @@ class ParseInputs(ParseInputsInterface):
     ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """Convert a software tool output into a generic format supported by the module."""
         # TODO add functionality/steps in docstring
-
-        for k, v in parse_settings.mapper.items():
-            if k not in df.columns:
-                raise ImportError(
-                    f"Column {k} not found in input dataframe." " Please check input file and selected software tool."
-                )
+        # if any of the keys are not in the columns, raise an error
+        if not all(k in df.columns for k in parse_settings.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(parse_settings.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected software tool."
+            )
 
         df.rename(columns=parse_settings.mapper, inplace=True)
 
-        replicate_to_raw = {}
+        replicate_to_raw = defaultdict(list)
         for k, v in parse_settings.condition_mapper.items():
-            try:
-                replicate_to_raw[v].append(k)
-            except KeyError:
-                replicate_to_raw[v] = [k]
+            replicate_to_raw[v].append(k)
 
         if "Reverse" in parse_settings.mapper:
             df = df[df["Reverse"] != parse_settings.decoy_flag]
@@ -148,10 +146,10 @@ class ParseInputs(ParseInputsInterface):
         df["contaminant"] = df["Proteins"].str.contains(parse_settings.contaminant_flag)
         for flag, species in parse_settings.species_dict.items():
             df[species] = df["Proteins"].str.contains(flag)
+        # ?
         df["MULTI_SPEC"] = (
             df[list(parse_settings.species_dict.values())].sum(axis=1) > parse_settings.min_count_multispec
         )
-
         df = df[df["MULTI_SPEC"] == False]
 
         # If there is "Raw file" then it is a long format, otherwise short format
@@ -177,14 +175,19 @@ class ParseInputs(ParseInputsInterface):
                 modification_dict=parse_settings.modifications_mapper,
             )
 
+
         try:
             df.loc[df.index, "precursor ion"] = (
                 df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
             )
+            # why loc when this works too?
+            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+
         except KeyError:
             raise KeyError(
                 f"Not all columns required for making the ion are available."
                 "Is the charge available in the input file?"
             )
+
 
         return df, replicate_to_raw

@@ -10,11 +10,11 @@ import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.modules.dda_quant_base.datapoint import (
+from proteobench.utils.quant_datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.modules.dda_quant_base.parse_settings import (
+from proteobench.io.parsing.parse_settings import (
     INPUT_FORMATS,
     LOCAL_DEVELOPMENT,
     ParseSettings,

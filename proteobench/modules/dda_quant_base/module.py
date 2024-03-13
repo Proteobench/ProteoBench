@@ -4,7 +4,6 @@ import datetime
 import hashlib
 import logging
 import os
-import re
 from collections import ChainMap
 from dataclasses import asdict
 from tempfile import TemporaryDirectory
@@ -20,12 +19,12 @@ from proteobench.io.params.fragger import extract_params as extract_params_fragg
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
-from proteobench.modules.dda_quant_base.datapoint import Datapoint
-from proteobench.modules.dda_quant_base.parse import (
+from proteobench.utils.quant_datapoint import Datapoint
+from proteobench.io.parsing.parse import (
     ParseInputs,
     aggregate_modification_column,
 )
-from proteobench.modules.dda_quant_base.parse_settings import (
+from proteobench.io.parsing.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     PRECURSOR_NAME,
     ParseSettings,

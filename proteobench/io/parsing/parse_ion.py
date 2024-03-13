@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import re
 from typing import Dict, List
 
 import pandas as pd
 
-from proteobench.modules.dda_quant_base.parse import get_proforma_bracketed
-from proteobench.modules.dda_quant_ion.parse_settings import ParseSettings
+from proteobench.io.parsing.parse import get_proforma_bracketed
+from proteobench.io.parsing.parse_settings_ion import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 

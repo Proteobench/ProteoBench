@@ -7,8 +7,8 @@ import pandas as pd
 
 from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant_base.module import Datapoint, Module
-from proteobench.modules.dda_quant_base.parse import ParseInputs
-from proteobench.modules.dda_quant_base.parse_settings import (
+from proteobench.io.parsing.parse import ParseInputs
+from proteobench.io.parsing.parse_settings import (
     DDA_QUANT_RESULTS_REPO,
     INPUT_FORMATS,
     ParseSettings,
@@ -18,7 +18,7 @@ from proteobench.utils.plotting.plot import PlotDataPoint
 # genereate_input_field
 
 
-TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")
 TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),

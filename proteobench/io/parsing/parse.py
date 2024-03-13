@@ -6,7 +6,7 @@ from typing import Dict, List
 
 import pandas as pd
 
-from proteobench.modules.dda_quant_base.parse_settings import ParseSettings
+from proteobench.io.parsing.parse_settings import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 
@@ -175,7 +175,6 @@ class ParseInputs(ParseInputsInterface):
                 modification_dict=parse_settings.modifications_mapper,
             )
 
-
         try:
             df.loc[df.index, "precursor ion"] = (
                 df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
@@ -188,6 +187,5 @@ class ParseInputs(ParseInputsInterface):
                 f"Not all columns required for making the ion are available."
                 "Is the charge available in the input file?"
             )
-
 
         return df, replicate_to_raw

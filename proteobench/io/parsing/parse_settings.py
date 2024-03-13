@@ -7,7 +7,7 @@ from pathlib import Path
 
 import toml
 
-from ..interfaces import Settings
+from proteobench.modules.interfaces import Settings
 
 # import proteobench.modules.dda_quant.p
 

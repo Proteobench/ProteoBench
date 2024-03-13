@@ -20,7 +20,7 @@ class PlotDataPoint:
             result_df,
             x=result_df["log2_A_vs_B"],
             color="kind",
-            # Turned of marginal as it slows the interface considerably
+            # Turned off marginal as it slows the interface considerably
             # marginal="rug",
             histnorm="probability density",
             barmode="overlay",
@@ -46,7 +46,7 @@ class PlotDataPoint:
         # Add vertical lines for expected ratios, log2 tranformed
 
         ratio_map = {species: np.log2(data["A_vs_B"]) for species, data in species_ratio.items()}
-        # "YEAST", "ECOLI", "HUMAN"
+
         fig.add_vline(x=ratio_map["YEAST"], line_dash="dash", line_color=color_map["YEAST"], annotation_text="YEAST")
         fig.add_vline(x=ratio_map["ECOLI"], line_dash="dash", line_color=color_map["ECOLI"], annotation_text="ECOLI")
         fig.add_vline(x=ratio_map["HUMAN"], line_dash="dash", line_color=color_map["HUMAN"], annotation_text="HUMAN")

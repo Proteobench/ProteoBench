@@ -6,8 +6,6 @@ import uuid
 from datetime import datetime
 from pprint import pformat
 
-import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
@@ -21,7 +19,7 @@ from proteobench.modules.dda_quant_base.parse_settings import (
     LOCAL_DEVELOPMENT,
     ParseSettings,
 )
-from proteobench.modules.dda_quant_base.plot import PlotDataPoint
+from proteobench.utils.plotting.plot import PlotDataPoint
 from proteobench.modules.dda_quant_ion.module import IonModule
 
 logger = logging.getLogger(__name__)

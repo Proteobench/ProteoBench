@@ -13,7 +13,7 @@ from proteobench.modules.dda_quant_base.parse_settings import (
     INPUT_FORMATS,
     ParseSettings,
 )
-from proteobench.modules.dda_quant_base.plot import PlotDataPoint
+from proteobench.utils.plotting.plot import PlotDataPoint
 
 # genereate_input_field
 

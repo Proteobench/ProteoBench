@@ -5,15 +5,12 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from proteobench.github.gh import read_results_json_repo
-from proteobench.modules.dda_quant_base.module import Datapoint, Module
-from proteobench.io.parsing.parse_ion import ParseInputs
-from proteobench.io.parsing.parse_settings_ion import (
-    DDA_QUANT_RESULTS_REPO,
-    INPUT_FORMATS,
-    ParseSettings,
-)
+from proteobench.github.gh import read_results_json_repo, DDA_QUANT_RESULTS_REPO
+from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.modules.dda_quant_base.module import Module
+from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.utils.plotting.plot import PlotDataPoint
+from proteobench.utils.quant_datapoint import Datapoint
 
 # genereate_input_field
 
@@ -30,15 +27,16 @@ TESTDATA_FILES = {
 
 def load_file(format_name: str):
     """Method used to load the input file of a given format."""
-    input_df = Module().load_input_file(TESTDATA_FILES[format_name], format_name)
+    input_df = load_input_file(TESTDATA_FILES[format_name], format_name)
     return input_df
 
 
 def load__local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
-    parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+    parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
+    parse_settings = ParseSettingsBuilder(parse_settings_dir).build_parser(format_name)
+    prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
     intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
@@ -47,8 +45,8 @@ def load__local_parsing_configuration_file(format_name: str):
 def process_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
-    parse_settings = ParseSettings(format_name)
-    prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+    parse_settings = ParseSettingsBuilder().build_parser(format_name)
+    prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
     intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
@@ -60,6 +58,9 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_search_engines_supported(self):
         """Test whether the expected formats are supported."""
+        parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
+        parse_settings = ParseSettingsBuilder(parse_settings_dir)
+
         for format_name in (
             "MaxQuant",
             "AlphaPept",
@@ -67,7 +68,7 @@ class TestOutputFileReading(unittest.TestCase):
             "Proline",
             "Sage",
         ):  # , "WOMBAT"
-            self.assertTrue(format_name in INPUT_FORMATS)
+            self.assertTrue(format_name in parse_settings.INPUT_FORMATS)
 
     def test_input_file_loading(self):
         """Test whether the inputs input are loaded successfully."""
@@ -77,27 +78,31 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_local_parsing_configuration_file(self):
         """Test parsing of the local parsing configuration files."""
+        parse_settings_builder = ParseSettingsBuilder()
         for format_name in self.supported_formats:
-            parse_settings = ParseSettings(format_name)
-
+            parse_settings = parse_settings_builder.build_parser(format_name)
             self.assertFalse(parse_settings is None)
 
     def test_input_file_initial_parsing(self):
         """Test the initial parsing of the input file."""
+        parse_settings_builder = ParseSettingsBuilder()
+
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
-            parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+            parse_settings = parse_settings_builder.build_parser(format_name)
+            prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
             self.assertFalse(prepared_df.empty)
             self.assertFalse(replicate_to_raw == {})
 
     def test_input_file_processing(self):
         """Test the processing of the input files."""
+        parse_settings_builder = ParseSettingsBuilder()
+
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
-            parse_settings = ParseSettings(format_name)
-            prepared_df, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+            parse_settings = parse_settings_builder.build_parser(format_name)
+            prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
             # Get quantification data
             intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)

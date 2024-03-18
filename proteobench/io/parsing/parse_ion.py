@@ -6,8 +6,43 @@ from typing import Dict, List
 
 import pandas as pd
 
-from proteobench.io.parsing.parse_settings_ion import ParseSettings
-from proteobench.modules.interfaces import ParseInputsInterface
+
+def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
+    """Method loads dataframe from a csv depending on its format."""
+    input_data_frame: pd.DataFrame
+
+    if input_format == "MaxQuant":
+        input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
+    elif input_format == "AlphaPept":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False)
+    elif input_format == "Sage":
+        input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
+    elif input_format == "FragPipe":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    elif input_format == "WOMBAT":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+        input_data_frame["proforma"] = input_data_frame["modified_peptide"]
+    elif input_format == "Proline":
+        input_data_frame = pd.read_excel(
+            input_csv,
+            sheet_name="Quantified peptide ions",
+            header=0,
+            index_col=None,
+        )
+        # TODO this should be generalized further, maybe even moved to parsing param in toml
+        input_data_frame["modifications"].fillna("", inplace=True)
+        input_data_frame["proforma"] = input_data_frame.apply(
+            lambda x: aggregate_modification_column(x.sequence, x.modifications),
+            axis=1,
+        )
+    elif input_format == "i2MassChroQ":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        input_data_frame["proforma"] = input_data_frame["ProForma"]
+    elif input_format == "Custom":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        input_data_frame["proforma"] = input_data_frame["Modified sequence"]
+
+    return input_data_frame
 
 
 # TODO this should be generalized further
@@ -90,7 +125,6 @@ def get_proforma_bracketed(
     },
 ):
     modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
-
     new_modifications = []
     for m in modifications:
         try:
@@ -121,81 +155,5 @@ def get_proforma_bracketed(
 
 
 # TODO this is different between ion and peptidoform
-class ParseInputs(ParseInputsInterface):
-    def convert_to_standard_format(
-        self, df: pd.DataFrame, parse_settings: ParseSettings
-    ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
-        """Convert a software tool output into a generic format supported by the module."""
-        # TODO add functionality/steps in docstring
-        # if any of the keys are not in the columns, raise an error
-        if not all(k in df.columns for k in parse_settings.mapper.keys()):
-            raise ValueError(
-                f"Columns {set(parse_settings.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
-                " Please check input file and selected software tool."
-            )
-
-        df.rename(columns=parse_settings.mapper, inplace=True)
-
-        replicate_to_raw = defaultdict(list)
-        for k, v in parse_settings.condition_mapper.items():
-            replicate_to_raw[v].append(k)
-
-        if "Reverse" in parse_settings.mapper:
-            df = df[df["Reverse"] != parse_settings.decoy_flag]
-
-        df["contaminant"] = df["Proteins"].str.contains(parse_settings.contaminant_flag)
-        for flag, species in parse_settings.species_dict.items():
-            df[species] = df["Proteins"].str.contains(flag)
-        df["MULTI_SPEC"] = (
-            df[list(parse_settings.species_dict.values())].sum(axis=1) > parse_settings.min_count_multispec
-        )
-
-        df = df[df["MULTI_SPEC"] == False]
-
-        # If there is "Raw file" then it is a long format, otherwise short format
-        if "Raw file" not in parse_settings.mapper.values():
-            meltvars = parse_settings.condition_mapper.keys()
-            # Should be handled more elegant
-            try:
-                df = df.melt(
-                    id_vars=list(set(df.columns).difference(set(meltvars))),
-                    value_vars=meltvars,
-                    var_name="Raw file",
-                    value_name="Intensity",
-                )
-            except KeyError:
-                df.columns = [c.replace(".mzML", ".mzML.gz") for c in df.columns]
-                df = df.melt(
-                    id_vars=list(set(df.columns).difference(set(meltvars))),
-                    value_vars=meltvars,
-                    var_name="Raw file",
-                    value_name="Intensity",
-                )
-
-        df["replicate"] = df["Raw file"].map(parse_settings.condition_mapper)
-        df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)
-
-        if parse_settings.apply_modifications_parser:
-            df["proforma"] = df[parse_settings.modifications_parse_column].apply(
-                get_proforma_bracketed,
-                before_aa=parse_settings.modifications_before_aa,
-                isalpha=parse_settings.modifications_isalpha,
-                isupper=parse_settings.modifications_isupper,
-                pattern=parse_settings.modifications_pattern,
-                modification_dict=parse_settings.modifications_mapper,
-            )
-
-        try:
-            # df.loc[df.index, "precursor ion"] = (
-            #    df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
-            # )
-            # why loc when this works too?
-            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
-
-        except KeyError:
-            raise KeyError(
-                f"Not all columns required for making the ion are available."
-                "Is the charge available in the input file?"
-            )
-
-        return df, replicate_to_raw
+class ParseInputs:
+    """Class that contains methods to parse input files into a standard format."""

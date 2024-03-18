@@ -7,12 +7,14 @@ import os
 from collections import ChainMap
 from dataclasses import asdict
 from tempfile import TemporaryDirectory
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import streamlit as st
+from pandas import DataFrame
 
-from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo
+from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo, DDA_QUANT_RESULTS_REPO
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.fragger import extract_params as extract_params_fragger
@@ -23,11 +25,12 @@ from proteobench.utils.quant_datapoint import Datapoint
 from proteobench.io.parsing.parse_ion import (
     ParseInputs,
     aggregate_modification_column,
+    load_input_file,
 )
 from proteobench.io.parsing.parse_settings_ion import (
-    DDA_QUANT_RESULTS_REPO,
     PRECURSOR_NAME,
     ParseSettings,
+    ParseSettingsBuilder,
 )
 from proteobench.modules.interfaces import ModuleInterface
 
@@ -78,12 +81,12 @@ class Module(ModuleInterface):
             precursor=self.precursor_name,
         )
 
-        species_prec_ion = list(parse_settings.species_dict.values())
+        species_prec_ion = list(parse_settings.species_dict().values())
         species_prec_ion.append(self.precursor_name)
         prec_ion_to_species = filtered_df[species_prec_ion].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
         quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_name, how="inner")
-        species_expected_ratio = parse_settings.species_expected_ratio
+        species_expected_ratio = parse_settings.species_expected_ratio()
         res = Module.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res
 
@@ -238,43 +241,6 @@ class Module(ModuleInterface):
 
         return results_series
 
-    def load_input_file(self, input_csv: str, input_format: str) -> pd.DataFrame:
-        """Method loads dataframe from a csv depending on its format."""
-        input_data_frame: pd.DataFrame
-
-        if input_format == "MaxQuant":
-            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-        elif input_format == "AlphaPept":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False)
-        elif input_format == "Sage":
-            input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-        elif input_format == "FragPipe":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        elif input_format == "WOMBAT":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-            input_data_frame["proforma"] = input_data_frame["modified_peptide"]
-        elif input_format == "Proline":
-            input_data_frame = pd.read_excel(
-                input_csv,
-                sheet_name="Quantified peptide ions",
-                header=0,
-                index_col=None,
-            )
-            # TODO this should be generalized further, maybe even moved to parsing param in toml
-            input_data_frame["modifications"].fillna("", inplace=True)
-            input_data_frame["proforma"] = input_data_frame.apply(
-                lambda x: aggregate_modification_column(x.sequence, x.modifications),
-                axis=1,
-            )
-        elif input_format == "i2MassChroQ":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-            input_data_frame["proforma"] = input_data_frame["ProForma"]
-        elif input_format == "Custom":
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-            input_data_frame["proforma"] = input_data_frame["Modified sequence"]
-
-        return input_data_frame
-
     def add_current_data_point(self, all_datapoints, current_datapoint):
         """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
         if not isinstance(all_datapoints, pd.DataFrame):
@@ -301,14 +267,14 @@ class Module(ModuleInterface):
 
     def benchmarking(
         self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
-    ) -> pd.DataFrame:
+    ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """Main workflow of the module. Used to benchmark workflow results."""
 
         # Parse user config
-        input_df = self.load_input_file(input_file, input_format)
-        parse_settings = ParseSettings(input_format)
+        input_df = load_input_file(input_file, input_format)
+        parse_settings = ParseSettingsBuilder().build_parser(input_format)
 
-        standard_format, replicate_to_raw = ParseInputs().convert_to_standard_format(input_df, parse_settings)
+        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data
         intermediate_data_structure = self.generate_intermediate(standard_format, replicate_to_raw, parse_settings)

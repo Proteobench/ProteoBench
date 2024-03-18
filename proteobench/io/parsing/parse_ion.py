@@ -1,35 +1,144 @@
 from __future__ import annotations
 
+import re
+from collections import defaultdict
 from typing import Dict, List
 
 import pandas as pd
 
-from proteobench.io.parsing.parse import get_proforma_bracketed
 from proteobench.io.parsing.parse_settings_ion import ParseSettings
 from proteobench.modules.interfaces import ParseInputsInterface
 
 
+# TODO this should be generalized further
+def aggregate_modification_column(
+    input_string_seq: str,
+    input_string_modifications: str,
+    special_locations: dict = {
+        "Any N-term": 0,
+        "Any C-term": -1,
+        "Protein N-term": 0,
+        "Protein C-term": -1,
+    },
+):
+    all_mods = []
+    for m in input_string_modifications.split("; "):
+        if len(m) == 0:
+            continue
+        m_stripped = m.split(" (")[1].rstrip(")")
+        m_name = m.split(" (")[0]
+
+        if m_stripped in special_locations.keys():
+            if special_locations[m_stripped] == -1:
+                all_mods.append((m_name, len(input_string_seq)))
+            else:
+                all_mods.append((m_name, special_locations[m_stripped]))
+            continue
+
+        all_mods.append((m_name, int(m_stripped[1:])))
+
+    all_mods.sort(key=lambda x: x[1], reverse=True)
+
+    for name, loc in all_mods:
+        input_string_seq = input_string_seq[:loc] + f"[{name}]" + input_string_seq[loc:]
+
+    return input_string_seq
+
+
+def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):
+    if isalpha and isupper:
+        return sum(1 for char in input_string if char.isalpha() and char.isupper())
+    if isalpha:
+        return sum(1 for char in input_string if char.isalpha())
+    if isupper:
+        return sum(1 for char in input_string if char.isupper())
+
+
+def get_stripped_seq(input_string: str, isalpha: bool = True, isupper: bool = True):
+    if isalpha and isupper:
+        return "".join(char for char in input_string if char.isalpha() and char.isupper())
+    if isalpha:
+        return "".join(char for char in input_string if char.isalpha())
+    if isupper:
+        return "".join(char for char in input_string if char.isupper())
+
+
+def match_brackets(
+    input_string: str,
+    pattern: str = r"\[([^]]+)\]",
+    isalpha: bool = True,
+    isupper: bool = True,
+):
+    matches = [(match.group(1), match.start(1), match.end(1)) for match in re.finditer(pattern, input_string)]
+    positions = (count_chars(input_string[0 : m[1]], isalpha=isalpha, isupper=isupper) for m in matches)
+    mods = (m[0] for m in matches)
+    return mods, positions
+
+
+def get_proforma_bracketed(
+    input_string,
+    before_aa: bool = True,
+    isalpha: bool = True,
+    isupper: bool = True,
+    pattern: str = r"\[([^]]+)\]",
+    modification_dict: dict = {
+        "+57.0215": "Carbamidomethyl",
+        "+15.9949": "Oxidation",
+        "-17.026548": "Gln->pyro-Glu",
+        "-18.010565": "Glu->pyro-Glu",
+        "+42": "Acetyl",
+    },
+):
+    modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
+
+    new_modifications = []
+    for m in modifications:
+        try:
+            new_modifications.append(modification_dict[m])
+        except KeyError:
+            new_modifications.append(m)
+    modifications = new_modifications
+
+    pos_mod_dict = dict(zip(positions, modifications))
+
+    stripped_seq = get_stripped_seq(input_string, isalpha=isalpha, isupper=isupper)
+
+    new_seq = ""
+    for idx, aa in enumerate(stripped_seq):
+        if before_aa:
+            new_seq += aa
+        if idx in pos_mod_dict.keys():
+            if idx == 0:
+                new_seq += f"[{pos_mod_dict[idx]}]-"
+            elif idx == len(stripped_seq) - 1:
+                new_seq += f"-[{pos_mod_dict[idx]}]"
+            else:
+                new_seq += f"[{pos_mod_dict[idx]}]"
+        if not before_aa:
+            new_seq += aa
+
+    return new_seq
+
+
+# TODO this is different between ion and peptidoform
 class ParseInputs(ParseInputsInterface):
     def convert_to_standard_format(
         self, df: pd.DataFrame, parse_settings: ParseSettings
     ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """Convert a software tool output into a generic format supported by the module."""
         # TODO add functionality/steps in docstring
-
-        for k, v in parse_settings.mapper.items():
-            if k not in df.columns:
-                raise ImportError(
-                    f"Column {k} not found in input dataframe." " Please check input file and selected software tool."
-                )
+        # if any of the keys are not in the columns, raise an error
+        if not all(k in df.columns for k in parse_settings.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(parse_settings.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected software tool."
+            )
 
         df.rename(columns=parse_settings.mapper, inplace=True)
 
-        replicate_to_raw = {}
+        replicate_to_raw = defaultdict(list)
         for k, v in parse_settings.condition_mapper.items():
-            try:
-                replicate_to_raw[v].append(k)
-            except KeyError:
-                replicate_to_raw[v] = [k]
+            replicate_to_raw[v].append(k)
 
         if "Reverse" in parse_settings.mapper:
             df = df[df["Reverse"] != parse_settings.decoy_flag]
@@ -77,9 +186,12 @@ class ParseInputs(ParseInputsInterface):
             )
 
         try:
-            df.loc[df.index, "precursor ion"] = (
-                df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
-            )
+            # df.loc[df.index, "precursor ion"] = (
+            #    df.loc[df.index, "proforma"] + "|Z=" + df.loc[df.index, "Charge"].map(str)
+            # )
+            # why loc when this works too?
+            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+
         except KeyError:
             raise KeyError(
                 f"Not all columns required for making the ion are available."

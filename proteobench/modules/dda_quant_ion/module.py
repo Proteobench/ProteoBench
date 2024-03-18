@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from proteobench.modules.dda_quant_base.module import Module
-from proteobench.io.parsing.parse import aggregate_modification_column
+from proteobench.io.parsing.parse_ion import aggregate_modification_column
 from proteobench.io.parsing.parse_ion import ParseInputs
 from proteobench.io.parsing.parse_settings_ion import (
     DDA_QUANT_RESULTS_REPO,

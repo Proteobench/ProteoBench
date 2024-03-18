@@ -14,7 +14,7 @@ from proteobench.utils.quant_datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.io.parsing.parse_settings import (
+from proteobench.io.parsing.parse_settings_ion import (
     INPUT_FORMATS,
     LOCAL_DEVELOPMENT,
     ParseSettings,

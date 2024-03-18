@@ -7,8 +7,8 @@ import pandas as pd
 
 from proteobench.github.gh import read_results_json_repo
 from proteobench.modules.dda_quant_base.module import Datapoint, Module
-from proteobench.io.parsing.parse import ParseInputs
-from proteobench.io.parsing.parse_settings import (
+from proteobench.io.parsing.parse_ion import ParseInputs
+from proteobench.io.parsing.parse_settings_ion import (
     DDA_QUANT_RESULTS_REPO,
     INPUT_FORMATS,
     ParseSettings,

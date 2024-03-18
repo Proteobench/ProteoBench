@@ -20,11 +20,11 @@ from proteobench.io.params.maxquant import extract_params as extract_params_maxq
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.utils.quant_datapoint import Datapoint
-from proteobench.io.parsing.parse import (
+from proteobench.io.parsing.parse_ion import (
     ParseInputs,
     aggregate_modification_column,
 )
-from proteobench.io.parsing.parse_settings import (
+from proteobench.io.parsing.parse_settings_ion import (
     DDA_QUANT_RESULTS_REPO,
     PRECURSOR_NAME,
     ParseSettings,

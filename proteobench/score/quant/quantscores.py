@@ -1,9 +1,11 @@
+from typing import Dict
+
 import numpy as np
 import pandas as pd
 
 
 class QuantScores:
-    def __init__(self, precursor_name: str, species_expected_ratio, species_dict: dict[str, str]):
+    def __init__(self, precursor_name: str, species_expected_ratio, species_dict: Dict[str, str]):
         self.precursor_name = precursor_name
         self.species_expected_ratio = species_expected_ratio
         self.species_dict = species_dict

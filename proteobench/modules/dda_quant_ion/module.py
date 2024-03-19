@@ -12,6 +12,8 @@ from proteobench.io.parsing.parse_settings_ion import (
     PRECURSOR_NAME,
     ParseSettingsBuilder,
 )
+from proteobench.score.quant.quantscores import QuantScores
+from proteobench.utils.quant_datapoint import Datapoint
 
 
 class IonModule(Module):
@@ -29,7 +31,6 @@ class IonModule(Module):
         self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """Main workflow of the module. Used to benchmark workflow results."""
-
         # Parse user config
         input_df = load_input_file(input_file, input_format)
         parse_settings = ParseSettingsBuilder().build_parser(input_format)
@@ -37,9 +38,12 @@ class IonModule(Module):
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data
-        intermediate_data_structure = self.generate_intermediate(standard_format, replicate_to_raw, parse_settings)
+        quant_score = QuantScores(
+            self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+        )
+        intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
-        current_datapoint = self.generate_datapoint(
+        current_datapoint = Datapoint.generate_datapoint(
             intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 

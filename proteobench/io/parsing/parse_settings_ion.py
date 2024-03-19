@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import pandas as pd
-from collections import defaultdict
 
 import os
 from .parse_ion import *
 import toml
 
-from proteobench.modules.interfaces import Settings
 
 # import proteobench.modules.dda_quant.p
 
@@ -18,7 +15,7 @@ from proteobench.modules.interfaces import Settings
 LOCAL_DEVELOPMENT = False
 
 # For local development change below to the json and path,
-# if you do not want to download it from github
+# if you do not want to download it from GitHub
 DDA_QUANT_RESULTS_PATH = (
     "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json"  # e.g., K:/results.json
 )

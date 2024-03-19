@@ -9,6 +9,7 @@ from proteobench.github.gh import read_results_json_repo, DDA_QUANT_RESULTS_REPO
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.modules.dda_quant_base.module import Module
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.score.quant.quantscores import QuantScores
 from proteobench.utils.plotting.plot import PlotDataPoint
 from proteobench.utils.quant_datapoint import Datapoint
 
@@ -105,7 +106,10 @@ class TestOutputFileReading(unittest.TestCase):
             prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
             # Get quantification data
-            intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
+            quant_score = QuantScores(
+                "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            )
+            intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
 
             self.assertFalse(intermediate.empty)
 

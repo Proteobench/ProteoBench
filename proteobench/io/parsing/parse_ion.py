@@ -152,8 +152,3 @@ def get_proforma_bracketed(
             new_seq += aa
 
     return new_seq
-
-
-# TODO this is different between ion and peptidoform
-class ParseInputs:
-    """Class that contains methods to parse input files into a standard format."""

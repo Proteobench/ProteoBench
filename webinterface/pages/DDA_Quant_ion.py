@@ -7,6 +7,7 @@ from datetime import datetime
 from pprint import pformat
 from typing import Any, Dict, Optional, Type
 
+import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
@@ -24,7 +25,12 @@ if "submission_ready" not in st.session_state:
 
 
 class StreamlitUI:
-    """Proteobench Streamlit UI."""
+    """
+    Main class for the Streamlit interface of ProteoBench DDA quantification for ions.
+
+    This class manages the user interface, forms, and interactions within the ProteoBench application.
+    It handles user input, processes data using the IonModule, and displays results.
+    """
 
     def __init__(self):
         """Proteobench Streamlit UI."""
@@ -46,6 +52,16 @@ class StreamlitUI:
         self._sidebar()
 
     def generate_input_field(self, input_format: str, content: dict) -> Any:
+        """
+        Generates input fields in the Streamlit UI based on the specified format and content.
+
+        Args:
+            input_format: The format of the input (e.g., 'text_input', 'number_input').
+            content: Dictionary containing the configuration for the input field.
+
+        Returns:
+            A Streamlit widget corresponding to the specified input type.
+        """
         if content["type"] == "text_area":
             if "placeholder" in content:
                 return st.text_area(content["label"], placeholder=content["placeholder"], height=content["height"])
@@ -74,7 +90,10 @@ class StreamlitUI:
             return st.checkbox(content["label"], content["value"][input_format])
 
     def _main_page(self) -> None:
-        """Format main page."""
+        """
+        Sets up the main page layout for the Streamlit application.
+        This includes the title, module descriptions, input forms, and configuration settings.
+        """
         st.title("DDA quantification - precursor ions")
         st.warning(
             "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -187,14 +206,22 @@ class StreamlitUI:
             )
 
     def _populate_results(self) -> None:
+        """
+        Populates the results section of the UI. This is called after data processing is complete.
+        """
         self.generate_results("", None, None, False, None)
 
     def _sidebar(self):
-        """Format sidebar."""
+        """
+        Sets up the sidebar for the Streamlit application, including images and additional info.
+        """
         st.sidebar.image("logos/logo_funding/main_logos_sidebar.png", width=300)
 
     def _run_proteobench(self) -> None:
-        # Run Proteobench
+        """
+        Executes the ProteoBench benchmarking process. It handles the user's file submission,
+        runs the benchmarking module, and updates the session state with the results.
+        """
         st.header("Running Proteobench")
         status_placeholder = st.empty()
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
@@ -229,6 +256,10 @@ class StreamlitUI:
             self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
 
     def table_callback(self) -> None:
+        """
+        Callback function for handling edits made to the data table in the UI.
+        It updates the session state to reflect changes made to the data points.
+        """
         min_quant = st.session_state[st.session_state["slider_id"]]
         edits = st.session_state[st.session_state["table_id"]]["edited_rows"].items()
         for k, v in edits:
@@ -253,6 +284,10 @@ class StreamlitUI:
             self.plots_for_current_data(True)
 
     def slider_callback(self) -> None:
+        """
+        Callback function for the slider input. It adjusts the data points displayed based on
+        the selected slider value, such as the minimum number of ion quantifications.
+        """
         st.session_state[self.variables_dda_quant.all_datapoints] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_dda_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )
@@ -264,7 +299,20 @@ class StreamlitUI:
         if self.variables_dda_quant.result_perf in st.session_state.keys():
             self.plots_for_current_data(True)
 
-    def make_submission_webinterface(self, params, input_df, result_performance) -> Optional[str]:
+    def make_submission_webinterface(
+        self, params, input_df: pd.DataFrame, result_performance: pd.DataFrame
+    ) -> Optional[str]:
+        """
+        Handles the submission process of the benchmark results to the ProteoBench repository.
+
+        Args:
+            params: Parameters used for the benchmarking.
+            input_df: The input DataFrame.
+            result_performance: DataFrame containing the performance results.
+
+        Returns:
+            The URL of the submission if successful, None otherwise.
+        """
         st.session_state["submission_ready"] = True
 
         if self.variables_dda_quant.button_submission_uuid in st.session_state.keys():
@@ -317,6 +365,12 @@ class StreamlitUI:
         return pr_url
 
     def successful_submission(self, pr_url) -> None:
+        """
+        Handles the UI updates and notifications after a successful submission of benchmark results.
+
+        Args:
+            pr_url: The URL of the submitted pull request.
+        """
         if st.session_state[self.variables_dda_quant.submit]:
             # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
             st.subheader("SUCCESS")
@@ -331,6 +385,12 @@ class StreamlitUI:
             rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 
     def read_parameters(self) -> Any:
+        """
+        Reads and processes the parameter files provided by the user.
+
+        Returns:
+            The parameters read from the file, or None if there's an error.
+        """
         params = None
         try:
             params = self.ionmodule.load_params_file(
@@ -347,6 +407,9 @@ class StreamlitUI:
         return params
 
     def create_submission_elements(self) -> None:
+        """
+        Creates the UI elements necessary for data submission, including metadata uploader and comments section.
+        """
         self.user_input[self.variables_dda_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.texts.Help.meta_data_file,
@@ -369,6 +432,12 @@ class StreamlitUI:
         )
 
     def create_sample_name(self) -> str:
+        """
+        Generates a unique sample name based on the input format, software version, and the current timestamp.
+
+        Returns:
+            A string representing the generated sample name.
+        """
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
@@ -380,6 +449,10 @@ class StreamlitUI:
         return sample_name
 
     def create_first_new_plot(self) -> None:
+        """
+        Generates and displays the initial plots and data tables based on the benchmark results.
+        This includes setting up UI elements for displaying these results.
+        """
         st.header("Results")
         st.subheader("Sample of the processed file")
         st.markdown(open("pages/markdown_files/DDA_Quant_ion/table_description.md", "r").read())
@@ -432,6 +505,9 @@ class StreamlitUI:
         st.markdown(open("pages/markdown_files/DDA_Quant_ion/submit_description.md", "r").read())
 
     def call_later_plot(self) -> None:
+        """
+        Updates the plot data and UI elements after re-running the benchmark with new parameters or data.
+        """
         fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
         st.session_state[self.variables_dda_quant.fig_metric].data[0].x = fig_metric.data[0].x
         st.session_state[self.variables_dda_quant.fig_metric].data[0].y = fig_metric.data[0].y
@@ -442,13 +518,23 @@ class StreamlitUI:
 
     def generate_results(
         self,
-        status_placeholder,
-        result_performance,
-        all_datapoints,
-        recalculate,
-        input_df,
+        status_placeholder: Any,
+        result_performance: pd.DataFrame,
+        all_datapoints: pd.DataFrame,
+        recalculate: bool,
+        input_df: pd.DataFrame,
     ) -> None:
+        """
+        Generates and displays the final results of the benchmark process. It updates the UI with plots,
+        data tables, and other elements based on the benchmark results.
 
+        Args:
+            status_placeholder: UI element for displaying the processing status.
+            result_performance: DataFrame with performance results.
+            all_datapoints: DataFrame with all data points.
+            recalculate: Boolean indicating whether the results need to be recalculated.
+            input_df: DataFrame of the input data.
+        """
         if recalculate:
             status_placeholder.success(":heavy_check_mark: Finished!")
             st.session_state[self.variables_dda_quant.result_perf] = result_performance
@@ -501,7 +587,17 @@ class StreamlitUI:
             self.successful_submission(pr_url)
         self.variables_dda_quant.first_new_plot = False
 
-    def plots_for_current_data(self, recalculate) -> go.Figure:
+    def plots_for_current_data(self, recalculate: bool) -> go.Figure:
+        """
+        Generates and returns plots based on the current benchmark data.
+
+        Args:
+            recalculate: Boolean to determine if the plot needs to be recalculated.
+
+        Returns:
+            A Plotly graph object containing the generated plot.
+        """
+
         # filter result_performance dataframe on nr_observed column
         st.session_state[self.variables_dda_quant.result_perf] = st.session_state[self.variables_dda_quant.result_perf][
             st.session_state[self.variables_dda_quant.result_perf]["nr_observed"]

@@ -135,19 +135,25 @@ class StreamlitUI:
             or self.variables_dda_quant.first_new_plot == True
         ):
             st.session_state[self.variables_dda_quant.all_datapoints] = None
-            all_datapoints = st.session_state[self.variables_dda_quant.all_datapoints]
-            all_datapoints = self.ionmodule.obtain_all_data_point(all_datapoints)
-            all_datapoints = self.ionmodule.filter_data_point(
-                all_datapoints, st.session_state[st.session_state["slider_id"]]
+            st.session_state[self.variables_dda_quant.all_datapoints] = self.ionmodule.obtain_all_data_point(
+                st.session_state[self.variables_dda_quant.all_datapoints]
+            )
+            st.session_state[self.variables_dda_quant.all_datapoints] = self.ionmodule.filter_data_point(
+                st.session_state[self.variables_dda_quant.all_datapoints],
+                st.session_state[st.session_state["slider_id"]],
             )
 
             if (
                 self.variables_dda_quant.highlight_list not in st.session_state.keys()
-                and "Highlight" not in all_datapoints.columns
+                and "Highlight" not in st.session_state[self.variables_dda_quant.all_datapoints].columns
             ):
-                all_datapoints.insert(0, "Highlight", [False] * len(all_datapoints.index))
-            elif "Highlight" not in all_datapoints.columns:
-                all_datapoints.insert(0, "Highlight", st.session_state[self.variables_dda_quant.highlight_list])
+                st.session_state[self.variables_dda_quant.all_datapoints].insert(
+                    0, "Highlight", [False] * len(st.session_state[self.variables_dda_quant.all_datapoints].index)
+                )
+            elif "Highlight" not in st.session_state[self.variables_dda_quant.all_datapoints].columns:
+                st.session_state[self.variables_dda_quant.all_datapoints].insert(
+                    0, "Highlight", st.session_state[self.variables_dda_quant.highlight_list]
+                )
 
             st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
 
@@ -164,9 +170,8 @@ class StreamlitUI:
                 key=st.session_state["slider_id"],
             )
 
-            fig_metric = PlotDataPoint.plot_metric(all_datapoints)
+            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
 
-            st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
             st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
 
             st.session_state[self.variables_dda_quant.placeholder_fig_compare].plotly_chart(
@@ -262,6 +267,165 @@ class StreamlitUI:
                 st.session_state[st.session_state["slider_id"]],
             )
 
+    def make_submission_webinterface(self, params, all_datapoints, input_df, result_performance):
+        st.session_state["submission_ready"] = True
+
+        if self.variables_dda_quant.button_submission_uuid in st.session_state.keys():
+            button_submission_uuid = st.session_state[self.variables_dda_quant.button_submission_uuid]
+        else:
+            button_submission_uuid = uuid.uuid4()
+            st.session_state[self.variables_dda_quant.button_submission_uuid] = button_submission_uuid
+        submit_pr = st.button("I really want to upload it", key=button_submission_uuid)
+
+        if submit_pr:
+            st.session_state[self.variables_dda_quant.submit] = True
+            user_comments = self.user_input["comments_for_submission"]
+
+            submit_df = st.session_state[self.variables_dda_quant.all_datapoints]
+            if "Highlight" in submit_df.columns:
+                # TODO it seems that pandas trips over this sometime, even though it is present...
+                try:
+                    submit_df.drop("Highlight", inplace=True, axis=1)
+                except:
+                    pass
+
+            pr_url = self.ionmodule.clone_pr(
+                submit_df,
+                params,
+                st.secrets["gh"]["token"],
+                username="Proteobot",
+                remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                branch_name="new_branch",
+                submission_comments=user_comments,
+            )
+
+            if not pr_url:
+                del st.session_state[self.variables_dda_quant.submit]
+            else:
+                id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
+
+                if "storage" in st.secrets.keys():
+                    self.ionmodule.write_intermediate_raw(
+                        st.secrets["storage"]["dir"],
+                        id,
+                        input_df,
+                        result_performance,
+                        self.user_input[self.variables_dda_quant.meta_data],
+                    )
+
+        return pr_url
+
+    def successful_submission(self, pr_url):
+        if st.session_state[self.variables_dda_quant.submit]:
+            # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
+            st.subheader("SUCCESS")
+            st.markdown(self.texts.ShortMessages.submission_processing_warning)
+            try:
+                st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
+            except UnboundLocalError:
+                # Happens when pr_url is not defined, e.g., local dev
+                pass
+
+            st.session_state[self.variables_dda_quant.submit] = False
+            rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
+
+    def read_parameters(self):
+        params = None
+        try:
+            params = self.ionmodule.load_params_file(
+                self.user_input[self.variables_dda_quant.meta_data], self.user_input["input_format"]
+            )
+            st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
+        except KeyError as e:
+            st.error("Parsing of meta parameters file for this software is not supported yet.")
+        except Exception as err:
+            input_f = self.user_input["input_format"]
+            st.error(
+                f"Unexpected error while parsing file. Make sure you provided a meta parameters file produced by {input_f}."
+            )
+
+    def create_submission_elements(self):
+        self.user_input[self.variables_dda_quant.meta_data] = st.file_uploader(
+            "Meta data for searches",
+            help=self.texts.Help.meta_data_file,
+            key=self.variables_dda_quant.meta_file_uploader_uuid,
+            accept_multiple_files=True,
+        )
+
+        self.user_input["comments_for_submission"] = st.text_area(
+            "Comments for submission",
+            placeholder=self.texts.ShortMessages.parameters_additional,
+            height=200,
+            key=self.variables_dda_quant.comments_submission_uuid,
+        )
+
+        st.session_state[self.variables_dda_quant.meta_data_TEXT] = self.user_input["comments_for_submission"]
+
+        st.session_state[self.variables_dda_quant.check_submission] = st.checkbox(
+            "I confirm that the metadata is correct",
+            key=self.variables_dda_quant.check_submission_uuid,
+        )
+
+    def create_sample_name(self):
+        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        sample_name = "%s-%s-%s-%s" % (
+            self.user_input["input_format"],
+            self.user_input["software_version"],
+            self.user_input["enable_match_between_runs"],
+            time_stamp,
+        )
+
+        return sample_name
+
+    def create_first_new_plot(self):
+        sample_name = self.create_sample_name()
+
+        st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
+        # st.session_state["slider_id"] = uuid.uuid4()
+        f = st.select_slider(
+            label="Minimal ion quantifications (# samples)",
+            options=[1, 2, 3, 4, 5, 6],
+            value=st.session_state[st.session_state["slider_id"]],
+            on_change=self.slider_callback,
+            key=st.session_state["slider_id"],
+        )
+
+        placeholder_fig_compare = st.empty()
+        placeholder_fig_compare.plotly_chart(
+            st.session_state[self.variables_dda_quant.fig_metric], use_container_width=True
+        )
+        st.session_state[self.variables_dda_quant.placeholder_fig_compare] = placeholder_fig_compare
+
+        st.session_state["table_id"] = uuid.uuid4()
+
+        st.data_editor(
+            st.session_state[self.variables_dda_quant.all_datapoints],
+            key=st.session_state["table_id"],
+            on_change=self.table_callback,
+        )
+
+        st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
+        st.download_button(
+            label="Download",
+            data=streamlit_utils.save_dataframe(st.session_state[self.variables_dda_quant.result_perf]),
+            file_name=f"{sample_name}.csv",
+            mime="text/csv",
+            key=f"{random_uuid}",
+        )
+
+        st.subheader("Add results to online repository")
+        st.markdown(open("pages/markdown_files/DDA_Quant_ion/submit_description.md", "r").read())
+
+    def call_later_plot(self):
+        fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
+        st.session_state[self.variables_dda_quant.fig_metric].data[0].x = fig_metric.data[0].x
+        st.session_state[self.variables_dda_quant.fig_metric].data[0].y = fig_metric.data[0].y
+
+        st.session_state[self.variables_dda_quant.placeholder_fig_compare].plotly_chart(
+            st.session_state[self.variables_dda_quant.fig_metric], use_container_width=True
+        )
+
     def generate_results(
         self,
         status_placeholder,
@@ -270,7 +434,6 @@ class StreamlitUI:
         recalculate,
         input_df,
     ):
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if recalculate:
             status_placeholder.success(":heavy_check_mark: Finished!")
@@ -280,20 +443,24 @@ class StreamlitUI:
             st.header("Results")
             st.subheader("Sample of the processed file")
             st.markdown(open("pages/markdown_files/DDA_Quant_ion/table_description.md", "r").read())
-        if not recalculate:
-            result_performance = st.session_state[self.variables_dda_quant.result_perf]
-            all_datapoints = st.session_state[self.variables_dda_quant.all_datapoints]
+        if recalculate:
+            st.session_state[self.variables_dda_quant.result_perf] = result_performance
+            st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
             input_df = st.session_state[self.variables_dda_quant.input_df]
         if self.variables_dda_quant.first_new_plot:
-            st.session_state[self.variables_dda_quant.df_head] = st.dataframe(result_performance.head(100))
+            st.session_state[self.variables_dda_quant.df_head] = st.dataframe(
+                st.session_state[self.variables_dda_quant.result_perf].head(100)
+            )
         else:
-            st.session_state[self.variables_dda_quant.df_head] = result_performance.head(100)
+            st.session_state[self.variables_dda_quant.df_head] = st.session_state[
+                self.variables_dda_quant.result_perf
+            ].head(100)
 
         if self.variables_dda_quant.first_new_plot:
             st.markdown(st.markdown(open("pages/markdown_files/DDA_Quant_ion/result_description.md", "r").read()))
 
         fig_logfc = self.plots_for_current_data(
-            result_performance,
+            st.session_state[self.variables_dda_quant.result_perf],
             recalculate,
             self.variables_dda_quant.first_new_plot,
             slider_value=st.session_state[st.session_state["slider_id"]],
@@ -304,65 +471,16 @@ class StreamlitUI:
             st.markdown(self.texts.ShortMessages.submission_result_description)
 
         if recalculate:
-            fig_metric = PlotDataPoint.plot_metric(all_datapoints)
+            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
             st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
         else:
             fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
 
         if self.variables_dda_quant.first_new_plot:
-            st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
-            # st.session_state["slider_id"] = uuid.uuid4()
-            f = st.select_slider(
-                label="Minimal ion quantifications (# samples)",
-                options=[1, 2, 3, 4, 5, 6],
-                value=st.session_state[st.session_state["slider_id"]],
-                on_change=self.slider_callback,
-                key=st.session_state["slider_id"],
-            )
-
-            placeholder_fig_compare = st.empty()
-            placeholder_fig_compare.plotly_chart(
-                st.session_state[self.variables_dda_quant.fig_metric], use_container_width=True
-            )
-            st.session_state[self.variables_dda_quant.placeholder_fig_compare] = placeholder_fig_compare
-
-            st.session_state["table_id"] = uuid.uuid4()
-
-            st.data_editor(
-                st.session_state[self.variables_dda_quant.all_datapoints],
-                key=st.session_state["table_id"],
-                on_change=self.table_callback,
-            )
+            self.create_first_new_plot()
         else:
-            fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
-            st.session_state[self.variables_dda_quant.fig_metric].data[0].x = fig_metric.data[0].x
-            st.session_state[self.variables_dda_quant.fig_metric].data[0].y = fig_metric.data[0].y
+            self.call_later_plot()
 
-            st.session_state[self.variables_dda_quant.placeholder_fig_compare].plotly_chart(
-                st.session_state[self.variables_dda_quant.fig_metric], use_container_width=True
-            )
-
-        sample_name = "%s-%s-%s-%s" % (
-            self.user_input["input_format"],
-            self.user_input["software_version"],
-            self.user_input["enable_match_between_runs"],
-            time_stamp,
-        )
-
-        # Download link
-        if self.variables_dda_quant.first_new_plot:
-            st.subheader("Download calculated ratios")
-            random_uuid = uuid.uuid4()
-            st.download_button(
-                label="Download",
-                data=streamlit_utils.save_dataframe(result_performance),
-                file_name=f"{sample_name}.csv",
-                mime="text/csv",
-                key=f"{random_uuid}",
-            )
-
-            st.subheader("Add results to online repository")
-            st.markdown(open("pages/markdown_files/DDA_Quant_ion/submit_description.md", "r").read())
         st.session_state[self.variables_dda_quant.fig_logfc] = fig_logfc
         st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
         st.session_state[self.variables_dda_quant.result_perf] = result_performance
@@ -370,119 +488,29 @@ class StreamlitUI:
         st.session_state[self.variables_dda_quant.input_df] = input_df
 
         # Create unique element IDs
-        if self.variables_dda_quant.meta_file_uploader_uuid in st.session_state.keys():
-            meta_file_uploader_uuid = st.session_state[self.variables_dda_quant.meta_file_uploader_uuid]
-        else:
+        if self.variables_dda_quant.meta_file_uploader_uuid not in st.session_state.keys():
             meta_file_uploader_uuid = uuid.uuid4()
             st.session_state[self.variables_dda_quant.meta_file_uploader_uuid] = meta_file_uploader_uuid
-        if self.variables_dda_quant.comments_submission_uuid in st.session_state.keys():
-            comments_submission_uuid = st.session_state[self.variables_dda_quant.comments_submission_uuid]
-        else:
+        if self.variables_dda_quant.comments_submission_uuid not in st.session_state.keys():
             comments_submission_uuid = uuid.uuid4()
             st.session_state[self.variables_dda_quant.comments_submission_uuid] = comments_submission_uuid
-        if self.variables_dda_quant.check_submission_uuid in st.session_state.keys():
-            check_submission_uuid = st.session_state[self.variables_dda_quant.check_submission_uuid]
-        else:
+        if self.variables_dda_quant.check_submission_uuid not in st.session_state.keys():
             check_submission_uuid = uuid.uuid4()
             st.session_state[self.variables_dda_quant.check_submission_uuid] = check_submission_uuid
 
         if self.variables_dda_quant.first_new_plot:
-            self.user_input[self.variables_dda_quant.meta_data] = st.file_uploader(
-                "Meta data for searches",
-                help=self.texts.Help.meta_data_file,
-                key=meta_file_uploader_uuid,
-                accept_multiple_files=True,
-            )
-
-            self.user_input["comments_for_submission"] = st.text_area(
-                "Comments for submission",
-                placeholder=self.texts.ShortMessages.parameters_additional,
-                height=200,
-                key=comments_submission_uuid,
-            )
-
-            st.session_state[self.variables_dda_quant.meta_data_TEXT] = self.user_input["comments_for_submission"]
-
-            st.session_state[self.variables_dda_quant.check_submission] = st.checkbox(
-                "I confirm that the metadata is correct",
-                key=check_submission_uuid,
-            )
-
-        # TODO: do we need a better handling of this?
-        params = None
+            self.create_submission_elements()
         if self.user_input[self.variables_dda_quant.meta_data]:
-            try:
-                print(self.user_input["input_format"])
-                params = self.ionmodule.load_params_file(
-                    self.user_input[self.variables_dda_quant.meta_data], self.user_input["input_format"]
-                )
-                st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
-            except KeyError as e:
-                st.error("Parsing of meta parameters file for this software is not supported yet.")
-            except Exception as err:
-                input_f = self.user_input["input_format"]
-                st.error(
-                    f"Unexpected error while parsing file. Make sure you provided a meta parameters file produced by {input_f}."
-                )
-
+            params = self.read_parameters()
         if st.session_state[self.variables_dda_quant.check_submission] and params != None:
-            st.session_state["submission_ready"] = True
-
-            if self.variables_dda_quant.button_submission_uuid in st.session_state.keys():
-                button_submission_uuid = st.session_state[self.variables_dda_quant.button_submission_uuid]
-            else:
-                button_submission_uuid = uuid.uuid4()
-                st.session_state[self.variables_dda_quant.button_submission_uuid] = button_submission_uuid
-            submit_pr = st.button("I really want to upload it", key=button_submission_uuid)
-
-            if submit_pr:
-                st.session_state[self.variables_dda_quant.submit] = True
-                user_comments = self.user_input["comments_for_submission"]
-
-                submit_df = st.session_state[self.variables_dda_quant.all_datapoints]
-                if "Highlight" in submit_df.columns:
-                    # TODO it seems that pandas trips over this sometime, even though it is present...
-                    try:
-                        submit_df.drop("Highlight", inplace=True, axis=1)
-                    except:
-                        pass
-
-                pr_url = self.ionmodule.clone_pr(
-                    submit_df,
-                    params,
-                    st.secrets["gh"]["token"],
-                    username="Proteobot",
-                    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                    branch_name="new_branch",
-                    submission_comments=user_comments,
-                )
-
-                if not pr_url:
-                    del st.session_state[self.variables_dda_quant.submit]
-                else:
-                    id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
-
-                    if "storage" in st.secrets.keys():
-                        self.ionmodule.write_intermediate_raw(
-                            st.secrets["storage"]["dir"],
-                            id,
-                            input_df,
-                            result_performance,
-                            self.user_input[self.variables_dda_quant.meta_data],
-                        )
+            pr_url = self.make_submission_webinterface(
+                params,
+                st.session_state[self.variables_dda_quant.all_datapoints],
+                st.session_state[self.variables_dda_quant.input_df],
+                st.session_state[self.variables_dda_quant.result_perf],
+            )
         if self.variables_dda_quant.submit in st.session_state:
-            if st.session_state[self.variables_dda_quant.submit]:
-                # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
-                st.subheader("SUCCESS")
-                st.markdown(self.texts.ShortMessages.submission_processing_warning)
-                try:
-                    st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
-                except UnboundLocalError:
-                    # Happens when pr_url is not defined, e.g., local dev
-                    pass
-
-                st.session_state[self.variables_dda_quant.submit] = False
-                rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
+            self.successful_submission(pr_url)
         self.variables_dda_quant.first_new_plot = False
 
     def plots_for_current_data(self, result_performance, recalculate, first_new_plot, slider_value):

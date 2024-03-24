@@ -86,15 +86,8 @@ class StreamlitUI:
         st.markdown(open("pages/markdown_files/DDA_Quant_ion/introduction.md", "r").read())
         st.header("Downloading associated files")
         st.markdown(open("pages/markdown_files/DDA_Quant_ion/file_description.md", "r").read(), unsafe_allow_html=True)
-
         st.header("Input and configuration")
-
-        st.markdown(
-            """
-            Scroll down if you want to see the public benchmark runs publicly available
-            today.
-            """
-        )
+        st.markdown(self.texts.ShortMessages.initial_results)
 
         with st.form(key="main_form"):
             st.subheader("Input files")
@@ -107,12 +100,8 @@ class StreamlitUI:
                 "Software tool result file", help=self.texts.Help.input_file
             )
 
-            st.markdown(
-                """
-                Additionally, you can fill out some information on the paramters that were 
-                used for this benchmark run bellow. These will be printed when hovering on your point.
-                """
-            )
+            st.markdown(self.texts.ShortMessages.initial_parameters)
+
             with st.expander("Additional parameters"):
                 with open("../webinterface/configuration/dda_quant.json") as file:
                     config = json.load(file)
@@ -120,11 +109,7 @@ class StreamlitUI:
                 for key, value in config.items():
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
-            st.markdown(
-                """
-                    Now, press `Parse and Bench` to calculate the metrics from your input. 
-                    """
-            )
+            st.markdown(self.texts.ShortMessages.run_instructions)
 
             submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.parse_button)
 
@@ -174,14 +159,7 @@ class StreamlitUI:
             elif "Highlight" not in all_datapoints.columns:
                 all_datapoints.insert(0, "Highlight", st.session_state[self.variables_dda_quant.highlight_list])
 
-            st.markdown(
-                """
-                    Choose with the slider below the minimum number of quantification value 
-                    per raw file.  
-                    Example: when 3 is selected, only the precursor ions quantified in 
-                    3 or more raw files will be considered for the plot. 
-                        """
-            )
+            st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
 
             st.session_state[self.variables_dda_quant.placeholder_slider] = st.empty()
             st.session_state[self.variables_dda_quant.placeholder_fig_compare] = st.empty()
@@ -320,13 +298,7 @@ class StreamlitUI:
         if self.variables_dda_quant.first_new_plot:
             st.header("Results")
             st.subheader("Sample of the processed file")
-            st.markdown(
-                """
-                Here are the data from your benchmark run. The table contains the 
-                precursor ion MS signal calculated from your input data. You can download 
-                this table from `Download calculated ratios` below.
-                """
-            )
+            st.markdown(open("pages/markdown_files/DDA_Quant_ion/table_description.md", "r").read())
         if not recalculate:
             result_performance = st.session_state[self.variables_dda_quant.result_perf]
             all_datapoints = st.session_state[self.variables_dda_quant.all_datapoints]
@@ -350,13 +322,7 @@ class StreamlitUI:
 
         if self.variables_dda_quant.first_new_plot:
             st.subheader("Mean error between conditions")
-            st.markdown(
-                """
-                New figure including your benchmark run. The point corresponding to 
-                your data will appear bigger than the public data sets already available 
-                in ProteoBench.
-                """
-            )
+            st.markdown(self.texts.ShortMessages.submission_result_description)
 
         if recalculate:
             all_datapoints["weighted_sum"] = [
@@ -374,14 +340,7 @@ class StreamlitUI:
             fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
 
         if self.variables_dda_quant.first_new_plot:
-            st.markdown(
-                """
-                    Choose with the slider below the minimum number of quantification value 
-                    per raw file.  
-                    Example: when 3 is selected, only the precursor ions quantified in 
-                    3 or more raw files will be considered for the plot. 
-                        """
-            )
+            st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
             st.session_state["slider_id"] = uuid.uuid4()
             f = st.select_slider(
                 label="Minimal ion quantifications (# samples)",
@@ -550,11 +509,7 @@ class StreamlitUI:
             if st.session_state[self.variables_dda_quant.submit]:
                 # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
                 st.subheader("SUCCESS")
-                st.markdown(
-                    """
-                    **It will take a few working days for your point to be added to the plot**
-                    """
-                )
+                st.markdown(self.texts.ShortMessages.submission_processing_warning)
                 try:
                     st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
                 except UnboundLocalError:
@@ -609,6 +564,30 @@ class StreamlitUI:
 class WebpageTexts:
     class ShortMessages:
         no_results = "No results available for this module."
+
+        initial_results = """"
+            Scroll down if you want to see the public benchmark runs publicly available
+            today.
+            """
+
+        initial_parameters = """
+            Additionally, you can fill out some information on the paramters that were 
+            used for this benchmark run bellow. These will be printed when hovering on your point.
+            """
+
+        run_instructions = """
+            Now, press `Parse and Bench` to calculate the metrics from your input. 
+            """
+
+        submission_result_description = """
+            New figure including your benchmark run. The point corresponding to 
+            your data will appear bigger than the public data sets already available 
+            in ProteoBench.
+            """
+
+        submission_processing_warning = """
+            **It will take a few working days for your point to be added to the plot**
+            """
 
     class Help:
         input_file = """

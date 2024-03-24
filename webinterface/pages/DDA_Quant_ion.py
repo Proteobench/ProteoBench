@@ -5,7 +5,9 @@ import logging
 import uuid
 from datetime import datetime
 from pprint import pformat
+from typing import Any, Dict, Optional, Type
 
+import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
 from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
@@ -15,7 +17,7 @@ from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_ion.module import IonModule
 from proteobench.utils.plotting.plot import PlotDataPoint
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 if "submission_ready" not in st.session_state:
     st.session_state["submission_ready"] = False
@@ -26,9 +28,9 @@ class StreamlitUI:
 
     def __init__(self):
         """Proteobench Streamlit UI."""
-        self.variables_dda_quant = VariablesDDAQuant()
-        self.texts = WebpageTexts
-        self.user_input = dict()
+        self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
+        self.texts: Type[WebpageTexts] = WebpageTexts
+        self.user_input: Dict[str, Any] = dict()
 
         st.set_page_config(
             page_title="Proteobench web server",
@@ -39,11 +41,11 @@ class StreamlitUI:
         if self.variables_dda_quant.submit not in st.session_state:
             st.session_state[self.variables_dda_quant.submit] = False
 
-        self.ionmodule = IonModule()
+        self.ionmodule: IonModule = IonModule()
         self._main_page()
         self._sidebar()
 
-    def generate_input_field(self, input_format: str, content: dict):
+    def generate_input_field(self, input_format: str, content: dict) -> Any:
         if content["type"] == "text_area":
             if "placeholder" in content:
                 return st.text_area(content["label"], placeholder=content["placeholder"], height=content["height"])
@@ -71,7 +73,7 @@ class StreamlitUI:
         if content["type"] == "checkbox":
             return st.checkbox(content["label"], content["value"][input_format])
 
-    def _main_page(self):
+    def _main_page(self) -> None:
         """Format main page."""
         st.title("DDA quantification - precursor ions")
         st.warning(
@@ -184,14 +186,14 @@ class StreamlitUI:
                 on_change=self.table_callback,
             )
 
-    def _populate_results(self):
+    def _populate_results(self) -> None:
         self.generate_results("", None, None, False, None)
 
     def _sidebar(self):
         """Format sidebar."""
         st.sidebar.image("logos/logo_funding/main_logos_sidebar.png", width=300)
 
-    def _run_proteobench(self):
+    def _run_proteobench(self) -> None:
         # Run Proteobench
         st.header("Running Proteobench")
         status_placeholder = st.empty()
@@ -226,7 +228,7 @@ class StreamlitUI:
         else:
             self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
 
-    def table_callback(self):
+    def table_callback(self) -> None:
         min_quant = st.session_state[st.session_state["slider_id"]]
         edits = st.session_state[st.session_state["table_id"]]["edited_rows"].items()
         for k, v in edits:
@@ -248,9 +250,9 @@ class StreamlitUI:
         st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
 
         if self.variables_dda_quant.result_perf in st.session_state.keys():
-            self.plots_for_current_data(st.session_state[self.variables_dda_quant.result_perf], True, False, min_quant)
+            self.plots_for_current_data(True)
 
-    def slider_callback(self):
+    def slider_callback(self) -> None:
         st.session_state[self.variables_dda_quant.all_datapoints] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_dda_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )
@@ -260,14 +262,9 @@ class StreamlitUI:
         st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
 
         if self.variables_dda_quant.result_perf in st.session_state.keys():
-            self.plots_for_current_data(
-                st.session_state[self.variables_dda_quant.result_perf],
-                True,
-                False,
-                st.session_state[st.session_state["slider_id"]],
-            )
+            self.plots_for_current_data(True)
 
-    def make_submission_webinterface(self, params, input_df, result_performance):
+    def make_submission_webinterface(self, params, input_df, result_performance) -> Optional[str]:
         st.session_state["submission_ready"] = True
 
         if self.variables_dda_quant.button_submission_uuid in st.session_state.keys():
@@ -319,7 +316,7 @@ class StreamlitUI:
 
         return pr_url
 
-    def successful_submission(self, pr_url):
+    def successful_submission(self, pr_url) -> None:
         if st.session_state[self.variables_dda_quant.submit]:
             # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
             st.subheader("SUCCESS")
@@ -333,7 +330,7 @@ class StreamlitUI:
             st.session_state[self.variables_dda_quant.submit] = False
             rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 
-    def read_parameters(self):
+    def read_parameters(self) -> Any:
         params = None
         try:
             params = self.ionmodule.load_params_file(
@@ -347,8 +344,9 @@ class StreamlitUI:
             st.error(
                 f"Unexpected error while parsing file. Make sure you provided a meta parameters file produced by {input_f}."
             )
+        return params
 
-    def create_submission_elements(self):
+    def create_submission_elements(self) -> None:
         self.user_input[self.variables_dda_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.texts.Help.meta_data_file,
@@ -370,7 +368,7 @@ class StreamlitUI:
             key=self.variables_dda_quant.check_submission_uuid,
         )
 
-    def create_sample_name(self):
+    def create_sample_name(self) -> str:
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         sample_name = "%s-%s-%s-%s" % (
             self.user_input["input_format"],
@@ -381,7 +379,7 @@ class StreamlitUI:
 
         return sample_name
 
-    def create_first_new_plot(self):
+    def create_first_new_plot(self) -> None:
         st.header("Results")
         st.subheader("Sample of the processed file")
         st.markdown(open("pages/markdown_files/DDA_Quant_ion/table_description.md", "r").read())
@@ -433,7 +431,7 @@ class StreamlitUI:
         st.subheader("Add results to online repository")
         st.markdown(open("pages/markdown_files/DDA_Quant_ion/submit_description.md", "r").read())
 
-    def call_later_plot(self):
+    def call_later_plot(self) -> None:
         fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
         st.session_state[self.variables_dda_quant.fig_metric].data[0].x = fig_metric.data[0].x
         st.session_state[self.variables_dda_quant.fig_metric].data[0].y = fig_metric.data[0].y
@@ -449,7 +447,7 @@ class StreamlitUI:
         all_datapoints,
         recalculate,
         input_df,
-    ):
+    ) -> None:
 
         if recalculate:
             status_placeholder.success(":heavy_check_mark: Finished!")
@@ -461,12 +459,7 @@ class StreamlitUI:
                 self.variables_dda_quant.result_perf
             ].head(100)
 
-        st.session_state[self.variables_dda_quant.fig_logfc] = self.plots_for_current_data(
-            st.session_state[self.variables_dda_quant.result_perf],
-            recalculate,
-            self.variables_dda_quant.first_new_plot,
-            slider_value=st.session_state[st.session_state["slider_id"]],
-        )
+        st.session_state[self.variables_dda_quant.fig_logfc] = self.plots_for_current_data(recalculate)
 
         if recalculate:
             st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
@@ -508,24 +501,27 @@ class StreamlitUI:
             self.successful_submission(pr_url)
         self.variables_dda_quant.first_new_plot = False
 
-    def plots_for_current_data(self, result_performance, recalculate, first_new_plot, slider_value):
+    def plots_for_current_data(self, recalculate) -> go.Figure:
         # filter result_performance dataframe on nr_observed column
-        result_performance = result_performance[result_performance["nr_observed"] >= slider_value]
+        st.session_state[self.variables_dda_quant.result_perf] = st.session_state[self.variables_dda_quant.result_perf][
+            st.session_state[self.variables_dda_quant.result_perf]["nr_observed"]
+            >= st.session_state[st.session_state["slider_id"]]
+        ]
 
         if recalculate:
             parse_settings = ParseSettingsBuilder().build_parser(self.user_input["input_format"])
 
             fig_logfc = PlotDataPoint.plot_fold_change_histogram(
-                result_performance, parse_settings.species_expected_ratio()
+                st.session_state[self.variables_dda_quant.result_perf], parse_settings.species_expected_ratio()
             )
-            fig_CV = PlotDataPoint.plot_CV_violinplot(result_performance)
+            fig_CV = PlotDataPoint.plot_CV_violinplot(st.session_state[self.variables_dda_quant.result_perf])
             st.session_state[self.variables_dda_quant.fig_cv] = fig_CV
             st.session_state[self.variables_dda_quant.fig_logfc] = fig_logfc
         else:
             fig_logfc = st.session_state[self.variables_dda_quant.fig_logfc]
             fig_CV = st.session_state[self.variables_dda_quant.fig_cv]
 
-        if first_new_plot:
+        if self.variables_dda_quant.first_new_plot:
             # Use st.beta_columns to arrange the figures side by side
             col1, col2 = st.columns(2)
             col1.subheader("Log2 Fold Change distributions by species.")

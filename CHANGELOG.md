@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2024-03-22
+
+### New
+- Analysis notebooks
+- start contribution page
+- clean up contribution
+- Update index.rst
+- add tolerance unit of alphapept search
+- update ProteoBench on server after update
+- Fragpipe params upload
 
 ## [0.2.3] - 2024-02-22
 

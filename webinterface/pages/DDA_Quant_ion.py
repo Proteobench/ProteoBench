@@ -11,16 +11,9 @@ import streamlit_utils
 from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.io.parsing.parse_settings_ion import (
-    LOCAL_DEVELOPMENT,
-    ParseSettingsBuilder,
-)
+from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_ion.module import IonModule
 from proteobench.utils.plotting.plot import PlotDataPoint
-from proteobench.utils.quant_datapoint import (
-    filter_df_numquant_median_abs_epsilon,
-    filter_df_numquant_nr_prec,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +38,8 @@ class StreamlitUI:
         )
         if self.variables_dda_quant.submit not in st.session_state:
             st.session_state[self.variables_dda_quant.submit] = False
+
+        self.ionmodule = IonModule()
         self._main_page()
         self._sidebar()
 
@@ -123,18 +118,17 @@ class StreamlitUI:
                     del st.session_state[self.variables_dda_quant.check_submission_uuid]
                 if self.variables_dda_quant.button_submission_uuid in st.session_state.keys():
                     del st.session_state[self.variables_dda_quant.button_submission_uuid]
-
                 self._run_proteobench()
             else:
                 st.error(":x: Please provide a result file")
 
+        if "slider_id" not in st.session_state.keys():
+            st.session_state["slider_id"] = uuid.uuid4()
+        if st.session_state["slider_id"] not in st.session_state.keys():
+            st.session_state[st.session_state["slider_id"]] = self.variables_dda_quant.default_val_slider
+
         if self.variables_dda_quant.fig_logfc in st.session_state:
             self._populate_results()
-
-        if "slider_id" in st.session_state.keys():
-            default_val_slider = st.session_state[st.session_state["slider_id"]]
-        else:
-            default_val_slider = self.variables_dda_quant.default_val_slider
 
         if (
             self.variables_dda_quant.all_datapoints not in st.session_state
@@ -142,13 +136,9 @@ class StreamlitUI:
         ):
             st.session_state[self.variables_dda_quant.all_datapoints] = None
             all_datapoints = st.session_state[self.variables_dda_quant.all_datapoints]
-            all_datapoints = IonModule().obtain_all_data_point(all_datapoints)
-
-            all_datapoints["median_abs_epsilon"] = all_datapoints["results"].apply(
-                filter_df_numquant_median_abs_epsilon, min_quant=default_val_slider
-            )
-            all_datapoints["nr_prec"] = all_datapoints["results"].apply(
-                filter_df_numquant_nr_prec, min_quant=default_val_slider
+            all_datapoints = self.ionmodule.obtain_all_data_point(all_datapoints)
+            all_datapoints = self.ionmodule.filter_data_point(
+                all_datapoints, st.session_state[st.session_state["slider_id"]]
             )
 
             if (
@@ -164,14 +154,12 @@ class StreamlitUI:
             st.session_state[self.variables_dda_quant.placeholder_slider] = st.empty()
             st.session_state[self.variables_dda_quant.placeholder_fig_compare] = st.empty()
             st.session_state[self.variables_dda_quant.placeholder_table] = st.empty()
-
-            st.session_state["slider_id"] = uuid.uuid4()
             st.session_state["table_id"] = uuid.uuid4()
 
             st.session_state[self.variables_dda_quant.placeholder_slider].select_slider(
                 label="Minimal ion quantifications (# samples)",
                 options=[1, 2, 3, 4, 5, 6],
-                value=default_val_slider,
+                value=st.session_state[st.session_state["slider_id"]],
                 on_change=self.slider_callback,
                 key=st.session_state["slider_id"],
             )
@@ -208,17 +196,12 @@ class StreamlitUI:
             st.session_state[self.variables_dda_quant.all_datapoints] = None
 
         try:
-            if "slider_id" in st.session_state.keys():
-                default_val_slider = st.session_state[st.session_state["slider_id"]]
-            else:
-                default_val_slider = self.variables_dda_quant.default_val_slider
-
-            result_performance, all_datapoints, input_df = IonModule().benchmarking(
+            result_performance, all_datapoints, input_df = self.ionmodule.benchmarking(
                 self.user_input["input_csv"],
                 self.user_input["input_format"],
                 self.user_input,
                 st.session_state[self.variables_dda_quant.all_datapoints],
-                default_cutoff_min_prec=default_val_slider,
+                default_cutoff_min_prec=st.session_state[st.session_state["slider_id"]],
             )
 
             st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
@@ -263,22 +246,21 @@ class StreamlitUI:
             self.plots_for_current_data(st.session_state[self.variables_dda_quant.result_perf], True, False, min_quant)
 
     def slider_callback(self):
-        min_quant = st.session_state[st.session_state["slider_id"]]
-        st.session_state[self.variables_dda_quant.all_datapoints]["median_abs_epsilon"] = [
-            filter_df_numquant_median_abs_epsilon(v, min_quant=min_quant)
-            for v in st.session_state[self.variables_dda_quant.all_datapoints]["results"]
-        ]
-        st.session_state[self.variables_dda_quant.all_datapoints]["nr_prec"] = [
-            filter_df_numquant_nr_prec(v, min_quant=min_quant)
-            for v in st.session_state[self.variables_dda_quant.all_datapoints]["results"]
-        ]
+        st.session_state[self.variables_dda_quant.all_datapoints] = self.ionmodule.filter_data_point(
+            st.session_state[self.variables_dda_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
+        )
 
         fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
 
         st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
 
         if self.variables_dda_quant.result_perf in st.session_state.keys():
-            self.plots_for_current_data(st.session_state[self.variables_dda_quant.result_perf], True, False, min_quant)
+            self.plots_for_current_data(
+                st.session_state[self.variables_dda_quant.result_perf],
+                True,
+                False,
+                st.session_state[st.session_state["slider_id"]],
+            )
 
     def generate_results(
         self,
@@ -288,7 +270,6 @@ class StreamlitUI:
         recalculate,
         input_df,
     ):
-        self.variables_dda_quant.first_new_plot
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if recalculate:
@@ -311,13 +292,11 @@ class StreamlitUI:
         if self.variables_dda_quant.first_new_plot:
             st.markdown(st.markdown(open("pages/markdown_files/DDA_Quant_ion/result_description.md", "r").read()))
 
-        if "slider_id" in st.session_state.keys():
-            default_val_slider = st.session_state[st.session_state["slider_id"]]
-        else:
-            default_val_slider = self.variables_dda_quant.default_val_slider
-
         fig_logfc = self.plots_for_current_data(
-            result_performance, recalculate, self.variables_dda_quant.first_new_plot, slider_value=default_val_slider
+            result_performance,
+            recalculate,
+            self.variables_dda_quant.first_new_plot,
+            slider_value=st.session_state[st.session_state["slider_id"]],
         )
 
         if self.variables_dda_quant.first_new_plot:
@@ -325,27 +304,18 @@ class StreamlitUI:
             st.markdown(self.texts.ShortMessages.submission_result_description)
 
         if recalculate:
-            all_datapoints["weighted_sum"] = [
-                filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider)
-                for v in all_datapoints["results"]
-            ]
-            all_datapoints["nr_prec"] = [
-                filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
-            ]
-
             fig_metric = PlotDataPoint.plot_metric(all_datapoints)
-            st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
             st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
         else:
             fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
 
         if self.variables_dda_quant.first_new_plot:
             st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
-            st.session_state["slider_id"] = uuid.uuid4()
+            # st.session_state["slider_id"] = uuid.uuid4()
             f = st.select_slider(
                 label="Minimal ion quantifications (# samples)",
                 options=[1, 2, 3, 4, 5, 6],
-                value=default_val_slider,
+                value=st.session_state[st.session_state["slider_id"]],
                 on_change=self.slider_callback,
                 key=st.session_state["slider_id"],
             )
@@ -426,7 +396,7 @@ class StreamlitUI:
 
             self.user_input["comments_for_submission"] = st.text_area(
                 "Comments for submission",
-                placeholder="Anything else you want to let us know? Please specifically add changes in your search parameters here, that are not obvious from the parameter file.",
+                placeholder=self.texts.ShortMessages.parameters_additional,
                 height=200,
                 key=comments_submission_uuid,
             )
@@ -443,7 +413,7 @@ class StreamlitUI:
         if self.user_input[self.variables_dda_quant.meta_data]:
             try:
                 print(self.user_input["input_format"])
-                params = IonModule().load_params_file(
+                params = self.ionmodule.load_params_file(
                     self.user_input[self.variables_dda_quant.meta_data], self.user_input["input_format"]
                 )
                 st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
@@ -468,29 +438,24 @@ class StreamlitUI:
             if submit_pr:
                 st.session_state[self.variables_dda_quant.submit] = True
                 user_comments = self.user_input["comments_for_submission"]
-                if not LOCAL_DEVELOPMENT:
-                    submit_df = st.session_state[self.variables_dda_quant.all_datapoints]
-                    if "Highlight" in submit_df.columns:
-                        # TODO it seems that pandas trips over this sometime, even though it is present...
-                        try:
-                            submit_df.drop("Highlight", inplace=True, axis=1)
-                        except:
-                            pass
 
-                    pr_url = IonModule().clone_pr(
-                        submit_df,
-                        params,
-                        st.secrets["gh"]["token"],
-                        username="Proteobot",
-                        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                        branch_name="new_branch",
-                        submission_comments=user_comments,
-                    )
-                else:
-                    # TODO, what is this?
-                    DDA_QUANT_RESULTS_PATH = IonModule().write_json_local_development(
-                        st.session_state[self.variables_dda_quant.all_datapoints], params
-                    )
+                submit_df = st.session_state[self.variables_dda_quant.all_datapoints]
+                if "Highlight" in submit_df.columns:
+                    # TODO it seems that pandas trips over this sometime, even though it is present...
+                    try:
+                        submit_df.drop("Highlight", inplace=True, axis=1)
+                    except:
+                        pass
+
+                pr_url = self.ionmodule.clone_pr(
+                    submit_df,
+                    params,
+                    st.secrets["gh"]["token"],
+                    username="Proteobot",
+                    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                    branch_name="new_branch",
+                    submission_comments=user_comments,
+                )
 
                 if not pr_url:
                     del st.session_state[self.variables_dda_quant.submit]
@@ -498,7 +463,7 @@ class StreamlitUI:
                     id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
 
                     if "storage" in st.secrets.keys():
-                        IonModule().write_intermediate_raw(
+                        self.ionmodule.write_intermediate_raw(
                             st.secrets["storage"]["dir"],
                             id,
                             input_df,
@@ -587,6 +552,10 @@ class WebpageTexts:
 
         submission_processing_warning = """
             **It will take a few working days for your point to be added to the plot**
+            """
+
+        parameters_additional = """Anything else you want to let us know? Please specifically
+            add changes in your search parameters here, that are not obvious from the parameter file.
             """
 
     class Help:

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -66,7 +68,6 @@ class PlotDataPoint:
     @staticmethod
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
-        reinitialize_table: bool = False,
         software_colors: dict = {
             "MaxQuant": "#1f77b4",
             "AlphaPept": "#2ca02c",
@@ -92,6 +93,7 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
+        # TODO Shouldnt this use the weighted sum?
         all_median_abs_epsilon = [
             v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
         ]

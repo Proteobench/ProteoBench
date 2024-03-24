@@ -170,9 +170,9 @@ class StreamlitUI:
                 key=st.session_state["slider_id"],
             )
 
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
-
-            st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
+            st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_dda_quant.all_datapoints]
+            )
 
             st.session_state[self.variables_dda_quant.placeholder_fig_compare].plotly_chart(
                 st.session_state[self.variables_dda_quant.fig_metric], use_container_width=True
@@ -382,6 +382,18 @@ class StreamlitUI:
         return sample_name
 
     def create_first_new_plot(self):
+        st.header("Results")
+        st.subheader("Sample of the processed file")
+        st.markdown(open("pages/markdown_files/DDA_Quant_ion/table_description.md", "r").read())
+        st.session_state[self.variables_dda_quant.df_head] = st.dataframe(
+            st.session_state[self.variables_dda_quant.result_perf].head(100)
+        )
+
+        st.markdown(st.markdown(open("pages/markdown_files/DDA_Quant_ion/result_description.md", "r").read()))
+
+        st.subheader("Mean error between conditions")
+        st.markdown(self.texts.ShortMessages.submission_result_description)
+
         sample_name = self.create_sample_name()
 
         st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
@@ -441,53 +453,32 @@ class StreamlitUI:
 
         if recalculate:
             status_placeholder.success(":heavy_check_mark: Finished!")
-
-            # Show head of result DataFrame
-        if self.variables_dda_quant.first_new_plot:
-            st.header("Results")
-            st.subheader("Sample of the processed file")
-            st.markdown(open("pages/markdown_files/DDA_Quant_ion/table_description.md", "r").read())
-        if recalculate:
             st.session_state[self.variables_dda_quant.result_perf] = result_performance
             st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
-            input_df = st.session_state[self.variables_dda_quant.input_df]
-        if self.variables_dda_quant.first_new_plot:
-            st.session_state[self.variables_dda_quant.df_head] = st.dataframe(
-                st.session_state[self.variables_dda_quant.result_perf].head(100)
-            )
-        else:
+            st.session_state[self.variables_dda_quant.input_df] = input_df
+        if not self.variables_dda_quant.first_new_plot:
             st.session_state[self.variables_dda_quant.df_head] = st.session_state[
                 self.variables_dda_quant.result_perf
             ].head(100)
 
-        if self.variables_dda_quant.first_new_plot:
-            st.markdown(st.markdown(open("pages/markdown_files/DDA_Quant_ion/result_description.md", "r").read()))
-
-        fig_logfc = self.plots_for_current_data(
+        st.session_state[self.variables_dda_quant.fig_logfc] = self.plots_for_current_data(
             st.session_state[self.variables_dda_quant.result_perf],
             recalculate,
             self.variables_dda_quant.first_new_plot,
             slider_value=st.session_state[st.session_state["slider_id"]],
         )
 
-        if self.variables_dda_quant.first_new_plot:
-            st.subheader("Mean error between conditions")
-            st.markdown(self.texts.ShortMessages.submission_result_description)
-
         if recalculate:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
-            st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
-        else:
-            fig_metric = st.session_state[self.variables_dda_quant.fig_metric]
+            st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_dda_quant.all_datapoints]
+            )
 
         if self.variables_dda_quant.first_new_plot:
             self.create_first_new_plot()
         else:
             self.call_later_plot()
 
-        st.session_state[self.variables_dda_quant.fig_logfc] = fig_logfc
-        st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
-        st.session_state[self.variables_dda_quant.result_perf] = result_performance
+        # TODO do we need add this to the session state?
         st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
         st.session_state[self.variables_dda_quant.input_df] = input_df
 

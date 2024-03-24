@@ -267,7 +267,7 @@ class StreamlitUI:
                 st.session_state[st.session_state["slider_id"]],
             )
 
-    def make_submission_webinterface(self, params, all_datapoints, input_df, result_performance):
+    def make_submission_webinterface(self, params, input_df, result_performance):
         st.session_state["submission_ready"] = True
 
         if self.variables_dda_quant.button_submission_uuid in st.session_state.keys():
@@ -302,7 +302,11 @@ class StreamlitUI:
             if not pr_url:
                 del st.session_state[self.variables_dda_quant.submit]
             else:
-                id = str(all_datapoints[all_datapoints["old_new"] == "new"].iloc[-1, :]["intermediate_hash"])
+                id = str(
+                    st.session_state[self.variables_dda_quant.all_datapoints][
+                        st.session_state[self.variables_dda_quant.all_datapoints]["old_new"] == "new"
+                    ].iloc[-1, :]["intermediate_hash"]
+                )
 
                 if "storage" in st.secrets.keys():
                     self.ionmodule.write_intermediate_raw(

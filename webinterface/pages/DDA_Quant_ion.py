@@ -6,24 +6,23 @@ import uuid
 from datetime import datetime
 from pprint import pformat
 
-import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.modules.dda_quant_base.datapoint import (
+from proteobench.utils.quant_datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.modules.dda_quant_base.parse_settings import (
-    INPUT_FORMATS,
-    LOCAL_DEVELOPMENT,
-    ParseSettings,
+
+
+from proteobench.io.parsing.parse_settings_ion import (
+    ParseSettingsBuilder,
 )
-from proteobench.modules.dda_quant_base.plot import PlotDataPoint
+from proteobench.utils.plotting.plot import PlotDataPoint
 from proteobench.modules.dda_quant_ion.module import IonModule
 
+LOCAL_DEVELOPMENT = True
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"
@@ -181,7 +180,7 @@ class StreamlitUI:
                     """
             )
             self.user_input["input_format"] = st.selectbox(
-                "Software tool", INPUT_FORMATS, help=self.texts.Help.input_format
+                "Software tool", ParseSettingsBuilder().INPUT_FORMATS, help=self.texts.Help.input_format
             )
 
             self.user_input["input_csv"] = st.file_uploader(
@@ -697,10 +696,10 @@ class StreamlitUI:
         result_performance = result_performance[result_performance["nr_observed"] >= slider_value]
 
         if recalculate:
-            parse_settings = ParseSettings(self.user_input["input_format"])
+            parse_settings = ParseSettingsBuilder().build_parser(self.user_input["input_format"])
 
             fig_logfc = PlotDataPoint.plot_fold_change_histogram(
-                result_performance, parse_settings.species_expected_ratio
+                result_performance, parse_settings.species_expected_ratio()
             )
             fig_CV = PlotDataPoint.plot_CV_violinplot(result_performance)
             st.session_state[FIG_CV] = fig_CV

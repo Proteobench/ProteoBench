@@ -5,6 +5,8 @@ import pandas as pd
 from git import Repo
 from github import Github
 
+DDA_QUANT_RESULTS_REPO = "https://github.com/Proteobench/Results_quant_ion_DDA.git"
+
 
 def clone_repo_anon(
     clone_dir="K:/pb/",

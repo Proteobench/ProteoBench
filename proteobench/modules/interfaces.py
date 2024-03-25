@@ -10,11 +10,6 @@ class ModuleInterface(ABC):
         pass
 
     @abstractmethod
-    def load_input_file(self):
-        """Method loads dataframe from the file depending on its format."""
-        pass
-
-    @abstractmethod
     def generate_intermediate(self):
         """Calculate intermediate values from the uploaded file."""
         pass

@@ -10,17 +10,6 @@ import toml
 
 # import proteobench.modules.dda_quant.p
 
-# PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__package__), "io","io_parse_settings")
-# ! Could be created from keys of PARSE_SETTINGS_FILES
-LOCAL_DEVELOPMENT = False
-
-# For local development change below to the json and path,
-# if you do not want to download it from GitHub
-DDA_QUANT_RESULTS_PATH = (
-    "https://raw.githubusercontent.com/Proteobench/Results_Module2_quant_DDA/main/results.json"  # e.g., K:/results.json
-)
-PRECURSOR_NAME = "precursor ion"
-
 
 class ParseSettingsBuilder:
     def __init__(self, parse_settings_dir=None):

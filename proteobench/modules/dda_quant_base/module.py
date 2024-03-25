@@ -27,7 +27,6 @@ from proteobench.io.parsing.parse_ion import (
     load_input_file,
 )
 from proteobench.io.parsing.parse_settings_ion import (
-    PRECURSOR_NAME,
     ParseSettingsBuilder,
 )
 
@@ -37,7 +36,7 @@ class Module:
 
     def __init__(self):
         self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
-        self.precursor_name = PRECURSOR_NAME
+        self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""

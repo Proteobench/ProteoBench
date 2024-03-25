@@ -14,13 +14,15 @@ from proteobench.utils.quant_datapoint import (
     filter_df_numquant_median_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
+
+
 from proteobench.io.parsing.parse_settings_ion import (
-    LOCAL_DEVELOPMENT,
     ParseSettingsBuilder,
 )
 from proteobench.utils.plotting.plot import PlotDataPoint
 from proteobench.modules.dda_quant_ion.module import IonModule
 
+LOCAL_DEVELOPMENT = True
 logger = logging.getLogger(__name__)
 
 ALL_DATAPOINTS = "all_datapoints"

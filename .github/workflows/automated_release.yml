@@ -65,7 +65,8 @@ jobs:
       run: flit publish --repository pypi
   
   update-server:
-    name: Update on server
+    name: Update ProteoBench on server
+    needs: [build-and-release, publish]
     runs-on: ubuntu-latest
     steps:
     - name: executing update script on server

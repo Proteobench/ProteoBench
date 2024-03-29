@@ -7,7 +7,8 @@ Overview of ProteoBench
     :glob:
 
     About <self>
-    Modules <modules/index.rst>
+    General information <general-information/index.rst>
+    Modules <available-modules/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
     Changelog <changelog.rst>

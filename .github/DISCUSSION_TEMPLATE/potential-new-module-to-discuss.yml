@@ -1,0 +1,60 @@
+title: "[New module title] "
+labels: ["to be discussed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the place to propose a new module idea and discuss it in the community.
+  - type: textarea
+    id: goal
+    attributes:
+      label: "aim of the new module"
+      description: "Why would this new module be interesting for the community?"
+      value: |
+        1. what is its aim?
+        2. what is its added value compared to already available modules?
+        ...
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "full description of the new module"
+      description: "Full description of the new module proposed"
+      value: |
+        1. What file would be available for download on the module website?
+        Provide a persistent identifier for the dataset (e.g., PXD, or DOI) (If this does not exist yet, publish the data on Zenodo and provide this DOI). 
+        Optionally, provide DOI to the dataset publication. 
+        If only a subset of the referenced dataset is used, describe which subset.
+        Describe why this dataset was selected.
+        2. What would users need to do?
+        3. What would be the type/format of files used as input for the module?
+        4. What metrics would be calculated and how?
+        5. Propose a plot for metrics visualisation
+        ...
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: reviewers
+    attributes:
+      label: "potential reviewers"
+      description: "Please provide the name of potential reviewers for this module proposal"
+      value: |
+        ...
+      render: bash
+  - type: checkboxes
+    attributes:
+      label: "Will you be able to work on the implementation (coding) yourself, with additional help from the ProteoBench maintainers?"
+      options:
+        - label: "yes"
+        - label: "no"
+  - type: textarea
+    id: else
+    attributes:
+      label: "any other information"
+      description: "Please provide any other information that may help discussing this new module"
+      value: |
+        ...
+      render: bash

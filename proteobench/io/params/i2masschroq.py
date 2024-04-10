@@ -21,6 +21,10 @@ def extract_params(fname) -> ProteoBenchParameters:
         params.loc["spectrum, parent monoisotopic mass error units"],
     )
 
+    max_cleavage = params.loc["scoring, maximum missed cleavage sites"]
+    if params.loc["refine"] == "yes":
+        max_cleavage = params.loc["refine, maximum missed cleavage sites"]
+
     params = ProteoBenchParameters(
         software_name="i2MassChroQ",
         software_version=params.loc["i2MassChroQ_VERSION"],
@@ -33,7 +37,7 @@ def extract_params(fname) -> ProteoBenchParameters:
         precursor_mass_tolerance=_tol_prec,
         fragment_mass_tolerance=_tol_frag,
         enzyme=params.loc["protein, cleavage site"],
-        allowed_miscleavages=params.loc["refine, maximum missed cleavage sites"],
+        allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # "spectrum, minimum fragment mz"
         max_peptide_length=None,  # not mentionded, up to 38 AA in peptides
         fixed_mods=",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()),

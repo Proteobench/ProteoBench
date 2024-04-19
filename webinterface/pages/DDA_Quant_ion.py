@@ -15,7 +15,16 @@ from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.utils.quant_datapoint import (
+    filter_df_numquant_median_abs_epsilon,
+    filter_df_numquant_nr_prec,
+)
+
+
+from proteobench.io.parsing.parse_settings_ion import (
+    ParseSettingsBuilder,
+)
+from proteobench.utils.plotting.plot import PlotDataPoint
 from proteobench.modules.dda_quant_ion.module import IonModule
 from proteobench.utils.plotting.plot import PlotDataPoint
 

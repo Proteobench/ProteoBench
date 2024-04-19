@@ -9,7 +9,6 @@ from proteobench.github.gh import DDA_QUANT_RESULTS_REPO
 from proteobench.modules.dda_quant_base.module import Module
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import (
-    PRECURSOR_NAME,
     ParseSettingsBuilder,
 )
 from proteobench.score.quant.quantscores import QuantScores
@@ -20,8 +19,9 @@ class IonModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(self):
+        super().__init__()
         self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
-        self.precursor_name = PRECURSOR_NAME
+        self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""

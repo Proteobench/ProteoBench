@@ -22,7 +22,6 @@ from proteobench.io.params.proline import extract_params as extract_params_proli
 from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import (
-    PRECURSOR_NAME,
     ParseSettingsBuilder,
 )
 from proteobench.score.quant.quantscores import QuantScores
@@ -38,7 +37,7 @@ class Module:
 
     def __init__(self):
         self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
-        self.precursor_name = PRECURSOR_NAME
+        self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""

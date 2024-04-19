@@ -2,7 +2,7 @@ class WebpageTexts:
     class ShortMessages:
         no_results = "No results available for this module."
 
-        initial_results = """"
+        initial_results = """
             Scroll down if you want to see the public benchmark runs publicly available
             today.
             """

@@ -21,9 +21,7 @@ from proteobench.io.params.maxquant import extract_params as extract_params_maxq
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings_ion import (
-    ParseSettingsBuilder,
-)
+from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
 from proteobench.utils.quant_datapoint import (
     Datapoint,
@@ -78,9 +76,10 @@ class Module:
     @staticmethod
     def filter_data_point(all_datapoints, default_val_slider: int = 3):
         """Add current data point to all data points and load them from file if empty."""
-        all_datapoints["weighted_sum"] = [
+        all_datapoints["median_abs_epsilon"] = [
             filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
+
         all_datapoints["nr_prec"] = [
             filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]

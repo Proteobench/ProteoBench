@@ -200,9 +200,8 @@ class Module:
             logging.warning(f"Could not make directory: {path_write}")
 
         # TODO: save parameters file "locally" together with the raw and intermediate?
-        outfile_param = open(os.path.join(path_write, "params.csv"), "w")
-        outfile_param.write(str(param_loc.getvalue()))
-        outfile_param.close()
+        with open(os.path.join(path_write, "params.csv"), "w") as f:
+            f.write(",\n".join(_file.getvalue().decode("utf-8") for _file in param_loc))
 
         input_df.to_csv(os.path.join(path_write, "input_df.csv"))
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))

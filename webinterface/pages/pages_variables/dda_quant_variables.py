@@ -5,6 +5,7 @@ from typing import List
 @dataclass
 class VariablesDDAQuant:
     all_datapoints: str = "all_datapoints"
+    all_datapoints_submission: str = "all_datapoints_submission"
     submit: str = "submit"
     fig_logfc: str = "fig_logfc"
     fig_metric: str = "fig_metric"

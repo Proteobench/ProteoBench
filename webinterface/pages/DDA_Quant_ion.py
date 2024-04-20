@@ -305,7 +305,10 @@ class StreamlitUI:
             self.plots_for_current_data(True)
 
     def make_submission_webinterface(
-        self, params, input_df: pd.DataFrame, result_performance: pd.DataFrame
+        self,
+        params,
+        input_df: pd.DataFrame,
+        result_performance: pd.DataFrame,
     ) -> Optional[str]:
         """
         Handles the submission process of the benchmark results to the ProteoBench repository.
@@ -319,6 +322,7 @@ class StreamlitUI:
             The URL of the submission if successful, None otherwise.
         """
         st.session_state["submission_ready"] = True
+        pr_url = None
 
         if self.variables_dda_quant.button_submission_uuid in st.session_state.keys():
             button_submission_uuid = st.session_state[self.variables_dda_quant.button_submission_uuid]
@@ -331,7 +335,9 @@ class StreamlitUI:
             st.session_state[self.variables_dda_quant.submit] = True
             user_comments = self.user_input["comments_for_submission"]
 
-            submit_df = st.session_state[self.variables_dda_quant.all_datapoints]
+            # TODO I have written a copy to a different variable as it is reset when meta data file is uploaded
+            # TODO this needs to change in the future!
+            submit_df = st.session_state[self.variables_dda_quant.all_datapoints_submission]
             if "Highlight" in submit_df.columns:
                 # TODO it seems that pandas trips over this sometime, even though it is present...
                 try:
@@ -397,6 +403,7 @@ class StreamlitUI:
             The parameters read from the file, or None if there's an error.
         """
         params = None
+        print(st.session_state)
         try:
             params = self.ionmodule.load_params_file(
                 self.user_input[self.variables_dda_quant.meta_data], self.user_input["input_format"]
@@ -415,10 +422,16 @@ class StreamlitUI:
         """
         Creates the UI elements necessary for data submission, including metadata uploader and comments section.
         """
+        # TODO I have to write a copy to a different variable as it is reset when meta data file is uploaded
+        # TODO this needs to change in the future!
+        if st.session_state[self.variables_dda_quant.all_datapoints] is not None:
+            st.session_state[self.variables_dda_quant.all_datapoints_submission] = st.session_state[
+                self.variables_dda_quant.all_datapoints
+            ].copy()
         self.user_input[self.variables_dda_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.texts.Help.meta_data_file,
-            key=self.variables_dda_quant.meta_file_uploader_uuid,
+            key="meta_data_fileuploader",  # self.variables_dda_quant.meta_file_uploader_uuid,
             accept_multiple_files=True,
         )
 
@@ -426,14 +439,14 @@ class StreamlitUI:
             "Comments for submission",
             placeholder=self.texts.ShortMessages.parameters_additional,
             height=200,
-            key=self.variables_dda_quant.comments_submission_uuid,
+            # key=self.variables_dda_quant.comments_submission_uuid,
         )
 
-        st.session_state[self.variables_dda_quant.meta_data_TEXT] = self.user_input["comments_for_submission"]
+        st.session_state[self.variables_dda_quant.meta_data_text] = self.user_input["comments_for_submission"]
 
         st.session_state[self.variables_dda_quant.check_submission] = st.checkbox(
             "I confirm that the metadata is correct",
-            key=self.variables_dda_quant.check_submission_uuid,
+            # key=self.variables_dda_quant.check_submission_uuid,
         )
 
     def create_sample_name(self) -> str:
@@ -584,11 +597,14 @@ class StreamlitUI:
         if st.session_state[self.variables_dda_quant.check_submission] and params != None:
             pr_url = self.make_submission_webinterface(
                 params,
-                st.session_state[self.variables_dda_quant.all_datapoints],
                 st.session_state[self.variables_dda_quant.input_df],
                 st.session_state[self.variables_dda_quant.result_perf],
             )
-        if self.variables_dda_quant.submit in st.session_state:
+        if (
+            st.session_state[self.variables_dda_quant.check_submission]
+            and params != None
+            and self.variables_dda_quant.submit in st.session_state
+        ):
             self.successful_submission(pr_url)
         self.variables_dda_quant.first_new_plot = False
 

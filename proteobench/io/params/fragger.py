@@ -66,7 +66,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     header, fragpipe_params = read_fragpipe_workflow(file)
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
-    )
+    )["value"]
 
     match = re.search(VERSION_NO_PATTERN, header)
 
@@ -78,7 +78,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     params.software_version = header
     params.search_engine = "MSFragger"
 
-    msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger", "value"]
+    msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger"]
     msfragger_executable = Path(msfragger_executable).name
     match = re.search(VERSION_NO_PATTERN, msfragger_executable)
 
@@ -86,31 +86,29 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         msfragger_executable = match.group()
 
     params.search_engine_version = msfragger_executable
-    params.enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1", "value"]
-    params.allowed_miscleavages = fragpipe_params.loc["msfragger.allowed_missed_cleavage_1", "value"]
-    params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods", "value"]
-    params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods", "value"]
-    params.max_mods = fragpipe_params.loc["msfragger.max_variable_mods_per_peptide", "value"]
-    params.min_peptide_length = fragpipe_params.loc["msfragger.digest_min_length", "value"]
-    params.max_peptide_length = fragpipe_params.loc["msfragger.digest_max_length", "value"]
+    params.enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
+    params.allowed_miscleavages = fragpipe_params.loc["msfragger.allowed_missed_cleavage_1"]
+    params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods"]
+    params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods"]
+    params.max_mods = fragpipe_params.loc["msfragger.max_variable_mods_per_peptide"]
+    params.min_peptide_length = fragpipe_params.loc["msfragger.digest_min_length"]
+    params.max_peptide_length = fragpipe_params.loc["msfragger.digest_max_length"]
 
     precursor_mass_units = "Da"
-    if int(fragpipe_params.loc["msfragger.precursor_mass_units", "value"]):
+    if int(fragpipe_params.loc["msfragger.precursor_mass_units"]):
         precursor_mass_units = "ppm"
     params.precursor_mass_tolerance = (
-        f'{fragpipe_params.loc["msfragger.precursor_true_tolerance", "value"]} {precursor_mass_units}'
+        f'{fragpipe_params.loc["msfragger.precursor_true_tolerance"]} {precursor_mass_units}'
     )
 
     fragment_mass_units = "Da"
-    if int(fragpipe_params.loc["msfragger.fragment_mass_units", "value"]):
+    if int(fragpipe_params.loc["msfragger.fragment_mass_units"]):
         fragment_mass_units = "ppm"
-    params.fragment_mass_tolerance = (
-        f'{fragpipe_params.loc["msfragger.fragment_mass_tolerance", "value"]} {fragment_mass_units}'
-    )
+    params.fragment_mass_tolerance = f'{fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}'
     # ! ionquant is not necessarily fixed?
-    params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr", "value"]
-    params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr", "value"]
-    params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr", "value"]
+    params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr"]
+    params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr"]
+    params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr"]
 
     for key in ["ident_fdr_protein", "ident_fdr_peptide", "ident_fdr_psm"]:
         value = getattr(params, key)
@@ -120,9 +118,9 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         except ValueError:
             logging.warning(f"Could not convert {value} to int.")
 
-    params.min_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-lo", "value"])
-    params.max_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-hi", "value"])
-    params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr", "value"])
+    params.min_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-lo"])
+    params.max_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-hi"])
+    params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
     return params
 
 

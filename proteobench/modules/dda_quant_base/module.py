@@ -1,33 +1,32 @@
 from __future__ import annotations
 
-import datetime
-import hashlib
 import logging
 import os
-from collections import ChainMap
-from dataclasses import asdict
 from tempfile import TemporaryDirectory
 
-import numpy as np
 import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
-from proteobench.github.gh import clone_repo, pr_github, read_results_json_repo, DDA_QUANT_RESULTS_REPO
+from proteobench.github.gh import (
+    DDA_QUANT_RESULTS_REPO,
+    clone_repo,
+    pr_github,
+    read_results_json_repo,
+)
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.fragger import extract_params as extract_params_fragger
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
+from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
-from proteobench.utils.quant_datapoint import Datapoint
-
-from proteobench.io.parsing.parse_ion import (
-    load_input_file,
-)
-from proteobench.io.parsing.parse_settings_ion import (
-    ParseSettingsBuilder,
+from proteobench.utils.quant_datapoint import (
+    Datapoint,
+    filter_df_numquant_median_abs_epsilon,
+    filter_df_numquant_nr_prec,
 )
 
 
@@ -51,7 +50,7 @@ class Module:
     }
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
-        """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
+        """Add current data point to all data points and load them from file if empty."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
@@ -65,12 +64,25 @@ class Module:
         return all_datapoints
 
     def obtain_all_data_point(self, all_datapoints):
-        """Add current data point to all data points and load them from file if empty. TODO: Not clear why is the df transposed here."""
+        """Add current data point to all data points and load them from file if empty."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
 
         all_datapoints["old_new"] = "old"
+
+        return all_datapoints
+
+    @staticmethod
+    def filter_data_point(all_datapoints, default_val_slider: int = 3):
+        """Add current data point to all data points and load them from file if empty."""
+        all_datapoints["median_abs_epsilon"] = [
+            filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["nr_prec"] = [
+            filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        ]
 
         return all_datapoints
 

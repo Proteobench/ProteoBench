@@ -359,8 +359,8 @@ class StreamlitUI:
                 del st.session_state[self.variables_dda_quant.submit]
             else:
                 id = str(
-                    st.session_state[self.variables_dda_quant.all_datapoints][
-                        st.session_state[self.variables_dda_quant.all_datapoints]["old_new"] == "new"
+                    st.session_state[self.variables_dda_quant.all_datapoints_submission][
+                        st.session_state[self.variables_dda_quant.all_datapoints_submission]["old_new"] == "new"
                     ].iloc[-1, :]["intermediate_hash"]
                 )
 

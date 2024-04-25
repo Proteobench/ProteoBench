@@ -51,15 +51,10 @@ def extract_params(fname) -> ProteoBenchParameters:
 
 if __name__ == "__main__":
     for fname in [
-        "../../../test/params/i2mproteobench_2pep_fdr01psm_fdr01prot.ods",
+        "../../../test/params/i2mproteobench_2pep_fdr01psm_fdr01prot.tsv",
     ]:
         file = pathlib.Path(fname)
-        # ! First sheet contains search settings and infos, slow to read (~4mins)
-        # params = pd.read_excel(
-        #     fname, engine="odf", names=["param", "value"], sheet_name=0, header=None, index_col=0
-        # ).squeeze()
-        # ! change for speed to text based table (needs to be done by developers)
-        params = pd.read_csv(file.with_suffix(".tsv"), sep="\t", header=None, index_col=0).squeeze()
+        params = pd.read_csv(file, sep="\t", header=None, index_col=0).squeeze()
         params = extract_params(file.with_suffix(".tsv"))
         data_dict = params.__dict__
         series = pd.Series(data_dict)

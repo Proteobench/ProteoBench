@@ -3,10 +3,10 @@ software_name,i2MassChroQ
 software_version,1.0.8
 search_engine,X! Tandem
 search_engine_version,X! Tandem Alanine (2017.2.1.4)
-ident_fdr_psm,0.00999799237100984
-ident_fdr_peptide,0.0133552379470875
-ident_fdr_protein,0.00985995998856816
-enable_match_between_runs,1
+ident_fdr_psm,0.00999799237101
+ident_fdr_peptide,0.0133552379471
+ident_fdr_protein,0.00985995998857
+enable_match_between_runs,T
 precursor_mass_tolerance,10 (ppm)
 fragment_mass_tolerance,0.02 (Daltons)
 enzyme,[RK]|{P}

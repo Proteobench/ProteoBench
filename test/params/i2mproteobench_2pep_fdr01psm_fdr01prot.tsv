@@ -1,4 +1,3 @@
-param	value
 i2MassChroQ_VERSION	1.0.8
 AnalysisSoftware_name	X! Tandem
 AnalysisSoftware_version	X! Tandem Alanine (2017.2.1.4)
@@ -95,14 +94,14 @@ spectrum, use contrast angle	no
 spectrum, use neutral loss window	yes
 spectrum, use noise suppression	yes
 xtandem_preset_file	/gorgone/pappso/tmp/i2masschroq.VpYhHQ/QExactive_analysis_FDR.xml
-i2m_count_peptides_per_protein_accross_msruns	1
+i2m_count_peptides_per_protein_accross_msruns	T
 i2m_minimum_peptides_per_protein	2
-i2m_minimum_protein_log10_evalue	-3.25000102344165
+i2m_minimum_protein_log10_evalue	-3.25000102344
 i2m_pep_repro	1
 i2m_psm_fdr_threshold_target	0.01
-peptide_fdr	0.0133552379470875
-protein_fdr	0.00985995998856816
-psm_fdr	0.00999799237100984
+peptide_fdr	0.0133552379471
+protein_fdr	0.00985995998857
+psm_fdr	0.00999799237101
 mcq_alignment_ms1_smoothing_halfwindow	0
 mcq_alignment_ms2_smoothing_halfwindow	15
 mcq_alignment_ms2_tendency_halfwindow	10
@@ -113,7 +112,7 @@ mcq_detection_maxmin_half_edge	2
 mcq_detection_mean_filter_half_edge	1
 mcq_detection_minmax_half_edge	3
 mcq_filter_anti_spike_half	5
-mcq_mbr	1
+mcq_mbr	T
 mcq_version	2.4.26
 mcq_xic_extraction_type	max
 mcq_xic_ppm_range_max	10

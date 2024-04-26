@@ -50,17 +50,17 @@ class ParseSettings:
         self.condition_mapper = parse_settings["condition_mapper"]
         self.run_mapper = parse_settings["run_mapper"]
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
-        self.species_dict = parse_settings["species_mapper"]
+        self._species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
 
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
-        self.species_expected_ratio = parse_settings_module["species_expected_ratio"]
+        self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
 
     def species_dict(self):
-        return self.species_dict
+        return self._species_dict
 
     def species_expected_ratio(self):
-        return self.species_expected_ratio
+        return self._species_expected_ratio
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """Convert a software tool output into a generic format supported by the module."""
@@ -82,9 +82,9 @@ class ParseSettings:
             df = df[df["Reverse"] != self.decoy_flag]
 
         df["contaminant"] = df["Proteins"].str.contains(self.contaminant_flag)
-        for flag, species in self.species_dict.items():
+        for flag, species in self._species_dict.items():
             df[species] = df["Proteins"].str.contains(flag)
-        df["MULTI_SPEC"] = df[list(self.species_dict.values())].sum(axis=1) > self.min_count_multispec
+        df["MULTI_SPEC"] = df[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
 
         df = df[df["MULTI_SPEC"] == False]
 
@@ -130,10 +130,10 @@ class ParseModificationSettings:
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
 
     def species_dict(self):
-        return self.parser.species_dict
+        return self.parser.species_dict()
 
     def species_expected_ratio(self):
-        return self.parser.species_expected_ratio
+        return self.parser.species_expected_ratio()
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         df, replicate_to_raw = self.parser.convert_to_standard_format(df)

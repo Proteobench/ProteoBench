@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-
 import os
-from .parse_ion import *
+from collections import defaultdict
+from typing import Dict, List
+
+import pandas as pd
 import toml
 
-
-# import proteobench.modules.dda_quant.p
+from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
@@ -41,7 +42,6 @@ class ParseSettingsBuilder:
 
 
 class ParseSettings:
-
     """Structure that contains all the parameters used to parse
     the given benchmark run output depending on the software tool used."""
 
@@ -150,7 +150,7 @@ class ParseModificationSettings:
 
         except KeyError:
             raise KeyError(
-                f"Not all columns required for making the ion are available."
+                "Not all columns required for making the ion are available."
                 "Is the charge available in the input file?"
             )
 

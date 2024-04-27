@@ -304,12 +304,7 @@ class StreamlitUI:
         if self.variables_dda_quant.result_perf in st.session_state.keys():
             self.plots_for_current_data(True)
 
-    def make_submission_webinterface(
-        self,
-        params,
-        input_df: pd.DataFrame,
-        result_performance: pd.DataFrame,
-    ) -> Optional[str]:
+    def make_submission_webinterface(self, params) -> Optional[str]:
         """
         Handles the submission process of the benchmark results to the ProteoBench repository.
 
@@ -338,6 +333,9 @@ class StreamlitUI:
             # TODO I have written a copy to a different variable as it is reset when meta data file is uploaded
             # TODO this needs to change in the future!
             submit_df = st.session_state[self.variables_dda_quant.all_datapoints_submission]
+            input_df = st.session_state[self.variables_dda_quant.input_df_submission]
+            result_performance = st.session_state[self.variables_dda_quant.result_performance_submission]
+
             if "Highlight" in submit_df.columns:
                 # TODO it seems that pandas trips over this sometime, even though it is present...
                 try:
@@ -403,7 +401,7 @@ class StreamlitUI:
             The parameters read from the file, or None if there's an error.
         """
         params = None
-        print(st.session_state)
+
         try:
             params = self.ionmodule.load_params_file(
                 self.user_input[self.variables_dda_quant.meta_data], self.user_input["input_format"]
@@ -428,6 +426,15 @@ class StreamlitUI:
             st.session_state[self.variables_dda_quant.all_datapoints_submission] = st.session_state[
                 self.variables_dda_quant.all_datapoints
             ].copy()
+        if st.session_state[self.variables_dda_quant.input_df] is not None:
+            st.session_state[self.variables_dda_quant.input_df_submission] = st.session_state[
+                self.variables_dda_quant.input_df
+            ].copy()
+        if st.session_state[self.variables_dda_quant.result_perf] is not None:
+            st.session_state[self.variables_dda_quant.result_performance_submission] = st.session_state[
+                self.variables_dda_quant.result_perf
+            ].copy()
+
         self.user_input[self.variables_dda_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.texts.Help.meta_data_file,
@@ -595,11 +602,7 @@ class StreamlitUI:
         if self.user_input[self.variables_dda_quant.meta_data]:
             params = self.read_parameters()
         if st.session_state[self.variables_dda_quant.check_submission] and params != None:
-            pr_url = self.make_submission_webinterface(
-                params,
-                st.session_state[self.variables_dda_quant.input_df],
-                st.session_state[self.variables_dda_quant.result_perf],
-            )
+            pr_url = self.make_submission_webinterface(params)
         if (
             st.session_state[self.variables_dda_quant.check_submission]
             and params != None

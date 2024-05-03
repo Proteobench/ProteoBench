@@ -1,6 +1,9 @@
+import proteobench
+
 project = "ProteoBench"
 author = "EuBIC-MS"
 description = "A Python-base platform for benchmarking data analysis in proteomics."
+version = proteobench.__version__
 
 extensions = [
     "myst_parser",
@@ -33,6 +36,11 @@ html_theme_options = {
         "image_light": "_static/img/proteobench-logo-horizontal.svg",
         "image_dark": "_static/img/proteobench-logo-horizontal-inverted.svg",
     },
+    "switcher": {
+        "json_url": "_static/switcher.json",
+        "version_match": version,
+    },
+    "navbar_center": ["version-switcher", "navbar-nav"],
 }
 
 # Intersphinx options

@@ -582,9 +582,10 @@ class StreamlitUI:
         else:
             self.call_later_plot()
 
-        # TODO do we need add this to the session state?
-        st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
-        st.session_state[self.variables_dda_quant.input_df] = input_df
+        if all_datapoints is not None:
+            # TODO do we need add this to the session state?
+            st.session_state[self.variables_dda_quant.all_datapoints] = all_datapoints
+            st.session_state[self.variables_dda_quant.input_df] = input_df
 
         # Create unique element IDs
         if self.variables_dda_quant.meta_file_uploader_uuid not in st.session_state.keys():

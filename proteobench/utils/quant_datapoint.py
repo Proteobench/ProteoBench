@@ -15,6 +15,7 @@ def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
         return row[min_quant].get("median_abs_epsilon")
+
     return None
 
 
@@ -28,7 +29,7 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
 
 @dataclass
 class Datapoint:
-    """Data used to stored the"""
+    """Data used to stored the results of a benchmark run."""
 
     # TODO add threshold value used for presence ion/peptidoform
     id: str = None

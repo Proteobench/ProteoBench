@@ -65,9 +65,13 @@ After upload, you will get a link to the pull request associated with your data.
 -- available soon --
 
 ### MaxQuant
-By default, MaxQuant uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**
+By default, MaxQuant uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. 
+When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
+
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
-#### Troubleshooting: Fasta header parsing
+
+#### Troubleshooting: 
+##### Fasta header parsing
 The field "Proteins" in **the "evidence.txt" table should report proteins in the format "sp|O75822|EIF3J_HUMAN" (and separated with ";" in the case of protein groups)**. 
 In the recent versions of MaxQuant, the default settings work perfectly (`Identifier rule = >([^\s]*)`; `Description rule = >(.*)`).
 Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.

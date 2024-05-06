@@ -18,7 +18,7 @@ extensions = [
 
 source_suffix = [".rst"]
 master_doc = "index"
-exclude_patterns = ["_build", "_autosummary", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "_autosummary", "reference", "Thumbs.db", ".DS_Store"]
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
@@ -33,8 +33,8 @@ html_theme_options = {
         }
     ],
     "logo": {
-        "image_light": "_static/img/proteobench-logo-horizontal.svg",
-        "image_dark": "_static/img/proteobench-logo-horizontal-inverted.svg",
+        "image_light": "_static/proteobench-logo-horizontal.svg",
+        "image_dark": "_static/proteobench-logo-horizontal-inverted.svg",
     },
     "switcher": {
         "json_url": "_static/switcher.json",

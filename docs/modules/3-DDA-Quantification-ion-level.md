@@ -60,7 +60,7 @@ After upload, you will get a link to the pull request associated with your data.
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
 4. Upload "combined_ion/modified_peptides.tsv" in order for Proteobench to calculate the ion ratios. Parameter files are not yet implemented in ProteoBench, but we are working on it.
-For public submission, please provide the ".params" and the ".worflow" files that correspond to your search. 
+For public submission, please provide the ".worflow" file that correspond to your search.
 
 ### i2MassChroQ
 -- available soon --

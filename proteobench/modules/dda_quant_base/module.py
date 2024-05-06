@@ -157,6 +157,7 @@ class Module:
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         if not self.check_new_unique_hash(all_datapoints):
+            logging.error("The run was previously submitted. Will not submit.")
             return False
 
         branch_name = current_datapoint["id"]

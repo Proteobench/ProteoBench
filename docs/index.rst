@@ -1,9 +1,6 @@
 Overview of ProteoBench
 +++++++++++++++++++++++
 
-.. image:: https://img.shields.io/pypi/v/proteobench
-    :alt: PyPI - Version
-
 .. toctree::
     :maxdepth: 1
     :hidden:

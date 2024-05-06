@@ -41,7 +41,7 @@ html_theme_options = {
         "json_url": "_static/switcher.json",
         "version_match": version,
     },
-    "navbar_center": ["version-switcher", "navbar-nav"],
+    "navbar_center": ["version", "version-switcher", "navbar-nav"],
 }
 
 # Intersphinx options

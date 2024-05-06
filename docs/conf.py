@@ -22,6 +22,7 @@ exclude_patterns = ["_build", "_autosummary", "reference", "Thumbs.db", ".DS_Sto
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+templates_path = ["_templates"]
 html_css_files = ["css/custom.css"]
 html_theme_options = {
     "icon_links": [

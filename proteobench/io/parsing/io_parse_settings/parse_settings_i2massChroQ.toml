@@ -4,7 +4,7 @@
 "proteins" = "Proteins"
 "ProForma" = "Modified sequence"
 "charge" = "Charge"
-"areanorm" = "Intensity"
+"area" = "Intensity"
 
 [condition_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML" = "A"

@@ -502,6 +502,14 @@ class StreamlitUI:
             key=st.session_state["slider_id"],
         )
 
+        st.session_state[self.variables_dda_quant.all_datapoints] = self.ionmodule.filter_data_point(
+            st.session_state[self.variables_dda_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
+        )
+
+        st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
+            st.session_state[self.variables_dda_quant.all_datapoints]
+        )
+
         placeholder_fig_compare = st.empty()
         placeholder_fig_compare.plotly_chart(
             st.session_state[self.variables_dda_quant.fig_metric], use_container_width=True

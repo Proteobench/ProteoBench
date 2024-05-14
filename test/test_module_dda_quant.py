@@ -5,10 +5,10 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from proteobench.github.gh import read_results_json_repo, DDA_QUANT_RESULTS_REPO
+from proteobench.github.gh import DDA_QUANT_RESULTS_REPO, read_results_json_repo
 from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.modules.dda_quant_base.module import Module
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.modules.dda_quant_base.module import Module
 from proteobench.score.quant.quantscores import QuantScores
 from proteobench.utils.plotting.plot import PlotDataPoint
 from proteobench.utils.quant_datapoint import Datapoint

@@ -17,6 +17,9 @@ from proteobench.github.gh import (
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.fragger import extract_params as extract_params_fragger
+from proteobench.io.params.i2masschroq import (
+    extract_params as extract_params_i2masschroq,
+)
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
@@ -47,6 +50,7 @@ class Module:
         "AlphaPept": extract_params_alphapept,
         "Sage": extract_params_sage,
         "FragPipe": extract_params_fragger,
+        "i2MassChroQ": extract_params_i2masschroq,
     }
 
     def add_current_data_point(self, all_datapoints, current_datapoint):

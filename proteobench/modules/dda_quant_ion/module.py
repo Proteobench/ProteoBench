@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-from typing import Tuple, Any
-
-import pandas as pd
 from pandas import DataFrame
 
 from proteobench.github.gh import DDA_QUANT_RESULTS_REPO
-from proteobench.modules.dda_quant_base.module import Module
 from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings_ion import (
-    ParseSettingsBuilder,
-)
+from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.modules.dda_quant_base.module import Module
 from proteobench.score.quant.quantscores import QuantScores
 from proteobench.utils.quant_datapoint import Datapoint
 

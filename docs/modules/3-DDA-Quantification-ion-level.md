@@ -55,14 +55,14 @@ After upload, you will get a link to the pull request associated with your data.
 -> For Match Between runs, please select “Match”
 3. The input files for ProteoBench are "result_peptides.tsv" (peptide identification) and "results.yaml" (parameter files)
 
-### FragPipe
+### FragPipe _(still work in progress)_
 1. Select the LFQ-MBR workflow (using only 1 enzyme).
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
 4. Upload “combined_ion/modified_peptides.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the “.worflow” file that correspond to your search.
 
 
-### i2MassChroQ
+### i2MassChroQ _(still work in progress)_
 A ProteoBench-compatible format is available in i2MassChroQ through the button "ProteoBench export". It generates a tab-delimited file containing one row per quantified ion with all the information required for this module (column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN". The ProteoBench export of i2MassChroQ also generates a single parameter file (.tsv) that is compatible with ProteoBench public upload.
 Link to the i2MassChroQ documentation [here](http://pappso.inrae.fr/bioinfo/i2masschroq/documentation/html/).
 

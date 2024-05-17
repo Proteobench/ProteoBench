@@ -133,9 +133,19 @@ if __name__ == "__main__":
         _, data = read_fragpipe_workflow(f)
     df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
     df.to_csv(file.with_suffix(".csv"))
-
     with open(file, "rb") as f:
         params = extract_params(f)
     pprint(params.__dict__)
     series = pd.Series(params.__dict__)
-    series.to_csv(file.parent / "fragger_extracted_params.csv")
+    series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")
+
+    file = pathlib.Path("../../../test/params/fragpipe_win_paths.workflow")
+    with open(file, "rb") as f:
+        _, data = read_fragpipe_workflow(f)
+    df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
+    df.to_csv(file.with_suffix(".csv"))
+    with open(file, "rb") as f:
+        params = extract_params(f)
+    pprint(params.__dict__)
+    series = pd.Series(params.__dict__)
+    series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 
-
 import pandas as pd
 
 __all__ = [
@@ -112,7 +111,7 @@ def match_brackets(
     isalpha: bool = True,
     isupper: bool = True,
 ):
-    matches = [(match.group(1), match.start(1), match.end(1)) for match in re.finditer(pattern, input_string)]
+    matches = [(match.group(), match.start(), match.end()) for match in re.finditer(pattern, input_string)]
     positions = (count_chars(input_string[0 : m[1]], isalpha=isalpha, isupper=isupper) for m in matches)
     mods = (m[0] for m in matches)
     return mods, positions
@@ -158,5 +157,4 @@ def get_proforma_bracketed(
                 new_seq += f"[{pos_mod_dict[idx]}]"
         if not before_aa:
             new_seq += aa
-
     return new_seq

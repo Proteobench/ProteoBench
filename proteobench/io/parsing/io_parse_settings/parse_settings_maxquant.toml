@@ -32,7 +32,7 @@ LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = "B"
 "isalpha" = true
 "isupper" = true
 "pattern" = "\\(\\w+\\)|\\[.*?\\(.\\)\\]"
-"modification_dict" = {"ox" = "[Oxidation]", "ac" = "[Acetyl]", "Oxidation (M)" = "[Oxidation]", "Acetylation" = "[Acetylation]"}
+"modification_dict" = {"(ox)" = "Oxidation", "(ac)" = "Acetyl", "[Oxidation (M)]" = "[Oxidation]", "[Acetylation]" = "[Acetylation]"}
 
 [general]
 contaminant_flag = "Cont_"

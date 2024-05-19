@@ -11,7 +11,7 @@ import logging
 import re
 from collections import namedtuple
 from io import BytesIO
-from pathlib import Path
+from pathlib import PureWindowsPath
 
 import pandas as pd
 
@@ -79,7 +79,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     params.search_engine = "MSFragger"
 
     msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger"]
-    msfragger_executable = Path(msfragger_executable).name
+    msfragger_executable = PureWindowsPath(msfragger_executable).name
     match = re.search(VERSION_NO_PATTERN, msfragger_executable)
 
     if match:

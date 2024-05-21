@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2024-05-21
+
+## What's Changed
+- modify documentation and website by @mlocardpaulet in https://github.com/Proteobench/ProteoBench/pull/304
+- Combine protein columns fragpipe by @RobbinBouwmeester in https://github.com/Proteobench/ProteoBench/pull/305
+- Update parse_settings_maxquant.toml by @RobbinBouwmeester in https://github.com/Proteobench/ProteoBench/pull/299
+
+
+**Full Changelog**: https://github.com/Proteobench/ProteoBench/compare/v0.2.7...v0.2.8
+
 ## [0.2.7] - 2024-05-16
 
 ### New

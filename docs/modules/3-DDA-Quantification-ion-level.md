@@ -61,6 +61,8 @@ After upload, you will get a link to the pull request associated with your data.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
 4. Upload “combined_ion/modified_peptides.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the “.worflow” file that correspond to your search.
 
+In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
+
 
 ### i2MassChroQ _(still work in progress)_
 A ProteoBench-compatible format is available in i2MassChroQ through the button "ProteoBench export". It generates a tab-delimited file containing one row per quantified ion with all the information required for this module (column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN". The ProteoBench export of i2MassChroQ also generates a single parameter file (.tsv) that is compatible with ProteoBench public upload.
@@ -124,7 +126,7 @@ mapping between the headers in the input file (left-hand side) and the header of
  
   - "Charge" = precursor charge.
  
-  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
+  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST"). *Curently, there is an exception for FragPipe's .toml where we combine two columns, and protein IDs are seperated by "," (see the FragPipe section).*
  
   - "Intensity" = field containing the intensities utilised to calculate the module metrics. Used for long-format input.
 

@@ -1,6 +1,6 @@
 [mapper]
 "Peptide Sequence" = "Sequence"
-Protein = "Proteins"
+Protein = "Proteins" # For FragPipe outputs, we combine the values in "Proteins" and "Mapped Proteins"
 Charge = "Charge"
 
 [condition_mapper]

@@ -134,11 +134,13 @@ def get_proforma_bracketed(
 ):
     modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
     new_modifications = []
+
+    translation_table_remove_brackets = str.maketrans("", "", "[](){}")
     for m in modifications:
         try:
             new_modifications.append(modification_dict[m])
         except KeyError:
-            new_modifications.append(m)
+            new_modifications.append(m.translate(translation_table_remove_brackets))
     modifications = new_modifications
 
     pos_mod_dict = dict(zip(positions, modifications))
@@ -152,7 +154,7 @@ def get_proforma_bracketed(
         if idx in pos_mod_dict.keys():
             if idx == 0:
                 new_seq += f"[{pos_mod_dict[idx]}]-"
-            elif idx == len(stripped_seq) - 1:
+            elif idx == len(stripped_seq):
                 new_seq += f"-[{pos_mod_dict[idx]}]"
             else:
                 new_seq += f"[{pos_mod_dict[idx]}]"

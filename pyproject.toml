@@ -2,6 +2,7 @@
 authors = [
   {name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be"},
 ] # TODO: Add others
+description = "ProteoBench is a tool for the analysis of proteomics data."
 classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",
@@ -13,7 +14,7 @@ classifiers = [
 
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
 requires-python = ">=3.8"
-dynamic = ["version", "description"]
+dynamic = ["version"]
 dependencies = [
   "pandas",
   "openpyxl",
@@ -42,14 +43,15 @@ web = ["streamlit>1.27", "scipy"]
 "Homepage" = "https://github.com/ProteoBench"
 
 [build-system]
-requires = ["flit_scm"]
-build-backend = "flit_scm:buildapi"
-
-[tool.flit.sdist]
-exclude = [".gitignore"]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-write_to = "proteobench/_version.py"
+# https://setuptools-scm.readthedocs.io/ 
+# used to pick up the version from the git tags or the latest commit.
+
+[tool.setuptools.packages.find]
+include = ["proteobench"]
 
 [tool.isort]
 profile = "black"

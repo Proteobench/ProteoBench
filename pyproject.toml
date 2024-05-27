@@ -1,6 +1,7 @@
 [project]
 authors = [
-  {name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be"},
+  { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
+  { name = "Henry Webel", email = "henry.webel@sund.ku.dk" },
 ] # TODO: Add others
 description = "ProteoBench is a tool for the analysis of proteomics data."
 classifiers = [
@@ -29,13 +30,19 @@ dependencies = [
   "GitPython",
   "st-pages",
 ]
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
 dev = ["black"]
-docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser", "pydata-sphinx-theme"]
+docs = [
+  "sphinx",
+  "sphinx-rtd-theme",
+  "sphinx-autobuild",
+  "myst-parser",
+  "pydata-sphinx-theme",
+]
 web = ["streamlit>1.27", "scipy"]
 
 [project.urls]

@@ -1,3 +1,5 @@
 """ProteoBench"""
 
-__version__ = "0.2.9-beta"
+from _version import __version__
+
+__all__ = ["__version__"]

@@ -42,8 +42,14 @@ web = ["streamlit>1.27", "scipy"]
 "Homepage" = "https://github.com/ProteoBench"
 
 [build-system]
-build-backend = "flit_core.buildapi"
-requires = ["flit_core >=3.2,<4"]
+requires = ["flit_scm"]
+build-backend = "flit_scm:buildapi"
+
+[tool.flit.sdist]
+exclude = [".gitignore"]
+
+[tool.setuptools_scm]
+write_to = "proteobench/_version.py"
 
 [tool.isort]
 profile = "black"

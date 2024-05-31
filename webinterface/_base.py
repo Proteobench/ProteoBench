@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 import streamlit as st
 from st_pages import show_pages_from_config
 
+import proteobench
+
 
 class StreamlitPage(ABC):
     """Base class for Proteobench online Streamlit web server."""
@@ -39,8 +41,10 @@ class StreamlitPage(ABC):
 
             **If you still have questions, you can email us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query)**
 
-            
-            """,
+            Using proteobench version: {}
+            """.format(
+                proteobench.__version__
+            ),
             unsafe_allow_html=True,
         )
         st.image("logos/logo_participants/logos_all.png")

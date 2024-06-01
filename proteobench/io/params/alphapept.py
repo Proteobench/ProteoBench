@@ -9,8 +9,13 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(fname) -> ProteoBenchParameters:
-    with open(fname) as f:
-        record = yaml.safe_load(f)
+    try:
+        record = yaml.safe_load(fname)
+    except AttributeError:
+        print(f"Load locally: {fname}")
+        with open(fname, "rb") as f:
+            record = yaml.safe_load(f)
+
     summary = record["summary"]
     params = ProteoBenchParameters()
     params.software_name = "AlphaPept"

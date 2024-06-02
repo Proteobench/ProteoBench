@@ -1,7 +1,9 @@
 [project]
 authors = [
-  {name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be"},
+  { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
+  { name = "Henry Webel", email = "henry.webel@sund.ku.dk" },
 ] # TODO: Add others
+description = "ProteoBench compares the outputs of mass spectrometry-based proteomics data analysis pipelines"
 classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",
@@ -13,7 +15,7 @@ classifiers = [
 
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
 requires-python = ">=3.8"
-dynamic = ["version", "description"]
+dynamic = ["version"]
 dependencies = [
   "pandas",
   "openpyxl",
@@ -28,13 +30,19 @@ dependencies = [
   "GitPython",
   "st-pages",
 ]
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
 dev = ["black"]
-docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser", "pydata-sphinx-theme"]
+docs = [
+  "sphinx",
+  "sphinx-rtd-theme",
+  "sphinx-autobuild",
+  "myst-parser",
+  "pydata-sphinx-theme",
+]
 web = ["streamlit>1.27", "scipy"]
 
 [project.urls]
@@ -42,8 +50,15 @@ web = ["streamlit>1.27", "scipy"]
 "Homepage" = "https://github.com/ProteoBench"
 
 [build-system]
-build-backend = "flit_core.buildapi"
-requires = ["flit_core >=3.2,<4"]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+# https://setuptools-scm.readthedocs.io/ 
+# used to pick up the version from the git tags or the latest commit.
+
+[tool.setuptools.packages.find]
+include = ["proteobench"]
 
 [tool.isort]
 profile = "black"

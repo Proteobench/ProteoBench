@@ -3,7 +3,7 @@ authors = [
   { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
   { name = "Henry Webel", email = "henry.webel@sund.ku.dk" },
 ] # TODO: Add others
-description = "ProteoBench is a tool for the analysis of proteomics data."
+description = "ProteoBench compares the outputs of mass spectrometry-based proteomics data analysis pipelines"
 classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",

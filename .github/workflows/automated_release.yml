@@ -11,10 +11,10 @@ jobs:
     permissions: write-all
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
@@ -28,13 +28,15 @@ jobs:
         python -m build --wheel
 
     - name: Upload wheel to artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/*.whl
 
     - name: Create GitHub Release
-      uses: docker://antonyurchenko/git-release:v4
+      uses: docker://antonyurchenko/git-release:v5
+      # configurations
+      # https://github.com/anton-yurchenko/git-release?tab=readme-ov-file#configuration
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DRAFT_RELEASE: "false"

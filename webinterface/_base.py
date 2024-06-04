@@ -44,11 +44,10 @@ class StreamlitPage(ABC):
             unsafe_allow_html=True,
         )
         st.image("logos/logo_participants/logos_all.png")
-        st.markdown(
-            """
-            This site is hosted by the BMBF-funded de.NBI Cloud within the German Network for Bioinformatics Infrastructure (de.NBI)
-            """
-        )
+
+        # add hosting information if provided
+        if "hosting" in st.secrets.keys():
+            st.markdown(st.secrets["hosting"]["information"])
 
     @abstractmethod
     def _main_page(self):
@@ -57,3 +56,8 @@ class StreamlitPage(ABC):
     def _sidebar(self):
         """Format sidebar."""
         st.sidebar.image("logos/logo_funding/main_logos_sidebar.png", width=300)
+
+        # add gdpr links if provided
+        if "gdpr_links" in st.secrets.keys():
+            st.sidebar.page_link(st.secrets["gdpr_links"]["privacy_notice_link"], label="-> privacy notice")
+            st.sidebar.page_link(st.secrets["gdpr_links"]["legal_notice_link"], label="-> legal notice")

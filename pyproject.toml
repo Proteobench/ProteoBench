@@ -21,6 +21,7 @@ dependencies = [
   "openpyxl",
   "numpy",
   "plotly",
+  "streamlit>=1.31",
   "streamlit_extras",
   "streamlit-plotly-events",
   "matplotlib",

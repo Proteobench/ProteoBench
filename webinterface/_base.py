@@ -33,7 +33,7 @@ class StreamlitPage(ABC):
 
             **👈 Select a page from the sidebar to get started!**<br>
             **📖 Learn more about Proteobench on
-            [proteobench.readthedocs.io](https://proteobench.readthedocs.io/en/latest/)**<br>
+            [proteobench.readthedocs.io](https://proteobench.readthedocs.io/)**<br>
             **💻 Find the source code on
             [github.com](https://github.com/Proteobench/Proteobench)**<br>
 

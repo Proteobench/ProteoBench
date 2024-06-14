@@ -14,3 +14,4 @@ It contains the following columns:
 - species
 - expected ratio for the given species
 - epsilon = difference of the observed and expected log2-transformed fold change
+

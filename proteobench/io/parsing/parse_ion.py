@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 
-
 import pandas as pd
 
 __all__ = [
@@ -27,6 +26,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
     elif input_format == "FragPipe":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
     elif input_format == "WOMBAT":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
         input_data_frame["proforma"] = input_data_frame["modified_peptide"]
@@ -112,7 +112,7 @@ def match_brackets(
     isalpha: bool = True,
     isupper: bool = True,
 ):
-    matches = [(match.group(1), match.start(1), match.end(1)) for match in re.finditer(pattern, input_string)]
+    matches = [(match.group(), match.start(), match.end()) for match in re.finditer(pattern, input_string)]
     positions = (count_chars(input_string[0 : m[1]], isalpha=isalpha, isupper=isupper) for m in matches)
     mods = (m[0] for m in matches)
     return mods, positions
@@ -134,11 +134,13 @@ def get_proforma_bracketed(
 ):
     modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
     new_modifications = []
+
+    translation_table_remove_brackets = str.maketrans("", "", "[](){}")
     for m in modifications:
         try:
             new_modifications.append(modification_dict[m])
         except KeyError:
-            new_modifications.append(m)
+            new_modifications.append(m.translate(translation_table_remove_brackets))
     modifications = new_modifications
 
     pos_mod_dict = dict(zip(positions, modifications))
@@ -152,11 +154,10 @@ def get_proforma_bracketed(
         if idx in pos_mod_dict.keys():
             if idx == 0:
                 new_seq += f"[{pos_mod_dict[idx]}]-"
-            elif idx == len(stripped_seq) - 1:
+            elif idx == len(stripped_seq):
                 new_seq += f"-[{pos_mod_dict[idx]}]"
             else:
                 new_seq += f"[{pos_mod_dict[idx]}]"
         if not before_aa:
             new_seq += aa
-
     return new_seq

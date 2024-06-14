@@ -1,8 +1,9 @@
-"""Base classes for psm_utils online Streamlit web server."""
+"""Base classes for ProteoBench online Streamlit web server."""
 
 from abc import ABC, abstractmethod
 
 import streamlit as st
+import pages.texts.proteobench_builder as pbb
 from st_pages import show_pages_from_config
 
 import proteobench
@@ -14,16 +15,11 @@ class StreamlitPage(ABC):
     def __init__(self) -> None:
         self.state = st.session_state
 
-        st.set_page_config(
-            page_title="Proteobench",
-            page_icon=":rocket:",
-            layout="centered",
-            initial_sidebar_state="expanded",
-        )
-
+        pbb.proteobench_page_config(page_layout="centered")
+        pbb.proteobench_sidebar()
+        
         self._preface()
         self._main_page()
-        self._sidebar()
         show_pages_from_config()
 
     def _preface(self):
@@ -56,12 +52,3 @@ class StreamlitPage(ABC):
     @abstractmethod
     def _main_page(self):
         raise NotImplementedError()
-
-    def _sidebar(self):
-        """Format sidebar."""
-        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png", width=300)
-
-        # add gdpr links if provided
-        if "gdpr_links" in st.secrets.keys():
-            st.sidebar.page_link(st.secrets["gdpr_links"]["privacy_notice_link"], label="-> privacy notice")
-            st.sidebar.page_link(st.secrets["gdpr_links"]["legal_notice_link"], label="-> legal notice")

@@ -5,6 +5,6 @@ ProteoBench benchmark modules
 .. toctree::
    :caption: ProteoBench benchmark modules
    :glob:
-   :maxdepth: 2
+   :maxdepth: 3
 
    *

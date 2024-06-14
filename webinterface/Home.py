@@ -1,4 +1,4 @@
-"""psm_utils Streamlit-based web server."""
+"""Proteobench Streamlit-based web server."""
 
 from _base import StreamlitPage
 

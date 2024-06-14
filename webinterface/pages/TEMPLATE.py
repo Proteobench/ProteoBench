@@ -12,6 +12,9 @@ from proteobench.modules.template.module import Module
 from proteobench.modules.template.parse_settings import INPUT_FORMATS, LOCAL_DEVELOPMENT, TEMPLATE_RESULTS_PATH
 from proteobench.modules.template.plot import plot_bench1, plot_bench2
 
+import pages.texts.proteobench_builder as pbb
+
+
 logger = logging.getLogger(__name__)
 
 ## Different parts of the web application
@@ -38,16 +41,12 @@ class StreamlitUI:
         self.texts = WebpageTexts
         self.user_input = dict()
 
-        st.set_page_config(
-            page_title="Proteobench web server",
-            page_icon=":rocket:",
-            layout="centered",
-            initial_sidebar_state="expanded",
-        )
+        pbb.proteobench_page_config()
+        pbb.proteobench_sidebar()
+
         if SUBMIT not in st.session_state:
             st.session_state[SUBMIT] = False
         self._main_page()
-        self._sidebar()
 
     # Here the user can select the input file format. This is defined in the
     # modules folder in the io_parse_settings folder
@@ -107,16 +106,6 @@ class StreamlitUI:
 
     def _populate_results(self):
         self.generate_results("", None, None, False)
-
-    def _sidebar(self):
-        """Format sidebar."""
-        st.sidebar.image(
-            "https://upload.wikimedia.org/wikipedia/commons/8/85/Garden_bench_001.jpg",
-            width=150,
-        )
-        # st.sidebar.markdown(self.texts.Sidebar.badges)
-        st.sidebar.header("About")
-        st.sidebar.markdown(self.texts.Sidebar.about, unsafe_allow_html=True)
 
     def _run_proteobench(self):
         # Run Proteobench

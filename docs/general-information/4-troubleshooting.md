@@ -7,3 +7,7 @@ Please let us know if you have issues when using ProteoBench. You can:
 
 You may also find a solution to your problem(s) here:
 
+## Stable Internet Connection
+
+Make sure you have a stable internet connection. We rely on syncing results from GitHub, 
+which can lead to connections errors, see [#259](https://github.com/Proteobench/ProteoBench/issues/259).

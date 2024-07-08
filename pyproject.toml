@@ -33,7 +33,7 @@ name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = ["black"]
+dev = ["black", "jupyterlab", "notebook", "tqdm", "wget", "nox", "pytest"]
 docs = ["sphinx", "sphinx-rtd-theme", "sphinx-autobuild", "myst-parser", "pydata-sphinx-theme"]
 web = ["streamlit>1.27", "scipy"]
 

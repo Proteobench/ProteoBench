@@ -1,5 +1,7 @@
 # ProteoBench
 
+![PyPI - Version](https://img.shields.io/pypi/v/proteobench)
+
 Website: https://proteobench.cubimed.rub.de/
 
 PyPI: https://pypi.org/project/proteobench/

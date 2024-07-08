@@ -1,0 +1,11 @@
+[
+    {
+        "name": "stable (release)",
+        "version": "stable",
+        "url": "https://proteobench.readthedocs.io/en/stable/index.html"
+    },
+    {
+        "version": "latest",
+        "url": "https://proteobench.readthedocs.io/en/latest/index.html"
+    }
+]

@@ -11,7 +11,7 @@ import logging
 import re
 from collections import namedtuple
 from io import BytesIO
-from pathlib import Path
+from pathlib import PureWindowsPath
 
 import pandas as pd
 
@@ -55,40 +55,18 @@ def parse_params(l_of_str: list[str], sep: str = " = ") -> list[Parameter]:
     return data
 
 
-def read_msfragger_params(file: BytesIO, sep: str = " = ") -> list[Parameter]:
-    l_of_str = file.read().decode("utf-8").splitlines()
-    return parse_params(l_of_str, sep=sep)
-
-
 def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> list[Parameter]:
     l_of_str = file.read().decode("utf-8").splitlines()
     header = l_of_str[0][1:].strip()
     return header, parse_params(l_of_str, sep=sep)
 
 
-def extract_params(file: BytesIO, file1: BytesIO) -> ProteoBenchParameters:
-    # ! make it possible to pass files in both orders
-    msfragger_params, fragpipe_params = None, None
-    for f_ in [file, file1]:
-        print("file:", f_)
-        f_suffix = Path(f_.name).suffix
-        if f_suffix == ".params":
-            if msfragger_params is not None:
-                raise ValueError("MSFragger params file already parsed.")
-            msfragger_params = read_msfragger_params(f_)
-        elif f_suffix == ".workflow":
-            if fragpipe_params is not None:
-                raise ValueError("FragPipe workflow file already parsed.")
-            header, fragpipe_params = read_fragpipe_workflow(f_)
-        else:
-            raise ValueError("File extension not recognized.")
-
-    msfragger_params = pd.DataFrame.from_records(msfragger_params, columns=Parameter._fields).set_index(
-        Parameter._fields[0]
-    )
+def extract_params(file: BytesIO) -> ProteoBenchParameters:
+    """Parse FragPipe parameter files and extract relevant parameters."""
+    header, fragpipe_params = read_fragpipe_workflow(file)
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
-    )
+    )["value"]
 
     match = re.search(VERSION_NO_PATTERN, header)
 
@@ -100,37 +78,37 @@ def extract_params(file: BytesIO, file1: BytesIO) -> ProteoBenchParameters:
     params.software_version = header
     params.search_engine = "MSFragger"
 
-    msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger", "value"]
-    msfragger_executable = Path(msfragger_executable).name
+    msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger"]
+    msfragger_executable = PureWindowsPath(msfragger_executable).name
     match = re.search(VERSION_NO_PATTERN, msfragger_executable)
 
     if match:
         msfragger_executable = match.group()
 
     params.search_engine_version = msfragger_executable
-    params.enzyme = msfragger_params.loc["search_enzyme_name_1", "value"]
-    params.allowed_miscleavages = msfragger_params.loc["allowed_missed_cleavage_1", "value"]
-    params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods", "value"]
-    params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods", "value"]
-    params.max_mods = msfragger_params.loc["max_variable_mods_per_peptide", "value"]
-    params.min_peptide_length = msfragger_params.loc["digest_min_length", "value"]
-    params.max_peptide_length = msfragger_params.loc["digest_max_length", "value"]
+    params.enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
+    params.allowed_miscleavages = fragpipe_params.loc["msfragger.allowed_missed_cleavage_1"]
+    params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods"]
+    params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods"]
+    params.max_mods = fragpipe_params.loc["msfragger.max_variable_mods_per_peptide"]
+    params.min_peptide_length = fragpipe_params.loc["msfragger.digest_min_length"]
+    params.max_peptide_length = fragpipe_params.loc["msfragger.digest_max_length"]
 
     precursor_mass_units = "Da"
-    if int(msfragger_params.loc["precursor_mass_units", "value"]):
+    if int(fragpipe_params.loc["msfragger.precursor_mass_units"]):
         precursor_mass_units = "ppm"
     params.precursor_mass_tolerance = (
-        f'{msfragger_params.loc["precursor_true_tolerance", "value"]} {precursor_mass_units}'
+        f'{fragpipe_params.loc["msfragger.precursor_true_tolerance"]} {precursor_mass_units}'
     )
 
     fragment_mass_units = "Da"
-    if int(msfragger_params.loc["fragment_mass_units", "value"]):
+    if int(fragpipe_params.loc["msfragger.fragment_mass_units"]):
         fragment_mass_units = "ppm"
-    params.fragment_mass_tolerance = f'{msfragger_params.loc["fragment_mass_tolerance", "value"]} {fragment_mass_units}'
+    params.fragment_mass_tolerance = f'{fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}'
     # ! ionquant is not necessarily fixed?
-    params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr", "value"]
-    params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr", "value"]
-    params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr", "value"]
+    params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr"]
+    params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr"]
+    params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr"]
 
     for key in ["ident_fdr_protein", "ident_fdr_peptide", "ident_fdr_psm"]:
         value = getattr(params, key)
@@ -140,10 +118,9 @@ def extract_params(file: BytesIO, file1: BytesIO) -> ProteoBenchParameters:
         except ValueError:
             logging.warning(f"Could not convert {value} to int.")
 
-    min_precursor_charge, max_precursor_charge = msfragger_params.loc["precursor_charge", "value"].split(" ")
-    params.min_precursor_charge = int(min_precursor_charge)
-    params.max_precursor_charge = int(max_precursor_charge)
-    params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr", "value"])
+    params.min_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-lo"])
+    params.max_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-hi"])
+    params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
     return params
 
 
@@ -151,20 +128,24 @@ if __name__ == "__main__":
     import pathlib
     from pprint import pprint
 
-    file = pathlib.Path("../../../test/params/fragger.params")
+    file = pathlib.Path("../../../test/params/fragpipe.workflow")
     with open(file, "rb") as f:
-        data = read_msfragger_params(f)
-    df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
-    df.to_csv(file.with_suffix(".csv"))
-
-    file_fragpipe = pathlib.Path("../../../test/params/fragpipe.workflow")
-    with open(file_fragpipe, "rb") as f:
         _, data = read_fragpipe_workflow(f)
     df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
-    df.to_csv(file_fragpipe.with_suffix(".csv"))
-
-    with open(file, "rb") as f, open(file_fragpipe, "rb") as f2:
-        params = extract_params(f, f2)
+    df.to_csv(file.with_suffix(".csv"))
+    with open(file, "rb") as f:
+        params = extract_params(f)
     pprint(params.__dict__)
     series = pd.Series(params.__dict__)
-    series.to_csv(file.parent / "fragger_extracted_params.csv")
+    series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")
+
+    file = pathlib.Path("../../../test/params/fragpipe_win_paths.workflow")
+    with open(file, "rb") as f:
+        _, data = read_fragpipe_workflow(f)
+    df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
+    df.to_csv(file.with_suffix(".csv"))
+    with open(file, "rb") as f:
+        params = extract_params(f)
+    pprint(params.__dict__)
+    series = pd.Series(params.__dict__)
+    series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")

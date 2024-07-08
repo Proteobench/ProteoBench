@@ -11,6 +11,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
+import pages.texts.proteobench_builder as pbb
 from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 from streamlit_extras.let_it_rain import rain
@@ -43,18 +44,14 @@ class StreamlitUI:
         self.texts: Type[WebpageTexts] = WebpageTexts
         self.user_input: Dict[str, Any] = dict()
 
-        st.set_page_config(
-            page_title="Proteobench web server",
-            page_icon=":rocket:",
-            layout="wide",
-            initial_sidebar_state="expanded",
-        )
+        pbb.proteobench_page_config()
+        pbb.proteobench_sidebar()
+
         if self.variables_dda_quant.submit not in st.session_state:
             st.session_state[self.variables_dda_quant.submit] = False
 
         self.ionmodule: IonModule = IonModule()
         self._main_page()
-        self._sidebar()
 
     def generate_input_field(self, input_format: str, content: dict) -> Any:
         """
@@ -215,12 +212,6 @@ class StreamlitUI:
         Populates the results section of the UI. This is called after data processing is complete.
         """
         self.generate_results("", None, None, False, None)
-
-    def _sidebar(self):
-        """
-        Sets up the sidebar for the Streamlit application, including images and additional info.
-        """
-        st.sidebar.image("logos/logo_funding/main_logos_sidebar.png", width=300)
 
     def _run_proteobench(self) -> None:
         """
@@ -500,6 +491,14 @@ class StreamlitUI:
             value=st.session_state[st.session_state["slider_id"]],
             on_change=self.slider_callback,
             key=st.session_state["slider_id"],
+        )
+
+        st.session_state[self.variables_dda_quant.all_datapoints] = self.ionmodule.filter_data_point(
+            st.session_state[self.variables_dda_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
+        )
+
+        st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
+            st.session_state[self.variables_dda_quant.all_datapoints]
         )
 
         placeholder_fig_compare = st.empty()

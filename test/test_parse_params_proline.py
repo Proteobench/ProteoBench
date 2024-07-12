@@ -43,3 +43,10 @@ def test_extract_params(file):
     actual = pd.Series(actual.__dict__)
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=0).squeeze("columns")
     assert expected.equals(actual)
+
+
+def test_find_charges():
+    assert proline_params.find_charge("2+ and 3+") == [2, 3]
+    assert proline_params.find_charge("2+") == [2]
+    assert proline_params.find_charge("3+") == [3]
+    assert proline_params.find_charge("30+ and 14+") == [30, 14]

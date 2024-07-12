@@ -16,5 +16,5 @@ max_peptide_length,
 fixed_mods,Carbamidomethyl (C)
 variable_mods,Acetyl (Protein N-term); Oxidation (M)
 max_mods,
-min_precursor_charge,
-max_precursor_charge,
+min_precursor_charge,2
+max_precursor_charge,3

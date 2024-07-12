@@ -35,6 +35,14 @@ use_columns = {
 
 PATTERN_MIN_PEP_LENGTH = r"\[threshold_value=([0-9].*)\]"
 
+PATTERN_CHARGE = r"[\d+]+"
+
+
+def find_charge(string):
+    charges = re.findall(PATTERN_CHARGE, string)
+    charges = [int(c[:-1]) for c in charges]
+    return charges
+
 
 def find_min_pep_length(string):
     min_length = re.findall(PATTERN_MIN_PEP_LENGTH, string)[0]
@@ -64,6 +72,11 @@ def extract_params(fname) -> ProteoBenchParameters:
     params.variable_mods = sheet.loc[0, "variable_ptms"]
     params.precursor_mass_tolerance = sheet.loc[0, "peptide_mass_error_tolerance"]
     params.fragment_mass_tolerance = sheet.loc[0, "fragment_mass_error_tolerance"]
+
+    # Extract allowed minimum and maximum charge states
+    charges = find_charge(sheet.loc[0, "peptide_charge_states"])
+    params.min_precursor_charge = min(charges)
+    params.max_precursor_charge = max(charges)
 
     # ! Second sheet contains information about the import and filters
     sheet_name = "Import and filters"
@@ -97,7 +110,7 @@ if __name__ == "__main__":
         "../../../test/params/ProlineStudio_withMBR.xlsx",
     ]
     for file in files:
-        file = Path("../../../test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx")
+        file = Path(file)
         params = extract_params(file)
         data_dict = params.__dict__
         series = pd.Series(data_dict)

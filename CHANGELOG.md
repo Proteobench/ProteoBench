@@ -1,4 +1,4 @@
-# Changelog
+# Changelog - pre 0.2.10
 
 All notable changes to this project will be documented in this file.
 

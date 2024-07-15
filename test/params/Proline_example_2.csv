@@ -16,5 +16,5 @@ max_peptide_length,
 fixed_mods,Carbamidomethyl (C)
 variable_mods,Acetyl (Protein N-term); Gln->pyro-Glu (Any N-term Q); Ammonia-loss (Any N-term C); Glu->pyro-Glu (Any N-term E); Oxidation (M)
 max_mods,
-min_precursor_charge,
-max_precursor_charge,
+min_precursor_charge,1
+max_precursor_charge,4

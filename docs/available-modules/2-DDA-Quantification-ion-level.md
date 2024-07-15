@@ -43,9 +43,10 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from MaxQuant, FragPipe, Proline and i2MassChroQ (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (correspond to the benchmark run) before pressing the button `I really want to upload it`. 
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from MaxQuant, FragPipe, Proline and i2MassChroQ (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (correspond to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+`I really want to upload it` will appear to trigger the submission.
 
-After upload, you will get a link to the pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example "Proline__20240106_141919"), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
+After upload, you will get a link to the pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 
 ## Important Tool-specific settings
 
@@ -82,9 +83,9 @@ Some older versions of MaxQuant do not provide the option to change fasta header
 
 ### Proline
 Use the raw file names as sample names. In the output, it will automatically remove "LFQ_Orbitrap_".
-For this module, use the excel exports. Make sure that the “Quantified peptide ions” tab contains the columns "samesets_accessions" and "subsets_accessions". The accessions in these two field are combined to determine what species a peptide sequence matches to.
-The "Quantified peptide ions" tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation.
-For public submission, you can upload the same excel export, just make sure to have the tabs "Search settings and infos", "Import and filters", "Quant config".
+For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two field are combined to determine what species a peptide sequence matches to.
+The `Quantified peptide ions` tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation.
+For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`.
 
 ### Sage
 

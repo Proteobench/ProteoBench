@@ -136,7 +136,6 @@ def get_proforma_bracketed(
         "+42": "Acetyl",
     },
 ):
-
     input_string = re.sub(pattern, to_lowercase, input_string)
     modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
     new_modifications = []

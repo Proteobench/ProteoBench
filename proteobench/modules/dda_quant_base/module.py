@@ -184,9 +184,6 @@ class Module:
                 branch_name=branch_name,
                 commit_message=commit_message,
             )
-        except GitCommandError as e:
-            logging.error(f"Error in PR: {e}")
-            return "Unable to create PR. Please check the logs."
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."

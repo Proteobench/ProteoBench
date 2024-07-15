@@ -2,8 +2,8 @@
 
 from abc import ABC, abstractmethod
 
-import streamlit as st
 import pages.texts.proteobench_builder as pbb
+import streamlit as st
 from st_pages import show_pages_from_config
 
 import proteobench
@@ -17,7 +17,7 @@ class StreamlitPage(ABC):
 
         pbb.proteobench_page_config(page_layout="centered")
         pbb.proteobench_sidebar()
-        
+
         self._preface()
         self._main_page()
         show_pages_from_config()
@@ -46,8 +46,13 @@ class StreamlitPage(ABC):
         st.image("logos/logo_participants/logos_all.png")
 
         # add hosting information if provided
-        if "hosting" in st.secrets.keys():
-            st.markdown(st.secrets["hosting"]["information"])
+        try:
+            if "hosting" in st.secrets.keys():
+                st.markdown(st.secrets["hosting"]["information"])
+        except FileNotFoundError:
+            # Would be preffered if we can keep this information elsewhere or
+            # provide a default config file
+            pass
 
     @abstractmethod
     def _main_page(self):

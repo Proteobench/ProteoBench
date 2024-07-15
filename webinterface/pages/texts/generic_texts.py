@@ -1,5 +1,10 @@
 class WebpageTexts:
     class ShortMessages:
+
+        privacy_notice = "https://www.ruhr-uni-bochum.de/en/privacy-notice"
+
+        legal_notice = "https://www.ruhr-uni-bochum.de/en/legal-notice"
+
         no_results = "No results available for this module."
 
         initial_results = """

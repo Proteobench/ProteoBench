@@ -118,6 +118,10 @@ def match_brackets(
     return mods, positions
 
 
+def to_lowercase(match):
+    return match.group(0).lower()
+
+
 def get_proforma_bracketed(
     input_string,
     before_aa: bool = True,
@@ -132,15 +136,17 @@ def get_proforma_bracketed(
         "+42": "Acetyl",
     },
 ):
+
+    input_string = re.sub(pattern, to_lowercase, input_string)
     modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
     new_modifications = []
 
-    translation_table_remove_brackets = str.maketrans("", "", "[](){}")
     for m in modifications:
-        try:
+        if m in modification_dict.keys():
             new_modifications.append(modification_dict[m])
-        except KeyError:
-            new_modifications.append(m.translate(translation_table_remove_brackets))
+        else:
+            new_modifications.append(m)
+
     modifications = new_modifications
 
     pos_mod_dict = dict(zip(positions, modifications))

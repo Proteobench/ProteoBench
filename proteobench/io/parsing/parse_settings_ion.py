@@ -108,7 +108,7 @@ class ParseSettings:
                     value_name="Intensity",
                 )
 
-        df["replicate"] = df["Raw file"].map(self.condition_mapper)
+        df.loc[:, "replicate"] = df["Raw file"].map(self.condition_mapper)
         df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)
 
         if "proforma" in df.columns and "Charge" in df.columns:

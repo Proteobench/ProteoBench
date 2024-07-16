@@ -116,14 +116,14 @@ class QuantScores:
         withspecies["unique"] = withspecies[species_expected_ratio.keys()].sum(axis=1)
 
         # now remove all rows with withspecies["unique"] > 1
-        withspecies = withspecies[withspecies["unique"] == 1]
+        withspecies_unique = withspecies[withspecies["unique"] == 1].copy()
 
         # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
         for species in species_expected_ratio.keys():
-            withspecies.loc[withspecies[species] == True, "species"] = species
-            withspecies.loc[withspecies[species] == True, "log2_expectedRatio"] = np.log2(
+            withspecies_unique.loc[withspecies_unique[species] == True, "species"] = species
+            withspecies_unique.loc[withspecies_unique[species] == True, "log2_expectedRatio"] = np.log2(
                 species_expected_ratio[species]["A_vs_B"]
             )
 
-        withspecies["epsilon"] = withspecies["log2_A_vs_B"] - withspecies["log2_expectedRatio"]
-        return withspecies
+        withspecies_unique["epsilon"] = withspecies_unique["log2_A_vs_B"] - withspecies_unique["log2_expectedRatio"]
+        return withspecies_unique

@@ -50,7 +50,7 @@ class StreamlitUI:
         if self.variables_dda_quant.submit not in st.session_state:
             st.session_state[self.variables_dda_quant.submit] = False
 
-        self.ionmodule: IonModule = IonModule()
+        self.ionmodule: IonModule = IonModule(token = st.secrets["gh"]["token"])
         self._main_page()
 
     def generate_input_field(self, input_format: str, content: dict) -> Any:

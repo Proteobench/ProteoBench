@@ -2,6 +2,7 @@ import os
 from tempfile import TemporaryDirectory
 
 import pandas as pd
+import toml
 from git import Repo, exc
 from github import Github
 
@@ -33,10 +34,8 @@ class GithubRepo:
         self.username = username
 
     def read_results_json_repo(self):
-        t_dir = TemporaryDirectory().name
-        os.mkdir(t_dir)
         Repo.clone_from(self.remote_git, self.clone_dir)
-        f_name = os.path.join(t_dir, "results.json")
+        f_name = os.path.join(self.clone_dir, "results.json")
         all_datapoints = pd.read_json(f_name)
         return all_datapoints
 
@@ -49,7 +48,7 @@ class GithubRepo:
         repo = Repo.clone_from(remote_url, self.clone_dir)
         return self.clone_dir
 
-    def pr_github(self, token, branch_name, commit_message, repo_name="Proteobot/Results_Module2_quant_DDA"):
+    def pr_github(self,  branch_name, commit_message, repo_name="Proteobot/Results_Module2_quant_DDA"):
         remote_url = self.get_remote_url()
 
         # Clone the repository if it doesn't exist
@@ -72,7 +71,7 @@ class GithubRepo:
         repo.git.push("--set-upstream", "origin", current_branch)
 
         # Create a pull request using PyGithub
-        g = Github(token)
+        g = Github(self.token)
         repo = g.get_repo(repo_name)
         base = repo.get_branch("master")
         head = f"{self.username}:{branch_name}"

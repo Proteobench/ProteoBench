@@ -23,8 +23,8 @@ from proteobench.utils.quant_datapoint import Datapoint
 class IonModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, token):
+        super().__init__(token)
         self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
         self.precursor_name = "precursor ion"
 

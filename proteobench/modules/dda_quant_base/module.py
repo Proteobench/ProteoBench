@@ -31,9 +31,9 @@ from proteobench.utils.quant_datapoint import (
 class Module:
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self):
+    def __init__(self, token):
         self.t_dir = TemporaryDirectory().name
-        self.github_repo = GithubRepo( clone_dir=self.t_dir)
+        self.github_repo = GithubRepo(token, clone_dir=self.t_dir)
         self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
@@ -138,7 +138,6 @@ class Module:
         self,
         temporary_datapoints,
         datapoint_params,
-        token,
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         submission_comments="no comments",
     ):
@@ -169,7 +168,6 @@ class Module:
 
         try:
             pr_id = self.github_repo.pr_github(
-                token,
                 branch_name=branch_name,
                 commit_message=commit_message)
         except Exception as e:

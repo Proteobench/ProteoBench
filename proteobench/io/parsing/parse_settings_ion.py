@@ -111,6 +111,8 @@ class ParseSettings:
                     var_name="Raw file",
                     value_name="Intensity",
                 )
+        else:
+            df_filtered_melted = df_filtered.copy()
 
         df_filtered_melted.loc[:, "replicate"] = df["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)

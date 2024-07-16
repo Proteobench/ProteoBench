@@ -9,6 +9,8 @@ from datetime import datetime
 
 import pandas as pd
 
+import proteobench
+
 
 def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
     if isinstance(list(row.keys())[0], str):
@@ -53,6 +55,7 @@ class Datapoint:
     median_abs_epsilon: int = 0
     nr_prec: int = 0
     comments: str = ""
+    proteobench_version: str = ""
 
     # TODO do we want to save these values in the json?
     # fixed_mods: [],
@@ -97,6 +100,7 @@ class Datapoint:
             max_peptide_length=user_input["max_peptide_length"],
             intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
             comments=user_input["comments_for_submission"],
+            proteobench_version=proteobench.__version__,
         )
 
         result_datapoint.generate_id()

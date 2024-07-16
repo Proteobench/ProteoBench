@@ -175,14 +175,18 @@ class Module:
         f.close()
         commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
 
-        pr_id = pr_github(
-            clone_dir=t_dir,
-            token=token,
-            remote_git=remote_git,
-            username=username,
-            branch_name=branch_name,
-            commit_message=commit_message,
-        )
+        try:
+            pr_id = pr_github(
+                clone_dir=t_dir,
+                token=token,
+                remote_git=remote_git,
+                username=username,
+                branch_name=branch_name,
+                commit_message=commit_message,
+            )
+        except Exception as e:
+            logging.error(f"Error in PR: {e}")
+            return "Unable to create PR. Please check the logs."
 
         return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
 

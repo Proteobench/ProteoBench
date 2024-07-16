@@ -79,43 +79,51 @@ class ParseSettings:
             replicate_to_raw[v].append(k)
 
         if "Reverse" in self.mapper:
-            df = df[df["Reverse"] != self.decoy_flag]
+            df_filtered = df[df["Reverse"] != self.decoy_flag].copy()
+        else:
+            df_filtered = df.copy()
 
-        df["contaminant"] = df["Proteins"].str.contains(self.contaminant_flag)
+        df_filtered["contaminant"] = df_filtered["Proteins"].str.contains(self.contaminant_flag)
         for flag, species in self._species_dict.items():
-            df[species] = df["Proteins"].str.contains(flag)
-        df["MULTI_SPEC"] = df[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
+            df_filtered[species] = df_filtered["Proteins"].str.contains(flag)
+        df_filtered["MULTI_SPEC"] = (
+            df_filtered[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
+        )
 
-        df = df[df["MULTI_SPEC"] == False]
+        df_filtered = df_filtered[df_filtered["MULTI_SPEC"] == False]
 
         # If there is "Raw file" then it is a long format, otherwise short format
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
             # Should be handled more elegant
             try:
-                df = df.melt(
-                    id_vars=list(set(df.columns).difference(set(melt_vars))),
+                df_filtered_melted = df_filtered.melt(
+                    id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
                     value_vars=melt_vars,
                     var_name="Raw file",
                     value_name="Intensity",
                 )
             except KeyError:
-                df.columns = [c.replace(".mzML", ".mzML.gz") for c in df.columns]
-                df = df.melt(
-                    id_vars=list(set(df.columns).difference(set(melt_vars))),
+                df_filtered.columns = [c.replace(".mzML", ".mzML.gz") for c in df.columns]
+                df_filtered_melted = df_filtered.melt(
+                    id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
                     value_vars=melt_vars,
                     var_name="Raw file",
                     value_name="Intensity",
                 )
+        else:
+            df_filtered_melted = df_filtered.copy()
 
-        df["replicate"] = df["Raw file"].map(self.condition_mapper)
-        df = pd.concat([df, pd.get_dummies(df["Raw file"])], axis=1)
+        df_filtered_melted.loc[:, "replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
+        df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
-        if "proforma" in df.columns and "Charge" in df.columns:
-            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+        if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
+            df_filtered_melted["precursor ion"] = (
+                df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
+            )
         else:
             print("Not all columns required for making the ion are available.")
-        return df, replicate_to_raw
+        return df_filtered_melted, replicate_to_raw
 
 
 class ParseModificationSettings:

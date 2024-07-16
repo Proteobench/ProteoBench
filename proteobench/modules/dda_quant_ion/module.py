@@ -1,7 +1,17 @@
 from __future__ import annotations
 
+import pandas as pd
 from pandas import DataFrame
 
+from proteobench.exceptions import (
+    ConvertStandardFormatError,
+    DatapointAppendError,
+    DatapointGenerationError,
+    IntermediateFormatGenerationError,
+    ParseError,
+    ParseSettingsError,
+    QuantificationError,
+)
 from proteobench.github.gh import DDA_QUANT_RESULTS_REPO
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
@@ -27,22 +37,56 @@ class IonModule(Module):
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """Main workflow of the module. Used to benchmark workflow results."""
         # Parse user config
-        input_df = load_input_file(input_file, input_format)
-        parse_settings = ParseSettingsBuilder().build_parser(input_format)
 
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        try:
+            input_df = load_input_file(input_file, input_format)
+        except pd.errors.ParserError as e:
+            raise ParseError(
+                f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
+            )
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing the inpu file: {e}")
 
-        # Get quantification data
-        quant_score = QuantScores(
-            self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
-        )
-        intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        try:
+            parse_settings = ParseSettingsBuilder().build_parser(input_format)
+        except KeyError as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
 
-        current_datapoint = Datapoint.generate_datapoint(
-            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-        )
+        try:
+            standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        except KeyError as e:
+            raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
+        except Exception as e:
+            raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
 
-        all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
+        try:
+            # Get quantification data
+            quant_score = QuantScores(
+                self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            )
+        except Exception as e:
+            raise QuantificationError(f"Error generating quantification scores: {e}")
+
+        try:
+            intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        except Exception as e:
+            raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
+
+        try:
+            current_datapoint = Datapoint.generate_datapoint(
+                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            )
+        except Exception as e:
+            raise DatapointGenerationError(f"Error generating datapoint: {e}")
+
+        try:
+            all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
+        except Exception as e:
+            raise DatapointAppendError(f"Error adding current data point: {e}")
 
         # TODO check why there are NA and inf/-inf values
         return (

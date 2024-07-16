@@ -340,12 +340,10 @@ class StreamlitUI:
 
             try:
                 pr_url = self.ionmodule.clone_pr(
-                    submit_df,
-                    params,
-                    st.secrets["gh"]["token"],
-                    username="Proteobot",
+                    temporary_datapoints=submit_df,
+                    datapoint_params=params,
+                    token=st.secrets["gh"]["token"],
                     remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                    branch_name="new_branch",
                     submission_comments=user_comments,
                 )
             except Exception as e:

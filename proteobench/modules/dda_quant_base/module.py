@@ -8,12 +8,7 @@ import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
-from proteobench.github.gh import (
-    DDA_QUANT_RESULTS_REPO,
-    clone_repo,
-    pr_github,
-    read_results_json_repo,
-)
+from proteobench.github.gh import GithubRepo
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.fragger import extract_params as extract_params_fragger
@@ -37,7 +32,8 @@ class Module:
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(self):
-        self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
+        self.t_dir = TemporaryDirectory().name
+        self.github_repo = GithubRepo( clone_dir=self.t_dir)
         self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
@@ -57,7 +53,7 @@ class Module:
         """Add current data point to all data points and load them from file if empty."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-            all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
+            all_datapoints = self.github_repo.read_results_json_repo()
 
         all_datapoints["old_new"] = "old"
         all_datapoints = all_datapoints.T
@@ -71,7 +67,7 @@ class Module:
         """Add current data point to all data points and load them from file if empty."""
         if not isinstance(all_datapoints, pd.DataFrame):
             # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-            all_datapoints = read_results_json_repo(self.dda_quant_results_repo)
+            all_datapoints = self.github_repo.read_results_json_repo()
 
         all_datapoints["old_new"] = "old"
 
@@ -98,7 +94,6 @@ class Module:
         # Parse user config
         input_df = load_input_file(input_file, input_format)
         parse_settings = ParseSettingsBuilder().build_parser(input_format)
-
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data
@@ -144,14 +139,11 @@ class Module:
         temporary_datapoints,
         datapoint_params,
         token,
-        username="Proteobot",
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-        branch_name="new_branch",
         submission_comments="no comments",
     ):
-        t_dir = TemporaryDirectory().name
 
-        clone_repo(clone_dir=t_dir, token=token, remote_git=remote_git, username=username)
+        self.github_repo.clone_repo()
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
@@ -166,7 +158,7 @@ class Module:
 
         branch_name = current_datapoint["id"]
 
-        path_write = os.path.join(t_dir, "results.json")
+        path_write = os.path.join(self.t_dir, "results.json")
         logging.info(f"Writing the json to: {path_write}")
         f = open(path_write, "w")
 
@@ -176,14 +168,10 @@ class Module:
         commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
 
         try:
-            pr_id = pr_github(
-                clone_dir=t_dir,
-                token=token,
-                remote_git=remote_git,
-                username=username,
+            pr_id = self.github_repo.pr_github(
+                token,
                 branch_name=branch_name,
-                commit_message=commit_message,
-            )
+                commit_message=commit_message)
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."

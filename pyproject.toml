@@ -36,7 +36,7 @@ name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = ["black"]
+dev = ["black", "jupyterlab", "notebook", "tqdm", "wget", "nox", "pytest"]
 docs = [
   "sphinx",
   "sphinx-rtd-theme",
@@ -55,7 +55,7 @@ requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-# https://setuptools-scm.readthedocs.io/ 
+# https://setuptools-scm.readthedocs.io/
 # used to pick up the version from the git tags or the latest commit.
 
 [tool.setuptools.packages.find]

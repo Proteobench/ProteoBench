@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Type
+
+from pages.texts.generic_texts import WebpageTexts
 
 
 @dataclass
@@ -28,3 +30,13 @@ class VariablesDDAQuant:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+
+    description_module_md = "pages/markdown_files/DDA_Quant/introduction.md"
+    description_files_md = "pages/markdown_files/DDA_Quant/file_description.md"
+    description_input_file_md = "pages/markdown_files/DDA_Quant/input_file_description.md"
+    description_slider_md = "pages/markdown_files/DDA_Quant/slider_description.md"
+    description_table_md = "pages/markdown_files/DDA_Quant/table_description.md"
+    description_results_md = "pages/markdown_files/DDA_Quant/result_description.md"
+    description_submission_md = "pages/markdown_files/DDA_Quant/submit_description.md"
+
+    texts: Type[WebpageTexts] = WebpageTexts

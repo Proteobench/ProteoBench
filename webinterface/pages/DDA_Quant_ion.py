@@ -41,7 +41,6 @@ class StreamlitUI:
     def __init__(self):
         """Proteobench Streamlit UI."""
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
-        self.texts: Type[WebpageTexts] = WebpageTexts
         self.user_input: Dict[str, Any] = dict()
 
         pbb.proteobench_page_config()
@@ -91,34 +90,40 @@ class StreamlitUI:
         if content["type"] == "checkbox":
             return st.checkbox(content["label"], content["value"][input_format])
 
-    def _main_page(self) -> None:
-        """
-        Sets up the main page layout for the Streamlit application.
-        This includes the title, module descriptions, input forms, and configuration settings.
-        """
+    def _create_text_header(self) -> None:
+        ################################################
+        # Add all textual information to the main page #
+        ################################################
+
         st.title("DDA quantification - precursor ions")
         st.warning(
             "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
         )
         st.header("Description of the module")
-        st.markdown(open("pages/markdown_files/DDA_Quant_ion/introduction.md", "r").read())
+        st.markdown(open(self.variables_dda_quant.description_module_md, "r").read())
         st.header("Downloading associated files")
-        st.markdown(open("pages/markdown_files/DDA_Quant_ion/file_description.md", "r").read(), unsafe_allow_html=True)
+        st.markdown(open(self.variables_dda_quant.description_files_md, "r").read(), unsafe_allow_html=True)
         st.header("Input and configuration")
-        st.markdown(self.texts.ShortMessages.initial_results)
+        st.markdown(self.variables_dda_quant.texts.ShortMessages.initial_results)
 
+    def _create_main_submission_form(self) -> None:
+        #######################################
+        # Create the main form for user input #
+        #######################################
         with st.form(key="main_form"):
             st.subheader("Input files")
-            st.markdown(open("pages/markdown_files/DDA_Quant_ion/input_file_description.md", "r").read())
+            st.markdown(open(self.variables_dda_quant.description_input_file_md, "r").read())
             self.user_input["input_format"] = st.selectbox(
-                "Software tool", ParseSettingsBuilder().INPUT_FORMATS, help=self.texts.Help.input_format
+                "Software tool",
+                ParseSettingsBuilder().INPUT_FORMATS,
+                help=self.variables_dda_quant.texts.Help.input_format,
             )
 
             self.user_input["input_csv"] = st.file_uploader(
-                "Software tool result file", help=self.texts.Help.input_file
+                "Software tool result file", help=self.variables_dda_quant.texts.Help.input_file
             )
 
-            st.markdown(self.texts.ShortMessages.initial_parameters)
+            st.markdown(self.variables_dda_quant.texts.ShortMessages.initial_parameters)
 
             with st.expander("Additional parameters"):
                 with open("../webinterface/configuration/dda_quant.json") as file:
@@ -127,9 +132,15 @@ class StreamlitUI:
                 for key, value in config.items():
                     self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
 
-            st.markdown(self.texts.ShortMessages.run_instructions)
+            st.markdown(self.variables_dda_quant.texts.ShortMessages.run_instructions)
 
-            submit_button = st.form_submit_button("Parse and bench", help=self.texts.Help.parse_button)
+            submit_button = st.form_submit_button(
+                "Parse and bench", help=self.variables_dda_quant.texts.Help.parse_button
+            )
+
+        ######################################################################
+        # If data is submitted start resetting variables and run proteobench #
+        ######################################################################
 
         if submit_button:
             if self.user_input["input_csv"]:
@@ -145,13 +156,20 @@ class StreamlitUI:
             else:
                 st.error(":x: Please provide a result file", icon="🚨")
 
+    def _init_slider(self) -> None:
+        ##########################################
+        # Initialize slider ID and default value #
+        ##########################################
+
         if "slider_id" not in st.session_state.keys():
             st.session_state["slider_id"] = uuid.uuid4()
         if st.session_state["slider_id"] not in st.session_state.keys():
             st.session_state[st.session_state["slider_id"]] = self.variables_dda_quant.default_val_slider
 
-        if self.variables_dda_quant.fig_logfc in st.session_state:
-            self._populate_results()
+    def _create_results(self) -> None:
+        #########################################
+        # Creat the results section of the page #
+        #########################################
 
         if (
             self.variables_dda_quant.all_datapoints not in st.session_state
@@ -178,7 +196,7 @@ class StreamlitUI:
                     0, "Highlight", st.session_state[self.variables_dda_quant.highlight_list]
                 )
 
-            st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
+            st.markdown(open(self.variables_dda_quant.description_slider_md, "r").read())
 
             st.session_state[self.variables_dda_quant.placeholder_slider] = st.empty()
             st.session_state[self.variables_dda_quant.placeholder_fig_compare] = st.empty()
@@ -209,6 +227,20 @@ class StreamlitUI:
                 key=st.session_state["table_id"],
                 on_change=self.table_callback,
             )
+
+    def _main_page(self) -> None:
+        """
+        Sets up the main page layout for the Streamlit application.
+        This includes the title, module descriptions, input forms, and configuration settings.
+        """
+        self._create_text_header()
+        self._create_main_submission_form()
+        self._init_slider()
+
+        if self.variables_dda_quant.fig_logfc in st.session_state:
+            self._populate_results()
+
+        self._create_results()
 
     def _populate_results(self) -> None:
         """
@@ -381,7 +413,7 @@ class StreamlitUI:
         if st.session_state[self.variables_dda_quant.submit]:
             # status_placeholder.success(":heavy_check_mark: Successfully uploaded data!")
             st.subheader("SUCCESS")
-            st.markdown(self.texts.ShortMessages.submission_processing_warning)
+            st.markdown(self.variables_dda_quant.texts.ShortMessages.submission_processing_warning)
             try:
                 st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
             except UnboundLocalError:
@@ -436,14 +468,14 @@ class StreamlitUI:
 
         self.user_input[self.variables_dda_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
-            help=self.texts.Help.meta_data_file,
+            help=self.variables_dda_quant.texts.Help.meta_data_file,
             key="meta_data_fileuploader",  # self.variables_dda_quant.meta_file_uploader_uuid,
             accept_multiple_files=True,
         )
 
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
-            placeholder=self.texts.ShortMessages.parameters_additional,
+            placeholder=self.variables_dda_quant.texts.ShortMessages.parameters_additional,
             height=200,
             # key=self.variables_dda_quant.comments_submission_uuid,
         )
@@ -479,19 +511,19 @@ class StreamlitUI:
         """
         st.header("Results")
         st.subheader("Sample of the processed file")
-        st.markdown(open("pages/markdown_files/DDA_Quant_ion/table_description.md", "r").read())
+        st.markdown(open(self.variables_dda_quant.description_table_md, "r").read())
         st.session_state[self.variables_dda_quant.df_head] = st.dataframe(
             st.session_state[self.variables_dda_quant.result_perf].head(100)
         )
 
-        st.markdown(st.markdown(open("pages/markdown_files/DDA_Quant_ion/result_description.md", "r").read()))
+        st.markdown(st.markdown(open(self.variables_dda_quant.description_results_md, "r").read()))
 
         st.subheader("Mean error between conditions")
-        st.markdown(self.texts.ShortMessages.submission_result_description)
+        st.markdown(self.variables_dda_quant.texts.ShortMessages.submission_result_description)
 
         sample_name = self.create_sample_name()
 
-        st.markdown(open("pages/markdown_files/DDA_Quant_ion/slider_description.md", "r").read())
+        st.markdown(open(self.variables_dda_quant.description_slider_md, "r").read())
         # st.session_state["slider_id"] = uuid.uuid4()
         f = st.select_slider(
             label="Minimal ion quantifications (# samples)",
@@ -537,7 +569,7 @@ class StreamlitUI:
         )
 
         st.subheader("Add results to online repository")
-        st.markdown(open("pages/markdown_files/DDA_Quant_ion/submit_description.md", "r").read())
+        st.markdown(open(self.variables_dda_quant.description_submission_md, "r").read())
 
     def call_later_plot(self) -> None:
         """

@@ -143,7 +143,7 @@ class StreamlitUI:
                     del st.session_state[self.variables_dda_quant.button_submission_uuid]
                 self._run_proteobench()
             else:
-                st.error(":x: Please provide a result file")
+                st.error(":x: Please provide a result file", icon="🚨")
 
         if "slider_id" not in st.session_state.keys():
             st.session_state["slider_id"] = uuid.uuid4()
@@ -193,9 +193,12 @@ class StreamlitUI:
                 key=st.session_state["slider_id"],
             )
 
-            st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_dda_quant.all_datapoints]
-            )
+            try:
+                st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
+                    st.session_state[self.variables_dda_quant.all_datapoints]
+                )
+            except Exception as e:
+                st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
             st.session_state[self.variables_dda_quant.placeholder_fig_compare].plotly_chart(
                 st.session_state[self.variables_dda_quant.fig_metric], use_container_width=True
@@ -247,7 +250,6 @@ class StreamlitUI:
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
             st.error(e, icon="🚨")
-            # st.exception(e)
         else:
             self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
 
@@ -272,7 +274,10 @@ class StreamlitUI:
             self.variables_dda_quant.all_datapoints
         ]
 
-        fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
+        try:
+            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
         st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
 
@@ -288,7 +293,10 @@ class StreamlitUI:
             st.session_state[self.variables_dda_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )
 
-        fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
+        try:
+            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_dda_quant.all_datapoints])
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
         st.session_state[self.variables_dda_quant.fig_metric] = fig_metric
 
@@ -328,21 +336,20 @@ class StreamlitUI:
             result_performance = st.session_state[self.variables_dda_quant.result_performance_submission]
 
             if "Highlight" in submit_df.columns:
-                # TODO it seems that pandas trips over this sometime, even though it is present...
-                try:
-                    submit_df.drop("Highlight", inplace=True, axis=1)
-                except:
-                    pass
+                submit_df.drop("Highlight", inplace=True, axis=1)
 
-            pr_url = self.ionmodule.clone_pr(
-                submit_df,
-                params,
-                st.secrets["gh"]["token"],
-                username="Proteobot",
-                remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                branch_name="new_branch",
-                submission_comments=user_comments,
-            )
+            try:
+                pr_url = self.ionmodule.clone_pr(
+                    submit_df,
+                    params,
+                    st.secrets["gh"]["token"],
+                    username="Proteobot",
+                    remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                    branch_name="new_branch",
+                    submission_comments=user_comments,
+                )
+            except Exception as e:
+                st.error(f"Unable to create the pull request: {e}", icon="🚨")
 
             if not pr_url:
                 del st.session_state[self.variables_dda_quant.submit]
@@ -399,11 +406,12 @@ class StreamlitUI:
             )
             st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
         except KeyError as e:
-            st.error("Parsing of meta parameters file for this software is not supported yet.")
-        except Exception as err:
+            st.error("Parsing of meta parameters file for this software is not supported yet.", icon="🚨")
+        except Exception as e:
             input_f = self.user_input["input_format"]
             st.error(
-                f"Unexpected error while parsing file. Make sure you provided a meta parameters file produced by {input_f}."
+                f"Unexpected error while parsing file. Make sure you provided a meta parameters file produced by {input_f}: {e}",
+                icon="🚨",
             )
         return params
 
@@ -497,9 +505,12 @@ class StreamlitUI:
             st.session_state[self.variables_dda_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )
 
-        st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
-            st.session_state[self.variables_dda_quant.all_datapoints]
-        )
+        try:
+            st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_dda_quant.all_datapoints]
+            )
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
         placeholder_fig_compare = st.empty()
         placeholder_fig_compare.plotly_chart(
@@ -572,9 +583,12 @@ class StreamlitUI:
         st.session_state[self.variables_dda_quant.fig_logfc] = self.plots_for_current_data(recalculate)
 
         if recalculate:
-            st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_dda_quant.all_datapoints]
-            )
+            try:
+                st.session_state[self.variables_dda_quant.fig_metric] = PlotDataPoint.plot_metric(
+                    st.session_state[self.variables_dda_quant.all_datapoints]
+                )
+            except Exception as e:
+                st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
         if self.variables_dda_quant.first_new_plot:
             self.create_first_new_plot()

@@ -342,7 +342,6 @@ class StreamlitUI:
                 pr_url = self.ionmodule.clone_pr(
                     temporary_datapoints=submit_df,
                     datapoint_params=params,
-                    token=st.secrets["gh"]["token"],
                     remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
                     submission_comments=user_comments,
                 )

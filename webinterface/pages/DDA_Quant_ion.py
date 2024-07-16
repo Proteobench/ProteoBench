@@ -7,11 +7,11 @@ from datetime import datetime
 from pprint import pformat
 from typing import Any, Dict, Optional, Type
 
+import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-import pages.texts.proteobench_builder as pbb
 from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 from streamlit_extras.let_it_rain import rain
@@ -244,10 +244,10 @@ class StreamlitUI:
                 st.session_state[self.variables_dda_quant.all_datapoints]["Highlight"] = [False] * len(
                     st.session_state[self.variables_dda_quant.all_datapoints].index
                 )
-
         except Exception as e:
             status_placeholder.error(":x: Proteobench ran into a problem")
-            st.exception(e)
+            st.error(e, icon="🚨")
+            # st.exception(e)
         else:
             self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
 

@@ -20,6 +20,7 @@ TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")
 TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+    "MaxQuant_new": os.path.join(TESTDATA_DIR, "MaxQuant_2_5_1_evidence_sample.txt"),
     "FragPipe": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
     "Sage": os.path.join(TESTDATA_DIR, "lfq.tsv"),

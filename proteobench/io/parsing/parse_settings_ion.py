@@ -114,7 +114,7 @@ class ParseSettings:
         else:
             df_filtered_melted = df_filtered.copy()
 
-        df_filtered_melted.loc[:, "replicate"] = df["Raw file"].map(self.condition_mapper)
+        df_filtered_melted.loc[:, "replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
         if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:

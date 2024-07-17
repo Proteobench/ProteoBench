@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from proteobench.github.gh import GithubRepo
+from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_base.module import Module
@@ -159,7 +159,9 @@ class TestPlot(unittest.TestCase):
 
     def test_plot_metric(self):
         tmpdir = tempfile.TemporaryDirectory().name
-        all_datapoints = GithubRepo("", clone_dir=tmpdir).read_results_json_repo()
+        gpr = GithubProteobotRepo()
+        gpr.clone_repo_anonymous()
+        all_datapoints = gpr.read_results_json_repo()
         all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)

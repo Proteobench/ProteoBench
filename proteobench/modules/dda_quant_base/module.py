@@ -8,7 +8,7 @@ import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
-from proteobench.github.gh import GithubRepo
+from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.fragger import extract_params as extract_params_fragger
@@ -31,9 +31,11 @@ from proteobench.utils.quant_datapoint import (
 class Module:
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self, token=""):
+    def __init__(self, token=None):
         self.t_dir = TemporaryDirectory().name
-        self.github_repo = GithubRepo(token, clone_dir=self.t_dir)
+        self.github_repo = GithubProteobotRepo(token, clone_dir=self.t_dir)
+        self.github_repo.clone_repo()
+
         self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
@@ -66,7 +68,6 @@ class Module:
     def obtain_all_data_point(self, all_datapoints):
         """Add current data point to all data points and load them from file if empty."""
         if not isinstance(all_datapoints, pd.DataFrame):
-            # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = self.github_repo.read_results_json_repo()
 
         all_datapoints["old_new"] = "old"
@@ -167,9 +168,9 @@ class Module:
         commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
 
         try:
-            pr_id = self.github_repo.pr_github(
-                branch_name=branch_name,
-                commit_message=commit_message)
+            self.github_repo.create_branch(branch_name)
+            self.github_repo.commit(commit_message)
+            self.github_repo.create_pull_request(commit_message)
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."

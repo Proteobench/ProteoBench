@@ -45,10 +45,14 @@ class GithubRepo:
 
     def clone_repo(self):
         remote_url = self.get_remote_url()
-        repo = Repo.clone_from(remote_url, self.clone_dir)
+        try:
+            repo = Repo(self.clone_dir)
+        except (exc.NoSuchPathError, exc.InvalidGitRepositoryError):
+            repo = Repo.clone_from(remote_url, self.clone_dir)
         return self.clone_dir
 
     def pr_github(self,  branch_name, commit_message, repo_name="Proteobot/Results_Module2_quant_DDA"):
+        self.clone_repo()
         remote_url = self.get_remote_url()
 
         # Clone the repository if it doesn't exist

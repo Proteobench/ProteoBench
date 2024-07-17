@@ -1,11 +1,12 @@
 import datetime
 import os
+import tempfile
 import unittest
 
 import numpy as np
 import pandas as pd
 
-from proteobench.github.gh import DDA_QUANT_RESULTS_REPO, read_results_json_repo
+from proteobench.github.gh import GithubRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_base.module import Module
@@ -157,8 +158,8 @@ class TestPlot(unittest.TestCase):
     """Test if the plots return a figure."""
 
     def test_plot_metric(self):
-        # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-        all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+        tmpdir = tempfile.TemporaryDirectory().name
+        all_datapoints = GithubRepo("", clone_dir=tmpdir).read_results_json_repo()
         all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)

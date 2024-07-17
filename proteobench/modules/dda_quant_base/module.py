@@ -31,7 +31,7 @@ from proteobench.utils.quant_datapoint import (
 class Module:
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self, token):
+    def __init__(self, token=""):
         self.t_dir = TemporaryDirectory().name
         self.github_repo = GithubRepo(token, clone_dir=self.t_dir)
         self.precursor_name = "precursor ion"

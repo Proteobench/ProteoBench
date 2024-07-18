@@ -169,7 +169,7 @@ class Module:
         try:
             self.github_repo.create_branch(branch_name)
             self.github_repo.commit(commit_message)
-            self.github_repo.create_pull_request(commit_message)
+            pr_id = self.github_repo.create_pull_request(commit_message)
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."

@@ -1,4 +1,5 @@
 """Functionality to parse Maxqunt mqpar.xml parameter files"""
+
 from __future__ import annotations
 
 import collections

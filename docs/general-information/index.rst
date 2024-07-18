@@ -8,4 +8,3 @@ General information
     :maxdepth: 3
 
     *
-

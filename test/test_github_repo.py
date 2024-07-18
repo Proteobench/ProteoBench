@@ -7,8 +7,8 @@ import pandas as pd
 import toml
 from git import Repo, exc, Head
 from proteobench.github.gh import GithubProteobotRepo  # Adjust the import to match your module's location
-# Test data
 
+# Test data
 
 
 def test_clone_repo_anonymous():
@@ -42,13 +42,13 @@ def test_clone_repo():
     tmp_dir = TemporaryDirectory()
     temp_dir_name = tmp_dir.name
     token = read_token()
-    github_repo = GithubProteobotRepo(token, temp_dir_name,
-                                      proteobot_repo_name="wolski/Results_quant_ion_DDA",
-                                      username="wolski")
+    github_repo = GithubProteobotRepo(
+        token, temp_dir_name, proteobot_repo_name="wolski/Results_quant_ion_DDA", username="wolski"
+    )
     github_repo.clone_repo()
     # generate random branch name
 
-    branch = github_repo.create_branch("test_branch"+uuid.uuid4().hex[:6])
+    branch = github_repo.create_branch("test_branch" + uuid.uuid4().hex[:6])
     github_repo.commit("test_commit")
     github_repo.create_pull_request("test_commit")
     assert isinstance(branch, Head)

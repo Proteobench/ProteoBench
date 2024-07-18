@@ -7,13 +7,14 @@ from git import Repo, exc, GitError
 from github import Github
 
 
-
 class GithubProteobotRepo:
-    def __init__(self,
-                 token=None,
-                 clone_dir=None,
-                 proteobot_repo_name="Proteobench/Results_Module2_quant_DDA",
-                 username="Proteobot"):
+    def __init__(
+        self,
+        token=None,
+        clone_dir=None,
+        proteobot_repo_name="Proteobench/Results_Module2_quant_DDA",
+        username="Proteobot",
+    ):
         self.token = token
         self.clone_dir = clone_dir
         self.proteobot_repo_name = proteobot_repo_name

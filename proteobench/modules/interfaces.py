@@ -1,4 +1,5 @@
 """Types defined by ABCs"""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 

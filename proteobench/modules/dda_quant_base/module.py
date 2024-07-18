@@ -142,7 +142,6 @@ class Module:
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         submission_comments="no comments",
     ):
-
         self.github_repo.clone_repo()
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False

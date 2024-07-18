@@ -159,7 +159,7 @@ class TestPlot(unittest.TestCase):
 
     def test_plot_metric(self):
         tmpdir = tempfile.TemporaryDirectory().name
-        gpr = GithubProteobotRepo()
+        gpr = GithubProteobotRepo(clone_dir=tmpdir)
         gpr.clone_repo_anonymous()
         all_datapoints = gpr.read_results_json_repo()
         all_datapoints["old_new"] = "old"

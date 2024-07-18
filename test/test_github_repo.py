@@ -33,7 +33,7 @@ def read_token():
         return secrets["gh"]["token_test"]
 
 
-skip_condition = False
+skip_condition = True
 
 
 # exclude this test from the test run

@@ -10,6 +10,7 @@ def tests(session):
     session.install(".[dev]")
     session.run("pytest")
 
+
 @nox.session(reuse_venv=True, default=False)
 def test_notebooks(session: nox.Session) -> None:
     """
@@ -56,4 +57,3 @@ def docs(session: nox.Session) -> None:
         session.run("sphinx-autobuild", *shared_args)
     else:
         session.run("sphinx-build", "--keep-going", *shared_args)
-

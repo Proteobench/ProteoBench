@@ -49,8 +49,11 @@ class StreamlitUI:
 
         if self.variables_dda_quant.submit not in st.session_state:
             st.session_state[self.variables_dda_quant.submit] = False
-
-        self.ionmodule: IonModule = IonModule()
+        try:
+            token = st.secrets["gh"]["token"]
+        except KeyError:
+            token = ""
+        self.ionmodule: IonModule = IonModule(token=token)
         self._main_page()
 
     def generate_input_field(self, input_format: str, content: dict) -> Any:
@@ -340,12 +343,9 @@ class StreamlitUI:
 
             try:
                 pr_url = self.ionmodule.clone_pr(
-                    submit_df,
-                    params,
-                    st.secrets["gh"]["token"],
-                    username="Proteobot",
+                    temporary_datapoints=submit_df,
+                    datapoint_params=params,
                     remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                    branch_name="new_branch",
                     submission_comments=user_comments,
                 )
             except Exception as e:

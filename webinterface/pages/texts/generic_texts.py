@@ -7,6 +7,8 @@ class WebpageTexts:
 
         no_results = "No results available for this module."
 
+        title = "DDA quantification - precursor ions"
+
         initial_results = """
             Scroll down if you want to see the public benchmark runs publicly available
             today.

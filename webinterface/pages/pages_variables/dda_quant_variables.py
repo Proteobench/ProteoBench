@@ -30,13 +30,16 @@ class VariablesDDAQuant:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    beta_warning: bool = True
 
-    description_module_md = "pages/markdown_files/DDA_Quant/introduction.md"
-    description_files_md = "pages/markdown_files/DDA_Quant/file_description.md"
-    description_input_file_md = "pages/markdown_files/DDA_Quant/input_file_description.md"
-    description_slider_md = "pages/markdown_files/DDA_Quant/slider_description.md"
-    description_table_md = "pages/markdown_files/DDA_Quant/table_description.md"
-    description_results_md = "pages/markdown_files/DDA_Quant/result_description.md"
-    description_submission_md = "pages/markdown_files/DDA_Quant/submit_description.md"
+    additional_params_json: str = "../webinterface/configuration/dda_quant.json"
+
+    description_module_md: str = "pages/markdown_files/DDA_Quant/introduction.md"
+    description_files_md: str = "pages/markdown_files/DDA_Quant/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/DDA_Quant/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/DDA_Quant/slider_description.md"
+    description_table_md: str = "pages/markdown_files/DDA_Quant/table_description.md"
+    description_results_md: str = "pages/markdown_files/DDA_Quant/result_description.md"
+    description_submission_md: str = "pages/markdown_files/DDA_Quant/submit_description.md"
 
     texts: Type[WebpageTexts] = WebpageTexts

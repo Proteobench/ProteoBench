@@ -29,5 +29,3 @@ Files that contain parameters for a workflow or for a data analysis tool within 
 
 ## Validated benchmark run
 A benchmark run accepted by the ProteoBench team to be made publicly available as part of the ProteoBench repository. For validation, the submission must include the workflow output files, structured metadata, unstructured metadata, and (if applicable) workflow configuration files. The workflow metadata must include all information needed to fully understand and re-execute the workflow; i.e., the benchmark run must be fully reproducible. 
-
-

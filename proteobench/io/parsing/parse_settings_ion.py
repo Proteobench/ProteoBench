@@ -22,7 +22,7 @@ class ParseSettingsBuilder:
             "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
             "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
             "Proline": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
-            "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2masschroq.toml"),
+            "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
             "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
             "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
             "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),

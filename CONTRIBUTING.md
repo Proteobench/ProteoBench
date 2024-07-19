@@ -62,6 +62,27 @@ Changes to the code in `./webinterface` will trigger a reload of the web server.
 However, changes in `./proteobench` require a full restart of the webserver
 to be included.
 
+### Enabling pre-commit hooks
+
+The project contains a .pre-commit-config.yaml file that defines a set of checks that are run before each commit.
+
+To enable pre-commit checks on your machine install :
+
+```
+pipx install pre-commit
+```
+
+To run all the pre-commit checks on all files, run:
+```
+pre-commit run --all-files
+```
+
+To enable automatic pre-commit checks, run:
+
+```
+pre-commit install 
+```
+
 
 ### Documentation
 

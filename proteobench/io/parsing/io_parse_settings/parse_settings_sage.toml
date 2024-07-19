@@ -35,4 +35,3 @@
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = false
-

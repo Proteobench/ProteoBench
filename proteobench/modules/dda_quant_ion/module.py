@@ -12,7 +12,6 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
-from proteobench.github.gh import DDA_QUANT_RESULTS_REPO
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_base.module import Module
@@ -23,9 +22,8 @@ from proteobench.utils.quant_datapoint import Datapoint
 class IonModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self):
-        super().__init__()
-        self.dda_quant_results_repo = DDA_QUANT_RESULTS_REPO
+    def __init__(self, token):
+        super().__init__(token)
         self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:

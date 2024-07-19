@@ -61,8 +61,8 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_search_engines_supported(self):
         """Test whether the expected formats are supported."""
-        parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
-        parse_settings = ParseSettingsBuilder(parse_settings_dir)
+        # parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
+        parse_settings = ParseSettingsBuilder()
 
         for format_name in (
             "MaxQuant",

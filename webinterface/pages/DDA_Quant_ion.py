@@ -12,6 +12,19 @@ from proteobench.modules.dda_quant_ion.module import IonModule
 class StreamlitUI:
     def __init__(self):
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
+        self.texts: Type[WebpageTexts] = WebpageTexts
+        self.user_input: Dict[str, Any] = dict()
+
+        pbb.proteobench_page_config()
+        pbb.proteobench_sidebar()
+
+        if self.variables_dda_quant.submit not in st.session_state:
+            st.session_state[self.variables_dda_quant.submit] = False
+        try:
+            token = st.secrets["gh"]["token"]
+        except KeyError:
+            token = ""
+        self.ionmodule: IonModule = IonModule(token=token)
         self.ionmodule: IonModule = IonModule()
         self.parsesettingsbuilder = ParseSettingsBuilder()
 

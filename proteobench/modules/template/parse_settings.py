@@ -1,4 +1,5 @@
 """ All input formats available for the module """
+
 import os
 from dataclasses import dataclass
 from typing import List

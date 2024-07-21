@@ -37,8 +37,10 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
             header=0,
             index_col=None,
         )
+
         # TODO this should be generalized further, maybe even moved to parsing param in toml
-        input_data_frame["modifications"].fillna("", inplace=True)
+        input_data_frame["modifications"] = input_data_frame["modifications"].fillna("")
+        # input_data_frame.fillna({"modifications": ""}, inplace=True)
         input_data_frame["proforma"] = input_data_frame.apply(
             lambda x: aggregate_modification_column(x.sequence, x.modifications),
             axis=1,

@@ -22,13 +22,21 @@ class ParseSettingsBuilder:
             "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
             "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
             "Proline": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
-            "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2masschroq.toml"),
+            "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
             "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
             "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
             "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
         }
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
+        # Check if all files are present
+        cwd = os.getcwd()
+        missing_files = [file for file in self.PARSE_SETTINGS_FILES.values() if not os.path.isfile(file)]
+        if not os.path.isfile(self.PARSE_SETTINGS_FILES_MODULE):
+            missing_files.append(self.PARSE_SETTINGS_FILES_MODULE)
+
+        if missing_files:
+            raise FileNotFoundError(f"The following parse settings files are missing: {missing_files}")
 
     def build_parser(self, input_format: str) -> ParseSettings:
         toml_file = self.PARSE_SETTINGS_FILES[input_format]

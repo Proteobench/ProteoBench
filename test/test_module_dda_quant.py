@@ -1,11 +1,12 @@
 import datetime
 import os
+import tempfile
 import unittest
 
 import numpy as np
 import pandas as pd
 
-from proteobench.github.gh import DDA_QUANT_RESULTS_REPO, read_results_json_repo
+from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_base.module import Module
@@ -24,6 +25,7 @@ TESTDATA_FILES = {
     "FragPipe": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
     "Sage": os.path.join(TESTDATA_DIR, "lfq.tsv"),
+    "Proline": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
 }
 
 
@@ -55,13 +57,13 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage")  # "WOMBAT",
+    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "Proline")  # "WOMBAT",
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
         """Test whether the expected formats are supported."""
-        parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
-        parse_settings = ParseSettingsBuilder(parse_settings_dir)
+        # parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
+        parse_settings = ParseSettingsBuilder()
 
         for format_name in (
             "MaxQuant",
@@ -156,8 +158,10 @@ class TestPlot(unittest.TestCase):
     """Test if the plots return a figure."""
 
     def test_plot_metric(self):
-        # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
-        all_datapoints = read_results_json_repo(DDA_QUANT_RESULTS_REPO)
+        tmpdir = tempfile.TemporaryDirectory().name
+        gpr = GithubProteobotRepo(clone_dir=tmpdir)
+        gpr.clone_repo_anonymous()
+        all_datapoints = gpr.read_results_json_repo()
         all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
         self.assertIsNotNone(fig)

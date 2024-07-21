@@ -24,14 +24,14 @@ class StreamlitUI:
         Sets up the main page layout for the Streamlit application.
         This includes the title, module descriptions, input forms, and configuration settings.
         """
-        self.quant_uiobjects._create_text_header()
-        self.quant_uiobjects._create_main_submission_form()
-        self.quant_uiobjects._init_slider()
+        self.quant_uiobjects.create_text_header()
+        self.quant_uiobjects.create_main_submission_form()
+        self.quant_uiobjects.init_slider()
 
         if self.quant_uiobjects.variables_quant.fig_logfc in st.session_state:
-            self.quant_uiobjects._populate_results()
+            self.quant_uiobjects.populate_results()
 
-        self.quant_uiobjects._create_results()
+        self.quant_uiobjects.create_results()
 
 
 if __name__ == "__main__":

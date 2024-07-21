@@ -57,7 +57,69 @@ class QuantUIObjects:
         if self.variables_quant.submit not in st.session_state:
             st.session_state[self.variables_quant.submit] = False
 
-    def _create_text_header(self) -> None:
+    def create_main_submission_form(self) -> None:
+        """
+        Creates the main submission form for the Streamlit UI.
+        This includes the input file uploader, additional parameters, and the main submission button.
+        """
+        with st.form(key="main_form"):
+            self._create_input_section()
+            self._create_additional_parameters_section()
+            st.markdown(self.variables_quant.texts.ShortMessages.run_instructions)
+            submit_button = st.form_submit_button("Parse and bench", help=self.variables_quant.texts.Help.parse_button)
+
+        if submit_button:
+            self._handle_form_submission()
+
+    def generate_input_field(self, input_format: str, content: dict) -> Any:
+        """
+        Generates input fields in the Streamlit UI based on the specified format and content.
+
+        Args:
+            input_format: The format of the input (e.g., 'text_input', 'number_input').
+            content: Dictionary containing the configuration for the input field.
+
+        Returns:
+            A Streamlit widget corresponding to the specified input type.
+        """
+        field_type = content.get("type")
+        if field_type == "text_area":
+            return self._generate_text_area(input_format, content)
+        elif field_type == "text_input":
+            return self._generate_text_input(input_format, content)
+        elif field_type == "number_input":
+            return self._generate_number_input(content)
+        elif field_type == "selectbox":
+            return self._generate_selectbox(input_format, content)
+        elif field_type == "checkbox":
+            return self._generate_checkbox(input_format, content)
+
+    def init_slider(self) -> None:
+        ##########################################
+        # Initialize slider ID and default value #
+        ##########################################
+
+        if "slider_id" not in st.session_state.keys():
+            st.session_state["slider_id"] = uuid.uuid4()
+        if st.session_state["slider_id"] not in st.session_state.keys():
+            st.session_state[st.session_state["slider_id"]] = self.variables_quant.default_val_slider
+
+    def create_results(self) -> None:
+        """Creates the results section of the page."""
+        if self._results_already_initialized():
+            return
+
+        self._initialize_all_datapoints()
+        self._filter_data_points_by_slider()
+        self._initialize_highlight_column()
+        if "slider_id" in st.session_state.keys():
+            self._create_slider()
+
+        self._initialize_placeholders()
+        self._generate_and_display_metric_plot()
+        self._initialize_data_editor()
+
+    def create_text_header(self) -> None:
         """
         Creates the text header for the main page of the Streamlit UI. This includes the title,
         module description, input and configuration description.
@@ -75,173 +137,11 @@ class QuantUIObjects:
         st.header("Input and configuration")
         st.markdown(self.variables_quant.texts.ShortMessages.initial_results)
 
-    def _create_main_submission_form(self) -> None:
-        """
-        Creates the main submission form for the Streamlit UI.
-        This includes the input file uploader, additional parameters, and the main submission button.
-        """
-
-        with st.form(key="main_form"):
-            # Input for the files and software used
-            st.subheader("Input files")
-            st.markdown(open(self.variables_quant.description_input_file_md, "r").read())
-            self.user_input["input_format"] = st.selectbox(
-                "Software tool",
-                self.parsesettingsbuilder.INPUT_FORMATS,
-                help=self.variables_quant.texts.Help.input_format,
-            )
-
-            self.user_input["input_csv"] = st.file_uploader(
-                "Software tool result file", help=self.variables_quant.texts.Help.input_file
-            )
-
-            # Additional parameters not used for public submission, but displayed for the user
-            st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
-
-            with st.expander("Additional parameters"):
-                with open(self.variables_quant.additional_params_json) as file:
-                    config = json.load(file)
-
-                for key, value in config.items():
-                    self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
-
-            st.markdown(self.variables_quant.texts.ShortMessages.run_instructions)
-
-            # Submit button to start the benchmarking process
-            submit_button = st.form_submit_button("Parse and bench", help=self.variables_quant.texts.Help.parse_button)
-
-        ######################################################################
-        # If data is submitted start resetting variables and run proteobench #
-        ######################################################################
-
-        if submit_button:
-            if not self.user_input["input_csv"]:
-                st.error(":x: Please provide a result file", icon="🚨")
-                return
-            if self.variables_quant.meta_file_uploader_uuid in st.session_state.keys():
-                del st.session_state[self.variables_quant.meta_file_uploader_uuid]
-            if self.variables_quant.comments_submission_uuid in st.session_state.keys():
-                del st.session_state[self.variables_quant.comments_submission_uuid]
-            if self.variables_quant.check_submission_uuid in st.session_state.keys():
-                del st.session_state[self.variables_quant.check_submission_uuid]
-            if self.variables_quant.button_submission_uuid in st.session_state.keys():
-                del st.session_state[self.variables_quant.button_submission_uuid]
-            self._run_proteobench()
-
-    def _populate_results(self) -> None:
+    def populate_results(self) -> None:
         """
         Populates the results section of the UI. This is called after data processing is complete.
         """
         self.generate_results("", None, None, False, None)
-
-    def generate_input_field(self, input_format: str, content: dict) -> Any:
-        """
-        Generates input fields in the Streamlit UI based on the specified format and content.
-
-        Args:
-            input_format: The format of the input (e.g., 'text_input', 'number_input').
-            content: Dictionary containing the configuration for the input field.
-
-        Returns:
-            A Streamlit widget corresponding to the specified input type.
-        """
-        if content["type"] == "text_area":
-            if "placeholder" in content:
-                return st.text_area(content["label"], placeholder=content["placeholder"], height=content["height"])
-            elif "value" in content:
-                return st.text_area(content["label"], content["value"][input_format], height=content["height"])
-        if content["type"] == "text_input":
-            if "placeholder" in content:
-                return st.text_input(content["label"], placeholder=content["placeholder"])
-            elif "value" in content:
-                return st.text_input(content["label"], content["value"][input_format])
-        if content["type"] == "number_input":
-            return st.number_input(
-                content["label"],
-                value=None,
-                format=content["format"],
-                min_value=content["min_value"],
-                max_value=content["max_value"],
-            )
-        if content["type"] == "selectbox":
-            return st.selectbox(
-                content["label"],
-                content["options"],
-                content["options"].index(content["value"][input_format]),
-            )
-        if content["type"] == "checkbox":
-            return st.checkbox(content["label"], content["value"][input_format])
-
-    def _init_slider(self) -> None:
-        ##########################################
-        # Initialize slider ID and default value #
-        ##########################################
-
-        if "slider_id" not in st.session_state.keys():
-            st.session_state["slider_id"] = uuid.uuid4()
-        if st.session_state["slider_id"] not in st.session_state.keys():
-            st.session_state[st.session_state["slider_id"]] = self.variables_quant.default_val_slider
-
-    def _create_results(self) -> None:
-        #########################################
-        # Creat the results section of the page #
-        #########################################
-        if self.variables_quant.all_datapoints in st.session_state or self.variables_quant.first_new_plot == False:
-            return
-
-        st.session_state[self.variables_quant.all_datapoints] = None
-        st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_point(
-            st.session_state[self.variables_quant.all_datapoints]
-        )
-        if "slider_id" in st.session_state.keys():
-            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
-                st.session_state[self.variables_quant.all_datapoints],
-                st.session_state[st.session_state["slider_id"]],
-            )
-
-        if (
-            self.variables_quant.highlight_list not in st.session_state.keys()
-            and "Highlight" not in st.session_state[self.variables_quant.all_datapoints].columns
-        ):
-            st.session_state[self.variables_quant.all_datapoints].insert(
-                0, "Highlight", [False] * len(st.session_state[self.variables_quant.all_datapoints].index)
-            )
-        elif "Highlight" not in st.session_state[self.variables_quant.all_datapoints].columns:
-            st.session_state[self.variables_quant.all_datapoints].insert(
-                0, "Highlight", st.session_state[self.variables_quant.highlight_list]
-            )
-
-        if "slider_id" in st.session_state.keys():
-            st.markdown(open(self.variables_quant.description_slider_md, "r").read())
-            st.session_state[self.variables_quant.placeholder_slider] = st.empty()
-            st.session_state[self.variables_quant.placeholder_slider].select_slider(
-                label="Minimal ion quantifications (# samples)",
-                options=[1, 2, 3, 4, 5, 6],
-                value=st.session_state[st.session_state["slider_id"]],
-                on_change=self.slider_callback,
-                key=st.session_state["slider_id"],
-            )
-
-        st.session_state[self.variables_quant.placeholder_fig_compare] = st.empty()
-        st.session_state[self.variables_quant.placeholder_table] = st.empty()
-        st.session_state["table_id"] = uuid.uuid4()
-
-        try:
-            st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
-            )
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-        st.session_state[self.variables_quant.placeholder_fig_compare].plotly_chart(
-            st.session_state[self.variables_quant.fig_metric], use_container_width=True
-        )
-
-        st.session_state[self.variables_quant.placeholder_table].data_editor(
-            st.session_state[self.variables_quant.all_datapoints],
-            key=st.session_state["table_id"],
-            on_change=self.table_callback,
-        )
 
     def make_submission_webinterface(self, params) -> Optional[str]:
         """
@@ -249,72 +149,21 @@ class QuantUIObjects:
 
         Args:
             params: Parameters used for the benchmarking.
-            input_df: The input DataFrame.
-            result_performance: DataFrame containing the performance results.
 
         Returns:
             The URL of the submission if successful, None otherwise.
         """
-
-        # Make sure to set everything to submission ready
         st.session_state[self.variables_quant.submit] = True
-        pr_url = None
+        pr_url = self._create_submission_button()
 
-        # Make a public submission button
-        if self.variables_quant.button_submission_uuid in st.session_state.keys():
-            button_submission_uuid = st.session_state[self.variables_quant.button_submission_uuid]
-        else:
-            button_submission_uuid = uuid.uuid4()
-            st.session_state[self.variables_quant.button_submission_uuid] = button_submission_uuid
-        submit_pr = st.button("I really want to upload it", key=button_submission_uuid)
-
-        # If button is not pressed, return the pr_url (None)
-        if not submit_pr:
-            return pr_url
-
-        # Obtain the user comments to add to the PR
-        user_comments = self.user_input["comments_for_submission"]
-
-        result_performance = st.session_state[self.variables_quant.result_performance_submission]
-
-        # Remove the highlight column before submission
-        if "Highlight" in st.session_state[self.variables_quant.all_datapoints_submission].columns:
-            st.session_state[self.variables_quant.all_datapoints_submission].drop("Highlight", inplace=True, axis=1)
-
-        # Make a pull request with the submission
-        try:
-            pr_url = self.ionmodule.clone_pr(
-                st.session_state[self.variables_quant.all_datapoints_submission],
-                params,
-                st.secrets["gh"]["token"],
-                username="Proteobot",
-                remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                branch_name="new_branch",
-                submission_comments=user_comments,
-            )
-        except Exception as e:
-            st.error(f"Unable to create the pull request: {e}", icon="🚨")
-
-        # Unable to create the PR, return None
         if not pr_url:
-            del st.session_state[self.variables_quant.submit]
-            return pr_url
+            return None
 
-        id = str(
-            st.session_state[self.variables_quant.all_datapoints_submission][
-                st.session_state[self.variables_quant.all_datapoints_submission]["old_new"] == "new"
-            ].iloc[-1, :]["intermediate_hash"]
-        )
+        self._remove_highlight_column()
+        pr_url = self._submit_pull_request(params, pr_url)
 
-        # Write the intermediate and input data to the storage directory (if available)
-        if "storage" in st.secrets.keys():
-            self.ionmodule.write_intermediate_raw(
-                st.secrets["storage"]["dir"],
-                id,
-                st.session_state[self.variables_quant.input_df_submission],
-                result_performance,
-                self.user_input[self.variables_quant.meta_data],
-            )
+        if pr_url:
+            self._store_intermediate_data(pr_url)
 
         return pr_url
 
@@ -341,8 +190,221 @@ class QuantUIObjects:
         """
         Creates the UI elements necessary for data submission, including metadata uploader and comments section.
         """
-        # Create a copy of the dataframes before submission, any changes made after submission will not be saved
-        # to the dataframes shown to the user.
+        self._create_dataframe_copies()
+        self._create_meta_data_uploader()
+        self._create_comments_text_area()
+        self._create_confirmation_checkbox()
+
+    def _create_input_section(self) -> None:
+        """Creates the input section of the form."""
+        st.subheader("Input files")
+        st.markdown(open(self.variables_quant.description_input_file_md, "r").read())
+        self.user_input["input_format"] = st.selectbox(
+            "Software tool",
+            self.parsesettingsbuilder.INPUT_FORMATS,
+            help=self.variables_quant.texts.Help.input_format,
+        )
+        self.user_input["input_csv"] = st.file_uploader(
+            "Software tool result file", help=self.variables_quant.texts.Help.input_file
+        )
+
+    def _create_additional_parameters_section(self) -> None:
+        """Creates the additional parameters section of the form."""
+        st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
+        with st.expander("Additional parameters"):
+            with open(self.variables_quant.additional_params_json) as file:
+                config = json.load(file)
+            for key, value in config.items():
+                self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+
+    def _handle_form_submission(self) -> None:
+        """Handles the form submission logic."""
+        if not self.user_input["input_csv"]:
+            st.error(":x: Please provide a result file", icon="🚨")
+            return
+        self._reset_session_state_variables()
+        self._run_proteobench()
+
+    def _reset_session_state_variables(self) -> None:
+        """Resets specific session state variables."""
+        session_keys = [
+            self.variables_quant.meta_file_uploader_uuid,
+            self.variables_quant.comments_submission_uuid,
+            self.variables_quant.check_submission_uuid,
+            self.variables_quant.button_submission_uuid,
+        ]
+        for key in session_keys:
+            if key in st.session_state:
+                del st.session_state[key]
+
+    def _generate_text_area(self, input_format: str, content: dict) -> Any:
+        """Generates a text area input field."""
+        placeholder = content.get("placeholder")
+        value = content.get("value", {}).get(input_format)
+        height = content.get("height", 200)  # Default height if not specified
+        return st.text_area(content["label"], placeholder=placeholder, value=value, height=height)
+
+    def _generate_text_input(self, input_format: str, content: dict) -> Any:
+        """Generates a text input field."""
+        placeholder = content.get("placeholder")
+        value = content.get("value", {}).get(input_format)
+        return st.text_input(content["label"], placeholder=placeholder, value=value)
+
+    def _generate_number_input(self, content: dict) -> Any:
+        """Generates a number input field."""
+        return st.number_input(
+            content["label"],
+            value=None,
+            format=content["format"],
+            min_value=content["min_value"],
+            max_value=content["max_value"],
+        )
+
+    def _generate_selectbox(self, input_format: str, content: dict) -> Any:
+        """Generates a selectbox input field."""
+        options = content.get("options", [])
+        value = content.get("value", {}).get(input_format)
+        index = options.index(value) if value in options else 0
+        return st.selectbox(content["label"], options, index=index)
+
+    def _generate_checkbox(self, input_format: str, content: dict) -> Any:
+        """Generates a checkbox input field."""
+        value = content.get("value", {}).get(input_format, False)
+        return st.checkbox(content["label"], value=value)
+
+    def _results_already_initialized(self) -> bool:
+        """Checks if the results are already initialized."""
+        return self.variables_quant.all_datapoints in st.session_state or self.variables_quant.first_new_plot == False
+
+    def _initialize_all_datapoints(self) -> None:
+        """Initializes the all_datapoints variable in the session state."""
+        st.session_state[self.variables_quant.all_datapoints] = None
+        st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_point(
+            st.session_state[self.variables_quant.all_datapoints]
+        )
+
+    def _filter_data_points_by_slider(self) -> None:
+        """Filters the data points based on the slider value."""
+        if "slider_id" in st.session_state.keys():
+            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
+                st.session_state[self.variables_quant.all_datapoints],
+                st.session_state[st.session_state["slider_id"]],
+            )
+
+    def _initialize_highlight_column(self) -> None:
+        """Initializes the highlight column in the data points."""
+        if (
+            self.variables_quant.highlight_list not in st.session_state.keys()
+            and "Highlight" not in st.session_state[self.variables_quant.all_datapoints].columns
+        ):
+            st.session_state[self.variables_quant.all_datapoints].insert(
+                0, "Highlight", [False] * len(st.session_state[self.variables_quant.all_datapoints].index)
+            )
+        elif "Highlight" not in st.session_state[self.variables_quant.all_datapoints].columns:
+            st.session_state[self.variables_quant.all_datapoints].insert(
+                0, "Highlight", st.session_state[self.variables_quant.highlight_list]
+            )
+
+    def _create_slider(self) -> None:
+        """Creates a slider input if needed."""
+        st.markdown(open(self.variables_quant.description_slider_md, "r").read())
+        st.session_state[self.variables_quant.placeholder_slider] = st.empty()
+        st.session_state[self.variables_quant.placeholder_slider].select_slider(
+            label="Minimal ion quantifications (# samples)",
+            options=[1, 2, 3, 4, 5, 6],
+            value=st.session_state[st.session_state["slider_id"]],
+            on_change=self.slider_callback,
+            key=st.session_state["slider_id"],
+        )
+
+    def _initialize_placeholders(self) -> None:
+        """Initializes the placeholders for the figure and table."""
+        st.session_state[self.variables_quant.placeholder_fig_compare] = st.empty()
+        st.session_state[self.variables_quant.placeholder_table] = st.empty()
+        st.session_state["table_id"] = uuid.uuid4()
+
+    def _generate_and_display_metric_plot(self) -> None:
+        """Generates and displays the metric plot."""
+        try:
+            st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints]
+            )
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+
+        st.session_state[self.variables_quant.placeholder_fig_compare].plotly_chart(
+            st.session_state[self.variables_quant.fig_metric], use_container_width=True
+        )
+
+    def _initialize_data_editor(self) -> None:
+        """Initializes the data editor."""
+        st.session_state[self.variables_quant.placeholder_table].data_editor(
+            st.session_state[self.variables_quant.all_datapoints],
+            key=st.session_state["table_id"],
+            on_change=self.table_callback,
+        )
+
+    def _create_submission_button(self) -> Optional[str]:
+        """Creates a button for public submission and returns the PR URL if the button is pressed."""
+        if self.variables_quant.button_submission_uuid in st.session_state.keys():
+            button_submission_uuid = st.session_state[self.variables_quant.button_submission_uuid]
+        else:
+            button_submission_uuid = uuid.uuid4()
+            st.session_state[self.variables_quant.button_submission_uuid] = button_submission_uuid
+
+        submit_pr = st.button("I really want to upload it", key=button_submission_uuid)
+        if not submit_pr:
+            return None
+
+        return "button_pressed"
+
+    def _remove_highlight_column(self) -> None:
+        """Removes the highlight column from the submission data if it exists."""
+        if "Highlight" in st.session_state[self.variables_quant.all_datapoints_submission].columns:
+            st.session_state[self.variables_quant.all_datapoints_submission].drop("Highlight", inplace=True, axis=1)
+
+    def _submit_pull_request(self, params: Any, pr_url: str) -> Optional[str]:
+        """Submits the pull request with the benchmark results and returns the PR URL."""
+        user_comments = self.user_input["comments_for_submission"]
+
+        try:
+            pr_url = self.ionmodule.clone_pr(
+                st.session_state[self.variables_quant.all_datapoints_submission],
+                params,
+                st.secrets["gh"]["token"],
+                username="Proteobot",
+                remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                branch_name="new_branch",
+                submission_comments=user_comments,
+            )
+        except Exception as e:
+            st.error(f"Unable to create the pull request: {e}", icon="🚨")
+            pr_url = None
+
+        if not pr_url:
+            del st.session_state[self.variables_quant.submit]
+
+        return pr_url
+
+    def _store_intermediate_data(self, pr_url: str) -> None:
+        """Stores intermediate and input data to the storage directory if available."""
+        id = str(
+            st.session_state[self.variables_quant.all_datapoints_submission][
+                st.session_state[self.variables_quant.all_datapoints_submission]["old_new"] == "new"
+            ].iloc[-1, :]["intermediate_hash"]
+        )
+
+        if "storage" in st.secrets.keys():
+            self.ionmodule.write_intermediate_raw(
+                st.secrets["storage"]["dir"],
+                id,
+                st.session_state[self.variables_quant.input_df_submission],
+                st.session_state[self.variables_quant.result_performance_submission],
+                self.user_input[self.variables_quant.meta_data],
+            )
+
+    def _create_dataframe_copies(self) -> None:
+        """Creates copies of the dataframes before submission."""
         if st.session_state[self.variables_quant.all_datapoints] is not None:
             st.session_state[self.variables_quant.all_datapoints_submission] = st.session_state[
                 self.variables_quant.all_datapoints
@@ -356,6 +418,8 @@ class QuantUIObjects:
                 self.variables_quant.result_perf
             ].copy()
 
+    def _create_meta_data_uploader(self) -> None:
+        """Creates the file uploader for meta data."""
         self.user_input[self.variables_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.variables_quant.texts.Help.meta_data_file,
@@ -363,14 +427,17 @@ class QuantUIObjects:
             accept_multiple_files=True,
         )
 
+    def _create_comments_text_area(self) -> None:
+        """Creates the text area for submission comments."""
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
             placeholder=self.variables_quant.texts.ShortMessages.parameters_additional,
             height=200,
         )
-
         st.session_state[self.variables_quant.meta_data_text] = self.user_input["comments_for_submission"]
 
+    def _create_confirmation_checkbox(self) -> None:
+        """Creates the confirmation checkbox for metadata correctness."""
         st.session_state[self.variables_quant.check_submission] = st.checkbox(
             "I confirm that the metadata is correct",
         )
@@ -384,35 +451,62 @@ class QuantUIObjects:
         status_placeholder = st.empty()
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
-        # Initialize the datapoints if it does not exist yet
         if self.variables_quant.all_datapoints not in st.session_state:
-            st.session_state[self.variables_quant.all_datapoints] = None
+            self._initialize_datapoints_if_needed()
 
         try:
-            result_performance, all_datapoints, input_df = self.ionmodule.benchmarking(
-                self.user_input["input_csv"],
-                self.user_input["input_format"],
-                self.user_input,
-                st.session_state[self.variables_quant.all_datapoints],
-                default_cutoff_min_prec=st.session_state[st.session_state["slider_id"]],
+            result_performance, all_datapoints, input_df = self._execute_benchmarking()
+            self._update_session_state_with_results(all_datapoints)
+            self._initialize_highlight_column()
+
+        except Exception as e:
+            self._handle_benchmarking_exception(status_placeholder, e)
+        else:
+            self._generate_results_after_benchmarking(status_placeholder, result_performance, all_datapoints, input_df)
+
+    def _initialize_datapoints_if_needed(self) -> None:
+        """Initializes the all_datapoints session state if it does not exist."""
+        st.session_state[self.variables_quant.all_datapoints] = None
+
+    def _execute_benchmarking(self):
+        """Executes the benchmarking process and returns the results."""
+        return self.ionmodule.benchmarking(
+            self.user_input["input_csv"],
+            self.user_input["input_format"],
+            self.user_input,
+            st.session_state[self.variables_quant.all_datapoints],
+            default_cutoff_min_prec=st.session_state[st.session_state["slider_id"]],
+        )
+
+    def _update_session_state_with_results(self, all_datapoints: pd.DataFrame) -> None:
+        """Updates the session state with the results of the benchmarking."""
+        st.session_state[self.variables_quant.all_datapoints] = all_datapoints
+
+    def _initialize_highlight_column(self) -> None:
+        """Initializes the highlight column in the all_datapoints DataFrame."""
+        if "Highlight" not in st.session_state[self.variables_quant.all_datapoints].columns:
+            st.session_state[self.variables_quant.all_datapoints].insert(
+                0, "Highlight", [False] * len(st.session_state[self.variables_quant.all_datapoints].index)
+            )
+        else:
+            st.session_state[self.variables_quant.all_datapoints]["Highlight"] = [False] * len(
+                st.session_state[self.variables_quant.all_datapoints].index
             )
 
-            st.session_state[self.variables_quant.all_datapoints] = all_datapoints
+    def _handle_benchmarking_exception(self, status_placeholder: Any, exception: Exception) -> None:
+        """Handles exceptions that occur during the benchmarking process."""
+        status_placeholder.error(":x: Proteobench ran into a problem")
+        st.error(exception, icon="🚨")
 
-            if "Highlight" not in st.session_state[self.variables_quant.all_datapoints].columns:
-                st.session_state[self.variables_quant.all_datapoints].insert(
-                    0, "Highlight", [False] * len(st.session_state[self.variables_quant.all_datapoints].index)
-                )
-            else:
-                st.session_state[self.variables_quant.all_datapoints]["Highlight"] = [False] * len(
-                    st.session_state[self.variables_quant.all_datapoints].index
-                )
-        except Exception as e:
-            status_placeholder.error(":x: Proteobench ran into a problem")
-            st.error(e, icon="🚨")
-        else:
-            # If update did not work we can still try to generate results
-            self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
+    def _generate_results_after_benchmarking(
+        self,
+        status_placeholder: Any,
+        result_performance: pd.DataFrame,
+        all_datapoints: pd.DataFrame,
+        input_df: pd.DataFrame,
+    ) -> None:
+        """Generates and displays the results after the benchmarking process."""
+        self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
 
     def table_callback(self) -> None:
         """

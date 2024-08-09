@@ -154,7 +154,12 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     params.allowed_miscleavages = record.loc[
         pd.IndexSlice["parameterGroups", "parameterGroup", "maxMissedCleavages", :]
     ].squeeze()
-    params.min_peptide_length = record.loc["minPepLen"].squeeze()
+    try:
+        params.min_peptide_length = record.loc["minPepLen"].squeeze()
+    except KeyError:
+        # Version 2.6 and above
+        params.minPeptideLength = record.loc["minPeptideLength"].squeeze()
+    # minPeptideLengthForUnspecificSearch (what is it?)
     params.max_peptide_length = None
     # fixed mods
     if params.software_version > "1.6.0.0":
@@ -192,6 +197,7 @@ if __name__ == "__main__":
         "../../../test/params/mqpar_MQ1.6.3.3_MBR.xml",
         "../../../test/params/mqpar_MQ2.1.3.0_noMBR.xml",
         "../../../test/params/mqpar1.5.3.30_MBR.xml",
+        "../../../test/params/mqpar_mq2.6.2.0_1mc_MBR.xml",
     ]:
         print(f"{test_file = }")
         record = read_file(test_file)

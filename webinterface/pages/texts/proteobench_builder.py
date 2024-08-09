@@ -6,12 +6,15 @@ from pages.texts.generic_texts import WebpageTexts
 
 def proteobench_page_config(page_layout="wide"):
     """Set some ProteoBench wide page settings"""
-    st.set_page_config(
-        page_title="Proteobench",
-        page_icon=":rocket:",
-        layout=page_layout,
-        initial_sidebar_state="expanded",
-    )
+    try:
+        st.set_page_config(
+            page_title="Proteobench",
+            page_icon=":rocket:",
+            layout=page_layout,
+            initial_sidebar_state="expanded",
+        )
+    except:
+        return "Set already"
 
 
 def proteobench_sidebar(proteobench_logo="logos/logo_funding/main_logos_sidebar.png"):

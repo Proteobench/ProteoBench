@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 import toml
-from git import Repo, exc, GitError
+from git import GitError, Repo, exc
 from github import Github
 
 
@@ -31,7 +31,7 @@ class GithubProteobotRepo:
         try:
             repo = Repo(clone_dir)
         except (exc.NoSuchPathError, exc.InvalidGitRepositoryError):
-            repo = Repo.clone_from(remote_url, clone_dir)
+            repo = Repo.clone_from(remote_url.rstrip("/"), clone_dir)
         return repo
 
     def clone_repo_anonymous(self):

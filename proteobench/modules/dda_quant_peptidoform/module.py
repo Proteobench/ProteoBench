@@ -19,7 +19,7 @@ from proteobench.score.quant.quantscores import QuantScores
 from proteobench.utils.quant_datapoint import Datapoint
 
 
-class IonModule(Module):
+class PeptidoformModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(self, token):
@@ -28,7 +28,7 @@ class IonModule(Module):
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
-        return True
+        return False
 
     def benchmarking(
         self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3

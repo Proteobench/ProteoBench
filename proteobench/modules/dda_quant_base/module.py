@@ -38,7 +38,12 @@ class Module:
         proteobot_repo_name="Proteobot/Results_Module2_quant_DDA",
     ):
         self.t_dir = TemporaryDirectory().name
-        self.github_repo = GithubProteobotRepo(token, proteobot_repo_name=proteobot_repo_name, clone_dir=self.t_dir)
+        self.github_repo = GithubProteobotRepo(
+            token,
+            proteobot_repo_name=proteobot_repo_name,
+            proteobench_repo_name=proteobench_repo_name,
+            clone_dir=self.t_dir,
+        )
         self.github_repo.clone_repo()
 
         self.precursor_name = "precursor ion"

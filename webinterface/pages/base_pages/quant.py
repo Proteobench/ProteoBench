@@ -381,7 +381,7 @@ class QuantUIObjects:
                 params,
                 st.secrets["gh"]["token"],
                 username="Proteobot",
-                remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+                remote_git=self.variables_quant.github_link_pr,
                 branch_name="new_branch",
                 submission_comments=user_comments,
             )

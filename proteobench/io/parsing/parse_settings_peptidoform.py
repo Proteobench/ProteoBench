@@ -120,7 +120,7 @@ class ParseSettings:
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
         if "proforma" in df_filtered_melted.columns:
-            df_filtered_melted["precursor ion"] = df_filtered_melted["proforma"]
+            df_filtered_melted["peptidoform"] = df_filtered_melted["proforma"]
         else:
             print("Not all columns required for making the ion are available.")
         return df_filtered_melted, replicate_to_raw

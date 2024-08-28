@@ -18,14 +18,8 @@ class ParseSettingsBuilder:
             parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings")
 
         self.PARSE_SETTINGS_FILES = {
-            # "WOMBAT": os.path.join(parse_settings_dir, "parse_settings_wombat.toml"), # Wombat is not compatible with the module precursor ions
-            "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
-            "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
-            "Proline": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
-            "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
-            "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
-            "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
-            "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
+            "WOMBAT": os.path.join(parse_settings_dir, "parse_settings_wombat.toml"),
+            "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DDA_quand_peptidoform.toml"),
         }
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
@@ -125,10 +119,8 @@ class ParseSettings:
         df_filtered_melted.loc[:, "replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
-        if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
-            df_filtered_melted["precursor ion"] = (
-                df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
-            )
+        if "proforma" in df_filtered_melted.columns:
+            df_filtered_melted["precursor ion"] = df_filtered_melted["proforma"]
         else:
             print("Not all columns required for making the ion are available.")
         return df_filtered_melted, replicate_to_raw
@@ -162,7 +154,7 @@ class ParseModificationSettings:
             modification_dict=self.modifications_mapper,
         )
         try:
-            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+            df["peptidoform"] = df["proforma"]
 
         except KeyError:
             raise KeyError(

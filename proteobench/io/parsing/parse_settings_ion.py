@@ -29,8 +29,8 @@ class ParseSettingsBuilder:
         }
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
+
         # Check if all files are present
-        cwd = os.getcwd()
         missing_files = [file for file in self.PARSE_SETTINGS_FILES.values() if not os.path.isfile(file)]
         if not os.path.isfile(self.PARSE_SETTINGS_FILES_MODULE):
             missing_files.append(self.PARSE_SETTINGS_FILES_MODULE)
@@ -46,6 +46,7 @@ class ParseSettingsBuilder:
         parser = ParseSettings(parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
             parser = ParseModificationSettings(parser, parse_settings)
+
         return parser
 
 
@@ -161,6 +162,7 @@ class ParseModificationSettings:
             pattern=self.modifications_pattern,
             modification_dict=self.modifications_mapper,
         )
+
         try:
             df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
 
@@ -169,5 +171,10 @@ class ParseModificationSettings:
                 "Not all columns required for making the ion are available."
                 "Is the charge available in the input file?"
             )
+
+        if "proforma" in df.columns and "Charge" in df.columns:
+            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+        else:
+            print("Not all columns required for making the ion are available.")
 
         return df, replicate_to_raw

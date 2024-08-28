@@ -7,14 +7,16 @@ from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.module import IonModule
+from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
+from proteobench.modules.dda_quant_peptidoform.module import PeptidoformModule
 
 
 class StreamlitUI:
     def __init__(self):
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
+        self.texts.ShortMessages.title = "DDA peptidoform quantification"
+
         self.user_input: Dict[str, Any] = dict()
 
         pbb.proteobench_page_config()
@@ -25,10 +27,13 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: IonModule = IonModule(token=token)
+
+        self.peptidoform_module: PeptidoformModule = PeptidoformModule(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder()
 
-        self.quant_uiobjects = QuantUIObjects(self.variables_dda_quant, self.ionmodule, self.parsesettingsbuilder)
+        self.quant_uiobjects = QuantUIObjects(
+            self.variables_dda_quant, self.peptidoform_module, self.parsesettingsbuilder
+        )
 
         self._main_page()
 
@@ -39,7 +44,6 @@ class StreamlitUI:
         """
         self.quant_uiobjects.create_text_header()
         self.quant_uiobjects.create_main_submission_form()
-
         self.quant_uiobjects.init_slider()
 
         if self.quant_uiobjects.variables_quant.fig_logfc in st.session_state:

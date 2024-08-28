@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 from pandas import DataFrame
 
+from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -16,15 +17,19 @@ from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
 from proteobench.modules.dda_quant_base.module import Module
 from proteobench.score.quant.quantscores import QuantScores
-from proteobench.utils.quant_datapoint import Datapoint
 
 
 class PeptidoformModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self, token):
-        super().__init__(token)
-        self.precursor_name = "precursor ion"
+    def __init__(
+        self,
+        token,
+        proteobot_repo_name="Proteobot/Results_quant_peptidoform_DDA",
+        proteobench_repo_name="Proteobench/Results_quant_peptidoform_DDA",
+    ):
+        super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
+        self.precursor_name = "peptidoform"
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""

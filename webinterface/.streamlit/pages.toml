@@ -5,3 +5,7 @@ name = "Home"
 [[pages]]
 path = "pages/DDA_Quant_ion.py"
 name = "DDA Quant Ion Level -BETA-"
+
+# [[pages]]
+# path = "pages/DDA_Quant_peptidoform.py"
+# name = "DDA Quant Peptidoform Level -BETA-"

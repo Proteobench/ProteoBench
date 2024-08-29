@@ -8,6 +8,11 @@ import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
+from proteobench.datapoint.quant_datapoint import (
+    Datapoint,
+    filter_df_numquant_median_abs_epsilon,
+    filter_df_numquant_nr_prec,
+)
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
@@ -21,19 +26,26 @@ from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
-from proteobench.utils.quant_datapoint import (
-    Datapoint,
-    filter_df_numquant_median_abs_epsilon,
-    filter_df_numquant_nr_prec,
-)
 
 
 class Module:
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self, token=None):
+    def __init__(
+        self,
+        token=None,
+        proteobench_repo_name="Proteobench/Results_Module2_quant_DDA",
+        proteobot_repo_name="Proteobot/Results_Module2_quant_DDA",
+    ):
         self.t_dir = TemporaryDirectory().name
-        self.github_repo = GithubProteobotRepo(token, clone_dir=self.t_dir)
+        self.t_dir_pr = TemporaryDirectory().name
+        self.github_repo = GithubProteobotRepo(
+            token,
+            proteobot_repo_name=proteobot_repo_name,
+            proteobench_repo_name=proteobench_repo_name,
+            clone_dir=self.t_dir,
+            clone_dir_pr=self.t_dir_pr,
+        )
         self.github_repo.clone_repo()
 
         self.precursor_name = "precursor ion"
@@ -142,7 +154,7 @@ class Module:
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         submission_comments="no comments",
     ):
-        self.github_repo.clone_repo()
+        self.github_repo.clone_repo_pr()
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():

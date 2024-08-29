@@ -82,6 +82,7 @@ class Datapoint:
         if "comments_for_submission" not in user_input.keys():
             user_input["comments_for_submission"] = ""
 
+        user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,

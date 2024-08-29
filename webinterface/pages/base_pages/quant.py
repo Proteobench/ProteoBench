@@ -17,7 +17,7 @@ from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_ion.module import IonModule
-from proteobench.utils.plotting.plot import PlotDataPoint
+from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -98,7 +98,6 @@ class QuantUIObjects:
         ##########################################
         # Initialize slider ID and default value #
         ##########################################
-
         if "slider_id" not in st.session_state.keys():
             st.session_state["slider_id"] = uuid.uuid4()
         if st.session_state["slider_id"] not in st.session_state.keys():
@@ -278,10 +277,11 @@ class QuantUIObjects:
 
     def _initialize_all_datapoints(self) -> None:
         """Initializes the all_datapoints variable in the session state."""
-        st.session_state[self.variables_quant.all_datapoints] = None
-        st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_point(
-            st.session_state[self.variables_quant.all_datapoints]
-        )
+        if self.variables_quant.all_datapoints not in st.session_state.keys():
+            st.session_state[self.variables_quant.all_datapoints] = None
+            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_point(
+                st.session_state[self.variables_quant.all_datapoints]
+            )
 
     def _filter_data_points_by_slider(self) -> None:
         """Filters the data points based on the slider value."""
@@ -308,14 +308,18 @@ class QuantUIObjects:
     def _create_slider(self) -> None:
         """Creates a slider input if needed."""
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
-        st.session_state[self.variables_quant.placeholder_slider] = st.empty()
-        st.session_state[self.variables_quant.placeholder_slider].select_slider(
-            label="Minimal ion quantifications (# samples)",
-            options=[1, 2, 3, 4, 5, 6],
-            value=st.session_state[st.session_state["slider_id"]],
-            on_change=self.slider_callback,
-            key=st.session_state["slider_id"],
-        )
+        if (
+            self.variables_quant.placeholder_slider not in st.session_state.keys()
+            or st.session_state[self.variables_quant.placeholder_slider] == st.empty()
+        ):
+            st.session_state[self.variables_quant.placeholder_slider] = st.empty()
+            st.session_state[self.variables_quant.placeholder_slider].select_slider(
+                label="Minimal ion quantifications (# samples)",
+                options=[1, 2, 3, 4, 5, 6],
+                value=st.session_state[st.session_state["slider_id"]],
+                on_change=self.slider_callback,
+                key=st.session_state["slider_id"],
+            )
 
     def _initialize_placeholders(self) -> None:
         """Initializes the placeholders for the figure and table."""
@@ -331,7 +335,6 @@ class QuantUIObjects:
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
         st.session_state[self.variables_quant.placeholder_fig_compare].plotly_chart(
             st.session_state[self.variables_quant.fig_metric], use_container_width=True
         )
@@ -346,13 +349,13 @@ class QuantUIObjects:
 
     def _create_submission_button(self) -> Optional[str]:
         """Creates a button for public submission and returns the PR URL if the button is pressed."""
-        if self.variables_quant.button_submission_uuid in st.session_state.keys():
-            button_submission_uuid = st.session_state[self.variables_quant.button_submission_uuid]
-        else:
+        if self.variables_quant.button_submission_uuid not in st.session_state.keys():
             button_submission_uuid = uuid.uuid4()
             st.session_state[self.variables_quant.button_submission_uuid] = button_submission_uuid
 
-        submit_pr = st.button("I really want to upload it", key=button_submission_uuid)
+        submit_pr = st.button(
+            "I really want to upload it", key=st.session_state[self.variables_quant.button_submission_uuid]
+        )
         if not submit_pr:
             return None
 
@@ -371,10 +374,7 @@ class QuantUIObjects:
             pr_url = self.ionmodule.clone_pr(
                 st.session_state[self.variables_quant.all_datapoints_submission],
                 params,
-                st.secrets["gh"]["token"],
-                username="Proteobot",
-                remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
-                branch_name="new_branch",
+                remote_git=self.variables_quant.github_link_pr,
                 submission_comments=user_comments,
             )
         except Exception as e:
@@ -423,7 +423,7 @@ class QuantUIObjects:
         self.user_input[self.variables_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.variables_quant.texts.Help.meta_data_file,
-            key=self.variables_quant.meta_file_uploader_uuid,
+            # key=self.variables_quant.meta_file_uploader_uuid,
             accept_multiple_files=True,
         )
 
@@ -448,17 +448,17 @@ class QuantUIObjects:
         runs the benchmarking module, and updates the session state with the results.
         """
         st.header("Running Proteobench")
+
         status_placeholder = st.empty()
         status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
-        if self.variables_quant.all_datapoints not in st.session_state:
-            self._initialize_datapoints_if_needed()
-
         try:
+            if self.variables_quant.all_datapoints not in st.session_state:
+                self._initialize_datapoints_if_needed()
+
             result_performance, all_datapoints, input_df = self._execute_benchmarking()
             self._update_session_state_with_results(all_datapoints)
             self._initialize_highlight_column()
-
         except Exception as e:
             self._handle_benchmarking_exception(status_placeholder, e)
         else:
@@ -743,6 +743,7 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.check_submission]
             and params != None
             and self.variables_quant.submit in st.session_state
+            and pr_url != None
         ):
             self.successful_submission(pr_url)
         self.variables_quant.first_new_plot = False

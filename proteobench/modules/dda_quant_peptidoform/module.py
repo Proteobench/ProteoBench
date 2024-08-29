@@ -13,27 +13,27 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.io.parsing.parse_peptidoform import load_input_file
+from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
 from proteobench.modules.dda_quant_base.module import Module
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class IonModule(Module):
+class PeptidoformModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(
         self,
         token,
-        proteobench_repo_name="Proteobench/Results_Module2_quant_DDA",
-        proteobot_repo_name="Proteobot/Results_Module2_quant_DDA",
+        proteobot_repo_name="Proteobot/Results_quant_peptidoform_DDA",
+        proteobench_repo_name="Proteobench/Results_quant_peptidoform_DDA",
     ):
         super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
-        self.precursor_name = "precursor ion"
+        self.precursor_name = "peptidoform"
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
-        return True
+        return False
 
     def benchmarking(
         self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
@@ -79,12 +79,12 @@ class IonModule(Module):
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
-        # try:
-        current_datapoint = Datapoint.generate_datapoint(
-            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-        )
-        # except Exception as e:
-        #    raise DatapointGenerationError(f"Error generating datapoint: {e}")
+        try:
+            current_datapoint = Datapoint.generate_datapoint(
+                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            )
+        except Exception as e:
+            raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
         try:
             all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)

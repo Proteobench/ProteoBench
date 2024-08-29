@@ -18,18 +18,13 @@ class ParseSettingsBuilder:
             parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings")
 
         self.PARSE_SETTINGS_FILES = {
-            "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
-            "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
-            "Proline": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
-            "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
-            "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
-            "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
-            "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
+            "WOMBAT": os.path.join(parse_settings_dir, "parse_settings_wombat.toml"),
+            "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DDA_quand_peptidoform.toml"),
         }
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
-
         # Check if all files are present
+        cwd = os.getcwd()
         missing_files = [file for file in self.PARSE_SETTINGS_FILES.values() if not os.path.isfile(file)]
         if not os.path.isfile(self.PARSE_SETTINGS_FILES_MODULE):
             missing_files.append(self.PARSE_SETTINGS_FILES_MODULE)
@@ -45,7 +40,6 @@ class ParseSettingsBuilder:
         parser = ParseSettings(parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
             parser = ParseModificationSettings(parser, parse_settings)
-
         return parser
 
 
@@ -91,8 +85,6 @@ class ParseSettings:
         else:
             df_filtered = df.copy()
 
-        df_filtered.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
-
         df_filtered["contaminant"] = df_filtered["Proteins"].str.contains(self.contaminant_flag)
         for flag, species in self._species_dict.items():
             df_filtered[species] = df_filtered["Proteins"].str.contains(flag)
@@ -114,6 +106,7 @@ class ParseSettings:
                     value_name="Intensity",
                 )
             except KeyError:
+                df_filtered.columns = [c.replace(".mzML", ".mzML.gz") for c in df.columns]
                 df_filtered_melted = df_filtered.melt(
                     id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
                     value_vars=melt_vars,
@@ -126,10 +119,8 @@ class ParseSettings:
         df_filtered_melted.loc[:, "replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
-        if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
-            df_filtered_melted["precursor ion"] = (
-                df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
-            )
+        if "proforma" in df_filtered_melted.columns:
+            df_filtered_melted["peptidoform"] = df_filtered_melted["proforma"]
         else:
             print("Not all columns required for making the ion are available.")
         return df_filtered_melted, replicate_to_raw
@@ -162,18 +153,13 @@ class ParseModificationSettings:
             pattern=self.modifications_pattern,
             modification_dict=self.modifications_mapper,
         )
-
         try:
-            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+            df["peptidoform"] = df["proforma"]
+
         except KeyError:
             raise KeyError(
                 "Not all columns required for making the ion are available."
                 "Is the charge available in the input file?"
             )
-
-        if "proforma" in df.columns and "Charge" in df.columns:
-            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
-        else:
-            print("Not all columns required for making the ion are available.")
 
         return df, replicate_to_raw

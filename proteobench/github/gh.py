@@ -13,12 +13,14 @@ class GithubProteobotRepo:
         self,
         token=None,
         clone_dir=None,
+        clone_dir_pr=None,
         proteobench_repo_name="Proteobench/Results_Module2_quant_DDA",
-        proteobot_repo_name="Proteobench/Results_Module2_quant_DDA",
+        proteobot_repo_name="Proteobot/Results_Module2_quant_DDA",
         username="Proteobot",
     ):
         self.token = token
         self.clone_dir = clone_dir
+        self.clone_dir_pr = clone_dir_pr
         self.proteobot_repo_name = proteobot_repo_name
         self.proteobench_repo_name = proteobench_repo_name
         self.username = username
@@ -53,6 +55,18 @@ class GithubProteobotRepo:
         else:
             remote = f"https://{self.username}:{self.token}@github.com/{self.proteobench_repo_name}.git"
             self.repo = self.clone(remote, self.clone_dir)
+        return self.repo
+
+    def clone_repo_pr(self):
+        print(self.proteobot_repo_name)
+        print(self.clone_dir_pr)
+        print(self.clone_dir)
+        input("stop")
+        if self.token is None:
+            self.repo = self.clone_repo_anonymous()
+        else:
+            remote = f"https://{self.username}:{self.token}@github.com/{self.proteobot_repo_name}.git"
+            self.repo = self.clone(remote, self.clone_dir_pr)
         return self.repo
 
     def create_branch(self, branch_name):

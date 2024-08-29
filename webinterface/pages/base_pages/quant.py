@@ -285,7 +285,6 @@ class QuantUIObjects:
 
     def _filter_data_points_by_slider(self) -> None:
         """Filters the data points based on the slider value."""
-        print("filter_data_points_by_slider")
         if "slider_id" in st.session_state.keys():
             st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints],
@@ -294,7 +293,6 @@ class QuantUIObjects:
 
     def _initialize_highlight_column(self) -> None:
         """Initializes the highlight column in the data points."""
-        print("initialize_highlight_column")
         if (
             self.variables_quant.highlight_list not in st.session_state.keys()
             and "Highlight" not in st.session_state[self.variables_quant.all_datapoints].columns
@@ -331,8 +329,6 @@ class QuantUIObjects:
 
     def _generate_and_display_metric_plot(self) -> None:
         """Generates and displays the metric plot."""
-        print("generate_and_display_metric_plot")
-
         try:
             st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
                 st.session_state[self.variables_quant.all_datapoints]
@@ -345,7 +341,6 @@ class QuantUIObjects:
 
     def _initialize_data_editor(self) -> None:
         """Initializes the data editor."""
-        print("initialize_data_editor")
         st.session_state[self.variables_quant.placeholder_table].data_editor(
             st.session_state[self.variables_quant.all_datapoints],
             key=st.session_state["table_id"],
@@ -379,10 +374,7 @@ class QuantUIObjects:
             pr_url = self.ionmodule.clone_pr(
                 st.session_state[self.variables_quant.all_datapoints_submission],
                 params,
-                st.secrets["gh"]["token"],
-                username="Proteobot",
                 remote_git=self.variables_quant.github_link_pr,
-                branch_name="new_branch",
                 submission_comments=user_comments,
             )
         except Exception as e:
@@ -413,7 +405,6 @@ class QuantUIObjects:
 
     def _create_dataframe_copies(self) -> None:
         """Creates copies of the dataframes before submission."""
-        print("_create_dataframe_copies")
         if st.session_state[self.variables_quant.all_datapoints] is not None:
             st.session_state[self.variables_quant.all_datapoints_submission] = st.session_state[
                 self.variables_quant.all_datapoints

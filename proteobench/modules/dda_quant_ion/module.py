@@ -22,8 +22,13 @@ from proteobench.score.quant.quantscores import QuantScores
 class IonModule(Module):
     """Object is used as a main interface with the Proteobench library within the module."""
 
-    def __init__(self, token):
-        super().__init__(token)
+    def __init__(
+        self,
+        token,
+        proteobench_repo_name="Proteobench/Results_Module2_quant_DDA",
+        proteobot_repo_name="Proteobot/Results_Module2_quant_DDA",
+    ):
+        super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
         self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:

@@ -38,11 +38,13 @@ class Module:
         proteobot_repo_name="Proteobot/Results_Module2_quant_DDA",
     ):
         self.t_dir = TemporaryDirectory().name
+        self.t_dir_pr = TemporaryDirectory().name
         self.github_repo = GithubProteobotRepo(
             token,
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
             clone_dir=self.t_dir,
+            clone_dir_pr=self.t_dir_pr,
         )
         self.github_repo.clone_repo()
 
@@ -152,7 +154,7 @@ class Module:
         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
         submission_comments="no comments",
     ):
-        self.github_repo.clone_repo()
+        self.github_repo.clone_repo_pr()
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():

@@ -6,7 +6,6 @@ from github import Github
 
 
 class GithubProteobotRepo:
-
     def __init__(
         self,
         token=None,

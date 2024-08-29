@@ -166,7 +166,6 @@ class ParseModificationSettings:
 
         try:
             df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
-
         except KeyError:
             raise KeyError(
                 "Not all columns required for making the ion are available."

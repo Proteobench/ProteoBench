@@ -114,7 +114,6 @@ class ParseSettings:
                     value_name="Intensity",
                 )
             except KeyError:
-
                 df_filtered_melted = df_filtered.melt(
                     id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
                     value_vars=melt_vars,

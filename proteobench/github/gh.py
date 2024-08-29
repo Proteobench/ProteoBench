@@ -1,9 +1,7 @@
 import os
-from tempfile import TemporaryDirectory
 
 import pandas as pd
-import toml
-from git import GitError, Repo, exc
+from git import Repo, exc
 from github import Github
 
 

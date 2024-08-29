@@ -6,13 +6,13 @@ import unittest
 import numpy as np
 import pandas as pd
 
+from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_base.module import Module
 from proteobench.score.quant.quantscores import QuantScores
 from proteobench.utils.plotting.plot import PlotDataPoint
-from proteobench.utils.quant_datapoint import Datapoint
 
 # genereate_input_field
 

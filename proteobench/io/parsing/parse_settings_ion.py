@@ -91,7 +91,9 @@ class ParseSettings:
             df_filtered = df[df["Reverse"] != self.decoy_flag].copy()
         else:
             df_filtered = df.copy()
-
+        
+        df_filtered.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
+        
         df_filtered["contaminant"] = df_filtered["Proteins"].str.contains(self.contaminant_flag)
         for flag, species in self._species_dict.items():
             df_filtered[species] = df_filtered["Proteins"].str.contains(flag)
@@ -100,7 +102,7 @@ class ParseSettings:
         )
 
         df_filtered = df_filtered[df_filtered["MULTI_SPEC"] == False]
-
+        
         # If there is "Raw file" then it is a long format, otherwise short format
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
@@ -113,7 +115,7 @@ class ParseSettings:
                     value_name="Intensity",
                 )
             except KeyError:
-                df_filtered.columns = [c.replace(".mzML", ".mzML.gz") for c in df.columns]
+                
                 df_filtered_melted = df_filtered.melt(
                     id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
                     value_vars=melt_vars,

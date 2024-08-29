@@ -58,10 +58,6 @@ class GithubProteobotRepo:
         return self.repo
 
     def clone_repo_pr(self):
-        print(self.proteobot_repo_name)
-        print(self.clone_dir_pr)
-        print(self.clone_dir)
-        input("stop")
         if self.token is None:
             self.repo = self.clone_repo_anonymous()
         else:

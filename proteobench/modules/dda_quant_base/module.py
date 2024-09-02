@@ -169,7 +169,7 @@ class Module:
 
         branch_name = current_datapoint["id"]
 
-        path_write = os.path.join(self.t_dir, "results.json")
+        path_write = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {path_write}")
         f = open(path_write, "w")
 
@@ -189,8 +189,7 @@ class Module:
         return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
 
     def write_json_local_development(self, temporary_datapoints, datapoint_params):
-        t_dir = TemporaryDirectory().name
-        os.mkdir(t_dir)
+        os.mkdir(self.t_dir_pr)
 
         current_datapoint = temporary_datapoints.iloc[-1]
 
@@ -202,14 +201,14 @@ class Module:
         all_datapoints = self.add_current_data_point(None, current_datapoint)
 
         # TODO write below to logger instead of std.out
-        fname = os.path.join(t_dir, "results.json")
+        fname = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {fname}")
 
-        f = open(os.path.join(t_dir, "results.json"), "w")
+        f = open(os.path.join(self.t_dir_pr, "results.json"), "w")
 
         all_datapoints.to_json(f, orient="records", indent=2)
 
-        return os.path.join(t_dir, "results.json")
+        return os.path.join(self.t_dir_pr, "results.json")
 
     def write_intermediate_raw(self, dir, ident, input_df, result_performance, param_loc):
         path_write = os.path.join(dir, ident)

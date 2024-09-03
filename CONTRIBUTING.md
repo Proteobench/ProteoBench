@@ -25,11 +25,12 @@ that carry the `good first issue` or `help wanted` labels.
 ## Development setup
 
 ### Local installation
-Install the package and dependencies with [Flit](https://flit.pypa.io/en/stable/):
+Install the package and dependencies with pip:
+
+Change into the directory where you cloned proteobench into, and run:
 
 ```
-pip install flit
-flit install -s
+pip install -e .
 ```
 
 Using a virtual environment is recommended.
@@ -83,14 +84,31 @@ To enable automatic pre-commit checks, run:
 pre-commit install 
 ```
 
+### running tests, building notebooks and documentation.
+
+You can use `nox` to run tests build notebooks and build the documentation.
+
+to run test only 
+```
+nox --session "tests"
+```
+
+```
+nox --session "test_notebooks"
+```
+
+```
+nox --session "docs"
+```
 
 ### Documentation
 
 To work on the documentation and get a live preview, install the requirements
 and run `sphinx-autobuild`:
 
+
 ```
-flit install -s
+pip install -e'.[docs]'
 sphinx-autobuild  --watch ./proteobench ./docs/ ./docs/_build/html/
 ```
 

@@ -25,11 +25,12 @@ that carry the `good first issue` or `help wanted` labels.
 ## Development setup
 
 ### Local installation
-Install the package and dependencies with [Flit](https://flit.pypa.io/en/stable/):
+Install the package and dependencies with pip:
+
+Change into the directory where you cloned proteobench into, and run:
 
 ```
-pip install flit
-flit install -s
+pip install -e .
 ```
 
 Using a virtual environment is recommended.

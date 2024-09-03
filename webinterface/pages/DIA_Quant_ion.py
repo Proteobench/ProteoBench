@@ -8,7 +8,7 @@ from pages.pages_variables.dia_quant_variables import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dia_quant_ion.dia_quant_ion_module import QuantIonDIAModule as IonModule
+from proteobench.modules.dda_quant_ion.dda_quant_ion_module import DDAQuantIonModule
 
 
 class StreamlitUI:
@@ -26,8 +26,8 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: IonModule = IonModule(token=token)
-        self.parsesettingsbuilder = ParseSettingsBuilder(ion_approach="dia")
+        self.ionmodule: DDAQuantIonModule = DDAQuantIonModule(token=token)
+        self.parsesettingsbuilder = ParseSettingsBuilder()
 
         self.quant_uiobjects = QuantUIObjects(self.variables_dda_quant, self.ionmodule, self.parsesettingsbuilder)
 

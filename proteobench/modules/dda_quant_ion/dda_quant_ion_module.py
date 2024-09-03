@@ -19,7 +19,7 @@ from proteobench.modules.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class QuantIonDDAModule(QuantModule):
+class DDAQuantIonModule(QuantModule):
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(

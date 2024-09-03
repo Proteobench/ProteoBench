@@ -8,7 +8,7 @@ from pages.pages_variables.dda_quant_peptidoform_variables import VariablesDDAQu
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
-from proteobench.modules.dda_quant_peptidoform.dda_quant_peptidoform_module import QuantPeptidoformDDAModule as PeptidoformModule
+from proteobench.modules.dda_quant_peptidoform.dda_quant_peptidoform_module import DDAQuantPeptidoformModule
 
 
 class StreamlitUI:
@@ -28,7 +28,7 @@ class StreamlitUI:
         except KeyError:
             token = ""
 
-        self.peptidoform_module: PeptidoformModule = PeptidoformModule(token=token)
+        self.peptidoform_module: DDAQuantPeptidoformModule = DDAQuantPeptidoformModule(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder()
 
         self.quant_uiobjects = QuantUIObjects(

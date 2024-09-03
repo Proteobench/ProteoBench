@@ -84,14 +84,31 @@ To enable automatic pre-commit checks, run:
 pre-commit install 
 ```
 
+### running tests, building notebooks and documentation.
+
+You can use `nox` to run tests build notebooks and build the documentation.
+
+to run test only 
+```
+nox --session "tests"
+```
+
+```
+nox --session "test_notebooks"
+```
+
+```
+nox --session "docs"
+```
 
 ### Documentation
 
 To work on the documentation and get a live preview, install the requirements
 and run `sphinx-autobuild`:
 
+
 ```
-flit install -s
+pip install -e'.[docs]'
 sphinx-autobuild  --watch ./proteobench ./docs/ ./docs/_build/html/
 ```
 

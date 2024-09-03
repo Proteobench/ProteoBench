@@ -1,6 +1,6 @@
 Please upload the ouput of your analysis, and indicate what software 
 tool it comes from (this is necessary to correctly parse your table - find 
-more information in the "[How to use](https://proteobench.readthedocs.io/en/latest/modules/3-DIA-Quantification-ion-level/)"
+more information in the "[How to use](https://proteobench.readthedocs.io/en/stable/available-modules/3-DIA-Quantification-ion-level/)"
 section of this module).
 
 Currently, we support output files from AlphaDIA and DIA-NN. It is also possible to reformat your data in a tab-delimited file that we call "custom format" in the [documentation](https://proteobench.readthedocs.io/en/latest/modules/3-DIA-Quantification-ion-level/). We are still working on EncyclopeDIA, MSFraggerDIA, Skyline and Spectronaut.

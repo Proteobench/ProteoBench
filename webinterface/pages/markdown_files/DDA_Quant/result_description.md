@@ -1,6 +1,6 @@
 It contains the following columns:
 
-- precursor ion = concatenation of the modified sequence en charge
+- precursor ion = concatenation of the modified sequence and charge
 - mean log2-transformed intensities for condition A and B
 - standard deviations calculated for the log2-transformed values in condition A and B
 - mean intensity for condition A and B

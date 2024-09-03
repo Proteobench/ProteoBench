@@ -25,6 +25,7 @@ class ParseSettingsBuilder:
             "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
             "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
             "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
+            "DIA-NN": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
         }
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())

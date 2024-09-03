@@ -151,7 +151,7 @@ class TestWrongFormatting(unittest.TestCase):
         user_input["input_format"] = format_name
 
         with self.assertRaises(KeyError) as context:
-            QuantIonDDAModule().benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
+            QuantIonDDAModule("").benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
 
 
 class TestPlot(unittest.TestCase):

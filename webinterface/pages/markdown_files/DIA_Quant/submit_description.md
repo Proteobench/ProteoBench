@@ -2,7 +2,7 @@
 
 To do so, you need to provide the parameter file that corresponds to 
 your analysis. You can upload it in the drag and drop area below. 
-See [here](https://proteobench.readthedocs.io/en/latest/modules/2-DDA-Quantification-ion-level/)
+See [here](https://proteobench.readthedocs.io/en/latest/modules/3-DIA-Quantification-ion-level/)
 for all compatible parameter files.
 In this module, we keep track of the following parameters, if you feel 
 that some important information is missing, please add it in the 

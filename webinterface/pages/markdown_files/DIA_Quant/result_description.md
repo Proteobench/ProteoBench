@@ -7,7 +7,7 @@ It contains the following columns:
 - standard deviations calculated for the intensity values in condition A and B
 - coefficient of variation (CV) for condition A and B
 - differences of the mean log2-transformed values between condition A and B
-- MS signal from the input table ("abundance_DDA_Condition_A_Sample_Alpha_01" to "abundance_DDA_Condition_B_Sample_Alpha_03")
+- MS signal from the input table ("abundance_AIF_Condition_A_Sample_Alpha_01" to "abundance_AIF_Condition_B_Sample_Alpha_03")
 - Count = number of runs with non-missing values
 - species the sequence matches to
 - unique = TRUE if the sequence is species-specific

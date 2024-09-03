@@ -49,13 +49,12 @@
         "type": "selectbox",
         "label": "Enzyme",
         "value": {
-            "MaxQuant": "-",
-            "AlphaPept": "-",
-            "FragPipe": "-",
-            "Proline": "-",
-            "i2MassChroQ": "-",
-            "WOMBAT": "-",
-            "Sage": "-",
+            "AlphaDIA": "-",
+            "DIANN": "-",
+            "EncyclopeDIA": "-",
+            "MSFraggerDIA": "-",
+            "Skyline": "-",
+            "Spectronaut": "-",
             "Custom": "-"
         },
         "options": [
@@ -120,13 +119,12 @@
         "type": "checkbox",
         "label": "Quantified with MBR",
         "value": {
-            "MaxQuant": false,
-            "AlphaPept": false,
-            "FragPipe": false,
-            "Proline": false,
-            "i2MassChroQ": false,
-            "WOMBAT": false,
-            "Sage": true,
+            "AlphaDIA": false,
+            "DIANN": false,
+            "EncyclopeDIA": false,
+            "MSFraggerDIA": false,
+            "Skyline": false,
+            "Spectronaut": false,
             "Custom": false
         }
     },

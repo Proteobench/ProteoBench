@@ -15,6 +15,7 @@ class StreamlitUI:
     def __init__(self):
         self.variables_dda_quant: VariablesDIAQuant = VariablesDIAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
+        self.texts.ShortMessages.title = "DIA Ion quantification"
         self.user_input: Dict[str, Any] = dict()
 
         pbb.proteobench_page_config()

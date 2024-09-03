@@ -78,12 +78,15 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     params.software_version = header
     params.search_engine = "MSFragger"
 
-    msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger"]
-    msfragger_executable = PureWindowsPath(msfragger_executable).name
-    match = re.search(VERSION_NO_PATTERN, msfragger_executable)
+    try:
+        msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger"]
+        msfragger_executable = PureWindowsPath(msfragger_executable).name
+        match = re.search(VERSION_NO_PATTERN, msfragger_executable)
 
-    if match:
-        msfragger_executable = match.group()
+        if match:
+            msfragger_executable = match.group()
+    except KeyError:
+        msfragger_executable = ""
 
     params.search_engine_version = msfragger_executable
     params.enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
@@ -140,6 +143,17 @@ if __name__ == "__main__":
     series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")
 
     file = pathlib.Path("../../../test/params/fragpipe_win_paths.workflow")
+    with open(file, "rb") as f:
+        _, data = read_fragpipe_workflow(f)
+    df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
+    df.to_csv(file.with_suffix(".csv"))
+    with open(file, "rb") as f:
+        params = extract_params(f)
+    pprint(params.__dict__)
+    series = pd.Series(params.__dict__)
+    series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")
+
+    file = pathlib.Path("../../../test/params/fragpipe_v22.workflow")
     with open(file, "rb") as f:
         _, data = read_fragpipe_workflow(f)
     df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])

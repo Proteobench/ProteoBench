@@ -55,6 +55,17 @@ class ProteoBenchParameters:
         Minimum precursor charge allowed.
     max_precursor_charge : Optional[int]
         Maximum precursor charge allowed.
+    spectral_library_generation : Optional[dict]
+        Models used to generate spectral library (DIA-specific).
+    scan_window : Optional[int]
+        Scan window radius. Ideally corresponds to approximate
+        average number of data points per peak (DIA-specific).
+    quantification_method_DIANN : Optional[str]
+        Quantification strategy used in the DIA-NN engine (DIANN-specific).
+    second_pass : Optional[bool]
+        Whether second pass search is enabled (DIANN-specific).
+    protein_inference : Optional[str]
+        Protein inference method used.
     """
 
     software_name: Optional[str] = None
@@ -77,3 +88,8 @@ class ProteoBenchParameters:
     max_mods: Optional[int] = None  # max_num_modifications
     min_precursor_charge: Optional[int] = None  # precursor_charge
     max_precursor_charge: Optional[int] = None
+    scan_window: Optional[int] = None # DIA-specific
+    quantification_method_DIANN: Optional[str] = None # DIANN-specific
+    second_pass: Optional[bool] = None # DIANN specific
+    protein_inference: Optional[str] = None
+    predictors_library: Optional[dict] = None

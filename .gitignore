@@ -140,6 +140,3 @@ results.json
 
 # secrets
 **/.streamlit/secrets.toml
-
-#temp
-temp_data/

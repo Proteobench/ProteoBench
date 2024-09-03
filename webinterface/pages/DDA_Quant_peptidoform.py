@@ -8,7 +8,7 @@ from pages.pages_variables.dda_quant_peptidoform_variables import VariablesDDAQu
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
-from proteobench.modules.dda_quant_peptidoform.module import PeptidoformModule
+from proteobench.modules.dda_quant_peptidoform.dda_quant_peptidoform_module import PeptidoformModule
 
 
 class StreamlitUI:

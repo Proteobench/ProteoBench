@@ -18,3 +18,8 @@ variable_mods,Acetyl (Protein N-term); Gln->pyro-Glu (Any N-term Q); Ammonia-los
 max_mods,
 min_precursor_charge,1
 max_precursor_charge,4
+scan_window,
+quantification_method_DIANN,
+second_pass,
+protein_inference,
+predictors_library,

@@ -1,0 +1,139 @@
+{
+    "software_version": {
+        "type": "text_input",
+        "label": "Software tool version",
+        "placeholder": "1.0"
+    },
+    "search_engine": {
+        "type": "text_input",
+        "label": "Search engine name",
+        "placeholder": "-"
+    },
+    "search_engine_version": {
+        "type": "text_input",
+        "label": "Search engine version",
+        "placeholder": "1.0"
+    },
+    "ident_fdr_psm": {
+        "type": "number_input",
+        "label": "FDR psm",
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "format": "%.4f"
+    },
+    "ident_fdr_peptide": {
+        "type": "number_input",
+        "label": "FDR peptide",
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "format": "%.4f"
+    },
+    "ident_fdr_protein": {
+        "type": "number_input",
+        "label": "FDR protein",
+        "min_value": 0.0,
+        "max_value": 1.0,
+        "format": "%.4f"
+    },
+    "precursor_mass_tolerance": {
+        "type": "text_input",
+        "label": "Precursor mass tolerance (including unit ppm, PPM or Da)",
+        "placeholder": "4.5 ppm"
+    },
+    "fragment_mass_tolerance": {
+        "type": "text_input",
+        "label": "Fragment mass tolerance (including unit ppm, PPM or Da)",
+        "placeholder": "20 ppm"
+    },
+    "enzyme": {
+        "type": "selectbox",
+        "label": "Enzyme",
+        "value": {
+            "MaxQuant": "-",
+            "AlphaPept": "-",
+            "FragPipe": "-",
+            "Proline": "-",
+            "i2MassChroQ": "-",
+            "WOMBAT": "-",
+            "Sage": "-",
+            "Custom": "-"
+        },
+        "options": [
+            "-",
+            "Trypsin",
+            "Chemotrypsin"
+        ]
+    },
+    "allowed_miscleavages": {
+        "type": "number_input",
+        "label": "Maximum allowed number of missed cleavage",
+        "min_value": 0,
+        "max_value": 10,
+        "format": "%d"
+    },
+    "fixed_mods": {
+        "type": "text_input",
+        "label": "Specify the fixed mods that were set",
+        "placeholder": "CAM"
+    },
+    "variable_mods": {
+        "type": "text_input",
+        "label": "Specify the variable mods that were set (separated by a comma)",
+        "placeholder": "MOxid, N-term Acetyl"
+    },
+    "min_precursor_charge": {
+        "type": "number_input",
+        "label": "Minimum precursor charge allowed",
+        "min_value": 0,
+        "max_value": 10,
+        "format": "%d"
+    },
+    "max_precursor_charge": {
+        "type": "number_input",
+        "label": "Maximum precursor charge allowed",
+        "min_value": 0,
+        "max_value": 100,
+        "format": "%d"
+    },
+    "max_mods": {
+        "type": "number_input",
+        "label": "Maximum number of modifications on peptides",
+        "min_value": 0,
+        "max_value": 10,
+        "format": "%d"
+    },
+    "min_peptide_length": {
+        "type": "number_input",
+        "label": "Minimum peptide length",
+        "min_value": 0,
+        "max_value": 100,
+        "format": "%d"
+    },
+    "max_peptide_length": {
+        "type": "number_input",
+        "label": "Maximum peptide length",
+        "min_value": 0,
+        "max_value": 1000,
+        "format": "%d"
+    },
+    "enable_match_between_runs": {
+        "type": "checkbox",
+        "label": "Quantified with MBR",
+        "value": {
+            "MaxQuant": false,
+            "AlphaPept": false,
+            "FragPipe": false,
+            "Proline": false,
+            "i2MassChroQ": false,
+            "WOMBAT": false,
+            "Sage": true,
+            "Custom": false
+        }
+    },
+    "comments_for_submission": {
+        "type": "text_area",
+        "label": "Fill in details not specified above",
+        "placeholder": "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...'",
+        "height": 200
+    }
+}

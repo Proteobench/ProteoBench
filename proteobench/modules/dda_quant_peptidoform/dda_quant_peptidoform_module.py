@@ -15,11 +15,11 @@ from proteobench.exceptions import (
 )
 from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
-from proteobench.modules.dda_quant_base.module import Module
+from proteobench.modules.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class PeptidoformModule(Module):
+class QuantPeptidoformDDAModule(QuantModule):
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(

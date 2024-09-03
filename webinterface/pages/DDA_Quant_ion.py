@@ -47,8 +47,6 @@ class StreamlitUI:
 
         self.quant_uiobjects.create_results()
 
-        self.quant_uiobjects.render_download_container()
-
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)

@@ -82,7 +82,7 @@ In FragPipe output files, the protein identifiers matching a given ion are in tw
 
 
 ### i2MassChroQ
-A ProteoBench-compatible format is available in i2MassChroQ through the button "ProteoBench export". It generates a tab-delimited file containing one row per quantified ion with all the information required for this module (column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN". The ProteoBench export of i2MassChroQ also generates a single parameter file (.tsv) that is compatible with ProteoBench public upload.
+A ProteoBench-compatible format is available in i2MassChroQ through the button "ProteoBench export". It generates a tab-delimited file containing one row per quantified ion for metric calculation ("proteobench_export.tsv"; column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"); and a parameter file for public submission ("Project parameters.tsv"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN". 
 Link to the i2MassChroQ documentation [here](http://pappso.inrae.fr/bioinfo/i2masschroq/documentation/html/).
 
 ### MaxQuant

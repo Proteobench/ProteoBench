@@ -173,3 +173,64 @@ information necessary for parsing the modification and their localisation when t
   - "pattern" = "\\[([^]]+)\\]" \ This regex pattern indicates the values to be matched for modifications. Make sure to include the full tag (only the peptide sequence should remain): "NEC[+57.0214]VVM[+15.9949]VIR". You can test your python regexes here: https://regex101.com/
 
   - "modification_dict" = {"+57.0215" = "Carbamidomethyl", "+15.9949" = "Oxidation", "-17.026548" = "Gln->pyro-Glu", "-18.010565" = "Glu->pyro-Glu", "+42" = "Acetyl"} / Pattern that is matched to be translated into the [ProForma standard](https://www.psidev.info/proforma): HUPO-PSI/ProForma: HUPO-PSI Standardized peptidoform notation (link to [github](https://github.com/HUPO-PSI/ProForma)). Make sure there are no additional parentheses, only the modification name should be translated to.
+
+## Result Description
+
+After uploading an output file, a table is generated that contains the following columns:
+
+- precursor ion = concatenation of the modified sequence and charge
+- mean log2-transformed intensities for condition A and B
+- standard deviations calculated for the log2-transformed values in condition A and B
+- mean intensity for condition A and B
+- standard deviations calculated for the intensity values in condition A and B
+- coefficient of variation (CV) for condition A and B
+- differences of the mean log2-transformed values between condition A and B
+- MS signal from the input table ("abundance_DDA_Condition_A_Sample_Alpha_01" to "abundance_DDA_Condition_B_Sample_Alpha_03")
+- Count = number of runs with non-missing values
+- species the sequence matches to
+- unique = TRUE if the sequence is species-specific
+- species
+- expected ratio for the given species
+- epsilon = difference of the observed and expected log2-transformed fold change
+
+
+Choose with the slider below the minimum number of quantification value per raw file.
+Example: when 3 is selected, only the precursor ions quantified in 3 or more raw files will be considered for the plot.
+ 
+  ## Define Parameters
+
+To make the results available to the entire community, you need to provide the parameter file that corresponds to 
+your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratio's). 
+See [here](https://proteobench.readthedocs.io/en/stable/available-modules/2-DDA-Quantification-ion-level/#important-tool-specific-settings)
+for all compatible parameter files.
+In this module, we keep track of the following parameters, if you feel 
+that some important information is missing, please add it in the 
+`Comments for submission` field. 
+  - software tool name and version
+  - search engine name and version (if different from software tool)
+  - FDR threshold for PSM, peptide and protein level
+  - match between run (or not)
+  - precursor mass tolerance
+  - fragment mass tolerance
+  - enzyme (although for these data it should be Trypsin)
+  - maximum number of missed-cleavages
+  - minimum and maximum peptide length
+  - fixed and variable modifications
+  - maximum number of modifications
+  - minimum and maximum precursor charge
+
+Once you confirm that the metadata is correct (and corresponds to the 
+table you uploaded before generating the plot), a button will appear.
+Press it to submit. 
+
+**If some parameters are not in your parameter file, it is important that 
+you provide them in the "comments" section.**
+
+Once submitted, you will see a weblink that will prompt you to a 
+pull request on the github repository of the module. Please write down
+its number to keep track of your submission. If it looks good, one of 
+the reviewers will accept it and make your data public. 
+
+Please contact us if you have any issue. To do so, you can create an 
+[issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
+github, or [send us an email](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).

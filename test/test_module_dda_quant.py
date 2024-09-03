@@ -41,7 +41,7 @@ def load__local_parsing_configuration_file(format_name: str):
     parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
     parse_settings = ParseSettingsBuilder(parse_settings_dir).build_parser(format_name)
     prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = QuantIonDDAModule().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
+    intermediate = QuantIonDDAModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
@@ -51,7 +51,7 @@ def process_file(format_name: str):
     input_df = load_file(format_name)
     parse_settings = ParseSettingsBuilder().build_parser(format_name)
     prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = QuantIonDDAModule().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
+    intermediate = QuantIonDDAModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
@@ -133,7 +133,7 @@ class TestOutputFileReading(unittest.TestCase):
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
-        result_performance, all_datapoints, input_df = QuantIonDDAModule().benchmarking(
+        result_performance, all_datapoints, input_df = QuantIonDDAModule("").benchmarking(
             TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None
         )
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))

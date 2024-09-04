@@ -44,13 +44,6 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame["proforma"] = input_data_frame["Modified sequence"]
     elif input_format == "DIA-NN":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["proforma"] = input_data_frame["modified_sequence"].apply(
-            lambda x: (
-                re.sub(r"^\(UniMod:(\d+)\)", r"[UNIMOD:\1]-", x)
-                if re.match(r"^\(UniMod:\d+\)", x)
-                else re.sub(r"\(UniMod:(\d+)\)", r"[UNIMOD:\1]", x)
-            )
-        )
     return input_data_frame
 
 

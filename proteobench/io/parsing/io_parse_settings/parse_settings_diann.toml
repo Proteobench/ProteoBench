@@ -2,7 +2,6 @@
 "Modified.Sequence" = "Sequence"
 "File.Name" = "Raw file"
 "Protein.Names" = "Proteins"
-"proforma" = "proforma"
 "Precursor.Charge" = "Charge"
 "Precursor.Quantity" = "Intensity"
 
@@ -30,3 +29,11 @@
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = true
+
+[modification_mapper]
+"parse_column" = "Modified.Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\[([^]]+)\\]"
+"modification_dict" = {"UniMod:35" = "Oxidation", "UniMod:1" = "Acetyl", "UniMod:4" = "Carbamidomethyl"}

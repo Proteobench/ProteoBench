@@ -71,7 +71,7 @@ class PlotDataPoint:
             "AlphaPept": "#2ca02c",
             "FragPipe": "#ff7f0e",
             "WOMBAT": "#7f7f7f",
-            "Proline": "#d62728",
+            "ProlineStudio": "#d62728",
             "Sage": "#f74c00",
             "i2MassChroQ": "#5ce681",
             "Custom": "#9467bd",

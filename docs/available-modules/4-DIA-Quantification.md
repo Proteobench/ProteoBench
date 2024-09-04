@@ -20,12 +20,12 @@ Please refer to the original publication for the full description of sample prep
 
 The files can be downloaded from the proteomeXchange repository PXD028735 or you can download them here:
 
-[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw),
-[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw),
-[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw),
-[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw),
-[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw),
-[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
+[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw),
+[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw),
+[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw),
+[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw),
+[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw),
+[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -33,7 +33,7 @@ Download the zipped FASTA file here: <a href="/app/static/ProteoBenchFASTA_DDAQu
 The fasta file provided for this module contains the three species
 present in the samples and contaminant proteins
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
-Note that this is the same FASTA as used in Module 2 - DDA Quantification
+Note that this is the same FASTA as used in Module 2 - DDA Quantification.
 
 ## Metric calculation
 

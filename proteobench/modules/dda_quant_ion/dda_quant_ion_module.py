@@ -120,16 +120,16 @@ class DDAQuantIonModule(QuantModule):
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
-        try:
-            current_datapoint = Datapoint.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-            )
-        except Exception as e:
-            raise DatapointGenerationError(f"Error generating datapoint: {e}")
+        #try:
+        current_datapoint = Datapoint.generate_datapoint(
+            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        )
+        #except Exception as e:
+        #    raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
         # add current data point to all datapoints
         try:
-            all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
+            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
         except Exception as e:
             raise DatapointAppendError(f"Error adding current data point: {e}")
 

@@ -129,7 +129,7 @@ class DIAQuantIonModule(QuantModule):
 
         # add current data point to all datapoints
         try:
-            all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
+            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
         except Exception as e:
             raise DatapointAppendError(f"Error adding current data point: {e}")
 

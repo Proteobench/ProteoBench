@@ -73,12 +73,12 @@ Table 2 provides an overview of the required input files for public submission. 
 **Table 2. Overview of input files required for public submission**
 |Tool|Input file|Parameter File|
 |---------|-----|-|
-|AlphaPept|result_peptides.tsv|results.yaml
-|FragPipe|combined_ion.tsv|fragpipe.workflow
+|AlphaPept|result_peptides.tsv|results.yaml|
+|FragPipe|combined_ion.tsv|fragpipe.workflow|
 |i2MassChroQ|_export.tsv|Project parameters.tsv|
-|MaxQuant|evidence.txt|mqpar.xml
-|Proline|.xlsx|.xlsx
-|Sage|lfq.tsv|results.json
+|MaxQuant|evidence.txt|mqpar.xml|
+|Proline|<result file>.xlsx|<result file>.xlsx|
+|Sage|lfq.tsv|results.json|
 
 ### AlphaPept
 1. Load folder that contains the data files.

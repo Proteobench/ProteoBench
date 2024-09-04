@@ -70,7 +70,7 @@ After upload, you will get a link to the pull request associated with your data.
 ## Important Tool-specific settings
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for public submission**
+**Table 2. Overview of input files required for metric caluclation and public submission**
 |Tool|Input file|Parameter File|
 |---------|-----|-|
 |AlphaPept|result_peptides.tsv|results.yaml|

@@ -7,8 +7,8 @@ Please use the template for adding a new benchmarking module.
 Here we provide a comprehensive overview of how to set up a new module in ProteoBench
 
 
-Naming convention
-=================
+Terms
+=====
 
 We suggest to understand the following terms as they are crucial components:
 
@@ -20,6 +20,11 @@ We suggest to understand the following terms as they are crucial components:
     **Datapoint**: Metadata and benchmarking metrics for a given data set. A `datapoint` is the
     data needed for the benchmarking and should also be represented by a json object.
 
+Naming convention
+=================
+
+New modules and classes should be given descriptive names, and fit into existing naming schemes.
+Go from general to specific properties, and make clear what distinguishes the module from existing ones, e.g. "DIAQuantPeptidoformModule".
 
 Programmatic structure
 ======================

@@ -279,8 +279,8 @@ class QuantUIObjects:
         """Initializes the all_datapoints variable in the session state."""
         if self.variables_quant.all_datapoints not in st.session_state.keys():
             st.session_state[self.variables_quant.all_datapoints] = None
-            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_point(
-                st.session_state[self.variables_quant.all_datapoints]
+            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_points(
+                all_datapoints=st.session_state[self.variables_quant.all_datapoints]
             )
 
     def _filter_data_points_by_slider(self) -> None:

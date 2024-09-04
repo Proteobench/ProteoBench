@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from tempfile import TemporaryDirectory
+from typing import Optional
 
 import pandas as pd
 import streamlit as st
@@ -15,27 +16,33 @@ from proteobench.datapoint.quant_datapoint import (
 )
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
-from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
-from proteobench.io.params.fragger import extract_params as extract_params_fragger
-from proteobench.io.params.i2masschroq import (
-    extract_params as extract_params_i2masschroq,
-)
-from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
-from proteobench.io.params.proline import extract_params as extract_params_proline
-from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
 
 
 class QuantModule:
-    """Object is used as a main interface with the Proteobench library within the module."""
+    """
+    Base Module for Quantification.
+
+    Attributes
+    ----------
+    t_dir
+        Temporary directory for the module.
+    t_dir_pr
+        Temporary directory for the pull request.
+    github_repo
+        Github repository for the module.
+    precursor_name
+        Level of quantification.
+
+    """
 
     def __init__(
         self,
-        token=None,
-        proteobench_repo_name="",
-        proteobot_repo_name="",
+        token: str = None,
+        proteobench_repo_name: str = "",
+        proteobot_repo_name: str = ""
     ):
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
@@ -54,21 +61,24 @@ class QuantModule:
         """Returns whether the module is fully implemented."""
         return True
 
-    EXTRACT_PARAMS_DICT = {
-        "MaxQuant": extract_params_maxquant,
-        "Proline": extract_params_proline,
-        "AlphaPept": extract_params_alphapept,
-        "Sage": extract_params_sage,
-        "FragPipe": extract_params_fragger,
-        "i2MassChroQ": extract_params_i2masschroq,
-        # "DiaNN": extract_params_diann,
-        # "Spectronaut": extract_params_spectronaut
-    }
+    def add_current_data_point(self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+        """
+        Add current data point to all data points and load them from file if empty.
 
-    def add_current_data_point(self, all_datapoints, current_datapoint):
-        """Add current data point to all data points and load them from file if empty."""
+        Parameters
+        ----------
+        all_datapoints
+            All data points. If none, it will be loaded from the github repo.
+        current_datapoint
+            Current data point.
+
+        Returns
+        -------
+        pd.DataFrame
+            All data points with the current data point added.
+        """
+
         if not isinstance(all_datapoints, pd.DataFrame):
-            # all_datapoints = pd.read_json(DDA_QUANT_RESULTS_PATH)
             all_datapoints = self.github_repo.read_results_json_repo()
 
         all_datapoints["old_new"] = "old"
@@ -79,8 +89,21 @@ class QuantModule:
         all_datapoints = all_datapoints.T.reset_index(drop=True)
         return all_datapoints
 
-    def obtain_all_data_point(self, all_datapoints):
-        """Add current data point to all data points and load them from file if empty."""
+    def obtain_all_data_points(self, all_datapoints: Optional[pd.DataFrame] = None):
+        """
+        Load all data points and load them from file if empty.
+
+        Parameters
+        ----------
+        all_datapoints
+            All data points. If none, it will be loaded from the github repo.
+
+        Returns
+        -------
+        pd.DataFrame
+            All data points.
+        """
+
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
@@ -121,7 +144,7 @@ class QuantModule:
             intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 
-        all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
+        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 
         # TODO check why there are NA and inf/-inf values
         return (
@@ -163,7 +186,7 @@ class QuantModule:
             current_datapoint[k] = v
         current_datapoint["submission_comments"] = submission_comments
 
-        all_datapoints = self.add_current_data_point(None, current_datapoint)
+        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
 
         if not self.check_new_unique_hash(all_datapoints):
             logging.error("The run was previously submitted. Will not submit.")
@@ -200,7 +223,7 @@ class QuantModule:
             current_datapoint[k] = v
 
         current_datapoint["is_temporary"] = False
-        all_datapoints = self.add_current_data_point(None, current_datapoint)
+        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
 
         # TODO write below to logger instead of std.out
         fname = os.path.join(self.t_dir_pr, "results.json")
@@ -230,6 +253,6 @@ class QuantModule:
         """Method loads parameters from a metadata file depending on its format."""
         # ! adapted to be able to parse more than one file.
         # ! how to ensure orrect order?
-        params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
+        params = self.extract_params_dict[input_format](*input_file)
         params.software_name = input_format
         return params

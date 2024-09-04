@@ -120,12 +120,12 @@ class DIAQuantIonModule(QuantModule):
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
         # generate current data point
-        try:
-            current_datapoint = Datapoint.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-            )
-        except Exception as e:
-            raise DatapointGenerationError(f"Error generating datapoint: {e}")
+        # try:
+        current_datapoint = Datapoint.generate_datapoint(
+            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        )
+        # except Exception as e:
+        #     raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
         # add current data point to all datapoints
         try:

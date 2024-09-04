@@ -118,6 +118,23 @@ class TestOutputFileReading(unittest.TestCase):
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
         self.assertEqual(len(all_datapoints.results[len(all_datapoints.results) - 1]), 6)
 
+class TestWrongFormatting(unittest.TestCase):
+        """Simple tests that should break if the input file is not formatted correctly."""
+
+        def test_DIANN_file(self):
+            """Test whether the DIANN input will throw an error on missing user inputs."""
+
+            format_name = "DIA-NN"
+            user_input = dict()
+            user_input['input_csv'] = TESTDATA_FILES[format_name]
+            user_input['input_format'] = format_name
+
+            with self.assertRaises(KeyError) as context:
+                DIAQuantIonModule("").benchmarking(user_input['input_csv'], user_input['input_format'], {}, None)
+
+
+
+
 if __name__ == "__main__":
     unittest.main()
         

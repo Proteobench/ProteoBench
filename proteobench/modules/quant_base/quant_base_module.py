@@ -28,14 +28,14 @@ from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class Module:
+class QuantModule:
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(
         self,
         token=None,
-        proteobench_repo_name="Proteobench/Results_Module2_quant_DDA",
-        proteobot_repo_name="Proteobot/Results_Module2_quant_DDA",
+        proteobench_repo_name="",
+        proteobot_repo_name="",
     ):
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
@@ -48,7 +48,7 @@ class Module:
         )
         self.github_repo.clone_repo()
 
-        self.precursor_name = "precursor ion"
+        self.precursor_name = ""
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
@@ -61,6 +61,8 @@ class Module:
         "Sage": extract_params_sage,
         "FragPipe": extract_params_fragger,
         "i2MassChroQ": extract_params_i2masschroq,
+        # "DiaNN": extract_params_diann,
+        # "Spectronaut": extract_params_spectronaut
     }
 
     def add_current_data_point(self, all_datapoints, current_datapoint):
@@ -151,7 +153,7 @@ class Module:
         self,
         temporary_datapoints,
         datapoint_params,
-        remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
+        remote_git,
         submission_comments="no comments",
     ):
         self.github_repo.clone_repo_pr()

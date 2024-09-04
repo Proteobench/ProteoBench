@@ -40,10 +40,13 @@ For each precursor ion (modified sequence + charge), we calculate the sum of sig
 
 ## How to use
 
+Click [here](https://proteobench.cubimed.rub.de/DDA%20Quant%20Ion%20Level%20-BETA-) if you want to submit your results or when you want to explore the DDA quantification module.
+
 ### Input data for private visualisation of your benchmark run(s)
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
 
+**Table 1. Suggested parameters for module 2**
 |Parameter|Value|
 |---------|-----|
 |Maximum number of missed cleavages|2|
@@ -65,12 +68,23 @@ To submit your run for public usage, you need to upload the parameter file assoc
 After upload, you will get a link to the pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 
 ## Important Tool-specific settings
+Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
+
+**Table 2. Overview of input files required for metric caluclation and public submission**
+|Tool|Input file|Parameter File|
+|---------|-----|-|
+|AlphaPept|result_peptides.tsv|results.yaml|
+|FragPipe|combined_ion.tsv|fragpipe.workflow|
+|i2MassChroQ|_export.tsv|Project parameters.tsv|
+|MaxQuant|evidence.txt|mqpar.xml|
+|Proline|<result file>.xlsx|<result file>.xlsx|
+|Sage|lfq.tsv|results.json|
 
 ### AlphaPept
 1. Load folder that contains the data files.
 2. Define parameters 
 -> For Match Between runs, please select “Match”
-3. The input files for ProteoBench are "result_peptides.tsv" (peptide identification) and "results.yaml" (parameter files)
+3. The input files for ProteoBench are "result_peptides.tsv" (peptide identification) and "results.yaml" (parameter file)
 
 ### FragPipe
 1. Select the LFQ-MBR workflow (using only 1 enzyme).

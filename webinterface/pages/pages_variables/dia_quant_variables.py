@@ -5,7 +5,7 @@ from pages.texts.generic_texts import WebpageTexts
 
 
 @dataclass
-class VariablesDDAQuant:
+class VariablesDIAQuant:
     all_datapoints: str = "all_datapoints"
     all_datapoints_submission: str = "all_datapoints_submission"
     input_df_submission: str = "input_df_submission"
@@ -27,21 +27,20 @@ class VariablesDDAQuant:
     placeholder_fig_compare: str = "placeholder_fig_compare"
     placeholder_table: str = "placeholder_table"
     placeholder_slider: str = "placeholder_slider"
-    placeholder_downloads_container: str = "placeholder_downloads_container"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
     beta_warning: bool = True
-    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA.git"
+    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git"
 
-    additional_params_json: str = "../webinterface/configuration/dda_quant.json"
+    additional_params_json: str = "../webinterface/configuration/dia_quant.json"
 
-    description_module_md: str = "pages/markdown_files/DDA_Quant/introduction.md"
-    description_files_md: str = "pages/markdown_files/DDA_Quant/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/DDA_Quant/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/DDA_Quant/slider_description.md"
-    description_table_md: str = "pages/markdown_files/DDA_Quant/table_description.md"
-    description_results_md: str = "pages/markdown_files/DDA_Quant/result_description.md"
-    description_submission_md: str = "pages/markdown_files/DDA_Quant/submit_description.md"
+    description_module_md: str = "pages/markdown_files/DIA_Quant/introduction.md"
+    description_files_md: str = "pages/markdown_files/DIA_Quant/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/DIA_Quant/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/DIA_Quant/slider_description.md"
+    description_table_md: str = "pages/markdown_files/DIA_Quant/table_description.md"
+    description_results_md: str = "pages/markdown_files/DIA_Quant/result_description.md"
+    description_submission_md: str = "pages/markdown_files/DIA_Quant/submit_description.md"
 
     texts: Type[WebpageTexts] = WebpageTexts

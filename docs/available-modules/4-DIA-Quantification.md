@@ -71,20 +71,20 @@ After upload, you will get a link to the pull request associated with your data.
 
 ## Important Tool-specific settings
 
-### DIA-NN
+### DIA-NN (https://github.com/vdemichev/DiaNN)
 1. Import Raw files
 2. Add FASTA but do not select "Contaminants" since these are already included in the FASTA file
 3. Turn on FASTA digest for library-free search / library generation (automatically activates deep-learning based spectra, RTs, and IMs prediction).
 4. The input files for Proteobench are "*_report.tsv" (main report for the precursor quantities) and "*report.log.txt" (parameter files)
 
-### AlphaDIA
+### AlphaDIA (https://github.com/MannLabs/alphadia)
 1. Select FASTA and import .raw files in "Input files"
 2. In "Method settings" you need to define your search parameters 
 3. Turn on "Predict Library" 
 4. The input files for ProteoBench are "precursors.tsv" (peptide identification) and "log.txt" (parameter files)
 
-### FragPipe - DIA-NN
-1. Select the LFQ-MBR workflow (using only 1 enzyme).
+### FragPipe - DIA-NN (https://github.com/Nesvilab/FragPipe)
+1. Load the DIA_SpecLib_Quant workflow
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
 4. Upload “combined_ion/modified_peptides.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the parameter file “fragpipe.workflow”  that correspond to your search.

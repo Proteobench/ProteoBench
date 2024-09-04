@@ -1,5 +1,5 @@
 This module compares the MS1-level quantification tools for
-data-dependent acquisition (DDA). The raw files provided for
+data-independent acquisition (DIA). The raw files provided for
 this module are presented in the comprehensive LFQ benchmark
 dataset from [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6).
 The samples contain tryptic peptides from Homo sapiens,
@@ -17,4 +17,4 @@ ProteoBench plots these three metrics to visualize workflow outputs
     from different tools, with different versions, and/or different
 sets of parameters for the search and quantification.
 The full description of the pre-processing steps and metrics
-calculation is available [here](https://proteobench.readthedocs.io/en/stable/available-modules/2-DDA-Quantification-ion-level/).
+calculation is available [here](https://proteobench.readthedocs.io/en/stable/available-modules/3-DIA-Quantification-ion-level/).

@@ -15,18 +15,18 @@ from proteobench.exceptions import (
 )
 from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
-from proteobench.modules.dda_quant_base.module import Module
+from proteobench.modules.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class PeptidoformModule(Module):
+class DIAQuantPeptidoformModule(QuantModule):
     """Object is used as a main interface with the Proteobench library within the module."""
 
     def __init__(
         self,
         token,
-        proteobot_repo_name="Proteobot/Results_quant_peptidoform_DDA",
-        proteobench_repo_name="Proteobench/Results_quant_peptidoform_DDA",
+        proteobot_repo_name="Proteobot/Results_quant_peptidoform_DIA",
+        proteobench_repo_name="Proteobench/Results_quant_peptidoform_DIA",
     ):
         super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
         self.precursor_name = "peptidoform"
@@ -48,7 +48,7 @@ class PeptidoformModule(Module):
                 f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
             )
         except Exception as e:
-            raise ParseSettingsError(f"Error parsing the inpu file: {e}")
+            raise ParseSettingsError(f"Error parsing the input file: {e}")
 
         try:
             parse_settings = ParseSettingsBuilder().build_parser(input_format)

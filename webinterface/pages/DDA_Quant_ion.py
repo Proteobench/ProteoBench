@@ -8,13 +8,14 @@ from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.module import IonModule
+from proteobench.modules.dda_quant_ion.dda_quant_ion_module import DDAQuantIonModule
 
 
 class StreamlitUI:
     def __init__(self):
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
+        self.texts.ShortMessages.title = "DDA Ion quantification"
         self.user_input: Dict[str, Any] = dict()
 
         pbb.proteobench_page_config()
@@ -25,7 +26,7 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: IonModule = IonModule(token=token)
+        self.ionmodule: DDAQuantIonModule = DDAQuantIonModule(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder()
 
         self.quant_uiobjects = QuantUIObjects(self.variables_dda_quant, self.ionmodule, self.parsesettingsbuilder)

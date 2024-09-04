@@ -13,19 +13,31 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
-    def __init__(self, parse_settings_dir=None):
+    def __init__(self, parse_settings_dir=None, ion_approach="dda"):
         if parse_settings_dir is None:
             parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings")
-
-        self.PARSE_SETTINGS_FILES = {
-            "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
-            "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
-            "Proline": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
-            "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
-            "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
-            "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
-            "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
-        }
+        if ion_approach == "dda":
+            self.PARSE_SETTINGS_FILES = {
+                "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
+                "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
+                "Proline": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
+                "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
+                "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
+                "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
+                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
+            }
+        elif ion_approach == "dia":
+            self.PARSE_SETTINGS_FILES = {
+                "DIA-NN": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
+                # "Skyline": os.path.join(parse_settings_dir, "parse_settings_skyline.toml"),
+                # "EncyclopeDIA": os.path.join(parse_settings_dir, "parse_settings_encyclopedia.toml"),
+                # "MSFraggerDIA": os.path.join(parse_settings_dir, "parse_settings_msfragger.toml"),
+                # "Spectronaut": os.path.join(parse_settings_dir, "parse_settings_spectronaut.toml"),
+                # "AlphaDIA": os.path.join(parse_settings_dir, "parse_settings_alphadia.toml"),
+                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
+            }
+        else:
+            raise ValueError("Invalid ion approach. Please choose either 'dda' or 'dia'.")
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
 

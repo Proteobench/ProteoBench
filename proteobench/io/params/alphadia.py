@@ -12,7 +12,7 @@ ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
 def parse_line(line: str) -> Tuple[str, dict, int]:
     """
     Parse a log line into a tuple.
-    
+
     Parameter
     ---------
     line: str
@@ -58,7 +58,7 @@ def parse_section(
         First parsed line of a new section
     line_generator: Generator
         The line generator of log file lines
-    
+
     Return
     ------
     dict:
@@ -123,12 +123,12 @@ def parse_section(
 def extract_file_version(line: str) -> str:
     """
     Extract file version from alphaDIA log file line.
-    
+
     Parameter
     ---------
     line: str
         The line containing the version number.
-    
+
     Return
     ------
     str

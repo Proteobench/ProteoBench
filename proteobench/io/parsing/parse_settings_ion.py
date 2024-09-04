@@ -143,7 +143,6 @@ class ParseSettings:
                 df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
             )
         else:
-            print('Here')
             print("Not all columns required for making the ion are available.")
         return df_filtered_melted, replicate_to_raw
 

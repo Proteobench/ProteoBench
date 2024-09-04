@@ -22,10 +22,10 @@ from proteobench.score.quant.quantscores import QuantScores
 class DIAQuantIonModule(QuantModule):
 
     def __init__(
-            self,
-            token,
-            proteobot_repo_name="Proteobot/Results_quant_ion_DIA",
-            proteobench_repo_name="Proteobench/Results_quant_ion_DIA",
+        self,
+        token,
+        proteobot_repo_name="Proteobot/Results_quant_ion_DIA",
+        proteobench_repo_name="Proteobench/Results_quant_ion_DIA",
     ):
         """
         DIA Quantification Module for Ion level Quantification.
@@ -55,7 +55,7 @@ class DIAQuantIonModule(QuantModule):
         return False
 
     def benchmarking(
-            self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
+        self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.

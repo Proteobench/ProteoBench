@@ -20,31 +20,29 @@ from proteobench.score.quant.quantscores import QuantScores
 
 
 class DIAQuantIonModule(QuantModule):
-
+    """DIA Quantification Module for Ion level Quantification."""
     def __init__(
         self,
-        token,
-        proteobot_repo_name="Proteobot/Results_quant_ion_DIA",
-        proteobench_repo_name="Proteobench/Results_quant_ion_DIA",
+        token: str,
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA",
     ):
         """
         DIA Quantification Module for Ion level Quantification.
 
-        Attributes
+        Parameters
         ----------
-        token: str
+        token
             GitHub token for the user.
-        proteobot_repo_name: str
+        proteobot_repo_name
             Name of the repository for pull requests and where new points are added.
-        proteobench_repo_name: str
+        proteobench_repo_name
             Name of the repository where the benchmarking results will be stored.
 
-        Methods
-        -------
-        is_implemented: bool
-            Returns whether the module is fully implemented.
-        benchmarking: tuple[DataFrame, DataFrame, DataFrame]
-            Main workflow of the module. Used to benchmark workflow results.
+        Attributes
+        ----------
+        precursor_name: str
+            Name of the precursor ion.
         
         """
         super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
@@ -62,15 +60,15 @@ class DIAQuantIonModule(QuantModule):
         
         Parameters
         ----------
-        input_file: str
+        input_file
             Path to the workflow output file.
-        input_format: str
+        input_format
             Format of the workflow output file.
-        user_input: dict
+        user_input
             User provided parameters for plotting.
-        all_datapoints: DataFrame
+        all_datapoints
             DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec: int
+        default_cutoff_min_prec
             Minimum number of runs an ion has to be identified in.
 
         Returns

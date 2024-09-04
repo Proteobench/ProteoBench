@@ -43,7 +43,7 @@ class DIAQuantIonModule(QuantModule):
         Attributes
         ----------
         precursor_name: str
-            Name of the precursor ion.
+            Level of quantification.
 
         """
         super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)

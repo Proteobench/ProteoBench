@@ -21,6 +21,7 @@ from proteobench.score.quant.quantscores import QuantScores
 
 class DIAQuantIonModule(QuantModule):
     """DIA Quantification Module for Ion level Quantification."""
+
     def __init__(
         self,
         token: str,
@@ -43,7 +44,7 @@ class DIAQuantIonModule(QuantModule):
         ----------
         precursor_name: str
             Name of the precursor ion.
-        
+
         """
         super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
         self.precursor_name = "precursor ion"

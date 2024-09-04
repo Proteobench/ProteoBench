@@ -25,7 +25,7 @@ TESTDATA_FILES = {
     "FragPipe": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
     "Sage": os.path.join(TESTDATA_DIR, "lfq.tsv"),
-    "Proline": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
+    "ProlineStudio": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
 }
 
 
@@ -57,7 +57,7 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "Proline")  # "WOMBAT",
+    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "ProlineStudio")  # "WOMBAT",
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
@@ -69,7 +69,7 @@ class TestOutputFileReading(unittest.TestCase):
             "MaxQuant",
             "AlphaPept",
             "FragPipe",
-            "Proline",
+            "ProlineStudio",
             "Sage",
         ):  # , "WOMBAT"
             self.assertTrue(format_name in parse_settings.INPUT_FORMATS)

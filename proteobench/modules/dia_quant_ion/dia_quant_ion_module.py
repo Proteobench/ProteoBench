@@ -57,7 +57,7 @@ class DIAQuantIonModule(QuantModule):
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
-        
+
         Parameters
         ----------
         input_file

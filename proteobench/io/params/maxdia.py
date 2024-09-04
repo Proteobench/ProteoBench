@@ -5,7 +5,7 @@ import pathlib
 import pandas as pd
 
 
-def extract_params(fname):
+def extract_params(fname: str) -> ProteoBenchParameters:
     """Relying on maxquant parser for maxDIA parameter parsing."""
 
     parameters = extract_params_mq(fname)

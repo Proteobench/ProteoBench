@@ -1,5 +1,5 @@
 [mapper]
-"Peptide Sequence" = "Sequence"
+"Peptide Sequence" = "Modified.Sequence"
 Protein = "Proteins" # For FragPipe outputs, we combine the values in "Proteins" and "Mapped Proteins"
 Charge = "Charge"
 

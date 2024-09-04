@@ -1,25 +1,25 @@
 [mapper]
 "Modified.Sequence" = "Sequence"
-"File.Name" = "Raw file"
+"Run" = "Raw file"
 "Protein.Names" = "Proteins"
 "Precursor.Charge" = "Charge"
 "Precursor.Quantity" = "Intensity"
 
 [condition_mapper]
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw" = "A"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw" = "A"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw" = "A"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw" = "B"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw" = "B"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw" = "B"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01" = "A"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02" = "A"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03" = "A"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01" = "B"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02" = "B"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" = "B"
 
 [run_mapper]
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw" = "Condition_A_Sample_Alpha_01"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw" = "Condition_A_Sample_Alpha_02"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw" = "Condition_A_Sample_Alpha_03"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw" = "Condition_B_Sample_Alpha_01"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw" = "Condition_B_Sample_Alpha_02"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw" = "Condition_B_Sample_Alpha_03"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01" = "Condition_A_Sample_Alpha_01"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02" = "Condition_A_Sample_Alpha_02"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03" = "Condition_A_Sample_Alpha_03"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01" = "Condition_B_Sample_Alpha_01"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02" = "Condition_B_Sample_Alpha_02"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" = "Condition_B_Sample_Alpha_03"
 
 [species_mapper]
 "_YEAST" = "YEAST"
@@ -30,10 +30,10 @@
 contaminant_flag = "Cont_"
 decoy_flag = true
 
-[modification_mapper]
-"parse_column" = "Modified.Sequence"
+[modifications_parser]
+"parse_column" = "Sequence"
 "before_aa" = false
 "isalpha" = true
 "isupper" = true
-"pattern" = "\\[([^]]+)\\]"
-"modification_dict" = {"UniMod:35" = "Oxidation", "UniMod:1" = "Acetyl", "UniMod:4" = "Carbamidomethyl"}
+"pattern" = "\\(([^()]*)\\)"
+"modification_dict" = {"(unimod:35)" = "Oxidation", "(unimod:1)" = "Acetyl", "(unimod:4)" = "Carbamidomethyl"}

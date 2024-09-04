@@ -17,7 +17,9 @@ class QuantScores:
     ) -> pd.DataFrame:
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
+        print(filtered_df)
         relevant_columns_df = filtered_df[["Raw file", self.precursor_name, "Intensity"]].copy()
+        print(relevant_columns_df)
         replicate_to_raw_df = QuantScores.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"

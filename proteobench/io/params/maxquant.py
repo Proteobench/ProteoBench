@@ -217,9 +217,7 @@ if __name__ == "__main__":
         params = extract_params(test_file, ms2frac="FTMS")
         pprint(params.__dict__)
         test_file = Path(test_file)
-        fname = Path(
-            str(test_file.with_suffix(".json").with_name(test_file.stem + "_sel"))+".json"
-        ) 
+        fname = Path(str(test_file.with_suffix(".json").with_name(test_file.stem + "_sel")) + ".json")
 
         with open(fname, "w") as f:
             json.dump(params.__dict__, f, indent=4)

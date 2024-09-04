@@ -5,14 +5,12 @@ import pandas as pd
 
 levels = [0, 1, 5, 9, 13, 17]
 
-ANSI_REGEX = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
+ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
+
 
 def parse_line(line):
-
     # Remove the info part and convert ansi
-    line = ANSI_REGEX.sub(
-        "", line[22:].strip()
-    )
+    line = ANSI_REGEX.sub("", line[22:].strip())
     # Split the string to tab part and setting part
     tab, setting = line.split("──")
     setting_list = setting.split(":")
@@ -25,6 +23,7 @@ def parse_line(line):
 
     # Return header, parsed setting, and the level
     return setting_list[0], setting_dict, level
+
 
 def parse_section(
     line,
@@ -43,9 +42,8 @@ def parse_section(
     except:
         # If no lines left, go up a level, returning the sectino so far
         return section, 0, None
-    
+
     while True:
-        
         # If no more lines go up a level
         try:
             header_next, line_dict_next, level_next = parse_line(next_line)
@@ -55,11 +53,11 @@ def parse_section(
         # If the next line is start of new section again
         if level_next > level_prev:
             # Get the subsection
-            
+
             subsection, _, next_line = parse_section(
                 line=parse_line(next_line),
                 line_generator=line_generator,
-                )
+            )
             # Add this subsection to new section
             # A new line is already outputted so continue
             section[header_prev] = subsection
@@ -74,11 +72,11 @@ def parse_section(
                 next_line = next(line_generator)
             except:
                 break
-    
+
         # The next line needs to go up and output the section
         # Also the new line should be returned
         else:
-            return section, level_next, next_line  
+            return section, level_next, next_line
 
     return section, 0, None
 
@@ -94,33 +92,27 @@ def extract_file_version(line):
     version = match.group(1) if match else None
     return version
 
+
 def add_fdr_parameters(parameter_dict, parsed_settings):
-    
     fdr_value = float(parsed_settings["fdr"]["fdr"])
     fdr_level = parsed_settings["fdr"]["group_level"].strip()
 
-    level_mapping = {
-        "proteins": "ident_fdr_protein"
-    }
-    fdr_parameters = {
-        "ident_fdr_psm": None,
-        "ident_fdr_peptide": None,
-        "ident_fdr_protein": None
-    }
+    level_mapping = {"proteins": "ident_fdr_protein"}
+    fdr_parameters = {"ident_fdr_psm": None, "ident_fdr_peptide": None, "ident_fdr_protein": None}
     fdr_parameters[level_mapping[fdr_level]] = fdr_value
     parameter_dict.update(fdr_parameters)
 
-def get_min_max(list_of_elements):
 
+def get_min_max(list_of_elements):
     if "(user defined)" in list_of_elements[1]:
         min_value = int(list_of_elements[1].replace("(user defined)", ""))
-        if len(list_of_elements)==4:
+        if len(list_of_elements) == 4:
             max_value = int(list_of_elements[3].replace("(user defined)", ""))
         else:
             max_value = int(list_of_elements[2])
     else:
         min_value = int(list_of_elements[0])
-        if len(list_of_elements)==3:
+        if len(list_of_elements) == 3:
             max_value = int(list_of_elements[2].replace("(user defined)", ""))
         else:
             max_value = int(list_of_elements[1])
@@ -128,26 +120,16 @@ def get_min_max(list_of_elements):
 
 
 def extract_params(fname):
-
-    with open(
-        fname
-    ) as f:
+    with open(fname) as f:
         lines_read = f.readlines()
-        lines = [
-            line for line in lines_read if "──" in line
-        ]
+        lines = [line for line in lines_read if "──" in line]
 
     version = extract_file_version(lines_read[6])
 
     line_generator = iter(lines)
     first_line = next(line_generator)
 
-    parsed_settings, level, line = parse_section(
-        line=parse_line(
-            first_line
-        ),
-        line_generator=line_generator
-    )
+    parsed_settings, level, line = parse_section(line=parse_line(first_line), line_generator=line_generator)
 
     peptide_lengths = get_min_max(list(parsed_settings["library_prediction"]["precursor_len"].keys()))
     precursor_charges = get_min_max(list(parsed_settings["library_prediction"]["precursor_charge"].keys()))
@@ -169,7 +151,7 @@ def extract_params(fname):
         "enable_match_between_runs": "?",
         "precursor_mass_tolerance": prec_tol,
         "fragment_mass_tolerance": frag_tol,
-        "enzyme": parsed_settings["library_prediction" ]["enzyme"].strip(),
+        "enzyme": parsed_settings["library_prediction"]["enzyme"].strip(),
         "allowed_miscleavages": int(parsed_settings["library_prediction"]["missed_cleavages"]),
         "min_peptide_length": peptide_lengths[0],
         "max_peptide_length": peptide_lengths[1],
@@ -182,11 +164,12 @@ def extract_params(fname):
         "quantification_method_DIANN": None,
         "second_pass": None,
         "protein_inference": parsed_settings["fdr"]["inference_strategy"].strip(),
-        "predictors_library": "Built-in"
+        "predictors_library": "Built-in",
     }
 
     add_fdr_parameters(parameters, parsed_settings)
     return ProteoBenchParameters(**parameters)
+
 
 if __name__ == "__main__":
     for fname in [

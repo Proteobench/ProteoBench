@@ -20,7 +20,7 @@ class ParseSettingsBuilder:
             self.PARSE_SETTINGS_FILES = {
                 "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
                 "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
-                "Proline": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
+                "ProlineStudio": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
                 "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
                 "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
                 "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),

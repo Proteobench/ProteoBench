@@ -22,10 +22,11 @@ TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
     "MaxQuant_new": os.path.join(TESTDATA_DIR, "MaxQuant_2_5_1_evidence_sample.txt"),
-    "FragPipe": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
+    "FragPipe": os.path.join(TESTDATA_DIR, "FragPipe_MSFragger_combined_ion.tsv"),
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
-    "Sage": os.path.join(TESTDATA_DIR, "lfq.tsv"),
+    "Sage": os.path.join(TESTDATA_DIR, "sage_sample_input_lfq.tsv"),
     "ProlineStudio": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
+    "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
 }
 
 
@@ -57,7 +58,7 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "ProlineStudio")  # "WOMBAT",
+    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "ProlineStudio", "i2MassChroQ")  # "WOMBAT",
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
@@ -71,6 +72,7 @@ class TestOutputFileReading(unittest.TestCase):
             "FragPipe",
             "ProlineStudio",
             "Sage",
+            "i2MassChroQ",
         ):  # , "WOMBAT"
             self.assertTrue(format_name in parse_settings.INPUT_FORMATS)
 

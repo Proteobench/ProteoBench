@@ -4,3 +4,5 @@ A benchmark module compares the performance of different data analysis workflows
 
 ## Downloading raw benchmarking data
 The data uploaded for benchmarking can be downloaded per analysis. To do so, go to the appropriate module and look for the "download raw datasets". You can select the analysis and then download any provided data stored on the ProteoBench server.
+
+All datasets are provided for download at https://proteobench.cubimed.rub.de/datasets/

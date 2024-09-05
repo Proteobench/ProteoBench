@@ -206,8 +206,8 @@ that some important information is missing, please add it in the
   - search engine name and version (if different from software tool)
   - FDR threshold for PSM, peptide and protein level
   - match between run (or not)
-  - precursor mass tolerance
-  - fragment mass tolerance
+  - Precursor and fragment m/z range
+  - precursor and fragment mass tolerance
   - enzyme (although for these data it should be Trypsin)
   - maximum number of missed-cleavages
   - minimum and maximum peptide length

@@ -107,7 +107,6 @@ def aggregate_modification_sites_column(
         m_name = m.split("@")[0]
         m_pos = int(s)
         input_string_seq = input_string_seq[:m_pos] + f"[{m_name}]" + input_string_seq[m_pos:]
-    
     return input_string_seq
 
 def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):

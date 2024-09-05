@@ -102,11 +102,11 @@ def aggregate_modification_sites_column(
     if isinstance(input_string_modifications, float) and math.isnan(input_string_modifications):
         return input_string_seq  # Return the original sequence if modifications are NaN or None
     for m,s in reversed(list(zip(input_string_modifications.split(";"), str(input_string_sites).split(";")))):
-            if len(m) == 0:
-                continue
-            m_name = m.split("@")[0]
-            m_pos = int(s)
-            input_string_seq = input_string_seq[:m_pos] + f"[{m_name}]" + input_string_seq[m_pos:]
+        if len(m) == 0:
+            continue
+        m_name = m.split("@")[0]
+        m_pos = int(s)
+        input_string_seq = input_string_seq[:m_pos] + f"[{m_name}]" + input_string_seq[m_pos:]
     
     return input_string_seq
 

@@ -38,12 +38,7 @@ class QuantModule:
 
     """
 
-    def __init__(
-        self,
-        token: str = None,
-        proteobench_repo_name: str = "",
-        proteobot_repo_name: str = ""
-    ):
+    def __init__(self, token: str = None, proteobench_repo_name: str = "", proteobot_repo_name: str = ""):
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
         self.github_repo = GithubProteobotRepo(
@@ -61,7 +56,9 @@ class QuantModule:
         """Returns whether the module is fully implemented."""
         return True
 
-    def add_current_data_point(self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def add_current_data_point(
+        self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None
+    ) -> pd.DataFrame:
         """
         Add current data point to all data points and load them from file if empty.
 

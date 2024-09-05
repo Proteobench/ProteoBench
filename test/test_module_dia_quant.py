@@ -16,14 +16,16 @@ from proteobench.plotting.plot_quant import PlotDataPoint
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
 TESTDATA_FILES = {
-    "DIA-NN" : os.path.join(TESTDATA_DIR, "DIANN_1.9_beta_sample_report.tsv"),
+    "DIA-NN": os.path.join(TESTDATA_DIR, "DIANN_1.9_beta_sample_report.tsv"),
     "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.7.2_sample.tsv"),
 }
 
-def load_file(format_name:str):
+
+def load_file(format_name: str):
     """Method used to load the input file."""
     input_df = load_input_file(TESTDATA_FILES[format_name], format_name)
     return input_df
+
 
 def load_local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
@@ -34,6 +36,7 @@ def load_local_parsing_configuration_file(format_name: str):
     intermediate = DIAQuantIonModule("").generate_intermediate(prepared_ddf, replicate_to_raw, parse_settings)
     return intermediate
 
+
 def process_file(format_name: str):
     """Method used to process the input file."""
     input_df = load_file(format_name)
@@ -42,6 +45,7 @@ def process_file(format_name: str):
     intermediate = DIAQuantIonModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
+
 
 class TestOutputFileReading(unittest.TestCase):
     supported_formats = ("DIA-NN", "AlphaDIA")
@@ -88,7 +92,8 @@ class TestOutputFileReading(unittest.TestCase):
             prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
             # Get quantification data
-            quant_score = QuantScores("precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            quant_score = QuantScores(
+                "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
             intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
 
@@ -119,19 +124,21 @@ class TestOutputFileReading(unittest.TestCase):
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
         self.assertEqual(len(all_datapoints.results[len(all_datapoints.results) - 1]), 6)
 
+
 class TestWrongFormatting(unittest.TestCase):
-        """Simple tests that should break if the input file is not formatted correctly."""
+    """Simple tests that should break if the input file is not formatted correctly."""
 
-        def test_DIANN_file(self):
-            """Test whether the DIANN input will throw an error on missing user inputs."""
+    def test_DIANN_file(self):
+        """Test whether the DIANN input will throw an error on missing user inputs."""
 
-            format_name = "DIA-NN"
-            user_input = dict()
-            user_input['input_csv'] = TESTDATA_FILES[format_name]
-            user_input['input_format'] = format_name
+        format_name = "DIA-NN"
+        user_input = dict()
+        user_input["input_csv"] = TESTDATA_FILES[format_name]
+        user_input["input_format"] = format_name
 
-            with self.assertRaises(KeyError) as context:
-                DIAQuantIonModule("").benchmarking(user_input['input_csv'], user_input['input_format'], {}, None)
+        with self.assertRaises(KeyError) as context:
+            DIAQuantIonModule("").benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
+
 
 class TestPlot(unittest.TestCase):
     """Test if the plots return a figure."""
@@ -165,12 +172,7 @@ class TestPlot(unittest.TestCase):
         # Concatenate the lists to create a single list
         combined_list = human_strings + ecoli_strings + yeast_strings
 
-        combineddf = pd.DataFrame(
-            {
-                "SPECIES": combined_list,
-                "log2_A_vs_B": combined_ratios
-            }
-        )
+        combineddf = pd.DataFrame({"SPECIES": combined_list, "log2_A_vs_B": combined_ratios})
         combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
         combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"
         combineddf["YEAST"] = combineddf["SPECIES"] == "YEAST"

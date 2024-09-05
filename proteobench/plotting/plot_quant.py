@@ -76,6 +76,7 @@ class PlotDataPoint:
             "Sage": "#a65628",
             "WOMBAT": "#f781bf",
             "DIA-NN": "#8c564b",
+            "AlphaDIA": "#ff7f00",
             "Custom": "#7f7f7f",
             ##ffff33 /yellow so not ideal
         },
@@ -115,7 +116,7 @@ class PlotDataPoint:
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
-        if "comments" in benchmark_metrics_df.columns:
+        if "submission_comments" in benchmark_metrics_df.columns:
             hover_texts = [
                 v + f"Comment: {c[0:75]}"
                 for v, c in zip(hover_texts, benchmark_metrics_df.submission_comments.fillna(""))

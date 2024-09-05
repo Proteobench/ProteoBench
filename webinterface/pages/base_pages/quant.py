@@ -359,9 +359,9 @@ class QuantUIObjects:
         # create a uuid for the selector (if necessary)
         if "download_selector_id" not in st.session_state.keys():
             st.session_state["download_selector_id"] = uuid.uuid4()
-        
+
         with st.session_state[self.variables_quant.placeholder_downloads_container].container(border=True):
-            #render everything into the "download"-container
+            # render everything into the "download"-container
             st.subheader("Download raw datasets")
 
             st.selectbox(
@@ -369,19 +369,28 @@ class QuantUIObjects:
                 downloads_df["intermediate_hash"],
                 index=None,
                 key=st.session_state["download_selector_id"],
-                format_func= lambda x: downloads_df["id"][x]
+                format_func=lambda x: downloads_df["id"][x],
             )
 
-            if st.session_state[st.session_state["download_selector_id"]] != None and st.secrets["storage"]["dir"] != None:
+            if (
+                st.session_state[st.session_state["download_selector_id"]] != None
+                and st.secrets["storage"]["dir"] != None
+            ):
                 # if some dataset is already selected, render the download buttons
-                st.write("Available files for " + downloads_df["id"][st.session_state[st.session_state["download_selector_id"]]] + ":")
+                st.write(
+                    "Available files for "
+                    + downloads_df["id"][st.session_state[st.session_state["download_selector_id"]]]
+                    + ":"
+                )
 
-                dataset_path = st.secrets["storage"]["dir"] + "/" + st.session_state[st.session_state["download_selector_id"]]
+                dataset_path = (
+                    st.secrets["storage"]["dir"] + "/" + st.session_state[st.session_state["download_selector_id"]]
+                )
                 if os.path.isdir(dataset_path):
                     files = os.listdir(dataset_path)
                     for file_name in files:
                         path_to_file = dataset_path + "/" + file_name
-                        with open(path_to_file, 'rb') as file:
+                        with open(path_to_file, "rb") as file:
                             st.download_button(file_name, file, file_name=file_name)
                 else:
                     st.write("Directory for this dataset does not exist, this should not happen.")
@@ -745,12 +754,12 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.fig_logfc] = self.plots_for_current_data(recalculate)
 
         if recalculate:
-            try:
-                st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                    st.session_state[self.variables_quant.all_datapoints]
-                )
-            except Exception as e:
-                st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            # try:
+            st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints]
+            )
+            # except Exception as e:
+            # st.error(f"Unable to lalal plot the datapoints: {e}", icon="🚨")
 
         if self.variables_quant.first_new_plot:
             self.create_first_new_plot()

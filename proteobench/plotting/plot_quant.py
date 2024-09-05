@@ -67,7 +67,6 @@ class PlotDataPoint:
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
         software_colors: dict = {
-
             # currently colors are based on a colorbrewer 8-class Set1
             "MaxQuant": "#377eb8",
             "AlphaPept": "#4daf4a",
@@ -79,7 +78,6 @@ class PlotDataPoint:
             "DIA-NN": "#8c564b",
             "Custom": "#7f7f7f",
             ##ffff33 /yellow so not ideal
-
         },
         mapping={"old": 10, "new": 20},
         highlight_color: str = "#d30067",

@@ -1,6 +1,6 @@
 # DIA quantification - precursor ions
 
-This module compares the sensitivity and quantification accuracy for data acquired with data-independent acquisition (DIA) on a Q Exactive HF-X Orbitrap (Thermo Fisher).
+This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely All-Ion Fragmentation, on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
 **This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
@@ -64,8 +64,20 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from DIA-NN, AlphaDIA, FragPipe DIA-NN and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (correspond to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from DIA-NN, AlphaDIA, FragPipe, MaxDIA and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (correspond to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
 `I really want to upload it` will appear to trigger the submission.
+
+Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
+
+**Table 2. Overview of input files required for metric caluclation and public submission**
+|Tool|Input file|Parameter File|
+|---------|-----|-|
+|AlphaDIA|precursors.tsv|log.txt|
+|DIA-NN|*_report.tsv|*report.log.txt|
+|FragPipe|*_report.tsv|fragpipe.workflow|
+|MaxDIA|evidence.txt|mqpar.xml|
+|Spectronaut|*.tsv|*.txt
+
 
 After upload, you will get a link to the pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 
@@ -87,15 +99,14 @@ After upload, you will get a link to the pull request associated with your data.
 1. Load the DIA_SpecLib_Quant workflow
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
-4. Upload “combined_ion/modified_peptides.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the parameter file “fragpipe.workflow”  that correspond to your search.
+4. Upload “*report.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the parameter file “fragpipe.workflow”  that correspond to your search.
 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
-### Spectronaut (work in progress)
+### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
 
 
-
-### MaxDIA (work in progress)
+### [MaxDIA](https://www.maxquant.org/) (work in progress)
 By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
 
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
@@ -106,7 +117,6 @@ Since the Thermo DIA data .raw files were acquired using a staggered window appr
 Detailed instructions for this process can be found [here](https://fragpipe.nesvilab.org/docs/tutorial_convert.html#convert-thermo-dia-raw-files-with-overlappingstaggered-windows).
 
 
-
 ### Custom format
 
 If you do not use a tool that is compatible with ProteoBench, you can upload a tab-delimited table format containing the following columns:
@@ -115,18 +125,18 @@ If you do not use a tool that is compatible with ProteoBench, you can upload a t
 - Proteins: column containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
 - Charge: Charge state of measured peptide ions
 - Modified sequence: column containing the sequences and the localised modifications in the [ProForma standard](https://www.psidev.info/proforma) format. 
-- LFQ_Orbitrap_DIA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
-- LFQ_Orbitrap_DIA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
-- LFQ_Orbitrap_DIA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
-- LFQ_Orbitrap_DIA_Condition_B_Sample_Alpha_01: Quantitative column sample 4
-- LFQ_Orbitrap_DIA_Condition_B_Sample_Alpha_02: Quantitative column sample 5
-- LFQ_Orbitrap_DIA_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01: Quantitative column sample 1
+- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02: Quantitative column sample 2
+- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03: Quantitative column sample 3
+- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01: Quantitative column sample 4
+- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02: Quantitative column sample 5
+- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03: Quantitative column sample 6
 
 the table must not contain non-validated ions. If you have any issue, contact us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
 
-## toml file description
+## toml file description (work in progress)
 
-Each software tool produces specific output files formats. We made ``.toml`` files that describe where to find the information needed in each type of input. These can be found in `proteobench/modules/dda_quant/io_parse_settings`:
+Each software tool produces specific output files formats. We made ``.toml`` files that describe where to find the information needed in each type of input. These can be found in `proteobench/modules/dia_quant/io_parse_settings`:
 
 - **[mapper]**
 mapping between the headers in the input file (left-hand side) and the header of the intermediate file generated by ProteoBench. If more parsing is required before metrics calculation, this part can contain mapping between intermediatec column names and the name in the intermediate file. This is the case for Proline where protein accessions are reported in two independent columns that need to be combined. This should be commented in the toml.
@@ -208,8 +218,8 @@ that some important information is missing, please add it in the
   - search engine name and version (if different from software tool)
   - FDR threshold for PSM, peptide and protein level
   - match between run (or not)
-  - precursor mass tolerance
-  - fragment mass tolerance
+  - Precursor and fragment m/z range
+  - precursor and fragment mass tolerance
   - enzyme (although for these data it should be Trypsin)
   - maximum number of missed-cleavages
   - minimum and maximum peptide length

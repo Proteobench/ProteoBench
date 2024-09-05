@@ -51,7 +51,7 @@ class DIAQuantPeptidoformModule(QuantModule):
             raise ParseSettingsError(f"Error parsing the input file: {e}")
 
         try:
-            parse_settings = ParseSettingsBuilder().build_parser(input_format)
+            parse_settings = ParseSettingsBuilder(acquisition_method="dia").build_parser(input_format)
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")
         except FileNotFoundError as e:

@@ -1,11 +1,9 @@
 [mapper]
-"sequence_naked" = "Sequence"
-"shortname" = "Raw file"
-"protein" = "Proteins"
-"sequence" = "Modified sequence"
-"charge" = "Charge"
-"decoy" = "Reverse"
-"ms1_int_sum_apex_dn" = "Intensity"
+"Proteins" = "Proteins"
+"Sequence" = "Sequence"
+"Charge" = "Charge"
+"Modified sequence" = "Modified sequence"
+
 
 [condition_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01" = "A"
@@ -27,14 +25,6 @@
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"
 "_HUMAN" = "HUMAN"
-
-[modifications_parser]
-"parse_column" = "Modified sequence"
-"before_aa" = true
-"isalpha" = true
-"isupper" = true
-"pattern"="([a-z]+)"
-"modification_dict" = {"ox" = "Oxidation", "c" = "Carbamidomethyl", "a" = "Acetyl", "decoy" = ""}
 
 [general]
 "contaminant_flag" = "Cont_"

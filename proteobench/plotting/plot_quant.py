@@ -75,6 +75,7 @@ class PlotDataPoint:
             "Sage": "#f74c00",
             "i2MassChroQ": "#5ce681",
             "Custom": "#9467bd",
+            "DIA-NN": "#8c564b",
         },
         mapping={"old": 10, "new": 20},
         highlight_color: str = "#d30067",

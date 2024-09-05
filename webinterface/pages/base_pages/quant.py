@@ -2,8 +2,8 @@
 
 import json
 import logging
-import uuid
 import os
+import uuid
 from datetime import datetime
 from pprint import pformat
 from typing import Any, Dict, Optional
@@ -17,7 +17,9 @@ from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.dda_quant_ion_module import DDAQuantIonModule as IonModule
+from proteobench.modules.dda_quant_ion.dda_quant_ion_module import (
+    DDAQuantIonModule as IonModule,
+)
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -215,7 +217,10 @@ class QuantUIObjects:
             with open(self.variables_quant.additional_params_json) as file:
                 config = json.load(file)
             for key, value in config.items():
-                self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+                if key == "comments_for_submission":
+                    self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+                else:
+                    self.user_input[key] = None
 
     def _handle_form_submission(self) -> None:
         """Handles the form submission logic."""
@@ -359,9 +364,9 @@ class QuantUIObjects:
         # create a uuid for the selector (if necessary)
         if "download_selector_id" not in st.session_state.keys():
             st.session_state["download_selector_id"] = uuid.uuid4()
-        
+
         with st.session_state[self.variables_quant.placeholder_downloads_container].container(border=True):
-            #render everything into the "download"-container
+            # render everything into the "download"-container
             st.subheader("Download raw datasets")
 
             st.selectbox(
@@ -369,19 +374,28 @@ class QuantUIObjects:
                 downloads_df["intermediate_hash"],
                 index=None,
                 key=st.session_state["download_selector_id"],
-                format_func= lambda x: downloads_df["id"][x]
+                format_func=lambda x: downloads_df["id"][x],
             )
 
-            if st.session_state[st.session_state["download_selector_id"]] != None and st.secrets["storage"]["dir"] != None:
+            if (
+                st.session_state[st.session_state["download_selector_id"]] != None
+                and st.secrets["storage"]["dir"] != None
+            ):
                 # if some dataset is already selected, render the download buttons
-                st.write("Available files for " + downloads_df["id"][st.session_state[st.session_state["download_selector_id"]]] + ":")
+                st.write(
+                    "Available files for "
+                    + downloads_df["id"][st.session_state[st.session_state["download_selector_id"]]]
+                    + ":"
+                )
 
-                dataset_path = st.secrets["storage"]["dir"] + "/" + st.session_state[st.session_state["download_selector_id"]]
+                dataset_path = (
+                    st.secrets["storage"]["dir"] + "/" + st.session_state[st.session_state["download_selector_id"]]
+                )
                 if os.path.isdir(dataset_path):
                     files = os.listdir(dataset_path)
                     for file_name in files:
                         path_to_file = dataset_path + "/" + file_name
-                        with open(path_to_file, 'rb') as file:
+                        with open(path_to_file, "rb") as file:
                             st.download_button(file_name, file, file_name=file_name)
                 else:
                     st.write("Directory for this dataset does not exist, this should not happen.")
@@ -625,11 +639,13 @@ class QuantUIObjects:
             A string representing the generated sample name.
         """
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        sample_name = "%s-%s-%s-%s" % (
-            self.user_input["input_format"],
-            self.user_input["software_version"],
-            self.user_input["enable_match_between_runs"],
-            time_stamp,
+        sample_name = "-".join(
+            [
+                self.user_input["input_format"],
+                # self.user_input["software_version"],
+                # self.user_input["enable_match_between_runs"],
+                time_stamp,
+            ]
         )
 
         return sample_name

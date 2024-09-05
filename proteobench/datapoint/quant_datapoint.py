@@ -68,7 +68,7 @@ class Datapoint:
 
     def generate_id(self):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.id = self.software_name + "_" + str(self.software_version) + "_" + str(time_stamp)
+        self.id = "_".join([self.software_name, str(time_stamp)])
         logging.info(f"Assigned the following ID to this run: {self.id}")
 
     @staticmethod

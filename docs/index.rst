@@ -1,147 +1,165 @@
-Overview of ProteoBench
-+++++++++++++++++++++++
+:html_theme.sidebar_secondary.remove:
+:sd_hide_title: true
+
+####
+Home
+####
 
 .. toctree::
     :maxdepth: 1
     :hidden:
     :glob:
 
-    About <self>
-    General information <general-information/index.rst>
-    Modules <available-modules/index.rst>
+    Home <self>
+    Learn more <general-information/index.rst>
+    Benchmarking modules <available-modules/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
     Changelog <changelog.rst>
 
+.. div:: landing-title
+    :style: padding: 2rem 2rem 4rem 2rem; background: rgb(49, 65, 89); clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 3rem)); -webkit-clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 3rem));
 
-`ProteoBench <https://proteobench.cubimed.rub.de/>`_ is an open and collaborative platform for community-curated benchmarks for proteomics 
-data analysis pipelines. Our goal is to allow a continuous, easy, and controlled comparison of 
-proteomics data analysis workflows.
+    .. grid::
+        :reverse:
+        :gutter: 2 3 3 3
+        :margin: 4 4 1 2
 
-ProteoBench provides a centralized web platform for developers and end-users to compare proteomics 
-data analysis pipelines. This community-curated effort will allow for an easy and controlled comparison 
-of tools developed or used by the participants to other state-of-the-art pipelines for specific 
-applications. The goal is not to select a single best one-fits-all data analysis workflow, but to allow:
+        .. grid-item::
+            :columns: 12 5 5 5
 
-1. **end-users** to identify a good workflow to fulfill their specific needs
-2. **developers** to identify the specific strengths and weaknesses in their workflows, guiding the development process
-3. **the field** to easily position a newly published workflow within the context of the existing state-of-the-art
+            .. image:: ./_static/img/proteobench-header-hex-dark.svg
+                :class: sd-m-auto sd-animate-grow50-rot20
 
-Description
-===========
+        .. grid-item::
+            :columns: 12 7 7 7
+            :child-align: justify
+            :class: sd-text-white sd-fs-3
 
-Participants (both end-users and developers) can download a set of input files (e.g., raw MS files, 
-search databases, or spectral libraries) tailored to specific benchmark metrics. They can then analyze 
-the data with any workflow, and upload the results in a homogenized format. A set of metrics will be 
-retrieved or calculated from these results and can be visualized alongside all the other metrics 
-calculated from the results of other participants (or of curated benchmark runs).
+            ProteoBench is an open platform for benchmarking proteomics data analysis workflows.
 
-Goals and non-goals
-===================
+            .. button-link:: #proteobench-in-5-steps
+                :outline:
+                :color: white
+                :class: sd-px-4 sd-fs-5
 
-ProteoBench:
-
-1. Allows for an easy and controlled comparison of existing data analysis workflows
-2. Provides a frame of reference for newly developed workflows
-3. Documents and implements benchmarks that each highlight strengths or weaknesses of data analysis workflow (steps)
-4. Evolves continuously, according to the needs of the field
-5. **DOES NOT** point to a single best one-fits-all data analysis workflow
-6. **SHOULD NOT**  be used as evidence for generalized statements about a workflow’s performance
-7. **SHOULD NOT**  be used by developers as single performance measure of their workflow
-
-Organization
-============
-
-The github repository for ProteoBench can be found `here <https://github.com/Proteobench/Proteobench>`_.
-
-ProteoBench documentation is divided into two main parts:
-
-The different :doc:`modules/index` that exist, how they evolve and how to used them.
-
-The :doc:`developer-guide/index` provides information on the structure of the project and how to contribute.
-
-Contact us
-==========
-
-email us `here <mailto:proteobench@eubic-ms.org?subject=ProteoBench_query>`_.
+                Get Started
 
 
-----------
+ProteoBench in 5 steps
+=======================
 
-Contribution
-============
-People who contributed to ProteoBench (in alphabetical order)
+.. image:: ./_static/img/proteobench-steps.png
+    :class: sd-m-auto
 
-.. line-block:: 
-    **Robbin Bouwmeester**
-    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+1. **Choose a module** to benchmark your proteomics data analysis workflow
+2. **Download the input data** from the module page
+3. **Run your workflow** on the input data
+4. **Upload the results** to ProteoBench
+5. **Compare your workflow run** with validated benchmark runs
 
-.. line-block:: 
-    **Nadezhda T. Doncheva**
-    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
-.. line-block:: 
-    **Viktoria Dorfer**
-    *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Hagenberg, Austria*
+Available ProteoBench modules
+==============================
 
-.. line-block:: 
-    **Ralf Gabriels**
-    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+.. For card colors, use:
+.. proposed: info
+.. in development: primary
+.. active: success
+.. archived: warning
+.. withdrawn: danger
 
-.. line-block:: 
-    **Vedran Kasalica**
-    *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
+.. grid::
 
-.. line-block:: 
-    **Caroline Lennartsson**
-    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+    .. grid-item-card:: DDA identification
+        :link: #
 
-.. line-block::
-    **Marie Locard-Paulet**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+        :bdg-info:`proposed`
+        ^^^
+        Benchmark the identification sensitivity and specificity of data dependent acquisition
+        workflows using an entrapment strategy
 
-.. line-block::
-    **Matthias Mattanovich**
-    *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
-.. line-block::
-    **Emmanuelle Mouton-Barbosa**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+    .. grid-item-card:: DDA quantification
+        :link: #
 
-.. line-block::
-    **Martin Rykær**
-    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+        :bdg-success:`active`
+        ^^^
+        Benchmark the quantification accuracy of label-free data dependent acquisition workflows
+        using a multi-species sample
 
-.. line-block::
-    **Julian Uszkoreit**
-    *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
 
-.. line-block::
-    **Tim Van Den Bossche**
-    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
-    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    .. grid-item-card:: DIA quantification
+        :link: #
 
-.. line-block::
-    **Bart Van Puyvelde**
-    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
+        :bdg-primary:`in development`
+        ^^^
+        Benchmark the quantification accuracy of label-free data independent acquisition workflows
+        using a multi-species sample
 
-.. line-block::
-    **Veit Schwämmle**
-    *Department of Biochemistry and Molecular Biology, University of Southern Denmark, Odense, Denmark*
+    .. grid-item-card:: De novo identification
+        :link: #
 
-.. line-block::
-    **Maximilian T. Strauss**
-    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+        :bdg-primary:`in development`
+        ^^^
+        Benchmark the identification sensitivity and specificity of de novo sequencing workflows
 
-.. line-block::
-    **Henry Webel**
-    *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
-.. line-block::
-    **Witold E. Wolski**
-    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
-    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+Join the ProteoBench community
+===============================
+
+.. grid::
+
+    .. grid-item-card::
+        :img-top: ./_static/img/icons/workflow-run-validated-with-padding.svg
+        :img-alt: A check-marked shield in an encircled gear
+        :class-card: sd-border-0
+        :class-footer: sd-border-0
+        :shadow: none
+        :text-align: center
+
+        Submit your results as a validated benchmark run to be shared with the community.
+        +++
+        .. button-link:: https://proteobench.cubimed.rub.de/
+            :color: primary
+            :expand:
+
+            :fas:`upload` Upload your results
+
+    .. grid-item-card::
+        :img-top: ./_static/img/icons/discussion-with-padding.svg
+        :img-alt: Two speech bubbles
+        :class-card: sd-border-0
+        :class-footer: sd-border-0
+        :shadow: none
+        :text-align: center
+
+        Discuss modules, benchmarking runs, and comparisons with the community.
+        +++
+        .. button-link:: https://github.com/orgs/Proteobench/discussions/
+            :color: primary
+            :expand:
+
+            :fas:`comments` Discussion forum
+
+    .. grid-item-card::
+        :img-top: ./_static/img/icons/contribute-with-padding.svg
+        :img-alt: A user with a development symbol (</>)
+        :class-card: sd-border-0
+        :class-footer: sd-border-0
+        :shadow: none
+        :text-align: center
+
+        Contribute to ProteoBench by developing new modules or improving existing ones.
+        +++
+        .. button-link:: https://github.com/Proteobench/ProteoBench
+            :color: primary
+            :expand:
+
+            :fab:`github` GitHub repository
+
+
+Contact
+========
+
+Questions or comments? Email us at `proteobench@eubic-ms.org <mailto:proteobench@eubic-ms.org?>`_.

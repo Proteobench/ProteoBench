@@ -23,7 +23,7 @@ PARAM_CMD_DICT = {
     "max_mods": "var-mods",
     "min_precursor_charge": "min-pr-charge",
     "max_precursor_charge": "max-pr-charge",
-    "scan_window": "window"
+    "scan_window": "window",
 }
 SETTINGS_PB_FLOAT = [
     "ident_fdr_psm",
@@ -39,7 +39,7 @@ SETTINGS_PB_INT = [
     "max_mods",
     "min_precursor_charge",
     "max_precursor_charge",
-    "scan_window"
+    "scan_window",
 ]
 SETTINGS_PB_MOD = ["fixed_mods", "variable_mods"]
 
@@ -104,6 +104,7 @@ def parse_cmdline_string(line: str) -> dict:
         setting_dict["mod"] = fixed_mods
     return setting_dict
 
+
 def parse_setting(setting_name: str, setting_list: list) -> Any:
     """
     Parse individual settings based on their setting type.
@@ -130,6 +131,7 @@ def parse_setting(setting_name: str, setting_list: list) -> Any:
         return ",".join(setting_list)
     return "".join(setting_list)
 
+
 def extract_with_regex(lines: List[str], regex) -> str:
     """
     If no mass accuracy was specified in the cmd string, extract it from the log-file.
@@ -151,6 +153,7 @@ def extract_with_regex(lines: List[str], regex) -> str:
             return x
     return None
 
+
 def parse_protein_inference_method(cmdline_dict: dict) -> str:
     """
     Parse the protein inference method from the parsed execution command string.
@@ -163,7 +166,7 @@ def parse_protein_inference_method(cmdline_dict: dict) -> str:
     ---------
     cmdline_dict: dict
         Parsed execution command string
-    
+
     Return
     ------
     str
@@ -178,15 +181,12 @@ def parse_protein_inference_method(cmdline_dict: dict) -> str:
         return "Disabled"
     elif "pg-level" in cmdline_dict.keys():
         pg_setting = cmdline_dict["pg-level"][0]
-        pg_level_mapping = {
-            "0": "Isoforms",
-            "1": "Protein_names",
-            "2": "Genes"
-        }
+        pg_level_mapping = {"0": "Isoforms", "1": "Protein_names", "2": "Genes"}
         try:
             return pg_level_mapping[pg_setting]
         except KeyError:
             Exception(f"Unexpected setting passed to --pg-level in diann.exe: {pg_setting}")
+
 
 def parse_quantification_strategy(cmdline_dict: dict):
     """
@@ -201,7 +201,7 @@ def parse_quantification_strategy(cmdline_dict: dict):
     ---------
     cmdline_dict: dict
         Parsed execution command string
-    
+
     Return
     ------
     str
@@ -219,6 +219,7 @@ def parse_quantification_strategy(cmdline_dict: dict):
         # Default value
         return "QuantUMS high-precision"
 
+
 def parse_predictors_library(cmdline_dict: dict):
     """
     Parse the spectral library predictors from parsed execute command string.
@@ -230,25 +231,17 @@ def parse_predictors_library(cmdline_dict: dict):
     ---------
     cmdline_dict: dict
         Parsed execution command string
-    
+
     Return
     ------
     dict
         Dictionary specifying algorithm name for RT, IM and MS2_int.
     """
     if "predictor" in cmdline_dict.keys():
-        return {
-            "RT": "DIANN",
-            "IM": "DIANN",
-            "MS2_int": "DIANN"
-        }
+        return {"RT": "DIANN", "IM": "DIANN", "MS2_int": "DIANN"}
     elif "lib" in cmdline_dict.keys():
         if not isinstance(cmdline_dict["lib"], bool):
-            return {
-                "RT": "User defined speclib",
-                "IM": "User defined speclib",
-                "MS2_int": "User defined speclib"
-            }
+            return {"RT": "User defined speclib", "IM": "User defined speclib", "MS2_int": "User defined speclib"}
 
 
 def extract_params(fname: str) -> ProteoBenchParameters:
@@ -275,10 +268,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     cmdline_string = find_cmdline_string(lines)
     cmdline_dict = parse_cmdline_string(cmdline_string)
 
-    parameters["second_pass"] = (
-        "double-search" in cmdline_dict.keys() or
-        "double-pass" in cmdline_dict.keys()
-    )
+    parameters["second_pass"] = "double-search" in cmdline_dict.keys() or "double-pass" in cmdline_dict.keys()
     parameters["quantification_method_DIANN"] = parse_quantification_strategy(cmdline_dict)
     parameters["protein_inference"] = parse_protein_inference_method(cmdline_dict)
     parameters["predictors_library"] = parse_predictors_library(cmdline_dict)

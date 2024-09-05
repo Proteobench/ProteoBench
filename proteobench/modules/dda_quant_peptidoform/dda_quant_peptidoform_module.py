@@ -26,7 +26,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         self,
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
-        proteobench_repo_name: str ="Proteobench/Results_quant_peptidoform_DDA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
     ):
         """
         DDA Quantification Module for Peptidoform level Quantification.

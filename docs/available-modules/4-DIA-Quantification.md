@@ -71,19 +71,19 @@ After upload, you will get a link to the pull request associated with your data.
 
 ## Important Tool-specific settings
 
-### DIA-NN (https://github.com/vdemichev/DiaNN)
+### [DIA-NN](https://github.com/vdemichev/DiaNN)
 1. Import Raw files
 2. Add FASTA but do not select "Contaminants" since these are already included in the FASTA file
 3. Turn on FASTA digest for library-free search / library generation (automatically activates deep-learning based spectra, RTs, and IMs prediction).
 4. The input files for Proteobench are "*_report.tsv" (main report for the precursor quantities) and "*report.log.txt" (parameter files)
 
-### AlphaDIA (https://github.com/MannLabs/alphadia)
+### [AlphaDIA](https://github.com/MannLabs/alphadia)
 1. Select FASTA and import .raw files in "Input files"
 2. In "Method settings" you need to define your search parameters 
 3. Turn on "Predict Library" 
 4. The input files for ProteoBench are "precursors.tsv" (peptide identification) and "log.txt" (parameter files)
 
-### FragPipe - DIA-NN (https://github.com/Nesvilab/FragPipe)
+### [FragPipe - DIA-NN](https://github.com/Nesvilab/FragPipe)
 1. Load the DIA_SpecLib_Quant workflow
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
@@ -91,32 +91,21 @@ After upload, you will get a link to the pull request associated with your data.
 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
-### Spectronaut
+### Spectronaut (work in progress)
+
 
 
 ### MaxDIA (work in progress)
-By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. 
-When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
+By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
 
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
 #### Troubleshooting: 
-##### Fasta header parsing
-The field "Proteins" in **the "evidence.txt" table should report proteins in the format "sp|O75822|EIF3J_HUMAN" (and separated with ";" in the case of protein groups)**. 
-In the recent versions of MaxQuant, the default settings work perfectly (`Identifier rule = >([^\s]*)`; `Description rule = >(.*)`).
-Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.
 
-### Proline Studio (work in progress..)
-Use the raw file names as sample names. In the output, it will automatically remove "LFQ_Orbitrap_".
-For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two field are combined to determine what species a peptide sequence matches to.
-The `Quantified peptide ions` tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation.
-For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`.
+Since the Thermo DIA data .raw files were acquired using a staggered window approach it is highly recommended to convert and demultiplex the .RAW files first into .mzML using MSConvert.
+Detailed instructions for this process can be found [here](https://fragpipe.nesvilab.org/docs/tutorial_convert.html#convert-thermo-dia-raw-files-with-overlappingstaggered-windows).
 
-### Sage
 
-1. Convert .raw files into .mzML using MSConvert or ThermoRawFileParser **(do not change the file names)**
-2. Run sage using a .json file
-3. Upload "lfq.tsv" in order for Proteobench to calculate the ion ratios, combined with the search parameter file "results.json".
 
 ### Custom format
 
@@ -126,12 +115,12 @@ If you do not use a tool that is compatible with ProteoBench, you can upload a t
 - Proteins: column containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
 - Charge: Charge state of measured peptide ions
 - Modified sequence: column containing the sequences and the localised modifications in the [ProForma standard](https://www.psidev.info/proforma) format. 
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01: Quantitative column sample 4
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02: Quantitative column sample 5
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+- LFQ_Orbitrap_DIA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
+- LFQ_Orbitrap_DIA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
+- LFQ_Orbitrap_DIA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
+- LFQ_Orbitrap_DIA_Condition_B_Sample_Alpha_01: Quantitative column sample 4
+- LFQ_Orbitrap_DIA_Condition_B_Sample_Alpha_02: Quantitative column sample 5
+- LFQ_Orbitrap_DIA_Condition_B_Sample_Alpha_03: Quantitative column sample 6
 
 the table must not contain non-validated ions. If you have any issue, contact us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
 

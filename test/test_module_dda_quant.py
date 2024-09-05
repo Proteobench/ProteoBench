@@ -11,8 +11,8 @@ from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dda_quant_ion.dda_quant_ion_module import DDAQuantIonModule
+from proteobench.plotting.plot_quant import PlotDataPoint
 from proteobench.score.quant.quantscores import QuantScores
-from proteobench.utils.plotting.plot import PlotDataPoint
 
 # genereate_input_field
 

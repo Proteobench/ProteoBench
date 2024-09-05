@@ -29,7 +29,7 @@ class StreamlitUI:
             token = ""
 
         self.peptidoform_module: DDAQuantPeptidoformModule = DDAQuantPeptidoformModule(token=token)
-        self.parsesettingsbuilder = ParseSettingsBuilder()
+        self.parsesettingsbuilder = ParseSettingsBuilder(acquisition_method="dia")
 
         self.quant_uiobjects = QuantUIObjects(
             self.variables_dda_quant, self.peptidoform_module, self.parsesettingsbuilder

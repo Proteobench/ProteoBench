@@ -1,17 +1,17 @@
 [mapper]
 "samesets_accessions" = "Proteins"
-sequence = "Sequence"
+"sequence" = "Sequence"
 "modifications" = "Modifications"
 "master_quant_peptide_ion_charge" = "Charge"
 
 
 [condition_mapper]
-abundance_DDA_Condition_A_Sample_Alpha_01 = "A"
-abundance_DDA_Condition_A_Sample_Alpha_02 = "A"
-abundance_DDA_Condition_A_Sample_Alpha_03 = "A"
-abundance_DDA_Condition_B_Sample_Alpha_01 = "B"
-abundance_DDA_Condition_B_Sample_Alpha_02 = "B"
-abundance_DDA_Condition_B_Sample_Alpha_03 = "B"
+"abundance_DDA_Condition_A_Sample_Alpha_01" = "A"
+"abundance_DDA_Condition_A_Sample_Alpha_02" = "A"
+"abundance_DDA_Condition_A_Sample_Alpha_03" = "A"
+"abundance_DDA_Condition_B_Sample_Alpha_01" = "B"
+"abundance_DDA_Condition_B_Sample_Alpha_02" = "B"
+"abundance_DDA_Condition_B_Sample_Alpha_03" = "B"
 
 [run_mapper]
 "abundance_DDA_Condition_A_Sample_Alpha_01" = "Condition_A_Sample_Alpha_01"
@@ -27,5 +27,5 @@ abundance_DDA_Condition_B_Sample_Alpha_03 = "B"
 "_HUMAN" = "HUMAN"
 
 [general]
-contaminant_flag = "Cont_"
-decoy_flag = true
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

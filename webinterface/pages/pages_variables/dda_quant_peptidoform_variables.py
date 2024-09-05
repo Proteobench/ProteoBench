@@ -27,6 +27,7 @@ class VariablesDDAQuant:
     placeholder_fig_compare: str = "placeholder_fig_compare_dda_quant_peptidoform"
     placeholder_table: str = "placeholder_table_dda_quant_peptidoform"
     placeholder_slider: str = "placeholder_slider_dda_quant_peptidoform"
+    placeholder_downloads_container: str = "placeholder_downloads_container"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3

@@ -1,7 +1,6 @@
 [mapper]
 "sequence" = "Sequence"
 "run" = "Raw file"
-"genes" = "Proteins"
 "charge" = "Charge"
 "intensity" = "Intensity"
 

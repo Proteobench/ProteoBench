@@ -51,6 +51,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
             lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
             axis=1,
         )
+        input_data_frame["Proteins"] = input_data_frame["genes"] + "/" + input_data_frame["pg_master"]
     return input_data_frame
 
 

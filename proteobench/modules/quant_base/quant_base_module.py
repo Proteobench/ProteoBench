@@ -56,7 +56,7 @@ class QuantModule:
 
     EXTRACT_PARAMS_DICT = {
         "MaxQuant": extract_params_maxquant,
-        "Proline": extract_params_proline,
+        "ProlineStudio": extract_params_proline,
         "AlphaPept": extract_params_alphapept,
         "Sage": extract_params_sage,
         "FragPipe": extract_params_fragger,

@@ -94,7 +94,6 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
-        # TODO Shouldnt this use the weighted sum?
         all_median_abs_epsilon = [
             v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
         ]
@@ -118,7 +117,8 @@ class PlotDataPoint:
 
         if "comments" in benchmark_metrics_df.columns:
             hover_texts = [
-                v + f"Comment: {c[0:75]}" for v, c in zip(hover_texts, benchmark_metrics_df.comments.fillna(""))
+                v + f"Comment: {c[0:75]}"
+                for v, c in zip(hover_texts, benchmark_metrics_df.submission_comments.fillna(""))
             ]
 
         scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]

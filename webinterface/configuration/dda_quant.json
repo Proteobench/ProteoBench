@@ -130,7 +130,7 @@
             "Custom": false
         }
     },
-    "comments_for_submission": {
+    "comments_for_plotting": {
         "type": "text_area",
         "label": "Comments for plotting",
         "placeholder": "This workflow was run ...",

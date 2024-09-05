@@ -216,7 +216,7 @@ class QuantUIObjects:
         with open(self.variables_quant.additional_params_json) as file:
             config = json.load(file)
         for key, value in config.items():
-            if key == "comments_for_submission":
+            if key == "comments_for_plotting":
                 self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
             else:
                 self.user_input[key] = None

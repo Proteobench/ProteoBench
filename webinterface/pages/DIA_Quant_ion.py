@@ -8,28 +8,28 @@ from pages.pages_variables.dia_quant_variables import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.dda_quant_ion_module import DDAQuantIonModule
+from proteobench.modules.dia_quant_ion.dia_quant_ion_module import DIAQuantIonModule
 
 
 class StreamlitUI:
     def __init__(self):
-        self.variables_dda_quant: VariablesDIAQuant = VariablesDIAQuant()
+        self.variables_dia_quant: VariablesDIAQuant = VariablesDIAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
         self.texts.ShortMessages.title = "DIA Ion quantification"
         self.user_input: Dict[str, Any] = dict()
 
         pbb.proteobench_page_config()
 
-        if self.variables_dda_quant.submit not in st.session_state:
-            st.session_state[self.variables_dda_quant.submit] = False
+        if self.variables_dia_quant.submit not in st.session_state:
+            st.session_state[self.variables_dia_quant.submit] = False
         try:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: DDAQuantIonModule = DDAQuantIonModule(token=token)
+        self.ionmodule: DIAQuantIonModule = DIAQuantIonModule(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder(acquisition_method="dia")
 
-        self.quant_uiobjects = QuantUIObjects(self.variables_dda_quant, self.ionmodule, self.parsesettingsbuilder)
+        self.quant_uiobjects = QuantUIObjects(self.variables_dia_quant, self.ionmodule, self.parsesettingsbuilder)
 
         self._main_page()
 

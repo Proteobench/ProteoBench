@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import math
 
 import pandas as pd
 
@@ -44,6 +45,13 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame["proforma"] = input_data_frame["Modified sequence"]
     elif input_format == "DIA-NN":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    elif input_format == "AlphaDIA":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        input_data_frame["proforma"] = input_data_frame.apply(
+            lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
+            axis=1,
+        )
+        input_data_frame["Proteins"] = input_data_frame["genes"] + "/" + input_data_frame["pg_master"]
     return input_data_frame
 
 
@@ -78,6 +86,29 @@ def aggregate_modification_column(
 
     for name, loc in all_mods:
         input_string_seq = input_string_seq[:loc] + f"[{name}]" + input_string_seq[loc:]
+
+    return input_string_seq
+
+
+def aggregate_modification_sites_column(
+    input_string_seq: str,
+    input_string_modifications: str,
+    input_string_sites,
+    special_locations: dict = {
+        "Any N-term": 0,
+        "Any C-term": -1,
+        "Protein N-term": 0,
+        "Protein C-term": -1,
+    },
+):
+    if isinstance(input_string_modifications, float) and math.isnan(input_string_modifications):
+        return input_string_seq  # Return the original sequence if modifications are NaN or None
+    for m, s in reversed(list(zip(input_string_modifications.split(";"), str(input_string_sites).split(";")))):
+        if len(m) == 0:
+            continue
+        m_name = m.split("@")[0]
+        m_pos = int(s)
+        input_string_seq = input_string_seq[:m_pos] + f"[{m_name}]" + input_string_seq[m_pos:]
 
     return input_string_seq
 

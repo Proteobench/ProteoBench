@@ -24,17 +24,18 @@ class ParseSettingsBuilder:
                 "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
                 "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
                 "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
-                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
+                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DDA_quant_ion.toml"),
             }
         elif acquisition_method == "dia":
             self.PARSE_SETTINGS_FILES = {
                 "DIA-NN": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
+                "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxdia.toml"),
                 # "Skyline": os.path.join(parse_settings_dir, "parse_settings_skyline.toml"),
                 # "EncyclopeDIA": os.path.join(parse_settings_dir, "parse_settings_encyclopedia.toml"),
                 # "MSFraggerDIA": os.path.join(parse_settings_dir, "parse_settings_msfragger.toml"),
                 # "Spectronaut": os.path.join(parse_settings_dir, "parse_settings_spectronaut.toml"),
-                # "AlphaDIA": os.path.join(parse_settings_dir, "parse_settings_alphadia.toml"),
-                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
+                "AlphaDIA": os.path.join(parse_settings_dir, "parse_settings_alphadia.toml"),
+                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DIA_quant_ion.toml"),
             }
         else:
             raise ValueError("Invalid acquisition mode. Please choose either 'dda' or 'dia'.")

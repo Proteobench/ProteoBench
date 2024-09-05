@@ -13,14 +13,22 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
-    def __init__(self, parse_settings_dir=None):
+    def __init__(self, parse_settings_dir=None, acquisition_method="dda"):
         if parse_settings_dir is None:
             parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings")
-
-        self.PARSE_SETTINGS_FILES = {
-            "WOMBAT": os.path.join(parse_settings_dir, "parse_settings_wombat.toml"),
-            "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DDA_quand_peptidoform.toml"),
-        }
+        if acquisition_method == "dda":
+            self.PARSE_SETTINGS_FILES = {
+                "WOMBAT": os.path.join(parse_settings_dir, "parse_settings_wombat.toml"),
+                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DDA_quant_peptidoform.toml"),
+            }
+        elif acquisition_method == "dia":
+            self.PARSE_SETTINGS_FILES = {
+                "DIA-NN": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
+                # "EncyclopeDIA": os.path.join(parse_settings_dir, "parse_settings_encyclopedia.toml"),
+                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DIA_quant_peptidoform.toml"),
+            }
+        else:
+            raise ValueError("Invalid acquisition mode. Please choose either 'dda' or 'dia'.")
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
         # Check if all files are present

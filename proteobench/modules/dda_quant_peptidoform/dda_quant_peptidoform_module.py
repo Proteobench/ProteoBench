@@ -20,14 +20,32 @@ from proteobench.score.quant.quantscores import QuantScores
 
 
 class DDAQuantPeptidoformModule(QuantModule):
-    """Object is used as a main interface with the Proteobench library within the module."""
+    """DDA Quantification Module for Peptidoform level Quantification."""
 
     def __init__(
         self,
-        token,
-        proteobot_repo_name="Proteobot/Results_quant_peptidoform_DDA",
-        proteobench_repo_name="Proteobench/Results_quant_peptidoform_DDA",
+        token: str,
+        proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
     ):
+        """
+        DDA Quantification Module for Peptidoform level Quantification.
+
+        Parameters
+        ----------
+        token
+            GitHub token for the user.
+        proteobot_repo_name
+            Name of the repository for pull requests and where new points are added.
+        proteobench_repo_name
+            Name of the repository where the benchmarking results will be stored.
+
+        Attributes
+        ----------
+        precursor_name: str
+            Level of quantification.
+
+        """
         super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
         self.precursor_name = "peptidoform"
 
@@ -38,8 +56,29 @@ class DDAQuantPeptidoformModule(QuantModule):
     def benchmarking(
         self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
-        """Main workflow of the module. Used to benchmark workflow results."""
-        # Parse user config
+        """
+        Main workflow of the module. Used to benchmark workflow results.
+
+        Parameters
+        ----------
+        input_file
+            Path to the workflow output file.
+        input_format
+            Format of the workflow output file.
+        user_input
+            User provided parameters for plotting.
+        all_datapoints
+            DataFrame containing all datapoints from the proteobench repo.
+        default_cutoff_min_prec
+            Minimum number of runs an ion has to be identified in.
+
+        Returns
+        -------
+        tuple[DataFrame, DataFrame, DataFrame]
+            Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
+        """
+
+        # Parse workflow output file
 
         try:
             input_df = load_input_file(input_file, input_format)
@@ -50,6 +89,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         except Exception as e:
             raise ParseSettingsError(f"Error parsing the inpu file: {e}")
 
+        # Parse settings file
         try:
             parse_settings = ParseSettingsBuilder().build_parser(input_format)
         except KeyError as e:
@@ -66,19 +106,21 @@ class DDAQuantPeptidoformModule(QuantModule):
         except Exception as e:
             raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
 
+        # calculate quantification scores
         try:
-            # Get quantification data
             quant_score = QuantScores(
                 self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
 
+        # generate intermediate data structure
         try:
             intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
+        # generate current data point
         try:
             current_datapoint = Datapoint.generate_datapoint(
                 intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
@@ -86,11 +128,13 @@ class DDAQuantPeptidoformModule(QuantModule):
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
+        # add current data point to all datapoints
         try:
-            all_datapoints = self.add_current_data_point(all_datapoints, current_datapoint)
+            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
         except Exception as e:
             raise DatapointAppendError(f"Error adding current data point: {e}")
 
+        # return intermediate data structure, all datapoints, and input DataFrame
         # TODO check why there are NA and inf/-inf values
         return (
             intermediate_data_structure,

@@ -13,3 +13,7 @@ name = "DDA Quant Ion Level -BETA-"
  [[pages]]
  path = "pages/DIA_Quant_ion.py"
  name = "DIA Quant Ion Level -BETA-"
+
+ [[pages]]
+ path = "pages/DIA_Quant_peptidoform.py"
+ name = "DIA Quant Peptidoform Level -BETA-"

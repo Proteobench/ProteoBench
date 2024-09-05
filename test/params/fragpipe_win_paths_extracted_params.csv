@@ -18,3 +18,8 @@ variable_mods,"15.9949,M,true,3; 42.0106,[^,true,1; 79.96633,STY,false,3; -17.02
 max_mods,3
 min_precursor_charge,1
 max_precursor_charge,4
+scan_window,
+quantification_method_DIANN,
+second_pass,
+protein_inference,
+predictors_library,

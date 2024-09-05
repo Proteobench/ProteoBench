@@ -47,28 +47,38 @@ class Datapoint:
     min_pep_length: int = 0
     max_pep_length: int = 0
 
-    def calculate_benchmarking_metric_1(self, intermediate_data):
-        """Calculates the first benchmarking metric based on the intermediate data.
+    def calculate_benchmarking_metric_1(self, intermediate_data: dict) -> float:
+        """
+        Calculates the first benchmarking metric based on the intermediate data.
 
-        Args:
-            intermediate_data (dict): A dictionary containing the intermediate data.
+        Parameters
+        ----------
+        intermediate_data
+            A dictionary containing the intermediate data.
 
-        Returns:
-            metric_1 (float): The value of the first benchmarking metric.
+        Returns
+        -------
+        metric_1
+            The value of the first benchmarking metric.
         """
         # TODO: calculate metric 1
         metric_1 = 0
 
         return metric_1
 
-    def calculate_benchmarking_metric_2(self, intermediate_data):
-        """Calculates the second benchmarking metric based on the intermediate data.
+    def calculate_benchmarking_metric_2(self, intermediate_data: dict) -> float:
+        """
+        Calculates the second benchmarking metric based on the intermediate data.
 
-        Args:
-            intermediate_data (dict): A dictionary containing the intermediate data.
+        Parameters
+        ----------
+        intermediate_data
+            A dictionary containing the intermediate data.
 
-        Returns:
-            metric_2 (float): The value of the second benchmarking metric.
+        Returns
+        -------
+        metric_2
+            The value of the second benchmarking metric.
         """
         # TODO: calculate metric 2
         metric_2 = 0
@@ -79,21 +89,26 @@ class Datapoint:
 
     # Leave this functions as it is
     def generate_id(self):
-        """Generates a unique id for the datapoint based on the search engine and software version.
+        """
+        Generates a unique id for the datapoint based on the search engine and software version.
 
         Sets the id attribute to a string composed of the search engine name, software version number,
         and current timestamp separated by underscores. Prints the id to stdout.
         """
         self.id = self.search_engine + "_" + str(self.software_version) + "_" + str(datetime.timestamp(datetime.now()))
 
-    def dump_json_object(self, file_name):
-        """Dumps the datapoint as a JSON object to a file.
-
-        Args:
-            file_name (str): The name of the file to write to.
+    def dump_json_object(self, file_name: str) -> None:
+        """
+        Dumps the datapoint as a JSON object to a file.
 
         Writes a JSON representation of the datapoint to a file with the given name. Appends the JSON object
         to the end of the file if it already exists.
+
+        Parameters
+        ----------
+        file_name
+            The name of the file to write to.
+
         """
         f = open(file_name, "a")
         f.write(json.dumps(asdict(self)))

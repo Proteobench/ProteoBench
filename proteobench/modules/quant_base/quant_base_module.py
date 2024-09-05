@@ -60,14 +60,14 @@ class QuantModule:
         self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None
     ) -> pd.DataFrame:
         """
-        Add current data point to all data points and load them from file if empty.
+        Add current data point to the data points from previous runs, load them from file if empty.
 
         Parameters
         ----------
         all_datapoints
-            All data points. If none, it will be loaded from the github repo.
+            The data points from previous runs. If none, it will be loaded from the github repo.
         current_datapoint
-            Current data point.
+            The current data point to be added.
 
         Returns
         -------

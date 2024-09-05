@@ -132,7 +132,98 @@ class TestWrongFormatting(unittest.TestCase):
             with self.assertRaises(KeyError) as context:
                 DIAQuantIonModule("").benchmarking(user_input['input_csv'], user_input['input_format'], {}, None)
 
+class TestPlot(unittest.TestCase):
+    """Test if the plots return a figure."""
 
+    def test_plot_metric(self):
+        tmpdir = tempfile.TemporaryDirectory().name
+        gpr = GithubProteobotRepo(clone_dir=tmpdir)
+        gpr.clone_repo_anonymous()
+        all_datapoints = gpr.read_results_json_repo()
+        all_datapoints["old_new"] = "old"
+        fig = PlotDataPoint().plot_metric(all_datapoints)
+        self.assertIsNotNone(fig)
+
+    def test_plot_bench(self):
+        np.random.seed(0)
+
+        # Generate 1000 random values from a normal distribution
+        Nyeast = 1000
+        Necoli = 500
+        Nhuman = 2000
+
+        yeastRatio = np.random.normal(loc=-1, scale=1, size=Nyeast)
+        humanRatio = np.random.normal(loc=0, scale=1, size=Nhuman)
+        ecoliRatio = np.random.normal(loc=2, scale=1, size=Necoli)
+        combined_ratios = np.concatenate([yeastRatio, humanRatio, ecoliRatio])
+
+        human_strings = ["HUMAN"] * Nhuman
+        ecoli_strings = ["ECOLI"] * Necoli
+        yeast_strings = ["YEAST"] * Nyeast  
+
+        # Concatenate the lists to create a single list
+        combined_list = human_strings + ecoli_strings + yeast_strings
+
+        combineddf = pd.DataFrame(
+            {
+                "SPECIES": combined_list,
+                "log2_A_vs_B": combined_ratios
+            }
+        )
+        combineddf["HUMAN"] = combineddf["SPECIES"] == "HUMAN"
+        combineddf["ECOLI"] = combineddf["SPECIES"] == "ECOLI"
+        combineddf["YEAST"] = combineddf["SPECIES"] == "YEAST"
+        species_dict = {
+            "YEAST": {"A_vs_B": 2.0, "color": "red"},
+            "ECOLI": {"A_vs_B": 0.25, "color": "blue"},
+            "HUMAN": {"A_vs_B": 1.0, "color": "green"},
+        }
+        fig = PlotDataPoint().plot_fold_change_histogram(combineddf, species_dict)
+        self.assertIsNotNone(fig)
+
+
+class TestDatapoint(unittest.TestCase):
+    """Test the Datapoint class."""
+
+    def test_Datapoint_constructor(self):
+        """Test the Datapoint class."""
+        input_format = "DIA-NN"
+        user_input = {
+            "software_name": "DIA-NN",
+            "software_version": "1.9",
+            "search_engine_version": "1.9",
+            "search_engine": "DIA-NN",
+            "ident_fdr_peptide": 0.01,
+            "ident_fdr_psm": 0.01,
+            "ident_fdr_protein": 0.01,
+            "enable_match_between_runs": 1,
+            "enzyme": "Trypsin",
+            "allowed_miscleavages": 1,
+            "min_peptide_length": 6,
+            "max_peptide_length": 40,
+            "precursor_mass_tolerance": None,
+            "fragment_mass_tolerance": None,
+        }
+        current_datetime = datetime.datetime.now()
+        formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
+
+        result_datapoint = Datapoint(
+            id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
+            software_name=input_format,
+            software_version=user_input["software_version"],
+            search_engine=user_input["search_engine"],
+            search_engine_version=user_input["search_engine_version"],
+            ident_fdr_psm=user_input["ident_fdr_psm"],
+            ident_fdr_peptide=user_input["ident_fdr_peptide"],
+            ident_fdr_protein=user_input["ident_fdr_protein"],
+            enable_match_between_runs=user_input["enable_match_between_runs"],
+            precursor_mass_tolerance=user_input["precursor_mass_tolerance"],
+            fragment_mass_tolerance=user_input["fragment_mass_tolerance"],
+            enzyme=user_input["enzyme"],
+            allowed_miscleavages=user_input["allowed_miscleavages"],
+            min_peptide_length=user_input["min_peptide_length"],
+            max_peptide_length=user_input["max_peptide_length"],
+        )
 
 
 if __name__ == "__main__":

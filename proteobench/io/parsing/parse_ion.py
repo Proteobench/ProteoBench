@@ -89,7 +89,6 @@ def aggregate_modification_column(
     return input_string_seq
 
 
-
 def aggregate_modification_sites_column(
     input_string_seq: str,
     input_string_modifications: str,

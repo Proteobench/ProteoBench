@@ -7,7 +7,7 @@ import pandas as pd
 from proteobench.modules.template.parse_settings import ParseSettings
 
 
-class ParseInputs():
+class ParseInputs:
     def convert_to_standard_format(df: pd.DataFrame, parse_settings: ParseSettings) -> pd.DataFrame:
         """Convert a search engine output into a generic format supported by the module."""
 

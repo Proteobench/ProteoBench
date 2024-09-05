@@ -1,10 +1,9 @@
-#############################
-General information
-#############################
+##########
+Learn more
+##########
 
 .. toctree::
-    :caption: General information
     :glob:
-    :maxdepth: 3
+    :maxdepth: 1
 
     *

@@ -7,6 +7,7 @@ version = proteobench.__version__
 
 extensions = [
     "myst_parser",
+    "sphinx_design",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
@@ -37,11 +38,11 @@ html_theme_options = {
         "image_light": "_static/proteobench-logo-horizontal.svg",
         "image_dark": "_static/proteobench-logo-horizontal-inverted.svg",
     },
-    "switcher": {
-        "json_url": "_static/switcher.json",
-        "version_match": version,
-    },
-    "navbar_center": ["version", "version-switcher", "navbar-nav"],
+    # "switcher": {
+    #     "json_url": "_static/switcher.json",
+    #     "version_match": version,
+    # },
+    # "navbar_center": ["version", "version-switcher", "navbar-nav"],
 }
 
 # Intersphinx options

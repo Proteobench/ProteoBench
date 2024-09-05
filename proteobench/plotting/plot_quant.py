@@ -114,10 +114,15 @@ class PlotDataPoint:
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
+        if "submission_comments" in benchmark_metrics_df.columns:
+            hover_texts = [
+                v + f"Comment (submission): {c[0:75]}<br>"
+                for v, c in zip(hover_texts, benchmark_metrics_df.submission_comments.fillna(""))
+            ]
+
         if "comments" in benchmark_metrics_df.columns:
             hover_texts = [
-                v + f"Comment: {c[0:75]}"
-                for v, c in zip(hover_texts, benchmark_metrics_df.submission_comments.fillna(""))
+                v + f"Comment (user): {c[0:75]}" for v, c in zip(hover_texts, benchmark_metrics_df.comments.fillna(""))
             ]
 
         scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]

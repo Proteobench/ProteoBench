@@ -28,5 +28,5 @@
 "_HUMAN" = "HUMAN"
 
 [general]
-contaminant_flag = "Cont_"
-decoy_flag = true
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

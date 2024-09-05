@@ -1,9 +1,9 @@
 [mapper]
-"Modified.Sequence" = "Sequence"
-"Run" = "Raw file"
-"Protein.Names" = "Proteins"
-"Precursor.Charge" = "Charge"
-"Precursor.Quantity" = "Intensity"
+"Sequence" = "Sequence"
+"Raw file" = "Raw file"
+"Proteins" = "Proteins"
+"Modified sequence" = "Modified sequence"
+"Charge" = "Charge"
 
 [condition_mapper]
 "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01" = "A"
@@ -27,12 +27,12 @@
 "_HUMAN" = "HUMAN"
 
 [modifications_parser]
-"parse_column" = "Sequence"
+"parse_column" = "Modified sequence"
 "before_aa" = false
 "isalpha" = true
 "isupper" = true
-"pattern" = "\\(([^()]*)\\)"
-"modification_dict" = {"(unimod:35)" = "Oxidation", "(unimod:1)" = "Acetyl", "(unimod:4)" = "Carbamidomethyl"}
+"pattern" = "\\([^()]*\\)|\\([^()]*\\([^()]*\\)[^()]*\\)"
+"modification_dict" = {"(ox)" = "Oxidation", "(ac)" = "Acetyl", "(oxidation (m))" = "Oxidation", "(acetyl (protein n-term))" = "Acetylation"}
 
 [general]
 "contaminant_flag" = "Cont_"

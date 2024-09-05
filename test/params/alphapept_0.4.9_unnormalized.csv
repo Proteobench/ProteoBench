@@ -18,3 +18,8 @@ variable_mods,oxM
 max_mods,3
 min_precursor_charge,1
 max_precursor_charge,6
+scan_window,
+quantification_method_DIANN,
+second_pass,
+protein_inference,
+predictors_library,

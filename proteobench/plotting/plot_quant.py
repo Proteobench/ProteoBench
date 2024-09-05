@@ -75,6 +75,8 @@ class PlotDataPoint:
             "i2MassChroQ": "#984ea3",
             "Sage": "#a65628",
             "WOMBAT": "#f781bf",
+            "DIA-NN": "#8c564b",
+            "AlphaDIA": "#ff7f00",
             "Custom": "#7f7f7f",
             ##ffff33 /yellow so not ideal
         },

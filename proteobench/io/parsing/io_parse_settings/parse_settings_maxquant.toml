@@ -1,17 +1,17 @@
 [mapper]
 "Sequence" = "Sequence"
 "Raw file" = "Raw file"
-Proteins = "Proteins"
+"Proteins" = "Proteins"
 "Modified sequence" = "Modified sequence"
-Charge = "Charge"
+"Charge" = "Charge"
 
 [condition_mapper]
-LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 = "A"
-LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 = "A"
-LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 = "A"
-LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 = "B"
-LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 = "B"
-LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = "B"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01" = "A"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02" = "A"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03" = "A"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01" = "B"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02" = "B"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03" = "B"
 
 [run_mapper]
 "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01" = "Condition_A_Sample_Alpha_01"
@@ -35,5 +35,5 @@ LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 = "B"
 "modification_dict" = {"(ox)" = "Oxidation", "(ac)" = "Acetyl", "(oxidation (m))" = "Oxidation", "(acetyl (protein n-term))" = "Acetylation"}
 
 [general]
-contaminant_flag = "Cont_"
-decoy_flag = true
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

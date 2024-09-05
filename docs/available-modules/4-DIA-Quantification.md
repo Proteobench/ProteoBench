@@ -76,7 +76,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |DIA-NN|*_report.tsv|*report.log.txt|
 |FragPipe|*_report.tsv|fragpipe.workflow|
 |MaxDIA|evidence.txt|mqpar.xml|
-|Spectronaut|
+|Spectronaut|*.tsv|*.txt
 
 
 After upload, you will get a link to the pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 

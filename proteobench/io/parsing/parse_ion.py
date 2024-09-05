@@ -110,7 +110,6 @@ def aggregate_modification_sites_column(
     
     return input_string_seq
 
-
 def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True):
     if isalpha and isupper:
         return sum(1 for char in input_string if char.isalpha() and char.isupper())

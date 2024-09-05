@@ -12,7 +12,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.dia_quant_ion.dia_quant_ion_module import DIAQuantIonModule
 from proteobench.score.quant.quantscores import QuantScores
-from proteobench.utils.plotting.plot import PlotDataPoint
+from proteobench.plotting.plot_quant import PlotDataPoint
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
 TESTDATA_FILES = {
@@ -68,7 +68,7 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_input_file_initial_parsing(self):
         """Test the initial parsing of the input file."""
-        parse_settings_builder = ParseSettingsBuilder(acquisition_method="dia") 
+        parse_settings_builder = ParseSettingsBuilder(acquisition_method="dia")
 
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
@@ -159,7 +159,7 @@ class TestPlot(unittest.TestCase):
 
         human_strings = ["HUMAN"] * Nhuman
         ecoli_strings = ["ECOLI"] * Necoli
-        yeast_strings = ["YEAST"] * Nyeast  
+        yeast_strings = ["YEAST"] * Nyeast
 
         # Concatenate the lists to create a single list
         combined_list = human_strings + ecoli_strings + yeast_strings
@@ -228,4 +228,3 @@ class TestDatapoint(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-        

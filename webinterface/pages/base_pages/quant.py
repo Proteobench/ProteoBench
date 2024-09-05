@@ -754,12 +754,12 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.fig_logfc] = self.plots_for_current_data(recalculate)
 
         if recalculate:
-            # try:
-            st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
-            )
-            # except Exception as e:
-            # st.error(f"Unable to lalal plot the datapoints: {e}", icon="🚨")
+            try:
+                st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
+                    st.session_state[self.variables_quant.all_datapoints]
+                )
+            except Exception as e:
+                st.error(f"Unable to lalal plot the datapoints: {e}", icon="🚨")
 
         if self.variables_quant.first_new_plot:
             self.create_first_new_plot()

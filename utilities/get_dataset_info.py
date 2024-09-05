@@ -9,7 +9,7 @@ import requests
 
 # URLs of the JSON file
 repo_jsons = {
-    "DDA quantification - precursor ions" : "https://raw.githubusercontent.com/Proteobench/Results_quant_ion_DDA/main/results.json",
+    "DDA quantification - precursor ions": "https://raw.githubusercontent.com/Proteobench/Results_quant_ion_DDA/main/results.json",
 }
 
 # download JSON files and print out general information
@@ -23,7 +23,15 @@ for name, url in repo_jsons.items():
 
         print("#", name)
         for datapoint in data:
-            data_info = datapoint["id"] + "\t" + datapoint["software_name"]+ "\t" + datapoint["software_version"] + "\t" + datapoint["intermediate_hash"]
+            data_info = (
+                datapoint["id"]
+                + "\t"
+                + datapoint["software_name"]
+                + "\t"
+                + datapoint["software_version"]
+                + "\t"
+                + datapoint["intermediate_hash"]
+            )
             print(data_info)
     except Exception as e:
         print("# Could not get data for ", name)

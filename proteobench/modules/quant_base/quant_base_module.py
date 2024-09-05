@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from tempfile import TemporaryDirectory
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
 import streamlit as st
@@ -112,8 +112,23 @@ class QuantModule:
         return all_datapoints
 
     @staticmethod
-    def filter_data_point(all_datapoints, default_val_slider: int = 3):
-        """Add current data point to all data points and load them from file if empty."""
+    def filter_data_point(all_datapoints: pd.DataFrame, default_val_slider: int = 3):
+        """
+        Add current data point to all data points and load them from file if empty.
+
+        Parameters
+        ----------
+        all_datapoints
+            All data points.
+        default_val_slider
+            Default value for the slider.
+
+        Returns
+        -------
+        pd.DataFrame
+            All data points with the filtered data points.
+        """
+
         all_datapoints["median_abs_epsilon"] = [
             filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
@@ -127,7 +142,27 @@ class QuantModule:
     def benchmarking(
         self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
-        """Main workflow of the module. Used to benchmark workflow results."""
+        """
+        Main workflow of the module. Used to benchmark workflow results.
+
+        Parameters
+        ----------
+        input_file
+            Path to the workflow output file.
+        input_format
+            Format of the workflow output file.
+        user_input
+            User provided parameters for plotting.
+        all_datapoints
+            DataFrame containing all datapoints from the proteobench repo.
+        default_cutoff_min_prec
+            Minimum number of runs an ion has to be identified in.
+
+        Returns
+        -------
+        tuple[DataFrame, DataFrame, DataFrame]
+            Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
+        """
 
         # Parse user config
         input_df = load_input_file(input_file, input_format)
@@ -153,7 +188,21 @@ class QuantModule:
             input_df,
         )
 
-    def check_new_unique_hash(self, datapoints):
+    def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
+        """
+        Check if the new data point has a unique hash.
+
+        Parameters
+        ----------
+        datapoints
+            Data points.
+
+        Returns
+        -------
+        bool
+            Whether the new data point has a unique hash.
+        """
+
         current_datapoint = datapoints[datapoints["old_new"] == "new"]
         all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
 
@@ -174,11 +223,31 @@ class QuantModule:
 
     def clone_pr(
         self,
-        temporary_datapoints,
-        datapoint_params,
-        remote_git,
-        submission_comments="no comments",
+        temporary_datapoints: pd.DataFrame,
+        datapoint_params: Any,
+        remote_git: str,
+        submission_comments: str = "no comments",
     ):
+        """
+        Clone repo and open pull request.
+
+        Parameters
+        ----------
+        temporary_datapoints
+            Temporary data points.
+        datapoint_params
+            Data point parameters.
+        remote_git
+            Remote git.
+        submission_comments
+            Submission comments.
+
+        Returns
+        -------
+        str
+            URL of the pull request.
+        """
+
         self.github_repo.clone_repo_pr()
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False

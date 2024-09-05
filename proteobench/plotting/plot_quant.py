@@ -114,6 +114,7 @@ class PlotDataPoint:
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
+        # TODO: decide if to show both or only either? And how to call them
         if "submission_comments" in benchmark_metrics_df.columns:
             hover_texts = [
                 v + f"Comment (submission): {c[0:75]}<br>"

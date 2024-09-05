@@ -33,8 +33,8 @@ class ParseSettingsBuilder:
                 # "EncyclopeDIA": os.path.join(parse_settings_dir, "parse_settings_encyclopedia.toml"),
                 # "MSFraggerDIA": os.path.join(parse_settings_dir, "parse_settings_msfragger.toml"),
                 # "Spectronaut": os.path.join(parse_settings_dir, "parse_settings_spectronaut.toml"),
-                # "AlphaDIA": os.path.join(parse_settings_dir, "parse_settings_alphadia.toml"),
-                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DIA_quant_ion.toml"),
+                "AlphaDIA": os.path.join(parse_settings_dir, "parse_settings_alphadia.toml"),
+                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom.toml"),
             }
         else:
             raise ValueError("Invalid acquisition mode. Please choose either 'dda' or 'dia'.")

@@ -17,6 +17,7 @@ from proteobench.plotting.plot_quant import PlotDataPoint
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
 TESTDATA_FILES = {
     "DIA-NN" : os.path.join(TESTDATA_DIR, "DIANN_1.9_beta_sample_report.tsv"),
+    "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.7.2_sample.tsv"),
 }
 
 def load_file(format_name:str):
@@ -43,7 +44,7 @@ def process_file(format_name: str):
     return intermediate
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("DIA-NN",)
+    supported_formats = ("DIA-NN", "AlphaDIA")
     """Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):

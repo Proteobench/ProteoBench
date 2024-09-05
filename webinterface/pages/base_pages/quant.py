@@ -211,16 +211,15 @@ class QuantUIObjects:
         )
 
     def _create_additional_parameters_section(self) -> None:
-        """Creates the additional parameters section of the form."""
+        """Creates the additional parameters section of the form and initialize the paramter fields."""
         st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
-        with st.expander("Additional parameters"):
-            with open(self.variables_quant.additional_params_json) as file:
-                config = json.load(file)
-            for key, value in config.items():
-                if key == "comments_for_submission":
-                    self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
-                else:
-                    self.user_input[key] = None
+        with open(self.variables_quant.additional_params_json) as file:
+            config = json.load(file)
+        for key, value in config.items():
+            if key == "comments_for_submission":
+                self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+            else:
+                self.user_input[key] = None
 
     def _handle_form_submission(self) -> None:
         """Handles the form submission logic."""

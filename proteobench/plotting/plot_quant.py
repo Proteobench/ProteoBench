@@ -117,13 +117,14 @@ class PlotDataPoint:
         # TODO: decide if to show both or only either? And how to call them
         if "submission_comments" in benchmark_metrics_df.columns:
             hover_texts = [
-                v + f"Comment (submission): {c[0:75]}<br>"
+                v + f"Comment (public submission): {c[0:75]}<br>"
                 for v, c in zip(hover_texts, benchmark_metrics_df.submission_comments.fillna(""))
             ]
 
         if "comments" in benchmark_metrics_df.columns:
             hover_texts = [
-                v + f"Comment (user): {c[0:75]}" for v, c in zip(hover_texts, benchmark_metrics_df.comments.fillna(""))
+                v + f"Comment (private submission): {c[0:75]}"
+                for v, c in zip(hover_texts, benchmark_metrics_df.comments.fillna(""))
             ]
 
         scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]

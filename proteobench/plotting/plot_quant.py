@@ -112,7 +112,6 @@ class PlotDataPoint:
             for idx, _ in benchmark_metrics_df.iterrows()
         ]
 
-        print(benchmark_metrics_df.submission_comments)
         if "comments" in benchmark_metrics_df.columns:
             hover_texts = [
                 v + f"Comment: {c[0:75]}"

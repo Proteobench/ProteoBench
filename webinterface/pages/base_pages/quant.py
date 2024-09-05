@@ -759,7 +759,7 @@ class QuantUIObjects:
                     st.session_state[self.variables_quant.all_datapoints]
                 )
             except Exception as e:
-                st.error(f"Unable to lalal plot the datapoints: {e}", icon="🚨")
+                st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
         if self.variables_quant.first_new_plot:
             self.create_first_new_plot()

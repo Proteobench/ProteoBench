@@ -102,14 +102,12 @@ class PlotDataPoint:
         hover_texts = []
         for idx, _ in benchmark_metrics_df.iterrows():
             datapoint_text = ""
-            if benchmark_metrics_df.old_new[idx] == "new":
+            if benchmark_metrics_df.is_temporary[idx] == True:
                 datapoint_text = (
                     f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
-                print(benchmark_metrics_df.columns)
                 if "comments" in benchmark_metrics_df.columns:
-                    print(benchmark_metrics_df.comments[idx])
                     datapoint_text = (
                         datapoint_text + f"Comment (private submission): {benchmark_metrics_df.comments[idx]}"
                     )
@@ -128,7 +126,6 @@ class PlotDataPoint:
                     + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
                 )
                 if "submission_comments" in benchmark_metrics_df.columns:
-                    print(benchmark_metrics_df.comments[idx])
                     datapoint_text = (
                         datapoint_text + f"Comment (public submission): {benchmark_metrics_df.submission_comments[idx]}"
                     )

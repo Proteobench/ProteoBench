@@ -282,7 +282,23 @@ class QuantModule:
 
         return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
 
-    def write_json_local_development(self, temporary_datapoints, datapoint_params):
+    def write_json_local_development(self, temporary_datapoints: pd.DataFrame, datapoint_params: dict) -> str:
+        """
+        Write datapoints to json for local development.
+
+        Parameters
+        ----------
+        temporary_datapoints
+            Temporary data points.
+        datapoint_params
+            Data point parameters.
+
+        Returns
+        -------
+        str
+            Path to the json file.
+        """
+
         os.mkdir(self.t_dir_pr)
 
         current_datapoint = temporary_datapoints.iloc[-1]
@@ -304,7 +320,22 @@ class QuantModule:
 
         return os.path.join(self.t_dir_pr, "results.json")
 
-    def write_intermediate_raw(self, dir, ident, input_df, result_performance, param_loc):
+    def write_intermediate_raw(self, dir: str, ident: str, input_df: pd.DataFrame, result_performance, param_loc):
+        """
+        Write intermediate and raw data to a directory.
+
+        Parameters
+        ----------
+        dir
+            Directory to write to.
+        ident
+            Intermediate hash of the submission.
+        input_df
+            Input DataFrame.
+        result_performance
+            Result performance DataFrame.
+        """
+
         path_write = os.path.join(dir, ident)
         try:
             os.mkdir(path_write)
@@ -319,7 +350,22 @@ class QuantModule:
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 
     def load_params_file(self, input_file: list[str], input_format: str) -> ProteoBenchParameters:
-        """Method loads parameters from a metadata file depending on its format."""
+        """
+        Method loads parameters from a metadata file depending on its format.
+
+        Parameters
+        ----------
+        input_file
+            Path to the metadata file.
+        input_format
+            Format of the metadata file.
+
+        Returns
+        -------
+        ProteoBenchParameters
+            Parameters for the module.
+        """
+        
         # ! adapted to be able to parse more than one file.
         # ! how to ensure orrect order?
         params = self.extract_params_dict[input_format](*input_file)

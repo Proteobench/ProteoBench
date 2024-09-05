@@ -21,7 +21,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     elif input_format == "WOMBAT":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
         input_data_frame["proforma"] = input_data_frame["modified_peptide"]
-    elif input_format == "Proline":
+    elif input_format == "ProlineStudio":
         input_data_frame = pd.read_excel(
             input_csv,
             sheet_name="Quantified peptide ions",

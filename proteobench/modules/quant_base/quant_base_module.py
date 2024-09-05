@@ -78,7 +78,7 @@ class QuantModule:
             All data points with the current data point added.
         """
 
-        if not isinstance(all_datapoints, pd.DataFrame):
+      if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
         all_datapoints["old_new"] = "old"

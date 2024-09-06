@@ -54,7 +54,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame["Proteins"] = input_data_frame["genes"] + "/" + input_data_frame["pg_master"]
     elif input_format == "Spectronaut":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip('_')
+        input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
     return input_data_frame
 
 

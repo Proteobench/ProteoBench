@@ -16,6 +16,16 @@ from proteobench.datapoint.quant_datapoint import (
 )
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.alphadia import extract_params as extract_params_alphadia
+from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
+from proteobench.io.params.diann import extract_params as extract_params_diann
+from proteobench.io.params.fragger import extract_params as extract_params_fragger
+from proteobench.io.params.i2masschroq import (
+    extract_params as extract_params_i2masschroq,
+)
+from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.proline import extract_params as extract_params_proline
+from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
@@ -51,6 +61,18 @@ class QuantModule:
         self.github_repo.clone_repo()
 
         self.precursor_name = ""
+
+    EXTRACT_PARAMS_DICT = {
+        "MaxQuant": extract_params_maxquant,
+        "ProlineStudio": extract_params_proline,
+        "AlphaPept": extract_params_alphapept,
+        "Sage": extract_params_sage,
+        "FragPipe": extract_params_fragger,
+        "i2MassChroQ": extract_params_i2masschroq,
+        "DIA-NN": extract_params_diann,
+        "AlphaDIA": extract_params_alphadia,
+        # "Spectronaut": extract_params_spectronaut
+    }
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
@@ -267,12 +289,13 @@ class QuantModule:
         all_datapoints.to_json(f, orient="records", indent=2)
 
         f.close()
-        commit_message = f"Added new run with id {branch_name} \n user comments: {submission_comments}"
+        commit_name = f"Added new run with id {branch_name}"
+        commit_message = f"User comments: {submission_comments}"
 
         try:
             self.github_repo.create_branch(branch_name)
-            self.github_repo.commit(commit_message)
-            pr_id = self.github_repo.create_pull_request(commit_message)
+            self.github_repo.commit(commit_name, commit_message)
+            pr_id = self.github_repo.create_pull_request(commit_name, commit_message)
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."
@@ -365,6 +388,6 @@ class QuantModule:
 
         # ! adapted to be able to parse more than one file.
         # ! how to ensure orrect order?
-        params = self.extract_params_dict[input_format](*input_file)
+        params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
         params.software_name = input_format
         return params

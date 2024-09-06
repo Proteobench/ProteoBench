@@ -128,7 +128,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
 
 
 if __name__ == "__main__":
-    # create test csv files
+    # TODO create test csv files
     import pathlib
     from pprint import pprint
 

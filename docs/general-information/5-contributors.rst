@@ -9,6 +9,11 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **Robbe Devreese**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
     **Nadezhda T. Doncheva**
     *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
@@ -18,6 +23,11 @@ People who contributed to ProteoBench, in alphabetical order:
 
 .. line-block::
     **Ralf Gabriels**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Caroline Jachmann**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
@@ -44,6 +54,11 @@ People who contributed to ProteoBench, in alphabetical order:
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
 
 .. line-block::
+    **Alireza Nameni**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
     **Martin Rykær**
     *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
@@ -55,6 +70,11 @@ People who contributed to ProteoBench, in alphabetical order:
     **Tim Van Den Bossche**
     *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
     *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+
+.. line-block::
+    **Sam van Puyenbroeck**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
     **Bart Van Puyvelde**

@@ -87,7 +87,7 @@ class DDAQuantPeptidoformModule(QuantModule):
                 f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
             )
         except Exception as e:
-            raise ParseSettingsError(f"Error parsing the inpu file: {e}")
+            raise ParseSettingsError(f"Error parsing the input file: {e}")
 
         # Parse settings file
         try:

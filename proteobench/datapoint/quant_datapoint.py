@@ -68,7 +68,7 @@ class Datapoint:
 
     def generate_id(self):
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.id = self.software_name + "_" + str(self.software_version) + "_" + str(time_stamp)
+        self.id = "_".join([self.software_name, str(time_stamp)])
         logging.info(f"Assigned the following ID to this run: {self.id}")
 
     @staticmethod
@@ -79,8 +79,8 @@ class Datapoint:
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
-        if "comments_for_submission" not in user_input.keys():
-            user_input["comments_for_submission"] = ""
+        if "comments_for_plotting" not in user_input.keys():
+            user_input["comments_for_plotting"] = ""
 
         user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
         result_datapoint = Datapoint(
@@ -100,7 +100,7 @@ class Datapoint:
             min_peptide_length=user_input["min_peptide_length"],
             max_peptide_length=user_input["max_peptide_length"],
             intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
-            comments=user_input["comments_for_submission"],
+            comments=user_input["comments_for_plotting"],
             proteobench_version=proteobench.__version__,
         )
 

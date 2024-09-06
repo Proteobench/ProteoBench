@@ -29,6 +29,7 @@ class ParseSettingsBuilder:
         elif acquisition_method == "dia":
             self.PARSE_SETTINGS_FILES = {
                 "DIA-NN": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
+                "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxdia.toml"),
                 # "Skyline": os.path.join(parse_settings_dir, "parse_settings_skyline.toml"),
                 # "EncyclopeDIA": os.path.join(parse_settings_dir, "parse_settings_encyclopedia.toml"),
                 # "MSFraggerDIA": os.path.join(parse_settings_dir, "parse_settings_msfragger.toml"),

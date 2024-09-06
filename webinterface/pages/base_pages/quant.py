@@ -2,8 +2,8 @@
 
 import json
 import logging
-import uuid
 import os
+import uuid
 from datetime import datetime
 from pprint import pformat
 from typing import Any, Dict, Optional
@@ -17,7 +17,9 @@ from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.dda_quant_ion_module import DDAQuantIonModule as IonModule
+from proteobench.modules.dda_quant_ion.dda_quant_ion_module import (
+    DDAQuantIonModule as IonModule,
+)
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -209,13 +211,15 @@ class QuantUIObjects:
         )
 
     def _create_additional_parameters_section(self) -> None:
-        """Creates the additional parameters section of the form."""
+        """Creates the additional parameters section of the form and initialize the paramter fields."""
         st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
-        with st.expander("Additional parameters"):
-            with open(self.variables_quant.additional_params_json) as file:
-                config = json.load(file)
-            for key, value in config.items():
+        with open(self.variables_quant.additional_params_json) as file:
+            config = json.load(file)
+        for key, value in config.items():
+            if key == "comments_for_plotting":
                 self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+            else:
+                self.user_input[key] = None
 
     def _handle_form_submission(self) -> None:
         """Handles the form submission logic."""
@@ -634,11 +638,13 @@ class QuantUIObjects:
             A string representing the generated sample name.
         """
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        sample_name = "%s-%s-%s-%s" % (
-            self.user_input["input_format"],
-            self.user_input["software_version"],
-            self.user_input["enable_match_between_runs"],
-            time_stamp,
+        sample_name = "-".join(
+            [
+                self.user_input["input_format"],
+                # self.user_input["software_version"],
+                # self.user_input["enable_match_between_runs"],
+                time_stamp,
+            ]
         )
 
         return sample_name

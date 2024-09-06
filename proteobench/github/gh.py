@@ -72,13 +72,13 @@ class GithubProteobotRepo:
         current_branch.checkout()
         return current_branch
 
-    def commit(self, commit_message):
+    def commit(self, commit_name, commit_message):
         # Stage all changes, commit, and push to the new branch
         self.repo.git.add(A=True)
-        self.repo.index.commit(commit_message)
+        self.repo.index.commit("\n".join([commit_name, commit_message]))
         self.repo.git.push("--set-upstream", "origin", self.repo.active_branch)
 
-    def create_pull_request(self, commit_message):
+    def create_pull_request(self, commit_name, commit_message):
         # Create a pull request using PyGithub
         g = Github(self.token)
         repo = g.get_repo(self.proteobot_repo_name)
@@ -86,8 +86,8 @@ class GithubProteobotRepo:
         head = f"{self.username}:{self.repo.active_branch.name}"
 
         pr = repo.create_pull(
-            title=commit_message,
-            body="Pull request body",
+            title=commit_name,
+            body=commit_message,
             base=base.name,
             head=head,
         )

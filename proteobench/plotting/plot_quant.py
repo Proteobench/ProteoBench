@@ -78,6 +78,7 @@ class PlotDataPoint:
             "DIA-NN": "#8c564b",
             "AlphaDIA": "#ff7f00",
             "Custom": "#7f7f7f",
+            "Spectronaut": "#bcbd22",
             ##ffff33 /yellow so not ideal
         },
         mapping={"old": 10, "new": 20},

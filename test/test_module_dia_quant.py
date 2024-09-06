@@ -18,6 +18,7 @@ TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
 TESTDATA_FILES = {
     "DIA-NN": os.path.join(TESTDATA_DIR, "DIANN_1.9_beta_sample_report.tsv"),
     "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.7.2_sample.tsv"),
+    "Spectronaut": os.path.join(TESTDATA_DIR, "Spectronaut_test_sample.tsv"),
 }
 
 
@@ -48,7 +49,7 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("DIA-NN", "AlphaDIA")
+    supported_formats = ("DIA-NN", "AlphaDIA", "Spectronaut")
     """Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):

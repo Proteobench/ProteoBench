@@ -4,16 +4,20 @@ Developer guide
 
 .. toctree::
     :caption: Getting started
-    :glob:
     :maxdepth: 3
+    :hidden:
 
-    *
+    development-setup
+    local-usage
+    modifying-module
+    changelog
 
 
 .. toctree::
    :caption: Python API
    :glob:
    :maxdepth: 3
+   :hidden:
 
    api/*/index
 

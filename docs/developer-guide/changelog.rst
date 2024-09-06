@@ -11,6 +11,6 @@ and displayed below.
 Changelog - pre 0.2.10
 ----------------------
 
-.. include::  ../CHANGELOG.md
+.. include::  ../../CHANGELOG.md
    :parser: myst_parser.sphinx_
    :start-line: 1

@@ -1,4 +1,4 @@
-"""Alphapept uses the yaml format to save configuration."""
+"""Parser for Alphapept yaml configuration files."""
 
 import pathlib
 
@@ -8,7 +8,21 @@ import yaml
 from proteobench.io.params import ProteoBenchParameters
 
 
-def extract_params(fname) -> ProteoBenchParameters:
+def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
+    """
+    Extracts parameters from an AlphaPept yaml configuration file.
+
+    Parameters
+    ----------
+    fname : pathlib.Path
+        Path to the AlphaPept configuration file.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters.
+    """
+
     try:
         record = yaml.safe_load(fname)
     except AttributeError:
@@ -47,6 +61,7 @@ def extract_params(fname) -> ProteoBenchParameters:
 
 
 if __name__ == "__main__":
+    # create test csv files
     for fname in [
         "../../../test/params/alphapept_0.4.9.yaml",
         "../../../test/params/alphapept_0.4.9_unnormalized.yaml",

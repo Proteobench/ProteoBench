@@ -10,9 +10,9 @@ from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_base.module import Module
+from proteobench.modules.dda_quant_ion.dda_quant_ion_module import DDAQuantIonModule
+from proteobench.plotting.plot_quant import PlotDataPoint
 from proteobench.score.quant.quantscores import QuantScores
-from proteobench.utils.plotting.plot import PlotDataPoint
 
 # genereate_input_field
 
@@ -22,10 +22,11 @@ TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
     "MaxQuant_new": os.path.join(TESTDATA_DIR, "MaxQuant_2_5_1_evidence_sample.txt"),
-    "FragPipe": os.path.join(TESTDATA_DIR, "MSFragger_combined_ion.tsv"),
+    "FragPipe": os.path.join(TESTDATA_DIR, "FragPipe_MSFragger_combined_ion.tsv"),
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
-    "Sage": os.path.join(TESTDATA_DIR, "lfq.tsv"),
-    "Proline": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
+    "Sage": os.path.join(TESTDATA_DIR, "sage_sample_input_lfq.tsv"),
+    "ProlineStudio": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
+    "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
 }
 
 
@@ -41,7 +42,7 @@ def load__local_parsing_configuration_file(format_name: str):
     parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
     parse_settings = ParseSettingsBuilder(parse_settings_dir).build_parser(format_name)
     prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
+    intermediate = DDAQuantIonModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
@@ -51,13 +52,13 @@ def process_file(format_name: str):
     input_df = load_file(format_name)
     parse_settings = ParseSettingsBuilder().build_parser(format_name)
     prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = Module().generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
+    intermediate = DDAQuantIonModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
 
     return intermediate
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "Proline")  # "WOMBAT",
+    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "ProlineStudio", "i2MassChroQ")  # "WOMBAT",
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
@@ -69,8 +70,9 @@ class TestOutputFileReading(unittest.TestCase):
             "MaxQuant",
             "AlphaPept",
             "FragPipe",
-            "Proline",
+            "ProlineStudio",
             "Sage",
+            "i2MassChroQ",
         ):  # , "WOMBAT"
             self.assertTrue(format_name in parse_settings.INPUT_FORMATS)
 
@@ -133,7 +135,7 @@ class TestOutputFileReading(unittest.TestCase):
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
-        result_performance, all_datapoints, input_df = Module().benchmarking(
+        result_performance, all_datapoints, input_df = DDAQuantIonModule("").benchmarking(
             TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None
         )
         self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
@@ -151,7 +153,7 @@ class TestWrongFormatting(unittest.TestCase):
         user_input["input_format"] = format_name
 
         with self.assertRaises(KeyError) as context:
-            Module().benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
+            DDAQuantIonModule("").benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
 
 
 class TestPlot(unittest.TestCase):

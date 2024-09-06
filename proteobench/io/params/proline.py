@@ -1,4 +1,4 @@
-"""Proline is a quantification tool. Search engine is often Mascot.
+"""Proline Studio is a quantification tool. Search engine is often Mascot.
 
 The parameters are provided per raw file in separate sheets of an excel file.
 
@@ -63,7 +63,7 @@ def extract_params(fname) -> ProteoBenchParameters:
     assert all(stats.loc["unique", cols] == 1), "Not all columns are unique"
     sheet = sheet[cols].drop_duplicates().reset_index(drop=True)
     # Extract
-    params.software_name = "Proline"
+    params.software_name = "ProlineStudio"
     params.search_engine = sheet.loc[0, "software_name"]
     params.search_engine_version = sheet.loc[0, "software_version"]
     params.enzyme = sheet.loc[0, "enzymes"]

@@ -17,5 +17,10 @@
     "variable_mods": "Oxidation (M),Acetyl (Protein N-term)",
     "max_mods": "5",
     "min_precursor_charge": null,
-    "max_precursor_charge": "7"
+    "max_precursor_charge": "7",
+    "scan_window": null,
+    "quantification_method_DIANN": null,
+    "second_pass": null,
+    "protein_inference": null,
+    "predictors_library": null
 }

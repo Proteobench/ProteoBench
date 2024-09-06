@@ -27,11 +27,12 @@ class VariablesDDAQuant:
     placeholder_fig_compare: str = "placeholder_fig_compare"
     placeholder_table: str = "placeholder_table"
     placeholder_slider: str = "placeholder_slider"
+    placeholder_downloads_container: str = "placeholder_downloads_container"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
     beta_warning: bool = True
-    github_link_pr: str = "github.com/Proteobot/Results_Module2_quant_DDA.git"
+    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA.git"
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 

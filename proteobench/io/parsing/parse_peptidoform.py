@@ -18,6 +18,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     return input_data_frame
 
 
+# Currently unused?
 # TODO this should be generalized further
 def aggregate_modification_column(
     input_string_seq: str,

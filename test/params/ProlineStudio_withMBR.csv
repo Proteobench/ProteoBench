@@ -1,5 +1,5 @@
 ,0
-software_name,Proline
+software_name,ProlineStudio
 software_version,
 search_engine,Mascot
 search_engine_version,2.8.3
@@ -18,3 +18,8 @@ variable_mods,Acetyl (Protein N-term); Oxidation (M)
 max_mods,
 min_precursor_charge,2
 max_precursor_charge,3
+scan_window,
+quantification_method_DIANN,
+second_pass,
+protein_inference,
+predictors_library,

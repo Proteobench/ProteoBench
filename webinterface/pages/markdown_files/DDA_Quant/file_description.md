@@ -11,7 +11,7 @@ proteomeXchange repository PXD028735. You can download them here:
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="/app/static/ProteoBenchFASTA_DDAQuantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
+Download the zipped FASTA file here: <a href="/app/static/ProteoBenchFASTA_Quantification.zip" download>ProteoBenchFASTA_Quantification.zip</a>.
 The fasta file provided for this module contains the three species
 present in the samples and contaminant proteins
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))

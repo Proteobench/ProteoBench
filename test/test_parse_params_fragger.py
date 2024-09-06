@@ -12,6 +12,7 @@ TESTDATA_DIR = Path(__file__).parent / "params"
 parameter_files = [
     "fragpipe.workflow",
     "fragpipe_win_paths.workflow",
+    "fragpipe_v22.workflow",
 ]
 
 parameter_files = [TESTDATA_DIR / params_file for params_file in parameter_files]

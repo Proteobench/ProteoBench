@@ -67,14 +67,18 @@ class PlotDataPoint:
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
         software_colors: dict = {
-            "MaxQuant": "#1f77b4",
-            "AlphaPept": "#2ca02c",
-            "FragPipe": "#ff7f0e",
-            "WOMBAT": "#7f7f7f",
-            "Proline": "#d62728",
-            "Sage": "#f74c00",
-            "i2MassChroQ": "#5ce681",
-            "Custom": "#9467bd",
+            # currently colors are based on a colorbrewer 8-class Set1
+            "MaxQuant": "#377eb8",
+            "AlphaPept": "#4daf4a",
+            "ProlineStudio": "#e41a1c",
+            "FragPipe": "#ff7f00",
+            "i2MassChroQ": "#984ea3",
+            "Sage": "#a65628",
+            "WOMBAT": "#f781bf",
+            "DIA-NN": "#8c564b",
+            "AlphaDIA": "#ff7f00",
+            "Custom": "#7f7f7f",
+            ##ffff33 /yellow so not ideal
         },
         mapping={"old": 10, "new": 20},
         highlight_color: str = "#d30067",
@@ -91,32 +95,44 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
-        # TODO Shouldnt this use the weighted sum?
         all_median_abs_epsilon = [
             v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
         ]
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
-        # Add hover text
-        hover_texts = [
-            f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
-            + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
-            + f"Search engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.search_engine_version[idx]}<br>"
-            + f"FDR psm: {benchmark_metrics_df.ident_fdr_psm[idx]}<br>"
-            + f"MBR: {benchmark_metrics_df.enable_match_between_runs[idx]}<br>"
-            + f"Precursor Tolerance: {benchmark_metrics_df.precursor_mass_tolerance[idx]}<br>"
-            + f"Fragment Tolerance: {benchmark_metrics_df.fragment_mass_tolerance[idx]}<br>"
-            + f"Enzyme: {benchmark_metrics_df.enzyme[idx]} <br>"
-            + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
-            + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
-            + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
-            for idx, _ in benchmark_metrics_df.iterrows()
-        ]
+        # Add hover text , which is different depending on whether the submission is public or private
+        hover_texts = []
+        for idx, _ in benchmark_metrics_df.iterrows():
+            datapoint_text = ""
+            if benchmark_metrics_df.is_temporary[idx] == True:
+                datapoint_text = (
+                    f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
+                    + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
+                )
+                if "comments" in benchmark_metrics_df.columns:
+                    datapoint_text = (
+                        datapoint_text + f"Comment (private submission): {benchmark_metrics_df.comments[idx]}"
+                    )
+            else:
+                datapoint_text = (
+                    f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
+                    + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
+                    + f"Search engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.search_engine_version[idx]}<br>"
+                    + f"FDR psm: {benchmark_metrics_df.ident_fdr_psm[idx]}<br>"
+                    + f"MBR: {benchmark_metrics_df.enable_match_between_runs[idx]}<br>"
+                    + f"Precursor Tolerance: {benchmark_metrics_df.precursor_mass_tolerance[idx]}<br>"
+                    + f"Fragment Tolerance: {benchmark_metrics_df.fragment_mass_tolerance[idx]}<br>"
+                    + f"Enzyme: {benchmark_metrics_df.enzyme[idx]} <br>"
+                    + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
+                    + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
+                    + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
+                )
+                if "submission_comments" in benchmark_metrics_df.columns:
+                    datapoint_text = (
+                        datapoint_text + f"Comment (public submission): {benchmark_metrics_df.submission_comments[idx]}"
+                    )
 
-        if "comments" in benchmark_metrics_df.columns:
-            hover_texts = [
-                v + f"Comment: {c[0:75]}" for v, c in zip(hover_texts, benchmark_metrics_df.comments.fillna(""))
-            ]
+            hover_texts.append(datapoint_text)
 
         scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
         if "Highlight" in benchmark_metrics_df.columns:

@@ -52,7 +52,7 @@
             "MaxQuant": "-",
             "AlphaPept": "-",
             "FragPipe": "-",
-            "Proline": "-",
+            "ProlineStudio": "-",
             "i2MassChroQ": "-",
             "WOMBAT": "-",
             "Sage": "-",
@@ -123,17 +123,17 @@
             "MaxQuant": false,
             "AlphaPept": false,
             "FragPipe": false,
-            "Proline": false,
+            "ProlineStudio": false,
             "i2MassChroQ": false,
             "WOMBAT": false,
             "Sage": true,
             "Custom": false
         }
     },
-    "comments_for_submission": {
+    "comments_for_plotting": {
         "type": "text_area",
-        "label": "Fill in details not specified above",
-        "placeholder": "This workflow was run with isotope errors considering M-1, M+1, and M+2 ...'",
-        "height": 200
+        "label": "Comments for plotting",
+        "placeholder": "This workflow was run ...",
+        "height": 100
     }
 }

@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 import uuid
 from datetime import datetime
 from pprint import pformat
@@ -16,7 +17,9 @@ from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.module import IonModule
+from proteobench.modules.dda_quant_ion.dda_quant_ion_module import (
+    DDAQuantIonModule as IonModule,
+)
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -208,13 +211,15 @@ class QuantUIObjects:
         )
 
     def _create_additional_parameters_section(self) -> None:
-        """Creates the additional parameters section of the form."""
+        """Creates the additional parameters section of the form and initialize the paramter fields."""
         st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
-        with st.expander("Additional parameters"):
-            with open(self.variables_quant.additional_params_json) as file:
-                config = json.load(file)
-            for key, value in config.items():
+        with open(self.variables_quant.additional_params_json) as file:
+            config = json.load(file)
+        for key, value in config.items():
+            if key == "comments_for_plotting":
                 self.user_input[key] = self.generate_input_field(self.user_input["input_format"], value)
+            else:
+                self.user_input[key] = None
 
     def _handle_form_submission(self) -> None:
         """Handles the form submission logic."""
@@ -279,8 +284,8 @@ class QuantUIObjects:
         """Initializes the all_datapoints variable in the session state."""
         if self.variables_quant.all_datapoints not in st.session_state.keys():
             st.session_state[self.variables_quant.all_datapoints] = None
-            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_point(
-                st.session_state[self.variables_quant.all_datapoints]
+            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_points(
+                all_datapoints=st.session_state[self.variables_quant.all_datapoints]
             )
 
     def _filter_data_points_by_slider(self) -> None:
@@ -325,6 +330,7 @@ class QuantUIObjects:
         """Initializes the placeholders for the figure and table."""
         st.session_state[self.variables_quant.placeholder_fig_compare] = st.empty()
         st.session_state[self.variables_quant.placeholder_table] = st.empty()
+        st.session_state[self.variables_quant.placeholder_downloads_container] = st.empty()
         st.session_state["table_id"] = uuid.uuid4()
 
     def _generate_and_display_metric_plot(self) -> None:
@@ -346,6 +352,52 @@ class QuantUIObjects:
             key=st.session_state["table_id"],
             on_change=self.table_callback,
         )
+
+    def render_download_container(self) -> None:
+        """Render the selector and ares for raw data download"""
+
+        # create a dataframe for dataset selection from the submitted datasets
+        downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
+        downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
+
+        # create a uuid for the selector (if necessary)
+        if "download_selector_id" not in st.session_state.keys():
+            st.session_state["download_selector_id"] = uuid.uuid4()
+
+        with st.session_state[self.variables_quant.placeholder_downloads_container].container(border=True):
+            # render everything into the "download"-container
+            st.subheader("Download raw datasets")
+
+            st.selectbox(
+                "Select dataset",
+                downloads_df["intermediate_hash"],
+                index=None,
+                key=st.session_state["download_selector_id"],
+                format_func=lambda x: downloads_df["id"][x],
+            )
+
+            if (
+                st.session_state[st.session_state["download_selector_id"]] != None
+                and st.secrets["storage"]["dir"] != None
+            ):
+                # if some dataset is already selected, render the download buttons
+                st.write(
+                    "Available files for "
+                    + downloads_df["id"][st.session_state[st.session_state["download_selector_id"]]]
+                    + ":"
+                )
+
+                dataset_path = (
+                    st.secrets["storage"]["dir"] + "/" + st.session_state[st.session_state["download_selector_id"]]
+                )
+                if os.path.isdir(dataset_path):
+                    files = os.listdir(dataset_path)
+                    for file_name in files:
+                        path_to_file = dataset_path + "/" + file_name
+                        with open(path_to_file, "rb") as file:
+                            st.download_button(file_name, file, file_name=file_name)
+                else:
+                    st.write("Directory for this dataset does not exist, this should not happen.")
 
     def _create_submission_button(self) -> Optional[str]:
         """Creates a button for public submission and returns the PR URL if the button is pressed."""
@@ -586,11 +638,13 @@ class QuantUIObjects:
             A string representing the generated sample name.
         """
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        sample_name = "%s-%s-%s-%s" % (
-            self.user_input["input_format"],
-            self.user_input["software_version"],
-            self.user_input["enable_match_between_runs"],
-            time_stamp,
+        sample_name = "-".join(
+            [
+                self.user_input["input_format"],
+                # self.user_input["software_version"],
+                # self.user_input["enable_match_between_runs"],
+                time_stamp,
+            ]
         )
 
         return sample_name

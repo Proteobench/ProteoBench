@@ -39,9 +39,10 @@ readme = "README.md"
 dev = ["black~=23.0", "jupyterlab", "notebook", "tqdm", "wget", "nox", "pytest"]
 docs = [
   "sphinx",
+  "sphinx-design",
   "sphinx-rtd-theme",
   "sphinx-autobuild",
-  "myst-parser",
+  "myst-parser>=0.3.0",
   "pydata-sphinx-theme",
 ]
 web = ["streamlit>1.27", "scipy"]

@@ -1,10 +1,9 @@
-#############################
-ProteoBench benchmark modules
-#############################
+#####################
+Benchmarking modules
+#####################
 
 .. toctree::
-   :caption: ProteoBench benchmark modules
    :glob:
-   :maxdepth: 3
+   :maxdepth: 1
 
    *

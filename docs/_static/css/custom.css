@@ -6,14 +6,17 @@ html {
     --pst-font-weight-heading: 500;
 }
 
-/* html[data-theme="light"] {
-    --pst-color-primary: #3b5880;
+html[data-theme="light"] {
+    --pst-color-primary: #5776a3;
+    --pst-color-secondary: #f4a261;
+    --pst-color-primary-highlight: #344560;
+    --pst-color-secondary-highlight: #a76e40;
 }
 
 html[data-theme="dark"] {
-    --pst-color-primary: #5c87c2;
+    --pst-color-primary: #5776a3;
+    --pst-color-secondary: #f4a261;
+    --pst-color-primary-highlight: #344560;
+    --pst-color-secondary-highlight: #a76e40;
 }
 
-a:visited {
-    color: var(--pst-color-link);
-} */

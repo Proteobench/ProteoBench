@@ -57,6 +57,7 @@ ProteoBench in 5 steps
 4. **Upload the results** to ProteoBench
 5. **Compare your workflow run** with validated benchmark runs
 
+
 .. button-link:: https://proteobench.cubimed.rub.de/
     :class: sd-px-4
     :color: primary
@@ -74,6 +75,8 @@ Available ProteoBench modules
 .. active: success
 .. archived: warning
 .. withdrawn: danger
+
+.. grid::
 
     .. grid-item-card:: DDA quantification ion-level
         :columns: 6 6 4 4
@@ -113,6 +116,11 @@ Available ProteoBench modules
         :columns: 6 6 4 4
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/257
+
+        :bdg-primary:`in development`
+        ^^^
+        Benchmark the quantification accuracy of label-free data independent acquisition workflows
+        using a multi-species sample
 
 
     .. grid-item-card:: De novo identification

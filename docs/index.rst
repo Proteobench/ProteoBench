@@ -57,15 +57,6 @@ ProteoBench in 5 steps
 4. **Upload the results** to ProteoBench
 5. **Compare your workflow run** with validated benchmark runs
 
-.. line-block::
-    **Robbe Devreese**
-    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
-
-.. line-block:: 
-    **Nadezhda T. Doncheva**
-    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
-
 .. button-link:: https://proteobench.cubimed.rub.de/
     :class: sd-px-4
     :color: primary
@@ -83,15 +74,6 @@ Available ProteoBench modules
 .. active: success
 .. archived: warning
 .. withdrawn: danger
-
-.. line-block::
-    **Caroline Jachmann**
-    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
-
-.. line-block:: 
-    **Vedran Kasalica**
-    *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
 
     .. grid-item-card:: DDA quantification ion-level
         :columns: 6 6 4 4
@@ -121,36 +103,16 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/proteobench/proteobench/discussions/202
 
-<<<<<<< HEAD
-.. line-block::
-    **Alireza Nameni**
-    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
-
-.. line-block::
-    **Martin Rykær**
-    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
-=======
         :bdg-primary:`in development`
         ^^^
         Benchmark the peptidoform-level quantification accuracy of label-free data dependent
         acquisition workflows using a multi-species sample
->>>>>>> 63c5680 (Finalize landing page)
 
 
     .. grid-item-card:: DIA quantification
         :columns: 6 6 4 4
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/257
-
-.. line-block::
-    **Sam van Puyenbroeck**
-    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
-
-.. line-block::
-    **Bart Van Puyvelde**
-    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
 
 
     .. grid-item-card:: De novo identification

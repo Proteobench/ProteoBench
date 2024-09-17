@@ -3,12 +3,8 @@ from __future__ import annotations
 import os
 import re
 import math
-import csv
 
 import pandas as pd
-
-PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), "io_parse_settings")
-PROTEIN_ACC_FILE = os.path.join(PARSE_SETTINGS_DIR, "species_mapper.csv")
 
 
 def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
@@ -60,14 +56,14 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     elif input_format == "Spectronaut":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
-        with open(PROTEIN_ACC_FILE, mode="r") as infile:
-            reader = csv.reader(infile)
-            fasta_descriptors = {row[0] for row in reader}
-        # TODO improve efficiency?
-        input_data_frame["Proteins"] = [
-            map_protein_descriptor(protein_group, fasta_descriptors)
-            for protein_group in input_data_frame["PG.ProteinGroups"]
-        ]
+        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+        mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+        mapper = mapper_df["description"].to_dict()
+        input_data_frame["Protein_list"] = input_data_frame["PG.ProteinGroups"].str.split(";")
+        input_data_frame["Proteins"] = input_data_frame["Protein_list"].map(
+            lambda x: [mapper[protein] for protein in x]
+        )
+        input_data_frame["Proteins"] = input_data_frame["Proteins"].str.join(";")
 
     return input_data_frame
 
@@ -208,12 +204,3 @@ def get_proforma_bracketed(
         if not before_aa:
             new_seq += aa
     return new_seq
-
-
-def map_protein_descriptor(protein_name: str, fasta_set, sep=";") -> str:
-    proteins = []
-    protein_list = protein_name.split(sep=sep)
-    for descriptor in fasta_set:
-        if any(protein in descriptor for protein in protein_list):
-            proteins.append(descriptor)
-    return ";".join(proteins)

@@ -81,6 +81,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+species-mapping.ipynb
 
 # IPython
 profile_default/

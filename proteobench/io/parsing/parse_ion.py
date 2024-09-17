@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import os
 import re
 import math
+import csv
 
 import pandas as pd
+
+PARSE_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), "io_parse_settings")
+PROTEIN_ACC_FILE = os.path.join(PARSE_SETTINGS_DIR, "species_mapper.csv")
 
 
 def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
@@ -53,8 +58,18 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         )
         input_data_frame["Proteins"] = input_data_frame["genes"] + "/" + input_data_frame["pg_master"]
     elif input_format == "Spectronaut":
+        # TODO: multiple proteins mapping!!
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
+        with open(PROTEIN_ACC_FILE, mode="r") as infile:
+            reader = csv.reader(infile)
+            fasta_descriptors = [row[0] for row in reader]
+        input_data_frame["Proteins"] = [
+        map_protein_descriptor(protein_group, fasta_descriptors)
+        for protein_group in input_data_frame['PG.ProteinGroups']
+    ]
+        
+
     return input_data_frame
 
 
@@ -194,3 +209,14 @@ def get_proforma_bracketed(
         if not before_aa:
             new_seq += aa
     return new_seq
+
+def map_protein_descriptor(protein_name: str, fasta_df, sep=';') -> str:
+    proteins = ""
+    for descriptor in fasta_df:
+        for i, protein in enumerate(protein_name.split(sep=sep)):
+            if i > 0:
+                proteins += ';'
+            if protein in descriptor:
+                proteins += descriptor
+    return 'UNKNOWN'
+    

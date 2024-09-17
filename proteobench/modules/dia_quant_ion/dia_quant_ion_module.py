@@ -110,7 +110,6 @@ class DIAQuantIonModule(QuantModule):
             quant_score = QuantScores(
                 self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
-            print(quant_score)
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
 

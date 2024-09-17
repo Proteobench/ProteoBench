@@ -68,7 +68,6 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
             map_protein_descriptor(protein_group, fasta_descriptors)
             for protein_group in input_data_frame["PG.ProteinGroups"]
         ]
-    input_data_frame.to_csv("test.csv")
 
     return input_data_frame
 

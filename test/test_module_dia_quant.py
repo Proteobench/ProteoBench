@@ -20,6 +20,7 @@ TESTDATA_FILES = {
     "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.7.2_sample.tsv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxDIA_sample_test.txt"),
     "MSFraggerDIA": os.path.join(TESTDATA_DIR, "MSFraggerDIA_sample_test.tsv"),
+    "Spectronaut": os.path.join(TESTDATA_DIR, "Spectronaut_test_sample_default_PG.tsv"),
 }
 
 
@@ -50,7 +51,7 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("DIA-NN", "AlphaDIA", "MaxQuant", "MSFraggerDIA")
+    supported_formats = ("DIA-NN", "AlphaDIA", "MaxQuant", "MSFraggerDIA", "Spectronaut")
     """Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):

@@ -117,7 +117,6 @@ class QuantScores:
 
         # now remove all rows with withspecies["unique"] > 1
         withspecies_unique = withspecies[withspecies["unique"] == 1].copy()
-
         # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
         for species in species_expected_ratio.keys():
             withspecies_unique.loc[withspecies_unique[species] == True, "species"] = species

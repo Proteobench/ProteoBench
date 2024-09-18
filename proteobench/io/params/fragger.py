@@ -1,7 +1,7 @@
 """Functionality to parse FragPipe fragger.params parameter files.
 
 FragPipe has a text based paramter file format which
-separates paramters and their value using an equal sign. Optional comments are
+separates parameters and their value using an equal sign. Optional comments are
 expressed with a hash sign.
 """
 
@@ -128,6 +128,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
 
 
 if __name__ == "__main__":
+    # TODO create test csv files
     import pathlib
     from pprint import pprint
 

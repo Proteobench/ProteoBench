@@ -2,13 +2,31 @@ import re
 from proteobench.io.params import ProteoBenchParameters
 import pathlib
 import pandas as pd
+from typing import Iterable, Tuple, Optional
 
 levels = [0, 1, 5, 9, 13, 17]
 
 ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
 
 
-def parse_line(line):
+def parse_line(line: str) -> Tuple[str, dict, int]:
+    """
+    Parse a log line into a tuple.
+
+    Parameter
+    ---------
+    line: str
+        A log line.
+
+    Returns
+    -------
+    str:
+        Setting name
+    dict:
+        Dictionary of setting name and value
+    int:
+        The indentation level
+    """
     # Remove the info part and convert ansi
     line = ANSI_REGEX.sub("", line[22:].strip())
     # Split the string to tab part and setting part
@@ -26,9 +44,30 @@ def parse_line(line):
 
 
 def parse_section(
-    line,
-    line_generator,
-):
+    line: str,
+    line_generator: Iterable,
+) -> Tuple[dict, int, Optional[Tuple]]:
+    """
+    Parse a section into a dictionary.
+
+    All settings at the same indentation level are added to a dictionary.
+
+    Parameter
+    ---------
+    line: str
+        First parsed line of a new section
+    line_generator: Generator
+        The line generator of log file lines
+
+    Return
+    ------
+    dict:
+        The parsed section
+    int:
+        The indentation level of the line after the section
+    next_line:
+        The line after the section
+    """
     section = {}
 
     # Parse the line (both level and dictionary)
@@ -81,7 +120,20 @@ def parse_section(
     return section, 0, None
 
 
-def extract_file_version(line):
+def extract_file_version(line: str) -> str:
+    """
+    Extract file version from alphaDIA log file line.
+
+    Parameter
+    ---------
+    line: str
+        The line containing the version number.
+
+    Return
+    ------
+    str
+        Version number.
+    """
     # Regex pattern to extract the version number
     version_pattern = r"version:\s*([\d\.]+)"
 
@@ -93,7 +145,17 @@ def extract_file_version(line):
     return version
 
 
-def add_fdr_parameters(parameter_dict, parsed_settings):
+def add_fdr_parameters(parameter_dict: dict, parsed_settings: dict) -> None:
+    """
+    Add fdr parameters to the parameter dictionary.
+
+    Parameters
+    ----------
+    parameter_dict: dict
+        Dictionary where proteobench parameters should be stored.
+    parsed_settings: dict
+        Dictionary of parsed maxDIA log-file.
+    """
     fdr_value = float(parsed_settings["fdr"]["fdr"])
     fdr_level = parsed_settings["fdr"]["group_level"].strip()
 
@@ -103,7 +165,7 @@ def add_fdr_parameters(parameter_dict, parsed_settings):
     parameter_dict.update(fdr_parameters)
 
 
-def get_min_max(list_of_elements):
+def get_min_max(list_of_elements: list) -> Tuple[int, int]:
     if "(user defined)" in list_of_elements[1]:
         min_value = int(list_of_elements[1].replace("(user defined)", ""))
         if len(list_of_elements) == 4:
@@ -119,7 +181,7 @@ def get_min_max(list_of_elements):
     return min_value, max_value
 
 
-def extract_params(fname):
+def extract_params(fname: str) -> ProteoBenchParameters:
     with open(fname) as f:
         lines_read = f.readlines()
         lines = [line for line in lines_read if "──" in line]

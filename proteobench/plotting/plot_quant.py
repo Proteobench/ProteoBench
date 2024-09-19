@@ -155,7 +155,10 @@ class PlotDataPoint:
         benchmark_metrics_df["scatter_size"] = scatter_size
 
         fig = go.Figure(
-            layout_yaxis_range=[min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000), max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000)],
+            layout_yaxis_range=[
+                min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
+                max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
+            ],
             layout_xaxis_range=[
                 min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
                 max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,

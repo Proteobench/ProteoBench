@@ -22,7 +22,7 @@ It contains the following columns:
     - species the sequence matches to
 - **unique**
     - TRUE if the sequence is species-specific
-- species
+- **species**
     - species the sequence matches to
 - **log2_expectedRatio**
     - expected ratio for the given species

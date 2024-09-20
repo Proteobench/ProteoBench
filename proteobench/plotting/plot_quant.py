@@ -83,6 +83,7 @@ class PlotDataPoint:
         },
         mapping={"old": 10, "new": 20},
         highlight_color: str = "#d30067",
+        label: str = "None",
     ) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
@@ -165,18 +166,27 @@ class PlotDataPoint:
             ],
         )
 
+        # Get all unique color-software combinations (necessary for highlighting)
+        color_software_combinations = benchmark_metrics_df[["color", "software_name"]].drop_duplicates()
+
         # plot the data points, one trace per software tool
-        for software in benchmark_metrics_df["software_name"].unique():
-            tmp_df = benchmark_metrics_df[benchmark_metrics_df["software_name"] == software]
+        for _, row in color_software_combinations.iterrows():
+            color = row["color"]
+            software = row["software_name"]
+
+            tmp_df = benchmark_metrics_df[
+                (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
+            ]
             fig.add_trace(
                 go.Scatter(
                     x=tmp_df["median_abs_epsilon"],
                     y=tmp_df["nr_prec"],
-                    mode="markers",
-                    text=tmp_df["hover_text"],
+                    mode="markers" if label == "None" else "markers+text",
+                    hovertext=tmp_df["hover_text"],
+                    text=tmp_df[label] if label != "None" else None,
                     marker=dict(color=tmp_df["color"], showscale=False),
                     marker_size=tmp_df["scatter_size"],
-                    name=software,
+                    name=tmp_df["software_name"].iloc[0],
                 )
             )
 

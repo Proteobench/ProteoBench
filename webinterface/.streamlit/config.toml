@@ -3,4 +3,4 @@ base="light"
 
 [server]
 enableStaticServing = true
-maxUploadSize = 500
+maxUploadSize = 1000

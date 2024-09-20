@@ -76,9 +76,10 @@ class PlotDataPoint:
             "Sage": "#a65628",
             "WOMBAT": "#f781bf",
             "DIA-NN": "#8c564b",
-            "AlphaDIA": "#ff7f00",
+            "AlphaDIA": "#4daf4a",
             "Custom": "#7f7f7f",
             "Spectronaut": "#bcbd22",
+            "MSFraggerDIA (DIA-NN quant)": "#ff7f00",
             ##ffff33 /yellow so not ideal
         },
         mapping={"old": 10, "new": 20},

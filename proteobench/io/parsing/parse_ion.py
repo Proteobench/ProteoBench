@@ -53,12 +53,15 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
             axis=1,
         )
         input_data_frame["Proteins"] = input_data_frame["genes"] + "/" + input_data_frame["pg_master"]
-    elif input_format == "MSFraggerDIA (DIA-NN quant)":
+    elif input_format == "FragPipe (DIA-NN quant)":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
         mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
         mapper = mapper_df["description"].to_dict()
         input_data_frame["Protein.Names"] = input_data_frame["Protein.Ids"].map(mapper)
+    elif input_format == "FragPipe":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
     elif input_format == "Spectronaut":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
@@ -67,7 +70,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         mapper = mapper_df["description"].to_dict()
         input_data_frame["Protein_list"] = input_data_frame["PG.ProteinGroups"].str.split(";")
         input_data_frame["Proteins"] = input_data_frame["Protein_list"].map(
-            lambda x: [mapper[protein] for protein in x]
+            lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
         )
         input_data_frame["Proteins"] = input_data_frame["Proteins"].str.join(";")
 

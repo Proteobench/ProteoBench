@@ -70,7 +70,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         mapper = mapper_df["description"].to_dict()
         input_data_frame["Protein_list"] = input_data_frame["PG.ProteinGroups"].str.split(";")
         input_data_frame["Proteins"] = input_data_frame["Protein_list"].map(
-            lambda x: [mapper[protein] for protein in x]
+            lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
         )
         input_data_frame["Proteins"] = input_data_frame["Proteins"].str.join(";")
 

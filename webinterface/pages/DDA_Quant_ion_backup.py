@@ -36,27 +36,17 @@ class StreamlitUI:
     def _main_page(self) -> None:
         """
         Sets up the main page layout for the Streamlit application.
+        This includes the title, module descriptions, input forms, and configuration settings.
         """
-        # Create tabs
-        tab_results_all, tab_submission_details, tab_results_new, tab_public_submission = st.tabs(
-            ["Results (All Data)", "Submission Details", "Results (New Submissions)", "Public Submission"]
-        )
+        self.quant_uiobjects.create_text_header()
+        self.quant_uiobjects.create_main_submission_form()
 
-        # Tab 1: Results (All Data)
-        with tab_results_all:
-            self.quant_uiobjects.display_results_all_data()
+        self.quant_uiobjects.init_slider()
 
-        # Tab 2: Submission Details
-        with tab_submission_details:
-            self.quant_uiobjects.display_submission_details()
+        if self.quant_uiobjects.variables_quant.fig_logfc in st.session_state:
+            self.quant_uiobjects.populate_results()
 
-        # Tab 3: Results (New Submissions)
-        with tab_results_new:
-            self.quant_uiobjects.display_results_new_submissions()
-
-        # Tab 4: Public Submission
-        with tab_public_submission:
-            self.quant_uiobjects.display_public_submission_form()
+        self.quant_uiobjects.create_results()
 
 
 if __name__ == "__main__":

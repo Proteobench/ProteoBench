@@ -58,6 +58,7 @@ class QuantUIObjects:
 
         self.first_point_plotted = False
         st.session_state[self.variables_quant.submit] = False
+        self.stop_duplicating = False
 
         # Make sure when initialized the submission is False
         if self.variables_quant.submit not in st.session_state:
@@ -113,12 +114,14 @@ class QuantUIObjects:
     def create_results(self) -> None:
         """Creates the results section of the page."""
         if self._results_already_initialized():
-            print("Results already initialized")
-            self._create_slider()
-            self._generate_and_display_metric_plot()
+            try:
+                self._create_slider()
+                self._generate_and_display_metric_plot()
+                self._initialize_data_editor()
+                self.render_download_container()
+            except:
+                pass
             return
-
-        print("Results not initialized")
 
         self._initialize_all_datapoints()
         self._filter_data_points_by_slider()
@@ -326,13 +329,13 @@ class QuantUIObjects:
         # print(st.session_state)
         # print("-----------------")
         st.session_state[self.variables_quant.placeholder_slider] = st.empty()
-        input("stopped")
 
         if (
             self.variables_quant.placeholder_slider not in st.session_state.keys()
             or st.session_state[self.variables_quant.placeholder_slider] == st.empty()
         ):
-            print("Slider not initialized")
+            print("----", st.session_state[self.variables_quant.placeholder_slider])
+
             st.markdown(open(self.variables_quant.description_slider_md, "r").read())
             st.session_state[self.variables_quant.placeholder_slider] = st.empty()
             st.session_state[self.variables_quant.placeholder_slider].select_slider(
@@ -343,10 +346,10 @@ class QuantUIObjects:
                 key=st.session_state["slider_id"],
             )
         elif not self.first_point_plotted and self.variables_quant.button_submission_uuid:
-            print("submit is false")
-            print(st.session_state["slider_id"])
+            if self.stop_duplicating:
+                return
             st.markdown(open(self.variables_quant.description_slider_md, "r").read())
-            # st.session_state[self.variables_quant.placeholder_slider] = st.empty()
+            st.session_state[self.variables_quant.placeholder_slider] = st.empty()
             st.session_state[self.variables_quant.placeholder_slider].select_slider(
                 label="Minimal ion quantifications (# samples)",
                 options=[1, 2, 3, 4, 5, 6],
@@ -376,11 +379,14 @@ class QuantUIObjects:
 
     def _initialize_data_editor(self) -> None:
         """Initializes the data editor."""
-        st.session_state[self.variables_quant.placeholder_table].data_editor(
-            st.session_state[self.variables_quant.all_datapoints],
-            key=st.session_state["table_id"],
-            on_change=self.table_callback,
-        )
+        try:
+            st.session_state[self.variables_quant.placeholder_table].data_editor(
+                st.session_state[self.variables_quant.all_datapoints],
+                key=st.session_state["table_id"],
+                on_change=self.table_callback,
+            )
+        except:
+            self.stop_duplicating = True
 
     def render_download_container(self, reset_uuid=False) -> None:
         """Render the selector and ares for raw data download"""
@@ -523,6 +529,7 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.check_submission] = st.checkbox(
             "I confirm that the metadata is correct",
         )
+        self.stop_duplicating = True
 
     def _run_proteobench(self) -> None:
         """
@@ -693,6 +700,16 @@ class QuantUIObjects:
 
         st.markdown(st.markdown(open(self.variables_quant.description_results_md, "r").read()))
 
+        st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
+        st.download_button(
+            label="Download",
+            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
+            file_name=f"{sample_name}.csv",
+            mime="text/csv",
+            key=f"{random_uuid}",
+        )
+
         st.subheader("Mean error between conditions")
         st.markdown(self.variables_quant.texts.ShortMessages.submission_result_description)
 
@@ -734,16 +751,6 @@ class QuantUIObjects:
         )
 
         self.render_download_container(reset_uuid=True)
-
-        st.subheader("Download calculated ratios")
-        random_uuid = uuid.uuid4()
-        st.download_button(
-            label="Download",
-            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
-            file_name=f"{sample_name}.csv",
-            mime="text/csv",
-            key=f"{random_uuid}",
-        )
 
         st.subheader("Add results to online repository")
         st.markdown(open(self.variables_quant.description_submission_md, "r").read())

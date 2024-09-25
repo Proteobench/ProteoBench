@@ -80,6 +80,8 @@ class DDAQuantIonModule(QuantModule):
 
         # Parse workflow output file
 
+        print(input_file)
+        print(input_format)
         try:
             input_df = load_input_file(input_file, input_format)
         except pd.errors.ParserError as e:

@@ -43,6 +43,8 @@ class StreamlitUI:
 
         self.quant_uiobjects.init_slider()
 
+        self.quant_uiobjects.create_selectbox()
+
         if self.quant_uiobjects.variables_quant.fig_logfc in st.session_state:
             self.quant_uiobjects.populate_results()
 

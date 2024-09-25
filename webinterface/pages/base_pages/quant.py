@@ -106,6 +106,16 @@ class QuantUIObjects:
         if st.session_state["slider_id"] not in st.session_state.keys():
             st.session_state[st.session_state["slider_id"]] = self.variables_quant.default_val_slider
 
+    def create_selectbox(self) -> None:
+        """Creates the selectbox for the Streamlit UI."""
+        if "selectbox_id" not in st.session_state.keys():
+            st.session_state["selectbox_id"] = uuid.uuid4()
+        if st.session_state["selectbox_id"] not in st.session_state.keys():
+            st.session_state[st.session_state["selectbox_id"]] = "None"
+
+        st.session_state["_selectbox_id"] = st.session_state["selectbox_id"]
+        st.selectbox("Selectbox", ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"], key=st.session_state["selectbox_id"])
+
     def create_results(self) -> None:
         """Creates the results section of the page."""
         if self._results_already_initialized():
@@ -337,7 +347,7 @@ class QuantUIObjects:
         """Generates and displays the metric plot."""
         try:
             st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
+                st.session_state[self.variables_quant.all_datapoints], label = st.session_state[st.session_state["selectbox_id"]]
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -578,7 +588,9 @@ class QuantUIObjects:
 
         # Plot any changes made to the data points
         try:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_quant.all_datapoints])
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints], label = st.session_state[st.session_state["selectbox_id"]]
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
@@ -597,7 +609,9 @@ class QuantUIObjects:
         )
 
         try:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_quant.all_datapoints])
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints], label = st.session_state[st.session_state["selectbox_id"]]
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
@@ -684,7 +698,7 @@ class QuantUIObjects:
 
         try:
             st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
+                st.session_state[self.variables_quant.all_datapoints], label = st.session_state[st.session_state["selectbox_id"]]
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -762,8 +776,8 @@ class QuantUIObjects:
         if recalculate:
             try:
                 st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                    st.session_state[self.variables_quant.all_datapoints]
-                )
+                st.session_state[self.variables_quant.all_datapoints], label = st.session_state[st.session_state["selectbox_id"]]
+            )
             except Exception as e:
                 st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 

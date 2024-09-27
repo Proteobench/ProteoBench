@@ -54,7 +54,7 @@ class DDAQuantIonModule(QuantModule):
         return True
 
     def benchmarking(
-        self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
+        self, input_file_loc: any, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -80,10 +80,8 @@ class DDAQuantIonModule(QuantModule):
 
         # Parse workflow output file
 
-        print(input_file)
-        print(input_format)
         try:
-            input_df = load_input_file(input_file, input_format)
+            input_df = load_input_file(input_file_loc, input_format)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"

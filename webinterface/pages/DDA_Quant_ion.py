@@ -38,11 +38,19 @@ class StreamlitUI:
         Sets up the main page layout for the Streamlit application.
         """
         # Create tabs
-        tab_description, tab_results_all, tab_submission_details, tab_results_new, tab_public_submission = st.tabs(
+        (
+            tab_description,
+            tab_results_all,
+            tab_submission_details,
+            tab_indepth_plots,
+            tab_results_new,
+            tab_public_submission,
+        ) = st.tabs(
             [
                 "Module description",
                 "Results (All Data)",
                 "Submission form",
+                "In-depth submission",
                 "Results (New Submissions)",
                 "Public Submission",
             ]
@@ -54,6 +62,11 @@ class StreamlitUI:
 
         # Tab 1: Results (All Data)
         with tab_results_all:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
             self.quant_uiobjects.display_results_all_data()
 
         # Tab 2: Submission Details
@@ -62,14 +75,34 @@ class StreamlitUI:
             self.quant_uiobjects.create_main_submission_form()
             # self.quant_uiobjects.display_submission_details()
 
+        # Tab 2.5: in-depth plots current data
+        with tab_indepth_plots:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.plots_for_current_data(True)
+
         # Tab 3: Results (New Submissions)
         with tab_results_new:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
             self.quant_uiobjects.display_results_all_data_submitted()
             # self.quant_uiobjects.display_results_new_submissions()
 
         # Tab 4: Public Submission
         with tab_public_submission:
-            pass
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.wrap_public_submission_form()
+            # self.quant_uiobjects.create_main_submission_form()
             # self.quant_uiobjects.display_public_submission_form()
 
 

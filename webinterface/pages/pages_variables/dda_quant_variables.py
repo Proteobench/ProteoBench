@@ -34,6 +34,7 @@ class VariablesDDAQuant:
 
     placeholder_downloads_container: str = "placeholder_downloads_container"
     highlight_list: List[str] = field(default_factory=list)
+    highlight_list_submitted: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
     beta_warning: bool = True

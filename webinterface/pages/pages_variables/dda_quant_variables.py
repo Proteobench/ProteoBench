@@ -7,7 +7,6 @@ from pages.texts.generic_texts import WebpageTexts
 @dataclass
 class VariablesDDAQuant:
     all_datapoints: str = "all_datapoints"
-    all_datapoints_submitted: str = "all_datapoints_submitted"
     all_datapoints_submission: str = "all_datapoints_submission"
     input_df_submission: str = "input_df_submission"
     result_performance_submission: str = "result_performance_submission"
@@ -27,14 +26,16 @@ class VariablesDDAQuant:
     df_head: str = "df_head"
     placeholder_fig_compare: str = "placeholder_fig_compare"
 
+    all_datapoints_submitted: str = "all_datapoints_submitted"
     placeholder_table_submitted: str = "placeholder_table_submitted"
     placeholder_slider_submitted: str = "placeholder_slider_submitted"
+    highlight_list_submitted: List[str] = field(default_factory=list)
+
     placeholder_table: str = "placeholder_table"
     placeholder_slider: str = "placeholder_slider"
 
     placeholder_downloads_container: str = "placeholder_downloads_container"
     highlight_list: List[str] = field(default_factory=list)
-    highlight_list_submitted: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
     beta_warning: bool = True

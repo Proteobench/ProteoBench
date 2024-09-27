@@ -135,11 +135,6 @@ class QuantUIObjects:
         # Fetch the appropriate data
         self._initialize_all_datapoints_submitted()
 
-        try:
-            print(st.session_state[self.variables_quant.all_datapoints_submitted])
-            input("stop!9")
-        except:
-            pass
         # Filter data based on slider
         data_points_filtered = self._filter_data_points_by_slider_submitted()
 
@@ -365,11 +360,6 @@ class QuantUIObjects:
     def _filter_data_points_by_slider(self) -> None:
         """Filters the data points based on the slider value."""
         if "slider_id" in st.session_state.keys():
-            try:
-                print(st.session_state[self.variables_quant.all_datapoints_submitted])
-            except:
-                pass
-            input("stop!2")
             return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints],
                 st.session_state[st.session_state["slider_id"]],
@@ -381,11 +371,6 @@ class QuantUIObjects:
             "slider_id_submitted" in st.session_state.keys()
             and self.variables_quant.all_datapoints_submitted in st.session_state.keys()
         ):
-            try:
-                print(st.session_state[self.variables_quant.all_datapoints_submitted])
-            except:
-                pass
-            input("stop!")
             return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints_submitted],
                 st.session_state[st.session_state["slider_id_submitted"]],
@@ -488,7 +473,7 @@ class QuantUIObjects:
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
         # create a uuid for the selector (if necessary)
-        if "download_selector_id" not in st.session_state.keys() or reset_uuid:
+        if self.variables_quant.placeholder_downloads_container not in st.session_state.keys() or reset_uuid:
             st.session_state[self.variables_quant.placeholder_downloads_container] = st.empty()
             st.session_state["download_selector_id"] = uuid.uuid4()
 
@@ -732,11 +717,6 @@ class QuantUIObjects:
         Callback function for the slider input. It adjusts the data points displayed based on
         the selected slider value, such as the minimum number of ion quantifications.
         """
-        try:
-            print(st.session_state[self.variables_quant.all_datapoints_submitted])
-        except:
-            pass
-        input("stop!3")
         st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )
@@ -753,11 +733,6 @@ class QuantUIObjects:
         Callback function for the slider input. It adjusts the data points displayed based on
         the selected slider value, such as the minimum number of ion quantifications.
         """
-        try:
-            print(st.session_state[self.variables_quant.all_datapoints_submitted])
-        except:
-            pass
-        input("stop!5")
         st.session_state[self.variables_quant.all_datapoints_submitted] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_quant.all_datapoints_submitted],
             st.session_state[st.session_state["slider_id_submitted"]],
@@ -852,11 +827,6 @@ class QuantUIObjects:
             key=st.session_state["slider_id"],
         )
 
-        try:
-            print(st.session_state[self.variables_quant.all_datapoints_submitted])
-        except:
-            pass
-        input("stop!6")
         st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )

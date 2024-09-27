@@ -100,13 +100,18 @@ class QuantModule:
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
-        all_datapoints["old_new"] = "old"
         all_datapoints = all_datapoints.T
 
         current_datapoint["old_new"] = "new"
-        all_datapoints = pd.concat([all_datapoints, current_datapoint], axis=1)
-        all_datapoints = all_datapoints.T.reset_index(drop=True)
-        return all_datapoints
+
+        if current_datapoint["intermediate_hash"] not in all_datapoints.loc["intermediate_hash", :].values:
+            all_datapoints.loc["old_new", :] = "old"
+            all_datapoints_new = pd.concat([all_datapoints, current_datapoint], axis=1)
+            all_datapoints_new = all_datapoints_new.T.reset_index(drop=True)
+        else:
+            all_datapoints_new = all_datapoints.T.reset_index(drop=True)
+
+        return all_datapoints_new
 
     def obtain_all_data_points(self, all_datapoints: Optional[pd.DataFrame] = None):
         """
@@ -147,6 +152,7 @@ class QuantModule:
         pd.DataFrame
             All data points with the filtered data points.
         """
+        print(all_datapoints)
 
         all_datapoints["median_abs_epsilon"] = [
             filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]

@@ -135,6 +135,11 @@ class QuantUIObjects:
         # Fetch the appropriate data
         self._initialize_all_datapoints_submitted()
 
+        try:
+            print(st.session_state[self.variables_quant.all_datapoints_submitted])
+            input("stop!9")
+        except:
+            pass
         # Filter data based on slider
         data_points_filtered = self._filter_data_points_by_slider_submitted()
 
@@ -360,6 +365,11 @@ class QuantUIObjects:
     def _filter_data_points_by_slider(self) -> None:
         """Filters the data points based on the slider value."""
         if "slider_id" in st.session_state.keys():
+            try:
+                print(st.session_state[self.variables_quant.all_datapoints_submitted])
+            except:
+                pass
+            input("stop!2")
             return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints],
                 st.session_state[st.session_state["slider_id"]],
@@ -371,6 +381,11 @@ class QuantUIObjects:
             "slider_id_submitted" in st.session_state.keys()
             and self.variables_quant.all_datapoints_submitted in st.session_state.keys()
         ):
+            try:
+                print(st.session_state[self.variables_quant.all_datapoints_submitted])
+            except:
+                pass
+            input("stop!")
             return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints_submitted],
                 st.session_state[st.session_state["slider_id_submitted"]],
@@ -434,18 +449,6 @@ class QuantUIObjects:
             value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
             key=slider_key,
         )
-
-    def display_public_submission_form(self) -> None:
-        """
-        Displays the public submission form in Tab 4.
-        """
-        st.title("Public Submission Form")
-        # Implement the form fields
-        st.text_input("Name")
-        st.text_input("Email")
-        st.file_uploader("Upload Data File")
-        if st.button("Submit"):
-            st.success("Thank you for your submission!")
 
     def _initialize_placeholders(self) -> None:
         """Initializes the placeholders for the figure and table."""
@@ -630,19 +633,17 @@ class QuantUIObjects:
         # status_placeholder = st.empty()
         # status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
-        if self.variables_quant.all_datapoints not in st.session_state:
-            self._initialize_datapoints_if_needed()
+        if self.variables_quant.all_datapoints_submitted not in st.session_state:
+            self._initialize_all_datapoints()
 
         result_performance, all_datapoints, input_df = self._execute_benchmarking()
         st.session_state[self.variables_quant.all_datapoints_submitted] = all_datapoints
-        self._initialize_highlight_column_submitted()
-        st.session_state[self.variables_quant.result_perf] = result_performance
-        st.session_state[self.variables_quant.all_datapoints_submitted] = all_datapoints
-        st.session_state[self.variables_quant.input_df] = input_df
 
-    def _initialize_datapoints_if_needed(self) -> None:
-        """Initializes the all_datapoints session state if it does not exist."""
-        st.session_state[self.variables_quant.all_datapoints] = None
+        self._initialize_highlight_column_submitted()
+
+        st.session_state[self.variables_quant.result_perf] = result_performance
+
+        st.session_state[self.variables_quant.input_df] = input_df
 
     def _execute_benchmarking(self):
         """Executes the benchmarking process and returns the results."""
@@ -657,11 +658,16 @@ class QuantUIObjects:
         else:
             set_slider_val = self.variables_quant.default_val_slider
 
+        if self.variables_quant.all_datapoints_submitted in st.session_state.keys():
+            all_datapoints = st.session_state[self.variables_quant.all_datapoints_submitted]
+        else:
+            all_datapoints = st.session_state[self.variables_quant.all_datapoints]
+
         return self.ionmodule.benchmarking(
             f,  # self.user_input["input_csv"],
             self.user_input["input_format"],
             self.user_input,
-            st.session_state[self.variables_quant.all_datapoints],
+            all_datapoints,
             default_cutoff_min_prec=set_slider_val,
         )
 
@@ -726,6 +732,11 @@ class QuantUIObjects:
         Callback function for the slider input. It adjusts the data points displayed based on
         the selected slider value, such as the minimum number of ion quantifications.
         """
+        try:
+            print(st.session_state[self.variables_quant.all_datapoints_submitted])
+        except:
+            pass
+        input("stop!3")
         st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )
@@ -742,8 +753,13 @@ class QuantUIObjects:
         Callback function for the slider input. It adjusts the data points displayed based on
         the selected slider value, such as the minimum number of ion quantifications.
         """
-        st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
-            st.session_state[self.variables_quant.all_datapoints],
+        try:
+            print(st.session_state[self.variables_quant.all_datapoints_submitted])
+        except:
+            pass
+        input("stop!5")
+        st.session_state[self.variables_quant.all_datapoints_submitted] = self.ionmodule.filter_data_point(
+            st.session_state[self.variables_quant.all_datapoints_submitted],
             st.session_state[st.session_state["slider_id_submitted"]],
         )
 
@@ -827,8 +843,8 @@ class QuantUIObjects:
         sample_name = self.create_sample_name()
 
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
-        # st.session_state["slider_id"] = uuid.uuid4()
-        f = st.select_slider(
+
+        st.select_slider(
             label="Minimal ion quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
             value=st.session_state[st.session_state["slider_id"]],
@@ -836,6 +852,11 @@ class QuantUIObjects:
             key=st.session_state["slider_id"],
         )
 
+        try:
+            print(st.session_state[self.variables_quant.all_datapoints_submitted])
+        except:
+            pass
+        input("stop!6")
         st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
         )

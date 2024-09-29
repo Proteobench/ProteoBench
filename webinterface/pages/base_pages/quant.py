@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import tempfile
 import uuid
 from datetime import datetime
 from pprint import pformat
@@ -56,9 +57,14 @@ class QuantUIObjects:
         pbb.proteobench_page_config()
         pbb.proteobench_sidebar()
 
+        self.first_point_plotted = False
+        st.session_state[self.variables_quant.submit] = False
+        self.stop_duplicating = False
+
         # Make sure when initialized the submission is False
         if self.variables_quant.submit not in st.session_state:
             st.session_state[self.variables_quant.submit] = False
+            self.first_point_plotted = False
 
     def create_main_submission_form(self) -> None:
         """
@@ -106,20 +112,104 @@ class QuantUIObjects:
         if st.session_state["slider_id"] not in st.session_state.keys():
             st.session_state[st.session_state["slider_id"]] = self.variables_quant.default_val_slider
 
-    def create_results(self) -> None:
-        """Creates the results section of the page."""
-        if self._results_already_initialized():
+    def create_selectbox(self) -> None:
+        """Creates the selectbox for the Streamlit UI."""
+        if self.variables_quant.selectbox_id_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.selectbox_id_uuid] = uuid.uuid4()
+
+        try:
+            st.selectbox(
+                "Select label to plot",
+                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
+                key=st.session_state[self.variables_quant.selectbox_id_uuid],
+            )
+        except Exception as e:
+            st.error(f"Unable to create the selectbox: {e}", icon="🚨")
+
+    def create_selectbox_submitted(self) -> None:
+        """Creates the selectbox for the Streamlit UI."""
+        if self.variables_quant.selectbox_id_submitted_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.selectbox_id_submitted_uuid] = uuid.uuid4()
+
+        try:
+            st.selectbox(
+                "Select label to plot",
+                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
+                key=st.session_state[self.variables_quant.selectbox_id_submitted_uuid],
+            )
+        except Exception as e:
+            st.error(f"Unable to create the selectbox: {e}", icon="🚨")
+
+    def init_slider_submitted(self) -> None:
+        ##########################################
+        # Initialize slider ID and default value #
+        ##########################################
+        if "slider_id_submitted" not in st.session_state.keys():
+            st.session_state["slider_id_submitted"] = uuid.uuid4()
+        if st.session_state["slider_id_submitted"] not in st.session_state.keys():
+            st.session_state[st.session_state["slider_id_submitted"]] = self.variables_quant.default_val_slider
+
+    def create_results_submitted(self) -> None:
+        """
+        Creates the results section of the page.
+
+        Args:
+            show_new_submissions: If True, only display new submissions.
+        """
+        handled_submission = self._handle_form_submission()
+        if handled_submission == False:
             return
 
-        self._initialize_all_datapoints()
-        self._filter_data_points_by_slider()
-        self._initialize_highlight_column()
-        if "slider_id" in st.session_state.keys():
-            self._create_slider()
+        # Fetch the appropriate data
+        self._initialize_all_datapoints_submitted()
 
-        self._initialize_placeholders()
-        self._generate_and_display_metric_plot()
-        self._initialize_data_editor()
+        # Filter data based on slider
+        data_points_filtered = self._filter_data_points_by_slider_submitted()
+
+        # Plot
+        try:
+            fig_metric = PlotDataPoint.plot_metric(
+                data_points_filtered,
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_submitted_uuid]],
+            )
+            st.plotly_chart(fig_metric, use_container_width=True)
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+
+        st.session_state["table_id"] = uuid.uuid4()
+        # Data Table
+        st.data_editor(
+            st.session_state[self.variables_quant.all_datapoints_submitted],
+            key=st.session_state["table_id"],
+            on_change=self.table_callback_submitted,
+        )
+
+    def create_results_existing(self) -> None:
+        """
+        Creates the results section of the page.
+
+        Args:
+            show_new_submissions: If True, only display new submissions.
+        """
+        # Fetch the appropriate data
+        self._initialize_all_datapoints()
+
+        # Filter data based on slider
+        data_points_filtered = self._filter_data_points_by_slider()
+
+        # Plot
+        try:
+            fig_metric = PlotDataPoint.plot_metric(
+                data_points_filtered, label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]]
+            )
+            st.plotly_chart(fig_metric, use_container_width=True)
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+
+        # Data Table
+        st.dataframe(data_points_filtered)
+
+        self.render_download_container()
 
     def create_text_header(self) -> None:
         """
@@ -136,8 +226,6 @@ class QuantUIObjects:
         st.markdown(open(self.variables_quant.description_module_md, "r").read())
         st.header("Downloading associated files")
         st.markdown(open(self.variables_quant.description_files_md, "r").read(), unsafe_allow_html=True)
-        st.header("Input and configuration")
-        st.markdown(self.variables_quant.texts.ShortMessages.initial_results)
 
     def populate_results(self) -> None:
         """
@@ -192,7 +280,12 @@ class QuantUIObjects:
         """
         Creates the UI elements necessary for data submission, including metadata uploader and comments section.
         """
-        self._create_dataframe_copies()
+        try:
+            self._create_dataframe_copies()
+            self.submission_ready = True
+        except:
+            self.submission_ready = False
+            st.error(":x: Please provide a result file", icon="🚨")
         self._create_meta_data_uploader()
         self._create_comments_text_area()
         self._create_confirmation_checkbox()
@@ -225,9 +318,10 @@ class QuantUIObjects:
         """Handles the form submission logic."""
         if not self.user_input["input_csv"]:
             st.error(":x: Please provide a result file", icon="🚨")
-            return
-        self._reset_session_state_variables()
+            return False
+        # self._reset_session_state_variables()
         self._run_proteobench()
+        self.first_point_plotted = True
 
     def _reset_session_state_variables(self) -> None:
         """Resets specific session state variables."""
@@ -288,12 +382,31 @@ class QuantUIObjects:
                 all_datapoints=st.session_state[self.variables_quant.all_datapoints]
             )
 
+    def _initialize_all_datapoints_submitted(self) -> None:
+        """Initializes the all_datapoints variable in the session state."""
+        if self.variables_quant.all_datapoints_submitted not in st.session_state.keys():
+            st.session_state[self.variables_quant.all_datapoints_submitted] = None
+            st.session_state[self.variables_quant.all_datapoints_submitted] = self.ionmodule.obtain_all_data_points(
+                all_datapoints=st.session_state[self.variables_quant.all_datapoints_submitted]
+            )
+
     def _filter_data_points_by_slider(self) -> None:
         """Filters the data points based on the slider value."""
         if "slider_id" in st.session_state.keys():
-            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
+            return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints],
                 st.session_state[st.session_state["slider_id"]],
+            )
+
+    def _filter_data_points_by_slider_submitted(self) -> None:
+        """Filters the data points based on the slider value."""
+        if (
+            "slider_id_submitted" in st.session_state.keys()
+            and self.variables_quant.all_datapoints_submitted in st.session_state.keys()
+        ):
+            return self.ionmodule.filter_data_point(
+                st.session_state[self.variables_quant.all_datapoints_submitted],
+                st.session_state[st.session_state["slider_id_submitted"]],
             )
 
     def _initialize_highlight_column(self) -> None:
@@ -310,21 +423,50 @@ class QuantUIObjects:
                 0, "Highlight", st.session_state[self.variables_quant.highlight_list]
             )
 
-    def _create_slider(self) -> None:
-        """Creates a slider input if needed."""
-        st.markdown(open(self.variables_quant.description_slider_md, "r").read())
+    def _initialize_highlight_column_submitted(self) -> None:
+        """Initializes the highlight column in the data points."""
         if (
-            self.variables_quant.placeholder_slider not in st.session_state.keys()
-            or st.session_state[self.variables_quant.placeholder_slider] == st.empty()
+            self.variables_quant.highlight_list_submitted not in st.session_state.keys()
+            and "Highlight" not in st.session_state[self.variables_quant.all_datapoints_submitted].columns
         ):
-            st.session_state[self.variables_quant.placeholder_slider] = st.empty()
-            st.session_state[self.variables_quant.placeholder_slider].select_slider(
-                label="Minimal ion quantifications (# samples)",
-                options=[1, 2, 3, 4, 5, 6],
-                value=st.session_state[st.session_state["slider_id"]],
-                on_change=self.slider_callback,
-                key=st.session_state["slider_id"],
+            st.session_state[self.variables_quant.all_datapoints_submitted].insert(
+                0, "Highlight", [False] * len(st.session_state[self.variables_quant.all_datapoints_submitted].index)
             )
+        elif "Highlight" not in st.session_state[self.variables_quant.all_datapoints_submitted].columns:
+            st.session_state[self.variables_quant.all_datapoints_submitted].insert(
+                0, "Highlight", st.session_state[self.variables_quant.highlight_list_submitted]
+            )
+
+    def _create_slider(self) -> None:
+        """Creates a slider input."""
+        if "slider_id" not in st.session_state:
+            st.session_state["slider_id"] = uuid.uuid4()
+        slider_key = st.session_state["slider_id"]
+
+        st.markdown(open(self.variables_quant.description_slider_md, "r").read())
+
+        st.select_slider(
+            label="Minimal ion quantifications (# samples)",
+            options=[1, 2, 3, 4, 5, 6],
+            value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
+            key=slider_key,
+        )
+
+    def _create_slider_submitted(self) -> None:
+        """Creates a slider input."""
+        if "slider_id_submitted" not in st.session_state:
+            st.session_state["slider_id_submitted"] = uuid.uuid4()
+        slider_key = st.session_state["slider_id_submitted"]
+        # st.session_state[slider_key] = st.empty()
+
+        st.markdown(open(self.variables_quant.description_slider_md, "r").read())
+
+        st.select_slider(
+            label="Minimal ion quantifications (# samples)",
+            options=[1, 2, 3, 4, 5, 6],
+            value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
+            key=slider_key,
+        )
 
     def _initialize_placeholders(self) -> None:
         """Initializes the placeholders for the figure and table."""
@@ -337,7 +479,8 @@ class QuantUIObjects:
         """Generates and displays the metric plot."""
         try:
             st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -347,13 +490,16 @@ class QuantUIObjects:
 
     def _initialize_data_editor(self) -> None:
         """Initializes the data editor."""
-        st.session_state[self.variables_quant.placeholder_table].data_editor(
-            st.session_state[self.variables_quant.all_datapoints],
-            key=st.session_state["table_id"],
-            on_change=self.table_callback,
-        )
+        try:
+            st.session_state[self.variables_quant.placeholder_table].data_editor(
+                st.session_state[self.variables_quant.all_datapoints],
+                key=st.session_state["table_id"],
+                on_change=self.table_callback,
+            )
+        except:
+            self.stop_duplicating = True
 
-    def render_download_container(self) -> None:
+    def render_download_container(self, reset_uuid=False) -> None:
         """Render the selector and ares for raw data download"""
 
         # create a dataframe for dataset selection from the submitted datasets
@@ -361,7 +507,8 @@ class QuantUIObjects:
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
         # create a uuid for the selector (if necessary)
-        if "download_selector_id" not in st.session_state.keys():
+        if self.variables_quant.placeholder_downloads_container not in st.session_state.keys() or reset_uuid:
+            st.session_state[self.variables_quant.placeholder_downloads_container] = st.empty()
             st.session_state["download_selector_id"] = uuid.uuid4()
 
         with st.session_state[self.variables_quant.placeholder_downloads_container].container(border=True):
@@ -457,9 +604,9 @@ class QuantUIObjects:
 
     def _create_dataframe_copies(self) -> None:
         """Creates copies of the dataframes before submission."""
-        if st.session_state[self.variables_quant.all_datapoints] is not None:
+        if st.session_state[self.variables_quant.all_datapoints_submitted] is not None:
             st.session_state[self.variables_quant.all_datapoints_submission] = st.session_state[
-                self.variables_quant.all_datapoints
+                self.variables_quant.all_datapoints_submitted
             ].copy()
         if st.session_state[self.variables_quant.input_df] is not None:
             st.session_state[self.variables_quant.input_df_submission] = st.session_state[
@@ -493,46 +640,58 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.check_submission] = st.checkbox(
             "I confirm that the metadata is correct",
         )
+        self.stop_duplicating = True
 
     def _run_proteobench(self) -> None:
         """
         Executes the ProteoBench benchmarking process. It handles the user's file submission,
         runs the benchmarking module, and updates the session state with the results.
         """
-        st.header("Running Proteobench")
+        # st.header("Running Proteobench")
 
-        status_placeholder = st.empty()
-        status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
+        # status_placeholder = st.empty()
+        # status_placeholder.info(":hourglass_flowing_sand: Running Proteobench...")
 
-        try:
-            if self.variables_quant.all_datapoints not in st.session_state:
-                self._initialize_datapoints_if_needed()
+        if self.variables_quant.all_datapoints_submitted not in st.session_state:
+            self._initialize_all_datapoints()
 
-            result_performance, all_datapoints, input_df = self._execute_benchmarking()
-            self._update_session_state_with_results(all_datapoints)
-            self._initialize_highlight_column()
-        except Exception as e:
-            self._handle_benchmarking_exception(status_placeholder, e)
-        else:
-            self._generate_results_after_benchmarking(status_placeholder, result_performance, all_datapoints, input_df)
+        result_performance, all_datapoints, input_df = self._execute_benchmarking()
+        st.session_state[self.variables_quant.all_datapoints_submitted] = all_datapoints
 
-    def _initialize_datapoints_if_needed(self) -> None:
-        """Initializes the all_datapoints session state if it does not exist."""
-        st.session_state[self.variables_quant.all_datapoints] = None
+        self._initialize_highlight_column_submitted()
+
+        st.session_state[self.variables_quant.result_perf] = result_performance
+
+        st.session_state[self.variables_quant.input_df] = input_df
 
     def _execute_benchmarking(self):
         """Executes the benchmarking process and returns the results."""
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_file.write(self.user_input["input_csv"].getbuffer())
+            temp_file_name = tmp_file.name
+        f = open(temp_file_name)
+        f.seek(0)
+
+        if st.session_state["slider_id_submitted"] in st.session_state.keys():
+            set_slider_val = st.session_state[st.session_state["slider_id_submitted"]]
+        else:
+            set_slider_val = self.variables_quant.default_val_slider
+
+        if self.variables_quant.all_datapoints_submitted in st.session_state.keys():
+            all_datapoints = st.session_state[self.variables_quant.all_datapoints_submitted]
+        else:
+            all_datapoints = st.session_state[self.variables_quant.all_datapoints]
+
         return self.ionmodule.benchmarking(
-            self.user_input["input_csv"],
+            f,  # self.user_input["input_csv"],
             self.user_input["input_format"],
             self.user_input,
-            st.session_state[self.variables_quant.all_datapoints],
-            default_cutoff_min_prec=st.session_state[st.session_state["slider_id"]],
+            all_datapoints,
+            default_cutoff_min_prec=set_slider_val,
         )
 
     def _update_session_state_with_results(self, all_datapoints: pd.DataFrame) -> None:
         """Updates the session state with the results of the benchmarking."""
-        st.session_state[self.variables_quant.all_datapoints] = all_datapoints
 
     def _initialize_highlight_column(self) -> None:
         """Initializes the highlight column in the all_datapoints DataFrame."""
@@ -552,15 +711,14 @@ class QuantUIObjects:
 
     def _generate_results_after_benchmarking(
         self,
-        status_placeholder: Any,
         result_performance: pd.DataFrame,
         all_datapoints: pd.DataFrame,
         input_df: pd.DataFrame,
     ) -> None:
         """Generates and displays the results after the benchmarking process."""
-        self.generate_results(status_placeholder, result_performance, all_datapoints, True, input_df)
+        self.generate_results(result_performance, all_datapoints, True, input_df)
 
-    def table_callback(self) -> None:
+    def table_callback_submitted(self) -> None:
         """
         Callback function for handling edits made to the data table in the UI.
         It updates the session state to reflect changes made to the data points.
@@ -568,24 +726,28 @@ class QuantUIObjects:
         edits = st.session_state[st.session_state["table_id"]]["edited_rows"].items()
         for k, v in edits:
             try:
-                st.session_state[self.variables_quant.all_datapoints][list(v.keys())[0]].iloc[k] = list(v.values())[0]
+                st.session_state[self.variables_quant.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(
+                    v.values()
+                )[0]
             except TypeError:
                 return
-        st.session_state[self.variables_quant.highlight_list] = list(
-            st.session_state[self.variables_quant.all_datapoints]["Highlight"]
+        st.session_state[self.variables_quant.highlight_list_submitted] = list(
+            st.session_state[self.variables_quant.all_datapoints_submitted]["Highlight"]
         )
-        st.session_state[self.variables_quant.placeholder_table] = st.session_state[self.variables_quant.all_datapoints]
+        st.session_state[self.variables_quant.placeholder_table] = st.session_state[
+            self.variables_quant.all_datapoints_submitted
+        ]
 
         # Plot any changes made to the data points
         try:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_quant.all_datapoints])
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
         st.session_state[self.variables_quant.fig_metric] = fig_metric
-
-        if self.variables_quant.result_perf in st.session_state.keys():
-            self.plots_for_current_data(True)
 
     def slider_callback(self) -> None:
         """
@@ -597,14 +759,34 @@ class QuantUIObjects:
         )
 
         try:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_quant.all_datapoints])
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
         st.session_state[self.variables_quant.fig_metric] = fig_metric
 
-        if self.variables_quant.result_perf in st.session_state.keys():
-            self.plots_for_current_data(True)
+    def slider_callback_submitted(self) -> None:
+        """
+        Callback function for the slider input. It adjusts the data points displayed based on
+        the selected slider value, such as the minimum number of ion quantifications.
+        """
+        st.session_state[self.variables_quant.all_datapoints_submitted] = self.ionmodule.filter_data_point(
+            st.session_state[self.variables_quant.all_datapoints_submitted],
+            st.session_state[st.session_state["slider_id_submitted"]],
+        )
+
+        try:
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
+            )
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+
+        st.session_state[self.variables_quant.fig_metric] = fig_metric
 
     def read_parameters(self) -> Any:
         """
@@ -663,14 +845,23 @@ class QuantUIObjects:
 
         st.markdown(st.markdown(open(self.variables_quant.description_results_md, "r").read()))
 
+        st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
+        sample_name = self.create_sample_name()
+        st.download_button(
+            label="Download",
+            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
+            file_name=f"{sample_name}.csv",
+            mime="text/csv",
+            key=f"{random_uuid}",
+        )
+
         st.subheader("Mean error between conditions")
         st.markdown(self.variables_quant.texts.ShortMessages.submission_result_description)
 
-        sample_name = self.create_sample_name()
-
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
-        # st.session_state["slider_id"] = uuid.uuid4()
-        f = st.select_slider(
+
+        st.select_slider(
             label="Minimal ion quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
             value=st.session_state[st.session_state["slider_id"]],
@@ -684,7 +875,8 @@ class QuantUIObjects:
 
         try:
             st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -698,20 +890,12 @@ class QuantUIObjects:
         st.session_state["table_id"] = uuid.uuid4()
 
         st.data_editor(
-            st.session_state[self.variables_quant.all_datapoints],
+            st.session_state[self.variables_quant.all_datapoints_submitted],
             key=st.session_state["table_id"],
-            on_change=self.table_callback,
+            on_change=self.table_callback_submitted,
         )
 
-        st.subheader("Download calculated ratios")
-        random_uuid = uuid.uuid4()
-        st.download_button(
-            label="Download",
-            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
-            file_name=f"{sample_name}.csv",
-            mime="text/csv",
-            key=f"{random_uuid}",
-        )
+        self.render_download_container(reset_uuid=True)
 
         st.subheader("Add results to online repository")
         st.markdown(open(self.variables_quant.description_submission_md, "r").read())
@@ -730,7 +914,6 @@ class QuantUIObjects:
 
     def generate_results(
         self,
-        status_placeholder: Any,
         result_performance: pd.DataFrame,
         all_datapoints: pd.DataFrame,
         recalculate: bool,
@@ -748,51 +931,73 @@ class QuantUIObjects:
             input_df: DataFrame of the input data.
         """
         if recalculate:
-            status_placeholder.success(":heavy_check_mark: Finished!")
             st.session_state[self.variables_quant.result_perf] = result_performance
             st.session_state[self.variables_quant.all_datapoints] = all_datapoints
             st.session_state[self.variables_quant.input_df] = input_df
-        if not self.variables_quant.first_new_plot:
-            st.session_state[self.variables_quant.df_head] = st.session_state[self.variables_quant.result_perf].head(
-                100
-            )
 
-        st.session_state[self.variables_quant.fig_logfc] = self.plots_for_current_data(recalculate)
+            # if not self.variables_quant.first_new_plot:
+            #    st.session_state[self.variables_quant.df_head] = st.session_state[self.variables_quant.result_perf].head(
+            #        100
+            #    )
 
-        if recalculate:
-            try:
-                st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                    st.session_state[self.variables_quant.all_datapoints]
-                )
-            except Exception as e:
-                st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            # st.session_state[self.variables_quant.fig_logfc] = self.plots_for_current_data(recalculate)
 
-        if self.variables_quant.first_new_plot:
-            self.create_first_new_plot()
-        else:
-            self.call_later_plot()
+            # if recalculate:
+            #    try:
+            #        st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
+            #            st.session_state[self.variables_quant.all_datapoints]
+            #        )
+            #    except Exception as e:
+            #        st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+
+            # if self.variables_quant.first_new_plot:
+            #    self.create_first_new_plot()
+            # else:
+            # self.call_later_plot()
 
         if all_datapoints is not None:
             st.session_state[self.variables_quant.all_datapoints] = all_datapoints
             st.session_state[self.variables_quant.input_df] = input_df
 
         # Create unique element IDs
-        uuids = [
-            self.variables_quant.meta_file_uploader_uuid,
-            self.variables_quant.comments_submission_uuid,
-            self.variables_quant.check_submission_uuid,
-        ]
+        # uuids = [
+        #    self.variables_quant.meta_file_uploader_uuid,
+        #    self.variables_quant.comments_submission_uuid,
+        #    self.variables_quant.check_submission_uuid,
+        # ]
 
-        for uuid_key in uuids:
-            if uuid_key not in st.session_state:
-                st.session_state[uuid_key] = uuid.uuid4()
+        # for uuid_key in uuids:
+        #    if uuid_key not in st.session_state:
+        #        st.session_state[uuid_key] = uuid.uuid4()
 
+        # if self.variables_quant.first_new_plot:
+        #    self.create_submission_elements()
+        # if self.user_input[self.variables_quant.meta_data]:
+        #    params = self.read_parameters()
+        # if st.session_state[self.variables_quant.check_submission] and params != None:
+        #    pr_url = self.make_submission_webinterface(params)
+        # if (
+        #    st.session_state[self.variables_quant.check_submission]
+        #    and params != None
+        #    and self.variables_quant.submit in st.session_state
+        #    and pr_url != None
+        # ):
+        #    self.successful_submission(pr_url)
+        # self.variables_quant.first_new_plot = False
+
+    def wrap_public_submission_form(self) -> None:
         if self.variables_quant.first_new_plot:
             self.create_submission_elements()
+
         if self.user_input[self.variables_quant.meta_data]:
             params = self.read_parameters()
+        else:
+            params = None
+
         if st.session_state[self.variables_quant.check_submission] and params != None:
             pr_url = self.make_submission_webinterface(params)
+        if self.submission_ready == False:
+            return
         if (
             st.session_state[self.variables_quant.check_submission]
             and params != None
@@ -800,7 +1005,6 @@ class QuantUIObjects:
             and pr_url != None
         ):
             self.successful_submission(pr_url)
-        self.variables_quant.first_new_plot = False
 
     def plots_for_current_data(self, recalculate: bool) -> go.Figure:
         """
@@ -812,6 +1016,9 @@ class QuantUIObjects:
         Returns:
             A Plotly graph object containing the generated plot.
         """
+        if self.variables_quant.result_perf not in st.session_state.keys():
+            st.error(":x: Please provide a result file", icon="🚨")
+            return False
 
         # filter result_performance dataframe on nr_observed column
         st.session_state[self.variables_quant.result_perf] = st.session_state[self.variables_quant.result_perf][
@@ -850,10 +1057,90 @@ class QuantUIObjects:
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
-
         else:
             pass
+
+        st.subheader("Sample of the processed file")
+        st.markdown(open(self.variables_quant.description_table_md, "r").read())
+        st.session_state[self.variables_quant.df_head] = st.dataframe(
+            st.session_state[self.variables_quant.result_perf].head(100)
+        )
+
+        st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
+        sample_name = self.create_sample_name()
+        st.download_button(
+            label="Download",
+            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
+            file_name=f"{sample_name}.csv",
+            mime="text/csv",
+            key=f"{random_uuid}",
+        )
+
         return fig_logfc
+
+    def display_results_all_data(self) -> None:
+        """
+        Displays the results for all data in Tab 1.
+        """
+        st.title("Results (All Data)")
+        self.init_slider()
+        self._create_slider()
+        self.create_selectbox()
+        self.create_results_existing()
+
+    def display_results_all_data_submitted(self) -> None:
+        """
+        Displays the results for all data in Tab 1.
+        """
+        st.title("Results (All Data)")
+        self.init_slider_submitted()
+        self._create_slider_submitted()
+        self.create_selectbox_submitted()
+        self.create_results_submitted()
+
+    def display_submission_details(self) -> None:
+        """
+        Displays the submission form and details on the data in Tab 2.
+        """
+        st.title("Submission Details")
+        self.create_submission_elements()
+        if self.user_input[self.variables_quant.meta_data]:
+            params = self.read_parameters()
+        else:
+            params = None
+        if st.session_state[self.variables_quant.check_submission] and params is not None:
+            pr_url = self.make_submission_webinterface(params)
+            if pr_url is not None:
+                self.successful_submission(pr_url)
+
+    def display_results_new_submissions(self) -> None:
+        """
+        Displays the results for new submissions in Tab 3.
+        """
+        st.title("Results (New Submissions)")
+        self.init_slider()
+        self.create_results(show_new_submissions=True)
+
+    def display_public_submission_form(self) -> None:
+        """
+        Displays the public submission form in Tab 4.
+        """
+        st.title("Public Submission Form")
+        # Implement the public submission form here
+        st.write("Public submission form goes here.")
+
+    def get_all_data(self) -> Optional[pd.DataFrame]:
+        """
+        Returns all data points.
+        """
+        return st.session_state.get(self.variables_quant.all_datapoints)
+
+    def get_new_submissions_data(self) -> Optional[pd.DataFrame]:
+        """
+        Returns data points from new submissions only.
+        """
+        return st.session_state.get(self.variables_quant.all_datapoints_submission)
 
 
 if __name__ == "__main__":

@@ -36,19 +36,74 @@ class StreamlitUI:
     def _main_page(self) -> None:
         """
         Sets up the main page layout for the Streamlit application.
-        This includes the title, module descriptions, input forms, and configuration settings.
         """
-        self.quant_uiobjects.create_text_header()
-        self.quant_uiobjects.create_main_submission_form()
+        # Create tabs
+        (
+            tab_description,
+            tab_results_all,
+            tab_submission_details,
+            tab_indepth_plots,
+            tab_results_new,
+            tab_public_submission,
+        ) = st.tabs(
+            [
+                "Module description",
+                "Results (All Data)",
+                "Submission form",
+                "In-depth submission",
+                "Results (New Submissions)",
+                "Public Submission",
+            ]
+        )
 
-        self.quant_uiobjects.init_slider()
+        # Tab 0: Description
+        with tab_description:
+            self.quant_uiobjects.create_text_header()
 
-        if self.quant_uiobjects.variables_quant.fig_logfc in st.session_state:
-            self.quant_uiobjects.populate_results()
+        # Tab 1: Results (All Data)
+        with tab_results_all:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.display_results_all_data()
 
-        self.quant_uiobjects.create_results()
+        # Tab 2: Submission Details
+        with tab_submission_details:
+            self.quant_uiobjects.create_text_header()
+            self.quant_uiobjects.create_main_submission_form()
+            # self.quant_uiobjects.display_submission_details()
 
-        self.quant_uiobjects.render_download_container()
+        # Tab 2.5: in-depth plots current data
+        with tab_indepth_plots:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.plots_for_current_data(True)
+
+        # Tab 3: Results (New Submissions)
+        with tab_results_new:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.display_results_all_data_submitted()
+            # self.quant_uiobjects.display_results_new_submissions()
+
+        # Tab 4: Public Submission
+        with tab_public_submission:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.wrap_public_submission_form()
+            # self.quant_uiobjects.create_main_submission_form()
+            # self.quant_uiobjects.display_public_submission_form()
 
 
 if __name__ == "__main__":

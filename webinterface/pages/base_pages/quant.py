@@ -112,6 +112,34 @@ class QuantUIObjects:
         if st.session_state["slider_id"] not in st.session_state.keys():
             st.session_state[st.session_state["slider_id"]] = self.variables_quant.default_val_slider
 
+    def create_selectbox(self) -> None:
+        """Creates the selectbox for the Streamlit UI."""
+        if self.variables_quant.selectbox_id_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.selectbox_id_uuid] = uuid.uuid4()
+
+        try:
+            st.selectbox(
+                "Select label to plot",
+                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
+                key=st.session_state[self.variables_quant.selectbox_id_uuid],
+            )
+        except Exception as e:
+            st.error(f"Unable to create the selectbox: {e}", icon="🚨")
+
+    def create_selectbox_submitted(self) -> None:
+        """Creates the selectbox for the Streamlit UI."""
+        if self.variables_quant.selectbox_id_submitted_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.selectbox_id_submitted_uuid] = uuid.uuid4()
+
+        try:
+            st.selectbox(
+                "Select label to plot",
+                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
+                key=st.session_state[self.variables_quant.selectbox_id_submitted_uuid],
+            )
+        except Exception as e:
+            st.error(f"Unable to create the selectbox: {e}", icon="🚨")
+
     def init_slider_submitted(self) -> None:
         ##########################################
         # Initialize slider ID and default value #
@@ -140,7 +168,10 @@ class QuantUIObjects:
 
         # Plot
         try:
-            fig_metric = PlotDataPoint.plot_metric(data_points_filtered)
+            fig_metric = PlotDataPoint.plot_metric(
+                data_points_filtered,
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_submitted_uuid]],
+            )
             st.plotly_chart(fig_metric, use_container_width=True)
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -168,7 +199,9 @@ class QuantUIObjects:
 
         # Plot
         try:
-            fig_metric = PlotDataPoint.plot_metric(data_points_filtered)
+            fig_metric = PlotDataPoint.plot_metric(
+                data_points_filtered, label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]]
+            )
             st.plotly_chart(fig_metric, use_container_width=True)
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -446,7 +479,8 @@ class QuantUIObjects:
         """Generates and displays the metric plot."""
         try:
             st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -706,7 +740,10 @@ class QuantUIObjects:
 
         # Plot any changes made to the data points
         try:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_quant.all_datapoints_submitted])
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
@@ -722,7 +759,10 @@ class QuantUIObjects:
         )
 
         try:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_quant.all_datapoints])
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
@@ -739,7 +779,10 @@ class QuantUIObjects:
         )
 
         try:
-            fig_metric = PlotDataPoint.plot_metric(st.session_state[self.variables_quant.all_datapoints])
+            fig_metric = PlotDataPoint.plot_metric(
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
@@ -804,6 +847,7 @@ class QuantUIObjects:
 
         st.subheader("Download calculated ratios")
         random_uuid = uuid.uuid4()
+        sample_name = self.create_sample_name()
         st.download_button(
             label="Download",
             data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
@@ -814,8 +858,6 @@ class QuantUIObjects:
 
         st.subheader("Mean error between conditions")
         st.markdown(self.variables_quant.texts.ShortMessages.submission_result_description)
-
-        sample_name = self.create_sample_name()
 
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
 
@@ -833,7 +875,8 @@ class QuantUIObjects:
 
         try:
             st.session_state[self.variables_quant.fig_metric] = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints]
+                st.session_state[self.variables_quant.all_datapoints],
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
@@ -891,6 +934,7 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.result_perf] = result_performance
             st.session_state[self.variables_quant.all_datapoints] = all_datapoints
             st.session_state[self.variables_quant.input_df] = input_df
+
             # if not self.variables_quant.first_new_plot:
             #    st.session_state[self.variables_quant.df_head] = st.session_state[self.variables_quant.result_perf].head(
             #        100
@@ -1013,9 +1057,26 @@ class QuantUIObjects:
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
-
         else:
             pass
+
+        st.subheader("Sample of the processed file")
+        st.markdown(open(self.variables_quant.description_table_md, "r").read())
+        st.session_state[self.variables_quant.df_head] = st.dataframe(
+            st.session_state[self.variables_quant.result_perf].head(100)
+        )
+
+        st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
+        sample_name = self.create_sample_name()
+        st.download_button(
+            label="Download",
+            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
+            file_name=f"{sample_name}.csv",
+            mime="text/csv",
+            key=f"{random_uuid}",
+        )
+
         return fig_logfc
 
     def display_results_all_data(self) -> None:
@@ -1025,6 +1086,7 @@ class QuantUIObjects:
         st.title("Results (All Data)")
         self.init_slider()
         self._create_slider()
+        self.create_selectbox()
         self.create_results_existing()
 
     def display_results_all_data_submitted(self) -> None:
@@ -1034,6 +1096,7 @@ class QuantUIObjects:
         st.title("Results (All Data)")
         self.init_slider_submitted()
         self._create_slider_submitted()
+        self.create_selectbox_submitted()
         self.create_results_submitted()
 
     def display_submission_details(self) -> None:

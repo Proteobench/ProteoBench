@@ -84,6 +84,7 @@ class PlotDataPoint:
         },
         mapping={"old": 10, "new": 20},
         highlight_color: str = "#d30067",
+        label: str = "None",
     ) -> go.Figure:
         """
         Plot mean metrics in a scatterplot with plotly.
@@ -151,23 +152,44 @@ class PlotDataPoint:
                 for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
             ]
 
+        benchmark_metrics_df["color"] = colors
+        benchmark_metrics_df["hover_text"] = hover_texts
+        benchmark_metrics_df["scatter_size"] = scatter_size
+
         fig = go.Figure(
-            data=[
-                go.Scatter(
-                    x=benchmark_metrics_df["median_abs_epsilon"],
-                    y=benchmark_metrics_df["nr_prec"],
-                    mode="markers",
-                    text=hover_texts,
-                    marker=dict(color=colors, showscale=False),
-                    marker_size=scatter_size,
-                )
+            layout_yaxis_range=[
+                min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
+                max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
             ],
-            layout_yaxis_range=[min(all_nr_prec) - min(all_nr_prec) * 0.05, max(all_nr_prec) + min(all_nr_prec) * 0.05],
             layout_xaxis_range=[
                 min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
                 max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
             ],
         )
+
+        # Get all unique color-software combinations (necessary for highlighting)
+        color_software_combinations = benchmark_metrics_df[["color", "software_name"]].drop_duplicates()
+
+        # plot the data points, one trace per software tool
+        for _, row in color_software_combinations.iterrows():
+            color = row["color"]
+            software = row["software_name"]
+
+            tmp_df = benchmark_metrics_df[
+                (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
+            ]
+            fig.add_trace(
+                go.Scatter(
+                    x=tmp_df["median_abs_epsilon"],
+                    y=tmp_df["nr_prec"],
+                    mode="markers" if label == "None" else "markers+text",
+                    hovertext=tmp_df["hover_text"],
+                    text=tmp_df[label] if label != "None" else None,
+                    marker=dict(color=tmp_df["color"], showscale=False),
+                    marker_size=tmp_df["scatter_size"],
+                    name=tmp_df["software_name"].iloc[0],
+                )
+            )
 
         fig.update_layout(
             width=700,

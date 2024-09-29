@@ -60,13 +60,6 @@ class StreamlitUI:
         with tab_description:
             self.quant_uiobjects.create_text_header()
 
-        
-        # TODO Change below before merge with main
-        self.quant_uiobjects.create_selectbox()
-
-        if self.quant_uiobjects.variables_quant.fig_logfc in st.session_state:
-            self.quant_uiobjects.populate_results()
-
         # Tab 1: Results (All Data)
         with tab_results_all:
             st.title(self.variables_dda_quant.texts.ShortMessages.title)

@@ -119,7 +119,7 @@ class QuantUIObjects:
 
         try:
             st.selectbox(
-                "Select labels to plot",
+                "Select label to plot",
                 ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
                 key=st.session_state[self.variables_quant.selectbox_id_uuid],
             )
@@ -133,7 +133,7 @@ class QuantUIObjects:
 
         try:
             st.selectbox(
-                "Select labels to plot",
+                "Select label to plot",
                 ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
                 key=st.session_state[self.variables_quant.selectbox_id_submitted_uuid],
             )
@@ -1057,9 +1057,26 @@ class QuantUIObjects:
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
-
         else:
             pass
+
+        st.subheader("Sample of the processed file")
+        st.markdown(open(self.variables_quant.description_table_md, "r").read())
+        st.session_state[self.variables_quant.df_head] = st.dataframe(
+            st.session_state[self.variables_quant.result_perf].head(100)
+        )
+
+        st.subheader("Download calculated ratios")
+        random_uuid = uuid.uuid4()
+        sample_name = self.create_sample_name()
+        st.download_button(
+            label="Download",
+            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
+            file_name=f"{sample_name}.csv",
+            mime="text/csv",
+            key=f"{random_uuid}",
+        )
+
         return fig_logfc
 
     def display_results_all_data(self) -> None:

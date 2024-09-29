@@ -30,6 +30,8 @@ class VariablesDDAQuant:
     placeholder_table_submitted: str = "placeholder_table_submitted"
     placeholder_slider_submitted: str = "placeholder_slider_submitted"
     highlight_list_submitted: List[str] = field(default_factory=list)
+    selectbox_id_submitted_uuid: str = "selectbox_id_submitted"
+    selectbox_id_uuid: str = "selectbox_id"
 
     placeholder_table: str = "placeholder_table"
     placeholder_slider: str = "placeholder_slider"

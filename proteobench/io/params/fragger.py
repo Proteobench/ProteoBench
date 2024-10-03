@@ -122,14 +122,14 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         params.ident_fdr_peptide = fragpipe_params.loc["diann.q-value"]
         params.ident_fdr_psm = fragpipe_params.loc["diann.q-value"]
 
-    # I think this is incorrect? The values are stored as proportions in the fragpipe.workflow file?
-    for key in ["ident_fdr_protein", "ident_fdr_peptide", "ident_fdr_psm"]:
-        value = getattr(params, key)
-        try:
-            value = int(value) / 100
-            setattr(params, key, value)
-        except ValueError:
-            logging.warning(f"Could not convert {value} to int.")
+    # I think this is incorrect? The values are stored as proportions in the fragpipe.workflow file? Commenting out for now
+    # for key in ["ident_fdr_protein", "ident_fdr_peptide", "ident_fdr_psm"]:
+    #     value = getattr(params, key)
+    #     try:
+    #         value = int(value) / 100
+    #         setattr(params, key, value)
+    #     except ValueError:
+    #         logging.warning(f"Could not convert {value} to int.")
 
     if fragpipe_params.loc["msfragger.override_charge"] == "true":
         params.min_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-lo"])
@@ -141,11 +141,13 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
     elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
         diann_quant_dict = {1: 'Any LC (high accuracy)', 2: 'Any LC (high precision)', 3: 'Robust LC (high accuracy)', 4:'Robust LC (high precision)'}
-        if fragpipe_params.loc["diann.fragpipe.cmd-opts"].str.contains("--reanalyse").any():
+        if "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]:
             params.enable_match_between_runs = True
         else:
             params.enable_match_between_runs = False
         params.quantification_method_DIANN = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
+    if fragpipe_params.loc["protein-prophet.run-protein-prophet"] == "true":
+        params.protein_inference = "ProteinProphet: {}".format(fragpipe_params.loc["protein-prophet.cmd-opts"])
 
     return params
 

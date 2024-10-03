@@ -140,7 +140,12 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
         params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
     elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
-        diann_quant_dict = {1: 'Any LC (high accuracy)', 2: 'Any LC (high precision)', 3: 'Robust LC (high accuracy)', 4:'Robust LC (high precision)'}
+        diann_quant_dict = {
+            1: "Any LC (high accuracy)",
+            2: "Any LC (high precision)",
+            3: "Robust LC (high accuracy)",
+            4: "Robust LC (high precision)",
+        }
         if "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]:
             params.enable_match_between_runs = True
         else:

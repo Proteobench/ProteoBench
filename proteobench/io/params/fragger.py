@@ -89,9 +89,15 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         msfragger_executable = ""
 
     params.search_engine_version = msfragger_executable
-    params.enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
+    enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
+    if fragpipe_params.loc["msfragger.search_enzyme_name_2"] != "null":
+        enzyme += f"|{fragpipe_params.loc['msfragger.search_enzyme_name_2']}"
+    params.enzyme = enzyme
     params.allowed_miscleavages = fragpipe_params.loc["msfragger.allowed_missed_cleavage_1"]
+    # TODO: Fragpipe reports "0.0" mass shift for each unmodified AA here, which is not useful and could be removed
     params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods"]
+    # TODO: Fragpipe reports a lot of default suggestions for variable mods and assigns them as 'false' here,
+    # which is not useful and could be removed, i.e. only retain true variable mods
     params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods"]
     params.max_mods = fragpipe_params.loc["msfragger.max_variable_mods_per_peptide"]
     params.min_peptide_length = fragpipe_params.loc["msfragger.digest_min_length"]
@@ -100,19 +106,23 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     precursor_mass_units = "Da"
     if int(fragpipe_params.loc["msfragger.precursor_mass_units"]):
         precursor_mass_units = "ppm"
-    params.precursor_mass_tolerance = (
-        f'{fragpipe_params.loc["msfragger.precursor_true_tolerance"]} {precursor_mass_units}'
-    )
+    params.precursor_mass_tolerance = f'{fragpipe_params.loc["msfragger.precursor_mass_lower"]} {precursor_mass_units}|{fragpipe_params.loc["msfragger.precursor_mass_upper"]} {precursor_mass_units}'
 
     fragment_mass_units = "Da"
     if int(fragpipe_params.loc["msfragger.fragment_mass_units"]):
         fragment_mass_units = "ppm"
     params.fragment_mass_tolerance = f'{fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}'
     # ! ionquant is not necessarily fixed?
-    params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr"]
-    params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr"]
-    params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr"]
+    if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
+        params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr"]
+        params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr"]
+        params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr"]
+    elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
+        params.ident_fdr_protein = fragpipe_params.loc["diann.q-value"]
+        params.ident_fdr_peptide = fragpipe_params.loc["diann.q-value"]
+        params.ident_fdr_psm = fragpipe_params.loc["diann.q-value"]
 
+    # I think this is incorrect? The values are stored as proportions in the fragpipe.workflow file?
     for key in ["ident_fdr_protein", "ident_fdr_peptide", "ident_fdr_psm"]:
         value = getattr(params, key)
         try:
@@ -121,9 +131,22 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         except ValueError:
             logging.warning(f"Could not convert {value} to int.")
 
-    params.min_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-lo"])
-    params.max_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-hi"])
-    params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
+    if fragpipe_params.loc["msfragger.override_charge"] == "true":
+        params.min_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-lo"])
+        params.max_precursor_charge = int(fragpipe_params.loc["msfragger.misc.fragger.precursor-charge-hi"])
+    else:  # Fragpipe takes charge info from data, this is the default
+        params.min_precursor_charge = 1
+        params.max_precursor_charge = None
+    if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
+        params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
+    elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
+        diann_quant_dict = {1: 'Any LC (high accuracy)', 2: 'Any LC (high precision)', 3: 'Robust LC (high accuracy)', 4:'Robust LC (high precision)'}
+        if fragpipe_params.loc["diann.fragpipe.cmd-opts"].str.contains("--reanalyse").any():
+            params.enable_match_between_runs = True
+        else:
+            params.enable_match_between_runs = False
+        params.quantification_method_DIANN = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
+
     return params
 
 

@@ -64,6 +64,9 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
     elif input_format == "Spectronaut":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        if input_data_frame["FG.Quantity"].dtype == object:
+            input_csv.seek(0)
+            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t", decimal=",")
         input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
         mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
         mapper_df = pd.read_csv(mapper_path).set_index("gene_name")

@@ -132,6 +132,14 @@ Available ProteoBench modules
         ^^^
         Benchmark the identification sensitivity and specificity of de novo sequencing workflows
 
+    .. grid-item-card:: benchmark with Dynamic Organellar Mapping
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/404
+
+        :bdg-info:`proposed`
+        ^^^
+        Single-species benchmark using spacial proteomics
 
 .. button-ref:: available-modules/index
     :ref-type: doc

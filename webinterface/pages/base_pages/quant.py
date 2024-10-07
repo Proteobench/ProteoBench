@@ -107,10 +107,12 @@ class QuantUIObjects:
         ##########################################
         # Initialize slider ID and default value #
         ##########################################
-        if "slider_id" not in st.session_state.keys():
-            st.session_state["slider_id"] = uuid.uuid4()
-        if st.session_state["slider_id"] not in st.session_state.keys():
-            st.session_state[st.session_state["slider_id"]] = self.variables_quant.default_val_slider
+        if self.variables_quant.slider_id_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
+        if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
+            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]] = (
+                self.variables_quant.default_val_slider
+            )
 
     def create_selectbox(self) -> None:
         """Creates the selectbox for the Streamlit UI."""
@@ -120,7 +122,7 @@ class QuantUIObjects:
         try:
             st.selectbox(
                 "Select label to plot",
-                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
+                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance", "enable_match_between_runs"],
                 key=st.session_state[self.variables_quant.selectbox_id_uuid],
             )
         except Exception as e:
@@ -144,10 +146,12 @@ class QuantUIObjects:
         ##########################################
         # Initialize slider ID and default value #
         ##########################################
-        if "slider_id_submitted" not in st.session_state.keys():
-            st.session_state["slider_id_submitted"] = uuid.uuid4()
-        if st.session_state["slider_id_submitted"] not in st.session_state.keys():
-            st.session_state[st.session_state["slider_id_submitted"]] = self.variables_quant.default_val_slider
+        if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
+        if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
+            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]] = (
+                self.variables_quant.default_val_slider
+            )
 
     def create_results_submitted(self) -> None:
         """
@@ -176,12 +180,17 @@ class QuantUIObjects:
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
-        st.session_state["table_id"] = uuid.uuid4()
+        st.session_state[self.variables_quant.table_id_uuid] = uuid.uuid4()
         # Data Table
         st.data_editor(
             st.session_state[self.variables_quant.all_datapoints_submitted],
-            key=st.session_state["table_id"],
+            key=st.session_state[self.variables_quant.table_id_uuid],
             on_change=self.table_callback_submitted,
+        )
+
+        st.title("Public submission")
+        st.markdown(
+            "If you want to make this point — and the associated data — publicly available, please go to “Public Submission"
         )
 
     def create_results_existing(self) -> None:
@@ -224,6 +233,14 @@ class QuantUIObjects:
 
         st.header("Description of the module")
         st.markdown(open(self.variables_quant.description_module_md, "r").read())
+        st.header("Downloading associated files")
+        st.markdown(open(self.variables_quant.description_files_md, "r").read(), unsafe_allow_html=True)
+
+    def create_text_header_submit(self) -> None:
+        """
+        Creates the text header for the main page of the Streamlit UI. This includes the title,
+        module description, input and configuration description.
+        """
         st.header("Downloading associated files")
         st.markdown(open(self.variables_quant.description_files_md, "r").read(), unsafe_allow_html=True)
 
@@ -392,21 +409,21 @@ class QuantUIObjects:
 
     def _filter_data_points_by_slider(self) -> None:
         """Filters the data points based on the slider value."""
-        if "slider_id" in st.session_state.keys():
+        if self.variables_quant.slider_id_uuid in st.session_state.keys():
             return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints],
-                st.session_state[st.session_state["slider_id"]],
+                st.session_state[st.session_state[self.variables_quant.slider_id_uuid]],
             )
 
     def _filter_data_points_by_slider_submitted(self) -> None:
         """Filters the data points based on the slider value."""
         if (
-            "slider_id_submitted" in st.session_state.keys()
+            self.variables_quant.slider_id_submitted_uuid in st.session_state.keys()
             and self.variables_quant.all_datapoints_submitted in st.session_state.keys()
         ):
             return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints_submitted],
-                st.session_state[st.session_state["slider_id_submitted"]],
+                st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]],
             )
 
     def _initialize_highlight_column(self) -> None:
@@ -436,12 +453,16 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.all_datapoints_submitted].insert(
                 0, "Highlight", st.session_state[self.variables_quant.highlight_list_submitted]
             )
+        elif "Highlight" in st.session_state[self.variables_quant.all_datapoints_submitted].columns:
+            st.session_state[self.variables_quant.all_datapoints_submitted]["Highlight"] = st.session_state[
+                self.variables_quant.all_datapoints_submitted
+            ]["Highlight"].fillna(False)
 
     def _create_slider(self) -> None:
         """Creates a slider input."""
-        if "slider_id" not in st.session_state:
-            st.session_state["slider_id"] = uuid.uuid4()
-        slider_key = st.session_state["slider_id"]
+        if self.variables_quant.slider_id_uuid not in st.session_state:
+            st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
+        slider_key = st.session_state[self.variables_quant.slider_id_uuid]
 
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
 
@@ -454,9 +475,9 @@ class QuantUIObjects:
 
     def _create_slider_submitted(self) -> None:
         """Creates a slider input."""
-        if "slider_id_submitted" not in st.session_state:
-            st.session_state["slider_id_submitted"] = uuid.uuid4()
-        slider_key = st.session_state["slider_id_submitted"]
+        if self.variables_quant.slider_id_submitted_uuid not in st.session_state:
+            st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
+        slider_key = st.session_state[self.variables_quant.slider_id_submitted_uuid]
         # st.session_state[slider_key] = st.empty()
 
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
@@ -473,7 +494,7 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.placeholder_fig_compare] = st.empty()
         st.session_state[self.variables_quant.placeholder_table] = st.empty()
         st.session_state[self.variables_quant.placeholder_downloads_container] = st.empty()
-        st.session_state["table_id"] = uuid.uuid4()
+        st.session_state[self.variables_quant.table_id_uuid] = uuid.uuid4()
 
     def _generate_and_display_metric_plot(self) -> None:
         """Generates and displays the metric plot."""
@@ -493,7 +514,7 @@ class QuantUIObjects:
         try:
             st.session_state[self.variables_quant.placeholder_table].data_editor(
                 st.session_state[self.variables_quant.all_datapoints],
-                key=st.session_state["table_id"],
+                key=st.session_state[self.variables_quant.table_id_uuid],
                 on_change=self.table_callback,
             )
         except:
@@ -509,7 +530,7 @@ class QuantUIObjects:
         # create a uuid for the selector (if necessary)
         if self.variables_quant.placeholder_downloads_container not in st.session_state.keys() or reset_uuid:
             st.session_state[self.variables_quant.placeholder_downloads_container] = st.empty()
-            st.session_state["download_selector_id"] = uuid.uuid4()
+            st.session_state[self.variables_quant.download_selector_id_uuid] = uuid.uuid4()
 
         with st.session_state[self.variables_quant.placeholder_downloads_container].container(border=True):
             # render everything into the "download"-container
@@ -519,23 +540,27 @@ class QuantUIObjects:
                 "Select dataset",
                 downloads_df["intermediate_hash"],
                 index=None,
-                key=st.session_state["download_selector_id"],
+                key=st.session_state[self.variables_quant.download_selector_id_uuid],
                 format_func=lambda x: downloads_df["id"][x],
             )
 
             if (
-                st.session_state[st.session_state["download_selector_id"]] != None
+                st.session_state[st.session_state[self.variables_quant.download_selector_id_uuid]] != None
                 and st.secrets["storage"]["dir"] != None
             ):
                 # if some dataset is already selected, render the download buttons
                 st.write(
                     "Available files for "
-                    + downloads_df["id"][st.session_state[st.session_state["download_selector_id"]]]
+                    + downloads_df["id"][
+                        st.session_state[st.session_state[self.variables_quant.download_selector_id_uuid]]
+                    ]
                     + ":"
                 )
 
                 dataset_path = (
-                    st.secrets["storage"]["dir"] + "/" + st.session_state[st.session_state["download_selector_id"]]
+                    st.secrets["storage"]["dir"]
+                    + "/"
+                    + st.session_state[st.session_state[self.variables_quant.download_selector_id_uuid]]
                 )
                 if os.path.isdir(dataset_path):
                     files = os.listdir(dataset_path)
@@ -672,8 +697,8 @@ class QuantUIObjects:
         f = open(temp_file_name)
         f.seek(0)
 
-        if st.session_state["slider_id_submitted"] in st.session_state.keys():
-            set_slider_val = st.session_state[st.session_state["slider_id_submitted"]]
+        if st.session_state[self.variables_quant.slider_id_submitted_uuid] in st.session_state.keys():
+            set_slider_val = st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]]
         else:
             set_slider_val = self.variables_quant.default_val_slider
 
@@ -723,7 +748,7 @@ class QuantUIObjects:
         Callback function for handling edits made to the data table in the UI.
         It updates the session state to reflect changes made to the data points.
         """
-        edits = st.session_state[st.session_state["table_id"]]["edited_rows"].items()
+        edits = st.session_state[st.session_state[self.variables_quant.table_id_uuid]]["edited_rows"].items()
         for k, v in edits:
             try:
                 st.session_state[self.variables_quant.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(
@@ -755,7 +780,8 @@ class QuantUIObjects:
         the selected slider value, such as the minimum number of ion quantifications.
         """
         st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
-            st.session_state[self.variables_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
+            st.session_state[self.variables_quant.all_datapoints],
+            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]],
         )
 
         try:
@@ -775,7 +801,7 @@ class QuantUIObjects:
         """
         st.session_state[self.variables_quant.all_datapoints_submitted] = self.ionmodule.filter_data_point(
             st.session_state[self.variables_quant.all_datapoints_submitted],
-            st.session_state[st.session_state["slider_id_submitted"]],
+            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]],
         )
 
         try:
@@ -864,13 +890,14 @@ class QuantUIObjects:
         st.select_slider(
             label="Minimal ion quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
-            value=st.session_state[st.session_state["slider_id"]],
+            value=st.session_state[st.session_state[self.variables_quant.slider_id_uuid]],
             on_change=self.slider_callback,
-            key=st.session_state["slider_id"],
+            key=st.session_state[self.variables_quant.slider_id_uuid],
         )
 
         st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.filter_data_point(
-            st.session_state[self.variables_quant.all_datapoints], st.session_state[st.session_state["slider_id"]]
+            st.session_state[self.variables_quant.all_datapoints],
+            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]],
         )
 
         try:
@@ -887,11 +914,11 @@ class QuantUIObjects:
         )
         st.session_state[self.variables_quant.placeholder_fig_compare] = placeholder_fig_compare
 
-        st.session_state["table_id"] = uuid.uuid4()
+        st.session_state[self.variables_quant.table_id_uuid] = uuid.uuid4()
 
         st.data_editor(
             st.session_state[self.variables_quant.all_datapoints_submitted],
-            key=st.session_state["table_id"],
+            key=st.session_state[self.variables_quant.table_id_uuid],
             on_change=self.table_callback_submitted,
         )
 
@@ -1023,7 +1050,7 @@ class QuantUIObjects:
         # filter result_performance dataframe on nr_observed column
         st.session_state[self.variables_quant.result_perf] = st.session_state[self.variables_quant.result_perf][
             st.session_state[self.variables_quant.result_perf]["nr_observed"]
-            >= st.session_state[st.session_state["slider_id"]]
+            >= st.session_state[st.session_state[self.variables_quant.slider_id_uuid]]
         ]
 
         if recalculate:
@@ -1066,7 +1093,7 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.result_perf].head(100)
         )
 
-        st.subheader("Download calculated ratios")
+        st.subheader("Download table")
         random_uuid = uuid.uuid4()
         sample_name = self.create_sample_name()
         st.download_button(

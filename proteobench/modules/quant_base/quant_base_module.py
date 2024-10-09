@@ -71,6 +71,7 @@ class QuantModule:
         "i2MassChroQ": extract_params_i2masschroq,
         "DIA-NN": extract_params_diann,
         "AlphaDIA": extract_params_alphadia,
+        "FragPipe (DIA-NN quant)": extract_params_fragger,
         # "Spectronaut": extract_params_spectronaut
     }
 

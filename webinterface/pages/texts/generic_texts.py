@@ -8,7 +8,7 @@ class WebpageTexts:
 
         title = "DDA quantification - precursor ions"
 
-        doc_url = "https://proteobench.readthedocs.io/en/latest/available-modules/2-DDA-Quantification-ion-level/"
+        doc_url = "https://proteobench.readthedocs.io/en/latest/available-modules/4-DIA-Quantification/"
 
         initial_results = """
             Scroll down if you want to see the public benchmark runs publicly available
@@ -41,7 +41,7 @@ class WebpageTexts:
     class Help:
         input_file = """
             Output file of the software tool. More information on the accepted format can 
-            be found [here](https://proteobench.readthedocs.io/en/latest/modules/2-DDA-Quantification-ion-level/)
+            be found [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-DIA-Quantification/)
             """
 
         pull_req = """
@@ -51,7 +51,7 @@ class WebpageTexts:
         input_format = """
             Please select the software you used to generate the results. If it is not yet 
             implemented in ProteoBench, you can use a tab-delimited format that is described 
-            further [here](https://proteobench.readthedocs.io/en/latest/modules/2-DDA-Quantification-ion-level/)
+            further [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-DIA-Quantification/)
         """
 
         parse_button = """
@@ -60,6 +60,6 @@ class WebpageTexts:
 
         meta_data_file = """
             Please add a file with meta data that contains all relevant information about 
-            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/modules/2-DDA-Quantification-ion-level/)
+            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-DIA-Quantification/)
             for all compatible parameter files.
         """

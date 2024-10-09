@@ -257,9 +257,12 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "protein_inference": "Heuristic protein inference",
     }
 
-    # Read in the log file
-    with open(fname) as f:
-        lines = f.readlines()
+    try:
+        # Read in the log file
+        with open(fname) as f:
+            lines = f.readlines()
+    except:
+        lines = [l for l in fname.read().decode("utf-8").splitlines()]
 
     # Extract software versions from the log file.
     software_version = search_engine_version = extract_with_regex(lines, software_version_regex)

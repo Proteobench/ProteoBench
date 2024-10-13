@@ -287,7 +287,7 @@ class QuantModule:
             logging.error("The run was previously submitted. Will not submit.")
             return False
 
-        branch_name = current_datapoint["id"]
+        branch_name = current_datapoint["id"].replace(" ", "_").replace("(", "").replace(")", "")
 
         path_write = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {path_write}")

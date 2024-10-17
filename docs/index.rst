@@ -116,7 +116,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://proteobench.cubimed.rub.de/DIA%20Quant%20Ion%20Level%20-BETA-
 
-        :bdg-primary:`active`
+        :bdg-success:`active`
         ^^^
         Benchmark the quantification accuracy of label-free data independent acquisition workflows
         using a multi-species sample

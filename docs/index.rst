@@ -82,7 +82,6 @@ Available ProteoBench modules
         :columns: 6 6 4 4
         :padding: 1
         :link: https://proteobench.cubimed.rub.de/DDA%20Quant%20Ion%20Level%20-BETA-
-        :link-type: doc
 
         :bdg-success:`active`
         ^^^

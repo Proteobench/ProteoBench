@@ -1080,7 +1080,7 @@ class QuantUIObjects:
             col2.subheader("Coefficient of variation distribution in Group A and B.")
             col2.markdown(
                 """
-                    Right Panel Panel : CV calculated from your data
+                    Right Panel : CV calculated from your data
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)

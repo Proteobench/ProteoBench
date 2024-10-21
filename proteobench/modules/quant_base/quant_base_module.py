@@ -11,7 +11,7 @@ from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
     Datapoint,
-    filter_df_numquant_median_abs_epsilon,
+    filter_df_numquant_mean_abs_epsilon,
     filter_df_numquant_nr_prec,
 )
 from proteobench.github.gh import GithubProteobotRepo
@@ -155,8 +155,8 @@ class QuantModule:
         """
         print(all_datapoints)
 
-        all_datapoints["median_abs_epsilon"] = [
-            filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        all_datapoints["mean_abs_epsilon"] = [
+            filter_df_numquant_mean_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
 
         all_datapoints["nr_prec"] = [

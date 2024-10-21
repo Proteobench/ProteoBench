@@ -98,8 +98,8 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
-        all_median_abs_epsilon = [
-            v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
+        all_mean_abs_epsilon = [
+            v2["mean_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
         ]
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
@@ -162,8 +162,8 @@ class PlotDataPoint:
                 max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
             ],
             layout_xaxis_range=[
-                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
-                max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
+                min(all_mean_abs_epsilon) - min(all_mean_abs_epsilon) * 0.05,
+                max(all_mean_abs_epsilon) + min(all_mean_abs_epsilon) * 0.05,
             ],
         )
 
@@ -180,7 +180,7 @@ class PlotDataPoint:
             ]
             fig.add_trace(
                 go.Scatter(
-                    x=tmp_df["median_abs_epsilon"],
+                    x=tmp_df["mean_abs_epsilon"],
                     y=tmp_df["nr_prec"],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],

@@ -12,11 +12,11 @@ import pandas as pd
 import proteobench
 
 
-def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
+def filter_df_numquant_mean_abs_epsilon(row, min_quant=3):
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("median_abs_epsilon")
+        return row[min_quant].get("mean_abs_epsilon")
 
     return None
 
@@ -52,7 +52,7 @@ class Datapoint:
     is_temporary: bool = True
     intermediate_hash: str = ""
     results: dict = None
-    median_abs_epsilon: int = 0
+    mean_abs_epsilon: int = 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
@@ -106,8 +106,9 @@ class Datapoint:
 
         result_datapoint.generate_id()
         results = dict(ChainMap(*[Datapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
-        result_datapoint.results = results
-        result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
+        result_datapoint["results"] = results
+        result_datapoint["mean_abs_epsilon"] = result_datapoint["results"][default_cutoff_min_prec]["mean_abs_epsilon"]
+        result_datapoint["nr_prec"] = result_datapoint["results"][default_cutoff_min_prec]["nr_prec"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 
@@ -121,7 +122,7 @@ class Datapoint:
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         nr_prec = len(df_slice)
         # median abs unafected by outliers
-        median_abs_epsilon = df_slice["epsilon"].abs().mean()
+        mean_abs_epsilon = df_slice["epsilon"].abs().mean()
         # variance affected by outliers
         variance_epsilon = df_slice["epsilon"].var()
         # TODO more concise way to describe distribution of CV's
@@ -132,7 +133,7 @@ class Datapoint:
 
         return {
             min_nr_observed: {
-                "median_abs_epsilon": median_abs_epsilon,
+                "mean_abs_epsilon": mean_abs_epsilon,
                 "variance_epsilon": variance_epsilon,
                 "nr_prec": nr_prec,
                 "CV_median": cv_median,

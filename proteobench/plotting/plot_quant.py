@@ -32,12 +32,10 @@ class PlotDataPoint:
         fig.update_layout(
             width=700,
             height=700,
-            # title="Distplot",
-            xaxis=dict(title="log2_A_vs_B", color="white", gridwidth=2, linecolor="black"),
-            yaxis=dict(linecolor="black"),
+            xaxis=dict(title="log2_A_vs_B", gridwidth=2, linecolor="black"),
+            yaxis=dict(title="Density", gridwidth=2, linecolor="black"),
         )
 
-        fig.update_yaxes(title="Density", color="white", gridwidth=2)
         fig.update_layout(width=700, height=700)
         fig.update_xaxes(range=[-4, 4])
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
@@ -98,9 +96,7 @@ class PlotDataPoint:
         Return: Plotly figure object
 
         """
-        all_mean_abs_epsilon = [
-            v2["mean_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
-        ]
+        all_mean_abs_epsilon = [v2["mean_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text , which is different depending on whether the submission is public or private

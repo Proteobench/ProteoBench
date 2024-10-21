@@ -106,9 +106,9 @@ class Datapoint:
 
         result_datapoint.generate_id()
         results = dict(ChainMap(*[Datapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
-        result_datapoint["results"] = results
-        result_datapoint["mean_abs_epsilon"] = result_datapoint["results"][default_cutoff_min_prec]["mean_abs_epsilon"]
-        result_datapoint["nr_prec"] = result_datapoint["results"][default_cutoff_min_prec]["nr_prec"]
+        result_datapoint.results = results
+        result_datapoint.mean_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["mean_abs_epsilon"]
+        result_datapoint.nr_prec = result_datapoint.results[default_cutoff_min_prec]["nr_prec"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 

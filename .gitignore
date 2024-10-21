@@ -55,6 +55,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# jupyter notebook example files
+jupyter_notebooks/result_dir
+
 # Translations
 *.mo
 *.pot

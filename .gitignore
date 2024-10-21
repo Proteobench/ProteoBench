@@ -57,6 +57,7 @@ coverage.xml
 
 # jupyter notebook example files
 jupyter_notebooks/result_dir
+jupyter_notebooks/sage_results.*
 
 # Translations
 *.mo

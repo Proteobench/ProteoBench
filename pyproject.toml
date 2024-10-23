@@ -29,7 +29,7 @@ dependencies = [
   "toml",
   "PyGithub",
   "GitPython",
-  "st-pages",
+  "st-pages<1.0",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"

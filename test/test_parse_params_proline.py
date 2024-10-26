@@ -12,6 +12,7 @@ fnames = [
     "Proline_example_w_Mascot_wo_proteinSets.xlsx",
     "Proline_example_2.xlsx",
     "ProlineStudio_withMBR.xlsx",
+    "ProlineStudio_241024.xlsx",
 ]
 fnames = [TESTDATA_DIR / f for f in fnames]
 

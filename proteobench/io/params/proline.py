@@ -98,6 +98,18 @@ def extract_params(fname) -> ProteoBenchParameters:
     sheet = excel.parse(sheet_name, dtype="object", index_col=0)
     enable_match_between_runs = sheet.index.str.contains("cross assignment").any()
     params.enable_match_between_runs = enable_match_between_runs
+
+    try:
+        sheet_name = "Dataset statistics and infos"
+        sheet = excel.parse(sheet_name, dtype="object", index_col=0, header=None).squeeze()
+        print(sheet)
+        params.software_version = sheet.loc["version"]
+    except KeyError:
+        # logger.warning(f"Old ProlineStudio version.")
+        pass
+    except ValueError:
+        # sheet not available
+        pass
     return params
 
 
@@ -108,6 +120,7 @@ if __name__ == "__main__":
         "../../../test/params/Proline_example_w_Mascot_wo_proteinSets.xlsx",
         "../../../test/params/Proline_example_2.xlsx",
         "../../../test/params/ProlineStudio_withMBR.xlsx",
+        "../../../test/params/ProlineStudio_241024.xlsx",
     ]
     for file in files:
         file = Path(file)

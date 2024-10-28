@@ -178,6 +178,8 @@ class PlotDataPoint:
             tmp_df = benchmark_metrics_df[
                 (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
             ]
+            # to do: remove this line as soon as parameters are homogeneous, see #380
+            tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
             fig.add_trace(
                 go.Scatter(
                     x=tmp_df["median_abs_epsilon"],

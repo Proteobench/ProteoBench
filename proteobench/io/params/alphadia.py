@@ -8,10 +8,12 @@ levels = [0, 1, 5, 9, 13, 17]
 
 ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
 
+
 # Function to clean up "(default)" and "(user defined)" substrings
 def clean_line(line: str) -> str:
-    line = ANSI_REGEX.sub("", line)  
+    line = ANSI_REGEX.sub("", line)
     return line.strip()
+
 
 def parse_line(line: str) -> Tuple[str, dict, int]:
     """
@@ -47,17 +49,18 @@ def parse_line(line: str) -> Tuple[str, dict, int]:
             elif "(default)" in value:
                 value = value.replace("(default)", "").strip()
                 setting_dict = {setting_list[0]: (value, "default")}
-            
+
             else:
                 setting_dict = {setting_list[0]: (value, None)}
-        
+
         # Convert tab to level
         level = levels.index(len(tab))
     except:
         return "", {}, 0
     # Return header, parsed setting, and the level
-    return setting_list[0], setting_dict, level 
-    
+    return setting_list[0], setting_dict, level
+
+
 def parse_section(
     line: Tuple[str, dict, int],
     line_generator: Iterable,
@@ -96,7 +99,7 @@ def parse_section(
     except:
         # If no lines left, go up a level, returning the section so far
         return {k: v[0] if isinstance(v, tuple) else v for k, v in section.items()}, 0, None
-    
+
     nested_values = []
     current_header = None
 
@@ -112,8 +115,8 @@ def parse_section(
 
         # If the next line is start of new section again
         if level_next > level_prev:
-            
-            if header_prev in ['precursor_len', 'precursor_charge', 'precursor_mz', 'fragment_mz']:
+
+            if header_prev in ["precursor_len", "precursor_charge", "precursor_mz", "fragment_mz"]:
                 if current_header is None or current_header != header_prev:
                     nested_values = []
                     current_header = header_prev
@@ -126,19 +129,17 @@ def parse_section(
                 if "(user defined)" in list(line_dict_next.keys())[0]:
                     nested_values.pop(-2)
 
-                
                 # Save the values in the section
                 section[header_prev] = nested_values
-                
 
                 try:
                     next_line = next(line_generator)
                     continue
                 except:
                     break
-        
+
             else:
-            # Get the subsection
+                # Get the subsection
 
                 subsection, _, next_line = parse_section(
                     line=parse_line(next_line),
@@ -168,8 +169,7 @@ def parse_section(
         # Also the new line should be returned
         else:
             break
-    
-    
+
     return {k: v[0] if isinstance(v, tuple) else v for k, v in section.items()}, level_next, next_line
 
 
@@ -226,6 +226,7 @@ def get_min_max(list_of_elements: list) -> Tuple[int, int]:
         max_value = int(list_of_elements[1])
     return min_value, max_value
 
+
 def extract_params(fname: str) -> ProteoBenchParameters:
     with open(fname) as f:
         lines_read = f.readlines()
@@ -238,7 +239,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     parsed_settings, level, line = parse_section(line=parse_line(first_line), line_generator=line_generator)
 
-
     peptide_lengths = get_min_max(parsed_settings["library_prediction"]["precursor_len"])
     precursor_charges = get_min_max(parsed_settings["library_prediction"]["precursor_charge"])
 
@@ -250,7 +250,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "search_engine": "AlphaDIA",
         "software_version": version,
         "search_engine_version": version,
-        "enable_match_between_runs": False, # Not in AlphaDIA AFAIK
+        "enable_match_between_runs": False,  # Not in AlphaDIA AFAIK
         "precursor_mass_tolerance": prec_tol,
         "fragment_mass_tolerance": frag_tol,
         "enzyme": parsed_settings["library_prediction"]["enzyme"].strip(),

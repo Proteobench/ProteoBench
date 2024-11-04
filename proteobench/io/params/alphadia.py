@@ -115,7 +115,6 @@ def parse_section(
 
         # If the next line is start of new section again
         if level_next > level_prev:
-
             if header_prev in ["precursor_len", "precursor_charge", "precursor_mz", "fragment_mz"]:
                 if current_header is None or current_header != header_prev:
                     nested_values = []

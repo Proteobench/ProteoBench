@@ -150,7 +150,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
             params.enable_match_between_runs = True
         else:
             params.enable_match_between_runs = False
-        params.quantification_method_DIANN = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
+        params.quantification_method = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
     if fragpipe_params.loc["protein-prophet.run-protein-prophet"] == "true":
         params.protein_inference = "ProteinProphet: {}".format(fragpipe_params.loc["protein-prophet.cmd-opts"])
 

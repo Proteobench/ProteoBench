@@ -1,0 +1,31 @@
+Category,Value
+Name of Experiment,Proteobench_default_actual
+Experiment UUID,286fb5f9-afc5-4ed6-91fb-02c4a4aaa639
+Created By,robbe.devreese@ugent.be
+Account UUID,74def310-2d39-4476-8b93-fe4ee91a1953
+Created,2024-11-04T18:56:08.599094Z
+Last Used,2024-11-04T18:56:08.843832Z
+Status,Successful
+Tags,demo
+RAW Files,"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw, LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw, LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw, LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw, LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw, LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw"
+RAW File UUIDs,"337b42bd-b992-47d9-8882-14b9e7cc9909, 89ab8273-2ba6-4df2-8fc1-3cb2ca52c63f, cae09c5a-e31d-4e33-aa0b-2162349aa151, d4916b99-aa48-43d5-8e2b-64c1670bab61, d7aa56ad-4f9b-427d-a8cd-aa663f6bf067, e3094771-9f45-4dcd-b9b9-d65126969434"
+FASTA Files,ProteoBenchFASTA_DDAQuantification.fasta
+FASTA File UUIDs,8410ec7a-a403-49ce-986c-fe96d5017614
+Algorithm,Chimerys 4.1.1
+Prediction Model,INFERYS® 4.7.0
+Enzyme,Trypsin/P
+Enzyme Specificity,full
+Max. Missed Cleavage Sites,1
+Min. Peptide Length,7
+Max. Peptide Length,30
+Min. Peptide Charge,1
+Max. Peptide Charge,4
+Fragment Mass Tolerance,20 ppm
+Variable Modifications,"Oxidation (M), Acetylation (N-term)"
+Static Modifications,Carbamidomethyl (C)
+Maximum Number of Modifications,1
+Quantification Type,MS2 Area (Quan in all files)
+Template Name,None selected
+Unique PSMs (File-local FDR),2924219
+Unique Peptides (Dataset-global FDR),60807
+Unique Protein Groups (Dataset-global FDR),7681

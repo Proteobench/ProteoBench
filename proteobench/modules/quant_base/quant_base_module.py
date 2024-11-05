@@ -26,6 +26,7 @@ from proteobench.io.params.i2masschroq import (
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
+from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
@@ -72,6 +73,7 @@ class QuantModule:
         "DIA-NN": extract_params_diann,
         "AlphaDIA": extract_params_alphadia,
         "FragPipe (DIA-NN quant)": extract_params_fragger,
+        "MSAID": extract_params_msaid,
         # "Spectronaut": extract_params_spectronaut
     }
 

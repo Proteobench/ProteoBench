@@ -18,18 +18,11 @@ Other modules will be more suited to explore further post-pocessing steps.
 A subset of the Q Exactive HF-X Orbitrap (Thermo Fisher) data independent acquisition (DIA) data described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset (in the manuscript referred to as All-Ion Fragmentation (AIF)). Here, only the first biological replicate series (named “alpha”) was used, encompassing three technical replicates of two different conditions (referred to as “A” and “B”). The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
 Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
-The files can be downloaded from the proteomeXchange repository PXD028735 or you can download them here:
-
-[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw),
-[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw),
-[LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw),
-[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw),
-[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw),
-[LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://cloud.cmb.ugent.be/index.php/s/zdGB3zZ7Fwed9gq/download?path=%2FModule_4_DIA_Quantification%2FRAW&files=LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
+The files can be downloaded from the proteomeXchange repository PXD028735 (https://www.ebi.ac.uk/pride/archive/projects/PXD028735) or you can download them from the ProteoBench server here: https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="/app/static/ProteoBenchFASTA_DDAQuantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
+Download the zipped FASTA file here: <a href="/datasets/fasta/ProteoBenchFASTA_DDAQuantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
 The fasta file provided for this module contains the three species
 present in the samples and contaminant proteins
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))

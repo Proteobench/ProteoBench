@@ -76,7 +76,9 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
             lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
         )
         input_data_frame["Proteins"] = input_data_frame["Proteins"].str.join(";")
-
+    elif input_format == "MSAID":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    
     return input_data_frame
 
 

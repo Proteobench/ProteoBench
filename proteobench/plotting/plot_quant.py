@@ -80,6 +80,7 @@ class PlotDataPoint:
             "Custom": "#7f7f7f",
             "Spectronaut": "#bcbd22",
             "FragPipe (DIA-NN quant)": "#ff7f00",
+            "MSAID": "#afff57",
             ##ffff33 /yellow so not ideal
         },
         mapping={"old": 10, "new": 20},

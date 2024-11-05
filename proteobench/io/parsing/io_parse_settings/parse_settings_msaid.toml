@@ -1,0 +1,39 @@
+[mapper]
+"MODIFIED_SEQUENCE" = "Sequence"
+"RAW_FILE_NAME" = "Raw file"
+"PRECURSOR_CHARGE" = "Charge"
+"QUANTIFICATION" = "Intensity"
+"FASTA_HEADERS" = "Proteins"
+
+[condition_mapper]
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw" = "A"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw" = "A"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw" = "A"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw" = "B"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw" = "B"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw" = "B"
+
+[run_mapper]
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw" = "Condition_A_Sample_Alpha_01"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw" = "Condition_A_Sample_Alpha_02"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw" = "Condition_A_Sample_Alpha_03"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw" = "Condition_B_Sample_Alpha_01"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw" = "Condition_B_Sample_Alpha_02"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\[(.*?)\\]"
+"modification_dict" = {"[unimod:4]" = "Carbamidomethyl", "[unimod:1]" = "Acetyl", "[unimod:35]" = "Oxidation"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = false

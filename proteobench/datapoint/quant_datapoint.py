@@ -53,6 +53,7 @@ class Datapoint:
     intermediate_hash: str = ""
     results: dict = None
     median_abs_epsilon: int = 0
+    # TODO nr_prec doesnt get updated in final df, always 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""

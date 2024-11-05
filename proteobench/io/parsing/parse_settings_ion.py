@@ -36,6 +36,7 @@ class ParseSettingsBuilder:
                 "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe_DIA.toml"),
                 "Spectronaut": os.path.join(parse_settings_dir, "parse_settings_spectronaut.toml"),
                 "AlphaDIA": os.path.join(parse_settings_dir, "parse_settings_alphadia.toml"),
+                "MSAID": os.path.join(parse_settings_dir, "parse_settings_msaid.toml"),
                 "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DIA_quant_ion.toml"),
             }
         else:

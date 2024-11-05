@@ -43,10 +43,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
 if __name__ == "__main__":
     for fname in [
-        "../../../test/params/Proteobench_default_actual_details_MSAID.csv",
+        "../../../test/params/Proteobench_default_actual_details.csv",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)
         data_dict = params.__dict__
         series = pd.Series(data_dict)
-        series.to_csv(file.with_suffix(".csv"))
+        series.to_csv(file.with_suffix(".tsv"), sep="\t")

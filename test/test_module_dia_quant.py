@@ -22,7 +22,7 @@ TESTDATA_FILES = {
     "FragPipe (DIA-NN quant)": os.path.join(TESTDATA_DIR, "MSFraggerDIA_sample_test.tsv"),
     "Spectronaut": os.path.join(TESTDATA_DIR, "Spectronaut_test_sample_default_PG.tsv"),
     "FragPipe": os.path.join(TESTDATA_DIR, "Fragpipe_combined_ion.tsv"),
-    "MSAID": os.path.join(TESTDATA_DIR, "MSAID_sample.tsv")
+    "MSAID": os.path.join(TESTDATA_DIR, "MSAID_sample.tsv"),
 }
 
 
@@ -53,7 +53,15 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("DIA-NN", "AlphaDIA", "MaxQuant", "FragPipe (DIA-NN quant)", "Spectronaut", "FragPipe", "MSAID")
+    supported_formats = (
+        "DIA-NN",
+        "AlphaDIA",
+        "MaxQuant",
+        "FragPipe (DIA-NN quant)",
+        "Spectronaut",
+        "FragPipe",
+        "MSAID",
+    )
     """Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):

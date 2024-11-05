@@ -78,7 +78,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame["Proteins"] = input_data_frame["Proteins"].str.join(";")
     elif input_format == "MSAID":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-    
+
     return input_data_frame
 
 

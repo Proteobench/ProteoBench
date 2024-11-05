@@ -61,6 +61,19 @@ def parse_line(line: str) -> Tuple[str, dict, int]:
 def process_nested_values(
     header_prev: str, current_header: Optional[str], nested_values: list, line_dict_next: dict, section: dict
 ) -> Tuple[Optional[str], list]:
+    """
+    Processes nested values from a given line dictionary and updates the section dictionary.
+
+    Args:
+        header_prev (str): The previous header string.
+        current_header (Optional[str]): The current header string, which can be None.
+        nested_values (list): A list of nested values to be updated.
+        line_dict_next (dict): A dictionary representing the next line to be processed.
+        section (dict): A dictionary representing the section to be updated.
+
+    Returns:
+        Tuple[Optional[str], list]: A tuple containing the updated current header and the list of nested values.
+    """
     if current_header is None or current_header != header_prev:
         nested_values = []
         current_header = header_prev

@@ -9,7 +9,7 @@ levels = [0, 1, 5, 9, 13, 17]
 ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
 
 
-# Function to clean up "(default)" and "(user defined)" substrings
+# Function to clean up lines
 def clean_line(line: str) -> str:
     line = ANSI_REGEX.sub("", line)
     return line.strip()
@@ -35,30 +35,64 @@ def parse_line(line: str) -> Tuple[str, dict, int]:
     """
     # Remove the info part and convert ansi
     line = clean_line(line[22:])
-    try:
-        # Split the string to tab part and setting part
-        tab, setting = line.split("──")
-        setting_list = setting.split(":")
-        if len(setting_list) == 1:
-            setting_dict = {setting_list[0]: (None, None)}
+    # Split the string to tab part and setting part
+    tab, setting = line.split("──")
+    setting_list = setting.split(":")
+    if len(setting_list) == 1:
+        setting_dict = {setting_list[0]: (None, None)}
+    else:
+        value = setting_list[1].strip()
+        if "(user defined)" in value:
+            value = value.replace("(user defined)", "").strip()
+            setting_dict = {setting_list[0]: (value, "user defined")}
+        elif "(default)" in value:
+            value = value.replace("(default)", "").strip()
+            setting_dict = {setting_list[0]: (value, "default")}
+
         else:
-            value = setting_list[1].strip()
-            if "(user defined)" in value:
-                value = value.replace("(user defined)", "").strip()
-                setting_dict = {setting_list[0]: (value, "user defined")}
-            elif "(default)" in value:
-                value = value.replace("(default)", "").strip()
-                setting_dict = {setting_list[0]: (value, "default")}
+            setting_dict = {setting_list[0]: (value, None)}
 
-            else:
-                setting_dict = {setting_list[0]: (value, None)}
-
-        # Convert tab to level
-        level = levels.index(len(tab))
-    except:
-        return "", {}, 0
+    # Convert tab to level
+    level = levels.index(len(tab))
     # Return header, parsed setting, and the level
     return setting_list[0], setting_dict, level
+
+
+def process_nested_values(
+    header_prev: str, current_header: Optional[str], nested_values: list, line_dict_next: dict, section: dict
+) -> Tuple[Optional[str], list]:
+    if current_header is None or current_header != header_prev:
+        nested_values = []
+        current_header = header_prev
+
+    # Collect all values under this nested section
+    value = list(line_dict_next.keys())[0].split()[0]  # Extract value before space
+    nested_values.append(int(value))
+
+    # If "user defined", overwrite the default
+    if "(user defined)" in list(line_dict_next.keys())[0]:
+        nested_values.pop(-2)
+
+    section[header_prev] = nested_values
+    return current_header, nested_values
+
+
+def update_section_with_line_dict(section: dict, line_dict_next: dict) -> None:
+    """
+    Update the section dictionary with values from line_dict_next.
+
+    Parameters
+    ----------
+    section: dict
+        The section dictionary to update.
+    line_dict_next: dict
+        Dictionary containing the key-value pairs to update in the section.
+    """
+    for key, (value, flag) in line_dict_next.items():
+        if key in section and flag == "user defined":
+            section[key] = value
+        elif key not in section:
+            section[key] = value
 
 
 def parse_section(
@@ -96,7 +130,7 @@ def parse_section(
         # Get the next line to know what to do
         next_line = next(line_generator)
         header_next, line_dict_next, level_next = parse_line(next_line)
-    except:
+    except StopIteration:
         # If no lines left, go up a level, returning the section so far
         return {k: v[0] if isinstance(v, tuple) else v for k, v in section.items()}, 0, None
 
@@ -107,7 +141,7 @@ def parse_section(
         # If no more lines go up a level
         try:
             header_next, line_dict_next, level_next = parse_line(next_line)
-        except:
+        except StopIteration:
             break
 
         if not isinstance(line_dict_next, dict):
@@ -116,25 +150,13 @@ def parse_section(
         # If the next line is start of new section again
         if level_next > level_prev:
             if header_prev in ["precursor_len", "precursor_charge", "precursor_mz", "fragment_mz"]:
-                if current_header is None or current_header != header_prev:
-                    nested_values = []
-                    current_header = header_prev
-
-                # Collect all values under this nested section
-                value = list(line_dict_next.keys())[0].split()[0]  # Extract value before space
-                nested_values.append(int(value))
-
-                # If "user defined", overwrite the default
-                if "(user defined)" in list(line_dict_next.keys())[0]:
-                    nested_values.pop(-2)
-
-                # Save the values in the section
-                section[header_prev] = nested_values
-
+                current_header, nested_values = process_nested_values(
+                    header_prev, current_header, nested_values, line_dict_next, section
+                )
                 try:
                     next_line = next(line_generator)
                     continue
-                except:
+                except StopIteration:
                     break
 
             else:
@@ -151,17 +173,12 @@ def parse_section(
 
         # if new line is at same level
         elif level_prev == level_next:
-            if isinstance(line_dict_next, dict):
-                for key, (value, flag) in line_dict_next.items():
-                    if key in section and flag == "user defined":
-                        section[key] = value
-                    elif key not in section:
-                        section[key] = value
+            update_section_with_line_dict(section, line_dict_next)
             header_prev = header_next
             level_prev = level_next
             try:
                 next_line = next(line_generator)
-            except:
+            except StopIteration:
                 break
 
         # The next line needs to go up and output the section

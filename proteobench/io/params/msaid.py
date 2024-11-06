@@ -11,7 +11,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "software_name": "MSAID",
         "search_engine": "Chimerys",
         "search_engine_version": "4.1.1",
-        "enable_match_between_runs": False,
         "quantification_method": "MS2 Area",
         "ident_fdr_psm": "0.01",
         "ident_fdr_peptide": "0.01",
@@ -37,6 +36,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters["min_precursor_charge"] = params_dict["Min. Peptide Charge"]
     parameters["max_precursor_charge"] = params_dict["Max. Peptide Charge"]
     parameters["quantification_method"] = params_dict["Quantification Type"]
+    if parameters["quantification_method"].contains("Quan in all file"):
+        parameters["enable_match_between_runs"] = True
+    else:
+        parameters["enable_match_between_runs"] = False
 
     return ProteoBenchParameters(**parameters)
 

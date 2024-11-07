@@ -36,7 +36,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters["min_precursor_charge"] = params_dict["Min. Peptide Charge"]
     parameters["max_precursor_charge"] = params_dict["Max. Peptide Charge"]
     parameters["quantification_method"] = params_dict["Quantification Type"]
-    if parameters["quantification_method"].contains("Quan in all file"):
+    if "Quan in all file" in parameters["quantification_method"]:
         parameters["enable_match_between_runs"] = True
     else:
         parameters["enable_match_between_runs"] = False
@@ -46,7 +46,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
 if __name__ == "__main__":
     for fname in [
-        "../../../test/params/Proteobench_default_actual_details.csv",
+        "../../../test/params/MSAID_default_params.csv",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

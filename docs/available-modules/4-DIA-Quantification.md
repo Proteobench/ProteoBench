@@ -80,7 +80,7 @@ After upload, you will get a link to the pull request associated with your data.
 1. Import Raw files
 2. Add FASTA but do not select "Contaminants" since these are already included in the FASTA file
 3. Turn on FASTA digest for library-free search / library generation (automatically activates deep-learning based spectra, RTs, and IMs prediction).
-4. The input files for Proteobench are "*_report.tsv" (main report for the precursor quantities) and "*report.log.txt" (parameter files)
+4. The input files for Proteobench are "*_report.tsv" (main report for the precursor quantities) and "*report.log.txt" (parameter files). For correct parameter parsing, verbosity should not be set higher than 1.
 
 ### [AlphaDIA](https://github.com/MannLabs/alphadia)
 1. Select FASTA and import .raw files in "Input files"

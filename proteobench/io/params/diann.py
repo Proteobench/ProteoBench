@@ -253,7 +253,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "software_name": "DIA-NN",
         "search_engine": "DIA-NN",
         "enable_match_between_runs": False,
-        "quantification_method_DIANN": "QuantUMS high-precision",
+        "quantification_method": "QuantUMS high-precision",
         "protein_inference": "Heuristic protein inference",
     }
 
@@ -274,7 +274,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     cmdline_dict = parse_cmdline_string(cmdline_string)
 
     parameters["second_pass"] = "double-search" in cmdline_dict.keys() or "double-pass" in cmdline_dict.keys()
-    parameters["quantification_method_DIANN"] = parse_quantification_strategy(cmdline_dict)
+    parameters["quantification_method"] = parse_quantification_strategy(cmdline_dict)
     parameters["protein_inference"] = parse_protein_inference_method(cmdline_dict)
     parameters["predictors_library"] = parse_predictors_library(cmdline_dict)
 

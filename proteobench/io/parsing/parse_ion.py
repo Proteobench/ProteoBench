@@ -128,20 +128,17 @@ def aggregate_modification_sites_column(
     input_string_sites,
 ):
     if isinstance(input_string_modifications, float) and math.isnan(input_string_modifications):
-        return input_string_seq  # Return the original sequence if modifications are NaN or None
+        return input_string_seq
 
-    # Convert modifications and sites to lists and create tuples of (modification, position)
     mods_list = input_string_modifications.split(";")
     sites_list = list(map(int, str(input_string_sites).split(";")))
 
-    # Sort modifications by site position in descending order
     mods_and_sites = sorted(zip(mods_list, sites_list), key=lambda x: x[1], reverse=True)
 
     for mod, site in mods_and_sites:
         if not mod:
             continue
         mod_name = mod.split("@")[0]
-        # Insert modification at the modified position
         if site == 0:
             input_string_seq = input_string_seq[:site] + f"[{mod_name}]-" + input_string_seq[site:]
         elif site == -1:

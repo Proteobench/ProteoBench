@@ -19,7 +19,7 @@ max_mods,1
 min_precursor_charge,1
 max_precursor_charge,4
 scan_window,13
-quantification_method_DIANN,QuantUMS high-accuracy
+quantification_method,QuantUMS high-accuracy
 second_pass,True
 protein_inference,Protein_names
 predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"

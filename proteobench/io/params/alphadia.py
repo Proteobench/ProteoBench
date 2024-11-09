@@ -292,7 +292,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "variable_mods": parsed_settings["library_prediction"]["variable_modifications"].strip(),
         "max_mods": int(parsed_settings["library_prediction"]["max_var_mod_num"]),
         "scan_window": int(parsed_settings["selection_config"]["max_size_rt"]),
-        "quantification_method_DIANN": None,
         "second_pass": None,
         "protein_inference": parsed_settings["fdr"]["inference_strategy"].strip(),
         "predictors_library": "Built-in",

@@ -89,7 +89,7 @@ class ProteoBenchParameters:
     min_precursor_charge: Optional[int] = None  # precursor_charge
     max_precursor_charge: Optional[int] = None
     scan_window: Optional[int] = None  # DIA-specific
-    quantification_method_DIANN: Optional[str] = None  # DIANN-specific
+    quantification_method: Optional[str] = None
     second_pass: Optional[bool] = None  # DIANN specific
     protein_inference: Optional[str] = None
     predictors_library: Optional[dict] = None

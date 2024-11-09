@@ -26,6 +26,7 @@ from proteobench.io.params.i2masschroq import (
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
+from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
@@ -72,6 +73,7 @@ class QuantModule:
         "DIA-NN": extract_params_diann,
         "AlphaDIA": extract_params_alphadia,
         "FragPipe (DIA-NN quant)": extract_params_fragger,
+        "MSAID": extract_params_msaid,
         # "Spectronaut": extract_params_spectronaut
     }
 
@@ -105,12 +107,17 @@ class QuantModule:
 
         current_datapoint["old_new"] = "new"
 
-        if current_datapoint["intermediate_hash"] not in all_datapoints.loc["intermediate_hash", :].values:
-            all_datapoints.loc["old_new", :] = "old"
+        # TODO: this doesn't work outside of the web interface, because the intermediate_hash is not present without the old datapoints. Temp fix with try except
+        try:
+            if current_datapoint["intermediate_hash"] not in all_datapoints.loc["intermediate_hash", :].values:
+                all_datapoints.loc["old_new", :] = "old"
+                all_datapoints_new = pd.concat([all_datapoints, current_datapoint], axis=1)
+                all_datapoints_new = all_datapoints_new.T.reset_index(drop=True)
+            else:
+                all_datapoints_new = all_datapoints.T.reset_index(drop=True)
+        except KeyError:  # if there is no intermediate_hash, because of local use
             all_datapoints_new = pd.concat([all_datapoints, current_datapoint], axis=1)
             all_datapoints_new = all_datapoints_new.T.reset_index(drop=True)
-        else:
-            all_datapoints_new = all_datapoints.T.reset_index(drop=True)
 
         return all_datapoints_new
 

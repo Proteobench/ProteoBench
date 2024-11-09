@@ -48,11 +48,16 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     elif input_format == "AlphaDIA":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+        mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+        mapper = mapper_df["description"].to_dict()
+        input_data_frame["Proteins"] = input_data_frame["genes"].map(
+            lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
+        )
         input_data_frame["proforma"] = input_data_frame.apply(
             lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
             axis=1,
         )
-        input_data_frame["Proteins"] = input_data_frame["genes"] + "/" + input_data_frame["pg_master"]
     elif input_format == "FragPipe (DIA-NN quant)":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
@@ -76,6 +81,8 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
             lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
         )
         input_data_frame["Proteins"] = input_data_frame["Proteins"].str.join(";")
+    elif input_format == "MSAID":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 
     return input_data_frame
 
@@ -119,21 +126,25 @@ def aggregate_modification_sites_column(
     input_string_seq: str,
     input_string_modifications: str,
     input_string_sites,
-    special_locations: dict = {
-        "Any N-term": 0,
-        "Any C-term": -1,
-        "Protein N-term": 0,
-        "Protein C-term": -1,
-    },
 ):
     if isinstance(input_string_modifications, float) and math.isnan(input_string_modifications):
-        return input_string_seq  # Return the original sequence if modifications are NaN or None
-    for m, s in reversed(list(zip(input_string_modifications.split(";"), str(input_string_sites).split(";")))):
-        if len(m) == 0:
+        return input_string_seq
+
+    mods_list = input_string_modifications.split(";")
+    sites_list = list(map(int, str(input_string_sites).split(";")))
+
+    mods_and_sites = sorted(zip(mods_list, sites_list), key=lambda x: x[1], reverse=True)
+
+    for mod, site in mods_and_sites:
+        if not mod:
             continue
-        m_name = m.split("@")[0]
-        m_pos = int(s)
-        input_string_seq = input_string_seq[:m_pos] + f"[{m_name}]" + input_string_seq[m_pos:]
+        mod_name = mod.split("@")[0]
+        if site == 0:
+            input_string_seq = input_string_seq[:site] + f"[{mod_name}]-" + input_string_seq[site:]
+        elif site == -1:
+            input_string_seq = input_string_seq[:site] + f"-[{mod_name}]" + input_string_seq[site:]
+        else:
+            input_string_seq = input_string_seq[:site] + f"[{mod_name}]" + input_string_seq[site:]
 
     return input_string_seq
 

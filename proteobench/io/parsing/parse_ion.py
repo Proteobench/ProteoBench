@@ -10,8 +10,6 @@ import pandas as pd
 def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     """Method loads dataframe from a csv depending on its format."""
     input_data_frame: pd.DataFrame
-    # reload buffer: https://stackoverflow.com/a/64478151/9684872
-    input_csv.seek(0)
     if input_format == "MaxQuant":
         input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
     elif input_format == "AlphaPept":

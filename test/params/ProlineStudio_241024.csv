@@ -19,7 +19,7 @@ max_mods,
 min_precursor_charge,2
 max_precursor_charge,3
 scan_window,
-quantification_method_DIANN,
+quantification_method,
 second_pass,
 protein_inference,
 predictors_library,

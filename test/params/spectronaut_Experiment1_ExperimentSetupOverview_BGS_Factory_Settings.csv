@@ -1,0 +1,25 @@
+,0
+software_name,Spectronaut
+software_version,19.2.240905.62635
+search_engine,Spectronaut
+search_engine_version,19.2.240905.62635
+ident_fdr_psm,0.01
+ident_fdr_peptide,
+ident_fdr_protein,0.01
+enable_match_between_runs,
+precursor_mass_tolerance,System Default
+fragment_mass_tolerance,System Default
+enzyme,Trypsin/P
+allowed_miscleavages,2
+min_peptide_length,7
+max_peptide_length,52
+fixed_mods,:	Carbamidomethyl (C)
+variable_mods,
+max_mods,5
+min_precursor_charge,False
+max_precursor_charge,False
+scan_window,Dynamic
+quantification_method,MS2
+second_pass,directDIA+ (Deep)
+protein_inference,IDPicker
+predictors_library,:	False

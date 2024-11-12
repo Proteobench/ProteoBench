@@ -14,7 +14,7 @@ allowed_miscleavages,2
 min_peptide_length,7
 max_peptide_length,52
 fixed_mods,:	Carbamidomethyl (C)
-variable_mods,
+variable_mods,":	Acetyl (Protein N-term), Oxidation (M)"
 max_mods,5
 min_precursor_charge,False
 max_precursor_charge,False

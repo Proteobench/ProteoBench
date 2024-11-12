@@ -7,8 +7,10 @@ from pathlib import Path
 def extract_value(lines, search_term):
     return next((line.split(search_term)[1].strip() for line in lines if search_term in line), None)
 
+
 def extract_value_regex(lines, search_term):
     return next((re.split(search_term, line)[1].strip() for line in lines if re.search(search_term, line)), None)
+
 
 def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
     # check if file exists

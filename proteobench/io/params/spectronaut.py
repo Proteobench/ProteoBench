@@ -53,7 +53,7 @@ def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
     )  # "Quantity MS Level:" or "Protein LFQ Method:" or "Quantity Type:"
     params.second_pass = extract_value(lines, "directDIA Workflow:")
     params.protein_inference = extract_value(lines, "Inference Algorithm:")  # or Protein Inference Workflow:
-    params.predictors_library = extract_value(lines, "Hybrid (DDA + DIA) Library")
+    params.predictors_library = extract_value(lines, "Hybrid (DDA + DIA) Library").replace(':', '').strip()
 
     return params
 

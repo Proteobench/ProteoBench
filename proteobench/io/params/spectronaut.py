@@ -4,12 +4,17 @@ from proteobench.io.params import ProteoBenchParameters
 from pathlib import Path
 
 
+def clean_text(text):
+    text = re.sub(r"^[\s:,\t]+|[\s:,\t]+$", "", text)
+    return text
+
+
 def extract_value(lines, search_term):
-    return next((line.split(search_term)[1].strip() for line in lines if search_term in line), None)
+    return next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
 
 
 def extract_value_regex(lines, search_term):
-    return next((re.split(search_term, line)[1].strip() for line in lines if re.search(search_term, line)), None)
+    return next((clean_text(re.split(search_term, line)[1]) for line in lines if re.search(search_term, line)), None)
 
 
 def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
@@ -53,7 +58,7 @@ def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
     )  # "Quantity MS Level:" or "Protein LFQ Method:" or "Quantity Type:"
     params.second_pass = extract_value(lines, "directDIA Workflow:")
     params.protein_inference = extract_value(lines, "Inference Algorithm:")  # or Protein Inference Workflow:
-    params.predictors_library = extract_value(lines, "Hybrid (DDA + DIA) Library").replace(':', '').strip()
+    params.predictors_library = extract_value(lines, "Hybrid (DDA + DIA) Library").replace(":", "").strip()
 
     return params
 

@@ -13,8 +13,8 @@ enzyme,Trypsin/P
 allowed_miscleavages,2
 min_peptide_length,7
 max_peptide_length,52
-fixed_mods,:	Carbamidomethyl (C)
-variable_mods,":	Acetyl (Protein N-term), Oxidation (M)"
+fixed_mods,Carbamidomethyl (C)
+variable_mods,"Acetyl (Protein N-term), Oxidation (M)"
 max_mods,5
 min_precursor_charge,False
 max_precursor_charge,False
@@ -22,4 +22,4 @@ scan_window,Dynamic
 quantification_method,MS2
 second_pass,directDIA+ (Deep)
 protein_inference,IDPicker
-predictors_library,:	False
+predictors_library,False

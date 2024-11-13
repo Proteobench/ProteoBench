@@ -13,6 +13,12 @@ def extract_value(lines, search_term):
     return next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
 
 
+def extract_mass_tolerance(lines, search_term):
+    value = next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
+    value = "40ppm" if value == "System Default" else value
+    return value
+
+
 def extract_value_regex(lines, search_term):
     return next((clean_text(re.split(search_term, line)[1]) for line in lines if re.search(search_term, line)), None)
 
@@ -41,8 +47,8 @@ def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
     params.ident_fdr_peptide = None
     params.ident_fdr_protein = extract_value(lines, "Protein Qvalue Cutoff (Experiment):")
     params.enable_match_between_runs = None
-    params.precursor_mass_tolerance = extract_value(lines, "MS1 Mass Tolerance Strategy:")
-    params.fragment_mass_tolerance = extract_value(lines, "MS2 Mass Tolerance Strategy:")
+    params.precursor_mass_tolerance = extract_mass_tolerance(lines, "MS1 Mass Tolerance Strategy:")
+    params.fragment_mass_tolerance = extract_mass_tolerance(lines, "MS2 Mass Tolerance Strategy:")
     params.enzyme = extract_value(lines, "Enzymes / Cleavage Rules:")
     params.allowed_miscleavages = extract_value(lines, "Missed Cleavages:")
     params.max_peptide_length = extract_value(lines, "Max Peptide Length:")

@@ -109,9 +109,7 @@ class Datapoint:
         results = dict(ChainMap(*[Datapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
-
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
-
         return results_series
 
     @staticmethod
@@ -122,8 +120,9 @@ class Datapoint:
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         nr_prec = len(df_slice)
         # median abs unafected by outliers
-        median_abs_epsilon = df_slice["epsilon"].abs().mean()
-        # variance affected by outliers
+        median_abs_epsilon = df_slice["epsilon"].abs().median()
+        # variance and mean affected by outliers
+        mean_abs_epsilon = df_slice["epsilon"].abs().mean()
         variance_epsilon = df_slice["epsilon"].var()
         # TODO more concise way to describe distribution of CV's
         cv_median = (df_slice["CV_A"].median() + df_slice["CV_B"].median()) / 2
@@ -134,6 +133,7 @@ class Datapoint:
         return {
             min_nr_observed: {
                 "median_abs_epsilon": median_abs_epsilon,
+                "mean_abs_epsilon": mean_abs_epsilon,
                 "variance_epsilon": variance_epsilon,
                 "nr_prec": nr_prec,
                 "CV_median": cv_median,

@@ -198,7 +198,7 @@ class PlotDataPoint:
             width=700,
             height=700,
             xaxis=dict(
-                title="Mean absolute difference between measured and expected log2-transformed fold change",
+                title="Median absolute difference between measured and expected log2-transformed fold change",
                 gridcolor="white",
                 gridwidth=2,
                 linecolor="black",

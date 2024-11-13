@@ -1,0 +1,2669 @@
+Spectronaut 19.2.240905.62635
+Computer Name: fgcz-spectronaut
+User Domain Name: fgcz-spectronaut
+User Name: root
+Analysis Mode: cmd
+Analysis Type: directDIA
+Analysis Date: 08-November-2024 11:46:55 UTC+0
+
+
+[BEGIN-SETTINGS]
+Settings Used: BGS Factory Settings
+   ├─ DIA Analysis\Calibration
+   │  ├─ MZ Extraction Strategy:	Maximum Intensity
+   │  ├─ Allow source specific iRT Calibration:	True
+   │  ├─ Precision iRT:	True
+   │  │  ├─ Exclude De-amidated Peptides:	True
+   │  │  └─ iRT <-> RT Regression Type:	Local (Non-Linear) Regression
+   │  ├─ MS1 Mass Tolerance Strategy:	System Default
+   │  ├─ Precursor Qvalue Cutoff:	0.01
+   │  └─ MS2 Mass Tolerance Strategy:	System Default
+   ├─ DIA Analysis\Identification
+   │  ├─ Precursor PEP Cutoff:	0.2
+   │  ├─ Protein Qvalue Cutoff (Experiment):	0.01
+   │  ├─ Protein Qvalue Cutoff (Run):	0.05
+   │  ├─ Protein PEP Cutoff:	0.75
+   │  ├─ Single Hit Definition:	By Stripped Sequence
+   │  ├─ Exclude Single Hit Proteins:	False
+   │  ├─ Exclude Duplicate Assays:	True
+   │  ├─ Exclude Predicted Fragment Scores:	False
+   │  ├─ Generate Decoys:	True
+   │  │  ├─ Decoy Generation Method:	Mutated
+   │  │  │  └─ Preferred Fragment Source:	NN Predicted Fragments
+   │  │  └─ Decoy Limit Strategy:	Dynamic
+   │  │     └─ Library Size Fraction:	0.1
+   │  └─ Pvalue Estimator:	Kernel Density Estimator
+   ├─ DIA Analysis\Pipeline Mode
+   │  ├─ Export All XICs:	False
+   │  ├─ Generate SNE File:	True
+   │  │  └─ Store Ion traces in SNE:	True
+   │  ├─ Post Analysis Reports:	
+   │  │  ├─ Binned CVs:	False
+   │  │  ├─ Binned Identification:	False
+   │  │  ├─ CV Density Line Chart:	False
+   │  │  ├─ CVs Below X Bar Chart:	False
+   │  │  ├─ Data Completeness Bar Chart:	False
+   │  │  ├─ Run Identifications Bar Chart:	False
+   │  │  └─ Scoring Histograms:	False
+   │  ├─ Report Schema:	BGS Factory Report (Normal)
+   │  └─ Reporting Unit:	Across Experiment
+   ├─ DIA Analysis\Post Analysis
+   │  ├─ Differential Abundance Testing:	Unpaired t-test
+   │  │  ├─ Assume Equal Variance:	False
+   │  │  ├─ Group-Wise Testing Correction:	False
+   │  │  ├─ Log2 Ratio Candidate Filter:	0.58
+   │  │  └─ Confidence Candidate Filter:	Qvalue
+   │  │     └─ Confidence:	0.05
+   │  ├─ Differential Abundance Grouping:	Major Group (Quantification Settings)
+   │  │  └─ Smallest Quantitative Unit:	Major Group (Quantification Settings)
+   │  │     └─ Use All MS-Level Quantities:	True
+   │  ├─ Calculate Explained TIC:	None
+   │  ├─ Calculate Sample Correlation Matrix:	False
+   │  └─ Hierarchical Clustering:	True
+   │     ├─ Distance Metric:	Manhattan Distance
+   │     ├─ Linkage Strategy:	Ward's Method
+   │     ├─ Order Runs by Clustering:	True
+   │     └─ Z-score Transformation:	False
+   ├─ DIA Analysis\Protein Inference
+   │  └─ Protein Inference Workflow:	Automatic
+   │     └─ Inference Algorithm:	IDPicker
+   ├─ DIA Analysis\PTM Workflow
+   │  ├─ Input Normalization Strategy:	None
+   │  └─ PTM Localization:	False
+   ├─ DIA Analysis\Quantification
+   │  ├─ Precursor Filtering:	Identified (Qvalue)
+   │  │  ├─ Imputation Strategy:	None
+   │  │  └─ Multi Channel Qvalue Filter:	Group Qvalue
+   │  ├─ Proteotypicity Filter:	None
+   │  ├─ Protein LFQ Method:	Automatic
+   │  ├─ Quantity MS Level:	MS2
+   │  ├─ Quantity Type:	Area
+   │  ├─ Cross-Run Normalization:	True
+   │  │  ├─ Normalization Filter Type:	None
+   │  │  ├─ Normalization Strategy:	Automatic
+   │  │  └─ Row Selection:	Automatic
+   │  │     └─ Multi Channel Qvalue Filter:	Group Qvalue
+   │  ├─ Quantification window:	Synchronized
+   │  ├─ Interference Correction:	True
+   │  │  ├─ Only Identified Peptides:	True
+   │  │  ├─ Exclude All Multi-Channel Interferences:	True
+   │  │  ├─ MS1 Min:	2
+   │  │  └─ MS2 Min:	3
+   │  ├─ Major (Protein) Grouping:	by Protein Group Id
+   │  ├─ Minor (Peptide) Grouping:	by Stripped Sequence
+   │  ├─ Major Group Quantity:	Mean peptide quantity
+   │  ├─ Major Group Top N:	True
+   │  │  ├─ Max:	3
+   │  │  └─ Min:	1
+   │  ├─ Minor Group Quantity:	Mean precursor quantity
+   │  ├─ Minor Group Top N:	True
+   │  │  ├─ Max:	3
+   │  │  └─ Min:	1
+   │  └─ DeepQuant Correction [Beta]:	False
+   ├─ DIA Analysis\Workflow
+   │  ├─ Method Evaluation:	False
+   │  ├─ MS2 DeMultiplexing:	Automatic
+   │  ├─ Multi-Channel Workflow Definition:	From Library Annotation
+   │  │  └─ Fallback Option:	Labeled
+   │  ├─ Profiling Strategy:	None
+   │  ├─ Run Limit for directDIA Library:	-1
+   │  ├─ Hybrid (DDA + DIA) Library:	False
+   │  └─ Unify Peptide Peaks Strategy:	None
+   ├─ DIA Analysis\XIC Extraction
+   │  ├─ XIC IM Extraction Window:	Dynamic
+   │  │  └─ Correction Factor:	1
+   │  ├─ XIC RT Extraction Window:	Dynamic
+   │  │  └─ Correction Factor:	1
+   │  ├─ MS1 Mass Tolerance Strategy:	Dynamic
+   │  │  └─ Correction Factor:	1
+   │  └─ MS2 Mass Tolerance Strategy:	Dynamic
+   │     └─ Correction Factor:	1
+   ├─ Pulsar Search\Identification
+   │  ├─ PSM FDR:	0.01
+   │  ├─ Peptide FDR:	0.01
+   │  ├─ Protein Group FDR:	0.01
+   │  ├─ directDIA Workflow:	directDIA+ (Deep)
+   │  │  └─ RT Sampling Reduction:	1
+   │  └─ PTM Localization Filter:	False
+   ├─ Pulsar Search\Labeling
+   │  └─ Channels:	
+   │     ├─ Channel 1:	False
+   │     ├─ Channel 2:	False
+   │     ├─ Channel 3:	False
+   │     ├─ Channel 4:	False
+   │     └─ Channel 5:	False
+   ├─ Pulsar Search\Modifications
+   │  ├─ Max Variable Modifications:	5
+   │  └─ Select Modifications:	
+   │     ├─ Fixed Modifications::	Carbamidomethyl (C)
+   │     └─ Variable Modifications: :	Acetyl (Protein N-term), Oxidation (M)
+   ├─ Pulsar Search\Peptides
+   │  ├─ Enzymes / Cleavage Rules:	Trypsin/P
+   │  ├─ Digest Type:	Specific
+   │  ├─ Max Peptide Length:	52
+   │  ├─ Min Peptide Length:	7
+   │  ├─ Missed Cleavages:	2
+   │  └─ Toggle N-terminal M:	True
+   ├─ Pulsar Search\Result Filters
+   │  ├─ Fragment Ions:	
+   │  │  ├─ Ion AA Length:	True
+   │  │  │  └─ N:	3
+   │  │  ├─ Ion Charge:	False
+   │  │  ├─ Ion Loss Type:	False
+   │  │  ├─ Ion Type:	False
+   │  │  ├─ m/z :	True
+   │  │  │  ├─ Max:	3000
+   │  │  │  └─ Min:	200
+   │  │  ├─ Overlapping between Channels:	False
+   │  │  └─ Relative Intensity:	True
+   │  │     └─ Min:	1
+   │  └─ Precursors:	
+   │     ├─ Amino Acids:	False
+   │     ├─ Best N Fragments per Peptide:	True
+   │     │  ├─ Max:	6
+   │     │  └─ Min:	3
+   │     ├─ Best N Peptides per Protein Group:	False
+   │     ├─ Channel Count:	False
+   │     ├─ FASTA Matched:	False
+   │     ├─ Missed Cleavage:	False
+   │     ├─ Modifications:	None
+   │     ├─ Peptide Charge:	False
+   │     └─ Proteotypicity:	False
+   ├─ Pulsar Search\Speed-Up
+   │  ├─ MS2 Index:	Automatic
+   │  └─ diaPASEF Pre-Processing:	Automatic
+   ├─ Pulsar Search\Tolerances
+   │  └─ Tolerance Parameters:	
+   │     ├─ Thermo IonTrap:	
+   │     │  ├─ Calibration Search:	Dynamic
+   │     │  │  ├─ MS1 Correction Factor:	1
+   │     │  │  └─ MS2 Correction Factor:	1
+   │     │  └─ Main Search:	Dynamic
+   │     │     ├─ MS1 Correction Factor:	1
+   │     │     └─ MS2 Correction Factor:	1
+   │     ├─ Thermo Orbitrap:	
+   │     │  ├─ Calibration Search:	Dynamic
+   │     │  │  ├─ MS1 Correction Factor:	1
+   │     │  │  └─ MS2 Correction Factor:	1
+   │     │  └─ Main Search:	Dynamic
+   │     │     ├─ MS1 Correction Factor:	1
+   │     │     └─ MS2 Correction Factor:	1
+   │     └─ TOF:	
+   │        ├─ Calibration Search:	Dynamic
+   │        │  ├─ MS1 Correction Factor:	1
+   │        │  └─ MS2 Correction Factor:	1
+   │        └─ Main Search:	Dynamic
+   │           ├─ MS1 Correction Factor:	1
+   │           └─ MS2 Correction Factor:	1
+   └─ Pulsar Search\Workflow
+      ├─ Fragment Ion Selection Strategy:	Intensity Based
+      ├─ In-Silico Generate Missing Channels:	False
+      └─ Use DNN Predicted Ion Mobility:	Auto
+[END-SETTINGS]
+
+[BEGIN-SETUP]
+Run: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw
+   ├─ Vendor: Thermo
+   ├─ File: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01
+   ├─ Path: "/scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw"
+   ├─ Condition: Not Defined
+   ├─ Replicate: 1
+   ├─ HTRMS Version: 19.2.240905.62635
+   ├─ Protein Databases Used
+   │  └─ p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Protein Entries: 31,890
+   │     ├─ Original File: p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Date Created: 08-November-2024 09:08:03 UTC+0
+   │     ├─ Date Modified: 08-November-2024 11:09:44 UTC+0
+   │     └─ Parsing Rule: UniProt FASTA
+   └─ MS2 Method
+      ├─ [396.4 - 400.4]
+      ├─ [400.4 - 404.4]
+      ├─ [404.4 - 408.4]
+      ├─ [408.4 - 412.4]
+      ├─ [412.4 - 416.4]
+      ├─ [416.4 - 420.4]
+      ├─ [420.4 - 424.4]
+      ├─ [424.4 - 428.4]
+      ├─ [428.4 - 432.4]
+      ├─ [432.4 - 436.4]
+      ├─ [436.5 - 440.4]
+      ├─ [440.5 - 444.5]
+      ├─ [444.5 - 448.5]
+      ├─ [448.5 - 452.5]
+      ├─ [452.5 - 456.5]
+      ├─ [456.5 - 460.5]
+      ├─ [460.5 - 464.5]
+      ├─ [464.5 - 468.5]
+      ├─ [468.5 - 472.5]
+      ├─ [472.5 - 476.5]
+      ├─ [476.5 - 480.5]
+      ├─ [480.5 - 484.5]
+      ├─ [484.5 - 488.5]
+      ├─ [488.5 - 492.5]
+      ├─ [492.5 - 496.5]
+      ├─ [496.5 - 500.5]
+      ├─ [500.5 - 504.5]
+      ├─ [504.5 - 508.5]
+      ├─ [508.5 - 512.5]
+      ├─ [512.5 - 516.5]
+      ├─ [516.5 - 520.5]
+      ├─ [520.5 - 524.5]
+      ├─ [524.5 - 528.5]
+      ├─ [528.5 - 532.5]
+      ├─ [532.5 - 536.5]
+      ├─ [536.5 - 540.5]
+      ├─ [540.5 - 544.5]
+      ├─ [544.5 - 548.5]
+      ├─ [548.5 - 552.5]
+      ├─ [552.5 - 556.5]
+      ├─ [556.5 - 560.5]
+      ├─ [560.5 - 564.5]
+      ├─ [564.5 - 568.5]
+      ├─ [568.5 - 572.5]
+      ├─ [572.5 - 576.5]
+      ├─ [576.5 - 580.5]
+      ├─ [580.5 - 584.5]
+      ├─ [584.5 - 588.5]
+      ├─ [588.5 - 592.5]
+      ├─ [592.5 - 596.5]
+      ├─ [596.5 - 600.5]
+      ├─ [600.5 - 604.5]
+      ├─ [604.5 - 608.5]
+      ├─ [608.5 - 612.5]
+      ├─ [612.5 - 616.5]
+      ├─ [616.5 - 620.5]
+      ├─ [620.5 - 624.5]
+      ├─ [624.5 - 628.5]
+      ├─ [628.5 - 632.5]
+      ├─ [632.5 - 636.5]
+      ├─ [636.5 - 640.5]
+      ├─ [640.5 - 644.5]
+      ├─ [644.5 - 648.5]
+      ├─ [648.5 - 652.5]
+      ├─ [652.5 - 656.5]
+      ├─ [656.6 - 660.5]
+      ├─ [660.6 - 664.6]
+      ├─ [664.6 - 668.6]
+      ├─ [668.6 - 672.6]
+      ├─ [672.6 - 676.6]
+      ├─ [676.6 - 680.6]
+      ├─ [680.6 - 684.6]
+      ├─ [684.6 - 688.6]
+      ├─ [688.6 - 692.6]
+      ├─ [692.6 - 696.6]
+      ├─ [696.6 - 700.6]
+      ├─ [700.6 - 704.6]
+      ├─ [704.6 - 708.6]
+      ├─ [708.6 - 712.6]
+      ├─ [712.6 - 716.6]
+      ├─ [716.6 - 720.6]
+      ├─ [720.6 - 724.6]
+      ├─ [724.6 - 728.6]
+      ├─ [728.6 - 732.6]
+      ├─ [732.6 - 736.6]
+      ├─ [736.6 - 740.6]
+      ├─ [740.6 - 744.6]
+      ├─ [744.6 - 748.6]
+      ├─ [748.6 - 752.6]
+      ├─ [752.6 - 756.6]
+      ├─ [756.6 - 760.6]
+      ├─ [760.6 - 764.6]
+      ├─ [764.6 - 768.6]
+      ├─ [768.6 - 772.6]
+      ├─ [772.6 - 776.6]
+      ├─ [776.6 - 780.6]
+      ├─ [780.6 - 784.6]
+      ├─ [784.6 - 788.6]
+      ├─ [788.6 - 792.6]
+      ├─ [792.6 - 796.6]
+      ├─ [796.6 - 800.6]
+      ├─ [800.6 - 804.6]
+      ├─ [804.6 - 808.6]
+      ├─ [808.6 - 812.6]
+      ├─ [812.6 - 816.6]
+      ├─ [816.6 - 820.6]
+      ├─ [820.6 - 824.6]
+      ├─ [824.6 - 828.6]
+      ├─ [828.6 - 832.6]
+      ├─ [832.6 - 836.6]
+      ├─ [836.6 - 840.6]
+      ├─ [840.6 - 844.6]
+      ├─ [844.6 - 848.6]
+      ├─ [848.6 - 852.6]
+      ├─ [852.6 - 856.6]
+      ├─ [856.6 - 860.6]
+      ├─ [860.6 - 864.6]
+      ├─ [864.6 - 868.6]
+      ├─ [868.6 - 872.6]
+      ├─ [872.6 - 876.6]
+      ├─ [876.7 - 880.6]
+      ├─ [880.7 - 884.7]
+      ├─ [884.7 - 888.7]
+      ├─ [888.7 - 892.7]
+      ├─ [892.7 - 896.7]
+      ├─ [896.7 - 900.7]
+      ├─ [900.7 - 904.7]
+      ├─ [904.7 - 908.7]
+      ├─ [908.7 - 912.7]
+      ├─ [912.7 - 916.7]
+      ├─ [916.7 - 920.7]
+      ├─ [920.7 - 924.7]
+      ├─ [924.7 - 928.7]
+      ├─ [928.7 - 932.7]
+      ├─ [932.7 - 936.7]
+      ├─ [936.7 - 940.7]
+      ├─ [940.7 - 944.7]
+      ├─ [944.7 - 948.7]
+      ├─ [948.7 - 952.7]
+      ├─ [952.7 - 956.7]
+      ├─ [956.7 - 960.7]
+      ├─ [960.7 - 964.7]
+      ├─ [964.7 - 968.7]
+      ├─ [968.7 - 972.7]
+      ├─ [972.7 - 976.7]
+      ├─ [976.7 - 980.7]
+      ├─ [980.7 - 984.7]
+      ├─ [984.7 - 988.7]
+      ├─ [988.7 - 992.7]
+      ├─ [992.7 - 996.7]
+      ├─ [996.7 - 1000.7]
+      └─ [1000.7 - 1004.7]
+
+Run: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw
+   ├─ Vendor: Thermo
+   ├─ File: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02
+   ├─ Path: "/scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw"
+   ├─ Condition: Not Defined
+   ├─ Replicate: 2
+   ├─ HTRMS Version: 19.2.240905.62635
+   ├─ Protein Databases Used
+   │  └─ p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Protein Entries: 31,890
+   │     ├─ Original File: p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Date Created: 08-November-2024 09:08:03 UTC+0
+   │     ├─ Date Modified: 08-November-2024 11:09:44 UTC+0
+   │     └─ Parsing Rule: UniProt FASTA
+   └─ MS2 Method
+      ├─ [396.4 - 400.4]
+      ├─ [400.4 - 404.4]
+      ├─ [404.4 - 408.4]
+      ├─ [408.4 - 412.4]
+      ├─ [412.4 - 416.4]
+      ├─ [416.4 - 420.4]
+      ├─ [420.4 - 424.4]
+      ├─ [424.4 - 428.4]
+      ├─ [428.4 - 432.4]
+      ├─ [432.4 - 436.4]
+      ├─ [436.5 - 440.4]
+      ├─ [440.5 - 444.5]
+      ├─ [444.5 - 448.5]
+      ├─ [448.5 - 452.5]
+      ├─ [452.5 - 456.5]
+      ├─ [456.5 - 460.5]
+      ├─ [460.5 - 464.5]
+      ├─ [464.5 - 468.5]
+      ├─ [468.5 - 472.5]
+      ├─ [472.5 - 476.5]
+      ├─ [476.5 - 480.5]
+      ├─ [480.5 - 484.5]
+      ├─ [484.5 - 488.5]
+      ├─ [488.5 - 492.5]
+      ├─ [492.5 - 496.5]
+      ├─ [496.5 - 500.5]
+      ├─ [500.5 - 504.5]
+      ├─ [504.5 - 508.5]
+      ├─ [508.5 - 512.5]
+      ├─ [512.5 - 516.5]
+      ├─ [516.5 - 520.5]
+      ├─ [520.5 - 524.5]
+      ├─ [524.5 - 528.5]
+      ├─ [528.5 - 532.5]
+      ├─ [532.5 - 536.5]
+      ├─ [536.5 - 540.5]
+      ├─ [540.5 - 544.5]
+      ├─ [544.5 - 548.5]
+      ├─ [548.5 - 552.5]
+      ├─ [552.5 - 556.5]
+      ├─ [556.5 - 560.5]
+      ├─ [560.5 - 564.5]
+      ├─ [564.5 - 568.5]
+      ├─ [568.5 - 572.5]
+      ├─ [572.5 - 576.5]
+      ├─ [576.5 - 580.5]
+      ├─ [580.5 - 584.5]
+      ├─ [584.5 - 588.5]
+      ├─ [588.5 - 592.5]
+      ├─ [592.5 - 596.5]
+      ├─ [596.5 - 600.5]
+      ├─ [600.5 - 604.5]
+      ├─ [604.5 - 608.5]
+      ├─ [608.5 - 612.5]
+      ├─ [612.5 - 616.5]
+      ├─ [616.5 - 620.5]
+      ├─ [620.5 - 624.5]
+      ├─ [624.5 - 628.5]
+      ├─ [628.5 - 632.5]
+      ├─ [632.5 - 636.5]
+      ├─ [636.5 - 640.5]
+      ├─ [640.5 - 644.5]
+      ├─ [644.5 - 648.5]
+      ├─ [648.5 - 652.5]
+      ├─ [652.5 - 656.5]
+      ├─ [656.6 - 660.5]
+      ├─ [660.6 - 664.6]
+      ├─ [664.6 - 668.6]
+      ├─ [668.6 - 672.6]
+      ├─ [672.6 - 676.6]
+      ├─ [676.6 - 680.6]
+      ├─ [680.6 - 684.6]
+      ├─ [684.6 - 688.6]
+      ├─ [688.6 - 692.6]
+      ├─ [692.6 - 696.6]
+      ├─ [696.6 - 700.6]
+      ├─ [700.6 - 704.6]
+      ├─ [704.6 - 708.6]
+      ├─ [708.6 - 712.6]
+      ├─ [712.6 - 716.6]
+      ├─ [716.6 - 720.6]
+      ├─ [720.6 - 724.6]
+      ├─ [724.6 - 728.6]
+      ├─ [728.6 - 732.6]
+      ├─ [732.6 - 736.6]
+      ├─ [736.6 - 740.6]
+      ├─ [740.6 - 744.6]
+      ├─ [744.6 - 748.6]
+      ├─ [748.6 - 752.6]
+      ├─ [752.6 - 756.6]
+      ├─ [756.6 - 760.6]
+      ├─ [760.6 - 764.6]
+      ├─ [764.6 - 768.6]
+      ├─ [768.6 - 772.6]
+      ├─ [772.6 - 776.6]
+      ├─ [776.6 - 780.6]
+      ├─ [780.6 - 784.6]
+      ├─ [784.6 - 788.6]
+      ├─ [788.6 - 792.6]
+      ├─ [792.6 - 796.6]
+      ├─ [796.6 - 800.6]
+      ├─ [800.6 - 804.6]
+      ├─ [804.6 - 808.6]
+      ├─ [808.6 - 812.6]
+      ├─ [812.6 - 816.6]
+      ├─ [816.6 - 820.6]
+      ├─ [820.6 - 824.6]
+      ├─ [824.6 - 828.6]
+      ├─ [828.6 - 832.6]
+      ├─ [832.6 - 836.6]
+      ├─ [836.6 - 840.6]
+      ├─ [840.6 - 844.6]
+      ├─ [844.6 - 848.6]
+      ├─ [848.6 - 852.6]
+      ├─ [852.6 - 856.6]
+      ├─ [856.6 - 860.6]
+      ├─ [860.6 - 864.6]
+      ├─ [864.6 - 868.6]
+      ├─ [868.6 - 872.6]
+      ├─ [872.6 - 876.6]
+      ├─ [876.7 - 880.6]
+      ├─ [880.7 - 884.7]
+      ├─ [884.7 - 888.7]
+      ├─ [888.7 - 892.7]
+      ├─ [892.7 - 896.7]
+      ├─ [896.7 - 900.7]
+      ├─ [900.7 - 904.7]
+      ├─ [904.7 - 908.7]
+      ├─ [908.7 - 912.7]
+      ├─ [912.7 - 916.7]
+      ├─ [916.7 - 920.7]
+      ├─ [920.7 - 924.7]
+      ├─ [924.7 - 928.7]
+      ├─ [928.7 - 932.7]
+      ├─ [932.7 - 936.7]
+      ├─ [936.7 - 940.7]
+      ├─ [940.7 - 944.7]
+      ├─ [944.7 - 948.7]
+      ├─ [948.7 - 952.7]
+      ├─ [952.7 - 956.7]
+      ├─ [956.7 - 960.7]
+      ├─ [960.7 - 964.7]
+      ├─ [964.7 - 968.7]
+      ├─ [968.7 - 972.7]
+      ├─ [972.7 - 976.7]
+      ├─ [976.7 - 980.7]
+      ├─ [980.7 - 984.7]
+      ├─ [984.7 - 988.7]
+      ├─ [988.7 - 992.7]
+      ├─ [992.7 - 996.7]
+      ├─ [996.7 - 1000.7]
+      └─ [1000.7 - 1004.7]
+
+Run: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw
+   ├─ Vendor: Thermo
+   ├─ File: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03
+   ├─ Path: "/scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw"
+   ├─ Condition: Not Defined
+   ├─ Replicate: 3
+   ├─ HTRMS Version: 19.2.240905.62635
+   ├─ Protein Databases Used
+   │  └─ p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Protein Entries: 31,890
+   │     ├─ Original File: p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Date Created: 08-November-2024 09:08:03 UTC+0
+   │     ├─ Date Modified: 08-November-2024 11:09:44 UTC+0
+   │     └─ Parsing Rule: UniProt FASTA
+   └─ MS2 Method
+      ├─ [396.4 - 400.4]
+      ├─ [400.4 - 404.4]
+      ├─ [404.4 - 408.4]
+      ├─ [408.4 - 412.4]
+      ├─ [412.4 - 416.4]
+      ├─ [416.4 - 420.4]
+      ├─ [420.4 - 424.4]
+      ├─ [424.4 - 428.4]
+      ├─ [428.4 - 432.4]
+      ├─ [432.4 - 436.4]
+      ├─ [436.5 - 440.4]
+      ├─ [440.5 - 444.5]
+      ├─ [444.5 - 448.5]
+      ├─ [448.5 - 452.5]
+      ├─ [452.5 - 456.5]
+      ├─ [456.5 - 460.5]
+      ├─ [460.5 - 464.5]
+      ├─ [464.5 - 468.5]
+      ├─ [468.5 - 472.5]
+      ├─ [472.5 - 476.5]
+      ├─ [476.5 - 480.5]
+      ├─ [480.5 - 484.5]
+      ├─ [484.5 - 488.5]
+      ├─ [488.5 - 492.5]
+      ├─ [492.5 - 496.5]
+      ├─ [496.5 - 500.5]
+      ├─ [500.5 - 504.5]
+      ├─ [504.5 - 508.5]
+      ├─ [508.5 - 512.5]
+      ├─ [512.5 - 516.5]
+      ├─ [516.5 - 520.5]
+      ├─ [520.5 - 524.5]
+      ├─ [524.5 - 528.5]
+      ├─ [528.5 - 532.5]
+      ├─ [532.5 - 536.5]
+      ├─ [536.5 - 540.5]
+      ├─ [540.5 - 544.5]
+      ├─ [544.5 - 548.5]
+      ├─ [548.5 - 552.5]
+      ├─ [552.5 - 556.5]
+      ├─ [556.5 - 560.5]
+      ├─ [560.5 - 564.5]
+      ├─ [564.5 - 568.5]
+      ├─ [568.5 - 572.5]
+      ├─ [572.5 - 576.5]
+      ├─ [576.5 - 580.5]
+      ├─ [580.5 - 584.5]
+      ├─ [584.5 - 588.5]
+      ├─ [588.5 - 592.5]
+      ├─ [592.5 - 596.5]
+      ├─ [596.5 - 600.5]
+      ├─ [600.5 - 604.5]
+      ├─ [604.5 - 608.5]
+      ├─ [608.5 - 612.5]
+      ├─ [612.5 - 616.5]
+      ├─ [616.5 - 620.5]
+      ├─ [620.5 - 624.5]
+      ├─ [624.5 - 628.5]
+      ├─ [628.5 - 632.5]
+      ├─ [632.5 - 636.5]
+      ├─ [636.5 - 640.5]
+      ├─ [640.5 - 644.5]
+      ├─ [644.5 - 648.5]
+      ├─ [648.5 - 652.5]
+      ├─ [652.5 - 656.5]
+      ├─ [656.6 - 660.5]
+      ├─ [660.6 - 664.6]
+      ├─ [664.6 - 668.6]
+      ├─ [668.6 - 672.6]
+      ├─ [672.6 - 676.6]
+      ├─ [676.6 - 680.6]
+      ├─ [680.6 - 684.6]
+      ├─ [684.6 - 688.6]
+      ├─ [688.6 - 692.6]
+      ├─ [692.6 - 696.6]
+      ├─ [696.6 - 700.6]
+      ├─ [700.6 - 704.6]
+      ├─ [704.6 - 708.6]
+      ├─ [708.6 - 712.6]
+      ├─ [712.6 - 716.6]
+      ├─ [716.6 - 720.6]
+      ├─ [720.6 - 724.6]
+      ├─ [724.6 - 728.6]
+      ├─ [728.6 - 732.6]
+      ├─ [732.6 - 736.6]
+      ├─ [736.6 - 740.6]
+      ├─ [740.6 - 744.6]
+      ├─ [744.6 - 748.6]
+      ├─ [748.6 - 752.6]
+      ├─ [752.6 - 756.6]
+      ├─ [756.6 - 760.6]
+      ├─ [760.6 - 764.6]
+      ├─ [764.6 - 768.6]
+      ├─ [768.6 - 772.6]
+      ├─ [772.6 - 776.6]
+      ├─ [776.6 - 780.6]
+      ├─ [780.6 - 784.6]
+      ├─ [784.6 - 788.6]
+      ├─ [788.6 - 792.6]
+      ├─ [792.6 - 796.6]
+      ├─ [796.6 - 800.6]
+      ├─ [800.6 - 804.6]
+      ├─ [804.6 - 808.6]
+      ├─ [808.6 - 812.6]
+      ├─ [812.6 - 816.6]
+      ├─ [816.6 - 820.6]
+      ├─ [820.6 - 824.6]
+      ├─ [824.6 - 828.6]
+      ├─ [828.6 - 832.6]
+      ├─ [832.6 - 836.6]
+      ├─ [836.6 - 840.6]
+      ├─ [840.6 - 844.6]
+      ├─ [844.6 - 848.6]
+      ├─ [848.6 - 852.6]
+      ├─ [852.6 - 856.6]
+      ├─ [856.6 - 860.6]
+      ├─ [860.6 - 864.6]
+      ├─ [864.6 - 868.6]
+      ├─ [868.6 - 872.6]
+      ├─ [872.6 - 876.6]
+      ├─ [876.7 - 880.6]
+      ├─ [880.7 - 884.7]
+      ├─ [884.7 - 888.7]
+      ├─ [888.7 - 892.7]
+      ├─ [892.7 - 896.7]
+      ├─ [896.7 - 900.7]
+      ├─ [900.7 - 904.7]
+      ├─ [904.7 - 908.7]
+      ├─ [908.7 - 912.7]
+      ├─ [912.7 - 916.7]
+      ├─ [916.7 - 920.7]
+      ├─ [920.7 - 924.7]
+      ├─ [924.7 - 928.7]
+      ├─ [928.7 - 932.7]
+      ├─ [932.7 - 936.7]
+      ├─ [936.7 - 940.7]
+      ├─ [940.7 - 944.7]
+      ├─ [944.7 - 948.7]
+      ├─ [948.7 - 952.7]
+      ├─ [952.7 - 956.7]
+      ├─ [956.7 - 960.7]
+      ├─ [960.7 - 964.7]
+      ├─ [964.7 - 968.7]
+      ├─ [968.7 - 972.7]
+      ├─ [972.7 - 976.7]
+      ├─ [976.7 - 980.7]
+      ├─ [980.7 - 984.7]
+      ├─ [984.7 - 988.7]
+      ├─ [988.7 - 992.7]
+      ├─ [992.7 - 996.7]
+      ├─ [996.7 - 1000.7]
+      └─ [1000.7 - 1004.7]
+
+Run: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw
+   ├─ Vendor: Thermo
+   ├─ File: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01
+   ├─ Path: "/scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw"
+   ├─ Condition: Not Defined
+   ├─ Replicate: 4
+   ├─ HTRMS Version: 19.2.240905.62635
+   ├─ Protein Databases Used
+   │  └─ p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Protein Entries: 31,890
+   │     ├─ Original File: p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Date Created: 08-November-2024 09:08:03 UTC+0
+   │     ├─ Date Modified: 08-November-2024 11:09:44 UTC+0
+   │     └─ Parsing Rule: UniProt FASTA
+   └─ MS2 Method
+      ├─ [396.4 - 400.4]
+      ├─ [400.4 - 404.4]
+      ├─ [404.4 - 408.4]
+      ├─ [408.4 - 412.4]
+      ├─ [412.4 - 416.4]
+      ├─ [416.4 - 420.4]
+      ├─ [420.4 - 424.4]
+      ├─ [424.4 - 428.4]
+      ├─ [428.4 - 432.4]
+      ├─ [432.4 - 436.4]
+      ├─ [436.5 - 440.4]
+      ├─ [440.5 - 444.5]
+      ├─ [444.5 - 448.5]
+      ├─ [448.5 - 452.5]
+      ├─ [452.5 - 456.5]
+      ├─ [456.5 - 460.5]
+      ├─ [460.5 - 464.5]
+      ├─ [464.5 - 468.5]
+      ├─ [468.5 - 472.5]
+      ├─ [472.5 - 476.5]
+      ├─ [476.5 - 480.5]
+      ├─ [480.5 - 484.5]
+      ├─ [484.5 - 488.5]
+      ├─ [488.5 - 492.5]
+      ├─ [492.5 - 496.5]
+      ├─ [496.5 - 500.5]
+      ├─ [500.5 - 504.5]
+      ├─ [504.5 - 508.5]
+      ├─ [508.5 - 512.5]
+      ├─ [512.5 - 516.5]
+      ├─ [516.5 - 520.5]
+      ├─ [520.5 - 524.5]
+      ├─ [524.5 - 528.5]
+      ├─ [528.5 - 532.5]
+      ├─ [532.5 - 536.5]
+      ├─ [536.5 - 540.5]
+      ├─ [540.5 - 544.5]
+      ├─ [544.5 - 548.5]
+      ├─ [548.5 - 552.5]
+      ├─ [552.5 - 556.5]
+      ├─ [556.5 - 560.5]
+      ├─ [560.5 - 564.5]
+      ├─ [564.5 - 568.5]
+      ├─ [568.5 - 572.5]
+      ├─ [572.5 - 576.5]
+      ├─ [576.5 - 580.5]
+      ├─ [580.5 - 584.5]
+      ├─ [584.5 - 588.5]
+      ├─ [588.5 - 592.5]
+      ├─ [592.5 - 596.5]
+      ├─ [596.5 - 600.5]
+      ├─ [600.5 - 604.5]
+      ├─ [604.5 - 608.5]
+      ├─ [608.5 - 612.5]
+      ├─ [612.5 - 616.5]
+      ├─ [616.5 - 620.5]
+      ├─ [620.5 - 624.5]
+      ├─ [624.5 - 628.5]
+      ├─ [628.5 - 632.5]
+      ├─ [632.5 - 636.5]
+      ├─ [636.5 - 640.5]
+      ├─ [640.5 - 644.5]
+      ├─ [644.5 - 648.5]
+      ├─ [648.5 - 652.5]
+      ├─ [652.5 - 656.5]
+      ├─ [656.6 - 660.5]
+      ├─ [660.6 - 664.6]
+      ├─ [664.6 - 668.6]
+      ├─ [668.6 - 672.6]
+      ├─ [672.6 - 676.6]
+      ├─ [676.6 - 680.6]
+      ├─ [680.6 - 684.6]
+      ├─ [684.6 - 688.6]
+      ├─ [688.6 - 692.6]
+      ├─ [692.6 - 696.6]
+      ├─ [696.6 - 700.6]
+      ├─ [700.6 - 704.6]
+      ├─ [704.6 - 708.6]
+      ├─ [708.6 - 712.6]
+      ├─ [712.6 - 716.6]
+      ├─ [716.6 - 720.6]
+      ├─ [720.6 - 724.6]
+      ├─ [724.6 - 728.6]
+      ├─ [728.6 - 732.6]
+      ├─ [732.6 - 736.6]
+      ├─ [736.6 - 740.6]
+      ├─ [740.6 - 744.6]
+      ├─ [744.6 - 748.6]
+      ├─ [748.6 - 752.6]
+      ├─ [752.6 - 756.6]
+      ├─ [756.6 - 760.6]
+      ├─ [760.6 - 764.6]
+      ├─ [764.6 - 768.6]
+      ├─ [768.6 - 772.6]
+      ├─ [772.6 - 776.6]
+      ├─ [776.6 - 780.6]
+      ├─ [780.6 - 784.6]
+      ├─ [784.6 - 788.6]
+      ├─ [788.6 - 792.6]
+      ├─ [792.6 - 796.6]
+      ├─ [796.6 - 800.6]
+      ├─ [800.6 - 804.6]
+      ├─ [804.6 - 808.6]
+      ├─ [808.6 - 812.6]
+      ├─ [812.6 - 816.6]
+      ├─ [816.6 - 820.6]
+      ├─ [820.6 - 824.6]
+      ├─ [824.6 - 828.6]
+      ├─ [828.6 - 832.6]
+      ├─ [832.6 - 836.6]
+      ├─ [836.6 - 840.6]
+      ├─ [840.6 - 844.6]
+      ├─ [844.6 - 848.6]
+      ├─ [848.6 - 852.6]
+      ├─ [852.6 - 856.6]
+      ├─ [856.6 - 860.6]
+      ├─ [860.6 - 864.6]
+      ├─ [864.6 - 868.6]
+      ├─ [868.6 - 872.6]
+      ├─ [872.6 - 876.6]
+      ├─ [876.7 - 880.6]
+      ├─ [880.7 - 884.7]
+      ├─ [884.7 - 888.7]
+      ├─ [888.7 - 892.7]
+      ├─ [892.7 - 896.7]
+      ├─ [896.7 - 900.7]
+      ├─ [900.7 - 904.7]
+      ├─ [904.7 - 908.7]
+      ├─ [908.7 - 912.7]
+      ├─ [912.7 - 916.7]
+      ├─ [916.7 - 920.7]
+      ├─ [920.7 - 924.7]
+      ├─ [924.7 - 928.7]
+      ├─ [928.7 - 932.7]
+      ├─ [932.7 - 936.7]
+      ├─ [936.7 - 940.7]
+      ├─ [940.7 - 944.7]
+      ├─ [944.7 - 948.7]
+      ├─ [948.7 - 952.7]
+      ├─ [952.7 - 956.7]
+      ├─ [956.7 - 960.7]
+      ├─ [960.7 - 964.7]
+      ├─ [964.7 - 968.7]
+      ├─ [968.7 - 972.7]
+      ├─ [972.7 - 976.7]
+      ├─ [976.7 - 980.7]
+      ├─ [980.7 - 984.7]
+      ├─ [984.7 - 988.7]
+      ├─ [988.7 - 992.7]
+      ├─ [992.7 - 996.7]
+      ├─ [996.7 - 1000.7]
+      └─ [1000.7 - 1004.7]
+
+Run: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw
+   ├─ Vendor: Thermo
+   ├─ File: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02
+   ├─ Path: "/scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw"
+   ├─ Condition: Not Defined
+   ├─ Replicate: 5
+   ├─ HTRMS Version: 19.2.240905.62635
+   ├─ Protein Databases Used
+   │  └─ p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Protein Entries: 31,890
+   │     ├─ Original File: p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Date Created: 08-November-2024 09:08:03 UTC+0
+   │     ├─ Date Modified: 08-November-2024 11:09:44 UTC+0
+   │     └─ Parsing Rule: UniProt FASTA
+   └─ MS2 Method
+      ├─ [396.4 - 400.4]
+      ├─ [400.4 - 404.4]
+      ├─ [404.4 - 408.4]
+      ├─ [408.4 - 412.4]
+      ├─ [412.4 - 416.4]
+      ├─ [416.4 - 420.4]
+      ├─ [420.4 - 424.4]
+      ├─ [424.4 - 428.4]
+      ├─ [428.4 - 432.4]
+      ├─ [432.4 - 436.4]
+      ├─ [436.5 - 440.4]
+      ├─ [440.5 - 444.5]
+      ├─ [444.5 - 448.5]
+      ├─ [448.5 - 452.5]
+      ├─ [452.5 - 456.5]
+      ├─ [456.5 - 460.5]
+      ├─ [460.5 - 464.5]
+      ├─ [464.5 - 468.5]
+      ├─ [468.5 - 472.5]
+      ├─ [472.5 - 476.5]
+      ├─ [476.5 - 480.5]
+      ├─ [480.5 - 484.5]
+      ├─ [484.5 - 488.5]
+      ├─ [488.5 - 492.5]
+      ├─ [492.5 - 496.5]
+      ├─ [496.5 - 500.5]
+      ├─ [500.5 - 504.5]
+      ├─ [504.5 - 508.5]
+      ├─ [508.5 - 512.5]
+      ├─ [512.5 - 516.5]
+      ├─ [516.5 - 520.5]
+      ├─ [520.5 - 524.5]
+      ├─ [524.5 - 528.5]
+      ├─ [528.5 - 532.5]
+      ├─ [532.5 - 536.5]
+      ├─ [536.5 - 540.5]
+      ├─ [540.5 - 544.5]
+      ├─ [544.5 - 548.5]
+      ├─ [548.5 - 552.5]
+      ├─ [552.5 - 556.5]
+      ├─ [556.5 - 560.5]
+      ├─ [560.5 - 564.5]
+      ├─ [564.5 - 568.5]
+      ├─ [568.5 - 572.5]
+      ├─ [572.5 - 576.5]
+      ├─ [576.5 - 580.5]
+      ├─ [580.5 - 584.5]
+      ├─ [584.5 - 588.5]
+      ├─ [588.5 - 592.5]
+      ├─ [592.5 - 596.5]
+      ├─ [596.5 - 600.5]
+      ├─ [600.5 - 604.5]
+      ├─ [604.5 - 608.5]
+      ├─ [608.5 - 612.5]
+      ├─ [612.5 - 616.5]
+      ├─ [616.5 - 620.5]
+      ├─ [620.5 - 624.5]
+      ├─ [624.5 - 628.5]
+      ├─ [628.5 - 632.5]
+      ├─ [632.5 - 636.5]
+      ├─ [636.5 - 640.5]
+      ├─ [640.5 - 644.5]
+      ├─ [644.5 - 648.5]
+      ├─ [648.5 - 652.5]
+      ├─ [652.5 - 656.5]
+      ├─ [656.6 - 660.5]
+      ├─ [660.6 - 664.6]
+      ├─ [664.6 - 668.6]
+      ├─ [668.6 - 672.6]
+      ├─ [672.6 - 676.6]
+      ├─ [676.6 - 680.6]
+      ├─ [680.6 - 684.6]
+      ├─ [684.6 - 688.6]
+      ├─ [688.6 - 692.6]
+      ├─ [692.6 - 696.6]
+      ├─ [696.6 - 700.6]
+      ├─ [700.6 - 704.6]
+      ├─ [704.6 - 708.6]
+      ├─ [708.6 - 712.6]
+      ├─ [712.6 - 716.6]
+      ├─ [716.6 - 720.6]
+      ├─ [720.6 - 724.6]
+      ├─ [724.6 - 728.6]
+      ├─ [728.6 - 732.6]
+      ├─ [732.6 - 736.6]
+      ├─ [736.6 - 740.6]
+      ├─ [740.6 - 744.6]
+      ├─ [744.6 - 748.6]
+      ├─ [748.6 - 752.6]
+      ├─ [752.6 - 756.6]
+      ├─ [756.6 - 760.6]
+      ├─ [760.6 - 764.6]
+      ├─ [764.6 - 768.6]
+      ├─ [768.6 - 772.6]
+      ├─ [772.6 - 776.6]
+      ├─ [776.6 - 780.6]
+      ├─ [780.6 - 784.6]
+      ├─ [784.6 - 788.6]
+      ├─ [788.6 - 792.6]
+      ├─ [792.6 - 796.6]
+      ├─ [796.6 - 800.6]
+      ├─ [800.6 - 804.6]
+      ├─ [804.6 - 808.6]
+      ├─ [808.6 - 812.6]
+      ├─ [812.6 - 816.6]
+      ├─ [816.6 - 820.6]
+      ├─ [820.6 - 824.6]
+      ├─ [824.6 - 828.6]
+      ├─ [828.6 - 832.6]
+      ├─ [832.6 - 836.6]
+      ├─ [836.6 - 840.6]
+      ├─ [840.6 - 844.6]
+      ├─ [844.6 - 848.6]
+      ├─ [848.6 - 852.6]
+      ├─ [852.6 - 856.6]
+      ├─ [856.6 - 860.6]
+      ├─ [860.6 - 864.6]
+      ├─ [864.6 - 868.6]
+      ├─ [868.6 - 872.6]
+      ├─ [872.6 - 876.6]
+      ├─ [876.7 - 880.6]
+      ├─ [880.7 - 884.7]
+      ├─ [884.7 - 888.7]
+      ├─ [888.7 - 892.7]
+      ├─ [892.7 - 896.7]
+      ├─ [896.7 - 900.7]
+      ├─ [900.7 - 904.7]
+      ├─ [904.7 - 908.7]
+      ├─ [908.7 - 912.7]
+      ├─ [912.7 - 916.7]
+      ├─ [916.7 - 920.7]
+      ├─ [920.7 - 924.7]
+      ├─ [924.7 - 928.7]
+      ├─ [928.7 - 932.7]
+      ├─ [932.7 - 936.7]
+      ├─ [936.7 - 940.7]
+      ├─ [940.7 - 944.7]
+      ├─ [944.7 - 948.7]
+      ├─ [948.7 - 952.7]
+      ├─ [952.7 - 956.7]
+      ├─ [956.7 - 960.7]
+      ├─ [960.7 - 964.7]
+      ├─ [964.7 - 968.7]
+      ├─ [968.7 - 972.7]
+      ├─ [972.7 - 976.7]
+      ├─ [976.7 - 980.7]
+      ├─ [980.7 - 984.7]
+      ├─ [984.7 - 988.7]
+      ├─ [988.7 - 992.7]
+      ├─ [992.7 - 996.7]
+      ├─ [996.7 - 1000.7]
+      └─ [1000.7 - 1004.7]
+
+Run: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw
+   ├─ Vendor: Thermo
+   ├─ File: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03
+   ├─ Path: "/scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw"
+   ├─ Condition: Not Defined
+   ├─ Replicate: 6
+   ├─ HTRMS Version: 19.2.240905.62635
+   ├─ Protein Databases Used
+   │  └─ p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Protein Entries: 31,890
+   │     ├─ Original File: p34486_Proteobench_TripleProteome_20240614.fasta
+   │     ├─ Date Created: 08-November-2024 09:08:03 UTC+0
+   │     ├─ Date Modified: 08-November-2024 11:09:44 UTC+0
+   │     └─ Parsing Rule: UniProt FASTA
+   └─ MS2 Method
+      ├─ [396.4 - 400.4]
+      ├─ [400.4 - 404.4]
+      ├─ [404.4 - 408.4]
+      ├─ [408.4 - 412.4]
+      ├─ [412.4 - 416.4]
+      ├─ [416.4 - 420.4]
+      ├─ [420.4 - 424.4]
+      ├─ [424.4 - 428.4]
+      ├─ [428.4 - 432.4]
+      ├─ [432.4 - 436.4]
+      ├─ [436.5 - 440.4]
+      ├─ [440.5 - 444.5]
+      ├─ [444.5 - 448.5]
+      ├─ [448.5 - 452.5]
+      ├─ [452.5 - 456.5]
+      ├─ [456.5 - 460.5]
+      ├─ [460.5 - 464.5]
+      ├─ [464.5 - 468.5]
+      ├─ [468.5 - 472.5]
+      ├─ [472.5 - 476.5]
+      ├─ [476.5 - 480.5]
+      ├─ [480.5 - 484.5]
+      ├─ [484.5 - 488.5]
+      ├─ [488.5 - 492.5]
+      ├─ [492.5 - 496.5]
+      ├─ [496.5 - 500.5]
+      ├─ [500.5 - 504.5]
+      ├─ [504.5 - 508.5]
+      ├─ [508.5 - 512.5]
+      ├─ [512.5 - 516.5]
+      ├─ [516.5 - 520.5]
+      ├─ [520.5 - 524.5]
+      ├─ [524.5 - 528.5]
+      ├─ [528.5 - 532.5]
+      ├─ [532.5 - 536.5]
+      ├─ [536.5 - 540.5]
+      ├─ [540.5 - 544.5]
+      ├─ [544.5 - 548.5]
+      ├─ [548.5 - 552.5]
+      ├─ [552.5 - 556.5]
+      ├─ [556.5 - 560.5]
+      ├─ [560.5 - 564.5]
+      ├─ [564.5 - 568.5]
+      ├─ [568.5 - 572.5]
+      ├─ [572.5 - 576.5]
+      ├─ [576.5 - 580.5]
+      ├─ [580.5 - 584.5]
+      ├─ [584.5 - 588.5]
+      ├─ [588.5 - 592.5]
+      ├─ [592.5 - 596.5]
+      ├─ [596.5 - 600.5]
+      ├─ [600.5 - 604.5]
+      ├─ [604.5 - 608.5]
+      ├─ [608.5 - 612.5]
+      ├─ [612.5 - 616.5]
+      ├─ [616.5 - 620.5]
+      ├─ [620.5 - 624.5]
+      ├─ [624.5 - 628.5]
+      ├─ [628.5 - 632.5]
+      ├─ [632.5 - 636.5]
+      ├─ [636.5 - 640.5]
+      ├─ [640.5 - 644.5]
+      ├─ [644.5 - 648.5]
+      ├─ [648.5 - 652.5]
+      ├─ [652.5 - 656.5]
+      ├─ [656.6 - 660.5]
+      ├─ [660.6 - 664.6]
+      ├─ [664.6 - 668.6]
+      ├─ [668.6 - 672.6]
+      ├─ [672.6 - 676.6]
+      ├─ [676.6 - 680.6]
+      ├─ [680.6 - 684.6]
+      ├─ [684.6 - 688.6]
+      ├─ [688.6 - 692.6]
+      ├─ [692.6 - 696.6]
+      ├─ [696.6 - 700.6]
+      ├─ [700.6 - 704.6]
+      ├─ [704.6 - 708.6]
+      ├─ [708.6 - 712.6]
+      ├─ [712.6 - 716.6]
+      ├─ [716.6 - 720.6]
+      ├─ [720.6 - 724.6]
+      ├─ [724.6 - 728.6]
+      ├─ [728.6 - 732.6]
+      ├─ [732.6 - 736.6]
+      ├─ [736.6 - 740.6]
+      ├─ [740.6 - 744.6]
+      ├─ [744.6 - 748.6]
+      ├─ [748.6 - 752.6]
+      ├─ [752.6 - 756.6]
+      ├─ [756.6 - 760.6]
+      ├─ [760.6 - 764.6]
+      ├─ [764.6 - 768.6]
+      ├─ [768.6 - 772.6]
+      ├─ [772.6 - 776.6]
+      ├─ [776.6 - 780.6]
+      ├─ [780.6 - 784.6]
+      ├─ [784.6 - 788.6]
+      ├─ [788.6 - 792.6]
+      ├─ [792.6 - 796.6]
+      ├─ [796.6 - 800.6]
+      ├─ [800.6 - 804.6]
+      ├─ [804.6 - 808.6]
+      ├─ [808.6 - 812.6]
+      ├─ [812.6 - 816.6]
+      ├─ [816.6 - 820.6]
+      ├─ [820.6 - 824.6]
+      ├─ [824.6 - 828.6]
+      ├─ [828.6 - 832.6]
+      ├─ [832.6 - 836.6]
+      ├─ [836.6 - 840.6]
+      ├─ [840.6 - 844.6]
+      ├─ [844.6 - 848.6]
+      ├─ [848.6 - 852.6]
+      ├─ [852.6 - 856.6]
+      ├─ [856.6 - 860.6]
+      ├─ [860.6 - 864.6]
+      ├─ [864.6 - 868.6]
+      ├─ [868.6 - 872.6]
+      ├─ [872.6 - 876.6]
+      ├─ [876.7 - 880.6]
+      ├─ [880.7 - 884.7]
+      ├─ [884.7 - 888.7]
+      ├─ [888.7 - 892.7]
+      ├─ [892.7 - 896.7]
+      ├─ [896.7 - 900.7]
+      ├─ [900.7 - 904.7]
+      ├─ [904.7 - 908.7]
+      ├─ [908.7 - 912.7]
+      ├─ [912.7 - 916.7]
+      ├─ [916.7 - 920.7]
+      ├─ [920.7 - 924.7]
+      ├─ [924.7 - 928.7]
+      ├─ [928.7 - 932.7]
+      ├─ [932.7 - 936.7]
+      ├─ [936.7 - 940.7]
+      ├─ [940.7 - 944.7]
+      ├─ [944.7 - 948.7]
+      ├─ [948.7 - 952.7]
+      ├─ [952.7 - 956.7]
+      ├─ [956.7 - 960.7]
+      ├─ [960.7 - 964.7]
+      ├─ [964.7 - 968.7]
+      ├─ [968.7 - 972.7]
+      ├─ [972.7 - 976.7]
+      ├─ [976.7 - 980.7]
+      ├─ [980.7 - 984.7]
+      ├─ [984.7 - 988.7]
+      ├─ [988.7 - 992.7]
+      ├─ [992.7 - 996.7]
+      ├─ [996.7 - 1000.7]
+      └─ [1000.7 - 1004.7]
+
+[END-SETUP]
+
+[BEGIN-LOG]
+INFO:    [08/11/2024 09:08:02] -> Update available: https://files.biognosys.com/058_Spectronaut/Installer/SN19/Spectronaut_19.4.241104.62635.tgz
+INFO:    [08/11/2024 09:08:02] -> Update available: https://files.biognosys.com/058_Spectronaut/Installer/SN19/Spectronaut_19.4.241104.62635.deb
+INFO:    [08/11/2024 09:08:02] -> Running /usr/share/dotnet/dotnet /usr/lib/spectronaut/SpectronautCMD.dll directdia -fasta p34486_Proteobench_TripleProteome_20240614.fasta -r /scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw -r /scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw -r /scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw -r /scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw -r /scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw -r /scratch/cpanse/Spectronaut//wolski_20240614_proteobench_DIA_data/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw -o output/SanityCheck/
+INFO:    [08/11/2024 09:08:03] -> Reading report parameter...
+INFO:    [08/11/2024 09:08:03] -> 1 valid runs added
+INFO:    [08/11/2024 09:08:03] -> 1 valid runs added
+INFO:    [08/11/2024 09:08:03] -> 1 valid runs added
+INFO:    [08/11/2024 09:08:03] -> 1 valid runs added
+INFO:    [08/11/2024 09:08:03] -> 1 valid runs added
+INFO:    [08/11/2024 09:08:03] -> 1 valid runs added
+INFO:    [08/11/2024 09:08:03] -> Importing FASTA file...
+INFO:    [08/11/2024 09:08:46] -> Set output destination to: output/SanityCheck/20241108_090846_Experiment1
+INFO:    [08/11/2024 09:08:46] -> Selected Analysis Settings: BGS Factory Settings
+INFO:    [08/11/2024 09:08:46] -> Initializing Pipeline...
+INFO:    [08/11/2024 09:08:46] -> Preprocessing Run #1 of 6...
+INFO:    [08/11/2024 09:08:46] -> Searching DIA with Pulsar...
+INFO:    [08/11/2024 09:08:46] -> Initialize Pipeline...
+INFO:    [08/11/2024 09:08:46] -> Initialize Pipeline
+INFO:    [08/11/2024 09:09:03] -> Initialize Pipeline...
+INFO:    [08/11/2024 09:09:03] -> Creating Experiment Environment
+INFO:    [08/11/2024 09:09:07] -> SuperRun 1/6: Initializing (LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw)
+INFO:    [08/11/2024 09:09:07] -> Run 1/6: Organizing Data from Run
+INFO:    [08/11/2024 09:09:07] -> Run 1/6: Creating Calibration Search Space...
+INFO:    [08/11/2024 09:09:12] -> Collecting Search Space Parameters...
+INFO:    [08/11/2024 09:09:30] -> Creating the Search Space...
+INFO:    [08/11/2024 09:09:32] -> Run 1/6: Creating Search Space...
+INFO:    [08/11/2024 09:09:32] -> Collecting Search Space Parameters...
+INFO:    [08/11/2024 09:10:51] -> Creating the Search Space...
+INFO:    [08/11/2024 09:10:55] -> Size of search space [MB]: 0
+INFO:    [08/11/2024 09:10:55] -> Number of IMPGs in search space: 0
+INFO:    [08/11/2024 09:10:55] -> Run 1/6: MS2 Index Generation
+INFO:    [08/11/2024 09:13:26] -> Run 1/6: Method-Specific Pre-Processing...
+INFO:    [08/11/2024 09:13:28] -> Initializing...
+INFO:    [08/11/2024 09:13:54] -> Finalizing HTRMS File...
+INFO:    [08/11/2024 09:14:09] -> Processing Part 1 of 152
+INFO:    [08/11/2024 09:14:15] -> Processing Part 2 of 152
+INFO:    [08/11/2024 09:14:15] -> Processing Part 3 of 152
+INFO:    [08/11/2024 09:14:16] -> Processing Part 4 of 152
+INFO:    [08/11/2024 09:14:19] -> Processing Part 5 of 152
+INFO:    [08/11/2024 09:14:19] -> Processing Part 6 of 152
+INFO:    [08/11/2024 09:14:20] -> Processing Part 7 of 152
+INFO:    [08/11/2024 09:14:23] -> Processing Part 8 of 152
+INFO:    [08/11/2024 09:14:24] -> Processing Part 9 of 152
+INFO:    [08/11/2024 09:14:24] -> Processing Part 10 of 152
+INFO:    [08/11/2024 09:14:26] -> Processing Part 11 of 152
+INFO:    [08/11/2024 09:14:27] -> Processing Part 12 of 152
+INFO:    [08/11/2024 09:14:27] -> Processing Part 13 of 152
+INFO:    [08/11/2024 09:14:28] -> Processing Part 14 of 152
+INFO:    [08/11/2024 09:14:29] -> Processing Part 15 of 152
+INFO:    [08/11/2024 09:14:30] -> Processing Part 16 of 152
+INFO:    [08/11/2024 09:14:30] -> Processing Part 17 of 152
+INFO:    [08/11/2024 09:14:31] -> Processing Part 18 of 152
+INFO:    [08/11/2024 09:14:31] -> Processing Part 19 of 152
+INFO:    [08/11/2024 09:14:32] -> Processing Part 20 of 152
+INFO:    [08/11/2024 09:14:33] -> Processing Part 21 of 152
+INFO:    [08/11/2024 09:14:33] -> Processing Part 22 of 152
+INFO:    [08/11/2024 09:14:33] -> Processing Part 23 of 152
+INFO:    [08/11/2024 09:14:34] -> Processing Part 24 of 152
+INFO:    [08/11/2024 09:14:35] -> Processing Part 25 of 152
+INFO:    [08/11/2024 09:14:35] -> Processing Part 26 of 152
+INFO:    [08/11/2024 09:14:37] -> Processing Part 27 of 152
+INFO:    [08/11/2024 09:14:37] -> Processing Part 28 of 152
+INFO:    [08/11/2024 09:14:37] -> Processing Part 29 of 152
+INFO:    [08/11/2024 09:14:38] -> Processing Part 30 of 152
+INFO:    [08/11/2024 09:14:39] -> Processing Part 31 of 152
+INFO:    [08/11/2024 09:14:40] -> Processing Part 32 of 152
+INFO:    [08/11/2024 09:14:40] -> Processing Part 33 of 152
+INFO:    [08/11/2024 09:14:40] -> Processing Part 34 of 152
+INFO:    [08/11/2024 09:14:41] -> Processing Part 35 of 152
+INFO:    [08/11/2024 09:14:42] -> Processing Part 36 of 152
+INFO:    [08/11/2024 09:14:43] -> Processing Part 37 of 152
+INFO:    [08/11/2024 09:14:43] -> Processing Part 38 of 152
+INFO:    [08/11/2024 09:14:44] -> Processing Part 39 of 152
+INFO:    [08/11/2024 09:14:45] -> Processing Part 40 of 152
+INFO:    [08/11/2024 09:14:45] -> Processing Part 41 of 152
+INFO:    [08/11/2024 09:14:46] -> Processing Part 42 of 152
+INFO:    [08/11/2024 09:14:46] -> Processing Part 43 of 152
+INFO:    [08/11/2024 09:14:47] -> Processing Part 44 of 152
+INFO:    [08/11/2024 09:14:48] -> Processing Part 45 of 152
+INFO:    [08/11/2024 09:14:48] -> Processing Part 46 of 152
+INFO:    [08/11/2024 09:14:49] -> Processing Part 47 of 152
+INFO:    [08/11/2024 09:14:49] -> Processing Part 48 of 152
+INFO:    [08/11/2024 09:14:49] -> Processing Part 49 of 152
+INFO:    [08/11/2024 09:14:50] -> Processing Part 50 of 152
+INFO:    [08/11/2024 09:14:50] -> Processing Part 51 of 152
+INFO:    [08/11/2024 09:14:51] -> Processing Part 52 of 152
+INFO:    [08/11/2024 09:14:52] -> Processing Part 53 of 152
+INFO:    [08/11/2024 09:14:52] -> Processing Part 54 of 152
+INFO:    [08/11/2024 09:14:53] -> Processing Part 55 of 152
+INFO:    [08/11/2024 09:14:54] -> Processing Part 56 of 152
+INFO:    [08/11/2024 09:14:55] -> Processing Part 57 of 152
+INFO:    [08/11/2024 09:14:58] -> Processing Part 58 of 152
+INFO:    [08/11/2024 09:14:58] -> Processing Part 59 of 152
+INFO:    [08/11/2024 09:14:58] -> Processing Part 60 of 152
+INFO:    [08/11/2024 09:15:02] -> Processing Part 61 of 152
+INFO:    [08/11/2024 09:15:02] -> Processing Part 62 of 152
+INFO:    [08/11/2024 09:15:03] -> Processing Part 63 of 152
+INFO:    [08/11/2024 09:15:06] -> Processing Part 64 of 152
+INFO:    [08/11/2024 09:15:06] -> Processing Part 65 of 152
+INFO:    [08/11/2024 09:15:07] -> Processing Part 66 of 152
+INFO:    [08/11/2024 09:15:10] -> Processing Part 67 of 152
+INFO:    [08/11/2024 09:15:10] -> Processing Part 68 of 152
+INFO:    [08/11/2024 09:15:11] -> Processing Part 69 of 152
+INFO:    [08/11/2024 09:15:14] -> Processing Part 70 of 152
+INFO:    [08/11/2024 09:15:14] -> Processing Part 71 of 152
+INFO:    [08/11/2024 09:15:15] -> Processing Part 72 of 152
+INFO:    [08/11/2024 09:15:17] -> Processing Part 73 of 152
+INFO:    [08/11/2024 09:15:18] -> Processing Part 74 of 152
+INFO:    [08/11/2024 09:15:18] -> Processing Part 75 of 152
+INFO:    [08/11/2024 09:15:21] -> Processing Part 76 of 152
+INFO:    [08/11/2024 09:15:21] -> Processing Part 77 of 152
+INFO:    [08/11/2024 09:15:22] -> Processing Part 78 of 152
+INFO:    [08/11/2024 09:15:22] -> Processing Part 79 of 152
+INFO:    [08/11/2024 09:15:26] -> Processing Part 80 of 152
+INFO:    [08/11/2024 09:15:28] -> Processing Part 81 of 152
+INFO:    [08/11/2024 09:15:32] -> Processing Part 82 of 152
+INFO:    [08/11/2024 09:15:36] -> Processing Part 83 of 152
+INFO:    [08/11/2024 09:15:39] -> Processing Part 84 of 152
+INFO:    [08/11/2024 09:15:44] -> Processing Part 85 of 152
+INFO:    [08/11/2024 09:15:49] -> Processing Part 86 of 152
+INFO:    [08/11/2024 09:15:53] -> Processing Part 87 of 152
+INFO:    [08/11/2024 09:15:58] -> Processing Part 88 of 152
+INFO:    [08/11/2024 09:16:02] -> Processing Part 89 of 152
+INFO:    [08/11/2024 09:16:02] -> Processing Part 90 of 152
+INFO:    [08/11/2024 09:16:03] -> Processing Part 91 of 152
+INFO:    [08/11/2024 09:16:07] -> Processing Part 92 of 152
+INFO:    [08/11/2024 09:16:07] -> Processing Part 93 of 152
+INFO:    [08/11/2024 09:16:08] -> Processing Part 94 of 152
+INFO:    [08/11/2024 09:16:08] -> Processing Part 95 of 152
+INFO:    [08/11/2024 09:16:09] -> Processing Part 96 of 152
+INFO:    [08/11/2024 09:16:13] -> Processing Part 97 of 152
+INFO:    [08/11/2024 09:16:13] -> Processing Part 98 of 152
+INFO:    [08/11/2024 09:16:14] -> Processing Part 99 of 152
+INFO:    [08/11/2024 09:16:24] -> Processing Part 100 of 152
+INFO:    [08/11/2024 09:16:28] -> Processing Part 101 of 152
+INFO:    [08/11/2024 09:16:35] -> Processing Part 102 of 152
+INFO:    [08/11/2024 09:16:40] -> Processing Part 103 of 152
+INFO:    [08/11/2024 09:16:44] -> Processing Part 104 of 152
+INFO:    [08/11/2024 09:16:49] -> Processing Part 105 of 152
+INFO:    [08/11/2024 09:16:52] -> Processing Part 106 of 152
+INFO:    [08/11/2024 09:16:55] -> Processing Part 107 of 152
+INFO:    [08/11/2024 09:16:55] -> Processing Part 108 of 152
+INFO:    [08/11/2024 09:16:55] -> Processing Part 109 of 152
+INFO:    [08/11/2024 09:16:56] -> Processing Part 110 of 152
+INFO:    [08/11/2024 09:16:56] -> Processing Part 111 of 152
+INFO:    [08/11/2024 09:16:56] -> Processing Part 112 of 152
+INFO:    [08/11/2024 09:16:56] -> Processing Part 113 of 152
+INFO:    [08/11/2024 09:16:58] -> Processing Part 114 of 152
+INFO:    [08/11/2024 09:16:58] -> Processing Part 115 of 152
+INFO:    [08/11/2024 09:16:59] -> Processing Part 116 of 152
+INFO:    [08/11/2024 09:16:59] -> Processing Part 117 of 152
+INFO:    [08/11/2024 09:16:59] -> Processing Part 118 of 152
+INFO:    [08/11/2024 09:17:03] -> Processing Part 119 of 152
+INFO:    [08/11/2024 09:17:03] -> Processing Part 120 of 152
+INFO:    [08/11/2024 09:17:05] -> Processing Part 121 of 152
+INFO:    [08/11/2024 09:17:06] -> Processing Part 122 of 152
+INFO:    [08/11/2024 09:17:06] -> Processing Part 123 of 152
+INFO:    [08/11/2024 09:17:06] -> Processing Part 124 of 152
+INFO:    [08/11/2024 09:17:06] -> Processing Part 125 of 152
+INFO:    [08/11/2024 09:17:07] -> Processing Part 126 of 152
+INFO:    [08/11/2024 09:17:09] -> Processing Part 127 of 152
+INFO:    [08/11/2024 09:17:10] -> Processing Part 128 of 152
+INFO:    [08/11/2024 09:17:11] -> Processing Part 129 of 152
+INFO:    [08/11/2024 09:17:14] -> Processing Part 130 of 152
+INFO:    [08/11/2024 09:17:17] -> Processing Part 131 of 152
+INFO:    [08/11/2024 09:17:19] -> Processing Part 132 of 152
+INFO:    [08/11/2024 09:17:22] -> Processing Part 133 of 152
+INFO:    [08/11/2024 09:17:24] -> Processing Part 134 of 152
+INFO:    [08/11/2024 09:17:26] -> Processing Part 135 of 152
+INFO:    [08/11/2024 09:17:28] -> Processing Part 136 of 152
+INFO:    [08/11/2024 09:17:30] -> Processing Part 137 of 152
+INFO:    [08/11/2024 09:17:32] -> Processing Part 138 of 152
+INFO:    [08/11/2024 09:17:35] -> Processing Part 139 of 152
+INFO:    [08/11/2024 09:17:37] -> Processing Part 140 of 152
+INFO:    [08/11/2024 09:17:38] -> Processing Part 141 of 152
+INFO:    [08/11/2024 09:17:40] -> Processing Part 142 of 152
+INFO:    [08/11/2024 09:17:42] -> Processing Part 143 of 152
+INFO:    [08/11/2024 09:17:44] -> Processing Part 144 of 152
+INFO:    [08/11/2024 09:17:49] -> Processing Part 145 of 152
+INFO:    [08/11/2024 09:17:50] -> Processing Part 146 of 152
+INFO:    [08/11/2024 09:17:51] -> Processing Part 147 of 152
+INFO:    [08/11/2024 09:17:53] -> Processing Part 148 of 152
+INFO:    [08/11/2024 09:17:56] -> Processing Part 149 of 152
+INFO:    [08/11/2024 09:17:56] -> Processing Part 150 of 152
+INFO:    [08/11/2024 09:17:59] -> Processing Part 151 of 152
+INFO:    [08/11/2024 09:18:01] -> Processing Part 152 of 152
+INFO:    [08/11/2024 09:18:06] -> Nr of Features Requested: 253516
+INFO:    [08/11/2024 09:18:06] -> Size of Featurespace: 253527
+INFO:    [08/11/2024 09:18:06] -> Scans/Feature pairs that failed to Match: 1420
+INFO:    [08/11/2024 09:18:06] -> Maximum Nr of Features for one Scan: 11
+INFO:    [08/11/2024 09:18:06] -> Finalizing...
+INFO:    [08/11/2024 09:18:08] -> Processed in 3.98m
+INFO:    [08/11/2024 09:18:08] -> Processed in 4.7m
+INFO:    [08/11/2024 09:18:13] -> Done
+INFO:    [08/11/2024 09:18:13] -> Run 1/6: Process Raw File...
+INFO:    [08/11/2024 09:18:26] -> Run 1/6: Preparing Partitions...
+INFO:    [08/11/2024 09:18:27] -> Part 1/1 - Run 1/6: Preparing Calibration Searches...
+INFO:    [08/11/2024 09:18:28] -> Part 1/1 - Run 1/6: First Pass Calibration Search...
+INFO:    [08/11/2024 09:18:49] -> Part 1/1 - Run 1/6: Calibration Search...
+INFO:    [08/11/2024 09:19:04] -> The number of PSMs identified during calibration with FDR <= 0.01 is 5345 [15.5s]
+INFO:    [08/11/2024 09:19:28] -> Part 1/1 - Run 1/6: Preparing Main Search...
+INFO:    [08/11/2024 09:19:29] -> Part 1/1 - Run 1/6: Main Search...
+INFO:    [08/11/2024 09:19:29] -> PERFORMING MAIN SEARCH 1
+INFO:    [08/11/2024 09:20:01] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 43542 [32.2s]
+INFO:    [08/11/2024 09:20:01] -> PERFORMING MAIN SEARCH 2
+INFO:    [08/11/2024 09:20:23] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 7985 [21.9s]
+INFO:    [08/11/2024 09:20:23] -> PERFORMING MAIN SEARCH 3
+INFO:    [08/11/2024 09:20:32] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 1200 [9.1s]
+INFO:    [08/11/2024 09:20:32] -> PERFORMING MAIN SEARCH 4
+INFO:    [08/11/2024 09:20:41] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 157 [8.5s]
+INFO:    [08/11/2024 09:21:46] -> Extracting 162025 MS1 XICs
+INFO:    [08/11/2024 09:25:33] -> Run 1/6: Cleaning Up Run..
+INFO:    [08/11/2024 09:25:34] -> SuperRun 2/6: Initializing (LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw)
+INFO:    [08/11/2024 09:25:34] -> Run 2/6: Organizing Data from Run
+INFO:    [08/11/2024 09:25:34] -> Run 2/6: Creating Calibration Search Space...
+INFO:    [08/11/2024 09:25:34] -> Run 2/6: Creating Search Space...
+INFO:    [08/11/2024 09:25:34] -> Size of search space [MB]: 0
+INFO:    [08/11/2024 09:25:34] -> Number of IMPGs in search space: 0
+INFO:    [08/11/2024 09:25:34] -> Run 2/6: MS2 Index Generation
+INFO:    [08/11/2024 09:25:36] -> Run 2/6: Method-Specific Pre-Processing...
+INFO:    [08/11/2024 09:25:38] -> Initializing...
+INFO:    [08/11/2024 09:26:16] -> Finalizing HTRMS File...
+INFO:    [08/11/2024 09:27:16] -> Processing Part 1 of 152
+INFO:    [08/11/2024 09:27:27] -> Processing Part 2 of 152
+INFO:    [08/11/2024 09:27:31] -> Processing Part 3 of 152
+INFO:    [08/11/2024 09:27:34] -> Processing Part 4 of 152
+INFO:    [08/11/2024 09:27:49] -> Processing Part 5 of 152
+INFO:    [08/11/2024 09:27:54] -> Processing Part 6 of 152
+INFO:    [08/11/2024 09:27:59] -> Processing Part 7 of 152
+INFO:    [08/11/2024 09:28:02] -> Processing Part 8 of 152
+INFO:    [08/11/2024 09:28:06] -> Processing Part 9 of 152
+INFO:    [08/11/2024 09:28:07] -> Processing Part 10 of 152
+INFO:    [08/11/2024 09:28:17] -> Processing Part 11 of 152
+INFO:    [08/11/2024 09:28:18] -> Processing Part 12 of 152
+INFO:    [08/11/2024 09:28:29] -> Processing Part 13 of 152
+INFO:    [08/11/2024 09:28:30] -> Processing Part 14 of 152
+INFO:    [08/11/2024 09:28:36] -> Processing Part 15 of 152
+INFO:    [08/11/2024 09:28:37] -> Processing Part 16 of 152
+INFO:    [08/11/2024 09:28:37] -> Processing Part 17 of 152
+INFO:    [08/11/2024 09:28:38] -> Processing Part 18 of 152
+INFO:    [08/11/2024 09:28:44] -> Processing Part 19 of 152
+INFO:    [08/11/2024 09:28:45] -> Processing Part 20 of 152
+INFO:    [08/11/2024 09:28:51] -> Processing Part 21 of 152
+INFO:    [08/11/2024 09:28:52] -> Processing Part 22 of 152
+INFO:    [08/11/2024 09:28:58] -> Processing Part 23 of 152
+INFO:    [08/11/2024 09:29:00] -> Processing Part 24 of 152
+INFO:    [08/11/2024 09:29:04] -> Processing Part 25 of 152
+INFO:    [08/11/2024 09:29:10] -> Processing Part 26 of 152
+INFO:    [08/11/2024 09:29:11] -> Processing Part 27 of 152
+INFO:    [08/11/2024 09:29:12] -> Processing Part 28 of 152
+INFO:    [08/11/2024 09:29:16] -> Processing Part 29 of 152
+INFO:    [08/11/2024 09:29:17] -> Processing Part 30 of 152
+INFO:    [08/11/2024 09:29:20] -> Processing Part 31 of 152
+INFO:    [08/11/2024 09:29:26] -> Processing Part 32 of 152
+INFO:    [08/11/2024 09:29:27] -> Processing Part 33 of 152
+INFO:    [08/11/2024 09:29:28] -> Processing Part 34 of 152
+INFO:    [08/11/2024 09:29:33] -> Processing Part 35 of 152
+INFO:    [08/11/2024 09:29:34] -> Processing Part 36 of 152
+INFO:    [08/11/2024 09:29:40] -> Processing Part 37 of 152
+INFO:    [08/11/2024 09:29:47] -> Processing Part 38 of 152
+INFO:    [08/11/2024 09:29:48] -> Processing Part 39 of 152
+INFO:    [08/11/2024 09:29:53] -> Processing Part 40 of 152
+INFO:    [08/11/2024 09:29:54] -> Processing Part 41 of 152
+INFO:    [08/11/2024 09:29:55] -> Processing Part 42 of 152
+INFO:    [08/11/2024 09:29:58] -> Processing Part 43 of 152
+INFO:    [08/11/2024 09:29:59] -> Processing Part 44 of 152
+INFO:    [08/11/2024 09:30:00] -> Processing Part 45 of 152
+INFO:    [08/11/2024 09:30:01] -> Processing Part 46 of 152
+INFO:    [08/11/2024 09:30:04] -> Processing Part 47 of 152
+INFO:    [08/11/2024 09:30:04] -> Processing Part 48 of 152
+INFO:    [08/11/2024 09:30:05] -> Processing Part 49 of 152
+INFO:    [08/11/2024 09:30:06] -> Processing Part 50 of 152
+INFO:    [08/11/2024 09:30:07] -> Processing Part 51 of 152
+INFO:    [08/11/2024 09:30:09] -> Processing Part 52 of 152
+INFO:    [08/11/2024 09:30:10] -> Processing Part 53 of 152
+INFO:    [08/11/2024 09:30:11] -> Processing Part 54 of 152
+INFO:    [08/11/2024 09:30:12] -> Processing Part 55 of 152
+INFO:    [08/11/2024 09:30:14] -> Processing Part 56 of 152
+INFO:    [08/11/2024 09:30:15] -> Processing Part 57 of 152
+INFO:    [08/11/2024 09:30:16] -> Processing Part 58 of 152
+INFO:    [08/11/2024 09:30:17] -> Processing Part 59 of 152
+INFO:    [08/11/2024 09:30:18] -> Processing Part 60 of 152
+INFO:    [08/11/2024 09:30:19] -> Processing Part 61 of 152
+INFO:    [08/11/2024 09:30:23] -> Processing Part 62 of 152
+INFO:    [08/11/2024 09:30:25] -> Processing Part 63 of 152
+INFO:    [08/11/2024 09:30:26] -> Processing Part 64 of 152
+INFO:    [08/11/2024 09:30:26] -> Processing Part 65 of 152
+INFO:    [08/11/2024 09:30:26] -> Processing Part 66 of 152
+INFO:    [08/11/2024 09:30:30] -> Processing Part 67 of 152
+INFO:    [08/11/2024 09:30:31] -> Processing Part 68 of 152
+INFO:    [08/11/2024 09:30:32] -> Processing Part 69 of 152
+INFO:    [08/11/2024 09:30:33] -> Processing Part 70 of 152
+INFO:    [08/11/2024 09:30:34] -> Processing Part 71 of 152
+INFO:    [08/11/2024 09:30:35] -> Processing Part 72 of 152
+INFO:    [08/11/2024 09:30:36] -> Processing Part 73 of 152
+INFO:    [08/11/2024 09:30:38] -> Processing Part 74 of 152
+INFO:    [08/11/2024 09:30:39] -> Processing Part 75 of 152
+INFO:    [08/11/2024 09:30:42] -> Processing Part 76 of 152
+INFO:    [08/11/2024 09:30:44] -> Processing Part 77 of 152
+INFO:    [08/11/2024 09:30:46] -> Processing Part 78 of 152
+INFO:    [08/11/2024 09:30:49] -> Processing Part 79 of 152
+INFO:    [08/11/2024 09:30:50] -> Processing Part 80 of 152
+INFO:    [08/11/2024 09:30:56] -> Processing Part 81 of 152
+INFO:    [08/11/2024 09:30:58] -> Processing Part 82 of 152
+INFO:    [08/11/2024 09:31:00] -> Processing Part 83 of 152
+INFO:    [08/11/2024 09:31:02] -> Processing Part 84 of 152
+INFO:    [08/11/2024 09:31:02] -> Processing Part 85 of 152
+INFO:    [08/11/2024 09:31:03] -> Processing Part 86 of 152
+INFO:    [08/11/2024 09:31:05] -> Processing Part 87 of 152
+INFO:    [08/11/2024 09:31:08] -> Processing Part 88 of 152
+INFO:    [08/11/2024 09:31:09] -> Processing Part 89 of 152
+INFO:    [08/11/2024 09:31:10] -> Processing Part 90 of 152
+INFO:    [08/11/2024 09:31:11] -> Processing Part 91 of 152
+INFO:    [08/11/2024 09:31:13] -> Processing Part 92 of 152
+INFO:    [08/11/2024 09:31:15] -> Processing Part 93 of 152
+INFO:    [08/11/2024 09:31:16] -> Processing Part 94 of 152
+INFO:    [08/11/2024 09:31:18] -> Processing Part 95 of 152
+INFO:    [08/11/2024 09:31:20] -> Processing Part 96 of 152
+INFO:    [08/11/2024 09:31:23] -> Processing Part 97 of 152
+INFO:    [08/11/2024 09:31:27] -> Processing Part 98 of 152
+INFO:    [08/11/2024 09:31:28] -> Processing Part 99 of 152
+INFO:    [08/11/2024 09:31:28] -> Processing Part 100 of 152
+INFO:    [08/11/2024 09:31:30] -> Processing Part 101 of 152
+INFO:    [08/11/2024 09:31:30] -> Processing Part 102 of 152
+INFO:    [08/11/2024 09:31:32] -> Processing Part 103 of 152
+INFO:    [08/11/2024 09:31:32] -> Processing Part 104 of 152
+INFO:    [08/11/2024 09:31:34] -> Processing Part 105 of 152
+INFO:    [08/11/2024 09:31:34] -> Processing Part 106 of 152
+INFO:    [08/11/2024 09:31:37] -> Processing Part 107 of 152
+INFO:    [08/11/2024 09:31:37] -> Processing Part 108 of 152
+INFO:    [08/11/2024 09:31:40] -> Processing Part 109 of 152
+INFO:    [08/11/2024 09:31:41] -> Processing Part 110 of 152
+INFO:    [08/11/2024 09:31:43] -> Processing Part 111 of 152
+INFO:    [08/11/2024 09:31:43] -> Processing Part 112 of 152
+INFO:    [08/11/2024 09:31:43] -> Processing Part 113 of 152
+INFO:    [08/11/2024 09:31:44] -> Processing Part 114 of 152
+INFO:    [08/11/2024 09:31:45] -> Processing Part 115 of 152
+INFO:    [08/11/2024 09:31:45] -> Processing Part 116 of 152
+INFO:    [08/11/2024 09:31:47] -> Processing Part 117 of 152
+INFO:    [08/11/2024 09:31:48] -> Processing Part 118 of 152
+INFO:    [08/11/2024 09:31:51] -> Processing Part 119 of 152
+INFO:    [08/11/2024 09:31:52] -> Processing Part 120 of 152
+INFO:    [08/11/2024 09:31:54] -> Processing Part 121 of 152
+INFO:    [08/11/2024 09:31:55] -> Processing Part 122 of 152
+INFO:    [08/11/2024 09:31:57] -> Processing Part 123 of 152
+INFO:    [08/11/2024 09:31:58] -> Processing Part 124 of 152
+INFO:    [08/11/2024 09:31:58] -> Processing Part 125 of 152
+INFO:    [08/11/2024 09:31:59] -> Processing Part 126 of 152
+INFO:    [08/11/2024 09:31:59] -> Processing Part 127 of 152
+INFO:    [08/11/2024 09:32:00] -> Processing Part 128 of 152
+INFO:    [08/11/2024 09:32:02] -> Processing Part 129 of 152
+INFO:    [08/11/2024 09:32:03] -> Processing Part 130 of 152
+INFO:    [08/11/2024 09:32:03] -> Processing Part 131 of 152
+INFO:    [08/11/2024 09:32:04] -> Processing Part 132 of 152
+INFO:    [08/11/2024 09:32:06] -> Processing Part 133 of 152
+INFO:    [08/11/2024 09:32:06] -> Processing Part 134 of 152
+INFO:    [08/11/2024 09:32:06] -> Processing Part 135 of 152
+INFO:    [08/11/2024 09:32:07] -> Processing Part 136 of 152
+INFO:    [08/11/2024 09:32:07] -> Processing Part 137 of 152
+INFO:    [08/11/2024 09:32:08] -> Processing Part 138 of 152
+INFO:    [08/11/2024 09:32:09] -> Processing Part 139 of 152
+INFO:    [08/11/2024 09:32:10] -> Processing Part 140 of 152
+INFO:    [08/11/2024 09:32:10] -> Processing Part 141 of 152
+INFO:    [08/11/2024 09:32:11] -> Processing Part 142 of 152
+INFO:    [08/11/2024 09:32:12] -> Processing Part 143 of 152
+INFO:    [08/11/2024 09:32:12] -> Processing Part 144 of 152
+INFO:    [08/11/2024 09:32:14] -> Processing Part 145 of 152
+INFO:    [08/11/2024 09:32:14] -> Processing Part 146 of 152
+INFO:    [08/11/2024 09:32:16] -> Processing Part 147 of 152
+INFO:    [08/11/2024 09:32:22] -> Processing Part 148 of 152
+INFO:    [08/11/2024 09:32:23] -> Processing Part 149 of 152
+INFO:    [08/11/2024 09:32:26] -> Processing Part 150 of 152
+INFO:    [08/11/2024 09:32:26] -> Processing Part 151 of 152
+INFO:    [08/11/2024 09:32:26] -> Processing Part 152 of 152
+INFO:    [08/11/2024 09:32:27] -> Nr of Features Requested: 239407
+INFO:    [08/11/2024 09:32:28] -> Size of Featurespace: 239407
+INFO:    [08/11/2024 09:32:28] -> Scans/Feature pairs that failed to Match: 1573
+INFO:    [08/11/2024 09:32:28] -> Maximum Nr of Features for one Scan: 11
+INFO:    [08/11/2024 09:32:28] -> Finalizing...
+INFO:    [08/11/2024 09:32:29] -> Processed in 5.21m
+INFO:    [08/11/2024 09:32:29] -> Processed in 6.9m
+INFO:    [08/11/2024 09:32:31] -> Done
+INFO:    [08/11/2024 09:32:31] -> Run 2/6: Process Raw File...
+INFO:    [08/11/2024 09:32:41] -> Run 2/6: Preparing Partitions...
+INFO:    [08/11/2024 09:32:41] -> Part 1/1 - Run 2/6: Preparing Calibration Searches...
+INFO:    [08/11/2024 09:32:43] -> Part 1/1 - Run 2/6: First Pass Calibration Search...
+INFO:    [08/11/2024 09:32:54] -> Part 1/1 - Run 2/6: Calibration Search...
+INFO:    [08/11/2024 09:33:06] -> The number of PSMs identified during calibration with FDR <= 0.01 is 5001 [11.8s]
+INFO:    [08/11/2024 09:33:22] -> Part 1/1 - Run 2/6: Preparing Main Search...
+INFO:    [08/11/2024 09:33:23] -> Part 1/1 - Run 2/6: Main Search...
+INFO:    [08/11/2024 09:33:23] -> PERFORMING MAIN SEARCH 1
+INFO:    [08/11/2024 09:34:46] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 42877 [1.4m]
+INFO:    [08/11/2024 09:34:46] -> PERFORMING MAIN SEARCH 2
+INFO:    [08/11/2024 09:35:19] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 7479 [32.6s]
+INFO:    [08/11/2024 09:35:19] -> PERFORMING MAIN SEARCH 3
+INFO:    [08/11/2024 09:35:34] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 1015 [15.4s]
+INFO:    [08/11/2024 09:35:34] -> PERFORMING MAIN SEARCH 4
+INFO:    [08/11/2024 09:35:48] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 230 [14.2s]
+INFO:    [08/11/2024 09:37:10] -> Extracting 154843 MS1 XICs
+INFO:    [08/11/2024 09:40:16] -> Run 2/6: Cleaning Up Run..
+INFO:    [08/11/2024 09:40:16] -> SuperRun 3/6: Initializing (LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw)
+INFO:    [08/11/2024 09:40:16] -> Run 3/6: Organizing Data from Run
+INFO:    [08/11/2024 09:40:16] -> Run 3/6: Creating Calibration Search Space...
+INFO:    [08/11/2024 09:40:16] -> Run 3/6: Creating Search Space...
+INFO:    [08/11/2024 09:40:16] -> Size of search space [MB]: 0
+INFO:    [08/11/2024 09:40:16] -> Number of IMPGs in search space: 0
+INFO:    [08/11/2024 09:40:16] -> Run 3/6: MS2 Index Generation
+INFO:    [08/11/2024 09:40:17] -> Run 3/6: Method-Specific Pre-Processing...
+INFO:    [08/11/2024 09:40:18] -> Initializing...
+INFO:    [08/11/2024 09:40:42] -> Finalizing HTRMS File...
+INFO:    [08/11/2024 09:41:18] -> Processing Part 1 of 152
+INFO:    [08/11/2024 09:41:19] -> Processing Part 2 of 152
+INFO:    [08/11/2024 09:41:19] -> Processing Part 3 of 152
+INFO:    [08/11/2024 09:41:20] -> Processing Part 4 of 152
+INFO:    [08/11/2024 09:41:22] -> Processing Part 5 of 152
+INFO:    [08/11/2024 09:41:22] -> Processing Part 6 of 152
+INFO:    [08/11/2024 09:41:25] -> Processing Part 7 of 152
+INFO:    [08/11/2024 09:41:25] -> Processing Part 8 of 152
+INFO:    [08/11/2024 09:41:25] -> Processing Part 9 of 152
+INFO:    [08/11/2024 09:41:26] -> Processing Part 10 of 152
+INFO:    [08/11/2024 09:41:27] -> Processing Part 11 of 152
+INFO:    [08/11/2024 09:41:27] -> Processing Part 12 of 152
+INFO:    [08/11/2024 09:41:30] -> Processing Part 13 of 152
+INFO:    [08/11/2024 09:41:30] -> Processing Part 14 of 152
+INFO:    [08/11/2024 09:41:31] -> Processing Part 15 of 152
+INFO:    [08/11/2024 09:41:32] -> Processing Part 16 of 152
+INFO:    [08/11/2024 09:41:33] -> Processing Part 17 of 152
+INFO:    [08/11/2024 09:41:35] -> Processing Part 18 of 152
+INFO:    [08/11/2024 09:41:35] -> Processing Part 19 of 152
+INFO:    [08/11/2024 09:41:35] -> Processing Part 20 of 152
+INFO:    [08/11/2024 09:41:38] -> Processing Part 21 of 152
+INFO:    [08/11/2024 09:41:38] -> Processing Part 22 of 152
+INFO:    [08/11/2024 09:41:39] -> Processing Part 23 of 152
+INFO:    [08/11/2024 09:41:41] -> Processing Part 24 of 152
+INFO:    [08/11/2024 09:41:41] -> Processing Part 25 of 152
+INFO:    [08/11/2024 09:41:41] -> Processing Part 26 of 152
+INFO:    [08/11/2024 09:41:49] -> Processing Part 27 of 152
+INFO:    [08/11/2024 09:41:50] -> Processing Part 28 of 152
+INFO:    [08/11/2024 09:41:51] -> Processing Part 29 of 152
+INFO:    [08/11/2024 09:42:01] -> Processing Part 30 of 152
+INFO:    [08/11/2024 09:42:02] -> Processing Part 31 of 152
+INFO:    [08/11/2024 09:42:04] -> Processing Part 32 of 152
+INFO:    [08/11/2024 09:42:05] -> Processing Part 33 of 152
+INFO:    [08/11/2024 09:42:05] -> Processing Part 34 of 152
+INFO:    [08/11/2024 09:42:05] -> Processing Part 35 of 152
+INFO:    [08/11/2024 09:42:06] -> Processing Part 36 of 152
+INFO:    [08/11/2024 09:42:07] -> Processing Part 37 of 152
+INFO:    [08/11/2024 09:42:07] -> Processing Part 38 of 152
+INFO:    [08/11/2024 09:42:08] -> Processing Part 39 of 152
+INFO:    [08/11/2024 09:42:08] -> Processing Part 40 of 152
+INFO:    [08/11/2024 09:42:09] -> Processing Part 41 of 152
+INFO:    [08/11/2024 09:42:10] -> Processing Part 42 of 152
+INFO:    [08/11/2024 09:42:10] -> Processing Part 43 of 152
+INFO:    [08/11/2024 09:42:10] -> Processing Part 44 of 152
+INFO:    [08/11/2024 09:42:11] -> Processing Part 45 of 152
+INFO:    [08/11/2024 09:42:12] -> Processing Part 46 of 152
+INFO:    [08/11/2024 09:42:12] -> Processing Part 47 of 152
+INFO:    [08/11/2024 09:42:12] -> Processing Part 48 of 152
+INFO:    [08/11/2024 09:42:13] -> Processing Part 49 of 152
+INFO:    [08/11/2024 09:42:13] -> Processing Part 50 of 152
+INFO:    [08/11/2024 09:42:15] -> Processing Part 51 of 152
+INFO:    [08/11/2024 09:42:15] -> Processing Part 52 of 152
+INFO:    [08/11/2024 09:42:15] -> Processing Part 53 of 152
+INFO:    [08/11/2024 09:42:15] -> Processing Part 54 of 152
+INFO:    [08/11/2024 09:42:18] -> Processing Part 55 of 152
+INFO:    [08/11/2024 09:42:18] -> Processing Part 56 of 152
+INFO:    [08/11/2024 09:42:18] -> Processing Part 57 of 152
+INFO:    [08/11/2024 09:42:19] -> Processing Part 58 of 152
+INFO:    [08/11/2024 09:42:21] -> Processing Part 59 of 152
+INFO:    [08/11/2024 09:42:21] -> Processing Part 60 of 152
+INFO:    [08/11/2024 09:42:21] -> Processing Part 61 of 152
+INFO:    [08/11/2024 09:42:22] -> Processing Part 62 of 152
+INFO:    [08/11/2024 09:42:24] -> Processing Part 63 of 152
+INFO:    [08/11/2024 09:42:24] -> Processing Part 64 of 152
+INFO:    [08/11/2024 09:42:25] -> Processing Part 65 of 152
+INFO:    [08/11/2024 09:42:25] -> Processing Part 66 of 152
+INFO:    [08/11/2024 09:42:27] -> Processing Part 67 of 152
+INFO:    [08/11/2024 09:42:28] -> Processing Part 68 of 152
+INFO:    [08/11/2024 09:42:28] -> Processing Part 69 of 152
+INFO:    [08/11/2024 09:42:28] -> Processing Part 70 of 152
+INFO:    [08/11/2024 09:42:29] -> Processing Part 71 of 152
+INFO:    [08/11/2024 09:42:29] -> Processing Part 72 of 152
+INFO:    [08/11/2024 09:42:32] -> Processing Part 73 of 152
+INFO:    [08/11/2024 09:42:37] -> Processing Part 74 of 152
+INFO:    [08/11/2024 09:42:40] -> Processing Part 75 of 152
+INFO:    [08/11/2024 09:42:44] -> Processing Part 76 of 152
+INFO:    [08/11/2024 09:42:46] -> Processing Part 77 of 152
+INFO:    [08/11/2024 09:42:49] -> Processing Part 78 of 152
+INFO:    [08/11/2024 09:42:52] -> Processing Part 79 of 152
+INFO:    [08/11/2024 09:42:54] -> Processing Part 80 of 152
+INFO:    [08/11/2024 09:42:57] -> Processing Part 81 of 152
+INFO:    [08/11/2024 09:43:01] -> Processing Part 82 of 152
+INFO:    [08/11/2024 09:43:03] -> Processing Part 83 of 152
+INFO:    [08/11/2024 09:43:03] -> Processing Part 84 of 152
+INFO:    [08/11/2024 09:43:04] -> Processing Part 85 of 152
+INFO:    [08/11/2024 09:43:05] -> Processing Part 86 of 152
+INFO:    [08/11/2024 09:43:07] -> Processing Part 87 of 152
+INFO:    [08/11/2024 09:43:07] -> Processing Part 88 of 152
+INFO:    [08/11/2024 09:43:13] -> Processing Part 89 of 152
+INFO:    [08/11/2024 09:43:14] -> Processing Part 90 of 152
+INFO:    [08/11/2024 09:43:16] -> Processing Part 91 of 152
+INFO:    [08/11/2024 09:43:19] -> Processing Part 92 of 152
+INFO:    [08/11/2024 09:43:20] -> Processing Part 93 of 152
+INFO:    [08/11/2024 09:43:22] -> Processing Part 94 of 152
+INFO:    [08/11/2024 09:43:24] -> Processing Part 95 of 152
+INFO:    [08/11/2024 09:43:25] -> Processing Part 96 of 152
+INFO:    [08/11/2024 09:43:26] -> Processing Part 97 of 152
+INFO:    [08/11/2024 09:43:27] -> Processing Part 98 of 152
+INFO:    [08/11/2024 09:43:28] -> Processing Part 99 of 152
+INFO:    [08/11/2024 09:43:30] -> Processing Part 100 of 152
+INFO:    [08/11/2024 09:43:32] -> Processing Part 101 of 152
+INFO:    [08/11/2024 09:43:36] -> Processing Part 102 of 152
+INFO:    [08/11/2024 09:43:40] -> Processing Part 103 of 152
+INFO:    [08/11/2024 09:43:44] -> Processing Part 104 of 152
+INFO:    [08/11/2024 09:43:46] -> Processing Part 105 of 152
+INFO:    [08/11/2024 09:43:47] -> Processing Part 106 of 152
+INFO:    [08/11/2024 09:43:47] -> Processing Part 107 of 152
+INFO:    [08/11/2024 09:43:52] -> Processing Part 108 of 152
+INFO:    [08/11/2024 09:43:57] -> Processing Part 109 of 152
+INFO:    [08/11/2024 09:44:01] -> Processing Part 110 of 152
+INFO:    [08/11/2024 09:44:04] -> Processing Part 111 of 152
+INFO:    [08/11/2024 09:44:06] -> Processing Part 112 of 152
+INFO:    [08/11/2024 09:44:08] -> Processing Part 113 of 152
+INFO:    [08/11/2024 09:44:09] -> Processing Part 114 of 152
+INFO:    [08/11/2024 09:44:10] -> Processing Part 115 of 152
+INFO:    [08/11/2024 09:44:11] -> Processing Part 116 of 152
+INFO:    [08/11/2024 09:44:13] -> Processing Part 117 of 152
+INFO:    [08/11/2024 09:44:13] -> Processing Part 118 of 152
+INFO:    [08/11/2024 09:44:13] -> Processing Part 119 of 152
+INFO:    [08/11/2024 09:44:14] -> Processing Part 120 of 152
+INFO:    [08/11/2024 09:44:14] -> Processing Part 121 of 152
+INFO:    [08/11/2024 09:44:16] -> Processing Part 122 of 152
+INFO:    [08/11/2024 09:44:17] -> Processing Part 123 of 152
+INFO:    [08/11/2024 09:44:19] -> Processing Part 124 of 152
+INFO:    [08/11/2024 09:44:19] -> Processing Part 125 of 152
+INFO:    [08/11/2024 09:44:20] -> Processing Part 126 of 152
+INFO:    [08/11/2024 09:44:21] -> Processing Part 127 of 152
+INFO:    [08/11/2024 09:44:21] -> Processing Part 128 of 152
+INFO:    [08/11/2024 09:44:22] -> Processing Part 129 of 152
+INFO:    [08/11/2024 09:44:23] -> Processing Part 130 of 152
+INFO:    [08/11/2024 09:44:24] -> Processing Part 131 of 152
+INFO:    [08/11/2024 09:44:24] -> Processing Part 132 of 152
+INFO:    [08/11/2024 09:44:26] -> Processing Part 133 of 152
+INFO:    [08/11/2024 09:44:26] -> Processing Part 134 of 152
+INFO:    [08/11/2024 09:44:26] -> Processing Part 135 of 152
+INFO:    [08/11/2024 09:44:26] -> Processing Part 136 of 152
+INFO:    [08/11/2024 09:44:27] -> Processing Part 137 of 152
+INFO:    [08/11/2024 09:44:27] -> Processing Part 138 of 152
+INFO:    [08/11/2024 09:44:28] -> Processing Part 139 of 152
+INFO:    [08/11/2024 09:44:29] -> Processing Part 140 of 152
+INFO:    [08/11/2024 09:44:29] -> Processing Part 141 of 152
+INFO:    [08/11/2024 09:44:41] -> Processing Part 142 of 152
+INFO:    [08/11/2024 09:44:44] -> Processing Part 143 of 152
+INFO:    [08/11/2024 09:44:46] -> Processing Part 144 of 152
+INFO:    [08/11/2024 09:44:49] -> Processing Part 145 of 152
+INFO:    [08/11/2024 09:44:51] -> Processing Part 146 of 152
+INFO:    [08/11/2024 09:44:55] -> Processing Part 147 of 152
+INFO:    [08/11/2024 09:44:58] -> Processing Part 148 of 152
+INFO:    [08/11/2024 09:45:01] -> Processing Part 149 of 152
+INFO:    [08/11/2024 09:45:04] -> Processing Part 150 of 152
+INFO:    [08/11/2024 09:45:07] -> Processing Part 151 of 152
+INFO:    [08/11/2024 09:45:10] -> Processing Part 152 of 152
+INFO:    [08/11/2024 09:45:18] -> Nr of Features Requested: 249277
+INFO:    [08/11/2024 09:45:18] -> Size of Featurespace: 249277
+INFO:    [08/11/2024 09:45:18] -> Scans/Feature pairs that failed to Match: 2144
+INFO:    [08/11/2024 09:45:18] -> Maximum Nr of Features for one Scan: 14
+INFO:    [08/11/2024 09:45:18] -> Finalizing...
+INFO:    [08/11/2024 09:45:20] -> Processed in 4.03m
+INFO:    [08/11/2024 09:45:20] -> Processed in 5m
+INFO:    [08/11/2024 09:45:22] -> Done
+INFO:    [08/11/2024 09:45:22] -> Run 3/6: Process Raw File...
+INFO:    [08/11/2024 09:45:33] -> Run 3/6: Preparing Partitions...
+INFO:    [08/11/2024 09:45:33] -> Part 1/1 - Run 3/6: Preparing Calibration Searches...
+INFO:    [08/11/2024 09:45:35] -> Part 1/1 - Run 3/6: First Pass Calibration Search...
+INFO:    [08/11/2024 09:45:44] -> Part 1/1 - Run 3/6: Calibration Search...
+INFO:    [08/11/2024 09:46:00] -> The number of PSMs identified during calibration with FDR <= 0.01 is 4856 [16.5s]
+INFO:    [08/11/2024 09:46:23] -> Part 1/1 - Run 3/6: Preparing Main Search...
+INFO:    [08/11/2024 09:46:24] -> Part 1/1 - Run 3/6: Main Search...
+INFO:    [08/11/2024 09:46:24] -> PERFORMING MAIN SEARCH 1
+INFO:    [08/11/2024 09:47:20] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 40263 [55.8s]
+INFO:    [08/11/2024 09:47:20] -> PERFORMING MAIN SEARCH 2
+INFO:    [08/11/2024 09:47:33] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 6749 [12.8s]
+INFO:    [08/11/2024 09:47:33] -> PERFORMING MAIN SEARCH 3
+INFO:    [08/11/2024 09:47:40] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 879 [7s]
+INFO:    [08/11/2024 09:47:40] -> PERFORMING MAIN SEARCH 4
+INFO:    [08/11/2024 09:47:47] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 56 [6.7s]
+INFO:    [08/11/2024 09:48:40] -> Extracting 158553 MS1 XICs
+INFO:    [08/11/2024 09:53:15] -> Run 3/6: Cleaning Up Run..
+INFO:    [08/11/2024 09:53:21] -> SuperRun 4/6: Initializing (LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw)
+INFO:    [08/11/2024 09:53:21] -> Run 4/6: Organizing Data from Run
+INFO:    [08/11/2024 09:53:21] -> Run 4/6: Creating Calibration Search Space...
+INFO:    [08/11/2024 09:53:21] -> Run 4/6: Creating Search Space...
+INFO:    [08/11/2024 09:53:21] -> Size of search space [MB]: 0
+INFO:    [08/11/2024 09:53:21] -> Number of IMPGs in search space: 0
+INFO:    [08/11/2024 09:53:21] -> Run 4/6: MS2 Index Generation
+INFO:    [08/11/2024 09:53:23] -> Run 4/6: Method-Specific Pre-Processing...
+INFO:    [08/11/2024 09:53:26] -> Initializing...
+INFO:    [08/11/2024 09:54:18] -> Finalizing HTRMS File...
+INFO:    [08/11/2024 09:54:38] -> Processing Part 1 of 152
+INFO:    [08/11/2024 09:54:46] -> Processing Part 2 of 152
+INFO:    [08/11/2024 09:54:46] -> Processing Part 3 of 152
+INFO:    [08/11/2024 09:54:47] -> Processing Part 4 of 152
+INFO:    [08/11/2024 09:54:49] -> Processing Part 5 of 152
+INFO:    [08/11/2024 09:54:51] -> Processing Part 6 of 152
+INFO:    [08/11/2024 09:54:54] -> Processing Part 7 of 152
+INFO:    [08/11/2024 09:54:56] -> Processing Part 8 of 152
+INFO:    [08/11/2024 09:54:57] -> Processing Part 9 of 152
+INFO:    [08/11/2024 09:55:04] -> Processing Part 10 of 152
+INFO:    [08/11/2024 09:55:06] -> Processing Part 11 of 152
+INFO:    [08/11/2024 09:55:08] -> Processing Part 12 of 152
+INFO:    [08/11/2024 09:55:10] -> Processing Part 13 of 152
+INFO:    [08/11/2024 09:55:12] -> Processing Part 14 of 152
+INFO:    [08/11/2024 09:55:14] -> Processing Part 15 of 152
+INFO:    [08/11/2024 09:55:16] -> Processing Part 16 of 152
+INFO:    [08/11/2024 09:55:20] -> Processing Part 17 of 152
+INFO:    [08/11/2024 09:55:20] -> Processing Part 18 of 152
+INFO:    [08/11/2024 09:55:23] -> Processing Part 19 of 152
+INFO:    [08/11/2024 09:55:24] -> Processing Part 20 of 152
+INFO:    [08/11/2024 09:55:28] -> Processing Part 21 of 152
+INFO:    [08/11/2024 09:55:31] -> Processing Part 22 of 152
+INFO:    [08/11/2024 09:55:34] -> Processing Part 23 of 152
+INFO:    [08/11/2024 09:55:36] -> Processing Part 24 of 152
+INFO:    [08/11/2024 09:55:46] -> Processing Part 25 of 152
+INFO:    [08/11/2024 09:55:50] -> Processing Part 26 of 152
+INFO:    [08/11/2024 09:55:54] -> Processing Part 27 of 152
+INFO:    [08/11/2024 09:55:56] -> Processing Part 28 of 152
+INFO:    [08/11/2024 09:55:57] -> Processing Part 29 of 152
+INFO:    [08/11/2024 09:55:59] -> Processing Part 30 of 152
+INFO:    [08/11/2024 09:56:05] -> Processing Part 31 of 152
+INFO:    [08/11/2024 09:56:08] -> Processing Part 32 of 152
+INFO:    [08/11/2024 09:56:10] -> Processing Part 33 of 152
+INFO:    [08/11/2024 09:56:13] -> Processing Part 34 of 152
+INFO:    [08/11/2024 09:56:13] -> Processing Part 35 of 152
+INFO:    [08/11/2024 09:56:21] -> Processing Part 36 of 152
+INFO:    [08/11/2024 09:56:23] -> Processing Part 37 of 152
+INFO:    [08/11/2024 09:56:28] -> Processing Part 38 of 152
+INFO:    [08/11/2024 09:56:30] -> Processing Part 39 of 152
+INFO:    [08/11/2024 09:56:34] -> Processing Part 40 of 152
+INFO:    [08/11/2024 09:56:36] -> Processing Part 41 of 152
+INFO:    [08/11/2024 09:56:39] -> Processing Part 42 of 152
+INFO:    [08/11/2024 09:56:42] -> Processing Part 43 of 152
+INFO:    [08/11/2024 09:56:44] -> Processing Part 44 of 152
+INFO:    [08/11/2024 09:56:46] -> Processing Part 45 of 152
+INFO:    [08/11/2024 09:56:47] -> Processing Part 46 of 152
+INFO:    [08/11/2024 09:56:47] -> Processing Part 47 of 152
+INFO:    [08/11/2024 09:56:51] -> Processing Part 48 of 152
+INFO:    [08/11/2024 09:56:53] -> Processing Part 49 of 152
+INFO:    [08/11/2024 09:56:55] -> Processing Part 50 of 152
+INFO:    [08/11/2024 09:56:59] -> Processing Part 51 of 152
+INFO:    [08/11/2024 09:57:02] -> Processing Part 52 of 152
+INFO:    [08/11/2024 09:57:03] -> Processing Part 53 of 152
+INFO:    [08/11/2024 09:57:07] -> Processing Part 54 of 152
+INFO:    [08/11/2024 09:57:10] -> Processing Part 55 of 152
+INFO:    [08/11/2024 09:57:12] -> Processing Part 56 of 152
+INFO:    [08/11/2024 09:57:13] -> Processing Part 57 of 152
+INFO:    [08/11/2024 09:57:19] -> Processing Part 58 of 152
+INFO:    [08/11/2024 09:57:22] -> Processing Part 59 of 152
+INFO:    [08/11/2024 09:57:24] -> Processing Part 60 of 152
+INFO:    [08/11/2024 09:57:35] -> Processing Part 61 of 152
+INFO:    [08/11/2024 09:57:38] -> Processing Part 62 of 152
+INFO:    [08/11/2024 09:57:40] -> Processing Part 63 of 152
+INFO:    [08/11/2024 09:57:44] -> Processing Part 64 of 152
+INFO:    [08/11/2024 09:57:47] -> Processing Part 65 of 152
+INFO:    [08/11/2024 09:57:50] -> Processing Part 66 of 152
+INFO:    [08/11/2024 09:57:52] -> Processing Part 67 of 152
+INFO:    [08/11/2024 09:57:53] -> Processing Part 68 of 152
+INFO:    [08/11/2024 09:57:55] -> Processing Part 69 of 152
+INFO:    [08/11/2024 09:57:58] -> Processing Part 70 of 152
+INFO:    [08/11/2024 09:58:01] -> Processing Part 71 of 152
+INFO:    [08/11/2024 09:58:02] -> Processing Part 72 of 152
+INFO:    [08/11/2024 09:58:04] -> Processing Part 73 of 152
+INFO:    [08/11/2024 09:58:11] -> Processing Part 74 of 152
+INFO:    [08/11/2024 09:58:13] -> Processing Part 75 of 152
+INFO:    [08/11/2024 09:58:15] -> Processing Part 76 of 152
+INFO:    [08/11/2024 09:58:16] -> Processing Part 77 of 152
+INFO:    [08/11/2024 09:58:18] -> Processing Part 78 of 152
+INFO:    [08/11/2024 09:58:19] -> Processing Part 79 of 152
+INFO:    [08/11/2024 09:58:31] -> Processing Part 80 of 152
+INFO:    [08/11/2024 09:58:32] -> Processing Part 81 of 152
+INFO:    [08/11/2024 09:58:34] -> Processing Part 82 of 152
+INFO:    [08/11/2024 09:58:36] -> Processing Part 83 of 152
+INFO:    [08/11/2024 09:58:37] -> Processing Part 84 of 152
+INFO:    [08/11/2024 09:58:38] -> Processing Part 85 of 152
+INFO:    [08/11/2024 09:58:39] -> Processing Part 86 of 152
+INFO:    [08/11/2024 09:58:42] -> Processing Part 87 of 152
+INFO:    [08/11/2024 09:58:44] -> Processing Part 88 of 152
+INFO:    [08/11/2024 09:58:44] -> Processing Part 89 of 152
+INFO:    [08/11/2024 09:58:47] -> Processing Part 90 of 152
+INFO:    [08/11/2024 09:58:48] -> Processing Part 91 of 152
+INFO:    [08/11/2024 09:58:48] -> Processing Part 92 of 152
+INFO:    [08/11/2024 09:58:50] -> Processing Part 93 of 152
+INFO:    [08/11/2024 09:58:52] -> Processing Part 94 of 152
+INFO:    [08/11/2024 09:58:53] -> Processing Part 95 of 152
+INFO:    [08/11/2024 09:58:54] -> Processing Part 96 of 152
+INFO:    [08/11/2024 09:58:54] -> Processing Part 97 of 152
+INFO:    [08/11/2024 09:59:00] -> Processing Part 98 of 152
+INFO:    [08/11/2024 09:59:02] -> Processing Part 99 of 152
+INFO:    [08/11/2024 09:59:04] -> Processing Part 100 of 152
+INFO:    [08/11/2024 09:59:05] -> Processing Part 101 of 152
+INFO:    [08/11/2024 09:59:07] -> Processing Part 102 of 152
+INFO:    [08/11/2024 09:59:08] -> Processing Part 103 of 152
+INFO:    [08/11/2024 09:59:09] -> Processing Part 104 of 152
+INFO:    [08/11/2024 09:59:10] -> Processing Part 105 of 152
+INFO:    [08/11/2024 09:59:11] -> Processing Part 106 of 152
+INFO:    [08/11/2024 09:59:11] -> Processing Part 107 of 152
+INFO:    [08/11/2024 09:59:19] -> Processing Part 108 of 152
+INFO:    [08/11/2024 09:59:20] -> Processing Part 109 of 152
+INFO:    [08/11/2024 09:59:20] -> Processing Part 110 of 152
+INFO:    [08/11/2024 09:59:22] -> Processing Part 111 of 152
+INFO:    [08/11/2024 09:59:23] -> Processing Part 112 of 152
+INFO:    [08/11/2024 09:59:24] -> Processing Part 113 of 152
+INFO:    [08/11/2024 09:59:24] -> Processing Part 114 of 152
+INFO:    [08/11/2024 09:59:26] -> Processing Part 115 of 152
+INFO:    [08/11/2024 09:59:26] -> Processing Part 116 of 152
+INFO:    [08/11/2024 09:59:28] -> Processing Part 117 of 152
+INFO:    [08/11/2024 09:59:28] -> Processing Part 118 of 152
+INFO:    [08/11/2024 09:59:30] -> Processing Part 119 of 152
+INFO:    [08/11/2024 09:59:30] -> Processing Part 120 of 152
+INFO:    [08/11/2024 09:59:30] -> Processing Part 121 of 152
+INFO:    [08/11/2024 09:59:32] -> Processing Part 122 of 152
+INFO:    [08/11/2024 09:59:39] -> Processing Part 123 of 152
+INFO:    [08/11/2024 09:59:40] -> Processing Part 124 of 152
+INFO:    [08/11/2024 09:59:41] -> Processing Part 125 of 152
+INFO:    [08/11/2024 09:59:42] -> Processing Part 126 of 152
+INFO:    [08/11/2024 09:59:44] -> Processing Part 127 of 152
+INFO:    [08/11/2024 09:59:44] -> Processing Part 128 of 152
+INFO:    [08/11/2024 09:59:47] -> Processing Part 129 of 152
+INFO:    [08/11/2024 09:59:48] -> Processing Part 130 of 152
+INFO:    [08/11/2024 09:59:48] -> Processing Part 131 of 152
+INFO:    [08/11/2024 09:59:48] -> Processing Part 132 of 152
+INFO:    [08/11/2024 09:59:51] -> Processing Part 133 of 152
+INFO:    [08/11/2024 09:59:52] -> Processing Part 134 of 152
+INFO:    [08/11/2024 09:59:54] -> Processing Part 135 of 152
+INFO:    [08/11/2024 09:59:55] -> Processing Part 136 of 152
+INFO:    [08/11/2024 09:59:56] -> Processing Part 137 of 152
+INFO:    [08/11/2024 09:59:58] -> Processing Part 138 of 152
+INFO:    [08/11/2024 09:59:58] -> Processing Part 139 of 152
+INFO:    [08/11/2024 10:00:00] -> Processing Part 140 of 152
+INFO:    [08/11/2024 10:00:01] -> Processing Part 141 of 152
+INFO:    [08/11/2024 10:00:01] -> Processing Part 142 of 152
+INFO:    [08/11/2024 10:00:03] -> Processing Part 143 of 152
+INFO:    [08/11/2024 10:00:03] -> Processing Part 144 of 152
+INFO:    [08/11/2024 10:00:05] -> Processing Part 145 of 152
+INFO:    [08/11/2024 10:00:06] -> Processing Part 146 of 152
+INFO:    [08/11/2024 10:00:08] -> Processing Part 147 of 152
+INFO:    [08/11/2024 10:00:10] -> Processing Part 148 of 152
+INFO:    [08/11/2024 10:00:11] -> Processing Part 149 of 152
+INFO:    [08/11/2024 10:00:13] -> Processing Part 150 of 152
+INFO:    [08/11/2024 10:00:14] -> Processing Part 151 of 152
+INFO:    [08/11/2024 10:00:16] -> Processing Part 152 of 152
+INFO:    [08/11/2024 10:00:21] -> Nr of Features Requested: 254721
+INFO:    [08/11/2024 10:00:21] -> Size of Featurespace: 254731
+INFO:    [08/11/2024 10:00:21] -> Scans/Feature pairs that failed to Match: 1488
+INFO:    [08/11/2024 10:00:21] -> Maximum Nr of Features for one Scan: 13
+INFO:    [08/11/2024 10:00:22] -> Finalizing...
+INFO:    [08/11/2024 10:00:24] -> Processed in 5.76m
+INFO:    [08/11/2024 10:00:24] -> Processed in 7m
+INFO:    [08/11/2024 10:00:27] -> Done
+INFO:    [08/11/2024 10:00:27] -> Run 4/6: Process Raw File...
+INFO:    [08/11/2024 10:00:36] -> Run 4/6: Preparing Partitions...
+INFO:    [08/11/2024 10:00:36] -> Part 1/1 - Run 4/6: Preparing Calibration Searches...
+INFO:    [08/11/2024 10:00:37] -> Part 1/1 - Run 4/6: First Pass Calibration Search...
+INFO:    [08/11/2024 10:00:41] -> Part 1/1 - Run 4/6: Calibration Search...
+INFO:    [08/11/2024 10:00:49] -> The number of PSMs identified during calibration with FDR <= 0.01 is 3793 [7.1s]
+INFO:    [08/11/2024 10:00:55] -> Part 1/1 - Run 4/6: Preparing Main Search...
+INFO:    [08/11/2024 10:00:56] -> Part 1/1 - Run 4/6: Main Search...
+INFO:    [08/11/2024 10:00:56] -> PERFORMING MAIN SEARCH 1
+INFO:    [08/11/2024 10:01:43] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 40822 [46.3s]
+INFO:    [08/11/2024 10:01:43] -> PERFORMING MAIN SEARCH 2
+INFO:    [08/11/2024 10:02:08] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 6954 [25.3s]
+INFO:    [08/11/2024 10:02:08] -> PERFORMING MAIN SEARCH 3
+INFO:    [08/11/2024 10:02:24] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 1014 [16.6s]
+INFO:    [08/11/2024 10:02:24] -> PERFORMING MAIN SEARCH 4
+INFO:    [08/11/2024 10:02:35] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 136 [11s]
+INFO:    [08/11/2024 10:04:05] -> Extracting 161203 MS1 XICs
+INFO:    [08/11/2024 10:07:57] -> Run 4/6: Cleaning Up Run..
+INFO:    [08/11/2024 10:08:00] -> SuperRun 5/6: Initializing (LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
+INFO:    [08/11/2024 10:08:00] -> Run 5/6: Organizing Data from Run
+INFO:    [08/11/2024 10:08:00] -> Run 5/6: Creating Calibration Search Space...
+INFO:    [08/11/2024 10:08:00] -> Run 5/6: Creating Search Space...
+INFO:    [08/11/2024 10:08:00] -> Size of search space [MB]: 0
+INFO:    [08/11/2024 10:08:00] -> Number of IMPGs in search space: 0
+INFO:    [08/11/2024 10:08:00] -> Run 5/6: MS2 Index Generation
+INFO:    [08/11/2024 10:08:01] -> Run 5/6: Method-Specific Pre-Processing...
+INFO:    [08/11/2024 10:08:03] -> Initializing...
+INFO:    [08/11/2024 10:08:33] -> Finalizing HTRMS File...
+INFO:    [08/11/2024 10:08:58] -> Processing Part 1 of 152
+INFO:    [08/11/2024 10:09:01] -> Processing Part 2 of 152
+INFO:    [08/11/2024 10:09:01] -> Processing Part 3 of 152
+INFO:    [08/11/2024 10:09:01] -> Processing Part 4 of 152
+INFO:    [08/11/2024 10:09:02] -> Processing Part 5 of 152
+INFO:    [08/11/2024 10:09:02] -> Processing Part 6 of 152
+INFO:    [08/11/2024 10:09:03] -> Processing Part 7 of 152
+INFO:    [08/11/2024 10:09:03] -> Processing Part 8 of 152
+INFO:    [08/11/2024 10:09:04] -> Processing Part 9 of 152
+INFO:    [08/11/2024 10:09:05] -> Processing Part 10 of 152
+INFO:    [08/11/2024 10:09:05] -> Processing Part 11 of 152
+INFO:    [08/11/2024 10:09:05] -> Processing Part 12 of 152
+INFO:    [08/11/2024 10:09:06] -> Processing Part 13 of 152
+INFO:    [08/11/2024 10:09:07] -> Processing Part 14 of 152
+INFO:    [08/11/2024 10:09:07] -> Processing Part 15 of 152
+INFO:    [08/11/2024 10:09:08] -> Processing Part 16 of 152
+INFO:    [08/11/2024 10:09:08] -> Processing Part 17 of 152
+INFO:    [08/11/2024 10:09:08] -> Processing Part 18 of 152
+INFO:    [08/11/2024 10:09:09] -> Processing Part 19 of 152
+INFO:    [08/11/2024 10:09:09] -> Processing Part 20 of 152
+INFO:    [08/11/2024 10:09:09] -> Processing Part 21 of 152
+INFO:    [08/11/2024 10:09:10] -> Processing Part 22 of 152
+INFO:    [08/11/2024 10:09:11] -> Processing Part 23 of 152
+INFO:    [08/11/2024 10:09:11] -> Processing Part 24 of 152
+INFO:    [08/11/2024 10:09:12] -> Processing Part 25 of 152
+INFO:    [08/11/2024 10:09:12] -> Processing Part 26 of 152
+INFO:    [08/11/2024 10:09:12] -> Processing Part 27 of 152
+INFO:    [08/11/2024 10:09:13] -> Processing Part 28 of 152
+INFO:    [08/11/2024 10:09:14] -> Processing Part 29 of 152
+INFO:    [08/11/2024 10:09:14] -> Processing Part 30 of 152
+INFO:    [08/11/2024 10:09:15] -> Processing Part 31 of 152
+INFO:    [08/11/2024 10:09:15] -> Processing Part 32 of 152
+INFO:    [08/11/2024 10:09:16] -> Processing Part 33 of 152
+INFO:    [08/11/2024 10:09:16] -> Processing Part 34 of 152
+INFO:    [08/11/2024 10:09:17] -> Processing Part 35 of 152
+INFO:    [08/11/2024 10:09:18] -> Processing Part 36 of 152
+INFO:    [08/11/2024 10:09:18] -> Processing Part 37 of 152
+INFO:    [08/11/2024 10:09:18] -> Processing Part 38 of 152
+INFO:    [08/11/2024 10:09:19] -> Processing Part 39 of 152
+INFO:    [08/11/2024 10:09:19] -> Processing Part 40 of 152
+INFO:    [08/11/2024 10:09:20] -> Processing Part 41 of 152
+INFO:    [08/11/2024 10:09:21] -> Processing Part 42 of 152
+INFO:    [08/11/2024 10:09:21] -> Processing Part 43 of 152
+INFO:    [08/11/2024 10:09:21] -> Processing Part 44 of 152
+INFO:    [08/11/2024 10:09:22] -> Processing Part 45 of 152
+INFO:    [08/11/2024 10:09:23] -> Processing Part 46 of 152
+INFO:    [08/11/2024 10:09:23] -> Processing Part 47 of 152
+INFO:    [08/11/2024 10:09:23] -> Processing Part 48 of 152
+INFO:    [08/11/2024 10:09:24] -> Processing Part 49 of 152
+INFO:    [08/11/2024 10:09:24] -> Processing Part 50 of 152
+INFO:    [08/11/2024 10:09:25] -> Processing Part 51 of 152
+INFO:    [08/11/2024 10:09:25] -> Processing Part 52 of 152
+INFO:    [08/11/2024 10:09:26] -> Processing Part 53 of 152
+INFO:    [08/11/2024 10:09:26] -> Processing Part 54 of 152
+INFO:    [08/11/2024 10:09:26] -> Processing Part 55 of 152
+INFO:    [08/11/2024 10:09:27] -> Processing Part 56 of 152
+INFO:    [08/11/2024 10:09:28] -> Processing Part 57 of 152
+INFO:    [08/11/2024 10:09:28] -> Processing Part 58 of 152
+INFO:    [08/11/2024 10:09:28] -> Processing Part 59 of 152
+INFO:    [08/11/2024 10:09:28] -> Processing Part 60 of 152
+INFO:    [08/11/2024 10:09:29] -> Processing Part 61 of 152
+INFO:    [08/11/2024 10:09:30] -> Processing Part 62 of 152
+INFO:    [08/11/2024 10:09:30] -> Processing Part 63 of 152
+INFO:    [08/11/2024 10:09:30] -> Processing Part 64 of 152
+INFO:    [08/11/2024 10:09:31] -> Processing Part 65 of 152
+INFO:    [08/11/2024 10:09:31] -> Processing Part 66 of 152
+INFO:    [08/11/2024 10:09:32] -> Processing Part 67 of 152
+INFO:    [08/11/2024 10:09:32] -> Processing Part 68 of 152
+INFO:    [08/11/2024 10:09:33] -> Processing Part 69 of 152
+INFO:    [08/11/2024 10:09:33] -> Processing Part 70 of 152
+INFO:    [08/11/2024 10:09:34] -> Processing Part 71 of 152
+INFO:    [08/11/2024 10:09:34] -> Processing Part 72 of 152
+INFO:    [08/11/2024 10:09:34] -> Processing Part 73 of 152
+INFO:    [08/11/2024 10:09:35] -> Processing Part 74 of 152
+INFO:    [08/11/2024 10:09:35] -> Processing Part 75 of 152
+INFO:    [08/11/2024 10:09:35] -> Processing Part 76 of 152
+INFO:    [08/11/2024 10:09:36] -> Processing Part 77 of 152
+INFO:    [08/11/2024 10:09:36] -> Processing Part 78 of 152
+INFO:    [08/11/2024 10:09:37] -> Processing Part 79 of 152
+INFO:    [08/11/2024 10:09:37] -> Processing Part 80 of 152
+INFO:    [08/11/2024 10:09:37] -> Processing Part 81 of 152
+INFO:    [08/11/2024 10:09:38] -> Processing Part 82 of 152
+INFO:    [08/11/2024 10:09:38] -> Processing Part 83 of 152
+INFO:    [08/11/2024 10:09:38] -> Processing Part 84 of 152
+INFO:    [08/11/2024 10:09:38] -> Processing Part 85 of 152
+INFO:    [08/11/2024 10:09:39] -> Processing Part 86 of 152
+INFO:    [08/11/2024 10:09:39] -> Processing Part 87 of 152
+INFO:    [08/11/2024 10:09:40] -> Processing Part 88 of 152
+INFO:    [08/11/2024 10:09:40] -> Processing Part 89 of 152
+INFO:    [08/11/2024 10:09:40] -> Processing Part 90 of 152
+INFO:    [08/11/2024 10:09:40] -> Processing Part 91 of 152
+INFO:    [08/11/2024 10:09:40] -> Processing Part 92 of 152
+INFO:    [08/11/2024 10:09:41] -> Processing Part 93 of 152
+INFO:    [08/11/2024 10:09:41] -> Processing Part 94 of 152
+INFO:    [08/11/2024 10:09:41] -> Processing Part 95 of 152
+INFO:    [08/11/2024 10:09:42] -> Processing Part 96 of 152
+INFO:    [08/11/2024 10:09:42] -> Processing Part 97 of 152
+INFO:    [08/11/2024 10:09:42] -> Processing Part 98 of 152
+INFO:    [08/11/2024 10:09:42] -> Processing Part 99 of 152
+INFO:    [08/11/2024 10:09:42] -> Processing Part 100 of 152
+INFO:    [08/11/2024 10:09:43] -> Processing Part 101 of 152
+INFO:    [08/11/2024 10:09:43] -> Processing Part 102 of 152
+INFO:    [08/11/2024 10:09:43] -> Processing Part 103 of 152
+INFO:    [08/11/2024 10:09:43] -> Processing Part 104 of 152
+INFO:    [08/11/2024 10:09:43] -> Processing Part 105 of 152
+INFO:    [08/11/2024 10:09:44] -> Processing Part 106 of 152
+INFO:    [08/11/2024 10:09:45] -> Processing Part 107 of 152
+INFO:    [08/11/2024 10:09:45] -> Processing Part 108 of 152
+INFO:    [08/11/2024 10:09:45] -> Processing Part 109 of 152
+INFO:    [08/11/2024 10:09:45] -> Processing Part 110 of 152
+INFO:    [08/11/2024 10:09:45] -> Processing Part 111 of 152
+INFO:    [08/11/2024 10:09:46] -> Processing Part 112 of 152
+INFO:    [08/11/2024 10:09:46] -> Processing Part 113 of 152
+INFO:    [08/11/2024 10:09:46] -> Processing Part 114 of 152
+INFO:    [08/11/2024 10:09:46] -> Processing Part 115 of 152
+INFO:    [08/11/2024 10:09:46] -> Processing Part 116 of 152
+INFO:    [08/11/2024 10:09:47] -> Processing Part 117 of 152
+INFO:    [08/11/2024 10:09:47] -> Processing Part 118 of 152
+INFO:    [08/11/2024 10:09:47] -> Processing Part 119 of 152
+INFO:    [08/11/2024 10:09:47] -> Processing Part 120 of 152
+INFO:    [08/11/2024 10:09:47] -> Processing Part 121 of 152
+INFO:    [08/11/2024 10:09:47] -> Processing Part 122 of 152
+INFO:    [08/11/2024 10:09:48] -> Processing Part 123 of 152
+INFO:    [08/11/2024 10:09:48] -> Processing Part 124 of 152
+INFO:    [08/11/2024 10:09:49] -> Processing Part 125 of 152
+INFO:    [08/11/2024 10:09:49] -> Processing Part 126 of 152
+INFO:    [08/11/2024 10:09:49] -> Processing Part 127 of 152
+INFO:    [08/11/2024 10:09:49] -> Processing Part 128 of 152
+INFO:    [08/11/2024 10:09:49] -> Processing Part 129 of 152
+INFO:    [08/11/2024 10:09:50] -> Processing Part 130 of 152
+INFO:    [08/11/2024 10:09:50] -> Processing Part 131 of 152
+INFO:    [08/11/2024 10:09:50] -> Processing Part 132 of 152
+INFO:    [08/11/2024 10:09:51] -> Processing Part 133 of 152
+INFO:    [08/11/2024 10:09:51] -> Processing Part 134 of 152
+INFO:    [08/11/2024 10:09:51] -> Processing Part 135 of 152
+INFO:    [08/11/2024 10:09:51] -> Processing Part 136 of 152
+INFO:    [08/11/2024 10:09:51] -> Processing Part 137 of 152
+INFO:    [08/11/2024 10:09:51] -> Processing Part 138 of 152
+INFO:    [08/11/2024 10:09:52] -> Processing Part 139 of 152
+INFO:    [08/11/2024 10:09:52] -> Processing Part 140 of 152
+INFO:    [08/11/2024 10:09:52] -> Processing Part 141 of 152
+INFO:    [08/11/2024 10:09:52] -> Processing Part 142 of 152
+INFO:    [08/11/2024 10:09:52] -> Processing Part 143 of 152
+INFO:    [08/11/2024 10:09:52] -> Processing Part 144 of 152
+INFO:    [08/11/2024 10:09:52] -> Processing Part 145 of 152
+INFO:    [08/11/2024 10:09:53] -> Processing Part 146 of 152
+INFO:    [08/11/2024 10:09:53] -> Processing Part 147 of 152
+INFO:    [08/11/2024 10:09:53] -> Processing Part 148 of 152
+INFO:    [08/11/2024 10:09:53] -> Processing Part 149 of 152
+INFO:    [08/11/2024 10:09:53] -> Processing Part 150 of 152
+INFO:    [08/11/2024 10:09:53] -> Processing Part 151 of 152
+INFO:    [08/11/2024 10:09:53] -> Processing Part 152 of 152
+INFO:    [08/11/2024 10:09:54] -> Nr of Features Requested: 243107
+INFO:    [08/11/2024 10:09:54] -> Size of Featurespace: 243129
+INFO:    [08/11/2024 10:09:54] -> Scans/Feature pairs that failed to Match: 1802
+INFO:    [08/11/2024 10:09:54] -> Maximum Nr of Features for one Scan: 13
+INFO:    [08/11/2024 10:09:55] -> Finalizing...
+INFO:    [08/11/2024 10:09:56] -> Processed in 58.11s
+INFO:    [08/11/2024 10:09:56] -> Processed in 1.9m
+INFO:    [08/11/2024 10:09:56] -> Done
+INFO:    [08/11/2024 10:09:56] -> Run 5/6: Process Raw File...
+INFO:    [08/11/2024 10:10:01] -> Run 5/6: Preparing Partitions...
+INFO:    [08/11/2024 10:10:01] -> Part 1/1 - Run 5/6: Preparing Calibration Searches...
+INFO:    [08/11/2024 10:10:02] -> Part 1/1 - Run 5/6: First Pass Calibration Search...
+INFO:    [08/11/2024 10:10:06] -> Part 1/1 - Run 5/6: Calibration Search...
+INFO:    [08/11/2024 10:10:13] -> The number of PSMs identified during calibration with FDR <= 0.01 is 4039 [6.9s]
+INFO:    [08/11/2024 10:10:16] -> Part 1/1 - Run 5/6: Preparing Main Search...
+INFO:    [08/11/2024 10:10:16] -> Part 1/1 - Run 5/6: Main Search...
+INFO:    [08/11/2024 10:10:16] -> PERFORMING MAIN SEARCH 1
+INFO:    [08/11/2024 10:10:52] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 40499 [35.6s]
+INFO:    [08/11/2024 10:10:52] -> PERFORMING MAIN SEARCH 2
+INFO:    [08/11/2024 10:11:05] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 7106 [12.7s]
+INFO:    [08/11/2024 10:11:05] -> PERFORMING MAIN SEARCH 3
+INFO:    [08/11/2024 10:11:14] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 747 [9.2s]
+INFO:    [08/11/2024 10:11:48] -> Extracting 151679 MS1 XICs
+INFO:    [08/11/2024 10:14:11] -> Run 5/6: Cleaning Up Run..
+INFO:    [08/11/2024 10:14:12] -> SuperRun 6/6: Initializing (LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
+INFO:    [08/11/2024 10:14:12] -> Run 6/6: Organizing Data from Run
+INFO:    [08/11/2024 10:14:12] -> Run 6/6: Creating Calibration Search Space...
+INFO:    [08/11/2024 10:14:12] -> Run 6/6: Creating Search Space...
+INFO:    [08/11/2024 10:14:12] -> Size of search space [MB]: 0
+INFO:    [08/11/2024 10:14:12] -> Number of IMPGs in search space: 0
+INFO:    [08/11/2024 10:14:12] -> Run 6/6: MS2 Index Generation
+INFO:    [08/11/2024 10:14:13] -> Run 6/6: Method-Specific Pre-Processing...
+INFO:    [08/11/2024 10:14:15] -> Initializing...
+INFO:    [08/11/2024 10:14:29] -> Finalizing HTRMS File...
+INFO:    [08/11/2024 10:14:49] -> Processing Part 1 of 152
+INFO:    [08/11/2024 10:14:50] -> Processing Part 2 of 152
+INFO:    [08/11/2024 10:14:51] -> Processing Part 3 of 152
+INFO:    [08/11/2024 10:14:51] -> Processing Part 4 of 152
+INFO:    [08/11/2024 10:14:52] -> Processing Part 5 of 152
+INFO:    [08/11/2024 10:14:52] -> Processing Part 6 of 152
+INFO:    [08/11/2024 10:14:52] -> Processing Part 7 of 152
+INFO:    [08/11/2024 10:14:53] -> Processing Part 8 of 152
+INFO:    [08/11/2024 10:14:53] -> Processing Part 9 of 152
+INFO:    [08/11/2024 10:14:53] -> Processing Part 10 of 152
+INFO:    [08/11/2024 10:14:54] -> Processing Part 11 of 152
+INFO:    [08/11/2024 10:14:54] -> Processing Part 12 of 152
+INFO:    [08/11/2024 10:14:54] -> Processing Part 13 of 152
+INFO:    [08/11/2024 10:14:55] -> Processing Part 14 of 152
+INFO:    [08/11/2024 10:14:56] -> Processing Part 15 of 152
+INFO:    [08/11/2024 10:14:56] -> Processing Part 16 of 152
+INFO:    [08/11/2024 10:14:57] -> Processing Part 17 of 152
+INFO:    [08/11/2024 10:14:57] -> Processing Part 18 of 152
+INFO:    [08/11/2024 10:14:58] -> Processing Part 19 of 152
+INFO:    [08/11/2024 10:15:01] -> Processing Part 20 of 152
+INFO:    [08/11/2024 10:15:01] -> Processing Part 21 of 152
+INFO:    [08/11/2024 10:15:02] -> Processing Part 22 of 152
+INFO:    [08/11/2024 10:15:02] -> Processing Part 23 of 152
+INFO:    [08/11/2024 10:15:04] -> Processing Part 24 of 152
+INFO:    [08/11/2024 10:15:04] -> Processing Part 25 of 152
+INFO:    [08/11/2024 10:15:04] -> Processing Part 26 of 152
+INFO:    [08/11/2024 10:15:05] -> Processing Part 27 of 152
+INFO:    [08/11/2024 10:15:05] -> Processing Part 28 of 152
+INFO:    [08/11/2024 10:15:05] -> Processing Part 29 of 152
+INFO:    [08/11/2024 10:15:06] -> Processing Part 30 of 152
+INFO:    [08/11/2024 10:15:06] -> Processing Part 31 of 152
+INFO:    [08/11/2024 10:15:07] -> Processing Part 32 of 152
+INFO:    [08/11/2024 10:15:08] -> Processing Part 33 of 152
+INFO:    [08/11/2024 10:15:08] -> Processing Part 34 of 152
+INFO:    [08/11/2024 10:15:08] -> Processing Part 35 of 152
+INFO:    [08/11/2024 10:15:09] -> Processing Part 36 of 152
+INFO:    [08/11/2024 10:15:09] -> Processing Part 37 of 152
+INFO:    [08/11/2024 10:15:10] -> Processing Part 38 of 152
+INFO:    [08/11/2024 10:15:10] -> Processing Part 39 of 152
+INFO:    [08/11/2024 10:15:11] -> Processing Part 40 of 152
+INFO:    [08/11/2024 10:15:11] -> Processing Part 41 of 152
+INFO:    [08/11/2024 10:15:12] -> Processing Part 42 of 152
+INFO:    [08/11/2024 10:15:12] -> Processing Part 43 of 152
+INFO:    [08/11/2024 10:15:12] -> Processing Part 44 of 152
+INFO:    [08/11/2024 10:15:14] -> Processing Part 45 of 152
+INFO:    [08/11/2024 10:15:15] -> Processing Part 46 of 152
+INFO:    [08/11/2024 10:15:16] -> Processing Part 47 of 152
+INFO:    [08/11/2024 10:15:16] -> Processing Part 48 of 152
+INFO:    [08/11/2024 10:15:21] -> Processing Part 49 of 152
+INFO:    [08/11/2024 10:15:22] -> Processing Part 50 of 152
+INFO:    [08/11/2024 10:15:23] -> Processing Part 51 of 152
+INFO:    [08/11/2024 10:15:23] -> Processing Part 52 of 152
+INFO:    [08/11/2024 10:15:26] -> Processing Part 53 of 152
+INFO:    [08/11/2024 10:15:26] -> Processing Part 54 of 152
+INFO:    [08/11/2024 10:15:26] -> Processing Part 55 of 152
+INFO:    [08/11/2024 10:15:27] -> Processing Part 56 of 152
+INFO:    [08/11/2024 10:15:27] -> Processing Part 57 of 152
+INFO:    [08/11/2024 10:15:30] -> Processing Part 58 of 152
+INFO:    [08/11/2024 10:15:31] -> Processing Part 59 of 152
+INFO:    [08/11/2024 10:15:32] -> Processing Part 60 of 152
+INFO:    [08/11/2024 10:15:32] -> Processing Part 61 of 152
+INFO:    [08/11/2024 10:15:32] -> Processing Part 62 of 152
+INFO:    [08/11/2024 10:15:35] -> Processing Part 63 of 152
+INFO:    [08/11/2024 10:15:36] -> Processing Part 64 of 152
+INFO:    [08/11/2024 10:15:36] -> Processing Part 65 of 152
+INFO:    [08/11/2024 10:15:37] -> Processing Part 66 of 152
+INFO:    [08/11/2024 10:15:38] -> Processing Part 67 of 152
+INFO:    [08/11/2024 10:15:38] -> Processing Part 68 of 152
+INFO:    [08/11/2024 10:15:39] -> Processing Part 69 of 152
+INFO:    [08/11/2024 10:15:43] -> Processing Part 70 of 152
+INFO:    [08/11/2024 10:15:47] -> Processing Part 71 of 152
+INFO:    [08/11/2024 10:15:48] -> Processing Part 72 of 152
+INFO:    [08/11/2024 10:15:49] -> Processing Part 73 of 152
+INFO:    [08/11/2024 10:15:50] -> Processing Part 74 of 152
+INFO:    [08/11/2024 10:15:50] -> Processing Part 75 of 152
+INFO:    [08/11/2024 10:15:50] -> Processing Part 76 of 152
+INFO:    [08/11/2024 10:15:51] -> Processing Part 77 of 152
+INFO:    [08/11/2024 10:15:51] -> Processing Part 78 of 152
+INFO:    [08/11/2024 10:15:54] -> Processing Part 79 of 152
+INFO:    [08/11/2024 10:15:54] -> Processing Part 80 of 152
+INFO:    [08/11/2024 10:15:54] -> Processing Part 81 of 152
+INFO:    [08/11/2024 10:15:55] -> Processing Part 82 of 152
+INFO:    [08/11/2024 10:15:55] -> Processing Part 83 of 152
+INFO:    [08/11/2024 10:15:56] -> Processing Part 84 of 152
+INFO:    [08/11/2024 10:15:58] -> Processing Part 85 of 152
+INFO:    [08/11/2024 10:15:58] -> Processing Part 86 of 152
+INFO:    [08/11/2024 10:15:59] -> Processing Part 87 of 152
+INFO:    [08/11/2024 10:15:59] -> Processing Part 88 of 152
+INFO:    [08/11/2024 10:15:59] -> Processing Part 89 of 152
+INFO:    [08/11/2024 10:16:00] -> Processing Part 90 of 152
+INFO:    [08/11/2024 10:16:00] -> Processing Part 91 of 152
+INFO:    [08/11/2024 10:16:00] -> Processing Part 92 of 152
+INFO:    [08/11/2024 10:16:00] -> Processing Part 93 of 152
+INFO:    [08/11/2024 10:16:03] -> Processing Part 94 of 152
+INFO:    [08/11/2024 10:16:04] -> Processing Part 95 of 152
+INFO:    [08/11/2024 10:16:04] -> Processing Part 96 of 152
+INFO:    [08/11/2024 10:16:04] -> Processing Part 97 of 152
+INFO:    [08/11/2024 10:16:04] -> Processing Part 98 of 152
+INFO:    [08/11/2024 10:16:05] -> Processing Part 99 of 152
+INFO:    [08/11/2024 10:16:05] -> Processing Part 100 of 152
+INFO:    [08/11/2024 10:16:06] -> Processing Part 101 of 152
+INFO:    [08/11/2024 10:16:06] -> Processing Part 102 of 152
+INFO:    [08/11/2024 10:16:08] -> Processing Part 103 of 152
+INFO:    [08/11/2024 10:16:11] -> Processing Part 104 of 152
+INFO:    [08/11/2024 10:16:11] -> Processing Part 105 of 152
+INFO:    [08/11/2024 10:16:14] -> Processing Part 106 of 152
+INFO:    [08/11/2024 10:16:14] -> Processing Part 107 of 152
+INFO:    [08/11/2024 10:16:14] -> Processing Part 108 of 152
+INFO:    [08/11/2024 10:16:14] -> Processing Part 109 of 152
+INFO:    [08/11/2024 10:16:15] -> Processing Part 110 of 152
+INFO:    [08/11/2024 10:16:15] -> Processing Part 111 of 152
+INFO:    [08/11/2024 10:16:15] -> Processing Part 112 of 152
+INFO:    [08/11/2024 10:16:15] -> Processing Part 113 of 152
+INFO:    [08/11/2024 10:16:17] -> Processing Part 114 of 152
+INFO:    [08/11/2024 10:16:17] -> Processing Part 115 of 152
+INFO:    [08/11/2024 10:16:18] -> Processing Part 116 of 152
+INFO:    [08/11/2024 10:16:18] -> Processing Part 117 of 152
+INFO:    [08/11/2024 10:16:18] -> Processing Part 118 of 152
+INFO:    [08/11/2024 10:16:18] -> Processing Part 119 of 152
+INFO:    [08/11/2024 10:16:19] -> Processing Part 120 of 152
+INFO:    [08/11/2024 10:16:19] -> Processing Part 121 of 152
+INFO:    [08/11/2024 10:16:21] -> Processing Part 122 of 152
+INFO:    [08/11/2024 10:16:21] -> Processing Part 123 of 152
+INFO:    [08/11/2024 10:16:22] -> Processing Part 124 of 152
+INFO:    [08/11/2024 10:16:22] -> Processing Part 125 of 152
+INFO:    [08/11/2024 10:16:22] -> Processing Part 126 of 152
+INFO:    [08/11/2024 10:16:22] -> Processing Part 127 of 152
+INFO:    [08/11/2024 10:16:22] -> Processing Part 128 of 152
+INFO:    [08/11/2024 10:16:23] -> Processing Part 129 of 152
+INFO:    [08/11/2024 10:16:23] -> Processing Part 130 of 152
+INFO:    [08/11/2024 10:16:23] -> Processing Part 131 of 152
+INFO:    [08/11/2024 10:16:23] -> Processing Part 132 of 152
+INFO:    [08/11/2024 10:16:25] -> Processing Part 133 of 152
+INFO:    [08/11/2024 10:16:25] -> Processing Part 134 of 152
+INFO:    [08/11/2024 10:16:26] -> Processing Part 135 of 152
+INFO:    [08/11/2024 10:16:26] -> Processing Part 136 of 152
+INFO:    [08/11/2024 10:16:26] -> Processing Part 137 of 152
+INFO:    [08/11/2024 10:16:26] -> Processing Part 138 of 152
+INFO:    [08/11/2024 10:16:26] -> Processing Part 139 of 152
+INFO:    [08/11/2024 10:16:26] -> Processing Part 140 of 152
+INFO:    [08/11/2024 10:16:27] -> Processing Part 141 of 152
+INFO:    [08/11/2024 10:16:27] -> Processing Part 142 of 152
+INFO:    [08/11/2024 10:16:27] -> Processing Part 143 of 152
+INFO:    [08/11/2024 10:16:27] -> Processing Part 144 of 152
+INFO:    [08/11/2024 10:16:27] -> Processing Part 145 of 152
+INFO:    [08/11/2024 10:16:28] -> Processing Part 146 of 152
+INFO:    [08/11/2024 10:16:28] -> Processing Part 147 of 152
+INFO:    [08/11/2024 10:16:30] -> Processing Part 148 of 152
+INFO:    [08/11/2024 10:16:30] -> Processing Part 149 of 152
+INFO:    [08/11/2024 10:16:30] -> Processing Part 150 of 152
+INFO:    [08/11/2024 10:16:30] -> Processing Part 151 of 152
+INFO:    [08/11/2024 10:16:31] -> Processing Part 152 of 152
+INFO:    [08/11/2024 10:16:34] -> Nr of Features Requested: 249692
+INFO:    [08/11/2024 10:16:34] -> Size of Featurespace: 249692
+INFO:    [08/11/2024 10:16:34] -> Scans/Feature pairs that failed to Match: 1899
+INFO:    [08/11/2024 10:16:34] -> Maximum Nr of Features for one Scan: 13
+INFO:    [08/11/2024 10:16:35] -> Finalizing...
+INFO:    [08/11/2024 10:16:39] -> Processed in 1.82m
+INFO:    [08/11/2024 10:16:39] -> Processed in 2.4m
+INFO:    [08/11/2024 10:16:40] -> Done
+INFO:    [08/11/2024 10:16:40] -> Run 6/6: Process Raw File...
+INFO:    [08/11/2024 10:16:48] -> Run 6/6: Preparing Partitions...
+INFO:    [08/11/2024 10:16:48] -> Part 1/1 - Run 6/6: Preparing Calibration Searches...
+INFO:    [08/11/2024 10:16:50] -> Part 1/1 - Run 6/6: First Pass Calibration Search...
+INFO:    [08/11/2024 10:16:55] -> Part 1/1 - Run 6/6: Calibration Search...
+INFO:    [08/11/2024 10:17:12] -> The number of PSMs identified during calibration with FDR <= 0.01 is 3838 [17.4s]
+INFO:    [08/11/2024 10:17:17] -> Part 1/1 - Run 6/6: Preparing Main Search...
+INFO:    [08/11/2024 10:17:19] -> Part 1/1 - Run 6/6: Main Search...
+INFO:    [08/11/2024 10:17:19] -> PERFORMING MAIN SEARCH 1
+INFO:    [08/11/2024 10:18:20] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 38810 [1m]
+INFO:    [08/11/2024 10:18:20] -> PERFORMING MAIN SEARCH 2
+INFO:    [08/11/2024 10:18:37] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 5857 [16.8s]
+INFO:    [08/11/2024 10:18:37] -> PERFORMING MAIN SEARCH 3
+INFO:    [08/11/2024 10:18:57] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 748 [19.8s]
+INFO:    [08/11/2024 10:18:57] -> PERFORMING MAIN SEARCH 4
+INFO:    [08/11/2024 10:19:06] -> The number of PSMs identified with FDR (for subtraction) <= 0.01 is 45 [9s]
+INFO:    [08/11/2024 10:20:07] -> Extracting 158180 MS1 XICs
+INFO:    [08/11/2024 10:23:19] -> Run 6/6: Cleaning Up Run..
+INFO:    [08/11/2024 10:23:36] -> Remove Aborted Runs (if any) from the Experiment...
+INFO:    [08/11/2024 10:23:39] -> Score Post-Processing
+INFO:    [08/11/2024 10:25:22] -> Score Post-Processing: 1.72m
+INFO:    [08/11/2024 10:25:24] -> PSM FDR...
+INFO:    [08/11/2024 10:25:49] -> PSM FDR: 24.88s
+INFO:    [08/11/2024 10:25:50] -> Converting to non-redundant data structure...
+INFO:    [08/11/2024 10:26:10] -> Performing Peptide FDR...
+INFO:    [08/11/2024 10:26:16] -> Performing Protein Inference...
+INFO:    [08/11/2024 10:26:18] -> Performing Protein FDR...
+INFO:    [08/11/2024 10:26:19] -> Calculating Result Values at Run and Experiment Level...
+INFO:    [08/11/2024 10:26:27] -> Pulsar identified 221249 PSMs, 50373 stripped sequences, 62317 peptide precursors, 6544 protein groups.
+INFO:    [08/11/2024 10:26:28] -> Identifying Calibration Peptides...
+INFO:    [08/11/2024 10:26:29] -> iRT Calibration...
+INFO:    [08/11/2024 10:26:45] -> Performing directDIA+ search...
+INFO:    [08/11/2024 10:27:13] -> Generating directDIA+ search space
+INFO:    [08/11/2024 10:29:59] -> directDIA+ search: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw
+INFO:    [08/11/2024 10:34:01] -> directDIA+ search: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw
+INFO:    [08/11/2024 10:38:57] -> directDIA+ search: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw
+INFO:    [08/11/2024 10:43:34] -> directDIA+ search: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw
+INFO:    [08/11/2024 10:48:19] -> directDIA+ search: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw
+INFO:    [08/11/2024 10:53:38] -> directDIA+ search: LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw
+INFO:    [08/11/2024 10:58:28] -> Performing directDIA+ Post Processing...
+INFO:    [08/11/2024 10:58:45] -> Writing experiment store..
+INFO:    [08/11/2024 10:59:04] -> Assigning iRT Source...
+INFO:    [08/11/2024 10:59:07] -> Calculating iRT...
+INFO:    [08/11/2024 10:59:11] -> Cleaning Up Experiment...
+INFO:    [08/11/2024 10:59:14] -> Summarizing Identifications
+INFO:    [08/11/2024 11:10:08] -> Pipeline executed...
+INFO:    [08/11/2024 11:10:09] -> Pipeline executed...
+INFO:    [08/11/2024 11:10:33] -> Initializing Experiment...
+INFO:    [08/11/2024 11:10:33] -> Loading Spectral Libraries...
+INFO:    [08/11/2024 11:11:34] -> Initialize Scoring...
+INFO:    [08/11/2024 11:11:34] -> Generating Scan Map...
+INFO:    [08/11/2024 11:11:34] -> Initializing Workpackages...
+INFO:    [08/11/2024 11:11:34] -> Performing Basic Calibration...
+INFO:    [08/11/2024 11:11:34] -> Identifying Calibration Peptides...
+INFO:    [08/11/2024 11:11:34] -> Correcting Gradient Fine Structure...
+INFO:    [08/11/2024 11:11:39] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:11:39] -> Preprocessing Run #1 of 6...
+INFO:    [08/11/2024 11:11:39] -> Initialize Scoring...
+INFO:    [08/11/2024 11:11:39] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:11:56] -> Machine Learning...
+INFO:    [08/11/2024 11:11:58] -> Pipeline executed in 18.84s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:12:01] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:12:01] -> Preprocessing Run #1 of 6...
+INFO:    [08/11/2024 11:12:01] -> Initialize Scoring...
+INFO:    [08/11/2024 11:12:01] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:12:29] -> Machine Learning...
+INFO:    [08/11/2024 11:12:33] -> Pipeline executed in 31.99s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:12:43] -> Initialize Scoring...
+INFO:    [08/11/2024 11:12:43] -> Preprocessing Run #2 of 6...
+INFO:    [08/11/2024 11:12:43] -> Searching DIA with Pulsar...
+INFO:    [08/11/2024 11:12:43] -> Initializing Experiment...
+INFO:    [08/11/2024 11:12:43] -> Loading Spectral Libraries...
+INFO:    [08/11/2024 11:12:43] -> Initialize Scoring...
+INFO:    [08/11/2024 11:12:43] -> Generating Scan Map...
+INFO:    [08/11/2024 11:12:43] -> Initializing Workpackages...
+INFO:    [08/11/2024 11:12:43] -> Performing Basic Calibration...
+INFO:    [08/11/2024 11:12:43] -> Identifying Calibration Peptides...
+INFO:    [08/11/2024 11:12:43] -> Correcting Gradient Fine Structure...
+INFO:    [08/11/2024 11:12:46] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:12:46] -> Preprocessing Run #2 of 6...
+INFO:    [08/11/2024 11:12:46] -> Initialize Scoring...
+INFO:    [08/11/2024 11:12:46] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:13:03] -> Machine Learning...
+INFO:    [08/11/2024 11:13:04] -> Pipeline executed in 18.89s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:13:08] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:13:08] -> Preprocessing Run #2 of 6...
+INFO:    [08/11/2024 11:13:08] -> Initialize Scoring...
+INFO:    [08/11/2024 11:13:08] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:13:34] -> Machine Learning...
+INFO:    [08/11/2024 11:13:39] -> Pipeline executed in 31.36s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:13:49] -> Initialize Scoring...
+INFO:    [08/11/2024 11:13:49] -> Preprocessing Run #3 of 6...
+INFO:    [08/11/2024 11:13:49] -> Searching DIA with Pulsar...
+INFO:    [08/11/2024 11:13:49] -> Initializing Experiment...
+INFO:    [08/11/2024 11:13:49] -> Loading Spectral Libraries...
+INFO:    [08/11/2024 11:13:49] -> Initialize Scoring...
+INFO:    [08/11/2024 11:13:49] -> Generating Scan Map...
+INFO:    [08/11/2024 11:13:49] -> Initializing Workpackages...
+INFO:    [08/11/2024 11:13:49] -> Performing Basic Calibration...
+INFO:    [08/11/2024 11:13:49] -> Identifying Calibration Peptides...
+INFO:    [08/11/2024 11:13:49] -> Correcting Gradient Fine Structure...
+INFO:    [08/11/2024 11:13:51] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:13:51] -> Preprocessing Run #3 of 6...
+INFO:    [08/11/2024 11:13:51] -> Initialize Scoring...
+INFO:    [08/11/2024 11:13:51] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:14:08] -> Machine Learning...
+INFO:    [08/11/2024 11:14:10] -> Pipeline executed in 18.35s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:14:13] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:14:13] -> Preprocessing Run #3 of 6...
+INFO:    [08/11/2024 11:14:13] -> Initialize Scoring...
+INFO:    [08/11/2024 11:14:13] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:14:40] -> Machine Learning...
+INFO:    [08/11/2024 11:14:44] -> Pipeline executed in 31.44s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:14:55] -> Initialize Scoring...
+INFO:    [08/11/2024 11:14:55] -> Preprocessing Run #4 of 6...
+INFO:    [08/11/2024 11:14:55] -> Searching DIA with Pulsar...
+INFO:    [08/11/2024 11:14:55] -> Initializing Experiment...
+INFO:    [08/11/2024 11:14:55] -> Loading Spectral Libraries...
+INFO:    [08/11/2024 11:14:55] -> Initialize Scoring...
+INFO:    [08/11/2024 11:14:55] -> Generating Scan Map...
+INFO:    [08/11/2024 11:14:55] -> Initializing Workpackages...
+INFO:    [08/11/2024 11:14:55] -> Performing Basic Calibration...
+INFO:    [08/11/2024 11:14:55] -> Identifying Calibration Peptides...
+INFO:    [08/11/2024 11:14:55] -> Correcting Gradient Fine Structure...
+INFO:    [08/11/2024 11:14:57] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:14:57] -> Preprocessing Run #4 of 6...
+INFO:    [08/11/2024 11:14:57] -> Initialize Scoring...
+INFO:    [08/11/2024 11:14:57] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:15:13] -> Machine Learning...
+INFO:    [08/11/2024 11:15:15] -> Pipeline executed in 17.66s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:15:18] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:15:18] -> Preprocessing Run #4 of 6...
+INFO:    [08/11/2024 11:15:18] -> Initialize Scoring...
+INFO:    [08/11/2024 11:15:18] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:15:43] -> Machine Learning...
+INFO:    [08/11/2024 11:15:47] -> Pipeline executed in 28.9s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:15:54] -> Initialize Scoring...
+INFO:    [08/11/2024 11:15:54] -> Preprocessing Run #5 of 6...
+INFO:    [08/11/2024 11:15:54] -> Searching DIA with Pulsar...
+INFO:    [08/11/2024 11:15:54] -> Initializing Experiment...
+INFO:    [08/11/2024 11:15:54] -> Loading Spectral Libraries...
+INFO:    [08/11/2024 11:15:54] -> Initialize Scoring...
+INFO:    [08/11/2024 11:15:54] -> Generating Scan Map...
+INFO:    [08/11/2024 11:15:54] -> Initializing Workpackages...
+INFO:    [08/11/2024 11:15:54] -> Performing Basic Calibration...
+INFO:    [08/11/2024 11:15:54] -> Identifying Calibration Peptides...
+INFO:    [08/11/2024 11:15:54] -> Correcting Gradient Fine Structure...
+INFO:    [08/11/2024 11:15:56] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:15:56] -> Preprocessing Run #5 of 6...
+INFO:    [08/11/2024 11:15:56] -> Initialize Scoring...
+INFO:    [08/11/2024 11:15:56] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:16:12] -> Machine Learning...
+INFO:    [08/11/2024 11:16:14] -> Pipeline executed in 17.27s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:16:17] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:16:17] -> Preprocessing Run #5 of 6...
+INFO:    [08/11/2024 11:16:17] -> Initialize Scoring...
+INFO:    [08/11/2024 11:16:17] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:16:44] -> Machine Learning...
+INFO:    [08/11/2024 11:16:49] -> Pipeline executed in 31.46s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:16:56] -> Initialize Scoring...
+INFO:    [08/11/2024 11:16:56] -> Preprocessing Run #6 of 6...
+INFO:    [08/11/2024 11:16:56] -> Searching DIA with Pulsar...
+INFO:    [08/11/2024 11:16:56] -> Initializing Experiment...
+INFO:    [08/11/2024 11:16:56] -> Loading Spectral Libraries...
+INFO:    [08/11/2024 11:16:56] -> Initialize Scoring...
+INFO:    [08/11/2024 11:16:56] -> Generating Scan Map...
+INFO:    [08/11/2024 11:16:56] -> Initializing Workpackages...
+INFO:    [08/11/2024 11:16:56] -> Performing Basic Calibration...
+INFO:    [08/11/2024 11:16:56] -> Identifying Calibration Peptides...
+INFO:    [08/11/2024 11:16:56] -> Correcting Gradient Fine Structure...
+INFO:    [08/11/2024 11:16:58] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:16:58] -> Preprocessing Run #6 of 6...
+INFO:    [08/11/2024 11:16:58] -> Initialize Scoring...
+INFO:    [08/11/2024 11:16:58] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:17:14] -> Machine Learning...
+INFO:    [08/11/2024 11:17:15] -> Pipeline executed in 16.78s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:17:18] -> Initializing Pipeline...
+INFO:    [08/11/2024 11:17:18] -> Preprocessing Run #6 of 6...
+INFO:    [08/11/2024 11:17:18] -> Initialize Scoring...
+INFO:    [08/11/2024 11:17:19] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:17:44] -> Machine Learning...
+INFO:    [08/11/2024 11:17:48] -> Pipeline executed in 29.16s - Current Experiment had 0 Warnings and 0 Errors.
+INFO:    [08/11/2024 11:17:57] -> Initialize Scoring...
+INFO:    [08/11/2024 11:17:57] -> Initializing QC...
+INFO:    [08/11/2024 11:17:57] -> Determining Calibration Parameter...
+INFO:    [08/11/2024 11:17:57] -> Assigning ML Features...
+INFO:    [08/11/2024 11:17:58] -> Generating Decoys...
+INFO:    [08/11/2024 11:18:11] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:20:53] -> Releasing Raw Files...
+INFO:    [08/11/2024 11:20:53] -> Machine Learning...
+INFO:    [08/11/2024 11:21:35] -> Initializing HTRMS...
+INFO:    [08/11/2024 11:21:35] -> Releasing Run Resources...
+INFO:    [08/11/2024 11:21:36] -> Reducing Score Cache...
+INFO:    [08/11/2024 11:21:38] -> Calculating Qvalues...
+INFO:    [08/11/2024 11:21:39] -> Unique precursors: 98,398 of 105,535 | modified peptides: 86,470 of 92,142 | peptides: 78,347 of 82,943 |  protein groups: 8,765 (Qvalue <= 0.01) [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw]
+INFO:    [08/11/2024 11:21:39] -> Collapsing Search Tree...
+INFO:    [08/11/2024 11:21:39] -> Processed in 3.7m
+INFO:    [08/11/2024 11:21:40] -> Initializing QC...
+INFO:    [08/11/2024 11:21:40] -> Determining Calibration Parameter...
+INFO:    [08/11/2024 11:21:40] -> Assigning ML Features...
+INFO:    [08/11/2024 11:21:40] -> Generating Decoys...
+INFO:    [08/11/2024 11:21:40] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:24:32] -> Releasing Raw Files...
+INFO:    [08/11/2024 11:24:32] -> Machine Learning...
+INFO:    [08/11/2024 11:25:20] -> Initializing HTRMS...
+INFO:    [08/11/2024 11:25:20] -> Releasing Run Resources...
+INFO:    [08/11/2024 11:25:21] -> Reducing Score Cache...
+INFO:    [08/11/2024 11:25:23] -> Calculating Qvalues...
+INFO:    [08/11/2024 11:25:24] -> Unique precursors: 99,007 of 105,535 | modified peptides: 86,576 of 92,142 | peptides: 78,426 of 82,943 |  protein groups: 8,770 (Qvalue <= 0.01) [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw]
+INFO:    [08/11/2024 11:25:24] -> Collapsing Search Tree...
+INFO:    [08/11/2024 11:25:24] -> Processed in 3.75m
+INFO:    [08/11/2024 11:25:24] -> Initializing QC...
+INFO:    [08/11/2024 11:25:24] -> Determining Calibration Parameter...
+INFO:    [08/11/2024 11:25:25] -> Assigning ML Features...
+INFO:    [08/11/2024 11:25:25] -> Generating Decoys...
+INFO:    [08/11/2024 11:25:25] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:27:55] -> Releasing Raw Files...
+INFO:    [08/11/2024 11:27:55] -> Machine Learning...
+INFO:    [08/11/2024 11:29:06] -> Initializing HTRMS...
+INFO:    [08/11/2024 11:29:06] -> Releasing Run Resources...
+INFO:    [08/11/2024 11:29:06] -> Reducing Score Cache...
+INFO:    [08/11/2024 11:29:10] -> Calculating Qvalues...
+INFO:    [08/11/2024 11:29:11] -> Unique precursors: 96,681 of 105,535 | modified peptides: 85,125 of 92,142 | peptides: 77,338 of 82,943 |  protein groups: 8,686 (Qvalue <= 0.01) [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw]
+INFO:    [08/11/2024 11:29:11] -> Collapsing Search Tree...
+INFO:    [08/11/2024 11:29:12] -> Processed in 3.79m
+INFO:    [08/11/2024 11:29:12] -> Initializing QC...
+INFO:    [08/11/2024 11:29:12] -> Determining Calibration Parameter...
+INFO:    [08/11/2024 11:29:12] -> Assigning ML Features...
+INFO:    [08/11/2024 11:29:13] -> Generating Decoys...
+INFO:    [08/11/2024 11:29:13] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:33:04] -> Releasing Raw Files...
+INFO:    [08/11/2024 11:33:04] -> Machine Learning...
+INFO:    [08/11/2024 11:33:59] -> Initializing HTRMS...
+INFO:    [08/11/2024 11:33:59] -> Releasing Run Resources...
+INFO:    [08/11/2024 11:34:00] -> Reducing Score Cache...
+INFO:    [08/11/2024 11:34:03] -> Calculating Qvalues...
+INFO:    [08/11/2024 11:34:04] -> Unique precursors: 83,359 of 105,535 | modified peptides: 73,042 of 92,142 | peptides: 71,248 of 82,943 |  protein groups: 8,558 (Qvalue <= 0.01) [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw]
+INFO:    [08/11/2024 11:34:05] -> Collapsing Search Tree...
+INFO:    [08/11/2024 11:34:05] -> Processed in 4.88m
+INFO:    [08/11/2024 11:34:05] -> Initializing QC...
+INFO:    [08/11/2024 11:34:05] -> Determining Calibration Parameter...
+INFO:    [08/11/2024 11:34:05] -> Assigning ML Features...
+INFO:    [08/11/2024 11:34:06] -> Generating Decoys...
+INFO:    [08/11/2024 11:34:07] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:38:01] -> Releasing Raw Files...
+INFO:    [08/11/2024 11:38:01] -> Machine Learning...
+INFO:    [08/11/2024 11:38:53] -> Initializing HTRMS...
+INFO:    [08/11/2024 11:38:53] -> Releasing Run Resources...
+INFO:    [08/11/2024 11:38:54] -> Reducing Score Cache...
+INFO:    [08/11/2024 11:38:59] -> Calculating Qvalues...
+INFO:    [08/11/2024 11:39:00] -> Unique precursors: 86,943 of 105,535 | modified peptides: 75,694 of 92,142 | peptides: 72,459 of 82,943 |  protein groups: 8,644 (Qvalue <= 0.01) [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw]
+INFO:    [08/11/2024 11:39:01] -> Collapsing Search Tree...
+INFO:    [08/11/2024 11:39:01] -> Processed in 4.93m
+INFO:    [08/11/2024 11:39:02] -> Initializing QC...
+INFO:    [08/11/2024 11:39:02] -> Determining Calibration Parameter...
+INFO:    [08/11/2024 11:39:03] -> Assigning ML Features...
+INFO:    [08/11/2024 11:39:03] -> Generating Decoys...
+INFO:    [08/11/2024 11:39:03] -> Extracting Ion Currents...
+INFO:    [08/11/2024 11:42:15] -> Releasing Raw Files...
+INFO:    [08/11/2024 11:42:15] -> Machine Learning...
+INFO:    [08/11/2024 11:42:52] -> Initializing HTRMS...
+INFO:    [08/11/2024 11:42:52] -> Releasing Run Resources...
+INFO:    [08/11/2024 11:42:52] -> Reducing Score Cache...
+INFO:    [08/11/2024 11:42:55] -> Calculating Qvalues...
+INFO:    [08/11/2024 11:42:55] -> Unique precursors: 83,475 of 105,535 | modified peptides: 73,246 of 92,142 | peptides: 70,699 of 82,943 |  protein groups: 8,482 (Qvalue <= 0.01) [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw]
+INFO:    [08/11/2024 11:42:56] -> Collapsing Search Tree...
+INFO:    [08/11/2024 11:42:56] -> Processed in 3.89m
+INFO:    [08/11/2024 11:42:56] -> Normalizing Cscores...
+INFO:    [08/11/2024 11:42:57] -> Initializing Protein Groups...
+INFO:    [08/11/2024 11:43:51] -> Correcting Interferences...
+INFO:    [08/11/2024 11:44:10] -> Calculating Global CVs
+INFO:    [08/11/2024 11:44:12] -> Calculating Precursor Quantities...
+INFO:    [08/11/2024 11:44:14] -> Normalizing Quantification...
+INFO:    [08/11/2024 11:44:15] -> Performing Local Normalization...
+INFO:    [08/11/2024 11:44:21] -> Calculating Global CVs
+INFO:    [08/11/2024 11:44:22] -> Calculating Condition CVs
+INFO:    [08/11/2024 11:44:27] -> Excluding Library Duplicates...
+INFO:    [08/11/2024 11:44:28] -> Calculating Global CVs
+INFO:    [08/11/2024 11:44:32] -> Building Protein Groups...
+INFO:    [08/11/2024 11:45:21] -> Calculating Run-Wise Protein Group FDR...
+INFO:    [08/11/2024 11:45:23] -> Annotating Protein Single Hits...
+INFO:    [08/11/2024 11:45:24] -> Calculating Global CVs
+INFO:    [08/11/2024 11:45:26] -> Updating Identification Counts...
+INFO:    [08/11/2024 11:45:29] -> Resetting existing imputation...
+INFO:    [08/11/2024 11:45:30] -> Calculating Protein Quantities...
+INFO:    [08/11/2024 11:45:31] -> Calculating Protein Quantities...
+INFO:    [08/11/2024 11:45:31] -> Calculating MaxLFQ Protein Quantities...
+INFO:    [08/11/2024 11:45:39] -> Collapsing PTM-Locations...
+INFO:    [08/11/2024 11:45:39] -> PTM Stoichiometry calculation...
+INFO:    [08/11/2024 11:45:39] -> Creating Protein Map...
+INFO:    [08/11/2024 11:45:39] -> Compiling Run Summary Information...
+INFO:    [08/11/2024 11:45:40] -> Running Post Analysis Processes...
+INFO:    [08/11/2024 11:45:47] -> Saving Qc Data...
+INFO:    [08/11/2024 11:45:53] -> Generating Output
+INFO:    [08/11/2024 11:45:53] -> Generating Experiment Report
+INFO:    [08/11/2024 11:46:51] -> Experiment1_Report_BGS Factory Report (Normal).tsv
+INFO:    [08/11/2024 11:46:51] -> Generating RT Recalibration Report
+INFO:    [08/11/2024 11:46:51] -> LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw_1_iRTCalibration.tsv
+INFO:    [08/11/2024 11:46:51] -> LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw_2_iRTCalibration.tsv
+INFO:    [08/11/2024 11:46:51] -> LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw_3_iRTCalibration.tsv
+INFO:    [08/11/2024 11:46:51] -> LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw_4_iRTCalibration.tsv
+INFO:    [08/11/2024 11:46:51] -> LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw_5_iRTCalibration.tsv
+INFO:    [08/11/2024 11:46:51] -> LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw_6_iRTCalibration.tsv
+INFO:    [08/11/2024 11:46:51] -> Generating Run Meta Report
+INFO:    [08/11/2024 11:46:52] -> LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw_1_RunOverview.tsv
+INFO:    [08/11/2024 11:46:52] -> LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw_2_RunOverview.tsv
+INFO:    [08/11/2024 11:46:52] -> LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw_3_RunOverview.tsv
+INFO:    [08/11/2024 11:46:52] -> LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw_4_RunOverview.tsv
+INFO:    [08/11/2024 11:46:52] -> LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw_5_RunOverview.tsv
+INFO:    [08/11/2024 11:46:52] -> LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw_6_RunOverview.tsv
+INFO:    [08/11/2024 11:46:52] -> Generating Post Analysis Reports
+INFO:    [08/11/2024 11:46:55] -> Experiment1_AnalysisOverview.txt
+INFO:    [08/11/2024 11:46:55] -> Precursor CVs_CVsBelowX.tsv
+INFO:    [08/11/2024 11:46:55] -> Peptide CVs_CVsBelowX.tsv
+INFO:    [08/11/2024 11:46:55] -> Protein Group CVs_CVsBelowX.tsv
+INFO:    [08/11/2024 11:46:55] -> Protein CVs_CVsBelowX.tsv
+INFO:    [08/11/2024 11:46:55] -> RunIdentifications.tsv
+INFO:    [08/11/2024 11:46:55] -> Generating PTM Site Report
+INFO:    [08/11/2024 11:46:55] -> Generating Condition Setup Report
+INFO:    [08/11/2024 11:46:55] -> Experiment1_ConditionSetup.tsv
+INFO:    [08/11/2024 11:46:55] -> Generating Experiment Settings Report
+[END-LOG]

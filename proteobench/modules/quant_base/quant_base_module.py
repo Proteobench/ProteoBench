@@ -19,6 +19,7 @@ from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphadia import extract_params as extract_params_alphadia
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.diann import extract_params as extract_params_diann
+from proteobench.io.params.spectronaut import read_spectronaut_settings as extract_params_spectronaut
 from proteobench.io.params.fragger import extract_params as extract_params_fragger
 from proteobench.io.params.i2masschroq import (
     extract_params as extract_params_i2masschroq,
@@ -74,7 +75,7 @@ class QuantModule:
         "AlphaDIA": extract_params_alphadia,
         "FragPipe (DIA-NN quant)": extract_params_fragger,
         "MSAID": extract_params_msaid,
-        # "Spectronaut": extract_params_spectronaut
+        "Spectronaut": extract_params_spectronaut,
     }
 
     def is_implemented(self) -> bool:

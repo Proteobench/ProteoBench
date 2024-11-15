@@ -479,10 +479,9 @@ class QuantUIObjects:
         """Executes the benchmarking process and returns the results."""
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(self.user_input["input_csv"].getbuffer())
-            temp_file_name = tmp_file.name
-        f = open(temp_file_name)
-        f.seek(0)
 
+        # reload buffer: https://stackoverflow.com/a/64478151/9684872
+        self.user_input["input_csv"].seek(0)
         if st.session_state[self.variables_quant.slider_id_submitted_uuid] in st.session_state.keys():
             set_slider_val = st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]]
         else:
@@ -494,7 +493,7 @@ class QuantUIObjects:
             all_datapoints = st.session_state[self.variables_quant.all_datapoints]
 
         return self.ionmodule.benchmarking(
-            f,
+            self.user_input["input_csv"],
             self.user_input["input_format"],
             self.user_input,
             all_datapoints,

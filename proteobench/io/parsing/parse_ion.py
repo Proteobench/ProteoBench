@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import math
 import os
 import re
-import math
 
 import pandas as pd
 
@@ -10,7 +10,6 @@ import pandas as pd
 def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     """Method loads dataframe from a csv depending on its format."""
     input_data_frame: pd.DataFrame
-
     if input_format == "MaxQuant":
         input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
     elif input_format == "AlphaPept":

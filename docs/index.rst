@@ -140,6 +140,24 @@ Available ProteoBench modules
         ^^^
         Single-species benchmark using spacial proteomics
 
+    .. grid-item-card:: DIA quantification DIA-PASEF
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/438
+
+        :bdg-info:`proposed`
+        ^^^
+        additional DIA ion-level module with DIA-PASEF data
+
+    .. grid-item-card:: single-cell label free DIA quantification
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/426
+
+        :bdg-info:`proposed`
+        ^^^
+        benchmarking identification and quantification workflows for low-input and single cell proteomics (SCP)
+
 .. button-ref:: available-modules/index
     :ref-type: doc
     :class: sd-px-4

@@ -49,7 +49,7 @@ class VariablesDDAQuant:
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 
-    description_module_md: str = "pages/markdown_files/DDA_Quant/introduction.md"
+    description_module_md: str = "pages/markdown_files/DDA_Quant/introduction_DDA_quan_peptidoforms.md"
     description_files_md: str = "pages/markdown_files/DDA_Quant/file_description.md"
     description_input_file_md: str = "pages/markdown_files/DDA_Quant/input_file_description.md"
     description_slider_md: str = "pages/markdown_files/DDA_Quant/slider_description.md"

@@ -21,13 +21,26 @@ class VariablesDDAQuant:
     comments_submission_uuid: str = "comments_submission_uuid_dda_quant_peptidoform"
     check_submission_uuid: str = "check_submission_uuid_dda_quant_peptidoform"
     meta_data_text: str = "comments_for_submission_dda_quant_peptidoform"
-    check_submission: str = "heck_submission_dda_quant_peptidoform"
+    check_submission: str = "check_submission_dda_quant_peptidoform"
     button_submission_uuid: str = "button_submission_uuid_dda_quant_peptidoform"
     df_head: str = "df_head_dda_quant_peptidoform"
     placeholder_fig_compare: str = "placeholder_fig_compare_dda_quant_peptidoform"
+
+    all_datapoints_submitted: str = "all_datapoints_submitted_dda_quant_peptidoform"
+    placeholder_table_submitted: str = "placeholder_table_submitted_dda_quant_peptidoform"
+    placeholder_slider_submitted: str = "placeholder_slider_submitted_dda_quant_peptidoform"
+    highlight_list_submitted: List[str] = field(default_factory=list)
+    selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dda_quant_peptidoform"
+    selectbox_id_uuid: str = "selectbox_id_dda_quant_peptidoform"
+    slider_id_submitted_uuid: str = "slider_id_submitted_dda_quant_peptidoform"
+    slider_id_uuid: str = "slider_id_dda_quant_peptidoform"
+    download_selector_id_uuid: str = "download_selector_id_dda_quant_peptidoform"
+    table_id_uuid: str = "table_id_dda_quant_peptidoform"
+
     placeholder_table: str = "placeholder_table_dda_quant_peptidoform"
     placeholder_slider: str = "placeholder_slider_dda_quant_peptidoform"
-    placeholder_downloads_container: str = "placeholder_downloads_container"
+
+    placeholder_downloads_container: str = "placeholder_downloads_container_dda_quant_peptidoform"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
@@ -36,7 +49,7 @@ class VariablesDDAQuant:
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 
-    description_module_md: str = "pages/markdown_files/DDA_Quant/introduction.md"
+    description_module_md: str = "pages/markdown_files/DDA_Quant/introduction_DDA_quan_peptidoforms.md"
     description_files_md: str = "pages/markdown_files/DDA_Quant/file_description.md"
     description_input_file_md: str = "pages/markdown_files/DDA_Quant/input_file_description.md"
     description_slider_md: str = "pages/markdown_files/DDA_Quant/slider_description.md"

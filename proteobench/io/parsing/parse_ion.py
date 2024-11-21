@@ -14,6 +14,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
     elif input_format == "AlphaPept":
         input_data_frame = pd.read_csv(input_csv, low_memory=False)
+        input_data_frame["charge"] = input_data_frame["charge"].astype(int)
     elif input_format == "Sage":
         input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
     elif input_format == "FragPipe":

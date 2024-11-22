@@ -30,3 +30,11 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+
+[modifications_parser]
+"parse_column" = "proforma"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern"="(?<=\\[).+?(?=\\])"
+"modification_dict" = {"mod:00397" = "Carbamidomethyl", "mod:01160" = "Ammonia-loss", "mod:00394" = "Acetylation", "mod:00425" = "Oxidation", "mod:00704" = "Dehydrated"}

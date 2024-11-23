@@ -13,7 +13,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     if input_format == "MaxQuant":
         input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
     elif input_format == "AlphaPept":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False)
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, dtype={"charge": int})
     elif input_format == "Sage":
         input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
     elif input_format == "FragPipe":

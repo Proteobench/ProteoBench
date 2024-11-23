@@ -63,7 +63,7 @@ def find_cmdline_string(lines: List[str]) -> Optional[str]:
         The command line string.
     """
     for line in lines:
-        if line.startswith("diann.exe"):
+        if "diann" in line and "--f" in line and "--fasta" in line:
             return line.strip()
     return None
 
@@ -292,8 +292,8 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         parameters["precursor_mass_tolerance"] = mass_tol + " ppm"
         parameters["fragment_mass_tolerance"] = mass_tol + " ppm"
     else:
-        parameters["precursor_mass_tolerance"] += " ppm"
-        parameters["fragment_mass_tolerance"] += " ppm"
+        parameters["precursor_mass_tolerance"] = str(parameters["precursor_mass_tolerance"]) + " ppm"
+        parameters["fragment_mass_tolerance"] = str(parameters["fragment_mass_tolerance"]) + " ppm"
 
     # If scan window is not customely set, extract it from the log file
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
@@ -305,6 +305,7 @@ if __name__ == "__main__":
     for fname in [
         "../../../test/params/DIANN_output_20240229_report.log.txt",
         "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
+        "../../../test/params/DIANN_WU304578_report.log.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

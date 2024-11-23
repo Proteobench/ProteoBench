@@ -8,7 +8,9 @@ from pages.pages_variables.dda_quant_peptidoform_variables import VariablesDDAQu
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
-from proteobench.modules.dda_quant_peptidoform.dda_quant_peptidoform_module import DDAQuantPeptidoformModule
+from proteobench.modules.dda_quant_peptidoform.dda_quant_peptidoform_module import (
+    DDAQuantPeptidoformModule,
+)
 
 
 class StreamlitUI:
@@ -42,14 +44,82 @@ class StreamlitUI:
         Sets up the main page layout for the Streamlit application.
         This includes the title, module descriptions, input forms, and configuration settings.
         """
-        self.quant_uiobjects.create_text_header()
-        self.quant_uiobjects.create_main_submission_form()
-        self.quant_uiobjects.init_slider()
+        # Create tabs
+        (
+            tab_results_all,
+            tab_submission_details,
+            tab_indepth_plots,
+            tab_results_new,
+            tab_public_submission,
+        ) = st.tabs(
+            [
+                "Public Benchmark Runs",
+                "Submit New Data",
+                "Results In-Depth",
+                "Results New Data",
+                "Public Submission",
+            ]
+        )
 
-        if self.quant_uiobjects.variables_quant.fig_logfc in st.session_state:
-            self.quant_uiobjects.populate_results()
+        with tab_results_all:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.write(
+                f"The full description of the module is available [here]({self.variables_dda_quant.texts.ShortMessages.doc_url})"
+            )
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.display_all_data_results_main()
 
-        self.quant_uiobjects.create_results()
+        # Tab 2: Submission Details
+        with tab_submission_details:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.write(
+                f"The full description of the module is available [here]({self.variables_dda_quant.texts.ShortMessages.doc_url})"
+            )
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.display_submission_form()
+
+        # Tab 2.5: in-depth plots current data
+        with tab_indepth_plots:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.write(
+                f"The full description of the module is available [here]({self.variables_dda_quant.texts.ShortMessages.doc_url})"
+            )
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.generate_current_data_plots(True)
+
+        # Tab 3: Results (New Submissions)
+        with tab_results_new:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.write(
+                f"The full description of the module is available [here]({self.variables_dda_quant.texts.ShortMessages.doc_url})"
+            )
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+
+            self.quant_uiobjects.display_all_data_results_submitted()
+
+        # Tab 4: Public Submission
+        with tab_public_submission:
+            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.write(
+                f"The full description of the module is available [here]({self.variables_dda_quant.texts.ShortMessages.doc_url})"
+            )
+            if self.variables_dda_quant.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            self.quant_uiobjects.display_public_submission_ui()
 
 
 if __name__ == "__main__":

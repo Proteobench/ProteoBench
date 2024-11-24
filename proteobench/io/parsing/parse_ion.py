@@ -50,7 +50,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
         mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
         mapper = mapper_df["description"].to_dict()
-        input_data_frame["Proteins"] = input_data_frame["genes"].map(
+        input_data_frame["genes"] = input_data_frame["genes"].map(
             lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
         )
         input_data_frame["proforma"] = input_data_frame.apply(
@@ -75,11 +75,11 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
         mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
         mapper = mapper_df["description"].to_dict()
-        input_data_frame["Protein_list"] = input_data_frame["PG.ProteinGroups"].str.split(";")
-        input_data_frame["Proteins"] = input_data_frame["Protein_list"].map(
+        input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.split(";")
+        input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].map(
             lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
         )
-        input_data_frame["Proteins"] = input_data_frame["Proteins"].str.join(";")
+        input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
     elif input_format == "MSAID":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 

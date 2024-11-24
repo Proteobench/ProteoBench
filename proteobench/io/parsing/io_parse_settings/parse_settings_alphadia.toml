@@ -3,6 +3,7 @@
 "run" = "Raw file"
 "charge" = "Charge"
 "intensity" = "Intensity"
+"genes" = "Proteins" 
 
 [condition_mapper]
 "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01" = "A"

@@ -10,9 +10,9 @@ from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dia_quant_ion.dia_quant_ion_module import DIAQuantIonModule
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.modules.quant.DIA.ion.AIF import DIAQuantIonModule
 from proteobench.plotting.plot_quant import PlotDataPoint
+from proteobench.score.quant.quantscores import QuantScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
 TESTDATA_FILES = {

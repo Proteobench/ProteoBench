@@ -14,11 +14,11 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
+from pages.pages_variables.Quant.DDA.variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.dda_quant_ion_module import (
+from proteobench.modules.quant.dda_quant_ion.dda_quant_ion_module import (
     DDAQuantIonModule as IonModule,
 )
 from proteobench.plotting.plot_quant import PlotDataPoint

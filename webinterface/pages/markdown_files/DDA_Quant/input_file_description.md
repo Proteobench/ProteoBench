@@ -1,3 +1,0 @@
-
-Please upload the output of your analysis, and indicate what software
-tool it comes from (this is necessary to correctly parse your table - find more information in the "[How to use](https://proteobench.readthedocs.io/en/latest/available-modules/2-DDA-Quantification-ion-level/#how-to-use)" section of this module. For the data to run your workflow on please see the section "[Data set](https://proteobench.readthedocs.io/en/latest/available-modules/2-DDA-Quantification-ion-level/#data-set)". You can download an (*incomplete*) MaxQuant file example [here](https://raw.githubusercontent.com/Proteobench/ProteoBench/refs/heads/main/test/data/dda_quant/MaxQuant_2_5_1_evidence_sample.txt).

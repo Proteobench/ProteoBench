@@ -8,9 +8,7 @@ from pages.pages_variables.Quant.DIA.variables import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.quant.dia_quant_ion.dia_quant_ion_module import (
-    DIAQuantIonModule,
-)
+from proteobench.modules.quant.DIA.ion.dia_quant_ion_module import DIAQuantIonModule
 
 
 class StreamlitUI:

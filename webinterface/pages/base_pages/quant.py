@@ -18,7 +18,7 @@ from pages.pages_variables.Quant.DDA.variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.quant.dda_quant_ion.dda_quant_ion_module import (
+from proteobench.modules.quant.DDA.ion.dda_quant_ion_module import (
     DDAQuantIonModule as IonModule,
 )
 from proteobench.plotting.plot_quant import PlotDataPoint

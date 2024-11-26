@@ -35,10 +35,12 @@ def load_file(format_name: str):
 def load_local_parsing_configuration_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_file(format_name)
-    parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
-    parse_settings = ParseSettingsBuilder(parse_settings_dir, acquisition_method="dia").build_parser(format_name)
-    prepared_ddf, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = DIAQuantIonModule("").generate_intermediate(prepared_ddf, replicate_to_raw, parse_settings)
+    parse_settings_dir = os.path.join(
+        os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+    )
+    parse_settings = ParseSettingsBuilder(parse_settings_dir, module_id="dia").build_parser(format_name)
+    prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+    intermediate = DIAQuantIonModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
     return intermediate
 
 
@@ -66,7 +68,10 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_search_engines_supported(self):
         """Test whether the supported formats are supported."""
-        parse_settings = ParseSettingsBuilder(acquisition_method="dia")
+        parse_settings_dir = os.path.join(
+            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+        )
+        parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id="dia")
 
         for format_name in self.supported_formats:
             self.assertTrue(format_name in parse_settings.INPUT_FORMATS)
@@ -79,14 +84,20 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_local_parsing_configuration_file(self):
         """Test whether the input files are loaded successfully."""
-        parse_settings_builder = ParseSettingsBuilder(acquisition_method="dia")
+        parse_settings_dir = os.path.join(
+            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+        )
+        parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=parse_settings_dir)
         for format_name in self.supported_formats:
             parse_settings = parse_settings_builder.build_parser(format_name)
             self.assertFalse(parse_settings is None)
 
     def test_input_file_initial_parsing(self):
         """Test the initial parsing of the input file."""
-        parse_settings_builder = ParseSettingsBuilder(acquisition_method="dia")
+        parse_settings_dir = os.path.join(
+            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+        )
+        parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=parse_settings_dir)
 
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
@@ -98,7 +109,10 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_input_file_processing(self):
         """Test the processing of the input file."""
-        parse_settings_builder = ParseSettingsBuilder(acquisition_method="dia")
+        parse_settings_dir = os.path.join(
+            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+        )
+        parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=parse_settings_dir)
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = parse_settings_builder.build_parser(format_name)

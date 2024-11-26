@@ -4,11 +4,11 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
-from pages.pages_variables.Quant.DIA.variables import VariablesDIAQuant
+from pages.pages_variables.Quant.DIA.ion_AIF import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.quant.DIA.ion.dia_quant_ion_module import DIAQuantIonModule
+from proteobench.modules.quant.DIA.ion.AIF import DIAQuantIonModule
 
 
 class StreamlitUI:

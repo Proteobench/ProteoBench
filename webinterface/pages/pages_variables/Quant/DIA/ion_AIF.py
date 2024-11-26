@@ -42,13 +42,13 @@ class VariablesDIAQuant:
 
     additional_params_json: str = "../webinterface/configuration/dia_quant.json"
 
-    description_module_md: str = "pages/markdown_files/Quant/DIA/introduction.md"
-    description_files_md: str = "pages/markdown_files/Quant/DIA/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/Quant/DIA/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/Quant/DIA/slider_description.md"
-    description_table_md: str = "pages/markdown_files/Quant/DIA/table_description.md"
-    description_results_md: str = "pages/markdown_files/Quant/DIA/result_description.md"
-    description_submission_md: str = "pages/markdown_files/Quant/DIA/submit_description.md"
+    description_module_md: str = "pages/markdown_files/Quant/DIA/AIF/introduction.md"
+    description_files_md: str = "pages/markdown_files/Quant/DIA/AIF/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/Quant/DIA/AIF/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/Quant/DIA/AIF/slider_description.md"
+    description_table_md: str = "pages/markdown_files/Quant/DIA/AIF/table_description.md"
+    description_results_md: str = "pages/markdown_files/Quant/DIA/AIF/result_description.md"
+    description_submission_md: str = "pages/markdown_files/Quant/DIA/AIF/submit_description.md"
 
     all_datapoints_submitted: str = "all_datapoints_submitted_dia_quant"
     placeholder_table_submitted: str = "placeholder_table_submitted_dia_quant"

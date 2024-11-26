@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import pandas as pd
 from pandas import DataFrame
 
@@ -91,7 +93,8 @@ class DDAQuantPeptidoformModule(QuantModule):
 
         # Parse settings file
         try:
-            parse_settings = ParseSettingsBuilder().build_parser(input_format)
+            parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings/Quant/DDA")
+            parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir).build_parser(input_format)
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")
         except FileNotFoundError as e:

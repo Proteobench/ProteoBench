@@ -13,10 +13,11 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
-    def __init__(self, parse_settings_dir=None, acquisition_method="dda"):
+    def __init__(self, parse_settings_dir=None, module_id="dda"):
         if parse_settings_dir is None:
-            parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings")
-        if acquisition_method == "dda":
+            parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings", "Quant", "DDA")
+        # TODO: more neat way to handle this
+        if module_id == "dda":
             self.PARSE_SETTINGS_FILES = {
                 "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
                 "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
@@ -26,7 +27,7 @@ class ParseSettingsBuilder:
                 "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
                 "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DDA_quant_ion.toml"),
             }
-        elif acquisition_method == "dia":
+        elif module_id == "dia":
             self.PARSE_SETTINGS_FILES = {
                 "DIA-NN": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
                 "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxdia.toml"),
@@ -40,7 +41,7 @@ class ParseSettingsBuilder:
                 "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DIA_quant_ion.toml"),
             }
         else:
-            raise ValueError("Invalid acquisition mode. Please choose either 'dda' or 'dia'.")
+            raise ValueError("Invalid module ID.")
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
 

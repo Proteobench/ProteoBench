@@ -4,7 +4,7 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
-from pages.pages_variables.Quant.DIA.ion_diaPASEF import VariablesDIAQuant
+from pages.pages_variables.Quant.DIA.ion_diaPASEF import VariablesDIAQuantdiaPASEF
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
@@ -13,7 +13,7 @@ from proteobench.modules.quant.DIA.ion.diaPASEF import DIAQuantIonModule
 
 class StreamlitUI:
     def __init__(self):
-        self.variables_dia_quant: VariablesDIAQuant = VariablesDIAQuant()
+        self.variables_dia_quant: VariablesDIAQuantdiaPASEF = VariablesDIAQuantdiaPASEF()
         self.texts: Type[WebpageTexts] = WebpageTexts
         self.texts.ShortMessages.title = "DIA Ion quantification - diaPASEF"
         self.user_input: Dict[str, Any] = dict()

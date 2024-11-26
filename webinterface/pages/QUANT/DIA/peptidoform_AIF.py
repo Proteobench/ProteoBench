@@ -4,11 +4,11 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
-from pages.pages_variables.dia_quant_peptidoform_variables import VariablesDIAQuant
+from pages.pages_variables.Quant.DIA.peptidoform import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
-from proteobench.modules.dda_quant_peptidoform.dda_quant_peptidoform_module import (
+from proteobench.modules.quant.DDA.peptidoform.dda_quant_peptidoform_module import (
     DDAQuantPeptidoformModule,
 )
 

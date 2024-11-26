@@ -29,6 +29,19 @@ class DDAQuantPeptidoformModule(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
+        parse_settings_dir: str = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "..",
+                "io",
+                "parsing",
+                "io_parse_settings",
+                "Quant",
+                "DDA",
+            )
+        ),
     ):
         """
         DDA Quantification Module for Peptidoform level Quantification.
@@ -48,7 +61,12 @@ class DDAQuantPeptidoformModule(QuantModule):
             Level of quantification.
 
         """
-        super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
+        super().__init__(
+            token,
+            proteobot_repo_name=proteobot_repo_name,
+            proteobench_repo_name=proteobench_repo_name,
+            parse_settings_dir=parse_settings_dir,
+        )
         self.precursor_name = "peptidoform"
 
     def is_implemented(self) -> bool:
@@ -93,8 +111,7 @@ class DDAQuantPeptidoformModule(QuantModule):
 
         # Parse settings file
         try:
-            parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings/Quant/DDA")
-            parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir).build_parser(input_format)
+            parse_settings = ParseSettingsBuilder(parse_settings_dir=self.parse_settings_dir).build_parser(input_format)
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")
         except FileNotFoundError as e:

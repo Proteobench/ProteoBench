@@ -69,7 +69,7 @@ class TestOutputFileReading(unittest.TestCase):
     def test_search_engines_supported(self):
         """Test whether the supported formats are supported."""
         parse_settings_dir = os.path.join(
-            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+            os.path.dirname(__file__), "..", "proteobench", "io", "parsing", "io_parse_settings", "Quant", "DIA"
         )
         parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id="dia")
 
@@ -85,7 +85,7 @@ class TestOutputFileReading(unittest.TestCase):
     def test_local_parsing_configuration_file(self):
         """Test whether the input files are loaded successfully."""
         parse_settings_dir = os.path.join(
-            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+            os.path.dirname(__file__), "..", "proteobench", "io", "parsing", "io_parse_settings", "Quant", "DIA"
         )
         parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=parse_settings_dir)
         for format_name in self.supported_formats:
@@ -95,7 +95,7 @@ class TestOutputFileReading(unittest.TestCase):
     def test_input_file_initial_parsing(self):
         """Test the initial parsing of the input file."""
         parse_settings_dir = os.path.join(
-            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+            os.path.dirname(__file__), "..", "proteobench", "io", "parsing", "io_parse_settings", "Quant", "DIA"
         )
         parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=parse_settings_dir)
 
@@ -110,7 +110,7 @@ class TestOutputFileReading(unittest.TestCase):
     def test_input_file_processing(self):
         """Test the processing of the input file."""
         parse_settings_dir = os.path.join(
-            os.path.dirname(__package__), "io", "parsing", "io_parse_settings", "Quant", "DIA"
+            os.path.dirname(__file__), "..", "proteobench", "io", "parsing", "io_parse_settings", "Quant", "DIA"
         )
         parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=parse_settings_dir)
         for format_name in self.supported_formats:

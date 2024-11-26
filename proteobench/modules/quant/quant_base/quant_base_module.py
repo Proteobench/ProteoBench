@@ -19,15 +19,17 @@ from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphadia import extract_params as extract_params_alphadia
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.diann import extract_params as extract_params_diann
-from proteobench.io.params.spectronaut import read_spectronaut_settings as extract_params_spectronaut
 from proteobench.io.params.fragger import extract_params as extract_params_fragger
 from proteobench.io.params.i2masschroq import (
     extract_params as extract_params_i2masschroq,
 )
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.sage import extract_params as extract_params_sage
-from proteobench.io.params.msaid import extract_params as extract_params_msaid
+from proteobench.io.params.spectronaut import (
+    read_spectronaut_settings as extract_params_spectronaut,
+)
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
@@ -47,10 +49,18 @@ class QuantModule:
         Github repository for the module.
     precursor_name
         Level of quantification.
+    parse_settings_dir
+        Directory for parse settings.
 
     """
 
-    def __init__(self, token: str = None, proteobench_repo_name: str = "", proteobot_repo_name: str = ""):
+    def __init__(
+        self,
+        token: str = None,
+        proteobench_repo_name: str = "",
+        proteobot_repo_name: str = "",
+        parse_settings_dir: str = "",
+    ):
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
         self.github_repo = GithubProteobotRepo(
@@ -61,6 +71,7 @@ class QuantModule:
             clone_dir_pr=self.t_dir_pr,
         )
         self.github_repo.clone_repo()
+        self.parse_settings_dir = parse_settings_dir
 
         self.precursor_name = ""
 

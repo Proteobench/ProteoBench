@@ -58,4 +58,6 @@ class VariablesDIAQuantdiaPASEF:
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DIA"
+
     texts: Type[WebpageTexts] = WebpageTexts

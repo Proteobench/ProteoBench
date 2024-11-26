@@ -44,4 +44,6 @@ class VariablesDIAQuant:
     description_results_md: str = "pages/markdown_files/Quant/DIA/result_description.md"
     description_submission_md: str = "pages/markdown_files/Quant/DIA/submit_description.md"
 
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DIA"
+
     texts: Type[WebpageTexts] = WebpageTexts

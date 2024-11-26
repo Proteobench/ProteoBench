@@ -57,4 +57,6 @@ class VariablesDDAQuant:
     description_results_md: str = "pages/markdown_files/Quant/DDA/result_description.md"
     description_submission_md: str = "pages/markdown_files/Quant/DDA/submit_description.md"
 
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DDA"
+
     texts: Type[WebpageTexts] = WebpageTexts

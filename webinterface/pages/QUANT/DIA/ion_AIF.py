@@ -27,7 +27,9 @@ class StreamlitUI:
         except KeyError:
             token = ""
         self.ionmodule: DIAQuantIonModule = DIAQuantIonModule(token=token)
-        self.parsesettingsbuilder = ParseSettingsBuilder(acquisition_method="dia")
+        self.parsesettingsbuilder = ParseSettingsBuilder(
+            module_id="dia", parse_settings_dir=self.variables_dia_quant.parse_settings_dir
+        )
 
         self.quant_uiobjects = QuantUIObjects(self.variables_dia_quant, self.ionmodule, self.parsesettingsbuilder)
 

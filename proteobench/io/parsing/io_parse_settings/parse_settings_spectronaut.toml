@@ -3,6 +3,7 @@
 "R.FileName" = "Raw file"
 "FG.Charge" = "Charge"
 "FG.Quantity" = "Intensity"
+"PG.ProteinGroups" = "Proteins"
 
 [condition_mapper]
 "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01" = "A"

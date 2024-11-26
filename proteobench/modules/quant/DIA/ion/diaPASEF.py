@@ -31,7 +31,17 @@ class DIAQuantIonModule(QuantModule):
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_diaPASEF",
         parse_settings_dir: str = os.path.abspath(
             os.path.join(
-                os.path.dirname(__file__), "..", "..", "..", "io", "parsing", "io_parse_settings", "Quant", "DIA"
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "..",
+                "..",
+                "io",
+                "parsing",
+                "io_parse_settings",
+                "Quant",
+                "DIA",
+                "diaPASEF",
             )
         ),
     ):
@@ -114,6 +124,8 @@ class DIAQuantIonModule(QuantModule):
 
         try:
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+            standard_format.to_csv("standard_format.csv")
+            print(replicate_to_raw)
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
         except Exception as e:

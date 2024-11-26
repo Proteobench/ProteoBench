@@ -22,7 +22,6 @@ class QuantScores:
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
         relevant_columns_df = pd.merge(relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner")
-
         quant_df = QuantScores.compute_group_stats(
             relevant_columns_df,
             min_intensity=0,

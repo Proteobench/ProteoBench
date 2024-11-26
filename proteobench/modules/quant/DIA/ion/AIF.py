@@ -31,7 +31,17 @@ class DIAQuantIonModule(QuantModule):
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA",
         parse_settings_dir: str = os.path.abspath(
             os.path.join(
-                os.path.dirname(__file__), "..", "..", "..", "..", "io", "parsing", "io_parse_settings", "Quant", "DIA"
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "..",
+                "..",
+                "io",
+                "parsing",
+                "io_parse_settings",
+                "Quant",
+                "DIA",
+                "AIF",
             )
         ),
     ):

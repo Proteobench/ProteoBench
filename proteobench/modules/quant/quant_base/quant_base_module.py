@@ -172,8 +172,6 @@ class QuantModule:
         pd.DataFrame
             All data points with the filtered data points.
         """
-        print(all_datapoints)
-
         all_datapoints["median_abs_epsilon"] = [
             filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]

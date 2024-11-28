@@ -125,7 +125,6 @@ class DIAQuantIonModule(QuantModule):
         try:
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
             standard_format.to_csv("standard_format.csv")
-            print(replicate_to_raw)
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
         except Exception as e:

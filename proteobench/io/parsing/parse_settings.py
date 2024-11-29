@@ -13,37 +13,26 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
-    def __init__(self, parse_settings_dir=None, module_id="dda"):
+    def __init__(self, parse_settings_dir=None, module_id="quant_lfq_ion_DDA"):
+        self.PARSE_SETTINGS_TOMLS = toml.load(
+            os.path.join(os.path.dirname(__file__), "io_parse_settings", "parse_settings_files.toml")
+        )
         if parse_settings_dir is None:
             parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings", "Quant", "DDA")
         # TODO: more neat way to handle this
-        if module_id == "dda":
+        try:
             self.PARSE_SETTINGS_FILES = {
-                "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxquant.toml"),
-                "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe.toml"),
-                "ProlineStudio": os.path.join(parse_settings_dir, "parse_settings_proline.toml"),
-                "i2MassChroQ": os.path.join(parse_settings_dir, "parse_settings_i2massChroQ.toml"),
-                "AlphaPept": os.path.join(parse_settings_dir, "parse_settings_alphapept.toml"),
-                "Sage": os.path.join(parse_settings_dir, "parse_settings_sage.toml"),
-                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DDA_quant_ion.toml"),
+                key: os.path.join(parse_settings_dir, value)
+                for key, value in self.PARSE_SETTINGS_TOMLS[module_id].items()
             }
-        elif module_id == "dia":
-            self.PARSE_SETTINGS_FILES = {
-                "DIA-NN": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
-                "MaxQuant": os.path.join(parse_settings_dir, "parse_settings_maxdia.toml"),
-                # "Skyline": os.path.join(parse_settings_dir, "parse_settings_skyline.toml"),
-                # "EncyclopeDIA": os.path.join(parse_settings_dir, "parse_settings_encyclopedia.toml"),
-                "FragPipe (DIA-NN quant)": os.path.join(parse_settings_dir, "parse_settings_diann.toml"),
-                "FragPipe": os.path.join(parse_settings_dir, "parse_settings_fragpipe_DIA.toml"),
-                "Spectronaut": os.path.join(parse_settings_dir, "parse_settings_spectronaut.toml"),
-                "AlphaDIA": os.path.join(parse_settings_dir, "parse_settings_alphadia.toml"),
-                "MSAID": os.path.join(parse_settings_dir, "parse_settings_msaid.toml"),
-                "Custom": os.path.join(parse_settings_dir, "parse_settings_custom_DIA_quant_ion.toml"),
-            }
-        else:
-            raise ValueError("Invalid module ID.")
+        except KeyError:
+            raise KeyError(
+                f"Invalid module ID: {module_id}. Valid modules with configured parse settings are: {self.PARSE_SETTINGS_TOMLS.keys()}"
+            )
+
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
+        print(self.INPUT_FORMATS)
 
         # Check if all files are present
         missing_files = [file for file in self.PARSE_SETTINGS_FILES.values() if not os.path.isfile(file)]

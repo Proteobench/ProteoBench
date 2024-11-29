@@ -16,7 +16,7 @@ from proteobench.exceptions import (
     QuantificationError,
 )
 from proteobench.io.parsing.parse_peptidoform import load_input_file
-from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
@@ -29,6 +29,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DIA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DIA",
+        module_id="quant_lfq_peptidoform_DIA",
     ):
         """
         DIA Quantification Module for Peptidoform level Quantification.
@@ -94,7 +95,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         try:
             parse_settings_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "io_parse_settings/Quant/DIA")
             parse_settings = ParseSettingsBuilder(
-                parse_settings_dir=parse_settings_dir, acquisition_method="dia"
+                parse_settings_dir=parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")

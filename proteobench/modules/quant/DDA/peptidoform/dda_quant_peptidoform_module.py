@@ -16,7 +16,9 @@ from proteobench.exceptions import (
     QuantificationError,
 )
 from proteobench.io.parsing.parse_peptidoform import load_input_file
-from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+
+# from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
@@ -35,6 +37,7 @@ class DDAQuantPeptidoformModule(QuantModule):
                 "..",
                 "..",
                 "..",
+                "..",
                 "io",
                 "parsing",
                 "io_parse_settings",
@@ -42,6 +45,7 @@ class DDAQuantPeptidoformModule(QuantModule):
                 "DDA",
             )
         ),
+        module_id="quant_lfq_peptidoform_DDA",
     ):
         """
         DDA Quantification Module for Peptidoform level Quantification.
@@ -66,8 +70,10 @@ class DDAQuantPeptidoformModule(QuantModule):
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=parse_settings_dir,
+            module_id=module_id,
         )
         self.precursor_name = "peptidoform"
+        self.module_id = module_id
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
@@ -111,7 +117,10 @@ class DDAQuantPeptidoformModule(QuantModule):
 
         # Parse settings file
         try:
-            parse_settings = ParseSettingsBuilder(parse_settings_dir=self.parse_settings_dir).build_parser(input_format)
+            print(self.module_id)
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")
         except FileNotFoundError as e:

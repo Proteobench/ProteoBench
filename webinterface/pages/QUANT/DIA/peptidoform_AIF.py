@@ -7,7 +7,7 @@ from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.DIA.peptidoform import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
 from proteobench.modules.quant.DDA.peptidoform.dda_quant_peptidoform_module import (
     DDAQuantPeptidoformModule,
 )

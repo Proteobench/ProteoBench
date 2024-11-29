@@ -16,7 +16,7 @@ from proteobench.exceptions import (
     QuantificationError,
 )
 from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
@@ -44,6 +44,7 @@ class DIAQuantIonModule(QuantModule):
                 "AIF",
             )
         ),
+        module_id="quant_lfq_ion_DIA_AIF",
     ):
         """
         DIA Quantification Module for Ion level Quantification.
@@ -68,8 +69,10 @@ class DIAQuantIonModule(QuantModule):
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=parse_settings_dir,
+            module_id=module_id,
         )
         self.precursor_name = "precursor ion"
+        self.module_id = module_id
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
@@ -113,7 +116,7 @@ class DIAQuantIonModule(QuantModule):
         # Parse settings file
         try:
             parse_settings = ParseSettingsBuilder(
-                parse_settings_dir=self.parse_settings_dir, module_id="dia"
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")

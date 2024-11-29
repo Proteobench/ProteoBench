@@ -31,7 +31,7 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
 
 
@@ -60,6 +60,7 @@ class QuantModule:
         proteobench_repo_name: str = "",
         proteobot_repo_name: str = "",
         parse_settings_dir: str = "",
+        module_id: str = "",
     ):
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
@@ -74,6 +75,7 @@ class QuantModule:
         self.parse_settings_dir = parse_settings_dir
 
         self.precursor_name = ""
+        self.module_id = module_id
 
     EXTRACT_PARAMS_DICT = {
         "MaxQuant": extract_params_maxquant,
@@ -209,7 +211,9 @@ class QuantModule:
 
         # Parse user config
         input_df = load_input_file(input_file, input_format)
-        parse_settings = ParseSettingsBuilder().build_parser(input_format)
+        parse_settings = ParseSettingsBuilder(
+            parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+        ).build_parser(input_format)
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data

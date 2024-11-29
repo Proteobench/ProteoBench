@@ -7,7 +7,7 @@ from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.DDA.variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.DDA.ion.dda_quant_ion_module import DDAQuantIonModule
 
 

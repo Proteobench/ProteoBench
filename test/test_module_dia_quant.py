@@ -9,7 +9,7 @@ import pandas as pd
 from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.DIA.ion.AIF import DIAQuantIonModule
 from proteobench.plotting.plot_quant import PlotDataPoint
 from proteobench.score.quant.quantscores import QuantScores
@@ -69,7 +69,7 @@ class TestOutputFileReading(unittest.TestCase):
 
     def test_search_engines_supported(self):
         """Test whether the supported formats are supported."""
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="dia")
+        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DIA_AIF")
 
         for format_name in self.supported_formats:
             self.assertTrue(format_name in parse_settings.INPUT_FORMATS)
@@ -83,7 +83,9 @@ class TestOutputFileReading(unittest.TestCase):
     def test_local_parsing_configuration_file(self):
         """Test whether the input files are loaded successfully."""
 
-        parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=PARSE_SETTINGS_DIR)
+        parse_settings_builder = ParseSettingsBuilder(
+            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+        )
         for format_name in self.supported_formats:
             parse_settings = parse_settings_builder.build_parser(format_name)
             self.assertFalse(parse_settings is None)
@@ -91,7 +93,9 @@ class TestOutputFileReading(unittest.TestCase):
     def test_input_file_initial_parsing(self):
         """Test the initial parsing of the input file."""
 
-        parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=PARSE_SETTINGS_DIR)
+        parse_settings_builder = ParseSettingsBuilder(
+            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+        )
 
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
@@ -104,7 +108,9 @@ class TestOutputFileReading(unittest.TestCase):
     def test_input_file_processing(self):
         """Test the processing of the input file."""
 
-        parse_settings_builder = ParseSettingsBuilder(module_id="dia", parse_settings_dir=PARSE_SETTINGS_DIR)
+        parse_settings_builder = ParseSettingsBuilder(
+            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+        )
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
             parse_settings = parse_settings_builder.build_parser(format_name)

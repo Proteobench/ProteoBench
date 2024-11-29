@@ -9,7 +9,7 @@ import pandas as pd
 from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.DDA.ion.dda_quant_ion_module import DDAQuantIonModule
 from proteobench.plotting.plot_quant import PlotDataPoint
 from proteobench.score.quant.quantscores import QuantScores

@@ -45,19 +45,19 @@ class VariablesDIAQuantdiaPASEF:
         "../webinterface/configuration/dia_quant.json"  # TODO: make a new file for this, and adapt the configuration file for each module.
     )
 
-    description_module_md: str = "pages/markdown_files/Quant/DIA/diaPASEF/introduction.md"
-    description_files_md: str = "pages/markdown_files/Quant/DIA/diaPASEF/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/Quant/DIA/diaPASEF/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/Quant/DIA/diaPASEF/slider_description.md"
-    description_table_md: str = "pages/markdown_files/Quant/DIA/diaPASEF/table_description.md"
-    description_results_md: str = "pages/markdown_files/Quant/DIA/diaPASEF/result_description.md"
-    description_submission_md: str = "pages/markdown_files/Quant/DIA/diaPASEF/submit_description.md"
+    description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/introduction.md"
+    description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/slider_description.md"
+    description_table_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/table_description.md"
+    description_results_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/result_description.md"
+    description_submission_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/submit_description.md"
 
     all_datapoints_submitted: str = "all_datapoints_submitted_dia_quant"
     placeholder_table_submitted: str = "placeholder_table_submitted_dia_quant"
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DIA/diaPASEF"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/ion/DIA/diaPASEF"
 
     texts: Type[WebpageTexts] = WebpageTexts

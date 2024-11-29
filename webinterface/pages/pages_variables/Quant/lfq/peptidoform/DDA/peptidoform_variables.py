@@ -49,14 +49,14 @@ class VariablesDDAQuant:
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 
-    description_module_md: str = "pages/markdown_files/Quant/DDA/introduction_DDA_quan_peptidoforms.md"
-    description_files_md: str = "pages/markdown_files/Quant/DDA/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/Quant/DDA/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/Quant/DDA/slider_description.md"
-    description_table_md: str = "pages/markdown_files/Quant/DDA/table_description.md"
-    description_results_md: str = "pages/markdown_files/Quant/DDA/result_description.md"
-    description_submission_md: str = "pages/markdown_files/Quant/DDA/submit_description.md"
+    description_module_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/introduction_DDA_quan_peptidoforms.md"
+    description_files_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/slider_description.md"
+    description_table_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/table_description.md"
+    description_results_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/result_description.md"
+    description_submission_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DDA"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/peptidoform/DDA"
 
     texts: Type[WebpageTexts] = WebpageTexts

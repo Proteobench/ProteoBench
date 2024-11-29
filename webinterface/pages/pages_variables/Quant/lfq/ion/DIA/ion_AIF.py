@@ -42,19 +42,19 @@ class VariablesDIAQuant:
 
     additional_params_json: str = "../webinterface/configuration/dia_quant.json"
 
-    description_module_md: str = "pages/markdown_files/Quant/DIA/AIF/introduction.md"
-    description_files_md: str = "pages/markdown_files/Quant/DIA/AIF/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/Quant/DIA/AIF/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/Quant/DIA/AIF/slider_description.md"
-    description_table_md: str = "pages/markdown_files/Quant/DIA/AIF/table_description.md"
-    description_results_md: str = "pages/markdown_files/Quant/DIA/AIF/result_description.md"
-    description_submission_md: str = "pages/markdown_files/Quant/DIA/AIF/submit_description.md"
+    description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/introduction.md"
+    description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/slider_description.md"
+    description_table_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/table_description.md"
+    description_results_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/result_description.md"
+    description_submission_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/submit_description.md"
 
     all_datapoints_submitted: str = "all_datapoints_submitted_dia_quant"
     placeholder_table_submitted: str = "placeholder_table_submitted_dia_quant"
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DIA/AIF"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/ion/DIA/AIF"
 
     texts: Type[WebpageTexts] = WebpageTexts

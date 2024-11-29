@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 
-from proteobench.modules.quant.DIA.ion.AIF import DIAQuantIonModule
+from proteobench.modules.quant.lfq.ion.DIA.quant_lfq_ion_DIA_AIF import (
+    DIAQuantIonModule,
+)
 
 
 class DIAQuantIonModulediaPASEF(DIAQuantIonModule):

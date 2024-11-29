@@ -49,13 +49,13 @@ class VariablesDDAQuant:
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 
-    description_module_md: str = "pages/markdown_files/Quant/DDA/introduction_DDA_quan_ions.md"
-    description_files_md: str = "pages/markdown_files/Quant/DDA/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/Quant/DDA/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/Quant/DDA/slider_description.md"
-    description_table_md: str = "pages/markdown_files/Quant/DDA/table_description.md"
-    description_results_md: str = "pages/markdown_files/Quant/DDA/result_description.md"
-    description_submission_md: str = "pages/markdown_files/Quant/DDA/submit_description.md"
+    description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/introduction_DDA_quan_ions.md"
+    description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/slider_description.md"
+    description_table_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/table_description.md"
+    description_results_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/result_description.md"
+    description_submission_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/submit_description.md"
 
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DDA"
 

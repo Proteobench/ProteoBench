@@ -5,11 +5,11 @@
 "MaxQuant" = "parse_settings_maxquant.toml"
 "ProlineStudio" = "parse_settings_proline.toml"
 "Sage" = "parse_settings_sage.toml"
-"Custom" = "parse_settings_custom_DDA_quant_ion.toml"
+"Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_peptidoform_DDA]
 "WOMBAT" = "parse_settings_wombat.toml"
-"Custom" = "parse_settings_custom_DDA_quant_peptidoform.toml"
+"Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_ion_DIA_AIF]
 "DIA-NN" = "parse_settings_diann.toml"
@@ -19,7 +19,7 @@
 "Spectronaut" = "parse_settings_spectronaut.toml"
 "AlphaDIA" = "parse_settings_alphadia.toml"
 "MSAID" = "parse_settings_msaid.toml"
-"Custom" = "parse_settings_custom_DIA_quant_ion.toml"
+"Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_ion_DIA_diaPASEF]
 "DIA-NN" = "parse_settings_diann.toml"
@@ -29,7 +29,7 @@
 "Spectronaut" = "parse_settings_spectronaut.toml"
 "AlphaDIA" = "parse_settings_alphadia.toml"
 "MSAID" = "parse_settings_msaid.toml"
-"Custom" = "parse_settings_custom_DIA_quant_ion.toml"
+"Custom" = "parse_settings_custom.toml"
 
 
 

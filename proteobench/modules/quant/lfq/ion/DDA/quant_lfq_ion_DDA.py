@@ -21,17 +21,19 @@ from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class DIAQuantIonModule(QuantModule):
-    """DIA Quantification Module for Ion level Quantification."""
+class DDAQuantIonModule(QuantModule):
+    """DDA Quantification Module for Ion level Quantification."""
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA",
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA",
+        proteobench_repo_name: str = "Proteobench/Results_Module2_quant_DDA",
+        proteobot_repo_name: str = "Proteobot/Results_Module2_quant_DDA",
+        # TODO: Figure out how to do nicer relative calls
         parse_settings_dir: str = os.path.abspath(
             os.path.join(
                 os.path.dirname(__file__),
+                "..",
                 "..",
                 "..",
                 "..",
@@ -40,14 +42,15 @@ class DIAQuantIonModule(QuantModule):
                 "parsing",
                 "io_parse_settings",
                 "Quant",
-                "DIA",
-                "AIF",
+                "lfq",
+                "ion",
+                "DDA",
             )
         ),
-        module_id="quant_lfq_ion_DIA_AIF",
+        module_id="quant_lfq_ion_DDA",
     ):
         """
-        DIA Quantification Module for Ion level Quantification.
+        DDA Quantification Module for Ion level Quantification.
 
         Parameters
         ----------
@@ -76,10 +79,10 @@ class DIAQuantIonModule(QuantModule):
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
-        return False
+        return True
 
     def benchmarking(
-        self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
+        self, input_file_loc: any, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -104,8 +107,9 @@ class DIAQuantIonModule(QuantModule):
         """
 
         # Parse workflow output file
+
         try:
-            input_df = load_input_file(input_file, input_format)
+            input_df = load_input_file(input_file_loc, input_format)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
@@ -146,19 +150,18 @@ class DIAQuantIonModule(QuantModule):
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
-        # generate current data point
         # try:
         current_datapoint = Datapoint.generate_datapoint(
             intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
         # except Exception as e:
-        #     raise DatapointGenerationError(f"Error generating datapoint: {e}")
+        #    raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
         # add current data point to all datapoints
-        try:
-            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
-        except Exception as e:
-            raise DatapointAppendError(f"Error adding current data point: {e}")
+        # try:
+        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
+        # except Exception as e:
+        #    raise DatapointAppendError(f"Error adding current data point: {e}")
 
         # return intermediate data structure, all datapoints, and input DataFrame
         # TODO check why there are NA and inf/-inf values

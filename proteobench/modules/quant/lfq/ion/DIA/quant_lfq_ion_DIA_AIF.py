@@ -15,25 +15,24 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
-from proteobench.io.parsing.parse_peptidoform import load_input_file
+from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-
-# from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class DDAQuantPeptidoformModule(QuantModule):
-    """DDA Quantification Module for Peptidoform level Quantification."""
+class DIAQuantIonModule(QuantModule):
+    """DIA Quantification Module for Ion level Quantification."""
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
-        proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA",
         parse_settings_dir: str = os.path.abspath(
             os.path.join(
                 os.path.dirname(__file__),
+                "..",
                 "..",
                 "..",
                 "..",
@@ -42,13 +41,16 @@ class DDAQuantPeptidoformModule(QuantModule):
                 "parsing",
                 "io_parse_settings",
                 "Quant",
-                "DDA",
+                "lfq",
+                "ion",
+                "DIA",
+                "AIF",
             )
         ),
-        module_id="quant_lfq_peptidoform_DDA",
+        module_id="quant_lfq_ion_DIA_AIF",
     ):
         """
-        DDA Quantification Module for Peptidoform level Quantification.
+        DIA Quantification Module for Ion level Quantification.
 
         Parameters
         ----------
@@ -72,7 +74,7 @@ class DDAQuantPeptidoformModule(QuantModule):
             parse_settings_dir=parse_settings_dir,
             module_id=module_id,
         )
-        self.precursor_name = "peptidoform"
+        self.precursor_name = "precursor ion"
         self.module_id = module_id
 
     def is_implemented(self) -> bool:
@@ -105,7 +107,6 @@ class DDAQuantPeptidoformModule(QuantModule):
         """
 
         # Parse workflow output file
-
         try:
             input_df = load_input_file(input_file, input_format)
         except pd.errors.ParserError as e:
@@ -117,7 +118,6 @@ class DDAQuantPeptidoformModule(QuantModule):
 
         # Parse settings file
         try:
-            print(self.module_id)
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
@@ -150,12 +150,12 @@ class DDAQuantPeptidoformModule(QuantModule):
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
         # generate current data point
-        try:
-            current_datapoint = Datapoint.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-            )
-        except Exception as e:
-            raise DatapointGenerationError(f"Error generating datapoint: {e}")
+        # try:
+        current_datapoint = Datapoint.generate_datapoint(
+            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        )
+        # except Exception as e:
+        #     raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
         # add current data point to all datapoints
         try:

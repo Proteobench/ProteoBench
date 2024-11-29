@@ -18,8 +18,10 @@ class ParseSettingsBuilder:
             os.path.join(os.path.dirname(__file__), "io_parse_settings", "parse_settings_files.toml")
         )
         if parse_settings_dir is None:
-            parse_settings_dir = os.path.join(os.path.dirname(__file__), "io_parse_settings", "Quant", "DDA")
-        # TODO: more neat way to handle this
+            parse_settings_dir = os.path.join(
+                os.path.dirname(__file__), "io_parse_settings", "Quant", "lfq", "ion", "DDA"
+            )
+
         try:
             self.PARSE_SETTINGS_FILES = {
                 key: os.path.join(parse_settings_dir, value)
@@ -32,7 +34,6 @@ class ParseSettingsBuilder:
 
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
-        print(self.INPUT_FORMATS)
 
         # Check if all files are present
         missing_files = [file for file in self.PARSE_SETTINGS_FILES.values() if not os.path.isfile(file)]
@@ -65,8 +66,8 @@ class ParseSettings:
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
         self._species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
-
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
+        self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
 
     def species_dict(self):
@@ -131,13 +132,24 @@ class ParseSettings:
         df_filtered_melted.loc[:, "replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
-        if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
-            df_filtered_melted["precursor ion"] = (
-                df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
-            )
+        if self.analysis_level == "ion":
+            if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
+                df_filtered_melted["precursor ion"] = (
+                    df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
+                )
+            else:
+                print("Not all columns required for making the ion are available.")
+            return df_filtered_melted, replicate_to_raw
+
+        elif self.analysis_level == "peptidoform":
+            if "proforma" in df_filtered_melted.columns:
+                df_filtered_melted["peptidoform"] = df_filtered_melted["proforma"]
+            else:
+                print("Not all columns required for making the peptidoform are available.")
+            return df_filtered_melted, replicate_to_raw
+
         else:
-            print("Not all columns required for making the ion are available.")
-        return df_filtered_melted, replicate_to_raw
+            raise ValueError("Analysis level not supported.")
 
 
 class ParseModificationSettings:
@@ -168,17 +180,25 @@ class ParseModificationSettings:
             modification_dict=self.modifications_mapper,
         )
 
-        try:
-            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
-        except KeyError:
-            raise KeyError(
-                "Not all columns required for making the ion are available."
-                "Is the charge available in the input file?"
-            )
+        if self.parser.analysis_level == "ion":
+            try:
+                df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+            except KeyError:
+                raise KeyError(
+                    "Not all columns required for making the ion are available."
+                    "Is the charge available in the input file?"
+                )
 
-        if "proforma" in df.columns and "Charge" in df.columns:
-            df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
-        else:
-            print("Not all columns required for making the ion are available.")
+            if "proforma" in df.columns and "Charge" in df.columns:
+                df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+            else:
+                print("Not all columns required for making the ion are available.")
 
-        return df, replicate_to_raw
+            return df, replicate_to_raw
+
+        elif self.parser.analysis_level == "peptidoform":
+            if "proforma" in df.columns:
+                df["peptidoform"] = df["proforma"]
+            else:
+                print("Not all columns required for making the peptidoform are available.")
+            return df, replicate_to_raw

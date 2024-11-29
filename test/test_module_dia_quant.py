@@ -10,7 +10,9 @@ from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.DIA.ion.AIF import DIAQuantIonModule
+from proteobench.modules.quant.lfq.ion.DIA.quant_lfq_ion_DIA_AIF import (
+    DIAQuantIonModule,
+)
 from proteobench.plotting.plot_quant import PlotDataPoint
 from proteobench.score.quant.quantscores import QuantScores
 
@@ -33,6 +35,8 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "parsing",
         "io_parse_settings",
         "Quant",
+        "lfq",
+        "ion",
         "DIA",
         "AIF",
     )

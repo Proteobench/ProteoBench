@@ -20,10 +20,13 @@ class DIAQuantIonModulediaPASEF(DIAQuantIonModule):
                 "..",
                 "..",
                 "..",
+                "..",
                 "io",
                 "parsing",
                 "io_parse_settings",
                 "Quant",
+                "lfq",
+                "ion",
                 "DIA",
                 "diaPASEF",
             )

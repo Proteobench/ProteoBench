@@ -15,30 +15,43 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+
+# from proteobench.io.parsing.parse_settings_peptidoform import ParseSettingsBuilder
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class DDAQuantIonModule(QuantModule):
-    """DDA Quantification Module for Ion level Quantification."""
+class DDAQuantPeptidoformModule(QuantModule):
+    """DDA Quantification Module for Peptidoform level Quantification."""
 
     def __init__(
         self,
         token: str,
-        proteobench_repo_name: str = "Proteobench/Results_Module2_quant_DDA",
-        proteobot_repo_name: str = "Proteobot/Results_Module2_quant_DDA",
-        # TODO: Figure out how to do nicer relative calls
+        proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
         parse_settings_dir: str = os.path.abspath(
             os.path.join(
-                os.path.dirname(__file__), "..", "..", "..", "..", "io", "parsing", "io_parse_settings", "Quant", "DDA"
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "io",
+                "parsing",
+                "io_parse_settings",
+                "Quant",
+                "lfq",
+                "peptidoform",
+                "DDA",
             )
         ),
-        module_id="quant_lfq_ion_DDA",
+        module_id="quant_lfq_peptidoform_DDA",
     ):
         """
-        DDA Quantification Module for Ion level Quantification.
+        DDA Quantification Module for Peptidoform level Quantification.
 
         Parameters
         ----------
@@ -62,15 +75,15 @@ class DDAQuantIonModule(QuantModule):
             parse_settings_dir=parse_settings_dir,
             module_id=module_id,
         )
-        self.precursor_name = "precursor ion"
+        self.precursor_name = "peptidoform"
         self.module_id = module_id
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""
-        return True
+        return False
 
     def benchmarking(
-        self, input_file_loc: any, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
+        self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -97,7 +110,7 @@ class DDAQuantIonModule(QuantModule):
         # Parse workflow output file
 
         try:
-            input_df = load_input_file(input_file_loc, input_format)
+            input_df = load_input_file(input_file, input_format)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
@@ -107,6 +120,7 @@ class DDAQuantIonModule(QuantModule):
 
         # Parse settings file
         try:
+            print(self.module_id)
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
@@ -138,18 +152,19 @@ class DDAQuantIonModule(QuantModule):
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
-        # try:
-        current_datapoint = Datapoint.generate_datapoint(
-            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-        )
-        # except Exception as e:
-        #    raise DatapointGenerationError(f"Error generating datapoint: {e}")
+        # generate current data point
+        try:
+            current_datapoint = Datapoint.generate_datapoint(
+                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            )
+        except Exception as e:
+            raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
         # add current data point to all datapoints
-        # try:
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
-        # except Exception as e:
-        #    raise DatapointAppendError(f"Error adding current data point: {e}")
+        try:
+            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
+        except Exception as e:
+            raise DatapointAppendError(f"Error adding current data point: {e}")
 
         # return intermediate data structure, all datapoints, and input DataFrame
         # TODO check why there are NA and inf/-inf values

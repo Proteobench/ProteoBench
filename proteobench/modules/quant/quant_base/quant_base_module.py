@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 from tempfile import TemporaryDirectory
 from typing import Any, Optional
 
@@ -368,33 +369,42 @@ class QuantModule:
 
         return os.path.join(self.t_dir_pr, "results.json")
 
-    def write_intermediate_raw(self, dir: str, ident: str, input_df: pd.DataFrame, result_performance, param_loc):
+    def write_intermediate_raw(
+        self, dir: str, ident: str, input_file_path: str, result_performance: pd.DataFrame, param_loc
+    ):
         """
         Write intermediate and raw data to a directory.
 
         Parameters
         ----------
-        dir
+        dir : str
             Directory to write to.
-        ident
-            Intermediate hash of the submission.
-        input_df
-            Input DataFrame.
-        result_performance
-            Result performance DataFrame.
+        ident : str
+            Identifier (e.g., hash) to create a subdirectory for this submission.
+        input_file_path : str
+            Location to temp file of raw-input
+        result_performance : pd.DataFrame
+            Result performance DataFrame to be saved.
+        param_loc : list of str
+            List of paths to parameter files that need to be copied to the directory.
         """
 
+        # Create the target directory
         path_write = os.path.join(dir, ident)
         try:
-            os.mkdir(path_write)
-        except:
-            logging.warning(f"Could not make directory: {path_write}")
+            os.makedirs(path_write, exist_ok=True)
+        except Exception as e:
+            logging.warning(f"Could not create directory: {path_write}. Error: {e}")
+
+        try:
+            shutil.copy(input_file_path, dir)
+        except Exception as e:
+            logging.error(f"Failed to save input file to {input_file_path}. Error: {e}")
 
         # TODO: save parameters file "locally" together with the raw and intermediate?
-        with open(os.path.join(path_write, "params.csv"), "w") as f:
+        with open(os.path.join(path_write, "params_without_extension"), "w") as f:
             f.write(",\n".join(_file.getvalue().decode("utf-8") for _file in param_loc))
 
-        input_df.to_csv(os.path.join(path_write, "input_df.csv"))
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 
     def load_params_file(self, input_file: list[str], input_format: str) -> ProteoBenchParameters:
@@ -413,9 +423,6 @@ class QuantModule:
         ProteoBenchParameters
             Parameters for the module.
         """
-
-        # ! adapted to be able to parse more than one file.
-        # ! how to ensure orrect order?
         params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
         params.software_name = input_format
         return params

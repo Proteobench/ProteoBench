@@ -415,11 +415,13 @@ class QuantUIObjects:
             ].iloc[-1, :]["intermediate_hash"]
         )
 
+        self.user_input["input_csv"].getbuffer()
+
         if "storage" in st.secrets.keys():
             self.ionmodule.write_intermediate_raw(
                 st.secrets["storage"]["dir"],
                 id,
-                st.session_state[self.variables_quant.input_df_submission],
+                self.user_input["input_csv"],
                 st.session_state[self.variables_quant.result_performance_submission],
                 self.user_input[self.variables_quant.meta_data],
             )

@@ -66,9 +66,9 @@ class Datapoint:
     Attributes:
         id (str): Unique identifier for the datapoint.
         software_name (str): Name of the software used.
-        software_version (int): Version of the software.
+        software_version (float): Version of the software.
         search_engine (str): Name of the search engine used.
-        search_engine_version (int): Version of the search engine.
+        search_engine_version (float): Version of the search engine.
         ident_fdr_psm (int): False discovery rate for PSM identification.
         ident_fdr_peptide (int): False discovery rate for peptide identification.
         ident_fdr_protein (int): False discovery rate for protein identification.
@@ -90,9 +90,9 @@ class Datapoint:
 
     id: Optional[str] = None
     software_name: Optional[str] = None
-    software_version: int = 0
+    software_version: float = 0
     search_engine: Optional[str] = None
-    search_engine_version: int = 0
+    search_engine_version: float = 0
     ident_fdr_psm: int = 0
     ident_fdr_peptide: int = 0
     ident_fdr_protein: int = 0
@@ -146,9 +146,9 @@ class Datapoint:
         result_datapoint = Datapoint(
             id=f"{input_format}_{user_input['software_version']}_{formatted_datetime}",
             software_name=input_format,
-            software_version=int(user_input["software_version"]),
+            software_version=float(user_input["software_version"]),
             search_engine=user_input["search_engine"],
-            search_engine_version=int(user_input["search_engine_version"]),
+            search_engine_version=float(user_input["search_engine_version"]),
             ident_fdr_psm=int(user_input["ident_fdr_psm"]),
             ident_fdr_peptide=int(user_input["ident_fdr_peptide"]),
             ident_fdr_protein=int(user_input["ident_fdr_protein"]),

@@ -5,6 +5,7 @@ Module for handling parsing settings and converting benchmark tool outputs into 
 from __future__ import annotations
 
 import os
+from collections import defaultdict
 from typing import Any, Dict, List, Tuple
 
 import pandas as pd
@@ -142,7 +143,65 @@ class ParseSettings:
                 - Mapping of replicate numbers to raw file names.
         """
         # Convert tool-specific column names to standard ones
-        ...
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected software tool."
+            )
+
+        df.rename(columns=self.mapper, inplace=True)
+
+        replicate_to_raw = defaultdict(list)
+        for k, v in self.condition_mapper.items():
+            replicate_to_raw[v].append(k)
+
+        if "Reverse" in self.mapper:
+            df_filtered = df[df["Reverse"] != self.decoy_flag].copy()
+        else:
+            df_filtered = df.copy()
+
+        df_filtered.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
+
+        df_filtered["contaminant"] = df_filtered["Proteins"].str.contains(self.contaminant_flag)
+        for flag, species in self._species_dict.items():
+            df_filtered[species] = df_filtered["Proteins"].str.contains(flag)
+        df_filtered["MULTI_SPEC"] = (
+            df_filtered[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
+        )
+
+        df_filtered = df_filtered[df_filtered["MULTI_SPEC"] == False]
+
+        # If there is "Raw file" then it is a long format, otherwise short format
+        if "Raw file" not in self.mapper.values():
+            melt_vars = self.condition_mapper.keys()
+            # Should be handled more elegant
+            try:
+                df_filtered_melted = df_filtered.melt(
+                    id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
+                    value_vars=melt_vars,
+                    var_name="Raw file",
+                    value_name="Intensity",
+                )
+            except KeyError:
+                df_filtered_melted = df_filtered.melt(
+                    id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
+                    value_vars=melt_vars,
+                    var_name="Raw file",
+                    value_name="Intensity",
+                )
+        else:
+            df_filtered_melted = df_filtered.copy()
+
+        df_filtered_melted.loc[:, "replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
+        df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
+
+        if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
+            df_filtered_melted["precursor ion"] = (
+                df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
+            )
+        else:
+            print("Not all columns required for making the ion are available.")
+        return df_filtered_melted, replicate_to_raw
 
 
 class ParseModificationSettings:

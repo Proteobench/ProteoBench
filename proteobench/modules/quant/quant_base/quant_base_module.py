@@ -369,9 +369,7 @@ class QuantModule:
 
         return os.path.join(self.t_dir_pr, "results.json")
 
-    def write_intermediate_raw(
-        self, dir: str, ident: str, input_file_path: str, result_performance: pd.DataFrame, param_loc
-    ):
+    def write_intermediate_raw(self, dir: str, ident: str, input_file_obj, result_performance: pd.DataFrame, param_loc):
         """
         Write intermediate and raw data to a directory.
 
@@ -381,8 +379,8 @@ class QuantModule:
             Directory to write to.
         ident : str
             Identifier (e.g., hash) to create a subdirectory for this submission.
-        input_file_path : str
-            Location to temp file of raw-input
+        input_file_obj : file-like object
+            File-like object representing the raw input file (e.g., from Streamlit).
         result_performance : pd.DataFrame
             Result performance DataFrame to be saved.
         param_loc : list of str
@@ -396,8 +394,13 @@ class QuantModule:
         except Exception as e:
             logging.warning(f"Could not create directory: {path_write}. Error: {e}")
 
+        # Save the input file-like object content to disk
+        input_file_path = os.path.join(path_write, "input_file_without_extension")
         try:
-            shutil.copy(input_file_path, dir)
+            input_file_obj.seek(0)  # Reset file pointer to the beginning
+            with open(input_file_path, "wb") as f:
+                f.write(input_file_obj.read())  # Read the content and write it to a file
+            logging.info(f"Input file saved to {input_file_path}")
         except Exception as e:
             logging.error(f"Failed to save input file to {input_file_path}. Error: {e}")
 

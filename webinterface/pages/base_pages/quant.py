@@ -14,11 +14,11 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
+from pages.pages_variables.Quant.lfq.ion.DDA.variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.dda_quant_ion_module import (
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
     DDAQuantIonModule as IonModule,
 )
 from proteobench.plotting.plot_quant import PlotDataPoint
@@ -89,6 +89,7 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.selectbox_id_uuid] = uuid.uuid4()
 
         try:
+            # TODO: Other labels based on different modules, e.g. mass tolerances are less relevant for DIA
             st.selectbox(
                 "Select label to plot",
                 ["None", "precursor_mass_tolerance", "fragment_mass_tolerance", "enable_match_between_runs"],
@@ -219,6 +220,7 @@ class QuantUIObjects:
             "Software tool result file", help=self.variables_quant.texts.Help.input_file
         )
 
+    # TODO: change additional_params_json for other modules, to capture relevant parameters
     def generate_additional_parameters_fields(self) -> None:
         """Creates the additional parameters section of the form and initializes the parameter fields."""
         st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)

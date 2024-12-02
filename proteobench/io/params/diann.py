@@ -1,15 +1,17 @@
 import pathlib
 import re
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
 
+# Regular expression patterns for extracting specific settings
 mass_tolerance_regex = r"(?<=Optimised mass accuracy: )\d*\.?\d+(?= ppm)"
 software_version_regex = r"(?<=DIA-NN\s)(.*?)(?=\s\(Data-Independent Acquisition by Neural Networks\))"
 scan_window_regex = r"(?<=Scan window radius set to )\d+"
 
+# Dictionary to map command-line settings to ProteoBench parameters
 PARAM_CMD_DICT = {
     "ident_fdr_peptide": "qvalue",
     "ident_fdr_protein": "qvalue",
@@ -27,6 +29,8 @@ PARAM_CMD_DICT = {
     "max_precursor_charge": "max-pr-charge",
     "scan_window": "window",
 }
+
+# Lists of settings that should be treated as floats, integers, or modifications
 SETTINGS_PB_FLOAT = [
     "ident_fdr_psm",
     "ident_fdr_peptide",
@@ -50,17 +54,11 @@ def find_cmdline_string(lines: List[str]) -> Optional[str]:
     """
     Find the command line statement in the log file of DIANN.
 
-    It is assumed that this statement is stored on a single line.
+    Args:
+        lines (List[str]): All input lines from the DIA-NN log file.
 
-    Parameter
-    ---------
-    lines: list[str]
-        All input lines from the DIA-NN log file.
-
-    Return
-    ------
-    str
-        The command line string.
+    Returns:
+        Optional[str]: The command line string if found, otherwise None.
     """
     for line in lines:
         if "diann" in line and "--f" in line and "--fasta" in line:
@@ -70,21 +68,15 @@ def find_cmdline_string(lines: List[str]) -> Optional[str]:
 
 def parse_cmdline_string(line: str) -> dict:
     """
-    Parse the command line string to the settings it specifies.
+    Parse the command line string to extract settings.
 
-    The GitHub README.md of DIA-NN from version 1.9 was used to interpret settings.
+    Args:
+        line (str): The command line string to parse.
 
-    Parameter
-    ---------
-    line: str
-        The command line string to parse.
-
-    Return
-    ------
-    dict:
-        Parsed setting parameters in dictionary format.
-        Keys are setting names and values the inputted setting in list format.
-        The value is boolean if the setting is considered a boolean flag.
+    Returns:
+        dict: A dictionary of parsed settings.
+            - Keys are setting names.
+            - Values are lists of settings (or booleans if the setting is a flag).
     """
     setting_dict = {}
     settings = [setting.split() for setting in line.split(" --")]
@@ -102,26 +94,21 @@ def parse_cmdline_string(line: str) -> dict:
             setting_dict[setting_list[0]] = setting_list[1:]
 
     setting_dict["var-mod"] = var_mods
-    if "mod" not in setting_dict.keys():
+    if "mod" not in setting_dict:
         setting_dict["mod"] = fixed_mods
     return setting_dict
 
 
 def parse_setting(setting_name: str, setting_list: list) -> Any:
     """
-    Parse individual settings based on their setting type.
+    Parse individual settings based on their type.
 
-    Parameters
-    ----------
-    setting_name: str
-        The name of the setting (ProteoBench).
-    setting_list: list
-        The input value of a given setting.
+    Args:
+        setting_name (str): The name of the setting.
+        setting_list (list): The list of values for the setting.
 
-    Return
-    ------
-    Any
-        The parsed setting.
+    Returns:
+        Any: The parsed value, which could be a float, integer, or string.
     """
     if setting_name in SETTINGS_PB_FLOAT:
         assert len(setting_list) == 1
@@ -134,121 +121,100 @@ def parse_setting(setting_name: str, setting_list: list) -> Any:
     return "".join(setting_list)
 
 
-def extract_with_regex(lines: List[str], regex) -> str:
+def extract_with_regex(lines: List[str], regex: str) -> str:
     """
-    If no mass accuracy was specified in the cmd string, extract it from the log-file.
+    Extract a value from lines using the provided regular expression.
 
-    Parameter
-    ---------
-    lines: list[str]
-        All input lines from the DIA-NN log file.
+    Args:
+        lines (List[str]): All input lines from the DIA-NN log file.
+        regex (str): The regular expression pattern to search for.
 
-    Return
-    ------
-    str:
-        The MS1 and MS2 mass accuracy specified in ppm.
+    Returns:
+        str: The matched string if found, otherwise None.
     """
     for line in lines:
         regex_match = re.search(regex, line)
         if regex_match:
-            x = regex_match.group(0)
-            return x
+            return regex_match.group(0)
     return None
 
 
 def parse_protein_inference_method(cmdline_dict: dict) -> str:
     """
-    Parse the protein inference method from the parsed execution command string.
+    Parse the protein inference method from the command-line settings.
 
-    This setting is defined by disparate setting tags, namely:
-    - no-prot-inf: No protein inference
-    - pg-level: Code specifies inference method
+    Args:
+        cmdline_dict (dict): The parsed command line settings.
 
-    Parameter
-    ---------
-    cmdline_dict: dict
-        Parsed execution command string
-
-    Return
-    ------
-    str
-        The protein inference method.
-        Possibilities:
-        - Disabled
-        - Isoforms
-        - Protein_names
-        - Genes
+    Returns:
+        str: The protein inference method.
+            Possibilities are:
+            - "Disabled"
+            - "Isoforms"
+            - "Protein_names"
+            - "Genes"
     """
-    if "no-prot-inf" in cmdline_dict.keys():
+    if "no-prot-inf" in cmdline_dict:
         return "Disabled"
-    elif "pg-level" in cmdline_dict.keys():
+    elif "pg-level" in cmdline_dict:
         pg_setting = cmdline_dict["pg-level"][0]
         pg_level_mapping = {"0": "Isoforms", "1": "Protein_names", "2": "Genes"}
         try:
             return pg_level_mapping[pg_setting]
         except KeyError:
-            Exception(f"Unexpected setting passed to --pg-level in diann.exe: {pg_setting}")
+            raise Exception(f"Unexpected setting passed to --pg-level: {pg_setting}")
 
 
-def parse_quantification_strategy(cmdline_dict: dict):
+def parse_quantification_strategy(cmdline_dict: dict) -> str:
     """
-    Parse the quatnification method from the parsed execution command string.
+    Parse the quantification strategy from the command-line settings.
 
-    This setting is defined by disparate setting tags, namely:
-    - direct-quant: use legacy quantification within DIANN
-    - high-acc: QuantUMS high-accuracy setting
-    - no tag: Default is QuantUMS high-precision
+    Args:
+        cmdline_dict (dict): The parsed command line settings.
 
-    Parameter
-    ---------
-    cmdline_dict: dict
-        Parsed execution command string
-
-    Return
-    ------
-    str
-        The quantification method.
-        Possibilities:
-        - Legacy
-        - QuantUMS high-accuracy
-        - QuantUMS high-precision
+    Returns:
+        str: The quantification method.
+            Possibilities are:
+            - "Legacy"
+            - "QuantUMS high-accuracy"
+            - "QuantUMS high-precision"
     """
-    if "direct-quant" in cmdline_dict.keys():
+    if "direct-quant" in cmdline_dict:
         return "Legacy"
-    elif "high-acc" in cmdline_dict.keys():
+    elif "high-acc" in cmdline_dict:
         return "QuantUMS high-accuracy"
     else:
-        # Default value
-        return "QuantUMS high-precision"
+        return "QuantUMS high-precision"  # Default value
 
 
-def parse_predictors_library(cmdline_dict: dict):
+def parse_predictors_library(cmdline_dict: dict) -> Dict[str, str]:
     """
-    Parse the spectral library predictors from parsed execute command string.
+    Parse the spectral library predictors from the parsed execution command string.
 
-    For now, only 'DIANN' and 'User defined speclib' are supported.
-    In the future, the user might specify which algorithm was used for library generation.
+    Args:
+        cmdline_dict (dict): The parsed command line settings.
 
-    Parameter
-    ---------
-    cmdline_dict: dict
-        Parsed execution command string
-
-    Return
-    ------
-    dict
-        Dictionary specifying algorithm name for RT, IM and MS2_int.
+    Returns:
+        dict: A dictionary specifying the algorithm used for RT, IM, and MS2_int predictions.
     """
-    if "predictor" in cmdline_dict.keys():
+    if "predictor" in cmdline_dict:
         return {"RT": "DIANN", "IM": "DIANN", "MS2_int": "DIANN"}
-    elif "lib" in cmdline_dict.keys():
+    elif "lib" in cmdline_dict:
         if not isinstance(cmdline_dict["lib"], bool):
             return {"RT": "User defined speclib", "IM": "User defined speclib", "MS2_int": "User defined speclib"}
 
 
 def extract_params(fname: str) -> ProteoBenchParameters:
-    """Parse DIA-NN log file and extract relevant parameters."""
-    # Some default and flag settings
+    """
+    Parse the DIA-NN log file and extract relevant parameters into a ProteoBenchParameters object.
+
+    Args:
+        fname (str): The path to the DIA-NN log file.
+
+    Returns:
+        ProteoBenchParameters: A parameters object containing extracted settings.
+    """
+    # Default parameters
     parameters = {
         "software_name": "DIA-NN",
         "search_engine": "DIA-NN",
@@ -258,44 +224,40 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     }
 
     try:
-        # Read in the log file
         with open(fname) as f:
             lines = f.readlines()
     except:
         lines = [l for l in fname.read().decode("utf-8").splitlines()]
 
-    # Extract software versions from the log file.
-    software_version = search_engine_version = extract_with_regex(lines, software_version_regex)
+    # Extract software version
+    software_version = extract_with_regex(lines, software_version_regex)
     parameters["software_version"] = software_version
-    parameters["search_engine_version"] = search_engine_version
+    parameters["search_engine_version"] = software_version
 
-    # Get settings from the execution command string
+    # Extract settings from command-line
     cmdline_string = find_cmdline_string(lines)
     cmdline_dict = parse_cmdline_string(cmdline_string)
 
-    parameters["second_pass"] = "double-search" in cmdline_dict.keys() or "double-pass" in cmdline_dict.keys()
+    parameters["second_pass"] = "double-search" in cmdline_dict or "double-pass" in cmdline_dict
     parameters["quantification_method"] = parse_quantification_strategy(cmdline_dict)
     parameters["protein_inference"] = parse_protein_inference_method(cmdline_dict)
     parameters["predictors_library"] = parse_predictors_library(cmdline_dict)
 
-    # Parse most settings as possible from the execution command using PARAM_CMD_DICT for mapping.
+    # Map settings from command line to ProteoBench parameters
     for proteobench_setting, cmd_setting in PARAM_CMD_DICT.items():
-        if cmd_setting in cmdline_dict.keys():
+        if cmd_setting in cmdline_dict:
             if isinstance(cmdline_dict[cmd_setting], bool):
                 parameters[proteobench_setting] = cmdline_dict[cmd_setting]
             else:
                 parameters[proteobench_setting] = parse_setting(proteobench_setting, cmdline_dict[cmd_setting])
 
-    # If mass-acc flag is not present in cmdline string, extract it from the log file
-    if "precursor_mass_tolerance" not in parameters.keys():
+    # Extract mass tolerance if not present in command line
+    if "precursor_mass_tolerance" not in parameters:
         mass_tol = extract_with_regex(lines, mass_tolerance_regex)
-        parameters["precursor_mass_tolerance"] = mass_tol + " ppm"
-        parameters["fragment_mass_tolerance"] = mass_tol + " ppm"
-    else:
-        parameters["precursor_mass_tolerance"] = str(parameters["precursor_mass_tolerance"]) + " ppm"
-        parameters["fragment_mass_tolerance"] = str(parameters["fragment_mass_tolerance"]) + " ppm"
+        parameters["precursor_mass_tolerance"] = f"{mass_tol} ppm"
+        parameters["fragment_mass_tolerance"] = f"{mass_tol} ppm"
 
-    # If scan window is not customely set, extract it from the log file
+    # Extract scan window
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
 
     return ProteoBenchParameters(**parameters)

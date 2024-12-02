@@ -6,13 +6,24 @@ import logging
 from collections import ChainMap
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict
 
 import pandas as pd
 
 import proteobench
 
 
-def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
+def filter_df_numquant_median_abs_epsilon(row: Dict[str, Any], min_quant: int = 3) -> float | None:
+    """
+    Extract the 'median_abs_epsilon' value from a row (assumed to be a dictionary).
+
+    Args:
+        row (dict): The row from which to extract the value. Expected to be a dictionary.
+        min_quant (int or str, optional): The key for the desired value. Defaults to 3.
+
+    Returns:
+        float or None: The 'median_abs_epsilon' value if found, otherwise None.
+    """
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
@@ -21,7 +32,17 @@ def filter_df_numquant_median_abs_epsilon(row, min_quant=3):
     return None
 
 
-def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
+def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None:
+    """
+    Extract the 'nr_prec' value from a row (assumed to be a dictionary).
+
+    Args:
+        row (pd.Series or dict): The row from which to extract the value. Expected to be a dictionary or Series.
+        min_quant (int or str, optional): The key for the desired value. Defaults to 3.
+
+    Returns:
+        int or None: The 'nr_prec' value if found, otherwise None.
+    """
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
@@ -31,9 +52,34 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant=3):
 
 @dataclass
 class Datapoint:
-    """Data used to stored the results of a benchmark run."""
+    """
+    A data structure used to store the results of a benchmark run.
 
-    # TODO add threshold value used for presence ion/peptidoform
+    Attributes:
+        id (str): Unique identifier for the benchmark run.
+        software_name (str): Name of the software used in the benchmark.
+        software_version (int): Version of the software.
+        search_engine (str): Name of the search engine used.
+        search_engine_version (int): Version of the search engine.
+        ident_fdr_psm (int): False discovery rate for PSMs.
+        ident_fdr_peptide (int): False discovery rate for peptides.
+        ident_fdr_protein (int): False discovery rate for proteins.
+        enable_match_between_runs (bool): Whether matching between runs is enabled.
+        precursor_mass_tolerance (str): Mass tolerance for precursor ions.
+        fragment_mass_tolerance (str): Mass tolerance for fragment ions.
+        enzyme (str): Enzyme used for digestion.
+        allowed_miscleavages (int): Number of allowed miscleavages.
+        min_peptide_length (int): Minimum peptide length.
+        max_peptide_length (int): Maximum peptide length.
+        is_temporary (bool): Whether the data is temporary.
+        intermediate_hash (str): Hash of the intermediate result.
+        results (dict): A dictionary of metrics for the benchmark run.
+        median_abs_epsilon (int): Median absolute epsilon value for the benchmark.
+        nr_prec (int): Number of precursors identified.
+        comments (str): Any additional comments.
+        proteobench_version (str): Version of the Proteobench tool used.
+    """
+
     id: str = None
     software_name: str = None
     software_version: int = 0
@@ -53,21 +99,16 @@ class Datapoint:
     intermediate_hash: str = ""
     results: dict = None
     median_abs_epsilon: int = 0
-    # TODO nr_prec doesnt get updated in final df, always 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
 
-    # TODO do we want to save these values in the json?
-    # fixed_mods: [],
-    # variable_mods: [],
-    # max_mods: int = 0,
-    # min_precursor_charge: int = 0,
-    # max_precursor_charge: int = 0,
-    # reproducibility: int = 0,
-    # mean_reproducibility: int = 0,
+    def generate_id(self) -> None:
+        """
+        Generates a unique ID for the benchmark run by combining the software name and a timestamp.
 
-    def generate_id(self):
+        This ID is used to uniquely identify each run of the benchmark.
+        """
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.id = "_".join([self.software_name, str(time_stamp)])
         logging.info(f"Assigned the following ID to this run: {self.id}")
@@ -76,7 +117,18 @@ class Datapoint:
     def generate_datapoint(
         intermediate: pd.DataFrame, input_format: str, user_input: dict, default_cutoff_min_prec: int = 3
     ) -> pd.Series:
-        """Method used to compute metadata for the provided result."""
+        """
+        Generates a Datapoint object containing metadata and results from the benchmark run.
+
+        Args:
+            intermediate (pd.DataFrame): The intermediate DataFrame containing benchmark results.
+            input_format (str): The format of the input data (e.g., file format).
+            user_input (dict): User-defined input values for the benchmark.
+            default_cutoff_min_prec (int, optional): The default minimum precursor cutoff value. Defaults to 3.
+
+        Returns:
+            pd.Series: A Pandas Series containing the Datapoint's attributes as key-value pairs.
+        """
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
@@ -84,6 +136,7 @@ class Datapoint:
             user_input["comments_for_plotting"] = ""
 
         user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
+
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
@@ -106,6 +159,7 @@ class Datapoint:
         )
 
         result_datapoint.generate_id()
+
         results = dict(ChainMap(*[Datapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
@@ -115,17 +169,28 @@ class Datapoint:
         return results_series
 
     @staticmethod
-    def get_metrics(df, min_nr_observed=1):
-        # compute mean of epsilon column in df
-        # take abs value of df["epsilon"]
-        # TODO use nr_missing to filter df before computing stats.
+    def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> Dict[int, Dict[str, float]]:
+        """
+        Computes various statistical metrics from the provided DataFrame for the benchmark.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the benchmark results.
+            min_nr_observed (int, optional): The minimum number of observed values for a valid computation. Defaults to 1.
+
+        Returns:
+            dict: A dictionary containing computed metrics such as 'median_abs_epsilon', 'variance_epsilon', etc.
+        """
+        # Filter DataFrame by the minimum number of observations
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         nr_prec = len(df_slice)
-        # median abs unafected by outliers
+
+        # Calculate the median absolute epsilon (insensitive to outliers)
         median_abs_epsilon = df_slice["epsilon"].abs().mean()
-        # variance affected by outliers
+
+        # Calculate the variance of epsilon (sensitive to outliers)
         variance_epsilon = df_slice["epsilon"].var()
-        # TODO more concise way to describe distribution of CV's
+
+        # Compute the median of the coefficient of variation (CV) for both 'CV_A' and 'CV_B'
         cv_median = (df_slice["CV_A"].median() + df_slice["CV_B"].median()) / 2
         cv_q75 = (df_slice["CV_A"].quantile(0.75) + df_slice["CV_B"].quantile(0.75)) / 2
         cv_q90 = (df_slice["CV_A"].quantile(0.9) + df_slice["CV_B"].quantile(0.9)) / 2

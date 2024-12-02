@@ -1,6 +1,7 @@
 """Parser for Alphapept yaml configuration files."""
 
 import pathlib
+from typing import Optional
 
 import pandas as pd
 import yaml
@@ -10,19 +11,14 @@ from proteobench.io.params import ProteoBenchParameters
 
 def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     """
-    Extracts parameters from an AlphaPept yaml configuration file.
+    Extracts parameters from an AlphaPept YAML configuration file.
 
-    Parameters
-    ----------
-    fname : pathlib.Path
-        Path to the AlphaPept configuration file.
+    Args:
+        fname (pathlib.Path): Path to the AlphaPept configuration file.
 
-    Returns
-    -------
-    ProteoBenchParameters
-        The extracted parameters.
+    Returns:
+        ProteoBenchParameters: The extracted parameters as a ProteoBenchParameters object.
     """
-
     try:
         record = yaml.safe_load(fname)
     except AttributeError:
@@ -30,12 +26,17 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         with open(fname, "rb") as f:
             record = yaml.safe_load(f)
 
+    # Extracting the summary data
     summary = record["summary"]
     params = ProteoBenchParameters()
+
+    # Set software details
     params.software_name = "AlphaPept"
     params.software_version = summary["version"]
     params.search_engine = params.software_name
     params.search_engine_version = params.software_version
+
+    # Extract FASTA related details
     fasta = record["fasta"]
     params.enzyme = fasta["protease"]
     params.allowed_miscleavages = fasta["n_missed_cleavages"]
@@ -44,24 +45,27 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     params.max_mods = fasta["n_modifications_max"]
     params.min_peptide_length = fasta["pep_length_min"]
     params.max_peptide_length = fasta["pep_length_max"]
+
+    # Extract search parameters
     search = record["search"]
-    _tolerance_unit = "Da"  # default
+    _tolerance_unit = "Da"  # Default unit is Da
     if search["ppm"]:
         _tolerance_unit = "ppm"
     params.precursor_mass_tolerance = f'{search["prec_tol"]} {_tolerance_unit}'
     params.fragment_mass_tolerance = f'{search["frag_tol"]} {_tolerance_unit}'
     params.ident_fdr_protein = search["protein_fdr"]
     params.ident_fdr_peptide = search["peptide_fdr"]
-    # params.ident_fdr_psm = search
+
+    # Extract features and workflow details
     params.min_precursor_charge = record["features"]["iso_charge_min"]
     params.max_precursor_charge = record["features"]["iso_charge_max"]
-    params.enable_match_between_runs = record["workflow"]["match"]  # ! check
+    params.enable_match_between_runs = record["workflow"]["match"]  # Check if matching is enabled
 
     return params
 
 
 if __name__ == "__main__":
-    # create test csv files
+    # Create test CSV files for each YAML configuration
     for fname in [
         "../../../test/params/alphapept_0.4.9.yaml",
         "../../../test/params/alphapept_0.4.9_unnormalized.yaml",

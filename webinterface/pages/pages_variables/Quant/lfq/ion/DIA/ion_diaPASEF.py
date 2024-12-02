@@ -53,9 +53,9 @@ class VariablesDIAQuantdiaPASEF:
     description_results_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/result_description.md"
     description_submission_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/submit_description.md"
 
-    all_datapoints_submitted: str = "all_datapoints_submitted_dia_quant"
-    placeholder_table_submitted: str = "placeholder_table_submitted_dia_quant"
-    placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant"
+    all_datapoints_submitted: str = "all_datapoints_submitted_dia_quant_diaPASEF"
+    placeholder_table_submitted: str = "placeholder_table_submitted_dia_quant_diaPASEF"
+    placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant_diaPASEF"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/ion/DIA/diaPASEF"

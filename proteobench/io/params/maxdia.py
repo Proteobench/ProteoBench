@@ -1,26 +1,54 @@
-import re
-from proteobench.io.params import ProteoBenchParameters
-from maxquant import extract_params as extract_params_mq, read_file, build_Series_from_records
 import pathlib
+import re
+from typing import Any
+
 import pandas as pd
+from maxquant import build_Series_from_records
+from maxquant import extract_params as extract_params_mq
+from maxquant import read_file
+
+from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(fname: str) -> ProteoBenchParameters:
-    """Relying on maxquant parser for maxDIA parameter parsing."""
+    """
+    Parse MaxDIA parameters using MaxQuant's parser and extract additional parameters.
 
+    Args:
+        fname (str): The file path to the MaxDIA parameter file.
+
+    Returns:
+        ProteoBenchParameters: The extracted parameters as a `ProteoBenchParameters` object.
+    """
+    # Use MaxQuant's extract_params to parse the base parameters
     parameters = extract_params_mq(fname)
+
+    # Read the MaxDIA parameter file and build a pandas Series from the records
     series = build_Series_from_records(read_file(fname)).reset_index()
 
+    # Extract and set peptide length parameters
     parameters.min_peptide_length = series.loc[series["level_0"] == "minPeptideLength", 0].values[0]
     parameters.max_peptide_length = series.loc[series["level_0"] == "maxPeptideLengthForUnspecificSearch", 0].values[0]
+
+    # Set search engine version from software version
     parameters.search_engine_version = parameters.__dict__["software_version"]
+
     return parameters
 
 
 if __name__ == "__main__":
+    """
+    Reads MaxDIA parameter files, extracts parameters, and writes them to CSV files.
+    """
     for fname in ["../../../test/params/mqpar_maxdia.xml"]:
         file = pathlib.Path(fname)
+
+        # Extract parameters using the defined function
         params = extract_params(file)
+
+        # Convert the parameters to a dictionary and then to a pandas Series
         data_dict = params.__dict__
         series = pd.Series(data_dict)
+
+        # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".csv"))

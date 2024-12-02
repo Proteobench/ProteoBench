@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import pprint
 import re
 from collections import namedtuple
 from io import BytesIO

@@ -8,6 +8,7 @@ expressed with a hash sign.
 from __future__ import annotations
 
 import logging
+import pathlib
 import re
 from collections import namedtuple
 from io import BytesIO

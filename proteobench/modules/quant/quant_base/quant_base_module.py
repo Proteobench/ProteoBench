@@ -369,7 +369,9 @@ class QuantModule:
 
         return os.path.join(self.t_dir_pr, "results.json")
 
-    def write_intermediate_raw(self, dir: str, ident: str, input_file_obj, result_performance: pd.DataFrame, param_loc):
+    def write_intermediate_raw(
+        self, dir: str, ident: str, input_file_obj, result_performance: pd.DataFrame, param_loc, comment: str
+    ):
         """
         Write intermediate and raw data to a directory.
 
@@ -385,6 +387,8 @@ class QuantModule:
             Result performance DataFrame to be saved.
         param_loc : list of str
             List of paths to parameter files that need to be copied to the directory.
+        comment : str
+            User comment for the submission.
         """
 
         # Create the target directory
@@ -409,6 +413,9 @@ class QuantModule:
             f.write(",\n".join(_file.getvalue().decode("utf-8") for _file in param_loc))
 
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
+
+        with open(os.path.join(path_write, "comment.txt"), "w") as f:
+            f.write(comment)
 
     def load_params_file(self, input_file: list[str], input_format: str) -> ProteoBenchParameters:
         """

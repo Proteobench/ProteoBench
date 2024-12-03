@@ -424,6 +424,7 @@ class QuantUIObjects:
                 self.user_input["input_csv"],
                 st.session_state[self.variables_quant.result_performance_submission],
                 self.user_input[self.variables_quant.meta_data],
+                st.session_state[self.variables_quant.meta_data_text],
             )
 
     def copy_dataframes_for_submission(self) -> None:

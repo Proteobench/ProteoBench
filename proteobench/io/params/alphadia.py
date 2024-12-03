@@ -1,43 +1,48 @@
-import re
-from proteobench.io.params import ProteoBenchParameters
 import pathlib
+import re
+from typing import Dict, Iterable, Optional, Tuple
+
 import pandas as pd
-from typing import Iterable, Tuple, Optional
+
+from proteobench.io.params import ProteoBenchParameters
 
 levels = [0, 1, 5, 9, 13, 17]
 
+# Regular expression to remove ANSI escape codes from strings (used for terminal color codes)
 ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
 
 
-# Function to clean up lines
 def clean_line(line: str) -> str:
+    """
+    Cleans up a line by removing ANSI escape codes and leading/trailing whitespace.
+
+    Args:
+        line (str): The line to be cleaned.
+
+    Returns:
+        str: The cleaned line with no ANSI codes and stripped whitespace.
+    """
     line = ANSI_REGEX.sub("", line)
     return line.strip()
 
 
-def parse_line(line: str) -> Tuple[str, dict, int]:
+def parse_line(line: str) -> Tuple[str, Dict[str, Tuple[Optional[str], Optional[str]]], int]:
     """
-    Parse a log line into a tuple.
+    Parses a log line into a tuple containing the setting name, a dictionary of settings, and the indentation level.
 
-    Parameter
-    ---------
-    line: str
-        A log line.
+    Args:
+        line (str): A log line to parse.
 
-    Returns
-    -------
-    str:
-        Setting name
-    dict:
-        Dictionary of setting name and value
-    int:
-        The indentation level
+    Returns:
+        Tuple[str, dict, int]:
+            - The setting name as a string.
+            - A dictionary of setting names and their associated values (and flags, if any).
+            - The indentation level as an integer, indicating the depth of the setting in the hierarchy.
     """
-    # Remove the info part and convert ansi
     line = clean_line(line[22:])
-    # Split the string to tab part and setting part
     tab, setting = line.split("──")
     setting_list = setting.split(":")
+
     if len(setting_list) == 1:
         setting_dict = {setting_list[0]: (None, None)}
     else:
@@ -48,13 +53,10 @@ def parse_line(line: str) -> Tuple[str, dict, int]:
         elif "(default)" in value:
             value = value.replace("(default)", "").strip()
             setting_dict = {setting_list[0]: (value, "default")}
-
         else:
             setting_dict = {setting_list[0]: (value, None)}
 
-    # Convert tab to level
-    level = levels.index(len(tab))
-    # Return header, parsed setting, and the level
+    level = levels.index(len(tab))  # Convert tab count to level
     return setting_list[0], setting_dict, level
 
 
@@ -78,13 +80,11 @@ def process_nested_values(
         nested_values = []
         current_header = header_prev
 
-    # Collect all values under this nested section
     value = list(line_dict_next.keys())[0].split()[0]  # Extract value before space
     nested_values.append(int(value))
 
-    # If "user defined", overwrite the default
     if "(user defined)" in list(line_dict_next.keys())[0]:
-        nested_values.pop(-2)
+        nested_values.pop(-2)  # Remove the default value if overridden by user defined
 
     section[header_prev] = nested_values
     return current_header, nested_values
@@ -92,14 +92,11 @@ def process_nested_values(
 
 def update_section_with_line_dict(section: dict, line_dict_next: dict) -> None:
     """
-    Update the section dictionary with values from line_dict_next.
+    Updates the section dictionary with values from the line_dict_next.
 
-    Parameters
-    ----------
-    section: dict
-        The section dictionary to update.
-    line_dict_next: dict
-        Dictionary containing the key-value pairs to update in the section.
+    Args:
+        section (dict): The section dictionary to update.
+        line_dict_next (dict): The dictionary containing the new values to add to the section.
     """
     for key, (value, flag) in line_dict_next.items():
         if key in section and flag == "user defined":
@@ -108,50 +105,36 @@ def update_section_with_line_dict(section: dict, line_dict_next: dict) -> None:
             section[key] = value
 
 
-def parse_section(
-    line: Tuple[str, dict, int],
-    line_generator: Iterable,
-) -> Tuple[dict, int, Optional[Tuple]]:
+def parse_section(line: Tuple[str, dict, int], line_generator: Iterable[str]) -> Tuple[dict, int, Optional[Tuple]]:
     """
-    Parse a section into a dictionary.
+    Parses a section from a log file into a dictionary and returns the parsed section along with the indentation level and the next line.
 
-    All settings at the same indentation level are added to a dictionary.
+    Args:
+        line (Tuple[str, dict, int]): The first parsed line of a new section.
+        line_generator (Iterable[str]): The line generator of log file lines.
 
-    Parameter
-    ---------
-    line: str
-        First parsed line of a new section
-    line_generator: Generator
-        The line generator of log file lines
-
-    Return
-    ------
-    dict:
-        The parsed section
-    int:
-        The indentation level of the line after the section
-    next_line:
-        The line after the section
+    Returns:
+        Tuple[dict, int, Optional[Tuple]]:
+            - The parsed section as a dictionary.
+            - The indentation level of the line after the section.
+            - The next line after the section, or None if no more lines are available.
     """
     section = {}
 
-    # Parse the line (both level and dictionary)
+    # Parse the current line and add to the section
     header_prev, line_dict, level_prev = line
     section.update(line_dict)
 
     try:
-        # Get the next line to know what to do
         next_line = next(line_generator)
         header_next, line_dict_next, level_next = parse_line(next_line)
     except StopIteration:
-        # If no lines left, go up a level, returning the section so far
         return {k: v[0] if isinstance(v, tuple) else v for k, v in section.items()}, 0, None
 
     nested_values = []
     current_header = None
 
     while True:
-        # If no more lines go up a level
         try:
             header_next, line_dict_next, level_next = parse_line(next_line)
         except StopIteration:
@@ -160,8 +143,7 @@ def parse_section(
         if not isinstance(line_dict_next, dict):
             continue
 
-        # If the next line is start of new section again
-        if level_next > level_prev:
+        if level_next > level_prev:  # Start of a new section
             if header_prev in ["precursor_len", "precursor_charge", "precursor_mz", "fragment_mz"]:
                 current_header, nested_values = process_nested_values(
                     header_prev, current_header, nested_values, line_dict_next, section
@@ -171,21 +153,15 @@ def parse_section(
                     continue
                 except StopIteration:
                     break
-
             else:
-                # Get the subsection
-
                 subsection, _, next_line = parse_section(
                     line=parse_line(next_line),
                     line_generator=line_generator,
                 )
-                # Add this subsection to new section
-                # A new line is already outputted so continue
                 section[header_prev] = subsection
                 continue
 
-        # if new line is at same level
-        elif level_prev == level_next:
+        elif level_prev == level_next:  # Same level
             update_section_with_line_dict(section, line_dict_next)
             header_prev = header_next
             level_prev = level_next
@@ -194,9 +170,7 @@ def parse_section(
             except StopIteration:
                 break
 
-        # The next line needs to go up and output the section
-        # Also the new line should be returned
-        else:
+        else:  # Going up a level
             break
 
     return {k: v[0] if isinstance(v, tuple) else v for k, v in section.items()}, level_next, next_line
@@ -204,39 +178,26 @@ def parse_section(
 
 def extract_file_version(line: str) -> str:
     """
-    Extract file version from alphaDIA log file line.
+    Extracts the version from a given line of an alphaDIA log file.
 
-    Parameter
-    ---------
-    line: str
-        The line containing the version number.
+    Args:
+        line (str): The line containing the version number.
 
-    Return
-    ------
-    str
-        Version number.
+    Returns:
+        str: The extracted version number as a string, or None if not found.
     """
-    # Regex pattern to extract the version number
     version_pattern = r"version:\s*([\d\.]+)"
-
-    # Search for the version number in the line
     match = re.search(version_pattern, line)
-
-    # Extract and print the version number if found
-    version = match.group(1) if match else None
-    return version
+    return match.group(1) if match else None
 
 
 def add_fdr_parameters(parameter_dict: dict, parsed_settings: dict) -> None:
     """
-    Add fdr parameters to the parameter dictionary.
+    Adds FDR parameters (e.g., ident_fdr_psm, ident_fdr_peptide) to the parameter dictionary.
 
-    Parameters
-    ----------
-    parameter_dict: dict
-        Dictionary where proteobench parameters should be stored.
-    parsed_settings: dict
-        Dictionary of parsed maxDIA log-file.
+    Args:
+        parameter_dict (dict): The dictionary where the FDR parameters will be added.
+        parsed_settings (dict): The parsed settings containing the FDR values.
     """
     fdr_value = float(parsed_settings["fdr"]["fdr"])
     fdr_level = parsed_settings["fdr"]["group_level"].strip()
@@ -248,6 +209,16 @@ def add_fdr_parameters(parameter_dict: dict, parsed_settings: dict) -> None:
 
 
 def get_min_max(list_of_elements: list) -> Tuple[int, int]:
+    """
+    Extracts the minimum and maximum values from a list of elements.
+
+    Args:
+        list_of_elements (list): A list containing at least two elements. The first element is the minimum,
+                                  and the second element is the maximum (if three elements, the third is used as the max).
+
+    Returns:
+        Tuple[int, int]: A tuple containing the minimum and maximum values.
+    """
     min_value = int(list_of_elements[0])
     if len(list_of_elements) == 3:
         max_value = int(list_of_elements[2])
@@ -257,6 +228,15 @@ def get_min_max(list_of_elements: list) -> Tuple[int, int]:
 
 
 def extract_params(fname: str) -> ProteoBenchParameters:
+    """
+    Extracts parameters from a log file and returns them as a `ProteoBenchParameters` object.
+
+    Args:
+        fname (str): The path to the log file.
+
+    Returns:
+        ProteoBenchParameters: An object containing the extracted parameters.
+    """
     with open(fname) as f:
         lines_read = f.readlines()
         lines = [line for line in lines_read if "──" in line]
@@ -279,7 +259,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "search_engine": "AlphaDIA",
         "software_version": version,
         "search_engine_version": version,
-        "enable_match_between_runs": False,  # Not in AlphaDIA AFAIK
+        "enable_match_between_runs": False,
         "precursor_mass_tolerance": prec_tol,
         "fragment_mass_tolerance": frag_tol,
         "enzyme": parsed_settings["library_prediction"]["enzyme"].strip(),

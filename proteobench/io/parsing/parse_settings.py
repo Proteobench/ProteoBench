@@ -1,10 +1,10 @@
-""" All formats available for the module """
+"""All formats available for the module"""
 
 from __future__ import annotations
 
 import os
 from collections import defaultdict
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import toml
@@ -13,7 +13,14 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
-    def __init__(self, parse_settings_dir=None, module_id="quant_lfq_ion_DDA"):
+    def __init__(self, parse_settings_dir: Optional[str] = None, module_id: str = "quant_lfq_ion_DDA"):
+        """
+        Initializes the settings builder with parse settings from TOML files.
+
+        Args:
+            parse_settings_dir (Optional[str]): The directory containing the parse settings files. Defaults to None.
+            module_id (str): The ID of the module used to fetch the specific parse settings. Defaults to "quant_lfq_ion_DDA".
+        """
         self.PARSE_SETTINGS_TOMLS = toml.load(
             os.path.join(os.path.dirname(__file__), "io_parse_settings", "parse_settings_files.toml")
         )
@@ -44,6 +51,15 @@ class ParseSettingsBuilder:
             raise FileNotFoundError(f"The following parse settings files are missing: {missing_files}")
 
     def build_parser(self, input_format: str) -> ParseSettings:
+        """
+        Build the parser for a given input format using the corresponding TOML files.
+
+        Args:
+            input_format (str): The input format to build the parser for (e.g., "MaxQuant", "Sage").
+
+        Returns:
+            ParseSettings: The parser for the specified input format.
+        """
         toml_file = self.PARSE_SETTINGS_FILES[input_format]
         parse_settings = toml.load(toml_file)
         parse_settings_module = toml.load(self.PARSE_SETTINGS_FILES_MODULE)
@@ -59,7 +75,14 @@ class ParseSettings:
     """Structure that contains all the parameters used to parse
     the given benchmark run output depending on the software tool used."""
 
-    def __init__(self, parse_settings: dict[str, any], parse_settings_module: dict[str, any]):
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+        """
+        Initialize the ParseSettings object with the parameters from the TOML files.
+
+        Args:
+            parse_settings (Dict[str, Any]): The settings for parsing, typically loaded from a TOML file.
+            parse_settings_module (Dict[str, Any]): Module-specific settings, typically loaded from a TOML file.
+        """
         self.mapper = parse_settings["mapper"]
         self.condition_mapper = parse_settings["condition_mapper"]
         self.run_mapper = parse_settings["run_mapper"]
@@ -70,16 +93,35 @@ class ParseSettings:
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
 
-    def species_dict(self):
+    def species_dict(self) -> Dict[str, str]:
+        """
+        Get the species dictionary.
+
+        Returns:
+            Dict[str, str]: A dictionary of species mappings.
+        """
         return self._species_dict
 
-    def species_expected_ratio(self):
+    def species_expected_ratio(self) -> float:
+        """
+        Get the expected species ratio.
+
+        Returns:
+            float: The expected ratio of species.
+        """
         return self._species_expected_ratio
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
-        """Convert a software tool output into a generic format supported by the module."""
-        # TODO add functionality/steps in docstring
-        # if any of the keys are not in the columns, raise an error
+        """
+        Convert a software tool output into a generic format supported by the module.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame to convert.
+
+        Returns:
+            tuple[pd.DataFrame, Dict[int, List[str]]]: The converted DataFrame and a dictionary mapping replicates to raw data.
+        """
+        # TODO: Add functionality/steps in docstring.
         if not all(k in df.columns for k in self.mapper.keys()):
             raise ValueError(
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
@@ -111,25 +153,16 @@ class ParseSettings:
         # If there is "Raw file" then it is a long format, otherwise short format
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
-            # Should be handled more elegant
-            try:
-                df_filtered_melted = df_filtered.melt(
-                    id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
-                    value_vars=melt_vars,
-                    var_name="Raw file",
-                    value_name="Intensity",
-                )
-            except KeyError:
-                df_filtered_melted = df_filtered.melt(
-                    id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
-                    value_vars=melt_vars,
-                    var_name="Raw file",
-                    value_name="Intensity",
-                )
+            df_filtered_melted = df_filtered.melt(
+                id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
+                value_vars=melt_vars,
+                var_name="Raw file",
+                value_name="Intensity",
+            )
         else:
             df_filtered_melted = df_filtered.copy()
 
-        df_filtered_melted.loc[:, "replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
+        df_filtered_melted["replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
         if self.analysis_level == "ion":
@@ -153,7 +186,14 @@ class ParseSettings:
 
 
 class ParseModificationSettings:
-    def __init__(self, parser: ParseSettings, parse_settings: dict[str, any]):
+    def __init__(self, parser: ParseSettings, parse_settings: Dict[str, Any]):
+        """
+        Initialize the ParseModificationSettings object.
+
+        Args:
+            parser (ParseSettings): The base parse settings object.
+            parse_settings (Dict[str, Any]): The modifications-specific parse settings.
+        """
         self.parser = parser
         self.modifications_mapper = parse_settings["modifications_parser"]["modification_dict"]
         self.modifications_isalpha = parse_settings["modifications_parser"]["isalpha"]
@@ -163,13 +203,34 @@ class ParseModificationSettings:
         self.modifications_pattern = rf"{self.modifications_pattern}"
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
 
-    def species_dict(self):
+    def species_dict(self) -> Dict[str, str]:
+        """
+        Get the species dictionary from the parser.
+
+        Returns:
+            Dict[str, str]: The species dictionary.
+        """
         return self.parser.species_dict()
 
-    def species_expected_ratio(self):
+    def species_expected_ratio(self) -> float:
+        """
+        Get the expected species ratio from the parser.
+
+        Returns:
+            float: The expected species ratio.
+        """
         return self.parser.species_expected_ratio()
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+        """
+        Convert the DataFrame to a standard format, adding modifications to the 'proforma' column.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame to convert.
+
+        Returns:
+            tuple[pd.DataFrame, Dict[int, List[str]]]: The converted DataFrame and a dictionary mapping replicates to raw data.
+        """
         df, replicate_to_raw = self.parser.convert_to_standard_format(df)
         df["proforma"] = df[self.modifications_parse_column].apply(
             get_proforma_bracketed,
@@ -186,13 +247,8 @@ class ParseModificationSettings:
             except KeyError:
                 raise KeyError(
                     "Not all columns required for making the ion are available."
-                    "Is the charge available in the input file?"
+                    " Is the charge available in the input file?"
                 )
-
-            if "proforma" in df.columns and "Charge" in df.columns:
-                df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
-            else:
-                print("Not all columns required for making the ion are available.")
 
             return df, replicate_to_raw
 

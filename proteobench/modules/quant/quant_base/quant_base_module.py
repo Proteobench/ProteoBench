@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
 from tempfile import TemporaryDirectory
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import streamlit as st
@@ -42,27 +41,52 @@ class QuantModule:
 
     Attributes
     ----------
-    t_dir
+    t_dir : str
         Temporary directory for the module.
-    t_dir_pr
+    t_dir_pr : str
         Temporary directory for the pull request.
-    github_repo
+    github_repo : GithubProteobotRepo
         Github repository for the module.
-    precursor_name
+    precursor_name : str
         Level of quantification.
-    parse_settings_dir
+    parse_settings_dir : str
         Directory for parse settings.
-
+    EXTRACT_PARAMS_DICT : Dict[str, callable]
+        A dictionary that maps input formats to parameter extraction functions.
     """
+
+    EXTRACT_PARAMS_DICT: Dict[str, Any] = {
+        "MaxQuant": extract_params_maxquant,
+        "ProlineStudio": extract_params_proline,
+        "AlphaPept": extract_params_alphapept,
+        "Sage": extract_params_sage,
+        "FragPipe": extract_params_fragger,
+        "i2MassChroQ": extract_params_i2masschroq,
+        "DIA-NN": extract_params_diann,
+        "AlphaDIA": extract_params_alphadia,
+        "FragPipe (DIA-NN quant)": extract_params_fragger,
+        "MSAID": extract_params_msaid,
+        "Spectronaut": extract_params_spectronaut,
+    }
 
     def __init__(
         self,
-        token: str = None,
+        token: Optional[str] = None,
         proteobench_repo_name: str = "",
         proteobot_repo_name: str = "",
         parse_settings_dir: str = "",
         module_id: str = "",
     ):
+        """
+        Initialize the QuantModule with GitHub repo and settings.
+
+        Args:
+            token (Optional[str]): The GitHub token (optional for public repos).
+            proteobench_repo_name (str): The name of the ProteoBench repository.
+            proteobot_repo_name (str): The name of the ProteoBot repository.
+            parse_settings_dir (str): The directory containing parse settings.
+            module_id (str): The module identifier for configuration.
+        """
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
         self.github_repo = GithubProteobotRepo(
@@ -78,51 +102,38 @@ class QuantModule:
         self.precursor_name = ""
         self.module_id = module_id
 
-    EXTRACT_PARAMS_DICT = {
-        "MaxQuant": extract_params_maxquant,
-        "ProlineStudio": extract_params_proline,
-        "AlphaPept": extract_params_alphapept,
-        "Sage": extract_params_sage,
-        "FragPipe": extract_params_fragger,
-        "i2MassChroQ": extract_params_i2masschroq,
-        "DIA-NN": extract_params_diann,
-        "AlphaDIA": extract_params_alphadia,
-        "FragPipe (DIA-NN quant)": extract_params_fragger,
-        "MSAID": extract_params_msaid,
-        "Spectronaut": extract_params_spectronaut,
-    }
-
     def is_implemented(self) -> bool:
-        """Returns whether the module is fully implemented."""
+        """
+        Returns whether the module is fully implemented.
+
+        Returns
+        -------
+        bool
+            Always returns True in this implementation.
+        """
         return True
 
     def add_current_data_point(
         self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None
     ) -> pd.DataFrame:
         """
-        Add current data point to the data points from previous runs, load them from file if empty.
+        Add current data point to previous data points. Load them from file if empty.
 
-        Parameters
-        ----------
-        all_datapoints
-            The data points from previous runs. If none, it will be loaded from the github repo.
-        current_datapoint
-            The current data point to be added.
+        Args:
+            current_datapoint (pd.Series): The current data point to add.
+            all_datapoints (Optional[pd.DataFrame]): Data points from previous runs. Loaded from GitHub repo if None.
 
         Returns
         -------
         pd.DataFrame
-            All data points with the current data point added.
+            A DataFrame with the current data point added.
         """
-
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
         all_datapoints = all_datapoints.T
-
         current_datapoint["old_new"] = "new"
 
-        # TODO: this doesn't work outside of the web interface, because the intermediate_hash is not present without the old datapoints. Temp fix with try except
         try:
             if current_datapoint["intermediate_hash"] not in all_datapoints.loc["intermediate_hash", :].values:
                 all_datapoints.loc["old_new", :] = "old"
@@ -136,21 +147,18 @@ class QuantModule:
 
         return all_datapoints_new
 
-    def obtain_all_data_points(self, all_datapoints: Optional[pd.DataFrame] = None):
+    def obtain_all_data_points(self, all_datapoints: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """
-        Load all data points and load them from file if empty.
+        Load all data points, load from file if empty.
 
-        Parameters
-        ----------
-        all_datapoints
-            All data points. If none, it will be loaded from the github repo.
+        Args:
+            all_datapoints (Optional[pd.DataFrame]): All data points. Loaded from the GitHub repo if None.
 
         Returns
         -------
         pd.DataFrame
-            All data points.
+            A DataFrame containing all data points.
         """
-
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
@@ -159,21 +167,18 @@ class QuantModule:
         return all_datapoints
 
     @staticmethod
-    def filter_data_point(all_datapoints: pd.DataFrame, default_val_slider: int = 3):
+    def filter_data_point(all_datapoints: pd.DataFrame, default_val_slider: int = 3) -> pd.DataFrame:
         """
-        Add current data point to all data points and load them from file if empty.
+        Filter the data points based on predefined criteria.
 
-        Parameters
-        ----------
-        all_datapoints
-            All data points.
-        default_val_slider
-            Default value for the slider.
+        Args:
+            all_datapoints (pd.DataFrame): All data points.
+            default_val_slider (int, optional): The minimum number of observations for filtering. Defaults to 3.
 
         Returns
         -------
         pd.DataFrame
-            All data points with the filtered data points.
+            A DataFrame containing the filtered data points.
         """
         all_datapoints["median_abs_epsilon"] = [
             filter_df_numquant_median_abs_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
@@ -186,30 +191,28 @@ class QuantModule:
         return all_datapoints
 
     def benchmarking(
-        self, input_file: str, input_format: str, user_input: dict, all_datapoints, default_cutoff_min_prec: int = 3
+        self,
+        input_file: str,
+        input_format: str,
+        user_input: dict,
+        all_datapoints: Optional[pd.DataFrame],
+        default_cutoff_min_prec: int = 3,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
 
-        Parameters
-        ----------
-        input_file
-            Path to the workflow output file.
-        input_format
-            Format of the workflow output file.
-        user_input
-            User provided parameters for plotting.
-        all_datapoints
-            DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec
-            Minimum number of runs an ion has to be identified in.
+        Args:
+            input_file (str): Path to the workflow output file.
+            input_format (str): Format of the workflow output file.
+            user_input (dict): User-provided parameters for plotting.
+            all_datapoints (Optional[pd.DataFrame]): DataFrame containing all data points from the ProteoBench repo.
+            default_cutoff_min_prec (int, optional): Minimum number of runs an ion has to be identified in. Defaults to 3.
 
         Returns
         -------
         tuple[DataFrame, DataFrame, DataFrame]
-            Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
+            A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
-
         # Parse user config
         input_df = load_input_file(input_file, input_format)
         parse_settings = ParseSettingsBuilder(
@@ -229,28 +232,20 @@ class QuantModule:
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 
-        # TODO check why there are NA and inf/-inf values
-        return (
-            intermediate_data_structure,
-            all_datapoints,
-            input_df,
-        )
+        return intermediate_data_structure, all_datapoints, input_df
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """
         Check if the new data point has a unique hash.
 
-        Parameters
-        ----------
-        datapoints
-            Data points.
+        Args:
+            datapoints (pd.DataFrame): Data points.
 
         Returns
         -------
         bool
             Whether the new data point has a unique hash.
         """
-
         current_datapoint = datapoints[datapoints["old_new"] == "new"]
         all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
 
@@ -261,10 +256,8 @@ class QuantModule:
 
         if len(overlap) > 0:
             overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
-
             st.error(
-                f"The run you want to submit has been previously submitted \
-                 under the identifier: {str(overlap_name)}"
+                f"The run you want to submit has been previously submitted under the identifier: {str(overlap_name)}"
             )
             return False
         return True
@@ -275,27 +268,21 @@ class QuantModule:
         datapoint_params: Any,
         remote_git: str,
         submission_comments: str = "no comments",
-    ):
+    ) -> str:
         """
-        Clone repo and open pull request.
+        Clone the repo and open a pull request with the new data points.
 
-        Parameters
-        ----------
-        temporary_datapoints
-            Temporary data points.
-        datapoint_params
-            Data point parameters.
-        remote_git
-            Remote git.
-        submission_comments
-            Submission comments.
+        Args:
+            temporary_datapoints (pd.DataFrame): Temporary data points.
+            datapoint_params (Any): Data point parameters.
+            remote_git (str): Remote Git repository URL.
+            submission_comments (str, optional): Comments to be included in the pull request. Defaults to "no comments".
 
         Returns
         -------
         str
-            URL of the pull request.
+            The URL of the created pull request.
         """
-
         self.github_repo.clone_repo_pr()
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
@@ -310,7 +297,6 @@ class QuantModule:
             return False
 
         branch_name = current_datapoint["id"].replace(" ", "_").replace("(", "").replace(")", "")
-
         path_write = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {path_write}")
         f = open(path_write, "w")
@@ -333,21 +319,17 @@ class QuantModule:
 
     def write_json_local_development(self, temporary_datapoints: pd.DataFrame, datapoint_params: dict) -> str:
         """
-        Write datapoints to json for local development.
+        Write the datapoints to a JSON file for local development.
 
-        Parameters
-        ----------
-        temporary_datapoints
-            Temporary data points.
-        datapoint_params
-            Data point parameters.
+        Args:
+            temporary_datapoints (pd.DataFrame): Temporary data points.
+            datapoint_params (dict): Data point parameters.
 
         Returns
         -------
         str
-            Path to the json file.
+            The path to the written JSON file.
         """
-
         os.mkdir(self.t_dir_pr)
 
         current_datapoint = temporary_datapoints.iloc[-1]
@@ -359,7 +341,6 @@ class QuantModule:
         current_datapoint["is_temporary"] = False
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
 
-        # TODO write below to logger instead of std.out
         fname = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {fname}")
 
@@ -369,24 +350,24 @@ class QuantModule:
 
         return os.path.join(self.t_dir_pr, "results.json")
 
-    def write_intermediate_raw(self, dir: str, ident: str, input_file_obj, result_performance: pd.DataFrame, param_loc):
+    def write_intermediate_raw(
+        self,
+        dir: str,
+        ident: str,
+        input_file_obj: Any,
+        result_performance: pd.DataFrame,
+        param_loc: List[str],
+    ) -> None:
         """
         Write intermediate and raw data to a directory.
 
-        Parameters
-        ----------
-        dir : str
-            Directory to write to.
-        ident : str
-            Identifier (e.g., hash) to create a subdirectory for this submission.
-        input_file_obj : file-like object
-            File-like object representing the raw input file (e.g., from Streamlit).
-        result_performance : pd.DataFrame
-            Result performance DataFrame to be saved.
-        param_loc : list of str
-            List of paths to parameter files that need to be copied to the directory.
+        Args:
+            dir (str): Directory to write to.
+            ident (str): Identifier to create a subdirectory for this submission.
+            input_file_obj (Any): File-like object representing the raw input file.
+            result_performance (pd.DataFrame): The result performance DataFrame.
+            param_loc (List[str]): List of paths to parameter files that need to be copied.
         """
-
         # Create the target directory
         path_write = os.path.join(dir, ident)
         try:
@@ -404,27 +385,24 @@ class QuantModule:
         except Exception as e:
             logging.error(f"Failed to save input file to {input_file_path}. Error: {e}")
 
-        # TODO: save parameters file "locally" together with the raw and intermediate?
+        # Save parameters and result performance
         with open(os.path.join(path_write, "params_without_extension"), "w") as f:
             f.write(",\n".join(_file.getvalue().decode("utf-8") for _file in param_loc))
 
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 
-    def load_params_file(self, input_file: list[str], input_format: str) -> ProteoBenchParameters:
+    def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
         """
-        Method loads parameters from a metadata file depending on its format.
+        Load parameters from a metadata file depending on its format.
 
-        Parameters
-        ----------
-        input_file
-            Path to the metadata file.
-        input_format
-            Format of the metadata file.
+        Args:
+            input_file (List[str]): Path to the metadata file.
+            input_format (str): Format of the metadata file.
 
         Returns
         -------
         ProteoBenchParameters
-            Parameters for the module.
+            The parameters for the module.
         """
         params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
         params.software_name = input_format

@@ -6,20 +6,20 @@
 
 
 [condition_mapper]
-"abundance_DDA_Condition_A_Sample_Alpha_01" = "A"
-"abundance_DDA_Condition_A_Sample_Alpha_02" = "A"
-"abundance_DDA_Condition_A_Sample_Alpha_03" = "A"
-"abundance_DDA_Condition_B_Sample_Alpha_01" = "B"
-"abundance_DDA_Condition_B_Sample_Alpha_02" = "B"
-"abundance_DDA_Condition_B_Sample_Alpha_03" = "B"
+"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mgf" = "A"
+"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mgf" = "A"
+"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.mgf" = "A"
+"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.mgf" = "B"
+"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.mgf" = "B"
+"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mgf" = "B"
 
 [run_mapper]
-"abundance_DDA_Condition_A_Sample_Alpha_01" = "Condition_A_Sample_Alpha_01"
-"abundance_DDA_Condition_A_Sample_Alpha_02" = "Condition_A_Sample_Alpha_02"
-"abundance_DDA_Condition_A_Sample_Alpha_03" = "Condition_A_Sample_Alpha_03"
-"abundance_DDA_Condition_B_Sample_Alpha_01" = "Condition_B_Sample_Alpha_01"
-"abundance_DDA_Condition_B_Sample_Alpha_02" = "Condition_B_Sample_Alpha_02"
-"abundance_DDA_Condition_B_Sample_Alpha_03" = "Condition_B_Sample_Alpha_03"
+"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mgf" = "Condition_A_Sample_Alpha_01"
+"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mgf" = "Condition_A_Sample_Alpha_02"
+"abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.mgf" = "Condition_A_Sample_Alpha_03"
+"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.mgf" = "Condition_B_Sample_Alpha_01"
+"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.mgf" = "Condition_B_Sample_Alpha_02"
+"abundance_LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mgf" = "Condition_B_Sample_Alpha_03"
 
 [species_mapper]
 "_YEAST" = "YEAST"

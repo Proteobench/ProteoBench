@@ -396,7 +396,7 @@ class QuantModule:
         with open(os.path.join(path_write, "comment.txt"), "w") as f:
             f.write(comment)
 
-    def load_params_file(self, input_file: list[str], input_format: str) -> ProteoBenchParameters:
+    def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
         """
         Load parameters from a metadata file depending on its format.
 

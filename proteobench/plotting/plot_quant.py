@@ -71,6 +71,7 @@ class PlotDataPoint:
     @staticmethod
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
+        metric: str,
         software_colors: Dict[str, str] = {
             "MaxQuant": "#377eb8",
             "AlphaPept": "#4daf4a",
@@ -106,6 +107,7 @@ class PlotDataPoint:
         all_median_abs_epsilon = [
             v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
         ]
+        all_mean_abs_epsilon = [v2["mean_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
@@ -122,6 +124,7 @@ class PlotDataPoint:
                         datapoint_text + f"Comment (private submission): {benchmark_metrics_df.comments[idx]}"
                     )
             else:
+                # TODO: Determine parameters based on module
                 datapoint_text = (
                     f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
@@ -161,15 +164,27 @@ class PlotDataPoint:
         benchmark_metrics_df["hover_text"] = hover_texts
         benchmark_metrics_df["scatter_size"] = scatter_size
 
+        if metric == "median":
+            layout_xaxis_range = [
+                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
+                max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
+            ]
+            layout_xaxis_title = (
+                "Median absolute difference between measured and expected log2-transformed fold change."
+            )
+        elif metric == "mean":
+            layout_xaxis_range = [
+                min(all_mean_abs_epsilon) - min(all_mean_abs_epsilon) * 0.05,
+                max(all_mean_abs_epsilon) + min(all_mean_abs_epsilon) * 0.05,
+            ]
+            layout_xaxis_title = "Mean absolute difference between measured and expected log2-transformed fold change."
+
         fig = go.Figure(
             layout_yaxis_range=[
                 min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
                 max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
             ],
-            layout_xaxis_range=[
-                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
-                max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
-            ],
+            layout_xaxis_range=layout_xaxis_range,
         )
 
         # Get all unique color-software combinations (necessary for highlighting)
@@ -202,7 +217,7 @@ class PlotDataPoint:
             width=700,
             height=700,
             xaxis=dict(
-                title="Mean absolute difference between measured and expected log2-transformed fold change",
+                title=layout_xaxis_title,
                 gridcolor="white",
                 gridwidth=2,
                 linecolor="black",

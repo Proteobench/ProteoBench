@@ -185,7 +185,9 @@ class Datapoint:
         nr_prec = len(df_slice)
 
         # Calculate the median absolute epsilon (insensitive to outliers)
-        median_abs_epsilon = df_slice["epsilon"].abs().mean()
+        median_abs_epsilon = df_slice["epsilon"].abs().median()
+        # Calculate the mean absolute epsilon (sensitive to outliers)
+        mean_abs_epsilon = df_slice["epsilon"].abs().mean()
 
         # Calculate the variance of epsilon (sensitive to outliers)
         variance_epsilon = df_slice["epsilon"].var()
@@ -199,6 +201,7 @@ class Datapoint:
         return {
             min_nr_observed: {
                 "median_abs_epsilon": median_abs_epsilon,
+                "mean_abs_epsilon": mean_abs_epsilon,
                 "variance_epsilon": variance_epsilon,
                 "nr_prec": nr_prec,
                 "CV_median": cv_median,

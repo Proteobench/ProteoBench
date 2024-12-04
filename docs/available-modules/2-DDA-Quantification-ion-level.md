@@ -105,10 +105,10 @@ In the recent versions of MaxQuant, the default settings work perfectly (`Identi
 Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.
 
 ### Proline Studio (work in progress..)
-Use the raw file names as sample names, and do not modify the peaklist names. The columns with the quantification values that ProteoBench will retrieve in the outputs will have the following format "abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mgf". Please contact us if you have any issue with this.
-For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two field are combined to determine what species a peptide sequence matches to.
-The `Quantified peptide ions` tab reports validated PSMs, so precursor ion quantities (retrieved from XICs) are duplicated. This redundancy is removed before metric calculation.
-For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`. We strongly recommend to use the following  <a href="https://proteobench.cubimed.rub.de/TOADD" download>export template</a> to make sure that your parameter tab in excel does not contain any personnal information. 
+Make sure that the peaklists are named with the same prefix as raw files. To do so in ProlineStudio, use peaklist names as sample names (manually or with automatic renaming option). The columns with the quantification values that ProteoBench will retrieve in the outputs will have the following format "abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mgf". Please contact us if you have any issue with this.
+For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two fields are combined to determine what species a peptide sequence matches to.
+The `Quantified peptide ions` tab reports the precursor ion quantities (retrieved from XICs). Shared peptides ions between multiple ProteinSets are duplicated. This redundancy is removed by combining the protein identification from all rows of a given precursor ion before metric calculation.
+For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`. For local usage and public submission, we strongly recommend to use the following <a href="https://proteobench.cubimed.rub.de/TOADD" download>export template</a> to make sure that all the tabs and columns needed are exported to be correctly parsed. Make sure that no personal information is stored in the excel file before making it public.
 
 ### Sage
 

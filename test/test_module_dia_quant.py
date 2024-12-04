@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from proteobench.datapoint.quant_datapoint import Datapoint
+from proteobench.exceptions import DatapointGenerationError
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
@@ -165,7 +166,7 @@ class TestWrongFormatting(unittest.TestCase):
         user_input["input_csv"] = TESTDATA_FILES[format_name]
         user_input["input_format"] = format_name
 
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(DatapointGenerationError) as context:
             DIAQuantIonModule("").benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
 
 

@@ -169,16 +169,16 @@ class QuantUIObjects:
     def submit_to_repository(self, params) -> Optional[str]:
         """Handles the submission process of the benchmark results to the ProteoBench repository."""
         st.session_state[self.variables_quant.submit] = True
-        pr_url = self.generate_submission_button()
+        button_pressed = self.generate_submission_button()  # None or 'button_pressed'
 
-        if not pr_url:
+        if not button_pressed:  # if button_pressed is None
             return None
 
         self.clear_highlight_column()
-        pr_url = self.create_pull_request(params, pr_url)
+        pr_url = self.create_pull_request(params)
 
         if pr_url:
-            self.save_intermediate_submission_data(pr_url)
+            self.save_intermediate_submission_data()
 
         return pr_url
 
@@ -387,7 +387,7 @@ class QuantUIObjects:
         if "Highlight" in st.session_state[self.variables_quant.all_datapoints_submission].columns:
             st.session_state[self.variables_quant.all_datapoints_submission].drop("Highlight", inplace=True, axis=1)
 
-    def create_pull_request(self, params: Any, pr_url: str) -> Optional[str]:
+    def create_pull_request(self, params: Any) -> Optional[str]:
         """Submits the pull request with the benchmark results and returns the PR URL."""
         user_comments = self.user_input["comments_for_submission"]
 
@@ -407,9 +407,9 @@ class QuantUIObjects:
 
         return pr_url
 
-    def save_intermediate_submission_data(self, pr_url: str) -> None:
+    def save_intermediate_submission_data(self) -> None:
         """Stores intermediate and input data to the storage directory if available."""
-        id = str(
+        _id = str(
             st.session_state[self.variables_quant.all_datapoints_submission][
                 st.session_state[self.variables_quant.all_datapoints_submission]["old_new"] == "new"
             ].iloc[-1, :]["intermediate_hash"]
@@ -419,11 +419,11 @@ class QuantUIObjects:
 
         if "storage" in st.secrets.keys():
             self.ionmodule.write_intermediate_raw(
-                st.secrets["storage"]["dir"],
-                id,
-                self.user_input["input_csv"],
-                st.session_state[self.variables_quant.result_performance_submission],
-                self.user_input[self.variables_quant.meta_data],
+                dir=st.secrets["storage"]["dir"],
+                ident=_id,
+                input_file_obj=self.user_input["input_csv"],
+                result_performance=st.session_state[self.variables_quant.result_performance_submission],
+                param_loc=self.user_input[self.variables_quant.meta_data],
             )
 
     def copy_dataframes_for_submission(self) -> None:

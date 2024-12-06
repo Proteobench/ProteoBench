@@ -47,18 +47,22 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         ### first combine the accessions:
         input_data_frame["proteins"] = input_data_frame["samesets_accessions"] + input_data_frame[
                 "subsets_accessions"
-            ].apply(lambda x: "; " + x if len(x) > 0 else "")
+        ].apply(lambda x: "; " + x if len(x) > 0 else "")
         ### then sort the unique accessions:
         input_data_frame["proteins"] = input_data_frame["proteins"].apply(
                 lambda x: "; ".join(sorted(x.split("; ")))
-            )
+        )
         ### drop the duplicates:
         input_data_frame.drop_duplicates(
             subset=["proforma", "master_quant_peptide_ion_charge", "proteins"], inplace=True
         )
         ## combine the duplicated precursor ions because proline reports one row per precursor + accession:
         group_cols = ["proforma", "master_quant_peptide_ion_charge"]
-        agg_funcs = {col: "first" for col in input_data_frame.columns if col not in group_cols + ["proteins"]}
+        agg_funcs = {
+            col: "first" 
+            for col in input_data_frame.columns 
+            if col not in group_cols + ["proteins"]
+        }
         input_data_frame = (
             input_data_frame.groupby(group_cols)
             .agg({"proteins": lambda x: "; ".join(x), **agg_funcs})

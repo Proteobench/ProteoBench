@@ -1,5 +1,5 @@
 [mapper]
-"samesets_accessions" = "Proteins"
+"proteins" = "Proteins" # this will be the combination of samesets_accessions and subset_accessions after import. Specific to ProlineStudio and MSAngel.
 "sequence" = "Sequence"
 "modifications" = "Modifications"
 "master_quant_peptide_ion_charge" = "Charge"

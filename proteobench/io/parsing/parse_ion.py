@@ -37,25 +37,24 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
             header=0,
             index_col=None,
         )
-        input_data_frame["modifications"].fillna("", inplace=True)
-        input_data_frame["subsets_accessions"].fillna("", inplace=True)
-
-        # Combine and clean protein accessions
+        input_data_frame["modifications"] = input_data_frame["modifications"].fillna("")
+        input_data_frame["subsets_accessions"] = input_data_frame["subsets_accessions"].fillna("")
+        input_data_frame["proforma"] = input_data_frame.apply(
+            lambda x: aggregate_modification_column(x.sequence, x.modifications),
+            axis=1,
+        )
+        # combine the sameset and subset accessions:
+        # first combine the accessions:
         input_data_frame["proteins"] = input_data_frame["samesets_accessions"] + input_data_frame[
             "subsets_accessions"
-        ].apply(lambda x: "; " + x if x else "")
-
-        # TODO why is sorting necessary?
-        input_data_frame["proteins"] = input_data_frame["proteins"].apply(
-            lambda x: "; ".join(sorted(set(x.split("; "))))
-        )
-
-        # Remove duplicate rows
+        ].apply(lambda x: "; " + x if len(x) > 0 else "")
+        # then sort the unique accessions:
+        input_data_frame["proteins"] = input_data_frame["proteins"].apply(lambda x: "; ".join(sorted(x.split("; "))))
+        # drop the duplicates:
         input_data_frame.drop_duplicates(
             subset=["proforma", "master_quant_peptide_ion_charge", "proteins"], inplace=True
         )
-
-        # Aggregate duplicated precursor ions
+        # combine the duplicated precursor ions because proline reports one row per precursor + accession:
         group_cols = ["proforma", "master_quant_peptide_ion_charge"]
         agg_funcs = {col: "first" for col in input_data_frame.columns if col not in group_cols + ["proteins"]}
         input_data_frame = (

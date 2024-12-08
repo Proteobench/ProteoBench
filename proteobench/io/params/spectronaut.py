@@ -1,32 +1,82 @@
 import re
-import pandas as pd
-from proteobench.io.params import ProteoBenchParameters
 from pathlib import Path
+from typing import List, Optional
+
+import pandas as pd
+
+from proteobench.io.params import ProteoBenchParameters
 
 
-def clean_text(text):
+def clean_text(text: str) -> str:
+    """
+    Clean the input text by removing leading and trailing spaces, colons, commas, or tabs.
+
+    Args:
+        text (str): The text to be cleaned.
+
+    Returns:
+        str: The cleaned text.
+    """
     text = re.sub(r"^[\s:,\t]+|[\s:,\t]+$", "", text)
     return text
 
 
-def extract_value(lines, search_term):
+def extract_value(lines: List[str], search_term: str) -> Optional[str]:
+    """
+    Extract the value associated with a search term from a list of lines.
+
+    Args:
+        lines (List[str]): The list of lines to search through.
+        search_term (str): The term to search for in the lines.
+
+    Returns:
+        Optional[str]: The extracted value, or None if the search term is not found.
+    """
     return next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
 
 
-def extract_mass_tolerance(lines, search_term):
+def extract_mass_tolerance(lines: List[str], search_term: str) -> Optional[str]:
+    """
+    Extract the mass tolerance value associated with a search term, with special handling for "System Default".
+
+    Args:
+        lines (List[str]): The list of lines to search through.
+        search_term (str): The term to search for in the lines.
+
+    Returns:
+        Optional[str]: The extracted mass tolerance value, or None if the search term is not found.
+    """
     value = next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
     value = "40ppm" if value == "System Default" else value
     return value
 
 
-def extract_value_regex(lines, search_term):
+def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
+    """
+    Extract the value associated with a search term using regular expressions.
+
+    Args:
+        lines (List[str]): The list of lines to search through.
+        search_term (str): The regular expression to search for in the lines.
+
+    Returns:
+        Optional[str]: The extracted value, or None if the search term is not found.
+    """
     return next((clean_text(re.split(search_term, line)[1]) for line in lines if re.search(search_term, line)), None)
 
 
-def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
-    # check if file exists
+def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
+    """
+    Read a Spectronaut settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
+
+    Args:
+        file_path (str): The path to the Spectronaut settings file.
+
+    Returns:
+        ProteoBenchParameters: The extracted parameters encapsulated in a `ProteoBenchParameters` object.
+    """
+    # Try to read the file contents
     try:
-        # Read in the log file
         with open(file_path) as f:
             lines = f.readlines()
     except:
@@ -41,6 +91,7 @@ def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
     params.search_engine = "Spectronaut"
     params.search_engine_version = params.software_version
 
+    # Clean up the lines and extract the relevant parameters
     lines = [re.sub(r"^[\s│├─└]*", "", line).strip() for line in lines]
 
     params.ident_fdr_psm = extract_value(lines, "Precursor Qvalue Cutoff:")
@@ -70,10 +121,18 @@ def read_spectronaut_settings(file_path) -> ProteoBenchParameters:
 
 
 if __name__ == "__main__":
+    """
+    Reads Spectronaut settings files, extracts parameters, and writes them to CSV files.
+    """
     fnames = ["../../../test/params/spectronaut_Experiment1_ExperimentSetupOverview_BGS_Factory_Settings.txt"]
 
     for file in fnames:
+        # Extract parameters from the settings file
         parameters = read_spectronaut_settings(file)
+
+        # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)
         actual.to_csv(Path(file).with_suffix(".csv"))
+
+        # Optionally, print the parameters to the console
         print(parameters)

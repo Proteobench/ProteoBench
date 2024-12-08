@@ -14,11 +14,11 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.dda_quant_variables import VariablesDDAQuant
+from pages.pages_variables.Quant.lfq.ion.DDA.variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
-from proteobench.io.parsing.parse_settings_ion import ParseSettingsBuilder
-from proteobench.modules.dda_quant_ion.dda_quant_ion_module import (
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
     DDAQuantIonModule as IonModule,
 )
 from proteobench.plotting.plot_quant import PlotDataPoint
@@ -89,6 +89,7 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.selectbox_id_uuid] = uuid.uuid4()
 
         try:
+            # TODO: Other labels based on different modules, e.g. mass tolerances are less relevant for DIA
             st.selectbox(
                 "Select label to plot",
                 ["None", "precursor_mass_tolerance", "fragment_mass_tolerance", "enable_match_between_runs"],
@@ -168,16 +169,16 @@ class QuantUIObjects:
     def submit_to_repository(self, params) -> Optional[str]:
         """Handles the submission process of the benchmark results to the ProteoBench repository."""
         st.session_state[self.variables_quant.submit] = True
-        pr_url = self.generate_submission_button()
+        button_pressed = self.generate_submission_button()  # None or 'button_pressed'
 
-        if not pr_url:
+        if not button_pressed:  # if button_pressed is None
             return None
 
         self.clear_highlight_column()
-        pr_url = self.create_pull_request(params, pr_url)
+        pr_url = self.create_pull_request(params)
 
         if pr_url:
-            self.save_intermediate_submission_data(pr_url)
+            self.save_intermediate_submission_data()
 
         return pr_url
 
@@ -219,6 +220,7 @@ class QuantUIObjects:
             "Software tool result file", help=self.variables_quant.texts.Help.input_file
         )
 
+    # TODO: change additional_params_json for other modules, to capture relevant parameters
     def generate_additional_parameters_fields(self) -> None:
         """Creates the additional parameters section of the form and initializes the parameter fields."""
         st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
@@ -385,7 +387,7 @@ class QuantUIObjects:
         if "Highlight" in st.session_state[self.variables_quant.all_datapoints_submission].columns:
             st.session_state[self.variables_quant.all_datapoints_submission].drop("Highlight", inplace=True, axis=1)
 
-    def create_pull_request(self, params: Any, pr_url: str) -> Optional[str]:
+    def create_pull_request(self, params: Any) -> Optional[str]:
         """Submits the pull request with the benchmark results and returns the PR URL."""
         user_comments = self.user_input["comments_for_submission"]
 
@@ -405,21 +407,24 @@ class QuantUIObjects:
 
         return pr_url
 
-    def save_intermediate_submission_data(self, pr_url: str) -> None:
+    def save_intermediate_submission_data(self) -> None:
         """Stores intermediate and input data to the storage directory if available."""
-        id = str(
+        _id = str(
             st.session_state[self.variables_quant.all_datapoints_submission][
                 st.session_state[self.variables_quant.all_datapoints_submission]["old_new"] == "new"
             ].iloc[-1, :]["intermediate_hash"]
         )
 
+        self.user_input["input_csv"].getbuffer()
+
         if "storage" in st.secrets.keys():
             self.ionmodule.write_intermediate_raw(
-                st.secrets["storage"]["dir"],
-                id,
-                st.session_state[self.variables_quant.input_df_submission],
-                st.session_state[self.variables_quant.result_performance_submission],
-                self.user_input[self.variables_quant.meta_data],
+                dir=st.secrets["storage"]["dir"],
+                ident=_id,
+                input_file_obj=self.user_input["input_csv"],
+                result_performance=st.session_state[self.variables_quant.result_performance_submission],
+                param_loc=self.user_input[self.variables_quant.meta_data],
+                comment=st.session_state[self.variables_quant.meta_data_text],
             )
 
     def copy_dataframes_for_submission(self) -> None:

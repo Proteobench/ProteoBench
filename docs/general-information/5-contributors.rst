@@ -72,6 +72,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
 .. line-block::
+    **Julia Schessner**
+    *Department of Proteomics and Signaltransduction, Max-Planck-Institute of Biochemistry, Martinsried, Germany*
+
+.. line-block::
     **Julian Uszkoreit**
     *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
 

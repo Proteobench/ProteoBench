@@ -250,7 +250,7 @@ Funded by
 
 Through EuBIC-MS, ProteoBench is continuously supported by the European Proteomics Association
 (EuPA). For specific events, such as the ProteoBench hackathon, ProteoBench has received funding
-from the Danish Data Science Academy (DDSA) and the Research Foundation - Flanders (FWO).
+from the Danish Data Science Academy (DDSA), the Research Foundation - Flanders (FWO), and Core For Life.
 
 
 Supported by

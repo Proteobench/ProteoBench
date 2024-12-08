@@ -43,7 +43,7 @@ class StreamlitPage(ABC):
             ),
             unsafe_allow_html=True,
         )
-        st.image("logos/logo_participants/logos_all.png")
+        st.image("logos/logo_participants/proteobench-contributing-institutes.png")
 
         # add hosting information if provided
         try:

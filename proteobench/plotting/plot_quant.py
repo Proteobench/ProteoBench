@@ -74,7 +74,8 @@ class PlotDataPoint:
         software_colors: Dict[str, str] = {
             "MaxQuant": "#377eb8",
             "AlphaPept": "#4daf4a",
-            "ProlineStudio": "#e41a1c",
+            "ProlineStudio": "#5f0f40",
+            "MSAngel": "#e41a1c",
             "FragPipe": "#ff7f00",
             "i2MassChroQ": "#984ea3",
             "Sage": "#a65628",

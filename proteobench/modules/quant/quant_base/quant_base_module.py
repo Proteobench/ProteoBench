@@ -356,26 +356,29 @@ class QuantModule:
         ident: str,
         input_file_obj: Any,
         result_performance: pd.DataFrame,
-        param_loc: List[str],
+        param_loc: List[Any],
         comment: str,
     ) -> None:
         """
         Write intermediate and raw data to a directory.
+
+        Hint: Any is a File-like object.
 
         Args:
             dir (str): Directory to write to.
             ident (str): Identifier to create a subdirectory for this submission.
             input_file_obj (Any): File-like object representing the raw input file.
             result_performance (pd.DataFrame): The result performance DataFrame.
-            param_loc (List[str]): List of paths to parameter files that need to be copied.
+            param_loc (List[Any]): List of paths to parameter files that need to be copied.
             comment (str): User comment for the submission.
         """
         # Create the target directory
         path_write = os.path.join(dir, ident)
         try:
             os.makedirs(path_write, exist_ok=True)
-        except Exception as e:
-            logging.warning(f"Could not create directory: {path_write}. Error: {e}")
+        except OSError as e:
+            msg = f"Could not create directory: {path_write}. Error: {e}"
+            logging.warning(msg)
 
         # Save the input file-like object content to disk
         input_file_path = os.path.join(path_write, "input_file_without_extension")
@@ -383,13 +386,27 @@ class QuantModule:
             input_file_obj.seek(0)  # Reset file pointer to the beginning
             with open(input_file_path, "wb") as f:
                 f.write(input_file_obj.read())  # Read the content and write it to a file
-            logging.info(f"Input file saved to {input_file_path}")
-        except Exception as e:
-            logging.error(f"Failed to save input file to {input_file_path}. Error: {e}")
+            msg = f"Input file saved to {input_file_path}"
+            logging.info(msg)
+        except UnicodeDecodeError as e:
+            msg = f"Failed to save input file to {input_file_path}. Error: {e}"
+            logging.error(msg)
 
         # Save parameters and result performance
-        with open(os.path.join(path_write, "params_without_extension"), "w") as f:
-            f.write(",\n".join(_file.getvalue().decode("utf-8") for _file in param_loc))
+        # ! excel file cannot be saved by concatenating them, save individually
+        for i, _file in enumerate(param_loc):
+            fname = os.path.join(path_write, "params_without_extension")
+            if i > 0:
+                fname += f"_{i}"
+            _file.seek(0)
+            try:
+                with open(fname, "wb") as f:
+                    f.write(_file.read())
+                msg = f"Parameter file saved to {fname}"
+                logging.info(msg)
+            except UnicodeDecodeError as e:
+                msg = f"Failed to save parameter file to {fname}. Error: {e}"
+                logging.error(msg)
 
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
 

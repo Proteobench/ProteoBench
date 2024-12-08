@@ -357,6 +357,7 @@ class QuantModule:
         input_file_obj: Any,
         result_performance: pd.DataFrame,
         param_loc: List[str],
+        comment: str,
     ) -> None:
         """
         Write intermediate and raw data to a directory.
@@ -367,6 +368,7 @@ class QuantModule:
             input_file_obj (Any): File-like object representing the raw input file.
             result_performance (pd.DataFrame): The result performance DataFrame.
             param_loc (List[str]): List of paths to parameter files that need to be copied.
+            comment (str): User comment for the submission.
         """
         # Create the target directory
         path_write = os.path.join(dir, ident)
@@ -390,6 +392,9 @@ class QuantModule:
             f.write(",\n".join(_file.getvalue().decode("utf-8") for _file in param_loc))
 
         result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
+
+        with open(os.path.join(path_write, "comment.txt"), "w") as f:
+            f.write(comment)
 
     def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
         """

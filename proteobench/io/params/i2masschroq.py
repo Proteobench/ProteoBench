@@ -22,7 +22,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     # Construct tolerance strings for fragment and parent mass errors
     _tol_frag = "{} {}".format(
         params.loc["spectrum, fragment monoisotopic mass error"],
-        params.loc["spectrum, fragment monoisotopic mass error units"],
+        params.loc["spectrum, fragment monoisotopic mass error units"].replace("Daltons", "Da"),
     )
 
     # Assert the symmetry of parent mass error tolerances
@@ -34,7 +34,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     # Construct tolerance strings for parent mass error
     _tol_prec = "{} {}".format(
         params.loc["spectrum, parent monoisotopic mass error minus"],
-        params.loc["spectrum, parent monoisotopic mass error units"],
+        params.loc["spectrum, parent monoisotopic mass error units"].replace("Daltons", "Da"),
     )
 
     # Max missed cleavage sites, either from scoring or refinement

@@ -213,7 +213,7 @@ Example: when 3 is selected, only the precursor ions quantified in 3 or more raw
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to 
 your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratio's). 
-See [here](https://proteobench.readthedocs.io/en/stable/available-modules/2-DDA-Quantification-ion-level/#important-tool-specific-settings)
+See [here](https://proteobench.readthedocs.io/en/stable/available-modules/2-quant-lfq-ion-dda/#important-tool-specific-settings)
 for all compatible parameter files.
 In this module, we keep track of the following parameters, if you feel 
 that some important information is missing, please add it in the 

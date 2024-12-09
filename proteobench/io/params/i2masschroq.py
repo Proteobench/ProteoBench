@@ -47,7 +47,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         software_name="i2MassChroQ",
         software_version=params.loc["i2MassChroQ_VERSION"],
         search_engine=params.loc["AnalysisSoftware_name"],
-        search_engine_version=params.loc["AnalysisSoftware_version"],
+        search_engine_version=str(params.loc["AnalysisSoftware_version"] or ""),
         ident_fdr_psm=params.loc["psm_fdr"],
         ident_fdr_peptide=params.loc["peptide_fdr"],
         ident_fdr_protein=params.loc["protein_fdr"],

@@ -70,7 +70,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         variable_mods=",".join(params.loc[params.index.str.contains("residue, potential modification mass")].dropna()),
         max_mods=None,
         min_precursor_charge=1,  # Fixed in software
-        max_precursor_charge=params.loc["spectrum, maximum parent charge"],
+        max_precursor_charge=int(params.loc["spectrum, maximum parent charge"]),
     )
 
     return params

@@ -175,7 +175,9 @@ class PlotDataPoint:
 
         # Get all unique color-software combinations (necessary for highlighting)
         color_software_combinations = benchmark_metrics_df[["color", "software_name"]].drop_duplicates()
-
+        benchmark_metrics_df["enable_match_between_runs"] = benchmark_metrics_df["enable_match_between_runs"].astype(
+            str
+        )
         # plot the data points, one trace per software tool
         for _, row in color_software_combinations.iterrows():
             color = row["color"]
@@ -185,7 +187,7 @@ class PlotDataPoint:
                 (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
             ]
             # to do: remove this line as soon as parameters are homogeneous, see #380
-            tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
+            # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
             fig.add_trace(
                 go.Scatter(
                     x=tmp_df["median_abs_epsilon"],

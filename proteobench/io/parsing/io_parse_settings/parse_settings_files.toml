@@ -4,6 +4,7 @@
 "i2MassChroQ" = "parse_settings_i2massChroQ.toml"
 "MaxQuant" = "parse_settings_maxquant.toml"
 "ProlineStudio" = "parse_settings_proline.toml"
+"MSAngel" = "parse_settings_msangel.toml"
 "Sage" = "parse_settings_sage.toml"
 "Custom" = "parse_settings_custom.toml"
 

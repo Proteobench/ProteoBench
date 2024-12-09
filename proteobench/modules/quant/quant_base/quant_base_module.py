@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import zipfile
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 

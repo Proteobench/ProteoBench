@@ -240,6 +240,11 @@ class QuantUIObjects:
         self.execute_proteobench()
         self.first_point_plotted = True
 
+        # Inform the user with a link to the next tab
+        st.info(
+            "Form submitted successfully! Please navigate to the 'Results In-Depth' or 'Results New Data' tab for the next step."
+        )
+
     def generate_text_area_widget(self, input_format: str, content: dict) -> Any:
         """Generates a text area input field."""
         placeholder = content.get("placeholder")

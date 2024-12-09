@@ -40,7 +40,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     # Max missed cleavage sites, either from scoring or refinement
     max_cleavage = params.loc["scoring, maximum missed cleavage sites"]
     if params.loc["refine"] == "yes":
-        max_cleavage = params.loc["refine, maximum missed cleavage sites"]
+        max_cleavage = int(params.loc["refine, maximum missed cleavage sites"])
 
     _enzyme = str(params.loc["protein, cleavage site"])
     # Replace the regular expression for cleavage site with the one used in ProteoBench

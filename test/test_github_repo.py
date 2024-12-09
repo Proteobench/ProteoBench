@@ -2,11 +2,14 @@ import os
 import uuid
 from tempfile import TemporaryDirectory
 
-import pytest
 import pandas as pd
+import pytest
 import toml
-from git import Repo, exc, Head
-from proteobench.github.gh import GithubProteobotRepo  # Adjust the import to match your module's location
+from git import Head, Repo, exc
+
+from proteobench.github.gh import (
+    GithubProteobotRepo,  # Adjust the import to match your module's location
+)
 
 # Test data
 
@@ -28,9 +31,12 @@ def test_clone_repo_anonymous():
 # disable test store token in st.secrets, and add some code to read the token from st.secrets...
 # create a function that reads the token from secrets.toml located in ~/.streamlit/secrets.toml
 def read_token():
-    with open(os.path.expanduser("~/.streamlit/secrets.toml")) as f:
-        secrets = toml.load(f)
-        return secrets["gh"]["token_test"]
+    try:
+        with open(os.path.expanduser("~/.streamlit/secrets.toml")) as f:
+            secrets = toml.load(f)
+            return secrets["gh"]["token_test"]
+    except FileNotFoundError:
+        return ""
 
 
 skip_condition = True

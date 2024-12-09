@@ -18,11 +18,11 @@ Other modules will be more suited to explore further post-pocessing steps.
 A subset of the Q Exactive HF-X Orbitrap (Thermo Fisher) data dependent acquisition (DDA) data described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. Here, only the first biological replicate series (named “alpha”) was used, encompassing three technical replicates of two different conditions (referred to as “A” and “B”). The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
 Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
-The files can be downloaded from the proteomeXchange repository PXD028735 (https://www.ebi.ac.uk/pride/archive/projects/PXD028735) or you can download them from the ProteoBench server here: https://proteobench.cubimed.rub.de/datasets/raw_files/DDA/
+The files can be downloaded from the proteomeXchange repository [PXD028735](https://www.ebi.ac.uk/pride/archive/projects/PXD028735) or you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/datasets/raw_files/DDA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA/)
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_Quantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
+Download the zipped FASTA file here: [ProteoBenchFASTA_DDAQuantification.zip](https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_Quantification.zip).
 The fasta file provided for this module contains the three species
 present in the samples and contaminant proteins
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
@@ -106,10 +106,13 @@ Some older versions of MaxQuant do not provide the option to change fasta header
 
 ### Proline Studio (work in progress..)
 Make sure that the peaklists are named with the same prefix as raw files. To do so in ProlineStudio, use peaklist names as sample names (manually or with automatic renaming option).
+
 ![ProlineStudio Naming](../../img/module_docs/quant_lfq_ion_DDA/ProlineStudio_naming.png)
+
 The columns with the quantification values that ProteoBench will retrieve in the outputs will have the following format "abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mgf". 
 For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two fields are combined to determine what species a peptide sequence matches to.
 The `Quantified peptide ions` tab reports the precursor ion quantities (retrieved from XICs). Shared peptides ions between multiple ProteinSets are duplicated. This redundancy is removed by combining the protein identification from all rows of a given precursor ion before metric calculation.
+
 For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`. For local usage and public submission, we strongly recommend to use the following [template.json](../../files_provided_to_users/quant_lfq_ion_DDA/ProlineStudio/template.json) to make sure that all the tabs and columns needed are exported to be correctly parsed. Make sure that no personal information is stored in the excel file before making it public. The version of ProlineStudio is only exported in the parameters from version 2.3. 
 
 ### Sage

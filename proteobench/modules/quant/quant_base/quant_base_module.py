@@ -289,6 +289,13 @@ class QuantModule:
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
             current_datapoint[k] = v
+
+        # Generate the URL with the intermediate hash
+        intermediate_hash = current_datapoint["intermediate_hash"]
+        dataset_url = f"https://proteobench.cubimed.rub.de/datasets/{intermediate_hash}/"
+
+        # Append the URL to the user comments
+        submission_comments += f"\n\nDataset URL: {dataset_url}"
         current_datapoint["submission_comments"] = submission_comments
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
@@ -300,11 +307,9 @@ class QuantModule:
         branch_name = current_datapoint["id"].replace(" ", "_").replace("(", "").replace(")", "")
         path_write = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {path_write}")
-        f = open(path_write, "w")
+        with open(path_write, "w") as f:
+            all_datapoints.to_json(f, orient="records", indent=2)
 
-        all_datapoints.to_json(f, orient="records", indent=2)
-
-        f.close()
         commit_name = f"Added new run with id {branch_name}"
         commit_message = f"User comments: {submission_comments}"
 

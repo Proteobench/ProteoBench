@@ -42,6 +42,13 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     if params.loc["refine"] == "yes":
         max_cleavage = params.loc["refine, maximum missed cleavage sites"]
 
+    _enzyme = str(params.loc["protein, cleavage site"])
+    # Replace the regular expression for cleavage site with the one used in ProteoBench
+    if _enzyme == "[RK]|{P}":
+        _enzyme = "(?<=[KR])(?!P)"
+    elif _enzyme == "[RK]":
+        _enzyme = "(?<=[RK])"
+
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
         software_name="i2MassChroQ",
@@ -55,7 +62,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         enable_match_between_runs=True if params.loc["mcq_mbr"] == "T" else False,
         precursor_mass_tolerance=_tol_prec,
         fragment_mass_tolerance=_tol_frag,
-        enzyme=params.loc["protein, cleavage site"],
+        enzyme=_enzyme,
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # "spectrum, minimum fragment mz"
         max_peptide_length=None,  # Not mentioned, up to 38 AA in peptides

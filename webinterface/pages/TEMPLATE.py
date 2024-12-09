@@ -4,16 +4,18 @@ import json
 import logging
 from datetime import datetime
 
+import pages.texts.proteobench_builder as pbb
 import streamlit as st
 import streamlit_utils
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.modules.template.module import Module
-from proteobench.modules.template.parse_settings import INPUT_FORMATS, LOCAL_DEVELOPMENT, TEMPLATE_RESULTS_PATH
+from proteobench.modules.template.parse_settings import (
+    INPUT_FORMATS,
+    LOCAL_DEVELOPMENT,
+    TEMPLATE_RESULTS_PATH,
+)
 from proteobench.modules.template.plot import plot_bench1, plot_bench2
-
-import pages.texts.proteobench_builder as pbb
-
 
 logger = logging.getLogger(__name__)
 
@@ -197,9 +199,13 @@ class StreamlitUI:
             if submit_pr:
                 st.session_state[SUBMIT] = True
                 if not LOCAL_DEVELOPMENT:
+                    try:
+                        secret = st.secrets["gh"]["token"]
+                    except:
+                        secret = ""
                     Module().clone_pr(
                         st.session_state[ALL_DATAPOINTS],
-                        st.secrets["gh"]["token"],
+                        secret,
                         username="Proteobot",
                         remote_git="github.com/Proteobot/Results_Module2_quant_DDA.git",
                         branch_name="new_branch",

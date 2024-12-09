@@ -32,7 +32,7 @@
 "isalpha" = true
 "isupper" = true
 "pattern" = "\\([^()]*\\)|\\([^()]*\\([^()]*\\)[^()]*\\)"
-"modification_dict" = {"(ox)" = "Oxidation", "(ac)" = "Acetyl", "(oxidation (m))" = "Oxidation", "(acetyl (protein n-term))" = "Acetylation"}
+"modification_dict" = {"(ox)" = "Oxidation", "(ac)" = "Acetyl", "(oxidation (m))" = "Oxidation", "(acetyl (protein n-term))" = "Acetyl"}
 
 [general]
 "contaminant_flag" = "Cont_"

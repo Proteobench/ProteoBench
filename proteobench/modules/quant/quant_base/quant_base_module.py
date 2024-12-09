@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import zipfile
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
@@ -288,6 +289,13 @@ class QuantModule:
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
             current_datapoint[k] = v
+
+        # Generate the URL with the intermediate hash
+        intermediate_hash = current_datapoint["intermediate_hash"]
+        dataset_url = f"https://proteobench.cubimed.rub.de/datasets/{intermediate_hash}/"
+
+        # Append the URL to the user comments
+        submission_comments += f"\n\nDataset URL: {dataset_url}"
         current_datapoint["submission_comments"] = submission_comments
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
@@ -299,11 +307,9 @@ class QuantModule:
         branch_name = current_datapoint["id"].replace(" ", "_").replace("(", "").replace(")", "")
         path_write = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {path_write}")
-        f = open(path_write, "w")
+        with open(path_write, "w") as f:
+            all_datapoints.to_json(f, orient="records", indent=2)
 
-        all_datapoints.to_json(f, orient="records", indent=2)
-
-        f.close()
         commit_name = f"Added new run with id {branch_name}"
         commit_message = f"User comments: {submission_comments}"
 
@@ -356,40 +362,52 @@ class QuantModule:
         ident: str,
         input_file_obj: Any,
         result_performance: pd.DataFrame,
-        param_loc: List[str],
+        param_loc: List[Any],
+        comment: str,
     ) -> None:
         """
-        Write intermediate and raw data to a directory.
+        Write intermediate and raw data to a directory in zipped form.
 
         Args:
             dir (str): Directory to write to.
             ident (str): Identifier to create a subdirectory for this submission.
             input_file_obj (Any): File-like object representing the raw input file.
             result_performance (pd.DataFrame): The result performance DataFrame.
-            param_loc (List[str]): List of paths to parameter files that need to be copied.
+            param_loc (List[Any]): List of paths to parameter files that need to be copied.
+            comment (str): User comment for the submission.
         """
         # Create the target directory
         path_write = os.path.join(dir, ident)
         try:
             os.makedirs(path_write, exist_ok=True)
-        except Exception as e:
-            logging.warning(f"Could not create directory: {path_write}. Error: {e}")
+        except OSError as e:
+            msg = f"Could not create directory: {path_write}. Error: {e}"
+            logging.warning(msg)
 
-        # Save the input file-like object content to disk
-        input_file_path = os.path.join(path_write, "input_file_without_extension")
+        # Create a zip file for all outputs
+        zip_file_path = os.path.join(path_write, f"{ident}_data.zip")
         try:
-            input_file_obj.seek(0)  # Reset file pointer to the beginning
-            with open(input_file_path, "wb") as f:
-                f.write(input_file_obj.read())  # Read the content and write it to a file
-            logging.info(f"Input file saved to {input_file_path}")
+            with zipfile.ZipFile(zip_file_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+                # Save the input file-like object content to the zip file
+                input_file_obj.seek(0)
+                zf.writestr("input_file.txt", input_file_obj.read())
+
+                # Save the result performance DataFrame as a CSV in the zip file
+                result_csv = result_performance.to_csv(index=False)
+                zf.writestr("result_performance.csv", result_csv)
+
+                # Save parameter files in the zip file
+                for i, _file in enumerate(param_loc):
+                    _file.seek(0)
+                    param_filename = f"param_{i}.txt"  # Adjust the extension if needed
+                    zf.writestr(param_filename, _file.read())
+
+                # Save the user comment in the zip file
+                zf.writestr("comment.txt", comment)
+
+            logging.info(f"Zipped data saved to {zip_file_path}")
         except Exception as e:
-            logging.error(f"Failed to save input file to {input_file_path}. Error: {e}")
-
-        # Save parameters and result performance
-        with open(os.path.join(path_write, "params_without_extension"), "w") as f:
-            f.write(",\n".join(_file.getvalue().decode("utf-8") for _file in param_loc))
-
-        result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
+            logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 
     def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
         """

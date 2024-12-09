@@ -20,7 +20,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     params = pd.read_csv(fname, sep="\t", header=None, index_col=0).squeeze()
 
     # Construct tolerance strings for fragment and parent mass errors
-    _tol_frag = "{} ({})".format(
+    _tol_frag = "{} {}".format(
         params.loc["spectrum, fragment monoisotopic mass error"],
         params.loc["spectrum, fragment monoisotopic mass error units"],
     )
@@ -32,7 +32,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     ), "not symmetric tolerance"
 
     # Construct tolerance strings for parent mass error
-    _tol_prec = "{} ({})".format(
+    _tol_prec = "{} {}".format(
         params.loc["spectrum, parent monoisotopic mass error minus"],
         params.loc["spectrum, parent monoisotopic mass error units"],
     )

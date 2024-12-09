@@ -68,6 +68,7 @@ class StreamlitUI:
         # Tab 2: Submission Details
         with tab_submission_details:
             st.title(self.variables_dda_quant.texts.ShortMessages.title)
+
             st.write(
                 f"The full description of the module is available [here]({self.variables_dda_quant.texts.ShortMessages.doc_url})"
             )
@@ -77,9 +78,16 @@ class StreamlitUI:
                 )
             self.quant_uiobjects.display_submission_form()
 
+            if self.quant_uiobjects.first_point_plotted:
+                # Inform the user with a link to the next tab
+                st.info(
+                    "Form submitted successfully! Please navigate to the 'Results In-Depth' or 'Results New Data' tab for the next step."
+                )
+
         # Tab 2.5: in-depth plots current data
         with tab_indepth_plots:
             st.title(self.variables_dda_quant.texts.ShortMessages.title)
+
             st.write(
                 f"The full description of the module is available [here]({self.variables_dda_quant.texts.ShortMessages.doc_url})"
             )

@@ -360,9 +360,7 @@ class QuantModule:
         comment: str,
     ) -> None:
         """
-        Write intermediate and raw data to a directory.
-
-        Hint: Any is a File-like object.
+        Write intermediate and raw data to a directory in zipped form.
 
         Args:
             dir (str): Directory to write to.
@@ -380,38 +378,30 @@ class QuantModule:
             msg = f"Could not create directory: {path_write}. Error: {e}"
             logging.warning(msg)
 
-        # Save the input file-like object content to disk
-        input_file_path = os.path.join(path_write, "input_file_without_extension")
+        # Create a zip file for all outputs
+        zip_file_path = os.path.join(path_write, f"{ident}_data.zip")
         try:
-            input_file_obj.seek(0)  # Reset file pointer to the beginning
-            with open(input_file_path, "wb") as f:
-                f.write(input_file_obj.read())  # Read the content and write it to a file
-            msg = f"Input file saved to {input_file_path}"
-            logging.info(msg)
-        except UnicodeDecodeError as e:
-            msg = f"Failed to save input file to {input_file_path}. Error: {e}"
-            logging.error(msg)
+            with zipfile.ZipFile(zip_file_path, "w") as zf:
+                # Save the input file-like object content to the zip file
+                input_file_obj.seek(0)
+                zf.writestr("input_file.txt", input_file_obj.read())
 
-        # Save parameters and result performance
-        # ! excel file cannot be saved by concatenating them, save individually
-        for i, _file in enumerate(param_loc):
-            fname = os.path.join(path_write, "params_without_extension")
-            if i > 0:
-                fname += f"_{i}"
-            _file.seek(0)
-            try:
-                with open(fname, "wb") as f:
-                    f.write(_file.read())
-                msg = f"Parameter file saved to {fname}"
-                logging.info(msg)
-            except UnicodeDecodeError as e:
-                msg = f"Failed to save parameter file to {fname}. Error: {e}"
-                logging.error(msg)
+                # Save the result performance DataFrame as a CSV in the zip file
+                result_csv = result_performance.to_csv(index=False)
+                zf.writestr("result_performance.csv", result_csv)
 
-        result_performance.to_csv(os.path.join(path_write, "result_performance.csv"))
+                # Save parameter files in the zip file
+                for i, _file in enumerate(param_loc):
+                    _file.seek(0)
+                    param_filename = f"param_{i}.txt"  # Adjust the extension if needed
+                    zf.writestr(param_filename, _file.read())
 
-        with open(os.path.join(path_write, "comment.txt"), "w") as f:
-            f.write(comment)
+                # Save the user comment in the zip file
+                zf.writestr("comment.txt", comment)
+
+            logging.info(f"Zipped data saved to {zip_file_path}")
+        except Exception as e:
+            logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 
     def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
         """

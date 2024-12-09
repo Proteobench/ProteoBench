@@ -17,4 +17,4 @@ ProteoBench plots these three metrics to visualize workflow outputs
     from different tools, with different versions, and/or different
 sets of parameters for the search and quantification.
 The full description of the pre-processing steps and metrics
-calculation is available [here](https://proteobench.readthedocs.io/en/stable/available-modules/2-DDA-Quantification-ion-level/).
+calculation is available [here](https://proteobench.readthedocs.io/en/stable/available-modules/2-quant-lfq-ion-dda/).

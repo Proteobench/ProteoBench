@@ -1,7 +1,7 @@
 # DDA quantification - peptidoforms
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on a Q Exactive HF-X Orbitrap (Thermo Fisher).
-It is based on the DDA quantification module "ion-level" described [here](https://proteobench.readthedocs.io/en/stable/available-modules/3-DDA-Quantification-peptidoform-level). Data and metrics are the same, the difference is that in this module we focus on peptidoform quantities summarised from the ion quantities. 
+It is based on the DDA quantification module "ion-level" described [here](https://proteobench.readthedocs.io/en/stable/available-modules/3-quant-lfq-peptidoform-dda). Data and metrics are the same, the difference is that in this module we focus on peptidoform quantities summarised from the ion quantities. 
 
 ## How to use
 

@@ -59,6 +59,7 @@ class QuantModule:
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
         "ProlineStudio": extract_params_proline,
+        "MSAngel": extract_params_msangel,
         "AlphaPept": extract_params_alphapept,
         "Sage": extract_params_sage,
         "FragPipe": extract_params_fragger,

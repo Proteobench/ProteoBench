@@ -51,7 +51,8 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         ident_fdr_psm=params.loc["psm_fdr"],
         ident_fdr_peptide=params.loc["peptide_fdr"],
         ident_fdr_protein=params.loc["protein_fdr"],
-        enable_match_between_runs=params.loc["mcq_mbr"],
+        # set match between runs to True if it is enabled
+        enable_match_between_runs=True if params.loc["mcq_mbr"] == "T" else False,
         precursor_mass_tolerance=_tol_prec,
         fragment_mass_tolerance=_tol_frag,
         enzyme=params.loc["protein, cleavage site"],

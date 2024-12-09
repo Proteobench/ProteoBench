@@ -382,7 +382,7 @@ class QuantModule:
         # Create a zip file for all outputs
         zip_file_path = os.path.join(path_write, f"{ident}_data.zip")
         try:
-            with zipfile.ZipFile(zip_file_path, "w") as zf:
+            with zipfile.ZipFile(zip_file_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
                 # Save the input file-like object content to the zip file
                 input_file_obj.seek(0)
                 zf.writestr("input_file.txt", input_file_obj.read())

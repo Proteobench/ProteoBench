@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 import pathlib
-import pprint
 import re
 from collections import namedtuple
 from io import BytesIO
@@ -124,29 +123,33 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
     if fragpipe_params.loc["msfragger.search_enzyme_name_2"] != "null":
         enzyme += f"|{fragpipe_params.loc['msfragger.search_enzyme_name_2']}"
+    if enzyme == "stricttrypsin":
+        enzyme = "Trypsin/P"  # strict trypsin: always cut after K and R
+    elif enzyme == "trypsin":
+        enzyme = "Trypsin"  # trypsin: do not cut before P
     params.enzyme = enzyme
-    params.allowed_miscleavages = fragpipe_params.loc["msfragger.allowed_missed_cleavage_1"]
+    params.allowed_miscleavages = int(fragpipe_params.loc["msfragger.allowed_missed_cleavage_1"])
 
     # Modifications
     params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods"]
     params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods"]
-    params.max_mods = fragpipe_params.loc["msfragger.max_variable_mods_per_peptide"]
+    params.max_mods = int(fragpipe_params.loc["msfragger.max_variable_mods_per_peptide"])
 
     # Peptide length
-    params.min_peptide_length = fragpipe_params.loc["msfragger.digest_min_length"]
-    params.max_peptide_length = fragpipe_params.loc["msfragger.digest_max_length"]
+    params.min_peptide_length = int(fragpipe_params.loc["msfragger.digest_min_length"])
+    params.max_peptide_length = int(fragpipe_params.loc["msfragger.digest_max_length"])
 
     # Precursor mass tolerance
     precursor_mass_units = "Da"
     if int(fragpipe_params.loc["msfragger.precursor_mass_units"]):
         precursor_mass_units = "ppm"
-    params.precursor_mass_tolerance = f'{fragpipe_params.loc["msfragger.precursor_mass_lower"]} {precursor_mass_units}|{fragpipe_params.loc["msfragger.precursor_mass_upper"]} {precursor_mass_units}'
+    params.precursor_mass_tolerance = f'[{fragpipe_params.loc["msfragger.precursor_mass_lower"]} {precursor_mass_units}, {fragpipe_params.loc["msfragger.precursor_mass_upper"]} {precursor_mass_units}]'
 
     # Fragment mass tolerance
     fragment_mass_units = "Da"
     if int(fragpipe_params.loc["msfragger.fragment_mass_units"]):
         fragment_mass_units = "ppm"
-    params.fragment_mass_tolerance = f'{fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}'
+    params.fragment_mass_tolerance = f'[-{fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}, {fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}]'
 
     # Quantification settings
     if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
@@ -205,6 +208,6 @@ if __name__ == "__main__":
         df.to_csv(file.with_suffix(".csv"))
         with open(file, "rb") as f:
             params = extract_params(f)
-        pprint(params.__dict__)
         series = pd.Series(params.__dict__)
+        print(series)
         series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")

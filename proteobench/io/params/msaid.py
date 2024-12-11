@@ -22,9 +22,9 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "search_engine": "Chimerys",
         "search_engine_version": "4.1.1",
         "quantification_method": "MS2 Area",
-        "ident_fdr_psm": "0.01",
-        "ident_fdr_peptide": "0.01",
-        "ident_fdr_protein": "0.01",
+        "ident_fdr_psm": 0.01,
+        "ident_fdr_peptide": 0.01,
+        "ident_fdr_protein": 0.01,
         "enable_match_between_runs": False,
     }
 
@@ -37,16 +37,18 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     # Extract relevant parameters from the file's dictionary
     parameters["search_engine"] = params_dict["Algorithm"].split(" ")[0]
     parameters["search_engine_version"] = params_dict["Algorithm"].split(" ")[1]
-    parameters["fragment_mass_tolerance"] = params_dict["Fragment Mass Tolerance"]
+    parameters["fragment_mass_tolerance"] = (
+        "[-" + params_dict["Fragment Mass Tolerance"] + ", " + params_dict["Fragment Mass Tolerance"] + "]"
+    )
     parameters["enzyme"] = params_dict["Enzyme"]
-    parameters["allowed_miscleavages"] = params_dict["Max. Missed Cleavage Sites"]
-    parameters["min_peptide_length"] = params_dict["Min. Peptide Length"]
-    parameters["max_peptide_length"] = params_dict["Max. Peptide Length"]
+    parameters["allowed_miscleavages"] = int(params_dict["Max. Missed Cleavage Sites"])
+    parameters["min_peptide_length"] = int(params_dict["Min. Peptide Length"])
+    parameters["max_peptide_length"] = int(params_dict["Max. Peptide Length"])
     parameters["fixed_mods"] = params_dict["Static Modifications"]
     parameters["variable_mods"] = params_dict["Variable Modifications"]
-    parameters["max_mods"] = params_dict["Maximum Number of Modifications"]
-    parameters["min_precursor_charge"] = params_dict["Min. Peptide Charge"]
-    parameters["max_precursor_charge"] = params_dict["Max. Peptide Charge"]
+    parameters["max_mods"] = int(params_dict["Maximum Number of Modifications"])
+    parameters["min_precursor_charge"] = int(params_dict["Min. Peptide Charge"])
+    parameters["max_precursor_charge"] = int(params_dict["Max. Peptide Charge"])
     parameters["quantification_method"] = params_dict["Quantification Type"]
 
     # Set flag for enabling match between runs based on quantification method

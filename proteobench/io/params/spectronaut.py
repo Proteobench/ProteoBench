@@ -47,7 +47,7 @@ def extract_mass_tolerance(lines: List[str], search_term: str) -> Optional[str]:
         Optional[str]: The extracted mass tolerance value, or None if the search term is not found.
     """
     value = next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
-    value = "40ppm" if value == "System Default" else value
+    value = "40 ppm" if value == "System Default" else value
     return value
 
 
@@ -94,21 +94,33 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     # Clean up the lines and extract the relevant parameters
     lines = [re.sub(r"^[\s│├─└]*", "", line).strip() for line in lines]
 
-    params.ident_fdr_psm = extract_value(lines, "Precursor Qvalue Cutoff:")
+    params.ident_fdr_psm = float(extract_value(lines, "Precursor Qvalue Cutoff:"))
     params.ident_fdr_peptide = None
-    params.ident_fdr_protein = extract_value(lines, "Protein Qvalue Cutoff (Experiment):")
+    params.ident_fdr_protein = float(extract_value(lines, "Protein Qvalue Cutoff (Experiment):"))
     params.enable_match_between_runs = None
-    params.precursor_mass_tolerance = extract_mass_tolerance(lines, "MS1 Mass Tolerance Strategy:")
-    params.fragment_mass_tolerance = extract_mass_tolerance(lines, "MS2 Mass Tolerance Strategy:")
+    _precursor_mass_tolerance = extract_mass_tolerance(lines, "MS1 Mass Tolerance Strategy:")
+    params.precursor_mass_tolerance = f"[-{_precursor_mass_tolerance}, {_precursor_mass_tolerance}]"
+    _fragment_mass_tolerance = extract_mass_tolerance(lines, "MS2 Mass Tolerance Strategy:")
+    params.fragment_mass_tolerance = f"[-{_fragment_mass_tolerance}, {_fragment_mass_tolerance}]"
     params.enzyme = extract_value(lines, "Enzymes / Cleavage Rules:")
-    params.allowed_miscleavages = extract_value(lines, "Missed Cleavages:")
-    params.max_peptide_length = extract_value(lines, "Max Peptide Length:")
-    params.min_peptide_length = extract_value(lines, "Min Peptide Length:")
+    params.allowed_miscleavages = int(extract_value(lines, "Missed Cleavages:"))
+    params.max_peptide_length = int(extract_value(lines, "Max Peptide Length:"))
+    params.min_peptide_length = int(extract_value(lines, "Min Peptide Length:"))
     params.fixed_mods = extract_value(lines, "Fixed Modifications:")
     params.variable_mods = extract_value_regex(lines, "^Variable Modifications:")
-    params.max_mods = extract_value(lines, "Max Variable Modifications:")
-    params.min_precursor_charge = extract_value(lines, "Peptide Charge:")
-    params.max_precursor_charge = extract_value(lines, "Peptide Charge:")
+    params.max_mods = int(extract_value(lines, "Max Variable Modifications:"))
+    _min_precursor_charge = extract_value(lines, "Peptide Charge:")
+    if _min_precursor_charge == "False":
+        params.min_precursor_charge = None
+    else:
+        params.min_precursor_charge = int(_min_precursor_charge)
+
+    _max_precursor_charge = extract_value(lines, "Peptide Charge:")
+    if _max_precursor_charge == "False":
+        params.max_precursor_charge = None
+    else:
+        params.max_precursor_charge = int(_max_precursor_charge)
+
     params.scan_window = extract_value(lines, "XIC IM Extraction Window:")
     params.quantification_method = extract_value(
         lines, "Quantity MS Level:"

@@ -41,9 +41,7 @@ class VariablesDIAQuantdiaPASEF:
     download_selector_id_uuid: str = "download_selector_id_dia_quant_diaPASEF"
     table_id_uuid: str = "table_id_dia_quant_diaPASEF"
 
-    additional_params_json: str = (
-        "../webinterface/configuration/dia_quant.json"  # TODO: make a new file for this, and adapt the configuration file for each module.
-    )
+    additional_params_json: str = "../webinterface/configuration/dia_quant.json"  # TODO: make a new file for this, and adapt the configuration file for each module.
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/file_description.md"

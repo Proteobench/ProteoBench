@@ -15,3 +15,7 @@ def test_extract_params():
     actual = pd.Series(actual.__dict__)
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=0).squeeze("columns")
     assert expected.equals(actual)
+
+
+if __name__ == "__main__":
+    test_extract_params()

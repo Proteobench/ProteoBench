@@ -27,6 +27,7 @@ from proteobench.io.params.i2masschroq import (
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.proline import extract_params as extract_params_proline
+
 # from proteobench.io.params.msangel import extract_params as extract_params_msangel
 from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.params.spectronaut import (

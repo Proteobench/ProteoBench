@@ -43,11 +43,11 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         max_cleavage = int(params.loc["refine, maximum missed cleavage sites"])
 
     _enzyme = str(params.loc["protein, cleavage site"])
-    # Replace the regular expression for cleavage site with the one used in ProteoBench
+    # Replace the enzyme pattern with the enzyme name used in ProteoBench
     if _enzyme == "[RK]|{P}":
-        _enzyme = "(?<=[KR])(?!P)"
+        _enzyme = "Trypsin"
     elif _enzyme == "[RK]":
-        _enzyme = "(?<=[RK])"
+        _enzyme = "Trypsin/P"
 
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(

@@ -44,15 +44,11 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
 
     # Add "hidden" modifications when using X!Tandem:
     var_mods = ""
-    print(var_mods)
     if params.loc["AnalysisSoftware_name"] == "X!Tandem":
-        if params.loc["Protein, quick acetyl"] == "yes":
+        if params.loc["protein, quick acetyl"] == "yes":
             var_mods = ",Acetyl(N-term)"
-        if params.loc["Protein, quick pyrolidone"] == "yes":
-            var_mods = var_mods + ",Pyrolidone(N-term)"
-
-    print(var_mods)
-    # print(var_mods + ",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()))
+        if params.loc["protein, quick pyrolidone"] == "yes":
+            var_mods = ",Pyrolidone(N-term)" + var_mods
 
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
@@ -70,15 +66,14 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # "spectrum, minimum fragment mz"
         max_peptide_length=None,  # Not mentioned, up to 38 AA in peptides
-        # fixed_mods=var_mods + ",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()),
-        # variable_mods=var_mods + ",".join(params.loc[params.index.str.contains("residue, potential modification mass")].dropna()),
-        fixed_mods=",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()),
-        variable_mods=",".join(params.loc[params.index.str.contains("residue, potential modification mass")].dropna()),
+        fixed_mods=",".join(params.loc[params.index.str.contains(
+            "residue, modification mass")].dropna())+var_mods,
+        variable_mods=",".join(params.loc[params.index.str.contains(
+            "residue, potential modification mass")].dropna())+var_mods,
         max_mods=None,
         min_precursor_charge=1,  # Fixed in software
         max_precursor_charge=params.loc["spectrum, maximum parent charge"],
     )
-    print(params)
 
     return params
 
@@ -94,7 +89,8 @@ if __name__ == "__main__":
         file = pathlib.Path(fname)
 
         # Read the parameter file to extract parameters
-        params = pd.read_csv(file, sep="\t", header=None, index_col=0).squeeze()
+        params = pd.read_csv(file, sep="\t", header=None,
+                             index_col=0).squeeze()
         params = extract_params(file.with_suffix(".tsv"))
 
         # Convert the parameters to a dictionary and then to a pandas Series

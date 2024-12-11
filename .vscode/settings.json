@@ -7,7 +7,7 @@
         "editor.rulers": [
             88
         ],
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "ms-python.autopep8"
     },
     "python.testing.unittestArgs": [
         "-v",
@@ -21,4 +21,6 @@
     "flake8.args": [
         "--max-line-length=120",
     ],
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true,
 }

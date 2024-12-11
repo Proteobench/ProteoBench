@@ -26,6 +26,7 @@ TESTDATA_FILES = {
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
     "Sage": os.path.join(TESTDATA_DIR, "sage_sample_input_lfq.tsv"),
     "ProlineStudio": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
+    "MSAngel": os.path.join(TESTDATA_DIR, "MSAngel_DDA_quan_ions_subset.xlsx"),
     "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
 }
 
@@ -58,7 +59,7 @@ def process_file(format_name: str):
 
 
 class TestOutputFileReading(unittest.TestCase):
-    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "ProlineStudio", "i2MassChroQ")  # "WOMBAT",
+    supported_formats = ("MaxQuant", "FragPipe", "AlphaPept", "Sage", "ProlineStudio", "MSAngel", "i2MassChroQ")  # "WOMBAT",
     """ Simple tests for reading csv input files."""
 
     def test_search_engines_supported(self):
@@ -71,6 +72,7 @@ class TestOutputFileReading(unittest.TestCase):
             "AlphaPept",
             "FragPipe",
             "ProlineStudio",
+            "MSAngel",
             "Sage",
             "i2MassChroQ",
         ):  # , "WOMBAT"

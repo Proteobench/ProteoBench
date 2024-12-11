@@ -87,7 +87,6 @@ Table 2 provides an overview of the required input files for public submission. 
 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
-
 ### i2MassChroQ
 A ProteoBench-compatible format is available in i2MassChroQ through the button `ProteoBench export`. It generates a tab-delimited file containing one row per quantified ion for metric calculation ("proteobench_export.tsv"; column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"); and a parameter file for public submission ("Project parameters.tsv"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN". 
 Link to the i2MassChroQ documentation [here](http://pappso.inrae.fr/bioinfo/i2masschroq/documentation/html/).
@@ -106,7 +105,7 @@ The field "Proteins" in **the "evidence.txt" table should report proteins in the
 In the recent versions of MaxQuant, the default settings work perfectly (`Identifier rule = >([^\s]*)`; `Description rule = >(.*)`).
 Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.
 
-### Proline Studio (work in progress..)
+### Proline Studio 
 Make sure that the peaklists are named with the same prefix as raw files. To do so in ProlineStudio, use peaklist names as sample names (manually or with automatic renaming option).
 
 ![ProlineStudio Naming](../../img/module_docs/quant_lfq_ion_DDA/ProlineStudio_naming.png)
@@ -116,6 +115,10 @@ For this module, use the excel exports. Make sure that the `Quantified peptide i
 The `Quantified peptide ions` tab reports the precursor ion quantities (retrieved from XICs). Shared peptides ions between multiple ProteinSets are duplicated. This redundancy is removed by combining the protein identification from all rows of a given precursor ion before metric calculation.
 
 For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`. For local usage and public submission, we strongly recommend to use the following [template.json](../../files_provided_to_users/quant_lfq_ion_DDA/ProlineStudio/template.json) to make sure that all the tabs and columns needed are exported to be correctly parsed. Make sure that no personal information is stored in the excel file before making it public. The version of ProlineStudio is only exported in the parameters from version 2.3. 
+
+### MSAngel (work in progress..)
+MSAngel allows to build piplenes for bottom-up MS analysis with a choice of search engines, validation strategy and the Proline quantification. 
+More information can be found [here](https://www.profiproteomics.fr/ms-angel/)
 
 ### Sage
 

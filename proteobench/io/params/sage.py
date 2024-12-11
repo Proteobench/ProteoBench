@@ -43,21 +43,38 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
     params.search_engine = "Sage"
     params.search_engine_version = data["version"]
     params.enzyme = data["database"]["enzyme"]["cleave_at"]
+    if params.enzyme == "KR" or params.enzyme == "RK":
+        try:
+            if data["database"]["enzyme"]["restrict"] == "P":
+                params.enzyme = "Trypsin"
+        except KeyError:
+            params.enyzme = "Trypsin/P"
+
     params.allowed_miscleavages = data["database"]["enzyme"]["missed_cleavages"]
     params.fixed_mods = data["database"]["static_mods"]
     params.variable_mods = data["database"]["variable_mods"]
 
     try:
-        params.precursor_mass_tolerance = data["precursor_tol"]["ppm"]
+        _precursor_mass_tolerance = data["precursor_tol"]["ppm"]
+        # add unit after each value in list
+        _precursor_mass_tolerance = [str(val) + " ppm" for val in _precursor_mass_tolerance]
+        params.precursor_mass_tolerance = "[" + ", ".join(_precursor_mass_tolerance) + "]"
     except KeyError:
-        params.precursor_mass_tolerance = data["precursor_tol"]["Da"]
+        _precursor_mass_tolerance = data["precursor_tol"]["Da"]
+        # add unit after each value in list
+        _precursor_mass_tolerance = [str(val) + " Da" for val in params.precursor_mass_tolerance]
+        params.precursor_mass_tolerance = "[" + ", ".join(_precursor_mass_tolerance) + "]"
 
-    params.fragment_mass_tolerance = data["fragment_tol"]["ppm"]
-    params.min_peptide_length = data["database"]["enzyme"]["min_len"]
-    params.max_peptide_length = data["database"]["enzyme"]["max_len"]
-    params.max_mods = data["database"]["max_variable_mods"]
-    params.min_precursor_charge = data["precursor_charge"][0]
-    params.max_precursor_charge = data["precursor_charge"][1]
+    _fragment_mass_tolerance = data["fragment_tol"]["ppm"]
+    # add unit after each value in list
+    _fragment_mass_tolerance = [str(val) + " ppm" for val in _fragment_mass_tolerance]
+    params.fragment_mass_tolerance = "[" + ", ".join(_fragment_mass_tolerance) + "]"
+
+    params.min_peptide_length = int(data["database"]["enzyme"]["min_len"])
+    params.max_peptide_length = int(data["database"]["enzyme"]["max_len"])
+    params.max_mods = int(data["database"]["max_variable_mods"])
+    params.min_precursor_charge = int(data["precursor_charge"][0])
+    params.max_precursor_charge = int(data["precursor_charge"][1])
     params.enable_match_between_runs = True
 
     return params
@@ -68,6 +85,7 @@ if __name__ == "__main__":
     Extract parameters from Sage JSON files and save them as CSV.
     """
     from pathlib import Path
+    from pprint import pprint
 
     file = Path("../../../test/params/sage_results.json")
 
@@ -76,6 +94,7 @@ if __name__ == "__main__":
 
     # Convert the extracted parameters to a dictionary and then to a pandas Series
     data_dict = params.__dict__
+    pprint(params.__dict__)
     series = pd.Series(data_dict)
 
     # Write the Series to a CSV file

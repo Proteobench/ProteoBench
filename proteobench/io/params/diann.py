@@ -286,14 +286,34 @@ def extract_params(fname: str) -> ProteoBenchParameters:
             else:
                 parameters[proteobench_setting] = parse_setting(proteobench_setting, cmdline_dict[cmd_setting])
 
+    # Parse cut parameter to standard enzyme name
+    if parameters["enzyme"] == "K*,R*":
+        parameters["enzyme"] = "Trypsin/P"
+    elif parameters["enzyme"] == "K*,R*,!*P":
+        parameters["enzyme"] = "Trypsin"
+
     # If mass-acc flag is not present in cmdline string, extract it from the log file
     if "precursor_mass_tolerance" not in parameters.keys():
         mass_tol = extract_with_regex(lines, mass_tolerance_regex)
-        parameters["precursor_mass_tolerance"] = mass_tol + " ppm"
-        parameters["fragment_mass_tolerance"] = mass_tol + " ppm"
+        parameters["precursor_mass_tolerance"] = "[-" + mass_tol + " ppm" + ", " + mass_tol + " ppm]"
+        parameters["fragment_mass_tolerance"] = "[-" + mass_tol + " ppm" + ", " + mass_tol + " ppm]"
     else:
-        parameters["precursor_mass_tolerance"] = str(parameters["precursor_mass_tolerance"]) + " ppm"
-        parameters["fragment_mass_tolerance"] = str(parameters["fragment_mass_tolerance"]) + " ppm"
+        parameters["precursor_mass_tolerance"] = (
+            "[-"
+            + str(parameters["precursor_mass_tolerance"])
+            + " ppm"
+            + ", "
+            + str(parameters["precursor_mass_tolerance"])
+            + " ppm]"
+        )
+        parameters["fragment_mass_tolerance"] = (
+            "[-"
+            + str(parameters["fragment_mass_tolerance"])
+            + " ppm"
+            + ", "
+            + str(parameters["fragment_mass_tolerance"])
+            + " ppm]"
+        )
 
     # If scan window is not customely set, extract it from the log file
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
@@ -311,4 +331,5 @@ if __name__ == "__main__":
         params = extract_params(file)
         data_dict = params.__dict__
         series = pd.Series(data_dict)
+        print(series)
         series.to_csv(file.with_suffix(".csv"))

@@ -79,9 +79,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]] = (
-                self.variables_quant.default_val_slider
-            )
+            st.session_state[
+                st.session_state[self.variables_quant.slider_id_uuid]
+            ] = self.variables_quant.default_val_slider
 
     def generate_main_selectbox(self) -> None:
         """Creates the selectbox for the Streamlit UI."""
@@ -116,15 +116,15 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]] = (
-                self.variables_quant.default_val_slider
-            )
+            st.session_state[
+                st.session_state[self.variables_quant.slider_id_submitted_uuid]
+            ] = self.variables_quant.default_val_slider
 
     def display_submitted_results(self) -> None:
         """Displays the results section of the page for submitted data."""
-        handled_submission = self.process_submission_form()
-        if handled_submission == False:
-            return
+        # handled_submission = self.process_submission_form()
+        # if handled_submission == False:
+        #    return
 
         self.initialize_submitted_data_points()
         data_points_filtered = self.filter_data_submitted_slider()

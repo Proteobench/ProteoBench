@@ -1,10 +1,4 @@
-"""Proline is a quantification tool. Search engine is often Mascot.
-The parameters are provided per raw file in separate sheets of an Excel file.
-
-Relevant information in sheets:
-- "Search settings and infos",
-- "Import and filters"
-- "Quant config"
+"""Sage parameter extraction.
 """
 
 import json

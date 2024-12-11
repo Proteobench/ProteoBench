@@ -137,28 +137,30 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     params.search_engine = "Andromeda"
     params.software_version = record.loc["maxQuantVersion"].squeeze()
     params.ident_fdr_psm = None
-    params.ident_fdr_peptide = record.loc["peptideFdr"].squeeze()
-    params.ident_fdr_protein = record.loc["proteinFdr"].squeeze()
-    params.enable_match_between_runs = record.loc["matchBetweenRuns"].squeeze()
-    precursor_mass_tolerance = record.loc[
+    params.ident_fdr_peptide = float(record.loc["peptideFdr"].squeeze())
+    params.ident_fdr_protein = float(record.loc["proteinFdr"].squeeze())
+    params.enable_match_between_runs = record.loc["matchBetweenRuns"].squeeze() == "True"
+    _precursor_mass_tolerance = record.loc[
         pd.IndexSlice["parameterGroups", "parameterGroup", "mainSearchTol", :]
     ].squeeze()
-    params.precursor_mass_tolerance = f"{precursor_mass_tolerance} ppm"
+    _precursor_mass_tolerance = f"{_precursor_mass_tolerance} ppm"
+    params.precursor_mass_tolerance = "[-" + _precursor_mass_tolerance + ", " + _precursor_mass_tolerance + "]"
     # ! differences between version >1.6 and <=1.5
     fragment_mass_tolerance = record.loc[pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchTolerance", :]].squeeze()
     in_ppm = bool(record.loc[pd.IndexSlice["msmsParamsArray", "msmsParams", "MatchToleranceInPpm", :]].squeeze())
     if in_ppm:
         fragment_mass_tolerance = f"{fragment_mass_tolerance} ppm"
+    fragment_mass_tolerance = f"[-{fragment_mass_tolerance}, {fragment_mass_tolerance}]"
     params.fragment_mass_tolerance = fragment_mass_tolerance
     params.enzyme = record.loc[("parameterGroups", "parameterGroup", "enzymes", "string")].squeeze()
-    params.allowed_miscleavages = record.loc[
-        pd.IndexSlice["parameterGroups", "parameterGroup", "maxMissedCleavages", :]
-    ].squeeze()
+    params.allowed_miscleavages = int(
+        record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "maxMissedCleavages", :]].squeeze()
+    )
     try:
-        params.min_peptide_length = record.loc["minPepLen"].squeeze()
+        params.min_peptide_length = int(record.loc["minPepLen"].squeeze())
     except KeyError:
         # Version 2.6 and above
-        params.minPeptideLength = record.loc["minPeptideLength"].squeeze()
+        params.min_peptide_length = int(record.loc["minPeptideLength"].squeeze())
     # minPeptideLengthForUnspecificSearch (what is it?)
     params.max_peptide_length = None
     # fixed mods
@@ -180,11 +182,11 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
         params.variable_mods = variable_mods
     else:
         params.variable_mods = ",".join(variable_mods)
-    params.max_mods = record.loc[("parameterGroups", "parameterGroup", "maxNmods")].squeeze()
+    params.max_mods = int(record.loc[("parameterGroups", "parameterGroup", "maxNmods")].squeeze())
     params.min_precursor_charge = None
-    params.max_precursor_charge = record.loc[
-        pd.IndexSlice["parameterGroups", "parameterGroup", "maxCharge", :]
-    ].squeeze()
+    params.max_precursor_charge = int(
+        record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "maxCharge", :]].squeeze()
+    )
     return params
 
 

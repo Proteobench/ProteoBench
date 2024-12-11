@@ -27,8 +27,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     series = build_Series_from_records(read_file(fname)).reset_index()
 
     # Extract and set peptide length parameters
-    parameters.min_peptide_length = series.loc[series["level_0"] == "minPeptideLength", 0].values[0]
-    parameters.max_peptide_length = series.loc[series["level_0"] == "maxPeptideLengthForUnspecificSearch", 0].values[0]
+    parameters.min_peptide_length = int(series.loc[series["level_0"] == "minPeptideLength", 0].values[0])
+    parameters.max_peptide_length = int(
+        series.loc[series["level_0"] == "maxPeptideLengthForUnspecificSearch", 0].values[0]
+    )
 
     # Set search engine version from software version
     parameters.search_engine_version = parameters.__dict__["software_version"]

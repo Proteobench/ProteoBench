@@ -39,6 +39,8 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     # Extract FASTA related details
     fasta = record["fasta"]
     params.enzyme = fasta["protease"]
+    if params.enzyme == "trypsin":
+        params.enzyme = "Trypsin"
     params.allowed_miscleavages = fasta["n_missed_cleavages"]
     params.fixed_mods = ",".join(fasta["mods_fixed"])
     params.variable_mods = ",".join(fasta["mods_variable"])
@@ -51,8 +53,12 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     _tolerance_unit = "Da"  # Default unit is Da
     if search["ppm"]:
         _tolerance_unit = "ppm"
-    params.precursor_mass_tolerance = f'{search["prec_tol"]} {_tolerance_unit}'
-    params.fragment_mass_tolerance = f'{search["frag_tol"]} {_tolerance_unit}'
+    params.precursor_mass_tolerance = (
+        f'[-{search["prec_tol"]} {_tolerance_unit}, {search["prec_tol"]} {_tolerance_unit}]'
+    )
+    params.fragment_mass_tolerance = (
+        f'[-{search["frag_tol"]} {_tolerance_unit}, {search["frag_tol"]} {_tolerance_unit}]'
+    )
     params.ident_fdr_protein = search["protein_fdr"]
     params.ident_fdr_peptide = search["peptide_fdr"]
 

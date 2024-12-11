@@ -122,9 +122,9 @@ class QuantUIObjects:
 
     def display_submitted_results(self) -> None:
         """Displays the results section of the page for submitted data."""
-        handled_submission = self.process_submission_form()
-        if handled_submission == False:
-            return
+        # handled_submission = self.process_submission_form()
+        # if handled_submission == False:
+        #    return
 
         self.initialize_submitted_data_points()
         data_points_filtered = self.filter_data_submitted_slider()

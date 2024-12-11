@@ -26,7 +26,7 @@ TESTDATA_FILES = {
     "AlphaPept": os.path.join(TESTDATA_DIR, "AlphaPept_subset.csv"),
     "Sage": os.path.join(TESTDATA_DIR, "sage_sample_input_lfq.tsv"),
     "ProlineStudio": os.path.join(TESTDATA_DIR, "Proline_DDA_quan_ions_subset.xlsx"),
-    #TODO: add test file for MSAngel
+    "MSAngel": os.path.join(TESTDATA_DIR, "MSAngel_DDA_quan_ions_subset.xlsx"),
     "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
 }
 
@@ -72,6 +72,7 @@ class TestOutputFileReading(unittest.TestCase):
             "AlphaPept",
             "FragPipe",
             "ProlineStudio",
+            "MSAngel",
             "Sage",
             "i2MassChroQ",
         ):  # , "WOMBAT"

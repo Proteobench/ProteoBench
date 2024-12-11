@@ -42,6 +42,18 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     if params.loc["refine"] == "yes":
         max_cleavage = params.loc["refine, maximum missed cleavage sites"]
 
+    # Add "hidden" modifications when using X!Tandem:
+    var_mods = ""
+    print(var_mods)
+    if params.loc["AnalysisSoftware_name"] == "X!Tandem":
+        if params.loc["Protein, quick acetyl"] == "yes":
+            var_mods = ",Acetyl(N-term)"
+        if params.loc["Protein, quick pyrolidone"] == "yes":
+            var_mods = var_mods + ",Pyrolidone(N-term)"
+
+    print(var_mods)
+    # print(var_mods + ",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()))
+
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
         software_name="i2MassChroQ",
@@ -58,12 +70,15 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # "spectrum, minimum fragment mz"
         max_peptide_length=None,  # Not mentioned, up to 38 AA in peptides
+        # fixed_mods=var_mods + ",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()),
+        # variable_mods=var_mods + ",".join(params.loc[params.index.str.contains("residue, potential modification mass")].dropna()),
         fixed_mods=",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()),
         variable_mods=",".join(params.loc[params.index.str.contains("residue, potential modification mass")].dropna()),
         max_mods=None,
         min_precursor_charge=1,  # Fixed in software
         max_precursor_charge=params.loc["spectrum, maximum parent charge"],
     )
+    print(params)
 
     return params
 

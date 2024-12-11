@@ -289,21 +289,19 @@ class QuantUIObjects:
 
     def set_highlight_column_in_submitted_data(self) -> None:
         """Initializes the highlight column in the data points."""
+        df = st.session_state[self.variables_quant.all_datapoints_submitted]
         if (
             self.variables_quant.highlight_list_submitted not in st.session_state.keys()
-            and "Highlight" not in st.session_state[self.variables_quant.all_datapoints_submitted].columns
+            and "Highlight" not in df.columns
         ):
-            st.session_state[self.variables_quant.all_datapoints_submitted].insert(
-                0, "Highlight", [False] * len(st.session_state[self.variables_quant.all_datapoints_submitted].index)
-            )
-        elif "Highlight" not in st.session_state[self.variables_quant.all_datapoints_submitted].columns:
-            st.session_state[self.variables_quant.all_datapoints_submitted].insert(
-                0, "Highlight", st.session_state[self.variables_quant.highlight_list_submitted]
-            )
-        elif "Highlight" in st.session_state[self.variables_quant.all_datapoints_submitted].columns:
-            st.session_state[self.variables_quant.all_datapoints_submitted]["Highlight"] = st.session_state[
-                self.variables_quant.all_datapoints_submitted
-            ]["Highlight"].fillna(False)
+            df.insert(0, "Highlight", [False] * len(df.index))
+        elif "Highlight" not in df.columns:
+            df.insert(0, "Highlight", st.session_state[self.variables_quant.highlight_list_submitted])
+        elif "Highlight" in df.columns:
+            # Not sure how 'Highlight' column became object dtype
+            df["Highlight"] = df["Highlight"].astype(bool).fillna(False)
+        # only needed for last elif, but to be sure apply always:
+        st.session_state[self.variables_quant.all_datapoints_submitted] = df
 
     def generate_main_slider(self) -> None:
         """Creates a slider input."""
@@ -423,6 +421,7 @@ class QuantUIObjects:
         self.user_input["input_csv"].getbuffer()
 
         if "storage" in st.secrets.keys():
+            logger.info("Save intermediate raw")
             self.ionmodule.write_intermediate_raw(
                 dir=st.secrets["storage"]["dir"],
                 ident=_id,

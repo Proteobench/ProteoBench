@@ -42,13 +42,15 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     if params.loc["refine"] == "yes":
         max_cleavage = params.loc["refine, maximum missed cleavage sites"]
 
+    fixed_mods_list = list(params.loc[params.index.str.contains("residue, modification mass")].dropna())
+    var_mods_list = list(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())
+
     # Add "hidden" modifications when using X!Tandem:
-    var_mods = ""
-    if params.loc["AnalysisSoftware_name"] == "X!Tandem":
+    if params.loc["AnalysisSoftware_name"] == "X!Tandem" or params.loc["AnalysisSoftware_name"] == "X! Tandem":
         if params.loc["protein, quick acetyl"] == "yes":
-            var_mods = ",Acetyl(N-term)"
+            var_mods_list.append("Acetyl(N-term)")
         if params.loc["protein, quick pyrolidone"] == "yes":
-            var_mods = ",Pyrolidone(N-term)" + var_mods
+            var_mods_list.append("Pyrolidone(N-term)")
 
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
@@ -66,9 +68,8 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # "spectrum, minimum fragment mz"
         max_peptide_length=None,  # Not mentioned, up to 38 AA in peptides
-        fixed_mods=",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()) + var_mods,
-        variable_mods=",".join(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())
-        + var_mods,
+        fixed_mods=";".join(fixed_mods_list),
+        variable_mods=";".join(var_mods_list),
         max_mods=None,
         min_precursor_charge=1,  # Fixed in software
         max_precursor_charge=params.loc["spectrum, maximum parent charge"],

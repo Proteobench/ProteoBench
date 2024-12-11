@@ -66,10 +66,9 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # "spectrum, minimum fragment mz"
         max_peptide_length=None,  # Not mentioned, up to 38 AA in peptides
-        fixed_mods=",".join(params.loc[params.index.str.contains(
-            "residue, modification mass")].dropna())+var_mods,
-        variable_mods=",".join(params.loc[params.index.str.contains(
-            "residue, potential modification mass")].dropna())+var_mods,
+        fixed_mods=",".join(params.loc[params.index.str.contains("residue, modification mass")].dropna()) + var_mods,
+        variable_mods=",".join(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())
+        + var_mods,
         max_mods=None,
         min_precursor_charge=1,  # Fixed in software
         max_precursor_charge=params.loc["spectrum, maximum parent charge"],
@@ -89,8 +88,7 @@ if __name__ == "__main__":
         file = pathlib.Path(fname)
 
         # Read the parameter file to extract parameters
-        params = pd.read_csv(file, sep="\t", header=None,
-                             index_col=0).squeeze()
+        params = pd.read_csv(file, sep="\t", header=None, index_col=0).squeeze()
         params = extract_params(file.with_suffix(".tsv"))
 
         # Convert the parameters to a dictionary and then to a pandas Series

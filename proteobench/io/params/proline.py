@@ -103,8 +103,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     params.allowed_miscleavages = sheet.loc[0, "max_missed_cleavages"]
     params.fixed_mods = sheet.loc[0, "fixed_ptms"]
     params.variable_mods = sheet.loc[0, "variable_ptms"]
-    params.precursor_mass_tolerance = sheet.loc[0, "peptide_mass_error_tolerance"]
-    params.fragment_mass_tolerance = sheet.loc[0, "fragment_mass_error_tolerance"]
+    _precursor_mass_tolerance = sheet.loc[0, "peptide_mass_error_tolerance"]
+    params.precursor_mass_tolerance = f"[-{_precursor_mass_tolerance}, {_precursor_mass_tolerance}]"
+    _fragment_mass_tolerance = sheet.loc[0, "fragment_mass_error_tolerance"]
+    params.fragment_mass_tolerance = f"[-{_fragment_mass_tolerance}, {_fragment_mass_tolerance}]"
 
     # Extract charge states and set min/max precursor charge
     charges = find_charge(sheet.loc[0, "peptide_charge_states"])
@@ -130,7 +132,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     sheet_name = "Quant config"
     sheet = excel.parse(sheet_name, dtype="object", index_col=0)
     enable_match_between_runs = sheet.index.str.contains("cross assignment").any()
-    params.enable_match_between_runs = enable_match_between_runs
+    params.enable_match_between_runs = bool(enable_match_between_runs)
 
     # Try to extract software version from "Dataset statistics and infos" sheet
     try:

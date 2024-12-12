@@ -1,9 +1,5 @@
-Please upload the ouput of your analysis, and indicate what software 
-tool it comes from (this is necessary to correctly parse your table - find 
-more information in the "[How to use](https://proteobench.readthedocs.io/en/stable/available-modules/4-quant-lfq-ion-dia-aif/)"
-section of this module).
-
-Currently, we support output files from AlphaDIA, DIA-NN, FragPipe, MSAID, MaxQuant and Spectronaut. It is also possible to reformat your data in a tab-delimited file that we call "custom format" in the [documentation](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/). 
+Please upload the output of your analysis, and indicate what software
+tool it comes from (this is necessary to correctly parse your table) - find more information in the "[How to use](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/#how-to-use)" section of this module. To the raw data to run your workflow on please see the section "[Data set](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/#data-set)". 
 
 Remember: contaminant sequences are already present in the fasta file 
 associated to this module. **Do not add other contaminants** to your 

@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
-from st_pages import show_pages_from_config
 
 import proteobench
 
@@ -20,7 +19,6 @@ class StreamlitPage(ABC):
 
         self._preface()
         self._main_page()
-        show_pages_from_config()
 
     def _preface(self):
         st.markdown(

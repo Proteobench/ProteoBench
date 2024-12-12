@@ -25,11 +25,9 @@ dependencies = [
   "streamlit_extras",
   "streamlit-plotly-events",
   "matplotlib",
-  "importlib-metadata; python_version < '3.8'", # ? can be removed?
   "toml",
   "PyGithub",
   "GitPython",
-  "st-pages<1.0",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"

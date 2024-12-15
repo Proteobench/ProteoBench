@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import logging
-from collections import ChainMap
+from collections import ChainMap, defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict
@@ -135,7 +135,10 @@ class Datapoint:
         if "comments_for_plotting" not in user_input.keys():
             user_input["comments_for_plotting"] = ""
 
-        user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
+        user_input = defaultdict(
+            user_input.default_factory,  # Preserve the default factory
+            {key: ("" if value is None else value) for key, value in user_input.items()},
+        )
 
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,

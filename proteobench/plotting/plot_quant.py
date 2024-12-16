@@ -71,7 +71,7 @@ class PlotDataPoint:
     @staticmethod
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
-        metric: str = "median",
+        metric: str = "Median",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#377eb8",
             "AlphaPept": "#4daf4a",
@@ -165,18 +165,18 @@ class PlotDataPoint:
         benchmark_metrics_df["hover_text"] = hover_texts
         benchmark_metrics_df["scatter_size"] = scatter_size
 
-        if metric == "median":
+        if metric == "Median":
             layout_xaxis_range = [
                 min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
-                max(all_median_abs_epsilon) + min(all_median_abs_epsilon) * 0.05,
+                max(all_median_abs_epsilon) + max(all_median_abs_epsilon) * 0.05,
             ]
             layout_xaxis_title = (
                 "Median absolute difference between measured and expected log2-transformed fold change."
             )
-        elif metric == "mean":
+        elif metric == "Mean":
             layout_xaxis_range = [
                 min(all_mean_abs_epsilon) - min(all_mean_abs_epsilon) * 0.05,
-                max(all_mean_abs_epsilon) + min(all_mean_abs_epsilon) * 0.05,
+                max(all_mean_abs_epsilon) + max(all_mean_abs_epsilon) * 0.05,
             ]
             layout_xaxis_title = "Mean absolute difference between measured and expected log2-transformed fold change."
 
@@ -205,7 +205,7 @@ class PlotDataPoint:
             # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
             fig.add_trace(
                 go.Scatter(
-                    x=tmp_df["median_abs_epsilon"],
+                    x=tmp_df["{}_abs_epsilon".format(metric.lower())],
                     y=tmp_df["nr_prec"],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],

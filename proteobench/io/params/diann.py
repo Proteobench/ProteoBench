@@ -3,6 +3,7 @@ import re
 from typing import Any, List, Optional
 
 import pandas as pd
+from packaging.version import Version
 
 from proteobench.io.params import ProteoBenchParameters
 
@@ -68,43 +69,71 @@ def find_cmdline_string(lines: List[str]) -> Optional[str]:
     return None
 
 
-def parse_cmdline_string(line: str) -> dict:
+def parse_cmdline_string(cmd_line: str, software_version: str) -> dict:
     """
-    Parse the command line string to the settings it specifies.
+    Parse a DIA-NN command line string into a dictionary of settings.
 
-    The GitHub README.md of DIA-NN from version 1.9 was used to interpret settings.
-
-    Parameter
-    ---------
-    line: str
+    Parameters
+    ----------
+    cmd_line : str
         The command line string to parse.
+    software_version : str
+        The version of the DIA-NN software, e.g., "1.8".
 
-    Return
+    Returns
+    -------
+    dict
+        Parsed settings in dictionary format. Keys are setting names, and values are:
+        - List of inputs for multi-value settings.
+        - Boolean `True` for flag-like settings (without values).
+        - Modified settings for variable and fixed modifications.
+
+    Raises
     ------
-    dict:
-        Parsed setting parameters in dictionary format.
-        Keys are setting names and values the inputted setting in list format.
-        The value is boolean if the setting is considered a boolean flag.
+    AssertionError
+        If an unsupported setting format is detected (e.g., `unimod` with extra arguments).
     """
-    setting_dict = {}
-    settings = [setting.split() for setting in line.split(" --")]
-    var_mods = []
-    fixed_mods = []
-    for setting_list in settings:
-        if setting_list[0].startswith("unimod"):
-            assert len(setting_list) == 1
-            fixed_mods.append(setting_list[0])
-        elif len(setting_list) == 1:
-            setting_dict[setting_list[0]] = True
-        elif setting_list[0] == "var-mod":
-            var_mods.append("".join(setting_list[1:]).replace(",", "/"))
-        else:
-            setting_dict[setting_list[0]] = setting_list[1:]
+    settings_dict = {}
+    settings_list = [setting.split() for setting in cmd_line.split(" --")]
+    variable_modifications = []
+    fixed_modifications = []
 
-    setting_dict["var-mod"] = var_mods
-    if "mod" not in setting_dict.keys():
-        setting_dict["mod"] = fixed_mods
-    return setting_dict
+    def add_modification(mod_list, setting, description=None):
+        """Add a modification to the specified list."""
+        if len(setting) != 1:
+            raise ValueError(f"Invalid `unimod` format: {setting}")
+        mod_list.append(description or setting[0])
+
+    is_version_below_1_8 = Version(software_version.split(" ")[0]) < Version("1.8")
+
+    for setting_parts in settings_list:
+        key = setting_parts[0]
+        values = setting_parts[1:]
+
+        if key.startswith("unimod"):
+            if is_version_below_1_8:
+                if key == "unimod4":
+                    add_modification(fixed_modifications, setting_parts, "Carbamidomethyl (C)")
+                elif key == "unimod35":
+                    add_modification(variable_modifications, setting_parts, "Oxidation (M)")
+            else:
+                add_modification(fixed_modifications, setting_parts)
+
+        elif len(setting_parts) == 1:  # Boolean flag
+            settings_dict[key] = True
+
+        elif key == "var-mod":  # Handle variable modifications
+            variable_modifications.append("".join(values).replace(",", "/"))
+
+        else:  # General key-value settings
+            settings_dict[key] = values
+
+    # Add modifications to the settings dictionary
+    settings_dict["var-mod"] = variable_modifications
+    if "mod" not in settings_dict:
+        settings_dict["mod"] = fixed_modifications
+
+    return settings_dict
 
 
 def parse_setting(setting_name: str, setting_list: list) -> Any:
@@ -271,7 +300,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     # Get settings from the execution command string
     cmdline_string = find_cmdline_string(lines)
-    cmdline_dict = parse_cmdline_string(cmdline_string)
+    cmdline_dict = parse_cmdline_string(cmdline_string, software_version)
 
     parameters["second_pass"] = "double-search" in cmdline_dict.keys() or "double-pass" in cmdline_dict.keys()
     parameters["quantification_method"] = parse_quantification_strategy(cmdline_dict)
@@ -326,6 +355,7 @@ if __name__ == "__main__":
         "../../../test/params/DIANN_output_20240229_report.log.txt",
         "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
         "../../../test/params/DIANN_WU304578_report.log.txt",
+        "../../../test/params/DIANN_1.7.16.log.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

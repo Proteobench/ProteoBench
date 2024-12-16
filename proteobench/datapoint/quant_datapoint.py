@@ -135,10 +135,15 @@ class Datapoint:
         if "comments_for_plotting" not in user_input.keys():
             user_input["comments_for_plotting"] = ""
 
-        user_input = defaultdict(
-            user_input.default_factory,  # Preserve the default factory
-            {key: ("" if value is None else value) for key, value in user_input.items()},
-        )
+        try:
+            user_input = defaultdict(
+                user_input.default_factory,  # Preserve the default factory
+                {key: ("" if value is None else value) for key, value in user_input.items()},
+            )
+        except AttributeError:
+            user_input = defaultdict(
+                {key: ("" if value is None else value) for key, value in user_input.items()},
+            )
 
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,

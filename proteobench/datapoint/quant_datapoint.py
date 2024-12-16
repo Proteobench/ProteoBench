@@ -141,10 +141,7 @@ class Datapoint:
                 {key: ("" if value is None else value) for key, value in user_input.items()},
             )
         except AttributeError:
-            user_input = defaultdict(
-                lambda: "",  # Provide a default callable for missing keys
-                {key: ("" if value is None else value) for key, value in user_input.items()},
-            )
+            user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
 
         result_datapoint = Datapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,

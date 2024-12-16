@@ -71,7 +71,7 @@ class PlotDataPoint:
     @staticmethod
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
-        metric: str = "median",
+        metric: str = "Median",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#377eb8",
             "AlphaPept": "#4daf4a",

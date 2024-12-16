@@ -237,14 +237,11 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     Returns:
         ProteoBenchParameters: An object containing the extracted parameters.
     """
-    try:
-        with open(fname) as f:
-            lines_read = f.readlines()
-            lines = [line for line in lines_read if "──" in line]
-    except:
-        lines = [l for l in fname.read().decode("utf-8").splitlines() if "──" in l]
+    with open(fname) as f:
+        lines_read = f.readlines()
+        lines = [line for line in lines_read if "──" in line]
 
-    version = extract_file_version(lines[6])
+    version = extract_file_version(lines_read[6])
 
     line_generator = iter(lines)
     first_line = next(line_generator)

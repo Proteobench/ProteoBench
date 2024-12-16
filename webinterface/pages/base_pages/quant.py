@@ -173,8 +173,7 @@ class QuantUIObjects:
             fig_metric = PlotDataPoint.plot_metric(
                 data_points_filtered,
                 label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
-                metric=metric,
-                key="placeholder",  # TODO: add to variables
+                metric=metric
             )
             st.plotly_chart(fig_metric, use_container_width=True)
         except Exception as e:

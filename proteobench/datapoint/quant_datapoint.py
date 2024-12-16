@@ -13,7 +13,7 @@ import pandas as pd
 import proteobench
 
 
-def filter_df_numquant_median_abs_epsilon(row: Dict[str, Any], min_quant: int = 3) -> float | None:
+def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: str = "median") -> float | None:
     """
     Extract the 'median_abs_epsilon' value from a row (assumed to be a dictionary).
 
@@ -27,7 +27,7 @@ def filter_df_numquant_median_abs_epsilon(row: Dict[str, Any], min_quant: int = 
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("median_abs_epsilon")
+        return row[min_quant].get("{}_abs_epsilon".format(metric))
 
     return None
 
@@ -188,7 +188,9 @@ class Datapoint:
         nr_prec = len(df_slice)
 
         # Calculate the median absolute epsilon (insensitive to outliers)
-        median_abs_epsilon = df_slice["epsilon"].abs().mean()
+        median_abs_epsilon = df_slice["epsilon"].abs().median()
+        # Calculate the mean absolute epsilon (sensitive to outliers)
+        mean_abs_epsilon = df_slice["epsilon"].abs().mean()
 
         # Calculate the variance of epsilon (sensitive to outliers)
         variance_epsilon = df_slice["epsilon"].var()
@@ -202,6 +204,7 @@ class Datapoint:
         return {
             min_nr_observed: {
                 "median_abs_epsilon": median_abs_epsilon,
+                "mean_abs_epsilon": mean_abs_epsilon,
                 "variance_epsilon": variance_epsilon,
                 "nr_prec": nr_prec,
                 "CV_median": cv_median,

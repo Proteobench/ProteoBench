@@ -1,0 +1,25 @@
+,0
+software_name,DIA-NN
+software_version,1.7.16
+search_engine,DIA-NN
+search_engine_version,1.7.16
+ident_fdr_psm,
+ident_fdr_peptide,0.01
+ident_fdr_protein,0.01
+enable_match_between_runs,True
+precursor_mass_tolerance,"[-17.9612 ppm, 17.9612 ppm]"
+fragment_mass_tolerance,"[-17.9612 ppm, 17.9612 ppm]"
+enzyme,Trypsin/P
+allowed_miscleavages,1
+min_peptide_length,6
+max_peptide_length,30
+fixed_mods,Carbamidomethyl (C)
+variable_mods,Oxidation (M)
+max_mods,1
+min_precursor_charge,
+max_precursor_charge,
+scan_window,10
+quantification_method,QuantUMS high-precision
+second_pass,False
+protein_inference,
+predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"

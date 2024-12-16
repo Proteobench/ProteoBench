@@ -6,7 +6,7 @@
     "ident_fdr_psm": null,
     "ident_fdr_peptide": 0.01,
     "ident_fdr_protein": 0.01,
-    "enable_match_between_runs": false,
+    "enable_match_between_runs": true,
     "precursor_mass_tolerance": "[-4.5 ppm, 4.5 ppm]",
     "fragment_mass_tolerance": "[-20 ppm, 20 ppm]",
     "enzyme": "Trypsin/P",

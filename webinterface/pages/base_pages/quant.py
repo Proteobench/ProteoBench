@@ -129,9 +129,17 @@ class QuantUIObjects:
         self.initialize_submitted_data_points()
         data_points_filtered = self.filter_data_submitted_slider()
 
+        metric = st.radio(
+            "Select metric to plot",
+            options=["Median", "Mean"],
+            help="Toggle between median and mean absolute difference metrics.",
+            key="placeholder2",  # TODO: add to variables
+        )
+
         try:
             fig_metric = PlotDataPoint.plot_metric(
                 data_points_filtered,
+                metric=metric,
                 label=st.session_state[st.session_state[self.variables_quant.selectbox_id_submitted_uuid]],
             )
             st.plotly_chart(fig_metric, use_container_width=True)
@@ -155,9 +163,17 @@ class QuantUIObjects:
         self.initialize_main_data_points()
         data_points_filtered = self.filter_data_main_slider()
 
+        metric = st.radio(
+            "Select metric to plot",
+            options=["Median", "Mean"],
+            help="Toggle between median and mean absolute difference metrics.",
+        )
+
         try:
             fig_metric = PlotDataPoint.plot_metric(
-                data_points_filtered, label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]]
+                data_points_filtered,
+                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
+                metric=metric
             )
             st.plotly_chart(fig_metric, use_container_width=True)
         except Exception as e:

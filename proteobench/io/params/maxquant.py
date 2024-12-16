@@ -139,7 +139,7 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     params.ident_fdr_psm = None
     params.ident_fdr_peptide = float(record.loc["peptideFdr"].squeeze())
     params.ident_fdr_protein = float(record.loc["proteinFdr"].squeeze())
-    params.enable_match_between_runs = record.loc["matchBetweenRuns"].squeeze() == "True"
+    params.enable_match_between_runs = record.loc["matchBetweenRuns"].squeeze().lower() == "true"
     _precursor_mass_tolerance = record.loc[
         pd.IndexSlice["parameterGroups", "parameterGroup", "mainSearchTol", :]
     ].squeeze()

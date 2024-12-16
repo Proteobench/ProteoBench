@@ -142,7 +142,7 @@ class Datapoint:
             )
         except AttributeError:
             user_input = defaultdict(
-                {},
+                lambda: "",  # Provide a default callable for missing keys
                 {key: ("" if value is None else value) for key, value in user_input.items()},
             )
 

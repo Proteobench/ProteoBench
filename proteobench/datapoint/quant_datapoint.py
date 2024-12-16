@@ -142,6 +142,7 @@ class Datapoint:
             )
         except AttributeError:
             user_input = defaultdict(
+                {},
                 {key: ("" if value is None else value) for key, value in user_input.items()},
             )
 

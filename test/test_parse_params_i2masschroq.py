@@ -9,7 +9,7 @@ TESTDATA_DIR = Path(__file__).parent / "params"
 
 
 def test_extract_params():
-    file = TESTDATA_DIR / "i2mproteobench_2pep_fdr01psm_fdr01prot.tsv"
+    file = TESTDATA_DIR / "i2mproteobench_2pep_fdr01psm_fdr01prot_xtandem.tsv"
     expected = pd.read_csv(TESTDATA_DIR / f"{file.stem}_sel.csv", index_col=0).squeeze("columns")
     actual = params_module.extract_params(file)
     actual = pd.Series(actual.__dict__)

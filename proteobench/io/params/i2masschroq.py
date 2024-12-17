@@ -21,13 +21,13 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
 
     # Construct tolerance strings for fragment and parent mass errors
     _tol_frag = "{} {}".format(
-        params.loc["spectrum, fragment monoisotopic mass error"],
+        params.loc["spectrum, fragment monoisotopic mass error"], # this would be "sage_fragment_tol	-0.02 0.02 da" with sage
         params.loc["spectrum, fragment monoisotopic mass error units"].replace("Daltons", "Da"),
     )
 
     # Construct tolerance strings for parent mass error
     _tol_prec_lower = "{} {}".format(
-        params.loc["spectrum, parent monoisotopic mass error minus"],
+        params.loc["spectrum, parent monoisotopic mass error minus"], # "sage_precursor_tol	-10 10 ppm"
         params.loc["spectrum, parent monoisotopic mass error units"].replace("Daltons", "Da"),
     )
 
@@ -37,19 +37,19 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     )
 
     # Max missed cleavage sites, either from scoring or refinement
-    max_cleavage = params.loc["scoring, maximum missed cleavage sites"]
+    max_cleavage = params.loc["scoring, maximum missed cleavage sites"] # "sage_database_enzyme_missed_cleavages	2"
     if params.loc["refine"] == "yes":
         max_cleavage = int(params.loc["refine, maximum missed cleavage sites"])
 
-    _enzyme = str(params.loc["protein, cleavage site"])
+    _enzyme = str(params.loc["protein, cleavage site"]) # "sage_database_enzyme_cleave_at	KR" and "sage_database_enzyme_restrict	P" and "sage_database_enzyme_c_terminal	true"
     # Replace the enzyme pattern with the enzyme name used in ProteoBench
     if _enzyme == "[RK]|{P}":
         _enzyme = "Trypsin"
     elif _enzyme == "[RK]":
         _enzyme = "Trypsin/P"
 
-    fixed_mods_list = list(params.loc[params.index.str.contains("residue, modification mass")].dropna())
-    var_mods_list = list(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())
+    fixed_mods_list = list(params.loc[params.index.str.contains("residue, modification mass")].dropna()) # "sage_database_static_mods	C:57.021465"
+    var_mods_list = list(params.loc[params.index.str.contains("residue, potential modification mass")].dropna()) # "sage_database_variable_mods	M:15.994915 ^E:-18.010565 ^Q:-17.026548"
 
     # Add "hidden" modifications when using X!Tandem:
     if params.loc["AnalysisSoftware_name"] == "X!Tandem" or params.loc["AnalysisSoftware_name"] == "X! Tandem":
@@ -73,12 +73,12 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         fragment_mass_tolerance="[-" + _tol_frag + ", " + _tol_frag + "]",
         enzyme=_enzyme,
         allowed_miscleavages=max_cleavage,
-        min_peptide_length=None,  # "spectrum, minimum fragment mz"
-        max_peptide_length=None,  # Not mentioned, up to 38 AA in peptides
+        min_peptide_length=None,  # xtandem: "spectrum, minimum fragment mz" / for sage: "sage_database_enzyme_min_len	5"
+        max_peptide_length=None,  # xtandem: Not mentioned, up to 38 AA in peptides / for sage: "sage_database_enzyme_max_len	50"
         fixed_mods=";".join(fixed_mods_list),
         variable_mods=";".join(var_mods_list),
-        max_mods=None,
-        min_precursor_charge=1,  # Fixed in software
+        max_mods=None, # "sage_database_max_variable_mods	2"
+        min_precursor_charge=1,  # xtandem: Fixed in software / for sage maybe: "sage_database_min_ion_index	2" (I have to check the documentation)
         max_precursor_charge=int(params.loc["spectrum, maximum parent charge"]),
     )
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     """
     # List of parameter file paths
     for fname in [
-        "../../../test/params/i2mproteobench_2pep_fdr01psm_fdr01prot.tsv",
+        "../../../test/params/i2mproteobench_2pep_fdr01psm_fdr01prot_xtandem.tsv",
     ]:
         file = pathlib.Path(fname)
 

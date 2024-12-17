@@ -1,0 +1,25 @@
+,0
+software_name,i2MassChroQ
+software_version,1.0.18
+search_engine,Sage
+search_engine_version,0.14.7
+ident_fdr_psm,0.005999419143
+ident_fdr_peptide,0.008561447245
+ident_fdr_protein,0.009234643907
+enable_match_between_runs,True
+precursor_mass_tolerance,-10 10 ppm
+fragment_mass_tolerance,-0.02 0.02 da
+enzyme,"KR,P,true"
+allowed_miscleavages,2
+min_peptide_length,5
+max_peptide_length,50
+fixed_mods,C:57.021465
+variable_mods,M:15.994915 ^E:-18.010565 ^Q:-17.026548
+max_mods,2
+min_precursor_charge,2
+max_precursor_charge,4
+scan_window,
+quantification_method,
+second_pass,
+protein_inference,
+predictors_library,

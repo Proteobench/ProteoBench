@@ -16,6 +16,8 @@ build/
 develop-eggs/
 dist/
 downloads/
+jupyter_notebooks/extracted_files/
+jupyter_notebooks/result_dir/
 eggs/
 .eggs/
 lib/

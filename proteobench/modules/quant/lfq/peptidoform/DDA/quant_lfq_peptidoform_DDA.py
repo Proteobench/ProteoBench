@@ -37,6 +37,7 @@ class DDAQuantPeptidoformModule(QuantModule):
                 "..",
                 "..",
                 "..",
+                "..",
                 "io",
                 "parsing",
                 "io_parse_settings",

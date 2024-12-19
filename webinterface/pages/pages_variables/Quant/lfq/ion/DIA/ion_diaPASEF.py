@@ -61,3 +61,5 @@ class VariablesDIAQuantdiaPASEF:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/ion/DIA/diaPASEF"
 
     texts: Type[WebpageTexts] = WebpageTexts
+
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/5-quant-lfq-ion-dia-diapasef/"

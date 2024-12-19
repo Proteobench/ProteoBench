@@ -60,3 +60,6 @@ class VariablesDDAQuant:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/DDA"
 
     texts: Type[WebpageTexts] = WebpageTexts
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"
+
+    title: str = "DDA Ion quantification"

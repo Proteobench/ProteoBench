@@ -41,7 +41,9 @@ class VariablesDIAQuantdiaPASEF:
     download_selector_id_uuid: str = "download_selector_id_dia_quant_diaPASEF"
     table_id_uuid: str = "table_id_dia_quant_diaPASEF"
 
-    additional_params_json: str = "../webinterface/configuration/dia_quant.json"  # TODO: make a new file for this, and adapt the configuration file for each module.
+    additional_params_json: str = (
+        "../webinterface/configuration/dia_quant.json"  # TODO: make a new file for this, and adapt the configuration file for each module.
+    )
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/diaPASEF/file_description.md"
@@ -59,3 +61,7 @@ class VariablesDIAQuantdiaPASEF:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/ion/DIA/diaPASEF"
 
     texts: Type[WebpageTexts] = WebpageTexts
+
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/5-quant-lfq-ion-dia-diapasef/"
+
+    title: str = "DIA Ion quantification - diaPASEF"

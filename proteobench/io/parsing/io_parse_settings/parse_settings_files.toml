@@ -10,6 +10,7 @@
 
 [quant_lfq_peptidoform_DDA]
 "WOMBAT" = "parse_settings_wombat.toml"
+"Proteome Discoverer" = "parse_settings_proteomediscoverer.toml"
 "Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_ion_DIA_AIF]

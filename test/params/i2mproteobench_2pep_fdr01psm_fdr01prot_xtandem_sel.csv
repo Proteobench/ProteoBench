@@ -1,0 +1,25 @@
+,0
+software_name,i2MassChroQ
+software_version,1.0.8
+search_engine,X! Tandem
+search_engine_version,X! Tandem Alanine (2017.2.1.4)
+ident_fdr_psm,0.00999799237101
+ident_fdr_peptide,0.0133552379471
+ident_fdr_protein,0.00985995998857
+enable_match_between_runs,True
+precursor_mass_tolerance,"[-10 ppm, 10 ppm]"
+fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
+enzyme,Trypsin
+allowed_miscleavages,3
+min_peptide_length,
+max_peptide_length,
+fixed_mods,57.02146@C
+variable_mods,15.99491@M;Acetyl(N-term);Pyrolidone(N-term)
+max_mods,
+min_precursor_charge,1
+max_precursor_charge,4
+scan_window,
+quantification_method,
+second_pass,
+protein_inference,
+predictors_library,

@@ -1,13 +1,13 @@
 import logging
 from typing import Any, Dict, Type
 
-import pages_dir.texts.proteobench_builder as pbb
+import pages.texts.proteobench_builder as pbb
 import streamlit as st
-from pages_dir.base_pages.quant import QuantUIObjects
-from pages_dir.pages_variables.Quant.lfq.peptidoform.DDA.peptidoform_variables import (
+from pages.base_pages.quant import QuantUIObjects
+from pages.pages_variables.Quant.lfq.peptidoform.DDA.peptidoform_variables import (
     VariablesDDAQuant,
 )
-from pages_dir.texts.generic_texts import WebpageTexts
+from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.lfq.peptidoform.DDA.quant_lfq_peptidoform_DDA import (

@@ -13,10 +13,9 @@ from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import DDAQuantIonM
 
 class StreamlitUI:
     def __init__(self):
-        print("page loaded")
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
-        self.texts.ShortMessages.title = "DDA Ion quantification"
+        self.texts.ShortMessages.title = ""
         self.user_input: Dict[str, Any] = dict()
 
         pbb.proteobench_page_config()
@@ -56,7 +55,7 @@ class StreamlitUI:
         )
 
         with tab_results_all:
-            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.title(self.variables_dda_quant.title)
             st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
@@ -66,7 +65,7 @@ class StreamlitUI:
 
         # Tab 2: Submission Details
         with tab_submission_details:
-            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.title(self.variables_dda_quant.title)
 
             st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             if self.variables_dda_quant.beta_warning:
@@ -77,7 +76,7 @@ class StreamlitUI:
 
         # Tab 2.5: in-depth plots current data
         with tab_indepth_plots:
-            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.title(self.variables_dda_quant.title)
 
             st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             if self.variables_dda_quant.beta_warning:
@@ -88,7 +87,7 @@ class StreamlitUI:
 
         # Tab 3: Results (New Submissions)
         with tab_results_new:
-            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.title(self.variables_dda_quant.title)
             st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
@@ -99,7 +98,7 @@ class StreamlitUI:
 
         # Tab 4: Public Submission
         with tab_public_submission:
-            st.title(self.variables_dda_quant.texts.ShortMessages.title)
+            st.title(self.variables_dda_quant.title)
             st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             if self.variables_dda_quant.beta_warning:
                 st.warning(

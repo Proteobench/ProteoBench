@@ -8,8 +8,6 @@ class WebpageTexts:
 
         title = "DDA quantification - precursor ions"
 
-        doc_url = "https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/"
-
         initial_results = """
             Scroll down if you want to see the public benchmark runs publicly available
             today.

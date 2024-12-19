@@ -19,7 +19,6 @@ class StreamlitUI:
     def __init__(self):
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
-        self.texts.ShortMessages.title = "DDA peptidoform quantification"
 
         self.user_input: Dict[str, Any] = dict()
 

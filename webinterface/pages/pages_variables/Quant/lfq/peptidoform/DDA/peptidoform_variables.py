@@ -60,3 +60,5 @@ class VariablesDDAQuant:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/peptidoform/DDA"
 
     texts: Type[WebpageTexts] = WebpageTexts
+
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/3-quant-lfq-peptidoform-dda/"

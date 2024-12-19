@@ -16,6 +16,13 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         pd.DataFrame: The loaded dataframe with the required columns added (like "proforma").
     """
     input_data_frame: pd.DataFrame
+    if input_format == "Proteome Discoverer":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        input_data_frame["Modifications"].fillna("", inplace=True)
+        input_data_frame["proforma"] = input_data_frame.apply(
+            lambda x: aggregate_modification_column(x["Sequence"], x["Modifications"]),
+            axis=1,
+        )
     if input_format == "WOMBAT":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
         input_data_frame["proforma"] = input_data_frame["modified_peptide"]
@@ -34,10 +41,16 @@ def aggregate_modification_column(
         "Any C-term": -1,
         "Protein N-term": 0,
         "Protein C-term": -1,
+        "N-Term": 0,  # Added to handle "N-Term"
+        "C-Term": -1,  # If you also expect "C-Term"
     },
 ) -> str:
     """
     Aggregate modifications into a string representing the modified sequence.
+
+    This version handles both:
+    - Original format (e.g. "Methylation (C11)" or "Carbamidomethyl (Any N-term)")
+    - New format (e.g. "1xCarbamidomethyl [C11]", "1xOxidation [M4]", "1xAcetyl [N-Term]")
 
     Args:
         input_string_seq (str): The input sequence string.
@@ -47,25 +60,81 @@ def aggregate_modification_column(
     Returns:
         str: The modified sequence string with aggregated modifications.
     """
+
+    # If no modifications, return the original sequence unchanged
+    if not input_string_modifications.strip():
+        return input_string_seq
+
+    # Split modifications by ';' to handle multiple modifications
+    raw_mods = [x.strip() for x in input_string_modifications.split(";") if x.strip()]
+
     all_mods = []
-    for m in input_string_modifications.split("; "):
-        if len(m) == 0:
-            continue
-        m_stripped = m.split(" (")[1].rstrip(")")
-        m_name = m.split(" (")[0]
 
-        if m_stripped in special_locations.keys():
-            if special_locations[m_stripped] == -1:
-                all_mods.append((m_name, len(input_string_seq)))
+    for m in raw_mods:
+        # Detect format by checking for '(' or '['
+        if "(" in m and "[" not in m:
+            # Original format (e.g. "Carbamidomethyl (C11)" or "Methylation (Any N-term)")
+            parts = m.split(" (")
+            if len(parts) < 2:
+                continue
+            m_name = parts[0].strip()
+            m_stripped = parts[1].rstrip(")")
+
+            # Check if this is a special location
+            if m_stripped in special_locations:
+                loc = special_locations[m_stripped]
+                if loc == -1:
+                    loc = len(input_string_seq)  # C-term
+                all_mods.append((m_name, loc))
             else:
-                all_mods.append((m_name, special_locations[m_stripped]))
-            continue
+                # Assume format like C11 means position 11
+                loc = int(m_stripped[1:])
+                all_mods.append((m_name, loc))
 
-        all_mods.append((m_name, int(m_stripped[1:])))
+        else:
+            # New format, e.g. "1xCarbamidomethyl [C11]", "1xAcetyl [N-Term]"
+            # Remove any count prefix like "1x"
+            entry = re.sub(r"\d+x", "", m).strip()
 
+            # Extract modification name and bracketed portion
+            mod_name_match = re.match(r"([A-Za-z]+)\s*\[(.+)\]", entry)
+            if not mod_name_match:
+                continue
+
+            mod_name = mod_name_match.group(1)
+            positions_str = mod_name_match.group(2).strip()
+
+            # Positions could be multiple (e.g. "C10; C13")
+            pos_parts = [p.strip() for p in positions_str.split(";") if p.strip()]
+            if not pos_parts:
+                # If there's nothing after the brackets, skip
+                continue
+
+            for pos_part in pos_parts:
+                # Check if pos_part is a known special location (e.g. "N-Term")
+                if pos_part in special_locations:
+                    loc = special_locations[pos_part]
+                    if loc == -1:
+                        loc = len(input_string_seq)
+                    all_mods.append((mod_name, loc))
+                else:
+                    # Otherwise, assume format like C11 or M4
+                    if len(pos_part) > 1:
+                        loc = int(pos_part[1:])
+                        all_mods.append((mod_name, loc))
+
+    # Sort modifications by descending position so we insert from the end
     all_mods.sort(key=lambda x: x[1], reverse=True)
 
     for name, loc in all_mods:
+        # Insert the modification into the sequence.
+        # 'loc' is a 1-based index if it's a residue position.
+        # For terminal modifications, special_locations will have adjusted it.
+        # If loc is -1 or at sequence end, we've already resolved it to len(sequence).
+
+        # Insert the modification brackets at position 'loc'.
+        # Note: If loc == 0 (N-term), insert at start of sequence.
+        #       If loc == len(sequence), insert at end (C-term).
         input_string_seq = input_string_seq[:loc] + f"[{name}]" + input_string_seq[loc:]
 
     return input_string_seq

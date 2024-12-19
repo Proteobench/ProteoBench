@@ -71,6 +71,10 @@ class QuantModule:
         "FragPipe (DIA-NN quant)": extract_params_fragger,
         "MSAID": extract_params_msaid,
         "Spectronaut": extract_params_spectronaut,
+        # TODO needs to be replace with parameter extraction function
+        "WOMBAT": extract_params_spectronaut,
+        # TODO needs to be replace with parameter extraction function
+        "Proteome Discoverer": extract_params_spectronaut,
     }
 
     def __init__(

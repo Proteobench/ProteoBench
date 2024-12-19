@@ -87,6 +87,7 @@ class PlotDataPoint:
             "Spectronaut": "#bcbd22",
             "FragPipe (DIA-NN quant)": "#ff7f00",
             "MSAID": "#afff57",
+            "Proteome Discoverer": "#8c564b",
         },
         mapping: Dict[str, int] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",

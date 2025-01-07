@@ -23,6 +23,7 @@
 "Spectronaut" = "parse_settings_spectronaut.toml"
 "AlphaDIA" = "parse_settings_alphadia.toml"
 "MSAID" = "parse_settings_msaid.toml"
+"PEAKS" = "parse_settings_peaks.toml"
 "Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_ion_DIA_diaPASEF]

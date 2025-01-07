@@ -4,20 +4,20 @@
 "z" = "Charge"
 
 [condition_mapper]
-"Group 1 Normalized Area" = "A"
-"Group 2 Normalized Area" = "A"
-"Group 3 Normalized Area" = "A"
-"Group 4 Normalized Area" = "B"
-"Group 5 Normalized Area" = "B"
-"Group 6 Normalized Area" = "B"
+"Sample 1 Normalized Area" = "A"
+"Sample 2 Normalized Area" = "A"
+"Sample 3 Normalized Area" = "A"
+"Sample 4 Normalized Area" = "B"
+"Sample 5 Normalized Area" = "B"
+"Sample 6 Normalized Area" = "B"
 
 [run_mapper]
-"Group 1 Normalized Area" = "Condition_A_Sample_Alpha_01"
-"Group 2 Normalized Area" = "Condition_A_Sample_Alpha_02"
-"Group 3 Normalized Area" = "Condition_A_Sample_Alpha_03"
-"Group 4 Normalized Area" = "Condition_B_Sample_Alpha_01"
-"Group 5 Normalized Area" = "Condition_B_Sample_Alpha_02"
-"Group 6 Normalized Area" = "Condition_B_Sample_Alpha_03"
+"Sample 1 Normalized Area" = "Condition_A_Sample_Alpha_01"
+"Sample 2 Normalized Area" = "Condition_A_Sample_Alpha_02"
+"Sample 3 Normalized Area" = "Condition_A_Sample_Alpha_03"
+"Sample 4 Normalized Area" = "Condition_B_Sample_Alpha_01"
+"Sample 5 Normalized Area" = "Condition_B_Sample_Alpha_02"
+"Sample 6 Normalized Area" = "Condition_B_Sample_Alpha_03"
 
 [species_mapper]
 "_YEAST" = "YEAST"

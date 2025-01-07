@@ -107,6 +107,8 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
     elif input_format == "MSAID":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    elif input_format == "PEAKS":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
 
     return input_data_frame
 

@@ -6,6 +6,7 @@
 "ProlineStudio" = "parse_settings_proline.toml"
 "MSAngel" = "parse_settings_msangel.toml"
 "Sage" = "parse_settings_sage.toml"
+"PEAKS" = "parse_settings_peaks.toml"
 "Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_peptidoform_DDA]

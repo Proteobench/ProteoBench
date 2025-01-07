@@ -29,6 +29,8 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     elif input_format == "Custom":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         input_data_frame["proforma"] = input_data_frame["Modified sequence"]
+    elif input_format == "PEAKS":
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
 
     return input_data_frame
 

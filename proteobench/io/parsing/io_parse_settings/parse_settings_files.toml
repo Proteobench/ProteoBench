@@ -11,6 +11,7 @@
 
 [quant_lfq_peptidoform_DDA]
 "WOMBAT" = "parse_settings_wombat.toml"
+"PEAKS" = "parse_settings_peaks.toml"
 "Proteome Discoverer" = "parse_settings_proteomediscoverer.toml"
 "Custom" = "parse_settings_custom.toml"
 

@@ -136,6 +136,9 @@ class QuantUIObjects:
             key="placeholder2",  # TODO: add to variables
         )
 
+        if len(data_points_filtered) == 0:
+            st.error(f"No datapoints available for plotting", icon="🚨")
+
         try:
             fig_metric = PlotDataPoint.plot_metric(
                 data_points_filtered,
@@ -351,6 +354,10 @@ class QuantUIObjects:
 
     def display_download_section(self, reset_uuid=False) -> None:
         """Render the selector and area for raw data download."""
+        if len(st.session_state[self.variables_quant.all_datapoints]) == 0:
+            st.error("No data available for download.", icon="🚨")
+            return
+
         downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 

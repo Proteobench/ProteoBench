@@ -552,7 +552,7 @@ class QuantUIObjects:
             self.variables_quant.all_datapoints_submitted
         ]
 
-        if len(data_points_filtered) == 0:
+        if len(st.session_state[self.variables_quant.all_datapoints]) == 0:
             st.error(f"No datapoints available for plotting", icon="🚨")
 
         try:

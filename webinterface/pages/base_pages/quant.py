@@ -172,6 +172,9 @@ class QuantUIObjects:
             help="Toggle between median and mean absolute difference metrics.",
         )
 
+        if len(data_points_filtered) == 0:
+            st.error(f"No datapoints available for plotting", icon="🚨")
+
         try:
             fig_metric = PlotDataPoint.plot_metric(
                 data_points_filtered,
@@ -548,6 +551,9 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.placeholder_table] = st.session_state[
             self.variables_quant.all_datapoints_submitted
         ]
+
+        if len(data_points_filtered) == 0:
+            st.error(f"No datapoints available for plotting", icon="🚨")
 
         try:
             fig_metric = PlotDataPoint.plot_metric(

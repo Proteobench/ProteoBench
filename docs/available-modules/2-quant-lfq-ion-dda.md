@@ -81,7 +81,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |MaxQuant|evidence.txt|mqpar.xml|
 |Proline Studio|<result file>.xlsx|<result file>.xlsx|
 |Sage|lfq.tsv|results.json|
-|PEAKS|lfq_features.tsv|parameters.txt|
+|PEAKS|lfq_features.csv|parameters.txt|
 
 ### AlphaPept
 1. Load folder that contains the data files.

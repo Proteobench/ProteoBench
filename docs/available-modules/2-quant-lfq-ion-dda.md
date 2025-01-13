@@ -66,7 +66,8 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from MaxQuant, FragPipe, Proline Studio, and i2MassChroQ (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from MaxQuant, FragPipe, Proline Studio, AlphaPept, PEAKS and i2MassChroQ (see below for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (correspond to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button
 `I really want to upload it` will appear to trigger the submission.
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `ProlineStudio__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
@@ -83,6 +84,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |MaxQuant|evidence.txt|mqpar.xml|
 |Proline Studio|<result file>.xlsx|<result file>.xlsx|
 |Sage|lfq.tsv|results.json|
+|PEAKS|lfq_features.csv|parameters.txt|
 
 ### AlphaPept
 
@@ -164,6 +166,12 @@ For public submission, you can upload the same excel export, just make sure to h
 
 MSAngel allows to build piplenes for bottom-up MS analysis with a choice of search engines, validation strategy and the Proline quantification. 
 More information can be found [here](https://www.profiproteomics.fr/ms-angel/)
+
+### PEAKS (work in progress)
+When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that Sample 1 -> 3 are Condition "A" and Sample 4 -> 6 are condition "B".
+Make sure to set Enzyme as trypsin,  Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DDA.
+In workflow section use the PEAKS Q (de novo assisted search quantification) option. Set the different parameters in "Data refine" and "DB search". In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide FDR and Protein Group FDR are set to 1%. 
+Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
 
 ### Sage
 

@@ -32,13 +32,15 @@ Alternatively, you can download them from the ProteoBench server here: [proteobe
 
 Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/datasets/fasta/ProteoBenchFASTA_DDAQuantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
 The fasta file provided for this module contains the three species
-present in the samples and contaminant proteins
+present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
 Note that this is the same FASTA as used in Module 2 - DDA Quantification.
 
 ## Metric calculation
 
-For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file and condition. Then, we calculate the average signal per condition ("0" are replaced by NAs and missing values are ignored). The total number of unique precursor ions is reported on the *y*-axis, and the weighted sum of the mean absolute error from the expected ratio is reported on the *x*-axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation.
+For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file. Contaminant sequences flagged with the prefix "Cont_" in the fasta file are removed, as well as the peptide ions that match proteins from several species and the peptide ions that are not quantified in any raw file. When applicable, "0" are replaced by NAs and missing values are ignored.
+Then we log2-transform the values, and calculate the mean signal per condition, with the standard deviation and coefficient of variation (CV). For each precursor ion, we calculate the difference between the mean(log2) in A and B, and compare it to its expected value. The difference between measured and expected mean(log2) is called "epsilon".
+The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
 
 ## How to use
 
@@ -65,7 +67,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from DIA-NN, AlphaDIA, FragPipe, MaxDIA and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (correspond to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from DIA-NN, AlphaDIA, FragPipe, MaxDIA and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
 `I really want to upload it` will appear to trigger the submission.
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
@@ -81,7 +83,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |PEAKS|lfq.dia.peptides.csv|parameters.txt|
 
 
-After upload, you will get a link to the pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
+After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 
 ## Important Tool-specific settings
 

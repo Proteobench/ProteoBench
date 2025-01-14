@@ -33,12 +33,14 @@ Alternatively, you can download them from the ProteoBench server here: [proteobe
 
 Download the zipped FASTA file here: [ProteoBenchFASTA_DDAQuantification.zip](https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_Quantification.zip).
 The fasta file provided for this module contains the three species
-present in the samples and contaminant proteins
+present in the samples **and contaminant proteins**
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
 
 ## Metric calculation
 
-For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file and condition. Then, we calculate the average signal per condition ("0" are replaced by NAs and missing values are ignored). The total number of unique precursor ions is reported on the *y*-axis, and the weighted sum of the mean absolute error from the expected ratio is reported on the *x*-axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation.
+For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file. Contaminant sequences flagged with the prefix "Cont_" in the fasta file are removed, as well as the peptide ions that match proteins from several species and the peptide ions that are not quantified in any raw file. When applicable, "zeroes" are replaced by NAs and missing values are ignored.
+Then we log2-transform the values, and calculate the mean signal per condition, with the standard deviation and coefficient of variation (CV). For each precursor ion, we calculate the difference between the mean(log2) in A and B, and compare it to its expected value (Human: 0, _E. coli_: -2, and Yeast: 1). The difference between measured and expected mean(log2) is called "epsilon".
+The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
 
 ## How to use
 
@@ -64,10 +66,11 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from MaxQuant, FragPipe, Proline Studio, AlphaPept, PEAKS and i2MassChroQ (see below for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (correspond to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from MaxQuant, FragPipe, Proline Studio, AlphaPept, PEAKS and i2MassChroQ (see below for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button
 `I really want to upload it` will appear to trigger the submission.
 
-After upload, you will get a link to the pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `ProlineStudio__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
+After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `ProlineStudio__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 
 ## Important Tool-specific settings
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
@@ -84,30 +87,61 @@ Table 2 provides an overview of the required input files for public submission. 
 |PEAKS|lfq_features.csv|parameters.txt|
 
 ### AlphaPept
+
+To generate data compatible with ProteoBench, you can:
 1. Load folder that contains the data files.
 2. Define parameters 
 -> For Match Between runs, please select “Match”
 3. The input files for ProteoBench are "result_peptides.tsv" (peptide identification) and "results.yaml" (parameter file)
 
+Once uploaded to ProteoBench:
+In the "result_peptides.tsv", the following columns are considered:
+
+- "shortname" to get the raw file name and know what samples the results comes from
+- "protein" to get protein accessions and species
+- "sequence" to get the modified sequences
+- "charge" to get the charge of the precursor
+- "decoy" to identify decoy matches ("true")
+- "ms1_int_sum_apex_dn" to get the intensity values
+
+
 ### FragPipe
+
+To generate data compatible with ProteoBench, you can:
 1. Select the LFQ-MBR workflow (using only 1 enzyme).
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
 4. Upload “combined_ion/modified_peptides.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the parameter file “fragpipe.workflow”  that correspond to your search.
 
-In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
+Once uploaded to ProteoBench:
+In the "combined_ion/modified_peptides.tsv", we consider that decoys are already removed, and the following columns are considered:
+
+- "Modified Sequence" to get the modified sequences
+- "Protein" to get protein accessions and species. In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
+- "Charge" to get the charge of the precursor
+
 
 ### i2MassChroQ
+
 A ProteoBench-compatible format is available in i2MassChroQ through the button `ProteoBench export`. It generates a tab-delimited file containing one row per quantified ion for metric calculation ("proteobench_export.tsv"; column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"); and a parameter file for public submission ("Project parameters.tsv"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN". 
-Link to the i2MassChroQ documentation [here](http://pappso.inrae.fr/bioinfo/i2masschroq/documentation/html/).
+Link to the i2MassChroQ documentation [here](http://pappso.inrae.fr/bioinfo/i2masschroq/documentation/html/). In the outputs of i2MassChroQ, we consider that decoys are already removed.
 #### Specific information for searches with X!Tandem
 Among the default parameters of X!Tandem, "quick acetyl" and "quick pyrolidone" seach for the variable modifications N-ter acetylation and pyrolidone. Please turn these off if you don't want to include such modifications in your search. 
 
 ### MaxQuant
+
 By default, MaxQuant uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. 
 When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
 
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
+
+Once uploaded to ProteoBench:
+In the "evidence.txt", we consider that decoys are already removed, and the following columns are considered:
+
+- "Modified sequence" to get the modified sequences
+- "Proteins" to get protein accessions and species. 
+- "Raw file" to get the sample of origin
+- "Charge" to get the charge of the precursor
 
 #### Troubleshooting: 
 ##### Fasta header parsing
@@ -116,6 +150,7 @@ In the recent versions of MaxQuant, the default settings work perfectly (`Identi
 Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.
 
 ### Proline Studio 
+
 Make sure that the peaklists are named with the same prefix as raw files. To do so in ProlineStudio, use peaklist names as sample names (manually or with automatic renaming option).
 
 ![ProlineStudio Naming](../../img/module_docs/quant_lfq_ion_DDA/ProlineStudio_naming.png)
@@ -123,10 +158,12 @@ Make sure that the peaklists are named with the same prefix as raw files. To do 
 The columns with the quantification values that ProteoBench will retrieve in the outputs will have the following format "abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mgf". 
 For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two fields are combined to determine what species a peptide sequence matches to.
 The `Quantified peptide ions` tab reports the precursor ion quantities (retrieved from XICs). Shared peptides ions between multiple ProteinSets are duplicated. This redundancy is removed by combining the protein identification from all rows of a given precursor ion before metric calculation.
+In the outputs of ProlineStudio, we consider that decoys are already removed.
 
 For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`. For local usage and public submission, we strongly recommend to use the following [template.json](../../files_provided_to_users/quant_lfq_ion_DDA/ProlineStudio/template.json) to make sure that all the tabs and columns needed are exported to be correctly parsed. Make sure that no personal information is stored in the excel file before making it public. The version of ProlineStudio is only exported in the parameters from version 2.3. 
 
 ### MSAngel (work in progress..)
+
 MSAngel allows to build piplenes for bottom-up MS analysis with a choice of search engines, validation strategy and the Proline quantification. 
 More information can be found [here](https://www.profiproteomics.fr/ms-angel/)
 
@@ -138,9 +175,17 @@ Once the workflow has run succesfully, make sure to check the "All Search Parame
 
 ### Sage
 
+To generate data compatible with ProteoBench, you can:
 1. Convert .raw files into .mzML using MSConvert or ThermoRawFileParser **(do not change the file names)**
 2. Run sage using a .json file
 3. Upload "lfq.tsv" in order for Proteobench to calculate the ion ratios, combined with the search parameter file "results.json".
+
+Once uploaded to ProteoBench:
+In the "lfq.tsv", the following columns are considered:
+
+- "proteins" to get protein accessions and species
+- "peptide" to get the modified sequences
+- "charge" to get the charge of the precursor
 
 ### Custom format
 
@@ -226,11 +271,10 @@ After uploading an output file, a table is generated that contains the following
 - expected ratio for the given species
 - epsilon = difference of the observed and expected log2-transformed fold change
 
-
 Choose with the slider below the minimum number of quantification value per raw file.
 Example: when 3 is selected, only the precursor ions quantified in 3 or more raw files will be considered for the plot.
  
-  ## Define Parameters
+## Define Parameters
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to 
 your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratio's). 

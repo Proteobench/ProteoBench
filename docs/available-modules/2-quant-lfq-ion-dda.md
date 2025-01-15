@@ -111,10 +111,10 @@ To generate data compatible with ProteoBench, you can:
 1. Select the LFQ-MBR workflow (using only 1 enzyme).
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
-4. Upload “combined_ion/modified_peptides.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the parameter file “fragpipe.workflow”  that correspond to your search.
+4. Upload “combined_ion.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the parameter file “fragpipe.workflow”  that correspond to your search.
 
 Once uploaded to ProteoBench:
-In the "combined_ion/modified_peptides.tsv", we consider that decoys are already removed, and the following columns are considered:
+In the "combined_ion.tsv", we consider that decoys are already removed, and the following columns are considered:
 
 - "Modified Sequence" to get the modified sequences
 - "Protein" to get protein accessions and species. In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.

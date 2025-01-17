@@ -166,7 +166,7 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     params.second_pass = None
     params.protein_inference = None
     params.predictors_library = None
-
+    params.abundance_normalization = extract_value(lines, "Normalization Method:")
     return params
 
 

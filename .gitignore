@@ -142,3 +142,6 @@ results.json
 
 # secrets
 **/.streamlit/secrets.toml
+
+# wew
+build.sh

@@ -9,14 +9,14 @@ TESTDATA_DIR = Path(__file__).parent / "params"
 
 
 fnames = [
-    "Peaks_parameters.txt",
+    "PEAKS_parameters.txt",
 ]
 
 fnames = [TESTDATA_DIR / f for f in fnames]
 
 
 @pytest.mark.parametrize("file", fnames)
-def test_read_spectronaut_settings(file):
+def test_read_peaks_settings(file):
     expected = pd.read_csv(file.with_suffix(".csv"), index_col=0).squeeze("columns")
     actual = peaks_params.read_peaks_settings(file)
     print(actual.software_name)

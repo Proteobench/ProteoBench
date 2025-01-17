@@ -77,10 +77,11 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     """
     # Try to read the file contents
     try:
-        with open(file_path) as f:
+        # Attempt to open and read the file
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
-    except:
-        lines = [l for l in file_path.read().decode("utf-8").splitlines()]
+    except Exception as e:
+        raise IOError(f"Failed to open or read the file at {file_path}. Error: {e}")
 
     # Remove any trailing newline characters from each line
     lines = [line.strip() for line in lines]
@@ -128,7 +129,7 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     params.second_pass = extract_value(lines, "directDIA Workflow:")
     params.protein_inference = extract_value(lines, "Inference Algorithm:")  # or Protein Inference Workflow:
     params.predictors_library = extract_value(lines, "Hybrid (DDA + DIA) Library").replace(":", "").strip()
-
+    params.abundance_normalization_ions = extract_value(lines, "Cross-Run Normalization:")
     return params
 
 

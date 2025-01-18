@@ -111,12 +111,16 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
     # Try to read the file contents
-    try:
-        # Attempt to open and read the file
-        with open(file_path, encoding="utf-8") as f:
-            lines = f.readlines()
-    except Exception as e:
-        raise IOError(f"Failed to open or read the file at {file_path}. Error: {e}")
+    if hasattr(file_path, "read"):
+        # Assume it behaves like a file object
+        lines = file_path.read().decode("utf-8").splitlines()
+    else:
+        try:
+            # Attempt to open and read the file
+            with open(file_path, encoding="utf-8") as f:
+                lines = f.readlines()
+        except Exception as e:
+            raise IOError(f"Failed to open or read the file at {file_path}. Error: {e}")
 
     # Remove any trailing newline characters from each line
     lines = [line.strip() for line in lines]

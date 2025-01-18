@@ -33,6 +33,10 @@ from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
+from proteobench.io.params.peaks import (
+    read_peaks_settings as extract_params_peaks,
+)
+
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
@@ -71,6 +75,7 @@ class QuantModule:
         "FragPipe (DIA-NN quant)": extract_params_fragger,
         "MSAID": extract_params_msaid,
         "Spectronaut": extract_params_spectronaut,
+        "PEAKS": extract_params_peaks,
         # TODO needs to be replace with parameter extraction function
         "WOMBAT": extract_params_spectronaut,
         # TODO needs to be replace with parameter extraction function

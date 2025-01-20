@@ -154,7 +154,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/426
 
-        :bdg-info:`in development`
+        :bdg-primary:`in development`
         ^^^
         benchmarking identification and quantification workflows for low-input and single cell proteomics (SCP)
 

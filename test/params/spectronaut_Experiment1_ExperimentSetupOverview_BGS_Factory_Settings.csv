@@ -23,3 +23,4 @@ quantification_method,MS2
 second_pass,directDIA+ (Deep)
 protein_inference,IDPicker
 predictors_library,False
+abundance_normalization_ions,True

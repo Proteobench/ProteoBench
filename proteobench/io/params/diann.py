@@ -346,7 +346,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     # If scan window is not customely set, extract it from the log file
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
-
+    parameters["abundance_normalization_ions"] = None
     return ProteoBenchParameters(**parameters)
 
 

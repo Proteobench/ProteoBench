@@ -23,3 +23,4 @@ quantification_method,QuantUMS high-precision
 second_pass,True
 protein_inference,Protein_names
 predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
+abundance_normalization_ions,

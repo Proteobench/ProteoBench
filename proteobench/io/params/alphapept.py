@@ -66,7 +66,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     params.min_precursor_charge = record["features"]["iso_charge_min"]
     params.max_precursor_charge = record["features"]["iso_charge_max"]
     params.enable_match_between_runs = record["workflow"]["match"]  # Check if matching is enabled
-
+    params.abundance_normalization_ions = None  # No normalization in AlphaPept
     return params
 
 

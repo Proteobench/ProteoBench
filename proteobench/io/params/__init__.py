@@ -88,7 +88,8 @@ class ProteoBenchParameters:
     min_precursor_charge: Optional[int] = None  # precursor_charge
     max_precursor_charge: Optional[int] = None
     scan_window: Optional[int] = None  # DIA-specific
-    quantification_method: Optional[str] = None
+    quantification_method: Optional[str] = None  #
     second_pass: Optional[bool] = None  # DIANN specific
-    protein_inference: Optional[str] = None
-    predictors_library: Optional[dict] = None
+    protein_inference: Optional[str] = None  # example occams razor, proteinprophet
+    predictors_library: Optional[dict] = None  # type of model used to generate spectral library
+    abundance_normalization_ions: Optional[str] = None  # tic, median etc.

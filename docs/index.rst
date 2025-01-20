@@ -145,7 +145,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/438
 
-        :bdg-info:`proposed`
+        :bdg-primary:`in development`
         ^^^
         additional DIA ion-level module with DIA-PASEF data
 

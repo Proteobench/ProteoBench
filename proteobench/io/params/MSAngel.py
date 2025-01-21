@@ -132,7 +132,7 @@ if __name__ == "__main__":
     """
     from pathlib import Path
 
-    file = Path("../../../test/params/MSAngel_fromRAWtoQUANT-Mascot-export-param.json")
+    file = Path("../../../test/params/MSAngel_Xtandem-export-param.json")
 
     # Extract parameters from the file
     params = extract_params(file)

@@ -75,6 +75,7 @@ class Datapoint:
         intermediate_hash (str): Hash of the intermediate result.
         results (dict): A dictionary of metrics for the benchmark run.
         median_abs_epsilon (int): Median absolute epsilon value for the benchmark.
+        mean_abs_epsilon (int): Mean absolute epsilon value for the benchmark.
         nr_prec (int): Number of precursors identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.

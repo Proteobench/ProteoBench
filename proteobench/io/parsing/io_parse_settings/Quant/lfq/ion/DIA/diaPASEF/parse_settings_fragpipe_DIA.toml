@@ -4,20 +4,20 @@
 "Charge" = "Charge"
 
 [condition_mapper]
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_01 Intensity" = "A"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_02 Intensity" = "A"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_03 Intensity" = "A"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_01 Intensity" = "B"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_02 Intensity" = "B"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_03 Intensity" = "B"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494 Intensity" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500 Intensity" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506 Intensity" = "A"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496 Intensity" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502 Intensity" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508 Intensity" = "B"
 
 [run_mapper]
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_01 Intensity" = "Condition_A_Sample_Alpha_01"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_02 Intensity" = "Condition_A_Sample_Alpha_02"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_03 Intensity" = "Condition_A_Sample_Alpha_03"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_01 Intensity" = "Condition_B_Sample_Alpha_01"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_02 Intensity" = "Condition_B_Sample_Alpha_02"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_03 Intensity" = "Condition_B_Sample_Alpha_03"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494 Intensity" = "Condition_A_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500 Intensity" = "Condition_A_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506 Intensity" = "Condition_A_Sample_Alpha_03"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496 Intensity" = "Condition_B_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502 Intensity" = "Condition_B_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508 Intensity" = "Condition_B_Sample_Alpha_03"
 
 [species_mapper]
 "_YEAST" = "YEAST"

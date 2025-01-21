@@ -99,6 +99,7 @@ class Datapoint:
     intermediate_hash: str = ""
     results: dict = None
     median_abs_epsilon: int = 0
+    mean_abs_epsilon: int = 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
@@ -169,6 +170,7 @@ class Datapoint:
         results = dict(ChainMap(*[Datapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
+        result_datapoint.mean_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["mean_abs_epsilon"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 

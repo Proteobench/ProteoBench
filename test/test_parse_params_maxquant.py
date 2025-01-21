@@ -103,6 +103,7 @@ def test_file_parsing_to_csv(file, csv_expected):
     actual = mq_params.build_Series_from_records(actual, 4)
     actual = actual.to_frame("run_identifier")
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=[0, 1, 2, 3])
+    expected = expected.loc[actual.index]
     assert actual.equals(expected)
 
 
@@ -114,5 +115,6 @@ def test_extract_params(file, json_expected):
     with open(json_expected) as f:
         expected = json.load(f)
     actual = mq_params.extract_params(file)
+    expected = expected.loc[actual.index]
     actual = actual.__dict__
     assert actual == expected

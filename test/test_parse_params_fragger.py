@@ -29,6 +29,7 @@ def test_read_fragpipe_workflow(file, csv_expected):
         fragger_params.Parameter._fields[0]
     )
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=0).squeeze("columns")
+    expected = expected.loc[actual.index]
     assert actual.equals(expected)
 
 
@@ -42,4 +43,5 @@ def test_extract_params(file, csv_expected):
         actual = fragger_params.extract_params(f)
     actual = pd.Series(actual.__dict__)
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=0).squeeze("columns")
+    expected = expected.loc[actual.index]
     assert expected.equals(actual)

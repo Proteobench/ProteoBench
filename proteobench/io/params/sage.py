@@ -9,6 +9,15 @@ import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
 
+default_params = {  # Default parameters for Sage
+    "allowed_miscleavages": 1,
+    "min_peptide_length": 5,
+    "max_peptide_length": 50,
+    "max_mods": 2,
+    "min_precursor_charge": 2,
+    "max_precursor_charge": 4,
+}
+
 
 def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
     """
@@ -43,35 +52,47 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
                 params.enzyme = "Trypsin"
         except KeyError:
             params.enyzme = "Trypsin/P"
-
-    params.allowed_miscleavages = data["database"]["enzyme"]["missed_cleavages"]
     params.fixed_mods = data["database"]["static_mods"]
     params.variable_mods = data["database"]["variable_mods"]
 
-    try:
-        _precursor_mass_tolerance = data["precursor_tol"]["ppm"]
-        # add unit after each value in list
-        _precursor_mass_tolerance = [str(val) + " ppm" for val in _precursor_mass_tolerance]
-        params.precursor_mass_tolerance = "[" + ", ".join(_precursor_mass_tolerance) + "]"
-    except KeyError:
-        _precursor_mass_tolerance = data["precursor_tol"]["Da"]
-        # add unit after each value in list
-        _precursor_mass_tolerance = [str(val) + " Da" for val in params.precursor_mass_tolerance]
-        params.precursor_mass_tolerance = "[" + ", ".join(_precursor_mass_tolerance) + "]"
+    params.precursor_mass_tolerance = _format_mass_tolerance(data, "precursor_tol")
+    params.fragment_mass_tolerance = _format_mass_tolerance(data, "fragment_tol")
 
-    _fragment_mass_tolerance = data["fragment_tol"]["ppm"]
-    # add unit after each value in list
-    _fragment_mass_tolerance = [str(val) + " ppm" for val in _fragment_mass_tolerance]
-    params.fragment_mass_tolerance = "[" + ", ".join(_fragment_mass_tolerance) + "]"
-
-    params.min_peptide_length = int(data["database"]["enzyme"]["min_len"])
-    params.max_peptide_length = int(data["database"]["enzyme"]["max_len"])
-    params.max_mods = int(data["database"]["max_variable_mods"])
-    params.min_precursor_charge = int(data["precursor_charge"][0])
-    params.max_precursor_charge = int(data["precursor_charge"][1])
+    params.allowed_miscleavages = data["database"]["enzyme"]["missed_cleavages"]
+    params.min_peptide_length = data["database"]["enzyme"]["min_len"]
+    params.max_peptide_length = data["database"]["enzyme"]["max_len"]
+    params.max_mods = data["database"]["max_variable_mods"]
+    params.min_precursor_charge = data["precursor_charge"][0]
+    params.max_precursor_charge = data["precursor_charge"][1]
     params.enable_match_between_runs = True
 
+    for param in [
+        "allowed_miscleavages",
+        "min_peptide_length",
+        "max_peptide_length",
+        "max_mods",
+        "min_precursor_charge",
+        "max_precursor_charge",
+    ]:
+        if params.__dict__[param] is None:
+            # add default values for parameters not defined by user
+            params.__dict__[param] = default_params[param]
+
+        else:
+            # cast parsed param to int
+            params.__dict__[param] = int(params.__dict__[param])
+
     return params
+
+
+def _format_mass_tolerance(data, tol_type):
+    try:
+        tolerance = data[tol_type]["ppm"]
+        tolerance = [f"{val} ppm" for val in tolerance]
+    except KeyError:
+        tolerance = data[tol_type]["da"]
+        tolerance = [f"{val} Da" for val in tolerance]
+    return "[" + ", ".join(tolerance) + "]"
 
 
 if __name__ == "__main__":

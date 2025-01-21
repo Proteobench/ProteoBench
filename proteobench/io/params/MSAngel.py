@@ -21,7 +21,7 @@ from proteobench.io.params import ProteoBenchParameters
 def extract_search_engine(search_params: list) -> dict:
     """
     Extract search engine name from the JSON data.
-    It only works for workflows using only one search engine
+    It only works for workflows using a single search engine
     """
 
     for each_search_params in search_params["operations"]:

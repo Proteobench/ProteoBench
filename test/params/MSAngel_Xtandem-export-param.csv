@@ -14,7 +14,7 @@ allowed_miscleavages,2
 min_peptide_length,
 max_peptide_length,
 fixed_mods,Carbamidomethylation of C
-variable_mods,"Oxidation of M, Acetylation of protein N-term"
+variable_mods,"Oxidation of M, Acetylation of protein N-term;Acetyl(N-term);Pyrolidone(N-term)"
 max_mods,
 min_precursor_charge,
 max_precursor_charge,

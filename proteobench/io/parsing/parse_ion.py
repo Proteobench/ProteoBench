@@ -140,7 +140,6 @@ def aggregate_modification_column(
             continue
         mod_location = m.split(" (")[1].rstrip(")")
         mod_name = m.split(" (")[0]
-
         if mod_location in special_locations.keys():
             if special_locations[mod_location] == -1:  # C-Term
                 all_mods.append(("-[" + mod_name + "]", len(input_string_seq)))

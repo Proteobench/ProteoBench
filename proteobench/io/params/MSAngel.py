@@ -21,7 +21,7 @@ from proteobench.io.params import ProteoBenchParameters
 def extract_search_engine(search_params: list) -> dict:
     """
     Extract search engine parameters from the JSON data.
-    The parameter format depends on the search engine used, so this functino needs to be
+    The parameter format depends on the search engine used, so this function needs to be
     updated for each search engine. Currently, it is set up for:
     . Mascot
     """
@@ -62,6 +62,7 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
 
     ## Extract the search engine(s) parameters before concatenating them:
     all_search_engines = extract_search_engine(data)
+    print(all_search_engines)
     params.search_engines = all_search_engines.join(",")
     all_search_engines = []
     all_enzyme = []
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     """
     from pathlib import Path
 
-    file = Path("../../../test/params/msangel_results.json")
+    file = Path("../../../test/params/MSAngel-workflow-mascot.json")
 
     # Extract parameters from the file
     params = extract_params(file)

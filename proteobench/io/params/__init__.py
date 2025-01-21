@@ -89,6 +89,6 @@ class ProteoBenchParameters:
     max_precursor_charge: Optional[int] = None
     scan_window: Optional[int] = None  # DIA-specific
     quantification_method: Optional[str] = None
-    second_pass: Optional[bool] = None  # DIANN specific
+    second_pass: Optional[bool] = None  # used in both DDA and DIA: same thing?
     protein_inference: Optional[str] = None
     predictors_library: Optional[dict] = None

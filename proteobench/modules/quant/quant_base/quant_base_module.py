@@ -28,7 +28,7 @@ from proteobench.io.params.maxquant import extract_params as extract_params_maxq
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.proline import extract_params as extract_params_proline
 
-# from proteobench.io.params.msangel import extract_params as extract_params_msangel
+from proteobench.io.params.msangel import extract_params as extract_params_msangel
 from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
@@ -61,7 +61,7 @@ class QuantModule:
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
         "ProlineStudio": extract_params_proline,
-        # "MSAngel": extract_params_msangel,
+        "MSAngel": extract_params_msangel,
         "AlphaPept": extract_params_alphapept,
         "Sage": extract_params_sage,
         "FragPipe": extract_params_fragger,

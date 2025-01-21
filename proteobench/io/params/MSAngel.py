@@ -81,6 +81,15 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
             unit = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["precursorAccuracyType"] 
             tol = float(tol)
             input_params.precursor_mass_tolerance = "[-" + str(tol/2) + " " + unit + ", +" + str(tol/2) + " " + unit + "]"
+
+            # Add "hidden" modifications when using X!Tandem:
+            for key, value in each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["algorithmParameters"].items():
+                if value["type"] == "com.compomics.util.parameters.identification.tool_specific.XtandemParameters":
+                    if value["data"]["proteinQuickAcetyl"] == True:
+                        input_params.variable_mods = input_params.variable_mods + ";Acetyl(N-term)"
+                    if value["data"]["quickPyrolidone"] == True:
+                        input_params.variable_mods = input_params.variable_mods + ";Pyrolidone(N-term)"
+            
             
         if "validationConfig" in each_search_params:
             input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100

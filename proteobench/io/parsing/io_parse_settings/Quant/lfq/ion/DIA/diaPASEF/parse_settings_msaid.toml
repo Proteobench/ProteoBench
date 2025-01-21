@@ -6,20 +6,20 @@
 "FASTA_HEADERS" = "Proteins"
 
 [condition_mapper]
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_01.raw" = "A"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_02.raw" = "A"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_03.raw" = "A"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_01.raw" = "B"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_02.raw" = "B"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_03.raw" = "B"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d" = "A"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d" = "B"
 
 [run_mapper]
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_01.raw" = "Condition_A_Sample_Alpha_01"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_02.raw" = "Condition_A_Sample_Alpha_02"
-"LFQ_timsTOFPro_diaPASEF_Condition_A_Sample_Alpha_03.raw" = "Condition_A_Sample_Alpha_03"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_01.raw" = "Condition_B_Sample_Alpha_01"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_02.raw" = "Condition_B_Sample_Alpha_02"
-"LFQ_timsTOFPro_diaPASEF_Condition_B_Sample_Alpha_03.raw" = "Condition_B_Sample_Alpha_03"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d" = "Condition_A_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d" = "Condition_A_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d" = "Condition_A_Sample_Alpha_03"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d" = "Condition_B_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d" = "Condition_B_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d" = "Condition_B_Sample_Alpha_03"
 
 [species_mapper]
 "_YEAST" = "YEAST"

@@ -81,7 +81,7 @@ Available ProteoBench modules
     .. grid-item-card:: DDA quantification ion-level
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://proteobench.cubimed.rub.de/DDA%20Quant%20Ion%20Level%20-BETA-
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DDA
 
         :bdg-success:`active`
         ^^^
@@ -111,15 +111,15 @@ Available ProteoBench modules
         acquisition workflows using a multi-species sample
 
 
-    .. grid-item-card:: DIA quantification
+    .. grid-item-card:: DIA quantification (AIF)
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://proteobench.cubimed.rub.de/DIA%20Quant%20Ion%20Level%20-BETA-
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DIA_AIF
 
         :bdg-success:`active`
         ^^^
-        Benchmark the quantification accuracy of label-free data independent acquisition workflows
-        using a multi-species sample
+        Benchmark the quantification accuracy of label-free data independent acquisition workflows (All-Ion Fragmentation - AIF)
+        using a multi-species sample analysed with an Orbitrap
 
 
     .. grid-item-card:: De novo identification
@@ -145,7 +145,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/438
 
-        :bdg-info:`proposed`
+        :bdg-primary:`in development`
         ^^^
         additional DIA ion-level module with DIA-PASEF data
 
@@ -154,7 +154,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/426
 
-        :bdg-info:`proposed`
+        :bdg-primary:`in development`
         ^^^
         benchmarking identification and quantification workflows for low-input and single cell proteomics (SCP)
 

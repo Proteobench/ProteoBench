@@ -48,10 +48,38 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
             else: 
                 input_params.second_pass = False
             # get tolerance:
-            tol = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["TOL"] #
+            tol = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["TOL"]
             unit = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["TOLU"] 
             tol = float(tol)
             print(tol)
+            input_params.precursor_mass_tolerance = "[-" + str(tol/2) + " " + unit + ", +" + str(tol/2) + " " + unit + "]"
+            
+        if "validationConfig" in each_search_params:
+            input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100
+            # input_params.min_peptide_length = each_search_params["validationConfig"]["psmFilters"] #TODO: I am not sure if this is the max or min length
+   
+    return input_params
+
+def extract_params_xtandem_specific(search_params: list, input_params: ProteoBenchParameters) -> ProteoBenchParameters:
+    """
+    Extract search parameters from the JSON data of a workflow running X!Tandem.
+    Adds them to the partially completed input_params ProteoBenchParameters object.
+    """
+
+    for each_search_params in search_params["operations"]:
+        if "searchEnginesWithForms" in each_search_params:
+            # params.search_engine_version = 
+            input_params.enzyme = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["digestionParameters"]["enzymes"][0]["name"]
+            # params.allowed_miscleavages = 
+            input_params.fixed_mods = ', '.join(each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["modificationParameters"]["fixedModifications"])
+            input_params.variable_mods = ', '.join(each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["modificationParameters"]["variableModifications"])
+            ## get value of each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["digestionParameters"]["nMissedCleavages"] where key == input_params.enzyme
+            n_missed_cleavages_dict = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["digestionParameters"]["nMissedCleavages"]
+            input_params.allowed_miscleavages = n_missed_cleavages_dict.get(input_params.enzyme, None)
+            # get tolerance:
+            tol = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["fragmentIonMZTolerance"]
+            unit = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["precursorAccuracyType"] 
+            tol = float(tol)
             input_params.precursor_mass_tolerance = "[-" + str(tol/2) + " " + unit + ", +" + str(tol/2) + " " + unit + "]"
             
         if "validationConfig" in each_search_params:
@@ -92,6 +120,8 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
     # parameter parsing depends on the search engine used
     if params.search_engine == "Mascot":
         extract_params_mascot_specific(data, params)
+    elif params.search_engine == "X!Tandem":
+        extract_params_xtandem_specific(data, params)
 
     return params
 

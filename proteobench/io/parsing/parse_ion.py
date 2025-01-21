@@ -138,22 +138,22 @@ def aggregate_modification_column(
     for m in input_string_modifications.split("; "):
         if len(m) == 0:
             continue
-        m_stripped = m.split(" (")[1].rstrip(")")
-        m_name = m.split(" (")[0]
+        mod_location = m.split(" (")[1].rstrip(")")
+        mod_name = m.split(" (")[0]
 
-        if m_stripped in special_locations.keys():
-            if special_locations[m_stripped] == -1:
-                all_mods.append((m_name, len(input_string_seq)))
-            else:
-                all_mods.append((m_name, special_locations[m_stripped]))
+        if mod_location in special_locations.keys():
+            if special_locations[mod_location] == -1:  # C-Term
+                all_mods.append(("-[" + mod_name + "]", len(input_string_seq)))
+            else:  # N-Term
+                all_mods.append(("[" + mod_name + "]-", special_locations[mod_location]))
             continue
 
-        all_mods.append((m_name, int(m_stripped[1:])))
+        all_mods.append(("[" + mod_name + "]", int(mod_location[1:])))
 
     all_mods.sort(key=lambda x: x[1], reverse=True)
 
     for name, loc in all_mods:
-        input_string_seq = input_string_seq[:loc] + f"[{name}]" + input_string_seq[loc:]
+        input_string_seq = input_string_seq[:loc] + name + input_string_seq[loc:]
 
     return input_string_seq
 

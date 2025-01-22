@@ -92,3 +92,4 @@ class ProteoBenchParameters:
     second_pass: Optional[bool] = None  # used in DIA
     protein_inference: Optional[str] = None
     predictors_library: Optional[dict] = None
+    abundance_normalization_ions: Optional[str] = None  # tic, median etc.

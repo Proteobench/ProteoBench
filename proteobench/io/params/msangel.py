@@ -56,7 +56,7 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
             tol = float(tol)
             print(tol)
             input_params.precursor_mass_tolerance = (
-                "[-" + str(tol / 2) + " " + unit + ", +" + str(tol / 2) + " " + unit + "]"
+                "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
             )
 
         if "validationConfig" in each_search_params:
@@ -99,7 +99,7 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorAccuracyType"]
             tol = float(tol)
             input_params.precursor_mass_tolerance = (
-                "[-" + str(tol / 2) + " " + unit + ", +" + str(tol / 2) + " " + unit + "]"
+                "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
             )
 
             # Add "hidden" modifications when using X!Tandem:

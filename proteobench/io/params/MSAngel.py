@@ -6,7 +6,7 @@ requires a list of search engines and their respective parameters, which are the
 concatenated.
 
 Relevant information in file:
-
+-
 """
 
 import json

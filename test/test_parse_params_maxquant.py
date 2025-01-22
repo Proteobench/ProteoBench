@@ -115,6 +115,6 @@ def test_extract_params(file, json_expected):
     with open(json_expected) as f:
         expected = json.load(f)
     actual = mq_params.extract_params(file)
-    expected = expected.loc[actual.index]
+    expected = {k: v for k, v in expected.items() if k in actual}
     actual = actual.__dict__
     assert actual == expected

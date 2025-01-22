@@ -70,30 +70,9 @@ class ProteoBenchParameters:
         Protein inference method used.
     """
 
-    software_name: Optional[str] = field(default=None, init=False)
-    software_version: Optional[str] = field(default=None, init=False)
-    search_engine: Optional[str] = field(default=None, init=False)
-    search_engine_version: Optional[str] = field(default=None, init=False)
-    ident_fdr_psm: Optional[float] = field(default=None, init=False)
-    ident_fdr_peptide: Optional[float] = field(default=None, init=False)
-    ident_fdr_protein: Optional[float] = field(default=None, init=False)
-    enable_match_between_runs: Optional[bool] = field(default=None, init=False)
-    precursor_mass_tolerance: Optional[str] = field(default=None, init=False)
-    fragment_mass_tolerance: Optional[str] = field(default=None, init=False)
-    enzyme: Optional[str] = field(default=None, init=False)
-    allowed_miscleavages: Optional[int] = field(default=None, init=False)
-    min_peptide_length: Optional[int] = field(default=None, init=False)
-    max_peptide_length: Optional[int] = field(default=None, init=False)
-    fixed_mods: Optional[str] = field(default=None, init=False)
-    variable_mods: Optional[str] = field(default=None, init=False)
-    max_mods: Optional[int] = field(default=None, init=False)
-    min_precursor_charge: Optional[int] = field(default=None, init=False)
-    max_precursor_charge: Optional[int] = field(default=None, init=False)
-    quantification_method: Optional[str] = field(default=None, init=False)
-    protein_inference: Optional[str] = field(default=None, init=False)
-    abundance_normalization_ions: Optional[str] = field(default=None, init=False)
-
-    def __init__(self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/lfq/ion/DDA/fields.json")):
+    def __init__(
+        self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/lfq/ion/DDA/fields.json"), **kwargs
+    ):
         """
         Reads the JSON file and initializes only the attributes present in the file.
         """
@@ -104,16 +83,18 @@ class ProteoBenchParameters:
         with open(filename, "r", encoding="utf-8") as file:
             json_dict = json.load(file)
 
-        # Extract valid fields dynamically from the dataclass fields
-        valid_fields = set(self.__dataclass_fields__.keys())
-
         # Initialize only the fields present in the JSON
         for key, value in json_dict.items():
-            if key in valid_fields:
-                if "value" in value:
-                    setattr(self, key, value["value"])
-                elif "placeholder" in value and value["placeholder"] != "-":
-                    setattr(self, key, value["placeholder"])
+            if "value" in value:
+                setattr(self, key, value["value"])
+            elif "placeholder" in value:
+                setattr(self, key, value["placeholder"])
+            else:
+                setattr(self, key, None)
+
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def __repr__(self):
         """

@@ -26,8 +26,8 @@ class GithubProteobotRepo:
         token: Optional[str] = None,
         clone_dir: str = None,
         clone_dir_pr: str = None,
-        proteobench_repo_name: str = "Proteobench/Results_Module2_quant_DDA",
-        proteobot_repo_name: str = "Proteobot/Results_Module2_quant_DDA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
         username: str = "Proteobot",
     ):
         """
@@ -37,8 +37,8 @@ class GithubProteobotRepo:
             token (str | None, optional): GitHub access token for authenticated access. Defaults to None.
             clone_dir (str): Directory where the repository will be cloned.
             clone_dir_pr (str): Directory for cloning pull request repositories.
-            proteobench_repo_name (str, optional): Name of the Proteobench repository. Defaults to "Proteobench/Results_Module2_quant_DDA".
-            proteobot_repo_name (str, optional): Name of the Proteobot repository. Defaults to "Proteobot/Results_Module2_quant_DDA".
+            proteobench_repo_name (str, optional): Name of the Proteobench repository. Defaults to "Proteobench/Results_quant_ion_DDA".
+            proteobot_repo_name (str, optional): Name of the Proteobot repository. Defaults to "Proteobot/Results_quant_ion_DDA".
             username (str, optional): GitHub username for authentication. Defaults to "Proteobot".
         """
         self.token = token

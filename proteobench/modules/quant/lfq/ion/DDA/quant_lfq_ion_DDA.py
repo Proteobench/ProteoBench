@@ -27,8 +27,8 @@ class DDAQuantIonModule(QuantModule):
     def __init__(
         self,
         token: str,
-        proteobench_repo_name: str = "Proteobench/Results_Module2_quant_DDA",
-        proteobot_repo_name: str = "Proteobot/Results_Module2_quant_DDA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
         # TODO: Figure out how to do nicer relative calls
         parse_settings_dir: str = os.path.abspath(
             os.path.join(

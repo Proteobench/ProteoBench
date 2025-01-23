@@ -37,7 +37,7 @@ def test_find_pep_length(string, expected_min_pep):
 # parameters = [(fname, fname.with_suffix(".csv")) for fname in fnames]
 
 
-# @pytest.mark.parametrize("file", fnames)
+@pytest.mark.parametrize("file", fnames)
 def test_extract_params(file):
     expected = pd.read_csv(file.with_suffix(".csv"), index_col=0).squeeze("columns")
     actual = proline_params.extract_params(file)
@@ -56,13 +56,3 @@ def test_find_charges():
     assert proline_params.find_charge("2+") == [2]
     assert proline_params.find_charge("3+") == [3]
     assert proline_params.find_charge("30+ and 14+") == [30, 14]
-
-
-if __name__ == "__main__":
-    test_find_pep_length(parameters[0][0], parameters[0][1])
-    test_find_pep_length(parameters[1][0], parameters[1][1])
-    test_extract_params(fnames[0])
-    test_extract_params(fnames[1])
-    test_extract_params(fnames[2])
-    test_extract_params(fnames[3])
-    test_find_charges()

@@ -1,9 +1,13 @@
-from dataclasses import dataclass
-from typing import Optional
-
-
 # Reference for parameter names
 # https://github.com/bigbio/proteomics-sample-metadata/blob/master/sdrf-proteomics/assets/param2sdrf.yml
+import json
+import os
+from dataclasses import dataclass, field
+from typing import Optional
+
+import numpy as np
+
+
 @dataclass
 class ProteoBenchParameters:
     """
@@ -67,29 +71,51 @@ class ProteoBenchParameters:
     protein_inference : Optional[str]
         Protein inference method used.
     """
+    def __init__(
+        self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/lfq/ion/DDA/fields.json"), **kwargs
+    ):
+        """
+        Reads the JSON file and initializes only the attributes present in the file.
+        """
+        if not os.path.isfile(filename):
+            print(f"Error: File '{filename}' not found.")
+            return  # No initialization happens if the file is missing
 
-    software_name: Optional[str] = None
-    software_version: Optional[str] = None
-    search_engine: Optional[str] = None
-    search_engine_version: Optional[str] = None
-    ident_fdr_psm: Optional[str] = None  # fdr_psm
-    ident_fdr_peptide: Optional[float] = None  # fdr_peptide
-    ident_fdr_protein: Optional[float] = None  # fdr_protein
-    enable_match_between_runs: Optional[bool] = None  # MBR
-    precursor_mass_tolerance: Optional[str] = None  # precursor_tol, precursor_tol_unit
-    fragment_mass_tolerance: Optional[str] = None  # fragment_tol, fragment_tol_unit
-    enzyme: Optional[str] = None  # enzyme_name
-    allowed_miscleavages: Optional[int] = None  # missed_cleavages
-    min_peptide_length: Optional[int] = None  # min_pep_length
-    max_peptide_length: Optional[int] = None  # max_pep_length
-    fixed_mods: Optional[str] = None  # fixed_modifications
-    variable_mods: Optional[str] = None  # variable_modifications
-    max_mods: Optional[int] = None  # max_num_modifications
-    min_precursor_charge: Optional[int] = None  # precursor_charge
-    max_precursor_charge: Optional[int] = None
-    scan_window: Optional[int] = None  # DIA-specific
-    quantification_method: Optional[str] = None
-    second_pass: Optional[bool] = None  # used in DIA
-    protein_inference: Optional[str] = None
-    predictors_library: Optional[dict] = None
-    abundance_normalization_ions: Optional[str] = None  # tic, median etc.
+        with open(filename, "r", encoding="utf-8") as file:
+            json_dict = json.load(file)
+
+        # Initialize only the fields present in the JSON
+        for key, value in json_dict.items():
+            if "value" in value:
+                setattr(self, key, value["value"])
+            elif "placeholder" in value:
+                setattr(self, key, value["placeholder"])
+            else:
+                setattr(self, key, None)
+
+        for key, value in kwargs.items():
+            print(key, value)
+            if hasattr(self, key) and value == "None":
+                setattr(self, key, np.nan)
+            elif hasattr(self, key):
+                setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Custom string representation to only show initialized attributes.
+        """
+        return str({key: value for key, value in self.__dict__.items() if value is not None})
+
+    def fill_none(self):
+        """
+        Fill all None values with np.nan
+        """
+        for key, value in self.__dict__.items():
+            if value == "None":
+                setattr(self, key, np.nan)
+
+
+# Automatically initialize from fields.json if run directly
+if __name__ == "__main__":
+    proteo_params = ProteoBenchParameters()
+    print(proteo_params)

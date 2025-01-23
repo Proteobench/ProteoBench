@@ -144,6 +144,8 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     except ValueError:
         pass
 
+    params.fill_none()
+
     return params
 
 

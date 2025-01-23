@@ -1,8 +1,8 @@
 {
-    "software_name": null,
+    "software_name": NaN,
     "software_version": "1.5.3.30",
     "search_engine": "Andromeda",
-    "search_engine_version": null,
+    "search_engine_version": "1.0",
     "ident_fdr_psm": null,
     "ident_fdr_peptide": 0.01,
     "ident_fdr_protein": 0.01,
@@ -18,10 +18,7 @@
     "max_mods": 5,
     "min_precursor_charge": null,
     "max_precursor_charge": 7,
-    "scan_window": null,
-    "quantification_method": null,
-    "second_pass": null,
-    "protein_inference": null,
-    "predictors_library": null,
-    "abundance_normalization_ions": null
+    "quantification_method": NaN,
+    "protein_inference": NaN,
+    "abundance_normalization_ions": NaN
 }

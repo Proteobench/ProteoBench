@@ -97,7 +97,7 @@ class ProteoBenchParameters:
         for key, value in kwargs.items():
             print(key, value)
             if hasattr(self, key) and value == "None":
-                setattr(self, key, np.NaN)
+                setattr(self, key, np.nan)
             elif hasattr(self, key):
                 setattr(self, key, value)
 
@@ -109,11 +109,11 @@ class ProteoBenchParameters:
 
     def fill_none(self):
         """
-        Fill all None values with np.NaN
+        Fill all None values with np.nan
         """
         for key, value in self.__dict__.items():
             if value == "None":
-                setattr(self, key, np.NaN)
+                setattr(self, key, np.nan)
 
 
 # Automatically initialize from fields.json if run directly

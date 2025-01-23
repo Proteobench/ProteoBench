@@ -71,7 +71,6 @@ class ProteoBenchParameters:
     protein_inference : Optional[str]
         Protein inference method used.
     """
-
     def __init__(
         self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/lfq/ion/DDA/fields.json"), **kwargs
     ):

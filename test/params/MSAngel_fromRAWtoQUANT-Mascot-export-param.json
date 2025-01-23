@@ -5,103 +5,13 @@
     "outputFileFormat" : "MZDB",
     "outputDirectory" : "",
     "config" : {
-      "tool" : "ProFI raw2mzDB",
-      "toolVersion" : "0.9.9+",
+      "tool" : "mzDB tools Thermo converter",
       "params" : [ {
-        "name" : "Profile (MS levels X to Y)",
-        "isRequired" : false,
-        "description" : "This parameters accepts two types of entry:\n\n* Numeric: fill only the min. value to select a single MS level,\ne.g. 1-<empty> fo MS Level 1.\n\n* Interval: fill both fields to select a range of MS levels,\ne.g. 1-5 for MS level 1 to MS level 5.",
-        "allowRightMemberEmpty" : true,
-        "paramTypeAsStr" : "RANGE",
-        "cmdFlag" : "-p",
-        "allowLeftMemberEmpty" : false,
-        "maxValue" : 3
-      }, {
-        "name" : "Fitted (MS levels X to Y)",
-        "isRequired" : false,
-        "description" : "This parameters accepts two types of entry:\n\n* Numeric: fill only the min. value to select a single MS level,\ne.g. 1-<empty> fo MS Level 1.\n\n* Interval: fill both fields to select a range of MS levels,\ne.g. 1-5 for MS level 1 to MS level 5.",
-        "allowRightMemberEmpty" : true,
-        "default" : [ 1, 3 ],
-        "paramTypeAsStr" : "RANGE",
-        "cmdFlag" : "-f",
-        "allowLeftMemberEmpty" : false,
-        "maxValue" : 3
-      }, {
-        "name" : "Centroidization (MS levels X to Y)",
-        "isRequired" : false,
-        "description" : "This parameters accepts two types of entry:\n\n* Numeric: fill only the min. value to select a single MS level,\ne.g. 1-<empty> fo MS Level 1.\n\n* Interval: fill both fields to select a range of MS levels,\ne.g. 1-5 for MS level 1 to MS level 5.",
-        "allowRightMemberEmpty" : true,
-        "paramTypeAsStr" : "RANGE",
-        "cmdFlag" : "-c",
-        "allowLeftMemberEmpty" : false,
-        "maxValue" : 3
-      }, {
-        "name" : "Safe mode (use centroidization if needed)",
-        "description" : "Use centroid mode if the requested mode is not available",
-        "default" : true,
-        "paramTypeAsStr" : "BOOLEAN",
-        "cmdFlag" : "-s",
-        "value" : true
-      }, {
-        "name" : "Acquisition mode",
-        "isRequired" : false,
-        "options" : [ {
-          "name" : "DDA",
-          "value" : "dda"
-        }, {
-          "name" : "DIA",
-          "value" : "dia"
-        }, {
-          "name" : "Auto",
-          "value" : "auto"
-        } ],
-        "default" : {
-          "name" : "Auto",
-          "value" : "auto"
-        },
-        "paramTypeAsStr" : "SELECTION",
-        "cmdFlag" : "-a",
-        "value" : {
-          "name" : "Auto",
-          "value" : "auto"
-        }
-      }, {
-        "name" : "Bounding box time width for MS1 (seconds)",
-        "isRequired" : false,
-        "default" : 15,
-        "paramTypeAsStr" : "NUMERIC",
-        "cmdFlag" : "-T"
-      }, {
-        "name" : "Bounding box m/z width for MS1 (Da)",
-        "isRequired" : false,
-        "default" : 5,
-        "paramTypeAsStr" : "NUMERIC",
-        "cmdFlag" : "-M"
-      }, {
-        "name" : "Bounding box time width for MSn (seconds)",
-        "isRequired" : false,
-        "default" : 0,
-        "paramTypeAsStr" : "NUMERIC",
-        "cmdFlag" : "-t"
-      }, {
-        "name" : "Bounding box m/z width for MSn (Da)",
-        "isRequired" : false,
-        "default" : 10000,
-        "paramTypeAsStr" : "NUMERIC",
-        "cmdFlag" : "-m"
-      }, {
-        "name" : "Only convert the selected range of cycles",
-        "isRequired" : false,
-        "description" : "Only convert the selected range of cycles.\nNote that using this option will disable progress information.\nThis parameters accepts two types of entry:\n\n* Closed interval: fill both fields,\ne.g. 1-10 for the first ten cycles.\n\n* Interval open on the right: fill only the min. value,\ne.g. 10-<empty> to consider from cycle 10 to the end.",
-        "allowRightMemberEmpty" : true,
-        "paramTypeAsStr" : "RANGE",
-        "cmdFlag" : "--cycles",
-        "allowLeftMemberEmpty" : false
-      }, {
-        "name" : "64 bits conversion of m/z and intensities (larger output file)",
+        "name" : "Split FAIMS CV channels",
+        "description" : "Enables the creation of one mzDB file per FAIMS CV channel (required for Proline quantification)",
         "default" : false,
         "paramTypeAsStr" : "BOOLEAN",
-        "cmdFlag" : "--no_loss",
+        "cmdFlag" : "--split-faims",
         "value" : false
       } ],
       "filters" : [ ]
@@ -254,7 +164,7 @@
             "prettyString" : "None",
             "value" : "NONE"
           },
-          "restrainXAlignmentToReliableFeatures" : false,
+          "restrainXAlignmentToReliableFeatures" : true,
           "intensityThreshold" : 0,
           "mozTolUnit" : "ppm",
           "mozTol" : 5,
@@ -307,7 +217,7 @@
       "dsName" : "EMB Proteobench module DDA quant ion",
       "psmExpectedFdr" : 1
     },
-    "status" : "succeeded",
+    "status" : "pending",
     "type" : "ResultSetProcessing"
   } ],
   "isTemplate" : false,

@@ -5,6 +5,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Optional
 
+import numpy as np
+
 
 @dataclass
 class ProteoBenchParameters:
@@ -93,7 +95,10 @@ class ProteoBenchParameters:
                 setattr(self, key, None)
 
         for key, value in kwargs.items():
-            if hasattr(self, key):
+            print(key, value)
+            if hasattr(self, key) and value == "None":
+                setattr(self, key, np.NaN)
+            elif hasattr(self, key):
                 setattr(self, key, value)
 
     def __repr__(self):
@@ -101,6 +106,14 @@ class ProteoBenchParameters:
         Custom string representation to only show initialized attributes.
         """
         return str({key: value for key, value in self.__dict__.items() if value is not None})
+
+    def fill_none(self):
+        """
+        Fill all None values with np.NaN
+        """
+        for key, value in self.__dict__.items():
+            if value == "None":
+                setattr(self, key, np.NaN)
 
 
 # Automatically initialize from fields.json if run directly

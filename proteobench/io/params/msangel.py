@@ -55,9 +55,7 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["TOLU"]
             tol = float(tol)
             print(tol)
-            input_params.precursor_mass_tolerance = (
-                "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
-            )
+            input_params.precursor_mass_tolerance = "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
 
         if "validationConfig" in each_search_params:
             input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100
@@ -98,9 +96,7 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
             tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentIonMZTolerance"]
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorAccuracyType"]
             tol = float(tol)
-            input_params.precursor_mass_tolerance = (
-                "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
-            )
+            input_params.precursor_mass_tolerance = "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
 
             # Add "hidden" modifications when using X!Tandem:
             for key, value in each_search_params["searchEnginesWithForms"][0][1]["paramMap"][
@@ -153,6 +149,8 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
         extract_params_mascot_specific(data, params)
     elif params.search_engine == "X!Tandem":
         extract_params_xtandem_specific(data, params)
+
+    params.fill_none()
 
     return params
 

@@ -2,7 +2,7 @@
     "software_name": {
         "type": "text_input",
         "label": "Software name",
-        "placeholder": "-"
+        "placeholder": "None"
     },
 	"software_version": {
         "type": "text_input",
@@ -12,7 +12,7 @@
     "search_engine": {
         "type": "text_input",
         "label": "Search engine name",
-        "placeholder": "-"
+        "placeholder": "None"
     },
     "search_engine_version": {
         "type": "text_input",
@@ -58,7 +58,7 @@
     "enzyme": {
         "type": "text_input",
         "label": "Proteolytic Enzyme",
-        "placeholder": "-"
+        "placeholder": "None"
     },
     "allowed_miscleavages": {
         "type": "number_input",
@@ -94,7 +94,7 @@
 	"max_mods": {
         "type": "text_input",
         "label": "Maximum number of modifications",
-        "placeholder": "-"
+        "placeholder": "None"
     },
     "min_precursor_charge": {
         "type": "number_input",
@@ -113,16 +113,16 @@
     "quantification_method": {
         "type": "text_input",
         "label": "Quantification method",
-        "placeholder": "-"
+        "placeholder": "None"
     },
 	"protein_inference": {
         "type": "text_input",
         "label": "Protein inference method",
-        "placeholder": "-"
+        "placeholder": "None"
     },
 	"abundance_normalization_ions": {
         "type": "text_input",
         "label": "Abundance normalization method",
-        "placeholder": "-"
+        "placeholder": "None"
     }
 }

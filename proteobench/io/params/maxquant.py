@@ -187,6 +187,8 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     params.max_precursor_charge = int(
         record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "maxCharge", :]].squeeze()
     )
+
+    params.fill_none()
     return params
 
 

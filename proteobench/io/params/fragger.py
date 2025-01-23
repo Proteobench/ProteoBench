@@ -192,6 +192,8 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     if fragpipe_params.loc["protein-prophet.run-protein-prophet"] == "true":
         params.protein_inference = f"ProteinProphet: {fragpipe_params.loc['protein-prophet.cmd-opts']}"
 
+    params.fill_none()
+
     return params
 
 

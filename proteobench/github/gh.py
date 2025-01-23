@@ -112,7 +112,7 @@ class GithubProteobotRepo:
         Returns:
             Repo: The local repository object.
         """
-        if self.token is None:
+        if self.token is None or self.token == "":
             self.repo = self.clone_repo_anonymous()
         else:
             remote = f"https://{self.username}:{self.token}@github.com/{self.proteobench_repo_name}.git"
@@ -128,7 +128,7 @@ class GithubProteobotRepo:
         Returns:
             Repo: The local repository object for the pull request.
         """
-        if self.token is None:
+        if self.token is None or self.token == "":
             self.repo = self.clone_repo_anonymous()
         else:
             remote = f"https://{self.username}:{self.token}@github.com/{self.proteobot_repo_name}.git"

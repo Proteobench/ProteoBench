@@ -1,0 +1,2 @@
+"Sequence"	"Proteins"	"Charge"	"Modified sequence"	"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"	"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02"	"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03"	"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"	"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02"	"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03"
+"IIMYDQNHLLGR"	"sp|Q6PD62|CTR9_HUMAN"	3	"IIMYDQNHLLGR"	13062000.1214948	11418360.5257796	11735862.0778141	13572215.7997971	10291459.9079442	10275849.1834748

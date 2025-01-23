@@ -2,13 +2,13 @@
 software_name,MSAngel
 software_version,2.2.10
 search_engine,Mascot
-search_engine_version,
+search_engine_version,1.0
 ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,
 enable_match_between_runs,True
-precursor_mass_tolerance,"[-5.0 ppm, +5.0 ppm]"
-fragment_mass_tolerance,
+precursor_mass_tolerance,"[-10.0 ppm, +10.0 ppm]"
+fragment_mass_tolerance,20 ppm
 enzyme,Trypsin/P
 allowed_miscleavages,0
 min_peptide_length,
@@ -23,3 +23,4 @@ quantification_method,
 second_pass,False
 protein_inference,
 predictors_library,
+abundance_normalization_ions,

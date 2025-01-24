@@ -58,12 +58,12 @@ class Datapoint:
     Attributes:
         id (str): Unique identifier for the benchmark run.
         software_name (str): Name of the software used in the benchmark.
-        software_version (int): Version of the software.
+        software_version (str): Version of the software.
         search_engine (str): Name of the search engine used.
-        search_engine_version (int): Version of the search engine.
-        ident_fdr_psm (int): False discovery rate for PSMs.
-        ident_fdr_peptide (int): False discovery rate for peptides.
-        ident_fdr_protein (int): False discovery rate for proteins.
+        search_engine_version (str): Version of the search engine.
+        ident_fdr_psm (float): False discovery rate for PSMs.
+        ident_fdr_peptide (float): False discovery rate for peptides.
+        ident_fdr_protein (float): False discovery rate for proteins.
         enable_match_between_runs (bool): Whether matching between runs is enabled.
         precursor_mass_tolerance (str): Mass tolerance for precursor ions.
         fragment_mass_tolerance (str): Mass tolerance for fragment ions.
@@ -74,7 +74,8 @@ class Datapoint:
         is_temporary (bool): Whether the data is temporary.
         intermediate_hash (str): Hash of the intermediate result.
         results (dict): A dictionary of metrics for the benchmark run.
-        median_abs_epsilon (int): Median absolute epsilon value for the benchmark.
+        median_abs_epsilon (float): Median absolute epsilon value for the benchmark.
+        mean_abs_epsilon (float): Mean absolute epsilon value for the benchmark.
         nr_prec (int): Number of precursors identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
@@ -98,8 +99,8 @@ class Datapoint:
     is_temporary: bool = True
     intermediate_hash: str = ""
     results: dict = None
-    median_abs_epsilon: int = 0
-    mean_abs_epsilon: int = 0
+    median_abs_epsilon: float = 0
+    mean_abs_epsilon: float = 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
@@ -171,6 +172,7 @@ class Datapoint:
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
         result_datapoint.mean_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["mean_abs_epsilon"]
+        result_datapoint.nr_prec = result_datapoint.results[default_cutoff_min_prec]["nr_prec"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 

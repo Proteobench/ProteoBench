@@ -18,10 +18,10 @@ def test_clone_repo_anonymous():
     tmp_dir = TemporaryDirectory()
     temp_dir_name = tmp_dir.name
 
-    github_repo = GithubProteobotRepo("", temp_dir_name, proteobot_repo_name="Proteobench/Results_Module2_quant_DDA")
+    github_repo = GithubProteobotRepo("", temp_dir_name, proteobot_repo_name="Proteobench/Results_quant_ion_DDA")
     url = github_repo.get_remote_url_anon()
-    # assert that url equal 'https://github.com/Proteobench/Results_Module2_quant_DDA.git'
-    # assert url == 'https://github.com/Proteobench/Results_Module2_quant_DDA.git'
+    # assert that url equal 'https://github.com/Proteobench/Results_quant_ion_DDA.git'
+    # assert url == 'https://github.com/Proteobench/Results_quant_ion_DDA.git'
     repo = github_repo.clone_repo_anonymous()
     assert isinstance(repo, Repo)
     jsonfile = github_repo.read_results_json_repo()

@@ -83,12 +83,10 @@ def aggregate_modification_column(
             continue
 
         all_mods.append(("[" + mod_name + "]", int(mod_location[1:])))
-        all_mods.append(("[" + mod_name + "]", int(mod_location[1:])))
 
     all_mods.sort(key=lambda x: x[1], reverse=True)
 
     for name, loc in all_mods:
-        input_string_seq = input_string_seq[:loc] + name + input_string_seq[loc:]
         input_string_seq = input_string_seq[:loc] + name + input_string_seq[loc:]
 
     return input_string_seq

@@ -111,7 +111,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     elif input_format == "quantms":
         input_data_frame = pd.read_csv(input_csv, low_memory=False)
         input_data_frame = input_data_frame.assign(
-            Sequence=input_data_frame["PeptideSequence"].str.replace(
+            proforma=input_data_frame["PeptideSequence"].str.replace(
                 r"\(([^)]+)\)",
                 r"",
                 regex=True,

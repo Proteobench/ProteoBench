@@ -78,19 +78,42 @@ class GithubProteobotRepo:
         try:
             repo = Repo(clone_dir)
         except (exc.NoSuchPathError, exc.InvalidGitRepositoryError):
-            repo = Repo.clone_from(remote_url.rstrip("/"), clone_dir)
+            repo = Repo.clone_from(remote_url.rstrip("/"), clone_dir, depth=1, no_single_branch=True)
+        return repo
+
+    @staticmethod
+    def shallow_clone(remote_url: str, clone_dir: str) -> Repo:
+        """
+        Performs a shallow clone of the repository (only the latest commit).
+
+        Args:
+            remote_url (str): The repository URL.
+            clone_dir (str): The target directory for cloning.
+
+        Returns:
+            Repo: The cloned repository object.
+        """
+        if os.path.exists(clone_dir):
+            print(f"Repository already exists in {clone_dir}. Using existing files.")
+            return Repo(clone_dir)
+
+        try:
+            repo = Repo.clone_from(remote_url.rstrip("/"), clone_dir, depth=1, no_single_branch=True)
+        except exc.GitCommandError as e:
+            raise RuntimeError(f"Failed to clone the repository: {e}")
+
         return repo
 
     def clone_repo_anonymous(self) -> Repo:
         """
-        Clones the Proteobench repository anonymously (without authentication).
+        Clones the Proteobench repository anonymously with a shallow clone (without authentication).
 
         Returns:
-            Repo: The local repository object.
+            Repo: The cloned repository object.
         """
         remote_url = self.get_remote_url_anon()
-        repo = self.clone(remote_url, self.clone_dir)
-        return repo
+        self.repo = self.shallow_clone(remote_url, self.clone_dir)
+        return self.repo
 
     def read_results_json_repo_single_file(self) -> pd.DataFrame:
         """
@@ -107,26 +130,27 @@ class GithubProteobotRepo:
         all_datapoints = pd.read_json(f_name)
         return all_datapoints
 
-        def read_results_json_repo(self) -> pd.DataFrame:
-            """
-            Reads all JSON result files from the cloned Proteobench repository.
+    def read_results_json_repo(self) -> pd.DataFrame:
+        """
+        Reads all JSON result files from the cloned Proteobench repository.
 
-            Returns:
-                pd.DataFrame: A Pandas DataFrame containing aggregated results from multiple JSON files.
-            """
-            data = []
-            if not os.path.exists(self.clone_dir):
-                raise FileNotFoundError(f"Clone directory '{self.clone_dir}' does not exist.")
+        Returns:
+            pd.DataFrame: A Pandas DataFrame containing aggregated results from multiple JSON files.
+        """
+        data = []
+        if not os.path.exists(self.clone_dir):
+            raise FileNotFoundError(f"Clone directory '{self.clone_dir}' does not exist.")
 
-            for file in os.listdir(self.clone_dir):
-                if file.endswith(".json") and file != "results.json":
-                    file_path = os.path.join(self.clone_dir, file)
-                    with open(file_path, "r") as f:
-                        data.append(pd.read_json(f, typ="series"))
-            if not data:
-                raise ValueError("No valid JSON data found in the repository.")
+        for file in os.listdir(self.clone_dir):
+            print(file)
+            if file.endswith(".json") and file != "results.json":
+                file_path = os.path.join(self.clone_dir, file)
+                with open(file_path, "r") as f:
+                    data.append(pd.read_json(f, typ="series"))
+        if not data:
+            raise ValueError("No valid JSON data found in the repository.")
 
-            return pd.DataFrame(data)
+        return pd.DataFrame(data)
 
     def clone_repo(self) -> Repo:
         """

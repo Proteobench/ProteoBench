@@ -171,14 +171,14 @@ class ParseSettings:
                     df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
                 )
             else:
-                print("Not all columns required for making the ion are available.")
+                raise ValueError("Not all columns required for making the ion are available: 'proforma' and 'Charge'.")
             return df_filtered_melted, replicate_to_raw
 
         elif self.analysis_level == "peptidoform":
             if "proforma" in df_filtered_melted.columns:
                 df_filtered_melted["peptidoform"] = df_filtered_melted["proforma"]
             else:
-                print("Not all columns required for making the peptidoform are available.")
+                raise ValueError("Not all columns required for making the peptidoform are available: 'proforma'.")
             return df_filtered_melted, replicate_to_raw
 
         else:
@@ -244,11 +244,11 @@ class ParseModificationSettings:
         if self.parser.analysis_level == "ion":
             try:
                 df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
-            except KeyError:
+            except KeyError as e:
                 raise KeyError(
                     "Not all columns required for making the ion are available."
                     " Is the charge available in the input file?"
-                )
+                ) from e
 
             return df, replicate_to_raw
 

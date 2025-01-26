@@ -142,13 +142,12 @@ class GithubProteobotRepo:
             raise FileNotFoundError(f"Clone directory '{self.clone_dir}' does not exist.")
 
         for file in os.listdir(self.clone_dir):
-            print(file)
             if file.endswith(".json") and file != "results.json":
                 file_path = os.path.join(self.clone_dir, file)
                 with open(file_path, "r") as f:
                     data.append(pd.read_json(f, typ="series"))
         if not data:
-            raise ValueError("No valid JSON data found in the repository.")
+            self.read_results_json_repo_single_file()
 
         return pd.DataFrame(data)
 

@@ -92,7 +92,7 @@ class GithubProteobotRepo:
         repo = self.clone(remote_url, self.clone_dir)
         return repo
 
-    def read_results_json_repo(self) -> pd.DataFrame:
+    def read_results_json_repo_single_file(self) -> pd.DataFrame:
         """
         Reads the `results.json` file from the cloned Proteobench repository and returns the data as a DataFrame.
 
@@ -100,8 +100,33 @@ class GithubProteobotRepo:
             pd.DataFrame: A Pandas DataFrame containing the results from `results.json`.
         """
         f_name = os.path.join(self.clone_dir, "results.json")
+
+        if not os.path.exists(f_name):
+            raise FileNotFoundError(f"File '{f_name}' does not exist.")
+
         all_datapoints = pd.read_json(f_name)
         return all_datapoints
+
+        def read_results_json_repo(self) -> pd.DataFrame:
+            """
+            Reads all JSON result files from the cloned Proteobench repository.
+
+            Returns:
+                pd.DataFrame: A Pandas DataFrame containing aggregated results from multiple JSON files.
+            """
+            data = []
+            if not os.path.exists(self.clone_dir):
+                raise FileNotFoundError(f"Clone directory '{self.clone_dir}' does not exist.")
+
+            for file in os.listdir(self.clone_dir):
+                if file.endswith(".json") and file != "results.json":
+                    file_path = os.path.join(self.clone_dir, file)
+                    with open(file_path, "r") as f:
+                        data.append(pd.read_json(f, typ="series"))
+            if not data:
+                raise ValueError("No valid JSON data found in the repository.")
+
+            return pd.DataFrame(data)
 
     def clone_repo(self) -> Repo:
         """

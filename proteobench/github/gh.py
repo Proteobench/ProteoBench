@@ -94,8 +94,11 @@ class GithubProteobotRepo:
             Repo: The cloned repository object.
         """
         if os.path.exists(clone_dir):
-            print(f"Repository already exists in {clone_dir}. Using existing files.")
-            return Repo(clone_dir)
+            print(f"Repository already exists in {clone_dir}. Trying to use existing files.")
+            try:
+                return Repo(clone_dir)
+            except exc.InvalidGitRepositoryError:
+                print(f"Repository invalid, will clone again.")
 
         try:
             repo = Repo.clone_from(remote_url.rstrip("/"), clone_dir, depth=1, no_single_branch=True)

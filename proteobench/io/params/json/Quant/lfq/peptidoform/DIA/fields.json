@@ -124,19 +124,19 @@
         "type": "text_input",
         "label": "Abundance normalization method",
         "placeholder": "None"
-    }
+    },
 	"predictors_library": {
         "type": "text_input",
         "label": "Utilized spectral library",
         "placeholder": "None"
-    }	
+    },
 	"scan_window": {
         "type": "number_input",
         "label": "Window scanning size",
         "min_value": 0,
         "max_value": 10000,
         "format": "%d"
-    }
+    },
 	"second_pass": {
         "type": "checkbox",
         "label": "Second pass DIA",

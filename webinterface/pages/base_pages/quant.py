@@ -52,7 +52,6 @@ class QuantUIObjects:
         self.stop_duplicating = False
 
         if self.variables_quant.params_file_dict not in st.session_state.keys():
-            input("stop")
             st.session_state[self.variables_quant.params_file_dict] = dict()
 
     def display_submission_form(self) -> None:

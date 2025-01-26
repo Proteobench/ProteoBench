@@ -89,6 +89,7 @@ class PlotDataPoint:
             "MSAID": "#afff57",
             "Proteome Discoverer": "#8c564b",
             "PEAKS": "#f781bf",
+            "quantms": "#03fc39",
         },
         mapping: Dict[str, int] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",

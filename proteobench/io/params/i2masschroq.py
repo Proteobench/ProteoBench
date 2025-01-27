@@ -67,6 +67,7 @@ def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
         min_precursor_charge=1,
         max_precursor_charge=int(params.loc["spectrum, maximum parent charge"]),
     )
+    params.fill_none()
     return params
 
 
@@ -120,6 +121,7 @@ def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
         min_precursor_charge=int(min_precursor_charge),
         max_precursor_charge=int(max_precursor_charge),
     )
+    params.fill_none()
     return params
 
 

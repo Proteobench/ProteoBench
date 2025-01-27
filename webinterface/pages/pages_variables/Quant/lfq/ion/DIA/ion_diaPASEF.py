@@ -65,3 +65,8 @@ class VariablesDIAQuantdiaPASEF:
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/5-quant-lfq-ion-dia-diapasef/"
 
     title: str = "DIA Ion quantification - diaPASEF"
+
+    additional_params_json: str = "../proteobench/io/params/json/Quant/lfq/ion/DIA/fields.json"
+    prefix_params: str = "lfq_ion_dia_diapasef_quant_"
+    params_json_dict: str = "params_json_dict_lfq_ion_dda_diapasef_quant"
+    params_file_dict: str = "params_file_dict_lfq_ion_dia_diapasef_quant"

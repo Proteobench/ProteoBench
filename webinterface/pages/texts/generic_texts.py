@@ -14,8 +14,9 @@ class WebpageTexts:
             """
 
         initial_parameters = """
-            Additionally, you can fill out some information on the paramters that were 
-            used for this benchmark run bellow. These will be printed when hovering on your point.
+            Additionally, you can fill out parameters for your search manually. Please,
+            only fill out the parameters that are not already included in the input file.
+            Only make changes if you are sure about the parameters you are changing.
             """
 
         run_instructions = """

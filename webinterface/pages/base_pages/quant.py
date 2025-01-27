@@ -27,6 +27,26 @@ from proteobench.plotting.plot_quant import PlotDataPoint
 logger: logging.Logger = logging.getLogger(__name__)
 
 
+def compare_dictionaries(old_dict, new_dict):
+    """Generate a human-readable string describing differences between two dictionaries."""
+    changes = []
+
+    # Get all unique keys across both dictionaries
+    all_keys = set(old_dict.keys()).union(set(new_dict.keys()))
+
+    for key in all_keys:
+        old_value = old_dict.get(key, "[MISSING]")
+        new_value = new_dict.get(key, "[MISSING]")
+
+        if old_value != new_value:
+            changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
+
+    if changes:
+        return "### Changes Detected:\n" + "\n".join(changes)
+    else:
+        return "No changes detected."
+
+
 class QuantUIObjects:
     """
     Main class for the Streamlit interface of ProteoBench quantification.
@@ -519,12 +539,14 @@ class QuantUIObjects:
         """Submits the pull request with the benchmark results and returns the PR URL."""
         user_comments = self.user_input["comments_for_submission"]
 
+        changed_params_str = compare_dictionaries(st.session_state[self.variables_quant.params_file_dict], params)
+
         try:
             pr_url = self.ionmodule.clone_pr(
                 st.session_state[self.variables_quant.all_datapoints_submission],
                 params,
                 remote_git=self.variables_quant.github_link_pr,
-                submission_comments=user_comments,
+                submission_comments=user_comments + "\n" + changed_params_str,
             )
         except Exception as e:
             st.error(f"Unable to create the pull request: {e}", icon="🚨")

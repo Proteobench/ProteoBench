@@ -1,5 +1,6 @@
 """Streamlit-based web interface for ProteoBench."""
 
+import copy
 import json
 import logging
 import os
@@ -37,14 +38,13 @@ def compare_dictionaries(old_dict, new_dict):
     for key in all_keys:
         old_value = old_dict.get(key, "[MISSING]")
         new_value = new_dict.get(key, "[MISSING]")
-
-        if old_value != new_value:
+        if str(old_value) != str(new_value):
             changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
 
     if changes:
-        return "### Changes Detected:\n" + "\n".join(changes)
+        return "\n ### Parameter changes Detected:\n" + "\n".join(changes)
     else:
-        return "No changes detected."
+        return "\n ### No parameter changes detected. \n"
 
 
 class QuantUIObjects:
@@ -539,7 +539,7 @@ class QuantUIObjects:
         """Submits the pull request with the benchmark results and returns the PR URL."""
         user_comments = self.user_input["comments_for_submission"]
 
-        changed_params_str = compare_dictionaries(st.session_state[self.variables_quant.params_file_dict], params)
+        changed_params_str = compare_dictionaries(self.params_file_dict_copy, params.__dict__)
 
         try:
             pr_url = self.ionmodule.clone_pr(
@@ -768,6 +768,8 @@ class QuantUIObjects:
         if self.user_input[self.variables_quant.meta_data]:
             params = self.load_user_parameters()
             st.session_state[self.variables_quant.params_file_dict] = params.__dict__
+            self.params_file_dict_copy = copy.deepcopy(params.__dict__)
+            print(self.params_file_dict_copy)
             self.generate_additional_parameters_fields_submission()
         else:
             params = None

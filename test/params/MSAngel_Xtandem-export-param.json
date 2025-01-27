@@ -1,0 +1,459 @@
+{
+  "operations" : [ {
+    "createConcatDecoyIfNeeded" : false,
+    "type" : "PeaklistIdentification",
+    "searchEnginesWithForms" : [ [ "X!Tandem", {
+      "name" : "ProteoBench_DDAQuanXTandem_20241219_decoyfasta",
+      "isTemplate" : true,
+      "searchSubmitter" : "SEARCH_GUI",
+      "creationDate" : "2025-01-09T14:39:17.694+0100",
+      "paramMap" : {
+        "fragmentAccuracyType" : "DA",
+        "precursorTolerance" : 10,
+        "refMass" : 2000,
+        "fastaFile" : "\\\\halbarad\\Utilisateurs\\Emma\\Proteobench\\fasta\\2024-12-19-decoys-ProteoBenchFASTA_DDAQuantification.fasta",
+        "minChargeSearched" : 2,
+        "forwardIons" : [ 1 ],
+        "maxChargeSearched" : 4,
+        "digestionParameters" : {
+          "specificity" : {
+            "Trypsin" : "specific"
+          },
+          "enzymes" : [ {
+            "cvTerm" : {
+              "ontology" : "PSI-MS",
+              "accession" : "MS:1001251",
+              "name" : "Trypsin"
+            },
+            "name" : "Trypsin",
+            "restrictionBefore" : [ ],
+            "restrictionAfter" : [ "P" ],
+            "aminoAcidBefore" : [ "R", "K" ],
+            "aminoAcidAfter" : [ ]
+          } ],
+          "nMissedCleavages" : {
+            "Trypsin" : 2
+          },
+          "cleavageParameter" : "enzyme"
+        },
+        "fragmentIonMZTolerance" : 0.02,
+        "precursorAccuracyType" : "PPM",
+        "minIsotopicCorrection" : 0,
+        "modificationParameters" : {
+          "backUp" : { },
+          "refinementFixedModifications" : [ "Carbamidomethylation of C" ],
+          "refinementVariableModifications" : [ ],
+          "variableModifications" : [ "Oxidation of M", "Acetylation of protein N-term" ],
+          "fixedModifications" : [ "Carbamidomethylation of C" ]
+        },
+        "algorithmParameters" : {
+          "4" : {
+            "data" : {
+              "includeAmmonia" : true,
+              "topPeaksWindow" : 100,
+              "ptmIndexes" : { },
+              "minPeptideLengthNoEnzyme" : 8,
+              "decoyMode" : "none",
+              "empiricalCorrection" : true,
+              "dependentLosses" : true,
+              "fragmentationMethod" : "CID",
+              "higherCharge" : true,
+              "equalIL" : false,
+              "maxNumberOfModifications" : 5,
+              "numberOfCandidates" : 10,
+              "maxPeptideMass" : 4600,
+              "includeWater" : true,
+              "maxPeptideLengthNoEnzyme" : 30,
+              "maxCombinations" : 250,
+              "fragmentAll" : false,
+              "topPeaks" : 8
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.AndromedaParameters"
+          },
+          "33" : {
+            "data" : {
+              "maxFragmentSize" : 30000,
+              "minVariantDepth" : 1,
+              "fragmentationTerminus" : "Both",
+              "useDeltaScore" : false,
+              "decoyType" : "None",
+              "runGptm" : false,
+              "modPeptidesAreDifferent" : false,
+              "trimMs1Peaks" : false,
+              "scoreCutoff" : 5,
+              "noOneHitWonders" : false,
+              "maxPeptideLength" : 30,
+              "initiatorMethionineBehavior" : "Variable",
+              "deconvolutionMassTolerance" : 4,
+              "searchType" : "Classic",
+              "totalPartitions" : 1,
+              "doPrecursorDeconvolution" : true,
+              "maxModsForPeptide" : 2,
+              "maxModificationIsoforms" : 1024,
+              "deconvolutionIntensityRatio" : 3,
+              "searchTarget" : true,
+              "useProvidedPrecursorInfo" : true,
+              "numberOfPeaksToKeepPerWindow" : 200,
+              "writePepXml" : false,
+              "deconvolutionMassToleranceType" : "PPM",
+              "normalizePeaksAcrossAllWindows" : false,
+              "gPtmCategories" : [ "Common_Biological", "Common_Artifact", "Metal" ],
+              "dissociationType" : "HCD",
+              "trimMsMsPeaks" : true,
+              "writeMzId" : true,
+              "minAllowedIntensityRatioToBasePeak" : 0.01,
+              "massDiffAcceptorType" : "OneMM",
+              "minPeptideLength" : 8,
+              "maxHeterozygousVariants" : 4
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.MetaMorpheusParameters"
+          },
+          "13" : {
+            "data" : {
+              "numberOfBatches" : 50,
+              "upperIsotopeCorrection" : 2,
+              "minTerminiCleavages" : 2,
+              "numberOfSpectrumMatches" : 10,
+              "maxPeptideLength" : 30,
+              "maxDynamicMods" : 2,
+              "classSizeMultiplier" : 2,
+              "maxPrecursorMass" : 5000,
+              "minPrecursorMass" : 600,
+              "ticCutoffPercentage" : 0.98,
+              "useSmartPlusThreeModel" : true,
+              "lowerIsotopeCorrection" : -1,
+              "numIntensityClasses" : 3,
+              "outputFormat" : "mzIdentML",
+              "fragmentationRule" : "CID",
+              "maxPeakCount" : 300,
+              "computeXCorr" : false,
+              "minPeptideLength" : 8
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.MyriMatchParameters"
+          },
+          "5" : {
+            "data" : {
+              "performDeisotoping" : true,
+              "maxVariableModifications" : 4,
+              "maxLoadedProteins" : 100000,
+              "maxRank" : 10,
+              "generateDecoy" : false,
+              "maxPeptideLength" : 30,
+              "monoisotopic" : true,
+              "outputFormat" : "csv",
+              "reportBothBestHitsForTD" : true,
+              "instrumentID" : "b, y",
+              "maxModifications" : 3,
+              "maxNeutralLosses" : 1,
+              "lowMemoryMode" : true,
+              "maxLoadedSpectra" : 2000,
+              "maxNeutralLossesPerModification" : 2,
+              "minPeptideLength" : 8,
+              "maxModificationSites" : 6
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.MsAmandaParameters"
+          },
+          "10" : {
+            "data" : {
+              "minPeaks" : 10,
+              "lowerClearMzRange" : 0,
+              "removeMethionine" : false,
+              "removePrecursor" : 0,
+              "numberOfSpectrumMatches" : 10,
+              "batchSize" : 0,
+              "upperClearMzRange" : 0,
+              "maxPeptideLength" : 30,
+              "maxFragmentCharge" : 3,
+              "printExpectScore" : true,
+              "maxPrecursorMass" : 5000,
+              "enzymeType" : 2,
+              "minPrecursorMass" : 600,
+              "minPeakIntensity" : 0,
+              "fragmentBinOffset" : 0.25,
+              "useSparseMatrix" : true,
+              "removePrecursorTolerance" : 1.5,
+              "theoreticalFragmentIonsSumOnly" : false,
+              "selectedOutputFormat" : "PepXML",
+              "maxVariableMods" : 10,
+              "isotopeCorrection" : 1,
+              "minPeptideLength" : 8,
+              "requireVariableMods" : false
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.CometParameters"
+          },
+          "1" : {
+            "data" : {
+              "minPeaks" : 4,
+              "searchPositiveIons" : true,
+              "ptmIndexes" : { },
+              "removePrecursor" : false,
+              "scalePrecursor" : true,
+              "nAnnotatedMostIntensePeaks" : 6,
+              "singleChargeWindow" : 27,
+              "searchRewindFragments" : true,
+              "nPeaksIndoubleChargeWindow" : 2,
+              "iterativeReplaceEvalue" : 0,
+              "maxPeptideLength" : 30,
+              "iterativeSpectrumEvalue" : 0.01,
+              "maxFragmentCharge" : 2,
+              "maxMzLadders" : 128,
+              "noProlineRuleSeries" : [ ],
+              "consecutiveIonProbability" : 0.5,
+              "maxHitsPerSpectrumPerCharge" : 30,
+              "intensityCutOffIncrement" : 0.0005,
+              "highIntensityCutOff" : 0.2,
+              "maxEValue" : 100,
+              "fractionOfPeaksForChargeEstimation" : 0.95,
+              "minPrecPerSpectrum" : 1,
+              "determineChargePlusOneAlgorithmically" : true,
+              "iterativeSequenceEvalue" : 0,
+              "minAnnotatedPeaks" : 2,
+              "lowIntensityCutOff" : 0,
+              "minimalChargeForMultipleChargedFragments" : 3,
+              "neutronThreshold" : 1446.94,
+              "hitListLength" : 10,
+              "searchForwardFragmentFirst" : false,
+              "cleaveNtermMethionine" : true,
+              "doubleChargeWindow" : 14,
+              "estimateCharge" : true,
+              "nPeaksInSingleChargeWindow" : 2,
+              "minPeptideLength" : 8,
+              "selectedOutput" : "OMX",
+              "memoryMappedSequenceLibraries" : false,
+              "useCorrelationCorrectionScore" : true,
+              "maxFragmentPerSeries" : 100
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.OmssaParameters"
+          },
+          "2" : {
+            "data" : {
+              "refineSnaps" : true,
+              "refinePointMutations" : false,
+              "outputProteins" : true,
+              "outputSpectra" : true,
+              "refineSemi" : false,
+              "proteinQuickAcetyl" : true,
+              "minPeaksPerSpectrum" : 5,
+              "dynamicRange" : 100,
+              "refine" : true,
+              "refineSpectrumSynthesis" : true,
+              "nPeaks" : 50,
+              "stpBias" : false,
+              "minPrecursorMass" : 500,
+              "maxEValue" : 0.01,
+              "refineUnanticipatedCleavages" : true,
+              "skylinePath" : "",
+              "parentMonoisotopicMassIsotopeError" : true,
+              "outputHistograms" : false,
+              "maximumExpectationValueRefinement" : 0.01,
+              "minFragmentMz" : 200,
+              "proteinPtmComplexity" : 6,
+              "quickPyrolidone" : true,
+              "outputSequences" : false,
+              "outputResults" : "all",
+              "potentialModificationsForFullRefinment" : false,
+              "useNoiseSuppression" : false
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.XtandemParameters"
+          },
+          "7" : {
+            "data" : {
+              "maxPeptideLength" : 30,
+              "additionalOutput" : false,
+              "searchDecoyDatabase" : false,
+              "numberOfPtmsPerPeptide" : 2,
+              "numberOfModificationsPerPeptide" : 2,
+              "instrumentID" : 3,
+              "fragmentationType" : 3,
+              "minPeptideLength" : 8,
+              "numberTolerableTermini" : 2,
+              "protocol" : 0,
+              "numberOfSpectrumMarches" : 10
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.MsgfParameters"
+          },
+          "28" : {
+            "data" : {
+              "decoyFormat" : "none",
+              "mzBinWidth" : 0.02,
+              "computeExactPValues" : false,
+              "clipNtermMethionine" : false,
+              "useFlankingPeaks" : false,
+              "removePrecursor" : false,
+              "numberOfSpectrumMatches" : 10,
+              "removeTempFolders" : true,
+              "concatenateTargetDecoy" : false,
+              "computeSpScore" : false,
+              "minSpectrumMz" : 0,
+              "maxPeptideLength" : 30,
+              "mzidOutput" : false,
+              "digestionType" : "full-digest",
+              "keepTerminalAminoAcids" : "NC",
+              "decoySeed" : 1,
+              "outputFolderName" : "crux-output",
+              "maxPrecursorMass" : 7200,
+              "mzBinOffset" : 0,
+              "spectrumCharges" : "all",
+              "minPrecursorMass" : 200,
+              "monoisotopicPrecursor" : true,
+              "useNeutralLossPeaks" : false,
+              "pepXmlOutput" : false,
+              "fastIndexFolderName" : "fasta-index",
+              "maxVariableModificationsPerTypePerPeptide" : 2,
+              "textOutput" : true,
+              "verbosity" : 30,
+              "removePrecursorTolerance" : 1.5,
+              "printPeptides" : false,
+              "printProgressIndicatorSize" : 1000,
+              "pinOutput" : false,
+              "minSpectrumPeaks" : 20,
+              "maxVariableModificationsPerPeptide" : 255,
+              "minPeptideLength" : 6,
+              "sqtOutput" : false
+            },
+            "type" : "com.compomics.util.parameters.identification.tool_specific.TideParameters"
+          }
+        },
+        "maxIsotopicCorrection" : 1,
+        "rewindIons" : [ 4 ]
+      }
+    } ] ]
+  }, {
+    "format" : "xtandem.xml",
+    "rescoreUsingRtPrediction" : false,
+    "rescoreUsingSpectraPrediction" : false,
+    "peaklistSoftwareId" : 13,
+    "registerMzDbFiles" : false,
+    "instrumentConfigId" : 20,
+    "importerProperties" : { },
+    "updatePepMatchScores" : false,
+    "protMatchDecoyRuleId" : 5,
+    "type" : "ProlineImport",
+    "decoyStrategy" : "Concatenated Decoy Database",
+    "autoMapRawFiles" : true
+  }, {
+    "type" : "ResultSetProcessing",
+    "validationConfig" : {
+      "minSpecificPepCount" : 1,
+      "psmFilters" : [ {
+        "name" : "Pretty Rank",
+        "parameter" : "PRETTY_RANK",
+        "threshold" : 1,
+        "type" : "int",
+        "postValidation" : false
+      }, {
+        "name" : "Peptide Seq Length",
+        "parameter" : "PEP_SEQ_LENGTH",
+        "threshold" : 7,
+        "type" : "int",
+        "postValidation" : false
+      } ],
+      "dsChildrenNamingProp" : {
+        "value" : "raw_file_identifier",
+        "prettyName" : "Raw file identifier"
+      },
+      "isFaimsDataset" : false,
+      "dsDescription" : "Automatically created by MS-Angel",
+      "enableProtSetFdrValidation" : false,
+      "datasetMergingMode" : {
+        "name" : "After validation (recommended for protein fractionation or no fractionation)",
+        "value" : false
+      },
+      "pepSetScoring" : {
+        "name" : "Standard",
+        "value" : "mascot:standard score"
+      },
+      "psmFdrCriterium" : {
+        "name" : "Score",
+        "parameter" : "SCORE",
+        "type" : "float"
+      },
+      "protSetExpectedFdr" : 1,
+      "dsName" : "ProteoBench DDA quan XTandem",
+      "psmExpectedFdr" : 1
+    },
+    "quantitationConfig" : {
+      "name" : "ProteoBench DDA quan XTandem",
+      "description" : "Automatically created by MS-Angel",
+      "lfqConfig" : {
+        "signalProcessingConfig" : {
+          "minPeakelDuration" : 15,
+          "featureExtractionStrategy" : {
+            "prettyString" : "Raw MS signal analysis-based",
+            "value" : 0
+          },
+          "mozTolUnit" : "ppm",
+          "useLastPeakelDetection" : false,
+          "mozTol" : 5,
+          "deisotopingMode" : {
+            "prettyString" : "Identification-based",
+            "value" : true
+          }
+        },
+        "clusteringConfig" : {
+          "timeTol" : 15,
+          "intensityComputationMethod" : {
+            "prettyString" : "Most Intense",
+            "value" : "MOST_INTENSE"
+          },
+          "timeComputationMethod" : {
+            "prettyString" : "Most Intense",
+            "value" : "MOST_INTENSE"
+          },
+          "mozTolUnit" : "ppm",
+          "mozTol" : 5
+        },
+        "alignmentConfig" : {
+          "method" : {
+            "prettyString" : "Iterative",
+            "value" : "ITERATIVE"
+          },
+          "timeTol" : 600,
+          "smoothingConfig" : {
+            "method" : {
+              "prettyString" : "Landmark Range",
+              "value" : "LANDMARK_RANGE"
+            },
+            "minWinLandmarks" : 50,
+            "timeInterval" : 50,
+            "slidingWinOverlap" : 50
+          },
+          "massInterval" : 20000,
+          "maxIterations" : 3,
+          "mozTolUnit" : "ppm",
+          "ignoreErrors" : false,
+          "mozTol" : 5,
+          "ftAlignmentMethod" : {
+            "prettyString" : "Peptide identity",
+            "value" : "PEPTIDE_IDENTITY"
+          }
+        },
+        "masterMapCreationConfig" : {
+          "timeTol" : 60,
+          "filterType" : {
+            "prettyString" : "Intensity",
+            "value" : "INTENSITY"
+          },
+          "normalizationMethod" : {
+            "prettyString" : "None",
+            "value" : "NONE"
+          },
+          "restrainXAlignmentToReliableFeatures" : true,
+          "intensityThreshold" : 0,
+          "mozTolUnit" : "ppm",
+          "mozTol" : 5,
+          "performXAlignmentInsideGroupOnly" : false
+        }
+      },
+      "quantMethod" : {
+        "id" : 1,
+        "readable_name" : "Label free based on the extraction of feature abundance",
+        "type" : "label_free"
+      },
+      "quantMethodType" : "label_free"
+    },
+    "status" : "running"
+  } ],
+  "isTemplate" : false,
+  "msAngelVersion" : "2.2.10"
+}

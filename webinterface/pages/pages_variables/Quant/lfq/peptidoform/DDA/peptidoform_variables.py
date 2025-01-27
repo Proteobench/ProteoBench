@@ -63,3 +63,8 @@ class VariablesDDAQuant:
 
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/3-quant-lfq-peptidoform-dda/"
     title: str = "DDA peptidoform quantification"
+
+    additional_params_json: str = "../proteobench/io/params/json/Quant/lfq/peptidoform/DDA/fields.json"
+    prefix_params: str = "lfq_peptidoform_dda_quant_"
+    params_json_dict: str = "params_json_dict_lfq_peptidoform_dda_quant"
+    params_file_dict: str = "params_file_dict_lfq_peptidoform_dda_quant"

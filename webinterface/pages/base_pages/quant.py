@@ -1,5 +1,6 @@
 """Streamlit-based web interface for ProteoBench."""
 
+import copy
 import json
 import logging
 import os
@@ -17,6 +18,7 @@ import streamlit_utils
 from pages.pages_variables.Quant.lfq.ion.DDA.variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
+from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
     DDAQuantIonModule as IonModule,
@@ -24,6 +26,25 @@ from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+
+def compare_dictionaries(old_dict, new_dict):
+    """Generate a human-readable string describing differences between two dictionaries."""
+    changes = []
+
+    # Get all unique keys across both dictionaries
+    all_keys = set(old_dict.keys()).union(set(new_dict.keys()))
+
+    for key in all_keys:
+        old_value = old_dict.get(key, "[MISSING]")
+        new_value = new_dict.get(key, "[MISSING]")
+        if str(old_value) != str(new_value):
+            changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
+
+    if changes:
+        return "\n ### Parameter changes Detected:\n" + "\n".join(changes)
+    else:
+        return "\n ### No parameter changes detected. \n"
 
 
 class QuantUIObjects:
@@ -50,6 +71,9 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.submit] = False
         self.stop_duplicating = False
 
+        if self.variables_quant.params_file_dict not in st.session_state.keys():
+            st.session_state[self.variables_quant.params_file_dict] = dict()
+
     def display_submission_form(self) -> None:
         """Creates the main submission form for the Streamlit UI."""
         with st.form(key="main_form"):
@@ -61,19 +85,114 @@ class QuantUIObjects:
         if submit_button:
             self.process_submission_form()
 
-    def generate_input_widget(self, input_format: str, content: dict) -> Any:
+    def generate_input_widget(self, input_format: str, content: dict, key: str = "") -> Any:
         """Generates input fields in the Streamlit UI based on the specified format and content."""
         field_type = content.get("type")
         if field_type == "text_area":
-            return self.generate_text_area_widget(input_format, content)
+            return self.generate_text_area_widget(input_format, content, key)
         elif field_type == "text_input":
-            return self._generate_text_input(input_format, content)
+            return self._generate_text_input(input_format, content, key)
         elif field_type == "number_input":
-            return self._generate_number_input(content)
+            return self._generate_number_input(content, key)
         elif field_type == "selectbox":
-            return self._generate_selectbox(input_format, content)
+            return self._generate_selectbox(input_format, content, key)
         elif field_type == "checkbox":
-            return self._generate_checkbox(input_format, content)
+            return self._generate_checkbox(input_format, content, key)
+
+    def _generate_text_area(self, input_format: str, content: dict, key: str = "") -> Any:
+        """Generates a text area input field."""
+        placeholder = content.get("placeholder")
+        if key in st.session_state[self.variables_quant.params_file_dict].keys():
+            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
+        else:
+            value = content.get("value", {}).get(input_format)
+        height = content.get("height", 200)  # Default height if not specified
+        return st.text_area(
+            content["label"],
+            placeholder=placeholder,
+            key=self.variables_quant.prefix_params + key,
+            value=value,
+            height=height,
+            on_change=self.update_parameters_submission_form(
+                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
+            ),
+        )
+
+        # Function to update session state dictionary
+
+    def update_parameters_submission_form(self, field, value) -> None:
+        try:
+            st.session_state[self.variables_quant.params_json_dict][field] = value
+        except KeyError:
+            st.session_state[self.variables_quant.params_json_dict] = {}
+            st.session_state[self.variables_quant.params_json_dict][field] = value
+
+    def _generate_text_input(self, input_format: str, content: dict, key: str = "") -> Any:
+        """Generates a text input field."""
+        placeholder = content.get("placeholder")
+        if key in st.session_state[self.variables_quant.params_file_dict].keys():
+            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
+        else:
+            value = content.get("value", {}).get(input_format)
+
+        return st.text_input(
+            content["label"],
+            placeholder=placeholder,
+            key=self.variables_quant.prefix_params + key,
+            value=value,
+            on_change=self.update_parameters_submission_form(
+                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
+            ),
+        )
+
+    def _generate_number_input(self, content: dict, key: str = "") -> Any:
+        """Generates a number input field."""
+        if key in st.session_state[self.variables_quant.params_file_dict].keys():
+            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
+        else:
+            value = content.get("value", {}).get("min_value")
+        return st.number_input(
+            content["label"],
+            value=value,
+            key=self.variables_quant.prefix_params + key,
+            format=content["format"],
+            min_value=content["min_value"],
+            max_value=content["max_value"],
+            on_change=self.update_parameters_submission_form(
+                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
+            ),
+        )
+
+    def _generate_selectbox(self, input_format: str, content: dict, key: str = "") -> Any:
+        """Generates a selectbox input field."""
+        options = content.get("options", [])
+        if key in st.session_state[self.variables_quant.params_file_dict].keys():
+            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
+        else:
+            value = content.get("value", {}).get(input_format)
+        index = options.index(value) if value in options else 0
+
+        return st.selectbox(
+            content["label"],
+            options,
+            key=self.variables_quant.prefix_params + key,
+            index=index,
+            on_change=self.update_parameters_submission_form(
+                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
+            ),
+        )
+
+    def _generate_checkbox(self, input_format: str, content: dict, key: str = "") -> Any:
+        """Generates a checkbox input field."""
+        # value = content.get("value", {}).get(input_format, False)
+        return st.checkbox(
+            content["label"],
+            key=self.variables_quant.prefix_params + key,
+            value=False,
+            on_change=self.update_parameters_submission_form(
+                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
+            ),
+        )
 
     def initialize_main_slider(self) -> None:
         if self.variables_quant.slider_id_uuid not in st.session_state.keys():
@@ -420,12 +539,14 @@ class QuantUIObjects:
         """Submits the pull request with the benchmark results and returns the PR URL."""
         user_comments = self.user_input["comments_for_submission"]
 
+        changed_params_str = compare_dictionaries(self.params_file_dict_copy, params.__dict__)
+
         try:
             pr_url = self.ionmodule.clone_pr(
                 st.session_state[self.variables_quant.all_datapoints_submission],
                 params,
                 remote_git=self.variables_quant.github_link_pr,
-                submission_comments=user_comments,
+                submission_comments=user_comments + "\n" + changed_params_str,
             )
         except Exception as e:
             st.error(f"Unable to create the pull request: {e}", icon="🚨")
@@ -573,6 +694,10 @@ class QuantUIObjects:
             params = self.ionmodule.load_params_file(
                 self.user_input[self.variables_quant.meta_data], self.user_input["input_format"]
             )
+            st.session_state[self.variables_quant.params_json_dict] = (
+                params.__dict__ if hasattr(params, "__dict__") else params
+            )
+
             st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
         except KeyError as e:
             st.error("Parsing of meta parameters file for this software is not supported yet.", icon="🚨")
@@ -583,6 +708,31 @@ class QuantUIObjects:
                 icon="🚨",
             )
         return params
+
+    def generate_additional_parameters_fields_submission(self) -> None:
+        """Creates the additional parameters section of the form and initializes the parameter fields."""
+        st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
+
+        # Load JSON config
+        with open(self.variables_quant.additional_params_json) as file:
+            config = json.load(file)
+
+        # Check if parsed values exist in session state
+        parsed_params = st.session_state.get(self.variables_quant.params_json_dict, {})
+
+        st_col1, st_col2, st_col3 = st.columns(3)
+        input_param_len = int(len(config.items()) / 3)
+
+        for idx, (key, value) in enumerate(config.items()):
+            if idx < input_param_len:
+                with st_col1:
+                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+            elif idx < input_param_len * 2:
+                with st_col2:
+                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+            else:
+                with st_col3:
+                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
 
     def generate_sample_name(self) -> str:
         """Generates a unique sample name based on the input format, software version, and the current timestamp."""
@@ -596,16 +746,37 @@ class QuantUIObjects:
 
         return sample_name
 
+    def get_form_values(self) -> Dict[str, Any]:
+        """Retrieves all user inputs from Streamlit session state and returns them as a dictionary."""
+        form_values = {}
+
+        # Load JSON config (same file used to create fields)
+        with open(self.variables_quant.additional_params_json, "r") as file:
+            config = json.load(file)
+
+        # Extract values from session state
+        for key in config.keys():
+            form_key = self.variables_quant.prefix_params + key  # Ensure correct session key
+            form_values[key] = st.session_state.get(form_key, None)  # Retrieve value, default to None if missing
+
+        return form_values
+
     def display_public_submission_ui(self) -> None:
         if self.variables_quant.first_new_plot:
             self.generate_submission_ui_elements()
 
         if self.user_input[self.variables_quant.meta_data]:
             params = self.load_user_parameters()
+            st.session_state[self.variables_quant.params_file_dict] = params.__dict__
+            self.params_file_dict_copy = copy.deepcopy(params.__dict__)
+            print(self.params_file_dict_copy)
+            self.generate_additional_parameters_fields_submission()
         else:
             params = None
 
         if st.session_state[self.variables_quant.check_submission] and params != None:
+            get_form_values = self.get_form_values()
+            params = ProteoBenchParameters(**get_form_values)
             pr_url = self.submit_to_repository(params)
         if self.submission_ready == False:
             return

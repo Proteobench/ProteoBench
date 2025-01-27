@@ -47,8 +47,6 @@ class VariablesDDAQuant:
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA.git"
 
-    additional_params_json: str = "../webinterface/configuration/dda_quant.json"
-
     description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/introduction_DDA_quan_ions.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/input_file_description.md"
@@ -62,4 +60,8 @@ class VariablesDDAQuant:
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"
 
+    additional_params_json: str = "../proteobench/io/params/json/Quant/lfq/ion/DDA/fields.json"
     title: str = "DDA Ion quantification"
+    prefix_params: str = "lfq_ion_dda_quant_"
+    params_json_dict: str = "params_json_dict_lfq_ion_dda_quant"
+    params_file_dict: str = "params_file_dict_lfq_ion_dda_quant"

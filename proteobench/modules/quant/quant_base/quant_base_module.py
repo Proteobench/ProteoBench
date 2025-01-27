@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 import zipfile
@@ -26,17 +27,13 @@ from proteobench.io.params.i2masschroq import (
 )
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
+from proteobench.io.params.msangel import extract_params as extract_params_msangel
+from proteobench.io.params.peaks import read_peaks_settings as extract_params_peaks
 from proteobench.io.params.proline import extract_params as extract_params_proline
-
-# from proteobench.io.params.msangel import extract_params as extract_params_msangel
 from proteobench.io.params.sage import extract_params as extract_params_sage
 from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
-from proteobench.io.params.peaks import (
-    read_peaks_settings as extract_params_peaks,
-)
-
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores
@@ -65,7 +62,7 @@ class QuantModule:
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
         "ProlineStudio": extract_params_proline,
-        # "MSAngel": extract_params_msangel,
+        "MSAngel": extract_params_msangel,
         "AlphaPept": extract_params_alphapept,
         "Sage": extract_params_sage,
         "FragPipe": extract_params_fragger,
@@ -329,6 +326,11 @@ class QuantModule:
         logging.info(f"Writing the json to: {path_write}")
         with open(path_write, "w") as f:
             all_datapoints.to_json(f, orient="records", indent=2)
+
+        path_write_individual_point = os.path.join(self.t_dir_pr, current_datapoint["intermediate_hash"] + ".json")
+        logging.info(f"Writing the json (single point) to: {path_write_individual_point}")
+        with open(path_write_individual_point, "w") as f:
+            json.dump(current_datapoint.to_dict(), f, indent=2)
 
         commit_name = f"Added new run with id {branch_name}"
         commit_message = f"User comments: {submission_comments}"

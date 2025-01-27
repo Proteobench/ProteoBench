@@ -17,28 +17,22 @@
     "search_engine_version": {
         "type": "text_input",
         "label": "Search engine version",
-        "placeholder": "1.0"
+        "placeholder": "None"
     },
     "ident_fdr_psm": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "FDR psm",
-        "min_value": 0.0,
-        "max_value": 1.0,
-        "format": "%.4f"
+        "placeholder": "None"
     },
     "ident_fdr_peptide": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "FDR peptide",
-        "min_value": 0.0,
-        "max_value": 1.0,
-        "format": "%.4f"
+        "placeholder": "None"
     },
     "ident_fdr_protein": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "FDR protein",
-        "min_value": 0.0,
-        "max_value": 1.0,
-        "format": "%.4f"
+        "placeholder": "None"
     },
 	"enable_match_between_runs": {
         "type": "checkbox",
@@ -48,12 +42,12 @@
     "precursor_mass_tolerance": {
         "type": "text_input",
         "label": "Precursor mass tolerance (including unit ppm, PPM or Da)",
-        "placeholder": "4.5 ppm"
+        "placeholder": "None"
     },
     "fragment_mass_tolerance": {
         "type": "text_input",
         "label": "Fragment mass tolerance (including unit ppm, PPM or Da)",
-        "placeholder": "20 ppm"
+        "placeholder": "None"
     },
     "enzyme": {
         "type": "text_input",
@@ -61,35 +55,29 @@
         "placeholder": "None"
     },
     "allowed_miscleavages": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "Maximum allowed number of missed cleavage",
-        "min_value": 0,
-        "max_value": 10,
-        "format": "%d"
+        "placeholder": "None"
     },
 	"min_peptide_length": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "Minimum peptide length",
-        "min_value": 0,
-        "max_value": 100,
-        "format": "%d"
+        "placeholder": "None"
     },
     "max_peptide_length": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "Maximum peptide length",
-        "min_value": 0,
-        "max_value": 1000,
-        "format": "%d"
+        "placeholder": "None"
     },
     "fixed_mods": {
         "type": "text_input",
         "label": "Specify the fixed mods that were set",
-        "placeholder": "CAM"
+        "placeholder": "None"
     },
     "variable_mods": {
         "type": "text_input",
         "label": "Specify the variable mods that were set (separated by a comma)",
-        "placeholder": "MOxid, N-term Acetyl"
+        "placeholder": "None"
     },
 	"max_mods": {
         "type": "text_input",
@@ -97,18 +85,14 @@
         "placeholder": "None"
     },
     "min_precursor_charge": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "Minimum precursor charge allowed",
-        "min_value": 0,
-        "max_value": 10,
-        "format": "%d"
+        "placeholder": "None"
     },
     "max_precursor_charge": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "Maximum precursor charge allowed",
-        "min_value": 0,
-        "max_value": 100,
-        "format": "%d"
+        "placeholder": "None"
     },
     "quantification_method": {
         "type": "text_input",
@@ -131,11 +115,9 @@
         "placeholder": "None"
     },
 	"scan_window": {
-        "type": "number_input",
+        "type": "text_input",
         "label": "Window scanning size",
-        "min_value": 0,
-        "max_value": 10000,
-        "format": "%d"
+        "placeholder": "None"
     },
 	"second_pass": {
         "type": "checkbox",

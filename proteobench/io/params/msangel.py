@@ -92,11 +92,16 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
                 "digestionParameters"
             ]["nMissedCleavages"]
             input_params.allowed_miscleavages = n_missed_cleavages_dict.get(input_params.enzyme, None)
-            # get tolerance:
-            tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentIonMZTolerance"]
+            # get tolerance for precursors:
+            tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorTolerance"]
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorAccuracyType"]
             tol = float(tol)
             input_params.precursor_mass_tolerance = "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
+            # get tolerance for fragments:
+            tol2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentIonMZTolerance"]
+            unit2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentAccuracyType"]
+            tol2 = float(tol2)
+            input_params.fragment_mass_tolerance = "[-" + str(tol2) + " " + unit2 + ", +" + str(tol2) + " " + unit2 + "]"
 
             # Add "hidden" modifications when using X!Tandem:
             for key, value in each_search_params["searchEnginesWithForms"][0][1]["paramMap"][

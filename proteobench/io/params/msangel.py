@@ -101,7 +101,9 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
             tol2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentIonMZTolerance"]
             unit2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentAccuracyType"]
             tol2 = float(tol2)
-            input_params.fragment_mass_tolerance = "[-" + str(tol2) + " " + unit2 + ", +" + str(tol2) + " " + unit2 + "]"
+            input_params.fragment_mass_tolerance = (
+                "[-" + str(tol2) + " " + unit2 + ", +" + str(tol2) + " " + unit2 + "]"
+            )
 
             # Add "hidden" modifications when using X!Tandem:
             for key, value in each_search_params["searchEnginesWithForms"][0][1]["paramMap"][

@@ -48,7 +48,7 @@ def extract_mass_tolerance(lines: List[str], search_term: str, mass_analyzer="Or
     """
     value = next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
     if value == "System Default":
-        if mass_analyzer.isin(["Orbitrap", "TOF", "BrukerTOF"]):
+        if mass_analyzer in (["Orbitrap", "TOF", "BrukerTOF"]):
             value = "40 ppm"
         elif mass_analyzer == "WatersTOF":
             value = "80 ppm"

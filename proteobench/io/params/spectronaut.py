@@ -35,7 +35,7 @@ def extract_value(lines: List[str], search_term: str) -> Optional[str]:
     return next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
 
 
-def extract_mass_tolerance(lines: List[str], search_term: str) -> Optional[str]:
+def extract_mass_tolerance(lines: List[str], search_term: str, mass_analyzer="Orbitrap") -> Optional[str]:
     """
     Extract the mass tolerance value associated with a search term, with special handling for "System Default".
 
@@ -47,7 +47,13 @@ def extract_mass_tolerance(lines: List[str], search_term: str) -> Optional[str]:
         Optional[str]: The extracted mass tolerance value, or None if the search term is not found.
     """
     value = next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
-    value = "40 ppm" if value == "System Default" else value
+    if value == "System Default":
+        if mass_analyzer.isin(["Orbitrap", "TOF", "BrukerTOF"]):
+            value = "40 ppm"
+        elif mass_analyzer == "WatersTOF":
+            value = "80 ppm"
+        elif mass_analyzer == "IonTrap":
+            value = "0.5 th"
     return value
 
 
@@ -102,7 +108,7 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     params.ident_fdr_psm = float(extract_value(lines, "Precursor Qvalue Cutoff:"))
     params.ident_fdr_peptide = None
     params.ident_fdr_protein = float(extract_value(lines, "Protein Qvalue Cutoff (Experiment):"))
-    params.enable_match_between_runs = None
+    params.enable_match_between_runs = False
     _precursor_mass_tolerance = extract_mass_tolerance(lines, "MS1 Mass Tolerance Strategy:")
     params.precursor_mass_tolerance = f"[-{_precursor_mass_tolerance}, {_precursor_mass_tolerance}]"
     _fragment_mass_tolerance = extract_mass_tolerance(lines, "MS2 Mass Tolerance Strategy:")

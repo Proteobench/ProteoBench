@@ -69,7 +69,10 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         input_data_frame["proforma"] = input_data_frame["Modified sequence"]
     elif input_format == "DIA-NN":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        if input_csv.name.endswith(".parquet"):
+            input_data_frame = pd.read_parquet(input_csv)
+        else:
+            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     elif input_format == "AlphaDIA":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")

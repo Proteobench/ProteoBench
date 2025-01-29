@@ -187,7 +187,9 @@ def extract_file_version(line: str) -> str:
         str: The extracted version number as a string, or None if not found.
     """
     version_pattern = r"version:\s*([\d\.]+)"
+    print(line)
     match = re.search(version_pattern, line)
+    print(match)
     return match.group(1) if match else None
 
 
@@ -241,10 +243,13 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         with open(fname) as f:
             lines_read = f.readlines()
             lines = [line for line in lines_read if "──" in line]
-        version = extract_file_version(lines_read[6])
+            version_line = [line for line in lines_read if "version" in line][0]
+        version = extract_file_version(version_line)
     except:
-        lines = [l for l in fname.read().decode("utf-8").splitlines() if "──" in l]
-        version = extract_file_version(lines[6])
+        lines_read = [l for l in fname.read().decode("utf-8").splitlines()]
+        lines = [line for line in lines_read if "──" in line]
+        version_line = [line for line in lines_read if "version" in line][0]
+        version = extract_file_version(version_line)
 
     line_generator = iter(lines)
     first_line = next(line_generator)

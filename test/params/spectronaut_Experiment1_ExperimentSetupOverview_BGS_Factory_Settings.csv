@@ -6,7 +6,7 @@ search_engine_version,19.2.240905.62635
 ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,0.01
-enable_match_between_runs,
+enable_match_between_runs,False
 precursor_mass_tolerance,"[-40 ppm, 40 ppm]"
 fragment_mass_tolerance,"[-40 ppm, 40 ppm]"
 enzyme,Trypsin/P
@@ -18,9 +18,9 @@ variable_mods,"Acetyl (Protein N-term), Oxidation (M)"
 max_mods,5
 min_precursor_charge,
 max_precursor_charge,
-scan_window,Dynamic
 quantification_method,MS2
-second_pass,directDIA+ (Deep)
 protein_inference,IDPicker
-predictors_library,False
 abundance_normalization_ions,True
+scan_window,Dynamic
+second_pass,directDIA+ (Deep)
+predictors_library,False

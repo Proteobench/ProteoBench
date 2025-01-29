@@ -284,4 +284,3 @@ if __name__ == "__main__":
         data_dict = params.__dict__
         series = pd.Series(data_dict)
         series.to_csv(file.with_suffix(".csv"))
-        series.to_csv(file.with_suffix(".csv"))

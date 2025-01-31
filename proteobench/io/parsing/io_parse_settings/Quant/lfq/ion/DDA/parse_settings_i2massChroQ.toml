@@ -37,4 +37,4 @@
 "isalpha" = true
 "isupper" = true
 "pattern"="(?<=\\[).+?(?=\\])"
-"modification_dict" = {"mod:00397" = "Carbamidomethyl", "mod:01160" = "Ammonia-loss", "mod:00394" = "Acetyl", "mod:00425" = "Oxidation", "mod:00704" = "Dehydrated"}
+"modification_dict" = {"mod:00397" = "Carbamidomethyl", "mod:01160" = "Ammonia-loss", "mod:00394" = "Acetyl", "mod:00425" = "Oxidation", "mod:00704" = "Dehydrated", "mod:00719" = "Oxidation"}

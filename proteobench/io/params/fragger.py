@@ -160,7 +160,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
 
     elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
         params.ident_fdr_protein = fragpipe_params.loc["diann.q-value"]
-        params.ident_fdr_peptide = fragpipe_params.loc["diann.q-value"]
+        params.ident_fdr_peptide = None
         params.ident_fdr_psm = fragpipe_params.loc["diann.q-value"]
         params.abundance_normalization_ions = None
 

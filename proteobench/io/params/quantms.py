@@ -43,6 +43,7 @@ def load_files(file1: IO, file2: IO, file3: IO) -> [dict, pd.DataFrame]:
             _versions = load_versions(file)
             if "Workflow" not in _versions:
                 logger.debug("Loaded other file.")
+                file.seek(0)
             elif versions is None:
                 versions = _versions
                 continue
@@ -77,6 +78,11 @@ def load_files(file1: IO, file2: IO, file3: IO) -> [dict, pd.DataFrame]:
                 raise ValueError("Multiple SDRF files provided.")
         except pd.errors.EmptyDataError as e:
             pass
+
+    assert versions is not None
+    assert sdrf is not None
+    assert pipeline_params is not None
+
     return versions, sdrf, pipeline_params
 
 

@@ -118,6 +118,27 @@ def extract_params(file1: IO, file2: IO, file3: IO) -> ProteoBenchParameters:
     if engines_version:
         params.search_engine_version = ",".join(engines_version)
 
+    # "fdr_level": "psm_level_fdrs",
+    params.ident_fdr_psm = pipeline_params["psm_level_fdr_cutoff"]
+    params.ident_fdr_protein = pipeline_params["protein_level_fdr_cutoff"]
+    params.variable_mods = pipeline_params["variable_mods"]
+    params.fixed_mods = pipeline_params["fixed_mods"]
+    params.max_mods = pipeline_params["max_mods"]
+    params.min_precursor_charge = pipeline_params["min_precursor_charge"]
+    params.max_precursor_charge = pipeline_params["max_precursor_charge"]
+    params.max_peptide_length = pipeline_params["max_peptide_length"]
+    params.min_peptide_length = pipeline_params["min_peptide_length"]
+    params.precursor_mass_tolerance = pipeline_params["precursor_mass_tolerance"]
+    params.fragment_mass_tolerance = pipeline_params["fragment_mass_tolerance"]
+    params.allowed_miscleavages = pipeline_params["allowed_missed_cleavages"]
+    params.quantification_method = pipeline_params["quantification_method"]
+    params.protein_inference = pipeline_params["protein_inference_method"]
+
+    # maybe (also) in sdrf infos?
+    # params.quantification_method =
+    # params.protein_inference =
+    # params.abundance_normalization_ions =
+
     return (versions, sdrf, pipeline_params, params)
 
 

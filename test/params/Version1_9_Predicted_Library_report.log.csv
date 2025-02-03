@@ -3,7 +3,7 @@ software_name,DIA-NN
 software_version,1.9
 search_engine,DIA-NN
 search_engine_version,1.9
-ident_fdr_psm,
+ident_fdr_psm,None
 ident_fdr_peptide,0.01
 ident_fdr_protein,0.01
 enable_match_between_runs,True
@@ -18,9 +18,6 @@ variable_mods,"UniMod:35/15.994915/M,UniMod:1/42.010565/*n"
 max_mods,1
 min_precursor_charge,1
 max_precursor_charge,4
-scan_window,13
 quantification_method,QuantUMS high-precision
-second_pass,True
 protein_inference,Protein_names
-predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
 abundance_normalization_ions,

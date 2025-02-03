@@ -51,7 +51,7 @@ def load_files(file1: IO, file2: IO, file3: IO) -> [dict, pd.DataFrame]:
                 logger.debug("Loaded nextflow parameters file.")
             else:
                 raise ValueError("Multiple version files provided.")
-        except yaml.YAMLError as e:
+        except yaml.YAMLError:
             file.seek(0)
 
         try:
@@ -76,7 +76,7 @@ def load_files(file1: IO, file2: IO, file3: IO) -> [dict, pd.DataFrame]:
                 sdrf = _sdrf
             else:
                 raise ValueError("Multiple SDRF files provided.")
-        except pd.errors.EmptyDataError as e:
+        except pd.errors.EmptyDataError:
             pass
 
     assert versions is not None
@@ -143,8 +143,9 @@ def extract_params(file1: IO, file2: IO, file3: IO) -> ProteoBenchParameters:
 
 
 if __name__ == "__main__":
-
     from pathlib import Path
+
+    from IPython.display import display
 
     fpath1 = Path("../../../test/params/quantms_1-3.sdrf_config.tsv")
     fpath2 = Path("../../../test/params/quantms_1-3.nf_core_quantms_software_mqc_versions.yml")

@@ -70,7 +70,7 @@ The project contains a .pre-commit-config.yaml file that defines a set of checks
 To enable pre-commit checks on your machine install :
 
 ```
-pipx install pre-commit
+pipx install pre-commit numpydoc
 ```
 
 To run all the pre-commit checks on all files, run:
@@ -81,14 +81,14 @@ pre-commit run --all-files
 To enable automatic pre-commit checks, run:
 
 ```
-pre-commit install 
+pre-commit install
 ```
 
 ### running tests, building notebooks and documentation.
 
 You can use `nox` to run tests build notebooks and build the documentation.
 
-to run test only 
+to run test only
 ```
 nox --session "tests"
 ```

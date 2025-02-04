@@ -64,4 +64,3 @@ Project:
       Group 6: 
         LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw;
     Normalization Method: Use TIC
-

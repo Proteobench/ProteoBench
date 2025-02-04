@@ -14,4 +14,3 @@ It contains the following columns:
 - **species**: species the sequence matches to
 - **log2_expectedRatio**: expected ratio for the given species
 - **epsilon**: difference of the observed and expected log2-transformed fold change
-

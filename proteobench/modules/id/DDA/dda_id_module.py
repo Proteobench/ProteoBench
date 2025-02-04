@@ -6,4 +6,4 @@ def is_implemented() -> bool:
     return False
 
 
-# Add dummy comment to test git commit hooks
+# TEST git commit hooks

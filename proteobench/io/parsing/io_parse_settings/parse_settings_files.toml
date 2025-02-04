@@ -36,8 +36,8 @@
 "MSAID" = "parse_settings_msaid.toml"
 "Custom" = "parse_settings_custom.toml"
 
-
-
+[subcellprofile_domlfq_protein_DIA_EXPL]
+"DIA-NN" = "parse_settings_diann.toml"
 
 
 

@@ -1,0 +1,5 @@
+[species_expected_ratio]
+
+[general]
+"min_count_multispec" = 1
+"level" = "protein"

@@ -13,8 +13,8 @@ def json_download(sd: domaps.SpatialDataSet) -> StringIO:
     sio.seek(0)
     return sio
 
-class Subcellprofile_Scores:
 
+class Subcellprofile_Scores:
     def __init__(self):
         self.sd: domaps.SpatialDataSet = None
 
@@ -31,10 +31,9 @@ class Subcellprofile_Scores:
         sd = domaps.SpatialDataSet.from_settings(settings)
         sd.run_pipeline(content=content)
         self.sd = sd
-    
+
     def write_AnalysedDatasets(self) -> StringIO:
         """
         Write the analysed datasets to a StringIO object.
         """
         return json_download(self.sd)
-    

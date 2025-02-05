@@ -28,22 +28,25 @@ def load_file(format_name: str):
     input_df = load_input_file(TESTDATA_FILES[format_name], format_name)
     return input_df
 
+
 class TestOutputFileReading:
-    supported_formats = (
-        "DIA-NN",
-    )
+    supported_formats = ("DIA-NN",)
     """Simple tests for reading csv input files."""
 
     def test_valid_and_supported_search_tool_settings_exists(self):
         """Test whether the supported formats are existing and  valid."""
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="subcellprofile_domlfq_protein_DIA_EXPL")
+        parse_settings = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="subcellprofile_domlfq_protein_DIA_EXPL"
+        )
 
         for format_name in self.supported_formats:
             assert format_name in parse_settings.INPUT_FORMATS
 
     def test_if_module_supports_search_tool(self):
         """Test whether the supported formats are existing and  valid."""
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="subcellprofile_domlfq_protein_DIA_EXPL")
+        parse_settings = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="subcellprofile_domlfq_protein_DIA_EXPL"
+        )
 
         for input_format in parse_settings.INPUT_FORMATS:
             assert input_format in self.supported_formats

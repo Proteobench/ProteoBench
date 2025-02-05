@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import Datapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -139,7 +139,7 @@ class DIAQuantIonModule(QuantModule):
 
         # Generate current data point
         try:
-            current_datapoint = Datapoint.generate_datapoint(
+            current_datapoint = QuantDatapoint.generate_datapoint(
                 intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
             )
         except Exception as e:

@@ -12,7 +12,7 @@ import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
-    Datapoint,
+    QuantDatapoint,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
@@ -244,7 +244,7 @@ class QuantModule:
         )
         intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
-        current_datapoint = Datapoint.generate_datapoint(
+        current_datapoint = QuantDatapoint.generate_datapoint(
             intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 

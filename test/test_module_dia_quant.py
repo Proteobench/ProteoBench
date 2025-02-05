@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from proteobench.datapoint.quant_datapoint import Datapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
@@ -240,7 +240,7 @@ class TestDatapoint(unittest.TestCase):
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
-        result_datapoint = Datapoint(
+        result_datapoint = QuantDatapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],

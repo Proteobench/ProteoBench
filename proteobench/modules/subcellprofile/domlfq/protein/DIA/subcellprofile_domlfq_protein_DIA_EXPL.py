@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
+# TODO: Needs to be adapted to the new Datapoint and QuantScores classes
 from proteobench.datapoint.quant_datapoint import Datapoint
 from proteobench.exceptions import (
     ConvertStandardFormatError,
@@ -29,8 +30,8 @@ class SubcellprofileDomlfqProteinDIAModule:
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA",  # TODO
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA",  # TODO
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA",  # TODO: Update to new streamlit page
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA",  # TODO: Update to new streamlit page
         parse_settings_dir: str = os.path.abspath(
             os.path.join(
                 os.path.dirname(__file__),
@@ -48,7 +49,7 @@ class SubcellprofileDomlfqProteinDIAModule:
                 "subcellprofile_domlfq_protein_DIA_EXPL",
             )
         ),
-        module_id: str = "quant_lfq_ion_DIA_AIF",
+        module_id: str = "subcellprofile_domlfq_protein_DIA_EXPL",
     ):
         """
         DIA Quantification Module for Ion level Quantification.
@@ -120,7 +121,7 @@ class SubcellprofileDomlfqProteinDIAModule:
         except Exception as e:
             raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
 
-        return standard_format
+        return pd.DataFrame(), pd.DataFrame(), input_df
         """
         # Calculate quantification scores
         try:

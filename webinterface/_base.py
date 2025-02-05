@@ -9,9 +9,14 @@ import proteobench
 
 
 class StreamlitPage(ABC):
-    """Base class for Proteobench online Streamlit web server."""
+    """
+    Base class for Proteobench online Streamlit web server.
+    """
 
     def __init__(self) -> None:
+        """
+        Initialize the Proteobench online Streamlit web server.
+        """
         self.state = st.session_state
 
         pbb.proteobench_page_config(page_layout="centered")
@@ -21,6 +26,9 @@ class StreamlitPage(ABC):
         self._main_page()
 
     def _preface(self):
+        """
+        Set up the preface of the Streamlit application.
+        """
         st.markdown(
             """
             # Welcome to ProteoBench
@@ -54,4 +62,7 @@ class StreamlitPage(ABC):
 
     @abstractmethod
     def _main_page(self):
+        """
+        Set up the main page layout for the Streamlit application.
+        """
         raise NotImplementedError()

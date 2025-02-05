@@ -22,7 +22,13 @@ Using a virtual environment is highly recommended.
 To run the tests run the command:
 
 ```
-python -m unittest test/test_module_dda_quant.py
+python -m unittest test/test*.py
+```
+
+We also support pytest:
+
+```
+pytest ./test
 ```
 
 

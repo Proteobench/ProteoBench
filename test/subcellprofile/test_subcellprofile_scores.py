@@ -7,7 +7,6 @@ from proteobench.score.subcellprofile.subcellprofile_scores import Subcellprofil
 
 dir = os.path.dirname(__file__)
 
-
 @fixture
 def sp_scores():
     settings = os.path.join(dir, "../data/subcellprofile/domqc_settings_raw_input.json")
@@ -17,8 +16,7 @@ def sp_scores():
     sp_scores = Subcellprofile_Scores()
     sp_scores.generate_SpatialDataSet(content, settings)
     return sp_scores
-
-
+ 
 def test_generate_SpatialDataset():
     settings = os.path.join(dir, "../data/subcellprofile/domqc_settings_raw_input.json")
     content = os.path.join(dir, "../data/subcellprofile/pg.matrix.tsv")
@@ -27,7 +25,6 @@ def test_generate_SpatialDataset():
     sp_scores = Subcellprofile_Scores()
     sp_scores.generate_SpatialDataSet(content, settings)
     assert list(sp_scores.sd.analysed_datasets_dict.keys()) == ["AlphaDIA 1.9.2 Lumos_predicted"]
-
 
 def test_run_SpatialDataSetComparison(sp_scores):
     sp_scores.run_SpatialDataSetComparison()

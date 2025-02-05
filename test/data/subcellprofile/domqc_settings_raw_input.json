@@ -1,0 +1,46 @@
+{
+    "filename": "pg.matrix.tsv",
+    "expname": "AlphaDIA 1.9.2 Lumos_predicted",
+    "source": "custom",
+    "acquisition": "LFQ",
+    "level": "proteins",
+    "orientation": "pivot",
+    "original_protein_ids": "pg",
+    "genes": "pg",
+    "sets": {
+        "LFQ intensity": ".*_SA_.*"
+    },
+    "name_pattern": ".*_(?P<rep>Map.)_(?P<frac>.*K).*",
+    "fractions": [
+        "1K",
+        "3K",
+        "6K",
+        "12K",
+        "24K",
+        "80K"
+    ],
+    "fraction_mapping": {
+        "1K": "1K",
+        "3K": "3K",
+        "6K": "6K",
+        "12K": "12K",
+        "24K": "24K",
+        "80K": "80K"
+    },
+    "columns_annotation": [],
+    "organism": "Homo sapiens",
+    "reannotate": "fasta_headers",
+    "reannotation_source": "Homo sapiens - uniprot reference_swissprot",
+    "organelles": "Homo sapiens - Uniprot",
+    "complexes": "Homo sapiens - Uniprot",
+    "input_invert": false,
+    "input_logged": false,
+    "input_samplenormalization": null,
+    "quality_filter": [
+        "consecutive"
+    ],
+    "consecutive": 4,
+    "column_filters": {},
+    "comment": "Settings for AlphaDIA output and 21 min benchmark of spatial proteomics data",
+    "domaps_settings_version": "1.0.4"
+}

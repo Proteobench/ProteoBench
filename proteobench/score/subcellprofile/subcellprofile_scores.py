@@ -6,6 +6,7 @@ import domaps
 class Subcellprofile_Scores:
     def __init__(self):
         self.sd: domaps.SpatialDataSet = None
+        self.sdc: domaps.SpatialDataSetComparison = None
 
     def generate_SpatialDataSet(
         self,
@@ -26,3 +27,13 @@ class Subcellprofile_Scores:
         Create the JSON download file for the analysed datasets.
         """
         json.dump(self.sd.analysed_datasets_dict, filename, indent=4, sort_keys=True)
+
+    def run_SpatialDataSetComparison(self):
+        """
+        Generate a SpatialDataSetComparison object from the SpatialDataSet object.
+        """
+        self.sdc = domaps.SpatialDataSetComparison()
+        self.sdc.json_dict = self.sd.analysed_datasets_dict
+        self.sdc.read_jsonFile()
+        self.sdc.calc_biological_precision()
+        self.sdc.calculate_global_scatter(metric="manhattan distance to average profile", consolidation="average")

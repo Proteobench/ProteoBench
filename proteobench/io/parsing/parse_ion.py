@@ -2,10 +2,6 @@
 Module for parsing ion data from various formats.
 """
 
-"""
-Module for parsing ion data from various formats.
-"""
-
 import math
 import os
 import re
@@ -17,7 +13,6 @@ import pandas as pd
 def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     """
     Load a dataframe from a CSV file depending on its format.
-    Load a dataframe from a CSV file depending on its format.
 
     Parameters
     ----------
@@ -25,15 +20,11 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         The path to the CSV file.
     input_format : str
         The format of the input file (e.g., "MaxQuant", "AlphaPept", etc.).
-    Parameters
-    ----------
-    input_csv : str
-        The path to the CSV file.
-    input_format : str
-        The format of the input file (e.g., "MaxQuant", "AlphaPept", etc.).
 
-    Returns:
-        pd.DataFrame: The loaded dataframe.
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
     """
     try:
         if input_format == "MaxQuant":
@@ -64,14 +55,6 @@ def aggregate_modification_column(
     """
     Aggregate modifications into a string representing the modified sequence.
 
-    Parameters
-    ----------
-    input_string_seq : str
-        The input sequence string.
-    input_string_modifications : str
-        The modifications applied to the sequence.
-    special_locations : dict, optional
-        A dictionary specifying special locations for modifications.
     Parameters
     ----------
     input_string_seq : str

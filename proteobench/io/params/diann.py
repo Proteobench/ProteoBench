@@ -1,3 +1,7 @@
+"""
+DIA-NN parameter parsing.
+"""
+
 import pathlib
 import re
 from typing import Any, List, Optional
@@ -53,13 +57,13 @@ def find_cmdline_string(lines: List[str]) -> Optional[str]:
 
     It is assumed that this statement is stored on a single line.
 
-    Parameter
-    ---------
-    lines: list[str]
+    Parameters
+    ----------
+    lines : list[str]
         All input lines from the DIA-NN log file.
 
-    Return
-    ------
+    Returns
+    -------
     str
         The command line string.
     """
@@ -99,7 +103,18 @@ def parse_cmdline_string(cmd_line: str, software_version: str) -> dict:
     fixed_modifications = []
 
     def add_modification(mod_list, setting, description=None):
-        """Add a modification to the specified list."""
+        """
+        Add a modification to the specified list.
+
+        Parameters
+        ----------
+        mod_list : list
+            The list of parsed modifications.
+        setting : str
+            The parsed setting file line.
+        description : str, optional
+            Modification description that overwrites the parsed setting file line.
+        """
         if len(setting) != 1:
             raise ValueError(f"Invalid `unimod` format: {setting}")
         mod_list.append(description or setting[0])
@@ -142,13 +157,13 @@ def parse_setting(setting_name: str, setting_list: list) -> Any:
 
     Parameters
     ----------
-    setting_name: str
+    setting_name : str
         The name of the setting (ProteoBench).
-    setting_list: list
+    setting_list : list
         The input value of a given setting.
 
-    Return
-    ------
+    Returns
+    -------
     Any
         The parsed setting.
     """
@@ -167,13 +182,15 @@ def extract_with_regex(lines: List[str], regex) -> str:
     """
     If no mass accuracy was specified in the cmd string, extract it from the log-file.
 
-    Parameter
-    ---------
-    lines: list[str]
+    Parameters
+    ----------
+    lines : list[str]
         All input lines from the DIA-NN log file.
+    regex : str
+        The regex pattern to be matched.
 
-    Return
-    ------
+    Returns
+    -------
     str:
         The MS1 and MS2 mass accuracy specified in ppm.
     """
@@ -193,13 +210,13 @@ def parse_protein_inference_method(cmdline_dict: dict) -> str:
     - no-prot-inf: No protein inference
     - pg-level: Code specifies inference method
 
-    Parameter
-    ---------
-    cmdline_dict: dict
-        Parsed execution command string
+    Parameters
+    ----------
+    cmdline_dict : dict
+        Parsed execution command string.
 
-    Return
-    ------
+    Returns
+    -------
     str
         The protein inference method.
         Possibilities:
@@ -225,20 +242,20 @@ def parse_protein_inference_method(cmdline_dict: dict) -> str:
 
 def parse_quantification_strategy(cmdline_dict: dict):
     """
-    Parse the quatnification method from the parsed execution command string.
+    Parse the quantification method from the parsed execution command string.
 
     This setting is defined by disparate setting tags, namely:
     - direct-quant: use legacy quantification within DIANN
     - high-acc: QuantUMS high-accuracy setting
     - no tag: Default is QuantUMS high-precision
 
-    Parameter
-    ---------
-    cmdline_dict: dict
-        Parsed execution command string
+    Parameters
+    ----------
+    cmdline_dict : dict
+        Parsed execution command string.
 
-    Return
-    ------
+    Returns
+    -------
     str
         The quantification method.
         Possibilities:
@@ -262,13 +279,13 @@ def parse_predictors_library(cmdline_dict: dict):
     For now, only 'DIANN' and 'User defined speclib' are supported.
     In the future, the user might specify which algorithm was used for library generation.
 
-    Parameter
-    ---------
-    cmdline_dict: dict
-        Parsed execution command string
+    Parameters
+    ----------
+    cmdline_dict : dict
+        Parsed execution command string.
 
-    Return
-    ------
+    Returns
+    -------
     dict
         Dictionary specifying algorithm name for RT, IM and MS2_int.
     """
@@ -280,7 +297,19 @@ def parse_predictors_library(cmdline_dict: dict):
 
 
 def extract_params(fname: str) -> ProteoBenchParameters:
-    """Parse DIA-NN log file and extract relevant parameters."""
+    """
+    Parse DIA-NN log file and extract relevant parameters.
+
+    Parameters
+    ----------
+    fname : str
+        Parameter file name path.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The parsed ProteoBenchParameters object.
+    """
     # Some default and flag settings
     parameters = {
         "software_name": "DIA-NN",

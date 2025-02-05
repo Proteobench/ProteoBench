@@ -1,8 +1,9 @@
-"""MSAngel creates modular pipelines that allows several search engines to identify 
+"""
+MSAngel creates modular pipelines that allows several search engines to identify
 peptides, which are then quantified with Proline.
 The parameters are provided in a .json file.
-MSAngel allows for multiple search engines to be used in the same pipeline. So it 
-requires a list of search engines and their respective parameters, which are then 
+MSAngel allows for multiple search engines to be used in the same pipeline. So it
+requires a list of search engines and their respective parameters, which are then
 concatenated.
 
 Relevant information in file:
@@ -21,7 +22,17 @@ from proteobench.io.params import ProteoBenchParameters
 def extract_search_engine(search_params: list) -> dict:
     """
     Extract search engine name from the JSON data.
-    It only works for workflows using only one search engine
+    It only works for workflows using a single search engine.
+
+    Parameters
+    ----------
+    search_params : list
+        The list of search parameters extracted from the JSON file.
+
+    Returns
+    -------
+    dict
+        The search engine name.
     """
 
     for each_search_params in search_params["operations"]:
@@ -32,6 +43,18 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
     """
     Extract search parameters from the JSON data of a workflow running Mascot.
     Adds them to the partially completed input_params ProteoBenchParameters object.
+
+    Parameters
+    ----------
+    search_params : list
+        The list of search parameters extracted from the JSON file.
+    input_params : ProteoBenchParameters
+        The partially completed input_params object.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The input_params object with the extracted parameters added.
     """
 
     for each_search_params in search_params["operations"]:
@@ -52,8 +75,78 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
             unit = each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["TOLU"] 
             tol = float(tol)
             print(tol)
-            input_params.precursor_mass_tolerance = "[-" + str(tol/2) + " " + unit + ", +" + str(tol/2) + " " + unit + "]"
-            
+            input_params.precursor_mass_tolerance = "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
+
+        if "validationConfig" in each_search_params:
+            input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100
+            # input_params.min_peptide_length = each_search_params["validationConfig"]["psmFilters"] #TODO: I am not sure if this is the max or min length
+
+    return input_params
+
+
+def extract_params_xtandem_specific(search_params: list, input_params: ProteoBenchParameters) -> ProteoBenchParameters:
+    """
+    Extract search parameters from the JSON data of a workflow running X!Tandem.
+    Adds them to the partially completed input_params ProteoBenchParameters object.
+
+    Parameters
+    ----------
+    search_params : list
+        The list of search parameters extracted from the JSON file.
+    input_params : ProteoBenchParameters
+        The partially completed input_params object.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The input_params object with the extracted parameters added.
+    """
+
+    for each_search_params in search_params["operations"]:
+        if "searchEnginesWithForms" in each_search_params:
+            # params.search_engine_version =
+            input_params.enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["digestionParameters"][
+                "enzymes"
+            ][0]["name"]
+            # params.allowed_miscleavages =
+            input_params.fixed_mods = ", ".join(
+                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["modificationParameters"][
+                    "fixedModifications"
+                ]
+            )
+            input_params.variable_mods = ", ".join(
+                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["modificationParameters"][
+                    "variableModifications"
+                ]
+            )
+            ## get value of each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["digestionParameters"]["nMissedCleavages"] where key == input_params.enzyme
+            n_missed_cleavages_dict = each_search_params["searchEnginesWithForms"][0][1]["paramMap"][
+                "digestionParameters"
+            ]["nMissedCleavages"]
+            input_params.allowed_miscleavages = n_missed_cleavages_dict.get(input_params.enzyme, None)
+            # get tolerance for precursors:
+            tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorTolerance"]
+            unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorAccuracyType"]
+            tol = float(tol)
+            input_params.precursor_mass_tolerance = "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
+            # get tolerance for fragments:
+            tol2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentIonMZTolerance"]
+            unit2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentAccuracyType"]
+            tol2 = float(tol2)
+            input_params.fragment_mass_tolerance = (
+                "[-" + str(tol2) + " " + unit2 + ", +" + str(tol2) + " " + unit2 + "]"
+            )
+
+            # Add "hidden" modifications when using X!Tandem:
+            for key, value in each_search_params["searchEnginesWithForms"][0][1]["paramMap"][
+                "algorithmParameters"
+            ].items():
+                if value["type"] == "com.compomics.util.parameters.identification.tool_specific.XtandemParameters":
+                    if value["data"]["proteinQuickAcetyl"] == True:
+                        input_params.variable_mods = input_params.variable_mods + ";Acetyl(N-term)"
+                    if value["data"]["quickPyrolidone"] == True:
+                        input_params.variable_mods = input_params.variable_mods + ";Pyrolidone(N-term)"
+
         if "validationConfig" in each_search_params:
             input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100
             # input_params.min_peptide_length = each_search_params["validationConfig"]["psmFilters"] #TODO: I am not sure if this is the max or min length
@@ -64,11 +157,15 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
     """
     Parse MSAangel quantification tool JSON parameter file and extract relevant parameters.
 
-    Args:
-        fname (str or pathlib.Path): The path to the Sage JSON parameter file.
+    Parameters
+    ----------
+    fname : str or pathlib.Path
+        The path to the MSAngel JSON parameter file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters as a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters as a `ProteoBenchParameters` object.
     """
     params = ProteoBenchParameters()
 

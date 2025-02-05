@@ -9,7 +9,7 @@ dir = os.path.dirname(__file__)
 
 
 @fixture
-def sp_scores():
+def Score_SpatialDataSet():
     """Fixture to return a Subcellprofile_Scores object with valid data."""
     settings = os.path.join(dir, "../data/subcellprofile/domqc_settings_raw_input.json")
     content = os.path.join(dir, "../data/subcellprofile/pg.matrix.tsv")
@@ -18,6 +18,13 @@ def sp_scores():
     sp_scores = Subcellprofile_Scores()
     sp_scores.generate_SpatialDataSet(content, settings)
     return sp_scores
+
+
+@fixture
+def Score_SpatialDataSetComparison(Score_SpatialDataSet):
+    """Fixture to return a Subcellprofile_Scores object with valid data and a SpatialDataSetComparison object."""
+    Score_SpatialDataSet.run_SpatialDataSetComparison()
+    return Score_SpatialDataSet
 
 
 def test_generate_SpatialDataset():
@@ -35,3 +42,9 @@ def test_generate_SpatialDataset():
 def test_run_SpatialDataSetComparison_noerrors(sp_scores: Subcellprofile_Scores):
     """Running the SpatialDataSetComparison should not raise errors with any input."""
     sp_scores.run_SpatialDataSetComparison()
+
+
+def test_complex_scatter_unnormalized_noerrors(Score_SpatialDataSetComparison):
+    """Test the complex scatter average is calculated correctly."""
+    mean_complex_scatter = Score_SpatialDataSetComparison.complex_scatter_unnormalized()
+    assert isinstance(mean_complex_scatter, float)

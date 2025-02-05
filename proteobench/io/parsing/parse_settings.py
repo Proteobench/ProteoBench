@@ -181,6 +181,9 @@ class ParseSettings:
                 print("Not all columns required for making the peptidoform are available.")
             return df_filtered_melted, replicate_to_raw
 
+        elif self.analysis_level == "protein":
+            return df_filtered_melted, replicate_to_raw
+
         else:
             raise ValueError("Analysis level not supported.")
 

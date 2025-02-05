@@ -17,6 +17,7 @@ def json_download(sd: domaps.SpatialDataSet) -> StringIO:
 class Subcellprofile_Scores:
     def __init__(self):
         self.sd: domaps.SpatialDataSet = None
+        self.sdc: domaps.SpatialDataSetComparison = None
 
     def generate_SpatialDataSet(
         self,
@@ -37,3 +38,13 @@ class Subcellprofile_Scores:
         Write the analysed datasets to a StringIO object.
         """
         return json_download(self.sd)
+
+    def run_SpatialDataSetComparison(self):
+        """
+        Generate a SpatialDataSetComparison object from the SpatialDataSet object.
+        """
+        self.sdc = domaps.SpatialDataSetComparison()
+        self.sdc.json_dict = self.sd.analysed_datasets_dict
+        self.sdc.read_jsonFile()
+        self.sdc.calc_biological_precision()
+        self.sdc.calculate_global_scatter(metric="manhattan distance to average profile", consolidation="average")

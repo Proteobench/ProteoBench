@@ -3,13 +3,14 @@ import os
 from proteobench.io.parsing.parse_proteins import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
-TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/subcellprofile_domlfq_protein_DIA_EXPL")
+TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "../data/subcellprofile_domlfq_protein_DIA_EXPL")
 TESTDATA_FILES = {
     "DIA-NN": os.path.join(TESTDATA_DIR, "DIA-NN_example_domlfq_report.pg_matrix.tsv"),
 }
 PARSE_SETTINGS_DIR = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
+        "..",
         "..",
         "proteobench",
         "io",

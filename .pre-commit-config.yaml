@@ -65,3 +65,8 @@ repos:
     hooks:
       - id: check-dependabot
       - id: check-github-workflows
+  - repo: https://github.com/numpy/numpydoc
+    rev: "v1.8.0"
+    hooks:
+      - id: numpydoc-validation
+        exclude: "test/.*"

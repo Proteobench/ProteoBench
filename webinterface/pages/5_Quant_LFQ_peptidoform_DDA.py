@@ -1,3 +1,7 @@
+"""
+Main Streamlit UI for the DDA quantification - peptidoform module.
+"""
+
 import logging
 from typing import Any, Dict, Type
 
@@ -16,7 +20,14 @@ from proteobench.modules.quant.lfq.peptidoform.DDA.quant_lfq_peptidoform_DDA imp
 
 
 class StreamlitUI:
+    """
+    Streamlit UI for the DDA quantification - peptidoform module.
+    """
+
     def __init__(self):
+        """
+        Initialize the Streamlit UI for the DDA quantification - peptidoform module.
+        """
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
 
@@ -44,7 +55,7 @@ class StreamlitUI:
 
     def _main_page(self) -> None:
         """
-        Sets up the main page layout for the Streamlit application.
+        Set up the main page layout for the Streamlit application.
         This includes the title, module descriptions, input forms, and configuration settings.
         """
         # Create tabs

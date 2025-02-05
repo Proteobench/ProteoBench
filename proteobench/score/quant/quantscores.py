@@ -1,3 +1,7 @@
+"""
+Module containing the QuantScores class.
+"""
+
 from typing import Dict
 
 import numpy as np
@@ -5,7 +9,32 @@ import pandas as pd
 
 
 class QuantScores:
+    """
+    Class for computing quantification scores.
+
+    Parameters
+    ----------
+    precursor_name : str
+        Name of the precursor.
+    species_expected_ratio : dict
+        Dictionary containing the expected ratios for each species.
+    species_dict : dict
+        Dictionary containing the species names.
+    """
+
     def __init__(self, precursor_name: str, species_expected_ratio, species_dict: Dict[str, str]):
+        """
+        Initialize the QuantScores object.
+
+        Parameters
+        ----------
+        precursor_name : str
+            Name of the precursor.
+        species_expected_ratio : dict
+            Dictionary containing the expected ratios for each species.
+        species_dict : dict
+            Dictionary containing the species names.
+        """
         self.precursor_name = precursor_name
         self.species_expected_ratio = species_expected_ratio
         self.species_dict = species_dict
@@ -15,6 +44,22 @@ class QuantScores:
         filtered_df: pd.DataFrame,
         replicate_to_raw: dict,
     ) -> pd.DataFrame:
+        """
+        Generate intermediate data structure for quantification scores.
+
+        Parameters
+        ----------
+        filtered_df : pd.DataFrame
+            DataFrame containing the filtered data.
+        replicate_to_raw : dict
+            Dictionary containing the replicate to raw mapping.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the intermediate data structure.
+        """
+
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
         relevant_columns_df = filtered_df[["Raw file", self.precursor_name, "Intensity"]].copy()
@@ -39,7 +84,19 @@ class QuantScores:
 
     @staticmethod
     def convert_replicate_to_raw(replicate_to_raw: dict) -> pd.DataFrame:
-        """Converts replicate_to_raw dictionary into a dataframe."""
+        """
+        Convert replicate_to_raw dictionary into a dataframe.
+
+        Parameters
+        ----------
+        replicate_to_raw : dict
+            Dictionary containing the replicate to raw mapping.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the replicate to raw mapping.
+        """
         replicate_to_raw_df = pd.DataFrame(replicate_to_raw.items(), columns=["Group", "Raw file"])
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
         return replicate_to_raw_df
@@ -50,7 +107,23 @@ class QuantScores:
         min_intensity=0,
         precursor="precursor ion",
     ) -> pd.DataFrame:
-        """Method used to precursor statistics, such as number of observations, CV, mean per group etc."""
+        """
+        Method used to precursor statistics, such as number of observations, CV, mean per group etc.
+
+        Parameters
+        ----------
+        relevant_columns_df : pd.DataFrame
+            DataFrame containing the relevant columns for the statistics.
+        min_intensity : int, optional
+            Minimum intensity value to filter for. Defaults to 0.
+        precursor : str, optional
+            Name of the precursor column. Defaults to "precursor ion.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the precursor statistics.
+        """
 
         # fiter for min_intensity
         relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] > min_intensity]
@@ -110,7 +183,22 @@ class QuantScores:
         return quant_raw_df
 
     @staticmethod
-    def compute_epsilon(withspecies, species_expected_ratio):
+    def compute_epsilon(withspecies, species_expected_ratio) -> pd.DataFrame:
+        """
+        Compute epsilon for each species in species_expected_ratio.
+
+        Parameters
+        ----------
+        withspecies : pd.DataFrame
+            DataFrame containing the species columns and the log2_A_vs_B column.
+        species_expected_ratio : dict
+            Dictionary containing the expected ratios for each species.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the epsilon values.
+        """
         # for all columns named parse_settings.species_dict.values() compute the sum over the rows and add it to a new column "unique"
         withspecies["unique"] = withspecies[species_expected_ratio.keys()].sum(axis=1)
 

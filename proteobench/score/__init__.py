@@ -1,0 +1,3 @@
+"""
+Score module for ProteoBench.
+"""

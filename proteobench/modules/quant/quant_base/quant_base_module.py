@@ -1,3 +1,7 @@
+"""
+Quant Base Module.
+"""
+
 from __future__ import annotations
 
 import json
@@ -44,20 +48,18 @@ class QuantModule:
     """
     Base Module for Quantification.
 
-    Attributes
+    Parameters
     ----------
-    t_dir : str
-        Temporary directory for the module.
-    t_dir_pr : str
-        Temporary directory for the pull request.
-    github_repo : GithubProteobotRepo
-        Github repository for the module.
-    precursor_name : str
-        Level of quantification.
+    token : Optional[str]
+        The GitHub token.
+    proteobench_repo_name : str
+        The name of the ProteoBench repository.
+    proteobot_repo_name : str
+        The name of the ProteoBot repository.
     parse_settings_dir : str
-        Directory for parse settings.
-    EXTRACT_PARAMS_DICT : Dict[str, callable]
-        A dictionary that maps input formats to parameter extraction functions.
+        The directory containing parse settings.
+    module_id : str
+        The module identifier for configuration.
     """
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
@@ -92,12 +94,18 @@ class QuantModule:
         """
         Initialize the QuantModule with GitHub repo and settings.
 
-        Args:
-            token (Optional[str]): The GitHub token (optional for public repos).
-            proteobench_repo_name (str): The name of the ProteoBench repository.
-            proteobot_repo_name (str): The name of the ProteoBot repository.
-            parse_settings_dir (str): The directory containing parse settings.
-            module_id (str): The module identifier for configuration.
+        Parameters
+        ----------
+        token : Optional[str]
+            The GitHub token.
+        proteobench_repo_name : str
+            The name of the ProteoBench repository.
+        proteobot_repo_name : str
+            The name of the ProteoBot repository.
+        parse_settings_dir : str
+            The directory containing parse settings.
+        module_id : str
+            The module identifier for configuration.
         """
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
@@ -116,7 +124,7 @@ class QuantModule:
 
     def is_implemented(self) -> bool:
         """
-        Returns whether the module is fully implemented.
+        Return whether the module is fully implemented.
 
         Returns
         -------
@@ -131,9 +139,12 @@ class QuantModule:
         """
         Add current data point to previous data points. Load them from file if empty.
 
-        Args:
-            current_datapoint (pd.Series): The current data point to add.
-            all_datapoints (Optional[pd.DataFrame]): Data points from previous runs. Loaded from GitHub repo if None.
+        Parameters
+        ----------
+        current_datapoint : pd.Series
+            The current data point to add.
+        all_datapoints : Optional[pd.DataFrame]
+            Data points from previous runs. Loaded from GitHub repo if None.
 
         Returns
         -------
@@ -163,8 +174,10 @@ class QuantModule:
         """
         Load all data points, load from file if empty.
 
-        Args:
-            all_datapoints (Optional[pd.DataFrame]): All data points. Loaded from the GitHub repo if None.
+        Parameters
+        ----------
+        all_datapoints : Optional[pd.DataFrame])
+            All data points. Loaded from the GitHub repo if None.
 
         Returns
         -------
@@ -183,9 +196,12 @@ class QuantModule:
         """
         Filter the data points based on predefined criteria.
 
-        Args:
-            all_datapoints (pd.DataFrame): All data points.
-            default_val_slider (int, optional): The minimum number of observations for filtering. Defaults to 3.
+        Parameters
+        ----------
+        all_datapoints : pd.DataFrame
+            All data points.
+        default_val_slider : int, optional
+            The minimum number of observations for filtering. Defaults to 3.
 
         Returns
         -------
@@ -221,12 +237,18 @@ class QuantModule:
         """
         Main workflow of the module. Used to benchmark workflow results.
 
-        Args:
-            input_file (str): Path to the workflow output file.
-            input_format (str): Format of the workflow output file.
-            user_input (dict): User-provided parameters for plotting.
-            all_datapoints (Optional[pd.DataFrame]): DataFrame containing all data points from the ProteoBench repo.
-            default_cutoff_min_prec (int, optional): Minimum number of runs an ion has to be identified in. Defaults to 3.
+        Parameters
+        ----------
+        input_file : str
+            Path to the workflow output file.
+        input_format : str
+            Format of the workflow output file.
+        user_input : dict
+            User-provided parameters for plotting.
+        all_datapoints : Optional[pd.DataFrame]
+            DataFrame containing all datapoints from the ProteoBench repo.
+        default_cutoff_min_prec : int, optional
+            Minimum number of runs an ion has to be identified in. Defaults to 3.
 
         Returns
         -------
@@ -258,8 +280,10 @@ class QuantModule:
         """
         Check if the new data point has a unique hash.
 
-        Args:
-            datapoints (pd.DataFrame): Data points.
+        Parameters
+        ----------
+        datapoints : pd.DataFrame
+            Data points.
 
         Returns
         -------
@@ -292,11 +316,16 @@ class QuantModule:
         """
         Clone the repo and open a pull request with the new data points.
 
-        Args:
-            temporary_datapoints (pd.DataFrame): Temporary data points.
-            datapoint_params (Any): Data point parameters.
-            remote_git (str): Remote Git repository URL.
-            submission_comments (str, optional): Comments to be included in the pull request. Defaults to "no comments".
+        Parameters
+        ----------
+        temporary_datapoints : pd.DataFrame
+            Temporary data points.
+        datapoint_params : Any
+            Data point parameters.
+        remote_git : str
+            Remote Git repository URL.
+        submission_comments : str, optional
+            Comments to be included in the pull request. Defaults to "no comments".
 
         Returns
         -------
@@ -351,9 +380,12 @@ class QuantModule:
         """
         Write the datapoints to a JSON file for local development.
 
-        Args:
-            temporary_datapoints (pd.DataFrame): Temporary data points.
-            datapoint_params (dict): Data point parameters.
+        Parameters
+        ----------
+        temporary_datapoints : pd.DataFrame
+            Temporary data points.
+        datapoint_params : dict
+            Data point parameters.
 
         Returns
         -------
@@ -392,13 +424,20 @@ class QuantModule:
         """
         Write intermediate and raw data to a directory in zipped form.
 
-        Args:
-            dir (str): Directory to write to.
-            ident (str): Identifier to create a subdirectory for this submission.
-            input_file_obj (Any): File-like object representing the raw input file.
-            result_performance (pd.DataFrame): The result performance DataFrame.
-            param_loc (List[Any]): List of paths to parameter files that need to be copied.
-            comment (str): User comment for the submission.
+        Parameters
+        ----------
+        dir : str
+            Directory to write to.
+        ident : str
+            Identifier to create a subdirectory for this submission.
+        input_file_obj : Any
+            File-like object representing the raw input file.
+        result_performance : pd.DataFrame
+            The result performance DataFrame.
+        param_loc : List[Any]
+            List of paths to parameter files that need to be copied.
+        comment : str
+            User comment for the submission.
         """
         # Create the target directory
         path_write = os.path.join(dir, ident)
@@ -437,9 +476,12 @@ class QuantModule:
         """
         Load parameters from a metadata file depending on its format.
 
-        Args:
-            input_file (List[str]): Path to the metadata file.
-            input_format (str): Format of the metadata file.
+        Parameters
+        ----------
+        input_file : List[str]
+            Path to the metadata file.
+        input_format : str
+            Format of the metadata file.
 
         Returns
         -------

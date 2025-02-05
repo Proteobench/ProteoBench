@@ -58,16 +58,30 @@ class Subcellprofile_Scores:
         self.sdc.calc_biological_precision()
         self.sdc.calculate_global_scatter(metric="manhattan distance to average profile", consolidation="average")
 
-    def get_metrics(self):
+    def get_metrics(self) -> dict:
         """
         Return the metrics from the SpatialDataSetComparison object.
+
+        Returns
+        -------
+        dict
+            The metrics from the SpatialDataSetComparison object.
         """
-        #     depth_id_1: int = 0
-        # depth_profile_1: int = 0
-        # depth_id_3: int = 0
-        # depth_profile_3: int = 0
-        # median_profile_reproducibility
-        # mean_complex_scatter
+        results = {}
+        results["depth_id_total"] = self.sdc.df_quantity_pr_pg_combined.query(
+            "filtering=='before_filtering' and type=='total'"
+        )["number of protein groups"].values[0]
+        results["depth_profile_intersection"] = self.sdc.df_quantity_pr_pg_combined.query(
+            "filtering=='after_filtering' and type=='total'"
+        )["number of protein groups"].values[0]
+        results["depth_id_total"] = self.sdc.df_quantity_pr_pg_combined.query(
+            "filtering=='before_filtering' and type=='intersection'"
+        )["number of protein groups"].values[0]
+        results["depth_profile_intersection"] = self.sdc.df_quantity_pr_pg_combined.query(
+            "filtering=='after_filtering' and type=='intersection'"
+        )["number of protein groups"].values[0]
+
+        return results
 
     def complex_scatter_unnormalized(self, mode="mean") -> float:
         """

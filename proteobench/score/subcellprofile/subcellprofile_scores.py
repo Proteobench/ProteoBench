@@ -1,5 +1,6 @@
 import json
 from io import StringIO
+
 import domaps
 
 
@@ -37,3 +38,14 @@ class Subcellprofile_Scores:
         self.sdc.read_jsonFile()
         self.sdc.calc_biological_precision()
         self.sdc.calculate_global_scatter(metric="manhattan distance to average profile", consolidation="average")
+
+    def get_metrics():
+        """
+        Return the metrics from the SpatialDataSetComparison object.
+        """
+        #     depth_id_1: int = 0
+        # depth_profile_1: int = 0
+        # depth_id_3: int = 0
+        # depth_profile_3: int = 0
+        # median_profile_reproducibility
+        # average_complex_scatter

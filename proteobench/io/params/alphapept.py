@@ -11,13 +11,17 @@ from proteobench.io.params import ProteoBenchParameters
 
 def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     """
-    Extracts parameters from an AlphaPept YAML configuration file.
+    Extract parameters from an AlphaPept YAML configuration file.
 
-    Args:
-        fname (pathlib.Path): Path to the AlphaPept configuration file.
+    Parameters
+    ----------
+    fname : pathlib.Path
+        Path to the AlphaPept configuration file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters as a ProteoBenchParameters object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters as a ProteoBenchParameters object.
     """
     try:
         record = yaml.safe_load(fname)

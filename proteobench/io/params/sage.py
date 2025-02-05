@@ -1,4 +1,5 @@
-"""Sage parameter extraction.
+"""
+Sage parameter extraction.
 """
 
 import json
@@ -23,11 +24,15 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
     """
     Parse Sage quantification tool JSON parameter file and extract relevant parameters.
 
-    Args:
-        fname (str or pathlib.Path): The path to the Sage JSON parameter file.
+    Parameters
+    ----------
+    fname : str or pathlib.Path
+        The path to the Sage JSON parameter file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters as a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters as a `ProteoBenchParameters` object.
     """
     params = ProteoBenchParameters()
 

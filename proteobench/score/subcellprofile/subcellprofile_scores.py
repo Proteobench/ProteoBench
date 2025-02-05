@@ -1,17 +1,6 @@
 import json
 from io import StringIO
-
 import domaps
-
-
-def json_download(sd: domaps.SpatialDataSet) -> StringIO:
-    """
-    Create the JSON download file for the analysed datasets.
-    """
-    sio = StringIO()
-    json.dump(sd.analysed_datasets_dict, sio, indent=4, sort_keys=True)
-    sio.seek(0)
-    return sio
 
 
 class Subcellprofile_Scores:
@@ -32,8 +21,8 @@ class Subcellprofile_Scores:
         sd.run_pipeline(content=content)
         self.sd = sd
 
-    def write_AnalysedDatasets(self) -> StringIO:
+    def create_sd_json(self, filename: str) -> None:
         """
-        Write the analysed datasets to a StringIO object.
+        Create the JSON download file for the analysed datasets.
         """
-        return json_download(self.sd)
+        json.dump(self.sd.analysed_datasets_dict, filename, indent=4, sort_keys=True)

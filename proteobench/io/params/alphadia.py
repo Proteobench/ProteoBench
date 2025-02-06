@@ -191,23 +191,6 @@ def extract_file_version(line: str) -> str:
     return match.group(1) if match else None
 
 
-def add_fdr_parameters(parameter_dict: dict, parsed_settings: dict) -> None:
-    """
-    Adds FDR parameters (e.g., ident_fdr_psm, ident_fdr_peptide) to the parameter dictionary.
-
-    Args:
-        parameter_dict (dict): The dictionary where the FDR parameters will be added.
-        parsed_settings (dict): The parsed settings containing the FDR values.
-    """
-    fdr_value = float(parsed_settings["fdr"]["fdr"])
-    fdr_level = parsed_settings["fdr"]["group_level"].strip()
-
-    level_mapping = {"proteins": "ident_fdr_protein"}
-    fdr_parameters = {"ident_fdr_psm": None, "ident_fdr_peptide": None, "ident_fdr_protein": None}
-    fdr_parameters[level_mapping[fdr_level]] = fdr_value
-    parameter_dict.update(fdr_parameters)
-
-
 def get_min_max(list_of_elements: list) -> Tuple[int, int]:
     """
     Extracts the minimum and maximum values from a list of elements.
@@ -241,10 +224,13 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         with open(fname) as f:
             lines_read = f.readlines()
             lines = [line for line in lines_read if "──" in line]
-        version = extract_file_version(lines_read[6])
+            version_line = [line for line in lines_read if "version" in line][0]
+        version = extract_file_version(version_line)
     except:
-        lines = [l for l in fname.read().decode("utf-8").splitlines() if "──" in l]
-        version = extract_file_version(lines[6])
+        lines_read = [l for l in fname.read().decode("utf-8").splitlines()]
+        lines = [line for line in lines_read if "──" in line]
+        version_line = [line for line in lines_read if "version" in line][0]
+        version = extract_file_version(version_line)
 
     line_generator = iter(lines)
     first_line = next(line_generator)
@@ -255,7 +241,9 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     precursor_charges = get_min_max(parsed_settings["library_prediction"]["precursor_charge"])
 
     prec_tol = float(parsed_settings["search"]["target_ms1_tolerance"])
+    prec_tol_string = f"[-{prec_tol} ppm, {prec_tol} ppm]"
     frag_tol = float(parsed_settings["search"]["target_ms2_tolerance"])
+    frag_tol_string = f"[-{frag_tol} ppm, {frag_tol} ppm]"
 
     parameters = {
         "software_name": "AlphaDIA",
@@ -263,9 +251,12 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "software_version": version,
         "search_engine_version": version,
         "enable_match_between_runs": False,
-        "precursor_mass_tolerance": prec_tol,
-        "fragment_mass_tolerance": frag_tol,
-        "enzyme": parsed_settings["library_prediction"]["enzyme"].strip(),
+        "precursor_mass_tolerance": prec_tol_string,
+        "fragment_mass_tolerance": frag_tol_string,
+        "ident_fdr_psm": parsed_settings["fdr"]["fdr"],
+        "ident_fdr_peptide": None,
+        "ident_fdr_protein": parsed_settings["fdr"]["fdr"],
+        "enzyme": parsed_settings["library_prediction"]["enzyme"].strip().capitalize(),
         "allowed_miscleavages": int(parsed_settings["library_prediction"]["missed_cleavages"]),
         "min_peptide_length": peptide_lengths[0],
         "max_peptide_length": peptide_lengths[1],
@@ -280,7 +271,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "predictors_library": "Built-in",
     }
 
-    add_fdr_parameters(parameters, parsed_settings)
     return ProteoBenchParameters(**parameters)
 
 

@@ -51,7 +51,7 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
 
 
 @dataclass
-class Datapoint:
+class QuantDatapoint:
     """
     A data structure used to store the results of a benchmark run.
 
@@ -145,7 +145,7 @@ class Datapoint:
         except AttributeError:
             user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
 
-        result_datapoint = Datapoint(
+        result_datapoint = QuantDatapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],
@@ -168,7 +168,9 @@ class Datapoint:
 
         result_datapoint.generate_id()
 
-        results = dict(ChainMap(*[Datapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)]))
+        results = dict(
+            ChainMap(*[QuantDatapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
+        )
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
         result_datapoint.mean_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["mean_abs_epsilon"]

@@ -58,6 +58,11 @@ People who contributed to ProteoBench, in alphabetical order:
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
 
 .. line-block::
+    **Dominik Lux**
+    *Ruhr University Bochum, Medical Faculty, Medizinisches Proteom-Center, Gesundheitscampus 4, 44801 Bochum, Germany*
+    *Ruhr University Bochum, Medical Faculty, Center for Protein Diagnostics (PRODI), Gesundheitscampus 4, 44801 Bochum , Germany*
+
+.. line-block::
     **Emmanuelle Mouton-Barbosa**
     *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*

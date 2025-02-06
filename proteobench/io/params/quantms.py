@@ -33,12 +33,17 @@ def load_parsed_sdrf(file: Union[str, pathlib.Path, IO]) -> pd.DataFrame:
     return pd.read_csv(file, sep="\t")
 
 
-def load_files(file1: IO, file2: IO, file3: IO) -> [dict, pd.DataFrame]:
-    """Load file independent of order they are provided in."""
+def load_files(file1: IO, file2: IO, file3: IO = None) -> [dict, pd.DataFrame]:
+    """Load file independent of order they are provided in.
+
+    SDRF file is optional.
+    """
     versions = None
     sdrf = None
     pipeline_params = None
     for file in [file1, file2, file3]:
+        if file is None:
+            continue
         try:
             _versions = load_versions(file)
             if "Workflow" not in _versions:
@@ -80,13 +85,12 @@ def load_files(file1: IO, file2: IO, file3: IO) -> [dict, pd.DataFrame]:
             pass
 
     assert versions is not None
-    assert sdrf is not None
     assert pipeline_params is not None
 
     return versions, sdrf, pipeline_params
 
 
-def extract_params(file1: IO, file2: IO, file3: IO) -> ProteoBenchParameters:
+def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParameters:
     """
     Extract parameters from the parsed SDRF and version file. We use both the parsed
     SDRF file and the yaml file of versions to extract the parameters. The function
@@ -147,14 +151,23 @@ if __name__ == "__main__":
 
     from IPython.display import display
 
+    # ! in streamlit the IO object is used -> open files
     fpath1 = Path("../../../test/params/quantms_1-3.sdrf_config.tsv")
     fpath2 = Path("../../../test/params/quantms_1-3.nf_core_quantms_software_mqc_versions.yml")
     fpath3 = Path("../../../test/params/quantms_1-3_dev.json")
 
-    # Extract parameters from the fileP
+    # Extract parameters from the file - do not parse sdrf
+    with open(fpath2, "r") as file2, open(fpath3, "r") as file3:
+        versions, sdrf, pipeline_params, params = extract_params(file2, file3)
+        display(params.__dict__)
+
+    # Extract parameters from the file
     with open(fpath1, "r") as file1, open(fpath2, "r") as file2, open(fpath3, "r") as file3:
         versions, sdrf, pipeline_params, params = extract_params(file1, file2, file3)
         display(params.__dict__)
+
+    series = pd.Series(params.__dict__)
+    series.to_csv(fpath3.parent / f"{fpath3.stem}_extracted_params.csv")
 
     import itertools
 

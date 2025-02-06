@@ -143,7 +143,7 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     # params.protein_inference =
     # params.abundance_normalization_ions =
 
-    return (versions, sdrf, pipeline_params, params)
+    return params
 
 
 if __name__ == "__main__":
@@ -158,12 +158,16 @@ if __name__ == "__main__":
 
     # Extract parameters from the file - do not parse sdrf
     with open(fpath2, "r") as file2, open(fpath3, "r") as file3:
-        versions, sdrf, pipeline_params, params = extract_params(file2, file3)
+        versions, sdrf, pipeline_params = load_files(file2, file3)
+        file2.seek(0), file3.seek(0)
+        params = extract_params(file2, file3)
         display(params.__dict__)
 
     # Extract parameters from the file
     with open(fpath1, "r") as file1, open(fpath2, "r") as file2, open(fpath3, "r") as file3:
-        versions, sdrf, pipeline_params, params = extract_params(file1, file2, file3)
+        versions, sdrf, pipeline_params = load_files(file1, file2, file3)
+        file1.seek(0), file2.seek(0), file3.seek(0)
+        params = extract_params(file1, file2, file3)
         display(params.__dict__)
 
     series = pd.Series(params.__dict__)
@@ -175,7 +179,9 @@ if __name__ == "__main__":
     for file1, file2, file3 in permutations_fpath:
         print(file1.name, file2.name, file3.name)
         with open(file1, "r") as f1, open(file2, "r") as f2, open(file3, "r") as f3:
-            _versions, _sdrf, _pipeline_params, params = extract_params(f1, f2, f3)
+            _versions, _sdrf, _pipeline_params = load_files(f1, f2, f3)
+            f1.seek(0), f2.seek(0), f3.seek(0)
+            _params = extract_params(f1, f2, f3)
             assert _versions == versions
             assert _sdrf.equals(sdrf)
             assert _pipeline_params == pipeline_params

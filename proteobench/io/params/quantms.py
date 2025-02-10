@@ -122,6 +122,7 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     if engines_version:
         params.search_engine_version = ",".join(engines_version)
 
+    params.enzyme = pipeline_params["enzyme"]
     # "fdr_level": "psm_level_fdrs",
     params.ident_fdr_psm = pipeline_params["psm_level_fdr_cutoff"]
     params.ident_fdr_protein = pipeline_params["protein_level_fdr_cutoff"]

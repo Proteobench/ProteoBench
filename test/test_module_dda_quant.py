@@ -1,10 +1,10 @@
 import datetime
 import os
 import tempfile
-import unittest
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.github.gh import GithubProteobotRepo
@@ -58,7 +58,7 @@ def process_file(format_name: str):
     return intermediate
 
 
-class TestOutputFileReading(unittest.TestCase):
+class TestOutputFileReading:
     supported_formats = (
         "MaxQuant",
         "FragPipe",
@@ -84,20 +84,20 @@ class TestOutputFileReading(unittest.TestCase):
             "Sage",
             "i2MassChroQ",
         ):  # , "WOMBAT"
-            self.assertTrue(format_name in parse_settings.INPUT_FORMATS)
+            assert format_name in parse_settings.INPUT_FORMATS
 
     def test_input_file_loading(self):
         """Test whether the inputs input are loaded successfully."""
         for format_name in self.supported_formats:
             input_df = load_file(format_name)
-            self.assertFalse(input_df.empty)
+            assert not input_df.empty
 
     def test_local_parsing_configuration_file(self):
         """Test parsing of the local parsing configuration files."""
         parse_settings_builder = ParseSettingsBuilder()
         for format_name in self.supported_formats:
             parse_settings = parse_settings_builder.build_parser(format_name)
-            self.assertFalse(parse_settings is None)
+            assert parse_settings is not None
 
     def test_input_file_initial_parsing(self):
         """Test the initial parsing of the input file."""
@@ -108,8 +108,8 @@ class TestOutputFileReading(unittest.TestCase):
             parse_settings = parse_settings_builder.build_parser(format_name)
             prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
-            self.assertFalse(prepared_df.empty)
-            self.assertFalse(replicate_to_raw == {})
+            assert not prepared_df.empty
+            assert replicate_to_raw != {}
 
     def test_input_file_processing(self):
         """Test the processing of the input files."""
@@ -126,7 +126,7 @@ class TestOutputFileReading(unittest.TestCase):
             )
             intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
 
-            self.assertFalse(intermediate.empty)
+            assert not intermediate.empty
 
     def test_benchmarking(self):
         user_input = {
@@ -148,11 +148,11 @@ class TestOutputFileReading(unittest.TestCase):
         result_performance, all_datapoints, input_df = DDAQuantIonModule("").benchmarking(
             TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None
         )
-        self.assertTrue(isinstance(all_datapoints, pd.DataFrame))
-        self.assertEqual(len(all_datapoints.results[len(all_datapoints.results) - 1]), 6)
+        assert isinstance(all_datapoints, pd.DataFrame)
+        assert len(all_datapoints.results[len(all_datapoints.results) - 1]) == 6
 
 
-class TestWrongFormatting(unittest.TestCase):
+class TestWrongFormatting:
     """Simple tests that should break if the ."""
 
     def test_MaxQuant_file(self):
@@ -161,12 +161,11 @@ class TestWrongFormatting(unittest.TestCase):
         user_input = dict()
         user_input["input_csv"] = TESTDATA_FILES[format_name]
         user_input["input_format"] = format_name
-
-        with self.assertRaises(KeyError) as context:
+        with pytest.raises(KeyError):
             DDAQuantIonModule("").benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
 
 
-class TestPlot(unittest.TestCase):
+class TestPlot:
     """Test if the plots return a figure."""
 
     def test_plot_metric(self):
@@ -176,7 +175,7 @@ class TestPlot(unittest.TestCase):
         all_datapoints = gpr.read_results_json_repo()
         all_datapoints["old_new"] = "old"
         fig = PlotDataPoint().plot_metric(all_datapoints)
-        self.assertIsNotNone(fig)
+        assert fig is not None
 
     def test_plot_bench(self):
         np.random.seed(0)
@@ -209,10 +208,10 @@ class TestPlot(unittest.TestCase):
         }
         fig = PlotDataPoint().plot_fold_change_histogram(combineddf, species_dict)
         # fig.write_html("dummy.html")
-        self.assertIsNotNone(fig)
+        assert fig is not None
 
 
-class TestDatapoint(unittest.TestCase):
+class TestDatapoint:
     """Test if the plots return a figure."""
 
     def test_Datapoint_constructor(self):
@@ -253,7 +252,4 @@ class TestDatapoint(unittest.TestCase):
             min_peptide_length=user_input["min_peptide_length"],
             max_peptide_length=user_input["max_peptide_length"],
         )
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert isinstance

@@ -133,8 +133,12 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     params.max_precursor_charge = pipeline_params["max_precursor_charge"]
     params.max_peptide_length = pipeline_params["max_peptide_length"]
     params.min_peptide_length = pipeline_params["min_peptide_length"]
-    params.precursor_mass_tolerance = pipeline_params["precursor_mass_tolerance"]
-    params.fragment_mass_tolerance = pipeline_params["fragment_mass_tolerance"]
+    params.precursor_mass_tolerance = "{tol} {unit}".format(
+        tol=pipeline_params["precursor_mass_tolerance"], unit=pipeline_params["precursor_mass_tolerance_unit"]
+    )
+    params.fragment_mass_tolerance = "{tol} {unit}".format(
+        tol=pipeline_params["fragment_mass_tolerance"], unit=pipeline_params["fragment_mass_tolerance_unit"]
+    )
     params.allowed_miscleavages = pipeline_params["allowed_missed_cleavages"]
     params.quantification_method = pipeline_params["quantification_method"]
     params.protein_inference = pipeline_params["protein_inference_method"]

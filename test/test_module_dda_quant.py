@@ -29,15 +29,15 @@ TESTDATA_FILES = {
     "MSAngel": os.path.join(TESTDATA_DIR, "MSAngel_DDA_quan_ions_subset.xlsx"),
     "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
 }
-SUPPORTED_SOFTWARE_TOOLS = (
+TESTED_SOFTWARE_TOOLS = (
     "MaxQuant",
-    "MaxQuant_new",
     "FragPipe",
     "AlphaPept",
     "Sage",
     "ProlineStudio",
     "MSAngel",
     "i2MassChroQ",
+    # "WOMBAT",
 )
 
 
@@ -48,85 +48,57 @@ def load_file(format_name: str):
 
 
 class TestSoftwareToolOutputParsing:
-    supported_formats = (
-        "MaxQuant",
-        "FragPipe",
-        "AlphaPept",
-        "Sage",
-        "ProlineStudio",
-        "MSAngel",
-        "i2MassChroQ",
-    )  # "WOMBAT",
-    """ Simple tests for reading csv input files."""
+    """Simple tests for reading csv input files."""
 
-    def test_search_engines_supported(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_search_engines_supported(self, software_tool):
         """Test whether the expected formats are supported."""
         # parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
         parse_settings = ParseSettingsBuilder()
+        assert software_tool in parse_settings.INPUT_FORMATS
 
-        for format_name in (
-            "MaxQuant",
-            "AlphaPept",
-            "FragPipe",
-            "ProlineStudio",
-            "MSAngel",
-            "Sage",
-            "i2MassChroQ",
-        ):  # , "WOMBAT"
-            assert format_name in parse_settings.INPUT_FORMATS
-
-    def test_input_file_loading(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_input_file_loading(self, software_tool):
         """Test whether the inputs input are loaded successfully."""
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            assert not input_df.empty
+        input_df = load_file(software_tool)
+        assert not input_df.empty
 
-    def test_local_parsing_configuration_file(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_local_parsing_configuration_file(self, software_tool):
         """Test parsing of the local parsing configuration files."""
         parse_settings_builder = ParseSettingsBuilder()
-        for format_name in self.supported_formats:
-            parse_settings = parse_settings_builder.build_parser(format_name)
-            assert parse_settings is not None
+        parse_settings = parse_settings_builder.build_parser(software_tool)
+        assert parse_settings is not None
 
-    def test_input_file_initial_parsing(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_input_file_initial_parsing(self, software_tool):
         """Test the initial parsing of the input file."""
         parse_settings_builder = ParseSettingsBuilder()
+        parse_settings = parse_settings_builder.build_parser(software_tool)
 
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            parse_settings = parse_settings_builder.build_parser(format_name)
-            prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        input_df = load_file(software_tool)
+        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
-            assert not prepared_df.empty
-            assert replicate_to_raw != {}
+        assert not prepared_df.empty
+        assert replicate_to_raw != {}
 
 
 class TestQuantScores:
-    supported_formats = (
-        "MaxQuant",
-        "FragPipe",
-        "AlphaPept",
-        "Sage",
-        "ProlineStudio",
-        "MSAngel",
-        "i2MassChroQ",
-    )  # "WOMBAT",
-
-    def test_intermediate_generated_from_software_tool_output(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_intermediate_generated_from_software_tool_output(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder()
+        parse_settings = parse_settings_builder.build_parser(software_tool)
 
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            parse_settings = parse_settings_builder.build_parser(format_name)
-            prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        input_df = load_file(software_tool)
+        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
-            # Get quantification data
-            quant_score = QuantScores(
-                "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
-            )
-            intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
+        # Get quantification data
+        quant_score = QuantScores(
+            "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
+        )
+        intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
 
-            assert not intermediate.empty
+        assert not intermediate.empty
 
 
 class TestDDAQuantIonModule:

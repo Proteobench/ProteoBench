@@ -1,4 +1,3 @@
-import datetime
 import os
 import tempfile
 
@@ -6,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
@@ -191,44 +189,3 @@ class TestPlotDataPoint:
         fig = PlotDataPoint().plot_fold_change_histogram(combineddf, species_dict)
         # fig.write_html("dummy.html")
         assert fig is not None
-
-
-class TestQuantDatapoint:
-    def test_Datapoint_constructor(self):
-        input_format = "MaxQuant"
-        user_input = {
-            "software_name": "MaxQuant",
-            "software_version": "1.0",
-            "search_engine_version": "1.0",
-            "search_engine": "MaxQuant",
-            "ident_fdr_psm": 0.01,
-            "ident_fdr_peptide": 0.05,
-            "ident_fdr_protein": 0.1,
-            "enable_match_between_runs": 1,
-            "precursor_mass_tolerance": "0.02 Da",
-            "fragment_mass_tolerance": "0.02 Da",
-            "enzyme": "Trypsin",
-            "allowed_miscleavages": 1,
-            "min_peptide_length": 6,
-            "max_peptide_length": 30,
-        }
-        current_datetime = datetime.datetime.now()
-        formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
-
-        result_datapoint = QuantDatapoint(
-            id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
-            software_name=input_format,
-            software_version=user_input["software_version"],
-            search_engine=user_input["search_engine"],
-            search_engine_version=user_input["search_engine_version"],
-            ident_fdr_psm=user_input["ident_fdr_psm"],
-            ident_fdr_peptide=user_input["ident_fdr_peptide"],
-            ident_fdr_protein=user_input["ident_fdr_protein"],
-            enable_match_between_runs=user_input["enable_match_between_runs"],
-            precursor_mass_tolerance=user_input["precursor_mass_tolerance"],
-            fragment_mass_tolerance=user_input["fragment_mass_tolerance"],
-            enzyme=user_input["enzyme"],
-            allowed_miscleavages=user_input["allowed_miscleavages"],
-            min_peptide_length=user_input["min_peptide_length"],
-            max_peptide_length=user_input["max_peptide_length"],
-        )

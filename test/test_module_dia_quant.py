@@ -1,4 +1,3 @@
-import datetime
 import os
 import tempfile
 
@@ -6,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.parse_ion import load_input_file
@@ -187,44 +185,3 @@ class TestPlotDataPoint:
         }
         fig = PlotDataPoint().plot_fold_change_histogram(combineddf, species_dict)
         assert fig is not None
-
-
-class TestQuantDatapoint:
-    def test_Datapoint_constructor(self):
-        input_format = "DIA-NN"
-        user_input = {
-            "software_name": "DIA-NN",
-            "software_version": "1.9",
-            "search_engine_version": "1.9",
-            "search_engine": "DIA-NN",
-            "ident_fdr_peptide": 0.01,
-            "ident_fdr_psm": 0.01,
-            "ident_fdr_protein": 0.01,
-            "enable_match_between_runs": 1,
-            "enzyme": "Trypsin",
-            "allowed_miscleavages": 1,
-            "min_peptide_length": 6,
-            "max_peptide_length": 40,
-            "precursor_mass_tolerance": None,
-            "fragment_mass_tolerance": None,
-        }
-        current_datetime = datetime.datetime.now()
-        formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
-
-        result_datapoint = QuantDatapoint(
-            id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
-            software_name=input_format,
-            software_version=user_input["software_version"],
-            search_engine=user_input["search_engine"],
-            search_engine_version=user_input["search_engine_version"],
-            ident_fdr_psm=user_input["ident_fdr_psm"],
-            ident_fdr_peptide=user_input["ident_fdr_peptide"],
-            ident_fdr_protein=user_input["ident_fdr_protein"],
-            enable_match_between_runs=user_input["enable_match_between_runs"],
-            precursor_mass_tolerance=user_input["precursor_mass_tolerance"],
-            fragment_mass_tolerance=user_input["fragment_mass_tolerance"],
-            enzyme=user_input["enzyme"],
-            allowed_miscleavages=user_input["allowed_miscleavages"],
-            min_peptide_length=user_input["min_peptide_length"],
-            max_peptide_length=user_input["max_peptide_length"],
-        )

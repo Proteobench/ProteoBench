@@ -62,25 +62,20 @@ def load_file(format_name: str):
 
 
 class TestSoftwareToolOutputParsing:
-    """Simple tests for reading csv input files."""
-
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
-    def test_search_engines_supported(self, software_tool):
-        """Test whether the expected formats are supported."""
+    def test_valid_and_supported_search_tool_settings_exists(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
             parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DDA"
         )
         assert software_tool in parse_settings_builder.INPUT_FORMATS
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
-    def test_input_file_loading(self, software_tool):
-        """Test whether the inputs input are loaded successfully."""
+    def test_loaded_software_tool_output_contains_data(self, software_tool):
         input_df = load_file(software_tool)
         assert not input_df.empty
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
-    def test_local_parsing_configuration_file(self, software_tool):
-        """Test parsing of the local parsing configuration files."""
+    def test_settings_parser_created_successfully(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
             parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DDA"
         )
@@ -88,8 +83,7 @@ class TestSoftwareToolOutputParsing:
         assert parse_settings is not None
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
-    def test_input_file_initial_parsing(self, software_tool):
-        """Test the initial parsing of the input file."""
+    def test_software_tool_output_converted_to_standard_format(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
             parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DDA"
         )
@@ -146,24 +140,17 @@ class TestDDAQuantIonModule:
         assert isinstance(all_datapoints, pd.DataFrame)
         assert len(all_datapoints.results[len(all_datapoints.results) - 1]) == 6
 
-
-class TestWrongFormatting:
-    """Simple tests that should break if the ."""
-
-    def test_MaxQuant_file(self):
-        """Test whether MaxQuant input will throw an error on missing user inputs."""
-        format_name = "MaxQuant"
+    def test_benchmarking_raises_error_when_user_input_missing_required_fields(self):
+        software_tool = "MaxQuant"
         user_input = dict()
-        user_input["input_csv"] = TESTDATA_FILES[format_name]
-        user_input["input_format"] = format_name
+        user_input["input_csv"] = TESTDATA_FILES[software_tool]
+        user_input["input_format"] = software_tool
         with pytest.raises(KeyError):
             DDAQuantIonModule("").benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
 
 
-class TestPlot:
-    """Test if the plots return a figure."""
-
-    def test_plot_metric(self):
+class TestPlotDataPoint:
+    def test_plot_metric_returns_a_figure(self):
         tmpdir = tempfile.TemporaryDirectory().name
         gpr = GithubProteobotRepo(clone_dir=tmpdir)
         gpr.clone_repo_anonymous()
@@ -172,7 +159,7 @@ class TestPlot:
         fig = PlotDataPoint().plot_metric(all_datapoints)
         assert fig is not None
 
-    def test_plot_bench(self):
+    def test_plot_fold_change_histogram_returns_a_figure(self):
         np.random.seed(0)
 
         # Generate 1000 random values from a normal distribution with mean -1 and variance 1
@@ -206,9 +193,7 @@ class TestPlot:
         assert fig is not None
 
 
-class TestDatapoint:
-    """Test if the plots return a figure."""
-
+class TestQuantDatapoint:
     def test_Datapoint_constructor(self):
         input_format = "MaxQuant"
         user_input = {
@@ -247,4 +232,3 @@ class TestDatapoint:
             min_peptide_length=user_input["min_peptide_length"],
             max_peptide_length=user_input["max_peptide_length"],
         )
-        assert isinstance

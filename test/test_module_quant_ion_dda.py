@@ -12,9 +12,6 @@ from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import DDAQuantIonM
 from proteobench.plotting.plot_quant import PlotDataPoint
 from proteobench.score.quant.quantscores import QuantScores
 
-# genereate_input_field
-
-
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")
 TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
@@ -115,8 +112,10 @@ class TestQuantScores:
 
 
 class TestDDAQuantIonModule:
-    def test_benchmarking(self):
-        user_input = {
+    @pytest.fixture(autouse=True)
+    def _init(self):
+        self.software_tool = "MaxQuant"
+        self.user_input = {
             "software_name": "MaxQuant",
             "software_version": "1.0",
             "search_engine_version": "1.0",
@@ -132,19 +131,81 @@ class TestDDAQuantIonModule:
             "min_peptide_length": 6,
             "max_peptide_length": 30,
         }
-        result_performance, all_datapoints, input_df = DDAQuantIonModule("").benchmarking(
-            TESTDATA_FILES["MaxQuant"], "MaxQuant", user_input, None
+
+    def test_benchmarking_return_types_are_correct(self):
+        intermediate_df, all_datapoints, input_df = DDAQuantIonModule("").benchmarking(
+            TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
+        assert isinstance(intermediate_df, pd.DataFrame)
         assert isinstance(all_datapoints, pd.DataFrame)
-        assert len(all_datapoints.results[len(all_datapoints.results) - 1]) == 6
+        assert isinstance(input_df, pd.DataFrame)
+
+    def test_results_column_in_new_data_point_contains_correct_number_of_entries(self):
+        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+            TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
+        )
+        results_entry_newest_datapoint = all_datapoints.results[len(all_datapoints.results) - 1]
+        expected_number_of_entries_for_min_nr_observed_filter = 6
+        assert len(results_entry_newest_datapoint) == expected_number_of_entries_for_min_nr_observed_filter
 
     def test_benchmarking_raises_error_when_user_input_missing_required_fields(self):
-        software_tool = "MaxQuant"
-        user_input = dict()
-        user_input["input_csv"] = TESTDATA_FILES[software_tool]
-        user_input["input_format"] = software_tool
+        input_file_location = TESTDATA_FILES[self.software_tool]
+        input_format = self.software_tool
+        empty_user_input = {}
         with pytest.raises(KeyError):
-            DDAQuantIonModule("").benchmarking(user_input["input_csv"], user_input["input_format"], {}, None)
+            DDAQuantIonModule("").benchmarking(input_file_location, input_format, empty_user_input, None)
+
+    def test_new_datapoint_with_unique_hash_is_added_to_existing_ones(self, monkeypatch):
+        def mock_clone_repo(*args, **kwargs):
+            return None
+
+        def mock_read_results_json_repo(*args, **kwargs):
+            return pd.DataFrame()
+
+        monkeypatch.setattr("proteobench.github.gh.GithubProteobotRepo.clone_repo", mock_clone_repo)
+        monkeypatch.setattr(
+            "proteobench.github.gh.GithubProteobotRepo.read_results_json_repo", mock_read_results_json_repo
+        )
+
+        first_software_tool = "MaxQuant"
+        second_software_tool = "FragPipe"
+
+        _, previous_datapoints, _ = DDAQuantIonModule("").benchmarking(
+            TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
+        )
+        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+            TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
+        )
+
+        assert first_software_tool != second_software_tool
+        assert len(all_datapoints) == 2
+
+    def test_new_datapoint_already_present_in_all_datapoints_is_not_added(self, monkeypatch):
+        # This test requires that exactly the same input data is used for the new datapoint
+        # as for the 'previous_datapoints', so they can be identified as duplicates.
+        def mock_clone_repo(*args, **kwargs):
+            return None
+
+        def mock_read_results_json_repo(*args, **kwargs):
+            return pd.DataFrame()
+
+        monkeypatch.setattr("proteobench.github.gh.GithubProteobotRepo.clone_repo", mock_clone_repo)
+        monkeypatch.setattr(
+            "proteobench.github.gh.GithubProteobotRepo.read_results_json_repo", mock_read_results_json_repo
+        )
+
+        first_software_tool = "MaxQuant"
+        second_software_tool = first_software_tool
+
+        _, previous_datapoints, _ = DDAQuantIonModule("").benchmarking(
+            TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
+        )
+        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+            TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
+        )
+
+        assert first_software_tool == second_software_tool
+        assert len(all_datapoints) == 1
 
 
 class TestPlotDataPoint:

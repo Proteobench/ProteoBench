@@ -42,6 +42,15 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "AIF",
     )
 )
+TESTED_SOFTWARE_TOOLS = (
+    "DIA-NN",
+    "AlphaDIA",
+    "MaxQuant",
+    "FragPipe (DIA-NN quant)",
+    "Spectronaut",
+    "FragPipe",
+    "MSAID",
+)
 
 
 def load_file(format_name: str):
@@ -51,83 +60,63 @@ def load_file(format_name: str):
 
 
 class TestSoftwareToolOutputParsing:
-    supported_formats = (
-        "DIA-NN",
-        "AlphaDIA",
-        "MaxQuant",
-        "FragPipe (DIA-NN quant)",
-        "Spectronaut",
-        "FragPipe",
-        "MSAID",
-    )
     """Simple tests for reading csv input files."""
 
-    def test_search_engines_supported(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_search_engines_supported(self, software_tool):
         """Test whether the supported formats are supported."""
         parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DIA_AIF")
+        assert software_tool in parse_settings.INPUT_FORMATS
 
-        for format_name in self.supported_formats:
-            assert format_name in parse_settings.INPUT_FORMATS
-
-    def test_input_file_loading(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_input_file_loading(self, software_tool):
         """Test whether the inputs input are loaded successfully."""
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            assert not input_df.empty
+        input_df = load_file(software_tool)
+        assert not input_df.empty
 
-    def test_local_parsing_configuration_file(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_local_parsing_configuration_file(self, software_tool):
         """Test whether the input files are loaded successfully."""
 
         parse_settings_builder = ParseSettingsBuilder(
             module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
-        for format_name in self.supported_formats:
-            parse_settings = parse_settings_builder.build_parser(format_name)
-            assert parse_settings is not None
+        parse_settings = parse_settings_builder.build_parser(software_tool)
+        assert parse_settings is not None
 
-    def test_input_file_initial_parsing(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_input_file_initial_parsing(self, software_tool):
         """Test the initial parsing of the input file."""
 
         parse_settings_builder = ParseSettingsBuilder(
             module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
+        parse_settings = parse_settings_builder.build_parser(software_tool)
+        input_df = load_file(software_tool)
+        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            parse_settings = parse_settings_builder.build_parser(format_name)
-            prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-
-            assert not prepared_df.empty
-            assert replicate_to_raw != {}
+        assert not prepared_df.empty
+        assert replicate_to_raw != {}
 
 
 class TestQuantScores:
-    supported_formats = (
-        "DIA-NN",
-        "AlphaDIA",
-        "MaxQuant",
-        "FragPipe (DIA-NN quant)",
-        "Spectronaut",
-        "FragPipe",
-        "MSAID",
-    )
-
-    def test_intermediate_generated_from_software_tool_output(self):
+    @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
+    def test_intermediate_generated_from_software_tool_output(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
             module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
-        for format_name in self.supported_formats:
-            input_df = load_file(format_name)
-            parse_settings = parse_settings_builder.build_parser(format_name)
-            prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        parse_settings = parse_settings_builder.build_parser(software_tool)
 
-            # Get quantification data
-            quant_score = QuantScores(
-                "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
-            )
-            intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
+        input_df = load_file(software_tool)
+        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
-            assert not intermediate.empty
+        # Get quantification data
+        quant_score = QuantScores(
+            "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
+        )
+        intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
+
+        assert not intermediate.empty
 
 
 class TestDIAQuantIonModule:

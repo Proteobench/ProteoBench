@@ -29,33 +29,22 @@ TESTDATA_FILES = {
     "MSAngel": os.path.join(TESTDATA_DIR, "MSAngel_DDA_quan_ions_subset.xlsx"),
     "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
 }
+SUPPORTED_SOFTWARE_TOOLS = (
+    "MaxQuant",
+    "MaxQuant_new",
+    "FragPipe",
+    "AlphaPept",
+    "Sage",
+    "ProlineStudio",
+    "MSAngel",
+    "i2MassChroQ",
+)
 
 
 def load_file(format_name: str):
     """Method used to load the input file of a given format."""
     input_df = load_input_file(TESTDATA_FILES[format_name], format_name)
     return input_df
-
-
-def load__local_parsing_configuration_file(format_name: str):
-    """Method used to load the input file of a given format."""
-    input_df = load_file(format_name)
-    parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
-    parse_settings = ParseSettingsBuilder(parse_settings_dir).build_parser(format_name)
-    prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = DDAQuantIonModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
-
-    return intermediate
-
-
-def process_file(format_name: str):
-    """Method used to load the input file of a given format."""
-    input_df = load_file(format_name)
-    parse_settings = ParseSettingsBuilder().build_parser(format_name)
-    prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = DDAQuantIonModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
-
-    return intermediate
 
 
 class TestSoftwareToolOutputParsing:

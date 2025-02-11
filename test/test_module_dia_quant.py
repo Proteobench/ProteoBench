@@ -50,16 +50,6 @@ def load_file(format_name: str):
     return input_df
 
 
-def process_file(format_name: str):
-    """Method used to process the input file."""
-    input_df = load_file(format_name)
-    parse_settings = ParseSettingsBuilder(acquisition_method="dia").build_parser(format_name)
-    prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-    intermediate = DIAQuantIonModule("").generate_intermediate(prepared_df, replicate_to_raw, parse_settings)
-
-    return intermediate
-
-
 class TestSoftwareToolOutputParsing:
     supported_formats = (
         "DIA-NN",

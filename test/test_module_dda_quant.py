@@ -29,6 +29,20 @@ TESTDATA_FILES = {
     "MSAngel": os.path.join(TESTDATA_DIR, "MSAngel_DDA_quan_ions_subset.xlsx"),
     "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
 }
+PARSE_SETTINGS_DIR = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "proteobench",
+        "io",
+        "parsing",
+        "io_parse_settings",
+        "Quant",
+        "lfq",
+        "ion",
+        "DDA",
+    )
+)
 TESTED_SOFTWARE_TOOLS = (
     "MaxQuant",
     "FragPipe",
@@ -53,9 +67,10 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_search_engines_supported(self, software_tool):
         """Test whether the expected formats are supported."""
-        # parse_settings_dir = os.path.join(os.path.dirname(__package__), "io", "parsing", "io_parse_settings")
-        parse_settings = ParseSettingsBuilder()
-        assert software_tool in parse_settings.INPUT_FORMATS
+        parse_settings_builder = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DDA"
+        )
+        assert software_tool in parse_settings_builder.INPUT_FORMATS
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_input_file_loading(self, software_tool):
@@ -66,14 +81,18 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_local_parsing_configuration_file(self, software_tool):
         """Test parsing of the local parsing configuration files."""
-        parse_settings_builder = ParseSettingsBuilder()
+        parse_settings_builder = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DDA"
+        )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         assert parse_settings is not None
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_input_file_initial_parsing(self, software_tool):
         """Test the initial parsing of the input file."""
-        parse_settings_builder = ParseSettingsBuilder()
+        parse_settings_builder = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DDA"
+        )
         parse_settings = parse_settings_builder.build_parser(software_tool)
 
         input_df = load_file(software_tool)
@@ -86,7 +105,9 @@ class TestSoftwareToolOutputParsing:
 class TestQuantScores:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_intermediate_generated_from_software_tool_output(self, software_tool):
-        parse_settings_builder = ParseSettingsBuilder()
+        parse_settings_builder = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DDA"
+        )
         parse_settings = parse_settings_builder.build_parser(software_tool)
 
         input_df = load_file(software_tool)

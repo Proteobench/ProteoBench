@@ -58,7 +58,7 @@ def process_file(format_name: str):
     return intermediate
 
 
-class TestOutputFileReading:
+class TestSoftwareToolOutputParsing:
     supported_formats = (
         "MaxQuant",
         "FragPipe",
@@ -111,8 +111,19 @@ class TestOutputFileReading:
             assert not prepared_df.empty
             assert replicate_to_raw != {}
 
-    def test_input_file_processing(self):
-        """Test the processing of the input files."""
+
+class TestQuantScores:
+    supported_formats = (
+        "MaxQuant",
+        "FragPipe",
+        "AlphaPept",
+        "Sage",
+        "ProlineStudio",
+        "MSAngel",
+        "i2MassChroQ",
+    )  # "WOMBAT",
+
+    def test_intermediate_generated_from_software_tool_output(self):
         parse_settings_builder = ParseSettingsBuilder()
 
         for format_name in self.supported_formats:
@@ -128,6 +139,8 @@ class TestOutputFileReading:
 
             assert not intermediate.empty
 
+
+class TestDDAQuantIonModule:
     def test_benchmarking(self):
         user_input = {
             "software_name": "MaxQuant",

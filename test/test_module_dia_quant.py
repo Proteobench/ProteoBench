@@ -60,7 +60,7 @@ def process_file(format_name: str):
     return intermediate
 
 
-class TestOutputFileReading:
+class TestSoftwareToolOutputParsing:
     supported_formats = (
         "DIA-NN",
         "AlphaDIA",
@@ -110,9 +110,19 @@ class TestOutputFileReading:
             assert not prepared_df.empty
             assert replicate_to_raw != {}
 
-    def test_input_file_processing(self):
-        """Test the processing of the input file."""
 
+class TestQuantScores:
+    supported_formats = (
+        "DIA-NN",
+        "AlphaDIA",
+        "MaxQuant",
+        "FragPipe (DIA-NN quant)",
+        "Spectronaut",
+        "FragPipe",
+        "MSAID",
+    )
+
+    def test_intermediate_generated_from_software_tool_output(self):
         parse_settings_builder = ParseSettingsBuilder(
             module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
@@ -129,6 +139,8 @@ class TestOutputFileReading:
 
             assert not intermediate.empty
 
+
+class TestDIAQuantIonModule:
     def test_benchmarking(self):
         user_input = {
             "software_name": "DIA-NN",
@@ -154,11 +166,7 @@ class TestOutputFileReading:
         assert isinstance(all_datapoints, pd.DataFrame)
         assert len(all_datapoints.results[len(all_datapoints.results) - 1]) == 6
 
-
-class TestWrongFormatting:
-    """Simple tests that should break if the input file is not formatted correctly."""
-
-    def test_DIANN_file(self):
+    def test_wrong_formatting_raises_error(self):
         """Test whether the DIANN input will throw an error on missing user inputs."""
 
         format_name = "DIA-NN"

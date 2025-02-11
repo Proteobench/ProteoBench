@@ -104,7 +104,13 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
 
     params = ProteoBenchParameters()
     params.software_name = "quantms"
-    params.software_version = versions["Workflow"]["bigbio/quantms"]
+    try:
+        params.software_version = versions["Workflow"]["bigbio/quantms"]
+    except KeyError:
+        try:
+            params.software_version = versions["Workflow"]["nf-core/quantms"]
+        except KeyError:
+            raise ValueError(f"Workflow version not found in versionss {versions}")
     engines = list()
     engines_version = list()
     for key in versions:
@@ -114,7 +120,7 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
             if _engine == "comet":
                 engines_version.append(versions[key]["Comet"])
             elif _engine == "msgf":
-                versions.append(versions[key]["msgf_plus"])
+                engines_version.append(versions[key]["msgf_plus"])
             else:
                 raise ValueError(f"Unknown search engine: {_engine}")
     if engines:
@@ -156,10 +162,23 @@ if __name__ == "__main__":
 
     from IPython.display import display
 
+    test_params_dir = Path("../../../test/params")
+
+    fpath1 = test_params_dir / "quantms_1-3_test.json"
+    fpath2 = test_params_dir / "quantms_1-3_test-versions.yml"
+
+    # Extract parameters from the file - do not parse sdrf
+    with open(fpath1, "r") as file1, open(fpath2, "r") as file2:
+        params = extract_params(file1, file2)
+        display(params.__dict__)
+
+    series = pd.Series(params.__dict__)
+    series.to_csv(fpath1.parent / f"{fpath1.stem}_extracted_params.csv")
+
     # ! in streamlit the IO object is used -> open files
-    fpath1 = Path("../../../test/params/quantms_1-3.sdrf_config.tsv")
-    fpath2 = Path("../../../test/params/quantms_1-3.nf_core_quantms_software_mqc_versions.yml")
-    fpath3 = Path("../../../test/params/quantms_1-3_dev.json")
+    fpath1 = test_params_dir / "quantms_1-3.sdrf_config.tsv"
+    fpath2 = test_params_dir / "quantms_1-3.nf_core_quantms_software_mqc_versions.yml"
+    fpath3 = test_params_dir / "quantms_1-3_dev.json"
 
     # Extract parameters from the file - do not parse sdrf
     with open(fpath2, "r") as file2, open(fpath3, "r") as file3:

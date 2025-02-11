@@ -14,7 +14,12 @@ parameter_files = [
         "quantms_1-3_dev.json",
         "quantms_1-3.nf_core_quantms_software_mqc_versions.yml",
         None,
-    )
+    ),
+    (
+        "quantms_1-3_test.json",
+        None,
+        "quantms_1-3_test-versions.yml",
+    ),
 ]
 
 parameter_files = [

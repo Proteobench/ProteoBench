@@ -136,7 +136,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/404
 
-        :bdg-info:`proposed`
+        :bdg-info:`in development`
         ^^^
         Single-species benchmark using spacial proteomics
 

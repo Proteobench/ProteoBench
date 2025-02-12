@@ -26,8 +26,8 @@ People who contributed to ProteoBench, in alphabetical order:
 
 .. line-block::
     **Karima Chaoui**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
     **Robbe Devreese**
@@ -62,8 +62,8 @@ People who contributed to ProteoBench, in alphabetical order:
 
 .. line-block::
     **Marie Locard-Paulet**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
     **Dominik Lux**
@@ -72,8 +72,8 @@ People who contributed to ProteoBench, in alphabetical order:
 
 .. line-block::
     **Emmanuelle Mouton-Barbosa**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
     **Alireza Nameni**

@@ -17,6 +17,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **Hector Mauricio Castaneda Cortes**
+    *The James Hutton Institute, ICS Department, Invergowrie, DD2 5DA, United Kingdom*
+
+.. line-block::
     **Karima Chaoui**
     *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
     *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*

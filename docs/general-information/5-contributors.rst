@@ -12,6 +12,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
 .. line-block::
+    **Wout Bittremieux**
+    *Department of Computer Science, University of Antwerp, Antwerp, Belgium*
+
+.. line-block::
     **Robbin Bouwmeester**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*

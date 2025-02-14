@@ -48,6 +48,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **David M. Hollenstein**
+    *Mass Spectrometry Facility, Max Perutz Labs, Vienna Biocenter Campus (VBC), Vienna, Austria*
+
+.. line-block::
     **Caroline Jachmann**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*

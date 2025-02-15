@@ -12,14 +12,22 @@ People who contributed to ProteoBench, in alphabetical order:
     *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
 .. line-block::
+    **Wout Bittremieux**
+    *Department of Computer Science, University of Antwerp, Antwerp, Belgium*
+
+.. line-block::
     **Robbin Bouwmeester**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **Hector Mauricio Castaneda Cortes**
+    *The James Hutton Institute, ICS Department, Invergowrie, DD2 5DA, United Kingdom*
+
+.. line-block::
     **Karima Chaoui**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
     **Robbe Devreese**
@@ -40,6 +48,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **David M. Hollenstein**
+    *Mass Spectrometry Facility, Max Perutz Labs, Vienna Biocenter Campus (VBC), Vienna, Austria*
+
+.. line-block::
     **Caroline Jachmann**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
@@ -54,8 +66,8 @@ People who contributed to ProteoBench, in alphabetical order:
 
 .. line-block::
     **Marie Locard-Paulet**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
     **Dominik Lux**
@@ -64,8 +76,8 @@ People who contributed to ProteoBench, in alphabetical order:
 
 .. line-block::
     **Emmanuelle Mouton-Barbosa**
-    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université Toulouse III - Paul Sabatier (UT3), Toulouse, France*
-    *Infrastructure nationale de protéomique, ProFI, FR 2048, Toulouse, France*
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
     **Alireza Nameni**

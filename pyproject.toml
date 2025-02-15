@@ -34,7 +34,20 @@ name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = ["black~=23.0", "jupyterlab", "notebook", "tqdm", "wget", "nox", "pytest"]
+dev = [
+  "black~=23.0",
+  "jupyterlab",
+  "notebook",
+  "tqdm",
+  "wget",
+  "nox",
+  "pytest",
+  "flake8",
+  "flake8-bugbear",
+  "flake8-comprehensions",
+  "flake8-docstrings",
+  "flake8-import-order",
+]
 docs = [
   "sphinx",
   "sphinx-design",
@@ -65,7 +78,7 @@ profile = "black"
 
 [tool.black]
 line-length = 120
-target-version = ['py38']
+target-version = ['py39']
 
 [tool.flake8]
 max-line-length = 120

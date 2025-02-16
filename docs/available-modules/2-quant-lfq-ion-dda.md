@@ -187,6 +187,15 @@ In the "lfq.tsv", the following columns are considered:
 - "peptide" to get the modified sequences
 - "charge" to get the charge of the precursor
 
+### Quantms (work in progress)
+
+When you run the DDA workflow in QuantMS, you can upload the precursors from the process
+`ProteomicsLFQ` (using OpenMS) with the name `<project-name>.sdrf_openms_design_msstats_in.csv` 
+to ProteoBench. Several version with PTMs still have to be tested.
+
+The parameters needed for public submission can be parsed based on the `versions.yml` and 
+parameter json `params_<timestamp>.json` produced by the `pipeline-info` step.
+
 ### Custom format
 
 If you do not use a tool that is compatible with ProteoBench, you can upload a tab-delimited table format containing the following columns:

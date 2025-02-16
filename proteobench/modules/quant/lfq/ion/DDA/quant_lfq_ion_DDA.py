@@ -113,42 +113,45 @@ class DDAQuantIonModule(QuantModule):
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
-            )
+            ) from e
         except Exception as e:
-            raise ParseSettingsError(f"Error parsing the input file: {e}")
+            raise ParseSettingsError("Error parsing the input file.") from e
 
+        msg = f"Folder: {self.parse_settings_dir}, Module: {self.module_id}"
         # Parse settings file
         try:
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
         except KeyError as e:
-            raise ParseSettingsError(f"Error parsing settings file for parsing, settings seem to be missing: {e}")
+            raise ParseSettingsError(
+                f"Error parsing settings file for parsing, settings seem to be missing: {msg}"
+            ) from e
         except FileNotFoundError as e:
-            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+            raise ParseSettingsError(f"Could not find the parsing settings file: {msg}") from e
         except Exception as e:
-            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {msg}") from e
 
         try:
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
         except KeyError as e:
-            raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
+            raise ConvertStandardFormatError("Error converting to standard format, key missing.") from e
         except Exception as e:
-            raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
+            raise ConvertStandardFormatError("Error converting to standard format.") from e
 
-        # calculate quantification scores
+        # instantiate quantification scores
         try:
             quant_score = QuantScores(
                 self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
-            raise QuantificationError(f"Error generating quantification scores: {e}")
+            raise QuantificationError("Error generating quantification scores.") from e
 
         # generate intermediate data structure
         try:
             intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
         except Exception as e:
-            raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
+            raise IntermediateFormatGenerationError("Error generating intermediate data structure.") from e
 
         # try:
         current_datapoint = QuantDatapoint.generate_datapoint(

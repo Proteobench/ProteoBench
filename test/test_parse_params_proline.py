@@ -34,15 +34,14 @@ def test_find_pep_length(string, expected_min_pep):
     assert actual_min_pep == expected_min_pep
 
 
-# parameters = [(fname, fname.with_suffix(".csv")) for fname in fnames]
-
-
 @pytest.mark.parametrize("file", fnames)
-def test_extract_params(file):
+def test_extract_params(file, tmpdir):
     expected = pd.read_csv(file.with_suffix(".csv"), index_col=0).squeeze("columns")
     actual = proline_params.extract_params(file)
     actual = pd.Series(actual.__dict__)
-    actual.to_csv("test_proline.csv")
+
+    temp_file = tmpdir.join("test_proline.csv")
+    actual.to_csv(temp_file)
 
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=0).squeeze("columns")
 

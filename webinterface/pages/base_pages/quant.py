@@ -87,6 +87,7 @@ class QuantUIObjects:
 
     def generate_input_widget(self, input_format: str, content: dict, key: str = "") -> Any:
         """Generates input fields in the Streamlit UI based on the specified format and content."""
+        print("Content", content)
         field_type = content.get("type")
         if field_type == "text_area":
             return self.generate_text_area_widget(input_format, content, key)
@@ -184,11 +185,13 @@ class QuantUIObjects:
 
     def _generate_checkbox(self, input_format: str, content: dict, key: str = "") -> Any:
         """Generates a checkbox input field."""
-        # value = content.get("value", {}).get(input_format, False)
+        value = content.get("value", {})
+        if key in st.session_state[self.variables_quant.params_file_dict].keys():
+            value = st.session_state[self.variables_quant.params_file_dict].get(key)
         return st.checkbox(
             content["label"],
             key=self.variables_quant.prefix_params + key,
-            value=False,
+            value=value,
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
@@ -698,6 +701,8 @@ class QuantUIObjects:
                 params.__dict__ if hasattr(params, "__dict__") else params
             )
 
+            print("704quant.py", st.session_state[self.variables_quant.params_json_dict])
+
             st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
         except KeyError as e:
             st.error("Parsing of meta parameters file for this software is not supported yet.", icon="🚨")
@@ -767,6 +772,7 @@ class QuantUIObjects:
 
         if self.user_input[self.variables_quant.meta_data]:
             params = self.load_user_parameters()
+            print("Params", params)
             st.session_state[self.variables_quant.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
             print(self.params_file_dict_copy)

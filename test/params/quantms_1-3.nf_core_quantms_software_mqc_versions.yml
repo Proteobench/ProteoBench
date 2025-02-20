@@ -1,0 +1,30 @@
+DECOYDATABASE:
+  DecoyDatabase: 3.2.0-pre-exported-20240919
+EXTRACTPSMFEATURES:
+  PSMFeatureExtractor: 3.2.0-pre-exported-20240919
+IDFILTER:
+  IDFilter: 3.2.0-pre-exported-20240919
+IDSCORESWITCHER:
+  IDScoreSwitcher: 3.2.0-pre-exported-20240919
+MSSTATS:
+  r-base: 4.3.2
+  bioconductor-msstats: 4.10.0
+MZMLSTATISTICS:
+  quantms-utils: 0.0.18
+PERCOLATOR:
+  PercolatorAdapter: 3.2.0-pre-exported-20240919
+  percolator: 3.05.0, Build Date Aug 31 2020 19:03:04
+PROTEOMICSLFQ:
+  ProteomicsLFQ: 3.2.0-pre-exported-20240919
+SAMPLESHEET_CHECK:
+  quantms-utils: 0.0.18
+SDRFPARSING:
+  sdrf-pipelines: 0.0.31
+SEARCHENGINECOMET:
+  CometAdapter: 3.2.0-pre-exported-20240919
+  Comet: 2023.01 rev. 2
+THERMORAWFILEPARSER:
+  ThermoRawFileParser: 1.3.4
+Workflow:
+    bigbio/quantms: v1.3.1dev-g70337bc
+    Nextflow: 24.10.3

@@ -184,11 +184,13 @@ class QuantUIObjects:
 
     def _generate_checkbox(self, input_format: str, content: dict, key: str = "") -> Any:
         """Generates a checkbox input field."""
-        # value = content.get("value", {}).get(input_format, False)
+        value = content.get("value", {})
+        if key in st.session_state[self.variables_quant.params_file_dict].keys():
+            value = st.session_state[self.variables_quant.params_file_dict].get(key)
         return st.checkbox(
             content["label"],
             key=self.variables_quant.prefix_params + key,
-            value=False,
+            value=value,
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),

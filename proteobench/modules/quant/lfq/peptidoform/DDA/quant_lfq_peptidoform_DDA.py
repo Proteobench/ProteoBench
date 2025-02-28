@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import Optional, Tuple
 
 import pandas as pd
@@ -18,6 +17,7 @@ from proteobench.exceptions import (
 )
 from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.quant.quant_base.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
@@ -29,30 +29,11 @@ class DDAQuantPeptidoformModule(QuantModule):
     ----------
     module_id : str
         Module identifier for configuration.
-    parse_settings_dir : str
-        Directory containing parsing settings.
     precursor_name: str
         Level of quantification.
     """
 
     module_id: str = "quant_lfq_peptidoform_DDA"
-    parse_settings_dir: str = os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            "io",
-            "parsing",
-            "io_parse_settings",
-            "Quant",
-            "lfq",
-            "peptidoform",
-            "DDA",
-        )
-    )
 
     def __init__(
         self,
@@ -72,7 +53,7 @@ class DDAQuantPeptidoformModule(QuantModule):
             token,
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
-            parse_settings_dir=self.parse_settings_dir,
+            parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
         )
         self.precursor_name = "peptidoform"

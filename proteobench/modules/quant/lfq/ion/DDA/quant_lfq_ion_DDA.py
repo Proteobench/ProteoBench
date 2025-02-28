@@ -8,8 +8,6 @@ from pandas import DataFrame
 from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.exceptions import (
     ConvertStandardFormatError,
-    DatapointAppendError,
-    DatapointGenerationError,
     IntermediateFormatGenerationError,
     ParseError,
     ParseSettingsError,
@@ -22,32 +20,42 @@ from proteobench.score.quant.quantscores import QuantScores
 
 
 class DDAQuantIonModule(QuantModule):
-    """DDA Quantification Module for Ion level Quantification."""
+    """DDA Quantification Module for Ion level Quantification.
+
+    Attributes
+    ----------
+    module_id : str
+        Module identifier for configuration.
+    parse_settings_dir : str
+        Directory containing parsing settings.
+    precursor_name: str
+        Level of quantification.
+    """
+
+    module_id = "quant_lfq_ion_DDA"
+    parse_settings_dir: str = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "..",
+            "..",
+            "..",
+            "io",
+            "parsing",
+            "io_parse_settings",
+            "Quant",
+            "lfq",
+            "ion",
+            "DDA",
+        )
+    )
 
     def __init__(
         self,
         token: str,
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
-        # TODO: Figure out how to do nicer relative calls
-        parse_settings_dir: str = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "..",
-                "..",
-                "..",
-                "..",
-                "io",
-                "parsing",
-                "io_parse_settings",
-                "Quant",
-                "lfq",
-                "ion",
-                "DDA",
-            )
-        ),
-        module_id="quant_lfq_ion_DDA",
     ):
         """
         DDA Quantification Module for Ion level Quantification.
@@ -61,21 +69,15 @@ class DDAQuantIonModule(QuantModule):
         proteobench_repo_name
             Name of the repository where the benchmarking results will be stored.
 
-        Attributes
-        ----------
-        precursor_name: str
-            Level of quantification.
-
         """
         super().__init__(
             token,
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
-            parse_settings_dir=parse_settings_dir,
-            module_id=module_id,
+            parse_settings_dir=self.parse_settings_dir,
+            module_id=self.module_id,
         )
         self.precursor_name = "precursor ion"
-        self.module_id = module_id
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""

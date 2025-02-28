@@ -1,6 +1,6 @@
 [mapper]
-protein_group = "Proteins"
-"modified_peptide" = "Modified sequence"
+"protein_group" = "Proteins"
+"modified_peptide" = "Sequence"
 
 [condition_mapper]
 "abundance_A_1" = "A"

@@ -41,6 +41,7 @@ class DIAQuantPeptidoformModule(QuantModule):
             proteobench_repo_name (str): Name of the repository where the benchmarking results will be stored.
             module_id (str): Module identifier for configuration.
         """
+        raise NotImplementedError("This module init lacks required arguments for its parent class.")
         super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
         self.precursor_name = "peptidoform"
 

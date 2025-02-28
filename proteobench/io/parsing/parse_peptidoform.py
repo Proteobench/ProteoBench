@@ -1,3 +1,4 @@
+import os
 import re
 from typing import Dict, Optional
 
@@ -25,12 +26,27 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         )
     if input_format == "WOMBAT":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+
+        # get mapper from pure accession to longer FASTA description
+        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+        mapper_df = pd.read_csv(mapper_path, sep=",")
+        mapper_df.set_index("gene_name", inplace=True)
+        mapper = mapper_df["description"].to_dict()
+
+        # map accession to longer FASTA description
+        input_data_frame["protein_group"] = input_data_frame["protein_group"].map(
+            lambda x: ";".join(
+                [mapper[accession] if accession in mapper.keys() else accession for accession in x.split(",")]
+            )
+        )
         input_data_frame["proforma"] = input_data_frame["modified_peptide"]
     elif input_format == "Custom":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
         input_data_frame["proforma"] = input_data_frame["Modified sequence"]
     elif input_format == "PEAKS":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    else:
+        raise ValueError(f"Input format '{input_format}' not recognized.")
 
     return input_data_frame
 

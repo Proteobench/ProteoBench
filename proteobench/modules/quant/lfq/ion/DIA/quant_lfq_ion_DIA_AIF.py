@@ -23,32 +23,43 @@ from proteobench.score.quant.quantscores import QuantScores
 
 
 class DIAQuantIonModule(QuantModule):
-    """DIA Quantification Module for Ion level Quantification."""
+    """DIA Quantification Module for Ion level Quantification.
+
+    Attributes
+    ----------
+    module_id : str
+        Module identifier for configuration.
+    parse_settings_dir : str
+        Directory containing parsing settings.
+    precursor_name: str
+        Level of quantification.
+    """
+
+    module_id: str = "quant_lfq_ion_DIA_AIF"
+    parse_settings_dir: str = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "..",
+            "..",
+            "..",
+            "io",
+            "parsing",
+            "io_parse_settings",
+            "Quant",
+            "lfq",
+            "ion",
+            "DIA",
+            "AIF",
+        )
+    )
 
     def __init__(
         self,
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA",
-        parse_settings_dir: str = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "..",
-                "..",
-                "..",
-                "..",
-                "io",
-                "parsing",
-                "io_parse_settings",
-                "Quant",
-                "lfq",
-                "ion",
-                "DIA",
-                "AIF",
-            )
-        ),
-        module_id: str = "quant_lfq_ion_DIA_AIF",
     ):
         """
         DIA Quantification Module for Ion level Quantification.
@@ -57,15 +68,13 @@ class DIAQuantIonModule(QuantModule):
             token (str): GitHub token for the user.
             proteobot_repo_name (str): Name of the repository for pull requests and where new points are added.
             proteobench_repo_name (str): Name of the repository where the benchmarking results will be stored.
-            parse_settings_dir (str): Directory containing parsing settings.
-            module_id (str): Module identifier for configuration.
         """
         super().__init__(
             token,
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
-            parse_settings_dir=parse_settings_dir,
-            module_id=module_id,
+            parse_settings_dir=self.parse_settings_dir,
+            module_id=self.module_id,
         )
         self.precursor_name = "precursor ion"
 

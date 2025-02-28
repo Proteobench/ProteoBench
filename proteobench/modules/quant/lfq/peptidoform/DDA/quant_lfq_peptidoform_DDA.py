@@ -23,31 +23,42 @@ from proteobench.score.quant.quantscores import QuantScores
 
 
 class DDAQuantPeptidoformModule(QuantModule):
-    """DDA Quantification Module for Peptidoform level Quantification."""
+    """DDA Quantification Module for Peptidoform level Quantification.
+
+    Attributes
+    ----------
+    module_id : str
+        Module identifier for configuration.
+    parse_settings_dir : str
+        Directory containing parsing settings.
+    precursor_name: str
+        Level of quantification.
+    """
+
+    module_id: str = "quant_lfq_peptidoform_DDA"
+    parse_settings_dir: str = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "..",
+            "..",
+            "..",
+            "io",
+            "parsing",
+            "io_parse_settings",
+            "Quant",
+            "lfq",
+            "peptidoform",
+            "DDA",
+        )
+    )
 
     def __init__(
         self,
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
-        parse_settings_dir: str = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "..",
-                "..",
-                "..",
-                "..",
-                "io",
-                "parsing",
-                "io_parse_settings",
-                "Quant",
-                "lfq",
-                "peptidoform",
-                "DDA",
-            )
-        ),
-        module_id: str = "quant_lfq_peptidoform_DDA",
     ):
         """
         DDA Quantification Module for Peptidoform level Quantification.
@@ -56,18 +67,15 @@ class DDAQuantPeptidoformModule(QuantModule):
             token (str): GitHub token for the user.
             proteobot_repo_name (str): Repository for pull requests and adding new points.
             proteobench_repo_name (str): Repository for storing benchmarking results.
-            parse_settings_dir (str): Directory containing parsing settings.
-            module_id (str): Module identifier for configuration.
         """
         super().__init__(
             token,
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
-            parse_settings_dir=parse_settings_dir,
-            module_id=module_id,
+            parse_settings_dir=self.parse_settings_dir,
+            module_id=self.module_id,
         )
         self.precursor_name = "peptidoform"
-        self.module_id = module_id
 
     def is_implemented(self) -> bool:
         """Returns whether the module is fully implemented."""

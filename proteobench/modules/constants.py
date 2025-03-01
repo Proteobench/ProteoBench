@@ -1,6 +1,6 @@
 import pathlib
 
-IO_PARSE_SETTINGS_DIR = pathlib.Path(__file__) / ".." / ".." / ".." / ".." / "io" / "parsing" / "io_parse_settings"
+IO_PARSE_SETTINGS_DIR = pathlib.Path(__file__) / ".." / ".." / "io" / "parsing" / "io_parse_settings"
 QUANT_LFQ_SETTINGS_DIR = IO_PARSE_SETTINGS_DIR / "Quant" / "lfq"
 
 MODULE_SETTINGS_DIRS = {

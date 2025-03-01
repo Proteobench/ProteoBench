@@ -83,11 +83,11 @@ class QuantModule:
 
     def __init__(
         self,
-        token: Optional[str] = None,
-        proteobench_repo_name: str = "",
-        proteobot_repo_name: str = "",
-        parse_settings_dir: str = "",
-        module_id: str = "",
+        token: Optional[str],
+        proteobench_repo_name: str,
+        proteobot_repo_name: str,
+        parse_settings_dir: str,
+        module_id: str,
     ):
         """
         Initialize the QuantModule with GitHub repo and settings.

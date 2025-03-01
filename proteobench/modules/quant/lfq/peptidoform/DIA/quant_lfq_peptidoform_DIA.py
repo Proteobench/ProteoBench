@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import Optional, Tuple
 
 import pandas as pd
@@ -20,17 +19,27 @@ from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
+from proteobench.modules.quant.quant_base.constants import MODULE_SETTINGS_DIRS
 
 
 class DIAQuantPeptidoformModule(QuantModule):
-    """DIA Quantification Module for Peptidoform level Quantification."""
+    """DIA Quantification Module for Peptidoform level Quantification.
+
+    Attributes
+    ----------
+    module_id : str
+        Module identifier for configuration.
+    precursor_name: str
+        Level of quantification.
+    """
+
+    module_id = "quant_lfq_peptidoform_DIA"
 
     def __init__(
         self,
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DIA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DIA",
-        module_id: str = "quant_lfq_peptidoform_DIA",
     ):
         """
         DDA Quantification Module for Peptidoform level Quantification.
@@ -41,8 +50,17 @@ class DIAQuantPeptidoformModule(QuantModule):
             proteobench_repo_name (str): Name of the repository where the benchmarking results will be stored.
             module_id (str): Module identifier for configuration.
         """
-        raise NotImplementedError("This module init lacks required arguments for its parent class.")
-        super().__init__(token, proteobot_repo_name=proteobot_repo_name, proteobench_repo_name=proteobench_repo_name)
+        raise NotImplementedError(
+            "This module is not be implemented properly, no parse settings .toml files exist. After .toml files have "
+            "been added, the parse settings dir must be added to `MODULE_SETTINGS_DIRS` in the constants.py file!"
+        )
+        super().__init__(
+            token,
+            proteobot_repo_name=proteobot_repo_name,
+            proteobench_repo_name=proteobench_repo_name,
+            parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
+            module_id=self.module_id,
+        )
         self.precursor_name = "peptidoform"
 
     def is_implemented(self) -> bool:
@@ -82,9 +100,8 @@ class DIAQuantPeptidoformModule(QuantModule):
 
         # Parse settings file
         try:
-            parse_settings_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "io_parse_settings/Quant/DIA")
             parse_settings = ParseSettingsBuilder(
-                parse_settings_dir=parse_settings_dir, module_id=self.module_id
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")

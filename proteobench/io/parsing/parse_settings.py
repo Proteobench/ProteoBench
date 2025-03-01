@@ -13,13 +13,13 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
-    def __init__(self, parse_settings_dir: str, module_id: str = "quant_lfq_ion_DDA"):
+    def __init__(self, parse_settings_dir: str, module_id: str):
         """
         Initializes the settings builder with parse settings from TOML files.
 
         Args:
             parse_settings_dir (str): The directory containing the parse settings files.
-            module_id (str): The ID of the module used to fetch the specific parse settings. Defaults to "quant_lfq_ion_DDA".
+            module_id (str): The ID of the module used to fetch the specific parse settings.
         """
         self.PARSE_SETTINGS_TOMLS = toml.load(
             os.path.join(os.path.dirname(__file__), "io_parse_settings", "parse_settings_files.toml")

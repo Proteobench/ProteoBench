@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from proteobench.modules.quant.quant_base.constants import MODULE_SETTINGS_DIRS
+from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 
 
 @pytest.mark.parametrize(

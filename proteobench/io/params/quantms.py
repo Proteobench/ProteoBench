@@ -1,4 +1,5 @@
-"""quantms is a nextflow pipeline that execution depends on the settings in an
+"""
+Quantms is a nextflow pipeline that execution depends on the settings in an
 SDRF file. It is executed using a parameters file in JSON format.
 
 However, the version of packages are dumped to a versions yaml file. And some parameters
@@ -21,6 +22,16 @@ logger = logging.getLogger(__name__)
 def load_versions(file: IO) -> dict:
     """
     Load the versions of the tools used in the quantms pipeline.
+
+    Parameters
+    ----------
+    file : IO
+        File object of the quantms pipeline versions file.
+
+    Returns
+    -------
+    dict
+        Dictionary with the versions of the tools used in the quantms pipeline.
     """
     versions = yaml.safe_load(file)
     return versions
@@ -29,14 +40,39 @@ def load_versions(file: IO) -> dict:
 def load_parsed_sdrf(file: Union[str, pathlib.Path, IO]) -> pd.DataFrame:
     """
     Load the parsed SDRF file.
+
+    Parameters
+    ----------
+    file : Union[str, pathlib.Path, IO]
+        File object of the parsed SDRF file.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with the parsed SDRF file.
     """
     return pd.read_csv(file, sep="\t")
 
 
-def load_files(file1: IO, file2: IO, file3: IO = None) -> [dict, pd.DataFrame]:
-    """Load file independent of order they are provided in.
+def load_files(file1: IO, file2: IO, file3: IO = None) -> tuple[dict, pd.DataFrame | None, dict]:
+    """
+    Load file independent of order they are provided in.
 
     SDRF file is optional.
+
+    Parameters
+    ----------
+    file1 : IO
+        File object of the first file.
+    file2 : IO
+        File object of the second file.
+    file3 : IO, optional
+        File object of the third file, by default None.
+
+    Returns
+    -------
+    tuple[dict, pd.DataFrame | None, dict]
+        Tuple with the versions, parsed SDRF and pipeline parameters.
     """
     versions = None
     sdrf = None
@@ -99,6 +135,20 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
 
     This might be changed in a newer quantms version with one central parameters
     file.
+
+    Parameters
+    ----------
+    file1 : IO
+        File object of the first file.
+    file2 : IO
+        File object of the second file.
+    file3 : IO, optional
+        File object of the third file, by default None.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        Parameters extracted from the files.
     """
     versions, sdrf, pipeline_params = load_files(file1, file2, file3)
 

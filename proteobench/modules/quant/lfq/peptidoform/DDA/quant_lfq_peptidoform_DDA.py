@@ -27,7 +27,8 @@ from proteobench.score.quant.quantscores import QuantScores
 
 
 class DDAQuantPeptidoformModule(QuantModule):
-    """DDA Quantification Module for Peptidoform level Quantification.
+    """
+    DDA Quantification Module for Peptidoform level Quantification.
 
     Parameters
     ----------
@@ -54,6 +55,18 @@ class DDAQuantPeptidoformModule(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
     ):
+        """
+        Initialize the DDAQuantPeptidoformModule.
+
+        Parameters
+        ----------
+        token : str
+            GitHub token for the user.
+        proteobot_repo_name : str
+            Name of the repository for pull requests and where new points are added. Defaults to "Proteobot/Results_quant_peptidoform_DDA".
+        proteobench_repo_name : str
+            Name of the repository where the benchmarking results will be stored. Defaults to "Proteobench/Results_quant_peptidoform_DDA".
+        """
         super().__init__(
             token,
             proteobot_repo_name=proteobot_repo_name,

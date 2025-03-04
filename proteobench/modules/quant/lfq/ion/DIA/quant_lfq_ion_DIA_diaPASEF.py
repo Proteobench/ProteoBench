@@ -27,7 +27,8 @@ from proteobench.score.quant.quantscores import QuantScores
 
 
 class DIAQuantIonModulediaPASEF(QuantModule):
-    """DIA Quantification Module for Ion level Quantification for diaPASEF.
+    """
+    DIA Quantification Module for Ion level Quantification for diaPASEF.
 
     Parameters
     ----------
@@ -54,6 +55,18 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_diaPASEF",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_diaPASEF",
     ):
+        """
+        Initialize the DIAQuantIonModulediaPASEF.
+
+        Parameters
+        ----------
+        token : str
+            GitHub token for the user.
+        proteobot_repo_name : str
+            Name of the repository for pull requests and where new points are added. Defaults to "Proteobot/Results_quant_ion_DIA_diaPASEF".
+        proteobench_repo_name : str
+            Name of the repository where the benchmarking results will be stored. Defaults to "Proteobench/Results_quant_ion_DIA_diaPASEF".
+        """
         super().__init__(
             token,
             proteobot_repo_name=proteobot_repo_name,

@@ -25,7 +25,8 @@ from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 
 
 class DIAQuantPeptidoformModule(QuantModule):
-    """DIA Quantification Module for Peptidoform level Quantification.
+    """
+    DIA Quantification Module for Peptidoform level Quantification.
 
     Parameters
     ----------
@@ -52,6 +53,18 @@ class DIAQuantPeptidoformModule(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DIA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DIA",
     ):
+        """
+        Initialize the DIAQuantPeptidoformModule.
+
+        Parameters
+        ----------
+        token : str
+            GitHub token for the user.
+        proteobot_repo_name : str
+            Name of the repository for pull requests and where new points are added. Defaults to "Proteobot/Results_quant_peptidoform_DIA".
+        proteobench_repo_name : str
+            Name of the repository where the benchmarking results will be stored. Defaults to "Proteobench/Results_quant_peptidoform_DIA".
+        """
         raise NotImplementedError(
             "This module is not be implemented properly, no parse settings .toml files exist. After .toml files have "
             "been added, the parse settings dir must be added to `MODULE_SETTINGS_DIRS` in the constants.py file!"

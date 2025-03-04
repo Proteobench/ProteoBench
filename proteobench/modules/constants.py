@@ -1,3 +1,5 @@
+"""Constants for the proteobench module."""
+
 import pathlib
 
 IO_PARSE_SETTINGS_DIR = pathlib.Path(__file__) / ".." / ".." / "io" / "parsing" / "io_parse_settings"

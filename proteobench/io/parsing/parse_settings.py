@@ -13,7 +13,16 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
-    """Class to build the parser settings for a given input format."""
+    """
+    Class to build the parser settings for a given input format.
+
+    Parameters
+    ----------
+    parse_settings_dir : str
+        The directory containing the parse settings files, by default None.
+    module_id : str
+        The ID of the module used to fetch the specific parse settings.
+    """
 
     def __init__(self, parse_settings_dir: str, module_id: str):
         """

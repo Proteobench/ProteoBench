@@ -40,6 +40,16 @@ def load_versions(file: IO) -> dict:
 def load_parsed_sdrf(file: Union[str, pathlib.Path, IO]) -> pd.DataFrame:
     """
     Load the parsed SDRF file.
+
+    Parameters
+    ----------
+    file : Union[str, pathlib.Path, IO]
+        File path or file object of the parsed SDRF file.
+
+    Returns
+    -------
+    pd.DataFrame
+        Parsed SDRF file as a pandas DataFrame.
     """
     return pd.read_csv(file, sep="\t")
 

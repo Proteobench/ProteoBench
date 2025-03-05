@@ -19,9 +19,9 @@ from proteobench.exceptions import (
 )
 from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
-from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 
 
 class DIAQuantPeptidoformModule(QuantModule):
@@ -54,16 +54,16 @@ class DIAQuantPeptidoformModule(QuantModule):
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DIA",
     ):
         """
-        Initialize the DIAQuantPeptidoformModule.
+        Initialize the DIA Quantification Module for Peptidoform level Quantification.
 
         Parameters
         ----------
         token : str
             GitHub token for the user.
-        proteobot_repo_name : str
-            Name of the repository for pull requests and where new points are added. Defaults to "Proteobot/Results_quant_peptidoform_DIA".
-        proteobench_repo_name : str
-            Name of the repository where the benchmarking results will be stored. Defaults to "Proteobench/Results_quant_peptidoform_DIA".
+        proteobot_repo_name : str, optional
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_peptidoform_DIA".
+        proteobench_repo_name : str, optional
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_peptidoform_DIA".
         """
         raise NotImplementedError(
             "This module is not be implemented properly, no parse settings .toml files exist. After .toml files have "

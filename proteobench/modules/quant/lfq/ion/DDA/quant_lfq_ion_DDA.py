@@ -52,17 +52,18 @@ class DDAQuantIonModule(QuantModule):
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
     ):
         """
-        Initialize the DDADDAQuantIonModule.
+        Initialize the DDA Quantification Module for Ion level Quantification.
 
         Parameters
         ----------
         token : str
             GitHub token for the user.
-        proteobot_repo_name : str
-            Name of the repository for pull requests and where new points are added. Defaults to "Proteobot/Results_quant_ion_DDA".
-        proteobench_repo_name : str
-            Name of the repository where the benchmarking results will be stored. Defaults to "Proteobench/Results_quant_ion_DDA".
+        proteobot_repo_name : str, optional
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DDA".
+        proteobench_repo_name : str, optional
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DDA".
         """
+
         super().__init__(
             token,
             proteobot_repo_name=proteobot_repo_name,

@@ -40,16 +40,6 @@ def load_versions(file: IO) -> dict:
 def load_parsed_sdrf(file: Union[str, pathlib.Path, IO]) -> pd.DataFrame:
     """
     Load the parsed SDRF file.
-
-    Parameters
-    ----------
-    file : Union[str, pathlib.Path, IO]
-        File object of the parsed SDRF file.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with the parsed SDRF file.
     """
     return pd.read_csv(file, sep="\t")
 
@@ -139,16 +129,16 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     Parameters
     ----------
     file1 : IO
-        File object of the first file.
+        Versions File object.
     file2 : IO
-        File object of the second file.
-    file3 : IO, optional
-        File object of the third file, by default None.
+        SDRF File object.
+    file3 : IO
+        Pipeline parameters File object.
 
     Returns
     -------
     ProteoBenchParameters
-        Parameters extracted from the files.
+        The extracted parameters as a ProteoBenchParameters object.
     """
     versions, sdrf, pipeline_params = load_files(file1, file2, file3)
 

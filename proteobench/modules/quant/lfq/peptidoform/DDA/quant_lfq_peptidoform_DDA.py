@@ -56,16 +56,16 @@ class DDAQuantPeptidoformModule(QuantModule):
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
     ):
         """
-        Initialize the DDAQuantPeptidoformModule.
+        Initialize the DDA Quantification Module for Peptidoform level Quantification.
 
         Parameters
         ----------
         token : str
             GitHub token for the user.
-        proteobot_repo_name : str
-            Name of the repository for pull requests and where new points are added. Defaults to "Proteobot/Results_quant_peptidoform_DDA".
-        proteobench_repo_name : str
-            Name of the repository where the benchmarking results will be stored. Defaults to "Proteobench/Results_quant_peptidoform_DDA".
+        proteobot_repo_name : str, optional
+            Repository for pull requests and adding new points, by default "Proteobot/Results_quant_peptidoform_DDA".
+        proteobench_repo_name : str, optional
+            Repository for storing benchmarking results, by default "Proteobench/Results_quant_peptidoform_DDA".
         """
         super().__init__(
             token,

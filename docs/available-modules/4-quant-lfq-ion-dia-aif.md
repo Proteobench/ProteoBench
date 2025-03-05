@@ -254,4 +254,3 @@ the reviewers will accept it and make your data public.
 Please contact us if you have any issue. To do so, you can create an 
 [issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
 github, or [send us an email](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
-

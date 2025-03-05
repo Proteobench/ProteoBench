@@ -1,4 +1,6 @@
-"""Constants for the proteobench module."""
+"""
+Constants for the proteobench modules.
+"""
 
 import pathlib
 

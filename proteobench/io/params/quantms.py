@@ -139,11 +139,11 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     Parameters
     ----------
     file1 : IO
-        Versions File object.
+        File object of the first file.
     file2 : IO
-        SDRF File object.
+        File object of the second file.
     file3 : IO
-        Pipeline parameters File object.
+        File object of the third file.
 
     Returns
     -------
@@ -160,7 +160,7 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
         try:
             params.software_version = versions["Workflow"]["nf-core/quantms"]
         except KeyError:
-            raise ValueError(f"Workflow version not found in versionss {versions}")
+            raise ValueError(f"Workflow version not found in versions {versions}")
     engines = list()
     engines_version = list()
     for key in versions:

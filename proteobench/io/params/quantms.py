@@ -143,7 +143,7 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     file2 : IO
         File object of the second file.
     file3 : IO
-        File object of the third file.
+        File object of the third file, by default None.
 
     Returns
     -------

@@ -39,9 +39,6 @@ class VariablesDIAQuant:
     slider_id_uuid: str = "slider_id_dia_quant"
     download_selector_id_uuid: str = "download_selector_id_dia_quant"
     table_id_uuid: str = "table_id_dia_quant"
-
-    additional_params_json: str = "../webinterface/configuration/dia_quant.json"
-
     description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/ion/DIA/AIF/input_file_description.md"

@@ -9,7 +9,7 @@ are taken from the SDRF file.
 import json
 import logging
 import pathlib
-from typing import IO, Union
+from typing import IO, Tuple, Union
 
 import pandas as pd
 import yaml
@@ -54,7 +54,7 @@ def load_parsed_sdrf(file: Union[str, pathlib.Path, IO]) -> pd.DataFrame:
     return pd.read_csv(file, sep="\t")
 
 
-def load_files(file1: IO, file2: IO, file3: IO = None) -> tuple[dict, Union[pd.DataFrame, None], dict]:
+def load_files(file1: IO, file2: IO, file3: IO = None) -> Tuple[dict, Union[pd.DataFrame, None], dict]:
     """
     Load file independent of order they are provided in.
 

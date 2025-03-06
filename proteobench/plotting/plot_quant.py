@@ -1,4 +1,8 @@
-from typing import Dict, Optional
+"""
+Module for plotting quantitative proteomics data.
+"""
+
+from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -7,17 +11,26 @@ import plotly.graph_objects as go
 
 
 class PlotDataPoint:
+    """
+    Class for plotting data points.
+    """
+
     @staticmethod
     def plot_fold_change_histogram(result_df: pd.DataFrame, species_ratio: Dict[str, Dict[str, str]]) -> go.Figure:
         """
         Plot a histogram of log2 fold changes using Plotly, color-coded by species.
 
-        Args:
-            result_df (pd.DataFrame): The results DataFrame containing fold changes and species data.
-            species_ratio (Dict[str, Dict[str, str]]): A dictionary mapping species to their respective colors and ratios.
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            The results DataFrame containing fold changes and species data.
+        species_ratio : Dict[str, Dict[str, str]]
+            A dictionary mapping species to their respective colors and ratios.
 
-        Returns:
-            go.Figure: A Plotly figure object representing the histogram.
+        Returns
+        -------
+        go.Figure
+            A Plotly figure object representing the histogram.
         """
         # Filter data to include only known species
         result_df = result_df[result_df[["YEAST", "ECOLI", "HUMAN"]].any(axis=1)]
@@ -98,15 +111,25 @@ class PlotDataPoint:
         """
         Plot mean metrics in a scatter plot with Plotly, highlighting specific data points.
 
-        Args:
-            benchmark_metrics_df (pd.DataFrame): The DataFrame containing benchmark metrics data.
-            software_colors (Dict[str, str], optional): A dictionary mapping software names to their colors. Defaults to predefined colors.
-            mapping (Dict[str, int], optional): A dictionary mapping categories to scatter plot sizes. Defaults to {"old": 10, "new": 20}.
-            highlight_color (str, optional): The color used for highlighting certain points. Defaults to "#d30067".
-            label (str, optional): The column name for labeling data points. Defaults to "None".
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            The DataFrame containing benchmark metrics data.
+        metric : str, optional
+            The metric to plot, either "Median" or "Mean", by default "Median".
+        software_colors : Dict[str, str], optional
+            A dictionary mapping software names to their colors, by default predefined colors.
+        mapping : Dict[str, int], optional
+            A dictionary mapping categories to scatter plot sizes, by default {"old": 10, "new": 20}.
+        highlight_color : str, optional
+            The color used for highlighting certain points, by default "#d30067".
+        label : str, optional
+            The column name for labeling data points, by default "None".
 
-        Returns:
-            go.Figure: A Plotly figure object representing the scatter plot.
+        Returns
+        -------
+        go.Figure
+            A Plotly figure object representing the scatter plot.
         """
         all_median_abs_epsilon = [
             v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
@@ -257,11 +280,15 @@ class PlotDataPoint:
         """
         Plot the coefficient of variation (CV) for A and B groups using a violin plot.
 
-        Args:
-            result_df (pd.DataFrame): The DataFrame containing the CV values for A and B.
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            The results DataFrame containing the CV data.
 
-        Returns:
-            go.Figure: A Plotly figure object representing the violin plot.
+        Returns
+        -------
+        go.Figure:
+            A Plotly figure object representing the violin plot.
         """
         fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points=False)
         fig.update_layout(

@@ -1,3 +1,7 @@
+"""
+Variables for the DIA quantification module using diaPASEF.
+"""
+
 from dataclasses import dataclass, field
 from typing import List, Type
 
@@ -7,6 +11,10 @@ from pages.texts.generic_texts import WebpageTexts
 # TODO: restructure the variable names. Do this for the other pages_variables as well.
 @dataclass
 class VariablesDIAQuantdiaPASEF:
+    """
+    Variables for the DIA quantification module using diaPASEF.
+    """
+
     all_datapoints: str = "all_datapoints_dia_quant_diaPASEF"
     all_datapoints_submission: str = "all_datapoints_submission_dia_quant_diaPASEF"
     input_df_submission: str = "input_df_submission_dia_quant_diaPASEF"

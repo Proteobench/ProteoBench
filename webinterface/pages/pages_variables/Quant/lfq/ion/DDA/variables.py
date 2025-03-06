@@ -1,3 +1,7 @@
+"""
+Variables for the DDA quantification - precursor ions module.
+"""
+
 from dataclasses import dataclass, field
 from typing import List, Type
 
@@ -6,6 +10,10 @@ from pages.texts.generic_texts import WebpageTexts
 
 @dataclass
 class VariablesDDAQuant:
+    """
+    Variables for the DDA quantification - precursor ions module.
+    """
+
     all_datapoints: str = "all_datapoints"
     all_datapoints_submission: str = "all_datapoints_submission"
     input_df_submission: str = "input_df_submission"

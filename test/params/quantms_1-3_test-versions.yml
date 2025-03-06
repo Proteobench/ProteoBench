@@ -26,4 +26,3 @@ SEARCHENGINEMSGF:
 Workflow:
     nf-core/quantms: v1.3.1dev-gb7c9b6a
     Nextflow: 24.10.2
-

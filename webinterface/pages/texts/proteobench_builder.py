@@ -5,7 +5,18 @@ from pages.texts.generic_texts import WebpageTexts
 
 
 def proteobench_page_config(page_layout="wide"):
-    """Set some ProteoBench wide page settings"""
+    """
+    Set some ProteoBench wide page settings.
+
+    Parameters
+    ----------
+    page_layout : str, optional
+        Layout of the page (default: "wide").
+
+    Returns
+    -------
+    None
+    """
     try:
         st.set_page_config(
             page_title="Proteobench",
@@ -18,7 +29,14 @@ def proteobench_page_config(page_layout="wide"):
 
 
 def proteobench_sidebar(proteobench_logo="logos/logo_funding/main_logos_sidebar.png"):
-    """Format the sidebar for ProteoBench."""
+    """
+    Format the sidebar for ProteoBench.
+
+    Parameters
+    ----------
+    proteobench_logo : str, optional
+        Path to the ProteoBench logo image file (default: "logos/logo_funding/main_logos_sidebar.png").
+    """
     texts = WebpageTexts
 
     st.sidebar.image(proteobench_logo, width=300)

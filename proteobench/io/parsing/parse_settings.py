@@ -1,4 +1,4 @@
-"""All formats available for the module"""
+"""All formats available for the module."""
 
 from __future__ import annotations
 
@@ -13,14 +13,29 @@ from .parse_ion import get_proforma_bracketed
 
 
 class ParseSettingsBuilder:
+    """
+    Class to build the parser settings for a given input format.
+
+    Parameters
+    ----------
+    parse_settings_dir : str
+        The directory containing the parse settings files, by default None.
+    module_id : str
+        The ID of the module used to fetch the specific parse settings.
+    """
+
     def __init__(self, parse_settings_dir: str, module_id: str):
         """
-        Initializes the settings builder with parse settings from TOML files.
+        Initialize the ParseSettingsBuilder object.
 
-        Args:
-            parse_settings_dir (str): The directory containing the parse settings files.
-            module_id (str): The ID of the module used to fetch the specific parse settings.
+        Parameters
+        ----------
+        parse_settings_dir : str
+            The directory containing the parse settings files.
+        module_id : str
+            The ID of the module used to fetch the specific parse settings.
         """
+
         self.PARSE_SETTINGS_TOMLS = toml.load(
             os.path.join(os.path.dirname(__file__), "io_parse_settings", "parse_settings_files.toml")
         )
@@ -50,11 +65,15 @@ class ParseSettingsBuilder:
         """
         Build the parser for a given input format using the corresponding TOML files.
 
-        Args:
-            input_format (str): The input format to build the parser for (e.g., "MaxQuant", "Sage").
+        Parameters
+        ----------
+        input_format : str
+            The input format to build the parser for (e.g., "MaxQuant", "Sage").
 
-        Returns:
-            ParseSettings: The parser for the specified input format.
+        Returns
+        -------
+        ParseSettings
+            The parser for the specified input format.
         """
         toml_file = self.PARSE_SETTINGS_FILES[input_format]
         parse_settings = toml.load(toml_file)
@@ -68,16 +87,28 @@ class ParseSettingsBuilder:
 
 
 class ParseSettings:
-    """Structure that contains all the parameters used to parse
-    the given benchmark run output depending on the software tool used."""
+    """
+    Structure that contains all the parameters used to parse
+    the given benchmark run output depending on the software tool used.
+
+    Parameters
+    ----------
+    parse_settings : Dict[str, Any]
+        The settings for parsing, typically loaded from a TOML file.
+    parse_settings_module : Dict[str, Any]
+        Module-specific settings, typically loaded from a TOML file.
+    """
 
     def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
         """
         Initialize the ParseSettings object with the parameters from the TOML files.
 
-        Args:
-            parse_settings (Dict[str, Any]): The settings for parsing, typically loaded from a TOML file.
-            parse_settings_module (Dict[str, Any]): Module-specific settings, typically loaded from a TOML file.
+        Parameters
+        ----------
+        parse_settings : Dict[str, Any]
+            The settings for parsing, typically loaded from a TOML file.
+        parse_settings_module : Dict[str, Any]
+            Module-specific settings, typically loaded from a TOML file.
         """
         self.mapper = parse_settings["mapper"]
         self.condition_mapper = parse_settings["condition_mapper"]
@@ -93,8 +124,10 @@ class ParseSettings:
         """
         Get the species dictionary.
 
-        Returns:
-            Dict[str, str]: A dictionary of species mappings.
+        Returns
+        -------
+        Dict[str, str]
+            A dictionary of species mappings.
         """
         return self._species_dict
 
@@ -102,8 +135,10 @@ class ParseSettings:
         """
         Get the expected species ratio.
 
-        Returns:
-            float: The expected ratio of species.
+        Returns
+        -------
+        float
+            The expected ratio of species.
         """
         return self._species_expected_ratio
 
@@ -111,11 +146,15 @@ class ParseSettings:
         """
         Convert a software tool output into a generic format supported by the module.
 
-        Args:
-            df (pd.DataFrame): The input DataFrame to convert.
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
 
-        Returns:
-            tuple[pd.DataFrame, Dict[int, List[str]]]: The converted DataFrame and a dictionary mapping replicates to raw data.
+        Returns
+        -------
+        tuple[pd.DataFrame, Dict[int, List[str]]]
+            The converted DataFrame and a dictionary mapping replicates to raw data.
         """
         # TODO: Add functionality/steps in docstring.
         if not all(k in df.columns for k in self.mapper.keys()):
@@ -184,13 +223,27 @@ class ParseSettings:
 
 
 class ParseModificationSettings:
+    """
+    Class to handle modifications-specific parsing settings.
+
+    Parameters
+    ----------
+    parser : ParseSettings
+        The base parse settings object.
+    parse_settings : Dict[str, Any]
+        The modifications-specific parse settings.
+    """
+
     def __init__(self, parser: ParseSettings, parse_settings: Dict[str, Any]):
         """
         Initialize the ParseModificationSettings object.
 
-        Args:
-            parser (ParseSettings): The base parse settings object.
-            parse_settings (Dict[str, Any]): The modifications-specific parse settings.
+        Parameters
+        ----------
+        parser : ParseSettings
+            The base parse settings object.
+        parse_settings : Dict[str, Any]
+            The modifications-specific parse settings.
         """
         self.parser = parser
         self.modifications_mapper = parse_settings["modifications_parser"]["modification_dict"]
@@ -205,8 +258,10 @@ class ParseModificationSettings:
         """
         Get the species dictionary from the parser.
 
-        Returns:
-            Dict[str, str]: The species dictionary.
+        Returns
+        -------
+        Dict[str, str]
+            The species dictionary.
         """
         return self.parser.species_dict()
 
@@ -214,8 +269,10 @@ class ParseModificationSettings:
         """
         Get the expected species ratio from the parser.
 
-        Returns:
-            float: The expected species ratio.
+        Returns
+        -------
+        float
+            The expected species ratio.
         """
         return self.parser.species_expected_ratio()
 
@@ -223,11 +280,15 @@ class ParseModificationSettings:
         """
         Convert the DataFrame to a standard format, adding modifications to the 'proforma' column.
 
-        Args:
-            df (pd.DataFrame): The input DataFrame to convert.
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
 
-        Returns:
-            tuple[pd.DataFrame, Dict[int, List[str]]]: The converted DataFrame and a dictionary mapping replicates to raw data.
+        Returns
+        -------
+        tuple[pd.DataFrame, Dict[int, List[str]]]
+            The converted DataFrame and a dictionary mapping replicates to raw data.
         """
         df, replicate_to_raw = self.parser.convert_to_standard_format(df)
         df["proforma"] = df[self.modifications_parse_column].apply(

@@ -1,4 +1,4 @@
-"""ProteoBench"""
+"""ProteoBench."""
 
 from importlib.metadata import version
 

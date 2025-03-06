@@ -321,4 +321,3 @@ Exclusion of fragments shared between heavy and light peptides from quantificati
 [209:51] Stats report saved to Q:\MISC_PERSONAL\Bart\Proteobench\Module_DIA_Quant\ProteoBenchFASTA_DDAQuantification\DIANN_output_20240229_report.stats.tsv
 
 Finished
-

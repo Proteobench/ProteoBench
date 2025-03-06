@@ -1,3 +1,7 @@
+"""
+Streamlit UI for the DIA quantification - precursor ions module - AIF.
+"""
+
 import logging
 from typing import Any, Dict, Type
 
@@ -14,7 +18,14 @@ from proteobench.modules.quant.lfq.ion.DIA.quant_lfq_ion_DIA_AIF import (
 
 
 class StreamlitUI:
+    """
+    Streamlit UI for the DIA quantification - precursor ions module - AIF.
+    """
+
     def __init__(self):
+        """
+        Initialize the Streamlit UI for the DIA quantification - precursor ions module - AIF.
+        """
         self.variables_dia_quant: VariablesDIAQuant = VariablesDIAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
 
@@ -39,7 +50,7 @@ class StreamlitUI:
 
     def _main_page(self) -> None:
         """
-        Sets up the main page layout for the Streamlit application.
+        Set up the main page layout for the Streamlit application.
         """
         # Create tabs
         (

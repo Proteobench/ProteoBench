@@ -2,5 +2,12 @@
 
 
 def is_implemented() -> bool:
-    """Returns whether the module is fully implemented."""
+    """
+    Return whether the module is fully implemented.
+
+    Returns
+    -------
+    bool
+        True if the module is fully implemented, False otherwise.
+    """
     return False

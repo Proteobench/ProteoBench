@@ -320,7 +320,7 @@ def _load_wombat(input_csv: str) -> pd.DataFrame:
     return input_data_frame
 
 
-def _load_prolinestudio(input_csv: str) -> pd.DataFrame:
+def _load_prolinestudio_msangel(input_csv: str) -> pd.DataFrame:
     input_data_frame = pd.read_excel(
         input_csv,
         sheet_name="Quantified peptide ions",
@@ -443,7 +443,8 @@ _LOAD_FUNCTIONS = {
     "Sage": _load_sage,
     "FragPipe": _load_fragpipe,
     "WOMBAT": _load_wombat,
-    "ProlineStudio": _load_prolinestudio,
+    "ProlineStudio": _load_prolinestudio_msangel,
+    "MSAngel": _load_prolinestudio_msangel,
     "i2MassChroQ": _load_i2masschroq,
     "Custom": _load_custom,
     "DIA-NN": _load_diann,

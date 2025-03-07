@@ -324,19 +324,23 @@ def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
     )
     return input_data_frame
 
+
 def _load_wombat(input_csv: str) -> pd.DataFrame:
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
     input_data_frame["proforma"] = input_data_frame["modified_peptide"]
     return input_data_frame
+
 
 def _load_custom(input_csv: str) -> pd.DataFrame:
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     input_data_frame["proforma"] = input_data_frame["Modified sequence"]
     return input_data_frame
 
+
 def _load_peaks(input_csv: str) -> pd.DataFrame:
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
     return input_data_frame
+
 
 _LOAD_FUNCTIONS = {
     "Proteome Discoverer": _load_proteome_discoverer,

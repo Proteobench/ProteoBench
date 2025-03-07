@@ -25,118 +25,12 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    input_data_frame: pd.DataFrame
-    if input_format == "MaxQuant":
-        input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-    elif input_format == "AlphaPept":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, dtype={"charge": int})
-    elif input_format == "Sage":
-        input_data_frame = pd.read_csv(input_csv, sep="\t", low_memory=False)
-    elif input_format == "FragPipe":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
-    elif input_format == "WOMBAT":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-        input_data_frame["proforma"] = input_data_frame["modified_peptide"]
-    elif (
-        input_format == "ProlineStudio" or input_format == "MSAngel"
-    ):  # Proline Studio and MSAngel have the same output format but the .toml is different
-        input_data_frame = pd.read_excel(
-            input_csv,
-            sheet_name="Quantified peptide ions",
-            header=0,
-            index_col=None,
-        )
-        input_data_frame["modifications"] = input_data_frame["modifications"].fillna("")
-        input_data_frame["subsets_accessions"] = input_data_frame["subsets_accessions"].fillna("")
-        input_data_frame["proforma"] = input_data_frame.apply(
-            lambda x: aggregate_modification_column(x.sequence, x.modifications),
-            axis=1,
-        )
-        # combine the sameset and subset accessions:
-        # first combine the accessions:
-        input_data_frame["proteins"] = input_data_frame["samesets_accessions"] + input_data_frame[
-            "subsets_accessions"
-        ].apply(lambda x: "; " + x if len(x) > 0 else "")
-        # then sort the unique accessions:
-        input_data_frame["proteins"] = input_data_frame["proteins"].apply(lambda x: "; ".join(sorted(x.split("; "))))
-        # drop the duplicates:
-        input_data_frame.drop_duplicates(
-            subset=["proforma", "master_quant_peptide_ion_charge", "proteins"], inplace=True
-        )
-        # combine the duplicated precursor ions because proline reports one row per precursor + accession:
-        group_cols = ["proforma", "master_quant_peptide_ion_charge"]
-        agg_funcs = {col: "first" for col in input_data_frame.columns if col not in group_cols + ["proteins"]}
-        input_data_frame = (
-            input_data_frame.groupby(group_cols).agg({"proteins": lambda x: "; ".join(x), **agg_funcs}).reset_index()
-        )
-    elif input_format == "i2MassChroQ":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["proforma"] = input_data_frame["ProForma"]
-    elif input_format == "Custom":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["proforma"] = input_data_frame["Modified sequence"]
-    elif input_format == "DIA-NN":
-        if isinstance(input_csv, str):
-            filename = input_csv
-        else:  # streamlit OpenedFile object
-            filename = input_csv.name
-        if filename.endswith(".parquet"):
-            input_data_frame = pd.read_parquet(input_csv)
-        else:
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-    elif input_format == "AlphaDIA":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
-        mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
-        mapper = mapper_df["description"].to_dict()
-        input_data_frame["genes"] = input_data_frame["genes"].map(
-            lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
-        )
-        input_data_frame["proforma"] = input_data_frame.apply(
-            lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
-            axis=1,
-        )
-    elif input_format == "FragPipe (DIA-NN quant)":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
-        mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
-        mapper = mapper_df["description"].to_dict()
-        input_data_frame["Protein.Names"] = input_data_frame["Protein.Ids"].map(mapper)
-    elif input_format == "FragPipe":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
-    elif input_format == "Spectronaut":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        if input_data_frame["FG.Quantity"].dtype == object:
-            input_csv.seek(0)
-            input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t", decimal=",")
-        input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
-        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
-        mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
-        mapper = mapper_df["description"].to_dict()
-        input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.split(";")
-        input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].map(
-            lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
-        )
-        input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
-    elif input_format == "MSAID":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-    elif input_format == "PEAKS":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-    elif input_format == "quantms":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False)
-        input_data_frame = input_data_frame.assign(
-            proforma=input_data_frame["PeptideSequence"].str.replace(
-                r"\(([^)]+)\)",
-                r"",
-                regex=True,
-            ),
-        )
-        input_data_frame["Sequence"] = input_data_frame["PeptideSequence"].str.replace(r"\(([^)]+)\)", r"", regex=True)
-    else:
-        raise ValueError(f"Input format '{input_format}' not recognized.")
-    return input_data_frame
+    try:
+        load_function = _LOAD_FUNCTIONS[input_format]
+    except KeyError as e:
+        raise ValueError(f"Invalid input format: {input_format}") from e
+
+    return load_function(input_csv)
 
 
 def aggregate_modification_column(
@@ -400,3 +294,164 @@ def get_proforma_bracketed(
             new_seq += aa
 
     return new_seq
+
+
+def _load_maxquant(input_csv: str) -> pd.DataFrame:
+    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+
+
+def _load_alphapept(input_csv: str) -> pd.DataFrame:
+    return pd.read_csv(input_csv, low_memory=False, dtype={"charge": int})
+
+
+def _load_sage(input_csv: str) -> pd.DataFrame:
+    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+
+
+def _load_fragpipe(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
+    return input_data_frame
+
+
+def _load_wombat(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
+    return input_data_frame
+
+
+def _load_prolinestudio_msangel(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_excel(
+        input_csv,
+        sheet_name="Quantified peptide ions",
+        header=0,
+        index_col=None,
+    )
+    input_data_frame["modifications"] = input_data_frame["modifications"].fillna("")
+    input_data_frame["subsets_accessions"] = input_data_frame["subsets_accessions"].fillna("")
+    input_data_frame["proforma"] = input_data_frame.apply(
+        lambda x: aggregate_modification_column(x.sequence, x.modifications),
+        axis=1,
+    )
+    # combine the sameset and subset accessions:
+    # first combine the accessions:
+    input_data_frame["proteins"] = input_data_frame["samesets_accessions"] + input_data_frame[
+        "subsets_accessions"
+    ].apply(lambda x: "; " + x if len(x) > 0 else "")
+    # then sort the unique accessions:
+    input_data_frame["proteins"] = input_data_frame["proteins"].apply(lambda x: "; ".join(sorted(x.split("; "))))
+    # drop the duplicates:
+    input_data_frame.drop_duplicates(subset=["proforma", "master_quant_peptide_ion_charge", "proteins"], inplace=True)
+    # combine the duplicated precursor ions because proline reports one row per precursor + accession:
+    group_cols = ["proforma", "master_quant_peptide_ion_charge"]
+    agg_funcs = {col: "first" for col in input_data_frame.columns if col not in group_cols + ["proteins"]}
+    input_data_frame = (
+        input_data_frame.groupby(group_cols).agg({"proteins": lambda x: "; ".join(x), **agg_funcs}).reset_index()
+    )
+    return input_data_frame
+
+
+def _load_i2masschroq(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["proforma"] = input_data_frame["ProForma"]
+    return input_data_frame
+
+
+def _load_custom(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["proforma"] = input_data_frame["Modified sequence"]
+    return input_data_frame
+
+
+def _load_diann(input_csv: str) -> pd.DataFrame:
+    if isinstance(input_csv, str):
+        filename = input_csv
+    else:  # streamlit OpenedFile object
+        filename = input_csv.name
+    if filename.endswith(".parquet"):
+        input_data_frame = pd.read_parquet(input_csv)
+    else:
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    return input_data_frame
+
+
+def _load_alphadia(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    input_data_frame["genes"] = input_data_frame["genes"].map(
+        lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
+    )
+    input_data_frame["proforma"] = input_data_frame.apply(
+        lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
+        axis=1,
+    )
+    return input_data_frame
+
+
+def _load_fragpipe_diann_quant(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    input_data_frame["Protein.Names"] = input_data_frame["Protein.Ids"].map(mapper)
+    return input_data_frame
+
+
+def _load_spectronaut(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    if input_data_frame["FG.Quantity"].dtype == object:
+        input_csv.seek(0)
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t", decimal=",")
+    input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.split(";")
+    input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].map(
+        lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
+    )
+    input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
+    return input_data_frame
+
+
+def _load_msaid(input_csv: str) -> pd.DataFrame:
+    return pd.read_csv(input_csv, low_memory=False, sep="\t")
+
+
+def _load_peaks(input_csv: str) -> pd.DataFrame:
+    return pd.read_csv(input_csv, low_memory=False, sep=",")
+
+
+def _load_quantms(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False)
+    input_data_frame = input_data_frame.assign(
+        proforma=input_data_frame["PeptideSequence"].str.replace(
+            r"\(([^)]+)\)",
+            r"",
+            regex=True,
+        ),
+    )
+    input_data_frame["Sequence"] = input_data_frame["PeptideSequence"].str.replace(r"\(([^)]+)\)", r"", regex=True)
+    return input_data_frame
+
+
+_LOAD_FUNCTIONS = {
+    "MaxQuant": _load_maxquant,
+    "AlphaPept": _load_alphapept,
+    "Sage": _load_sage,
+    "FragPipe": _load_fragpipe,
+    "WOMBAT": _load_wombat,
+    "ProlineStudio": _load_prolinestudio_msangel,
+    "MSAngel": _load_prolinestudio_msangel,
+    "i2MassChroQ": _load_i2masschroq,
+    "Custom": _load_custom,
+    "DIA-NN": _load_diann,
+    "AlphaDIA": _load_alphadia,
+    "FragPipe (DIA-NN quant)": _load_fragpipe_diann_quant,
+    "Spectronaut": _load_spectronaut,
+    "MSAID": _load_msaid,
+    "PEAKS": _load_peaks,
+    "quantms": _load_quantms,
+}

@@ -3,7 +3,7 @@ Module for parsing peptidoform strings and extracting modifications.
 """
 
 import re
-from typing import Dict, Optional
+from typing import Dict
 
 import pandas as pd
 
@@ -24,25 +24,12 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe with the required columns added (like "proforma").
     """
+    try:
+        load_function = _LOAD_FUNCTIONS[input_format]
+    except KeyError as e:
+        raise ValueError(f"Invalid input format: {input_format}") from e
 
-    input_data_frame: pd.DataFrame
-    if input_format == "Proteome Discoverer":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["Modifications"].fillna("", inplace=True)
-        input_data_frame["proforma"] = input_data_frame.apply(
-            lambda x: aggregate_modification_column(x["Sequence"], x["Modifications"]),
-            axis=1,
-        )
-    if input_format == "WOMBAT":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-        input_data_frame["proforma"] = input_data_frame["modified_peptide"]
-    elif input_format == "Custom":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["proforma"] = input_data_frame["Modified sequence"]
-    elif input_format == "PEAKS":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-
-    return input_data_frame
+    return load_function(input_csv)
 
 
 def aggregate_modification_column(
@@ -326,3 +313,34 @@ def get_proforma_bracketed(
             new_seq += aa
 
     return new_seq
+
+
+def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["Modifications"].fillna("", inplace=True)
+    input_data_frame["proforma"] = input_data_frame.apply(
+        lambda x: aggregate_modification_column(x["Sequence"], x["Modifications"]),
+        axis=1,
+    )
+    return input_data_frame
+
+def _load_wombat(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    input_data_frame["proforma"] = input_data_frame["modified_peptide"]
+    return input_data_frame
+
+def _load_custom(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["proforma"] = input_data_frame["Modified sequence"]
+    return input_data_frame
+
+def _load_peaks(input_csv: str) -> pd.DataFrame:
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    return input_data_frame
+
+_LOAD_FUNCTIONS = {
+    "Proteome Discoverer": _load_proteome_discoverer,
+    "WOMBAT": _load_wombat,
+    "Custom": _load_custom,
+    "PEAKS": _load_peaks,
+}

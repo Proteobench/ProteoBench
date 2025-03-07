@@ -33,7 +33,6 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     return load_function(input_csv)
 
 
-
 def aggregate_modification_column(
     input_string_seq: str,
     input_string_modifications: str,
@@ -398,7 +397,6 @@ def _load_fragpipe_diann_quant(input_csv: str) -> pd.DataFrame:
     mapper = mapper_df["description"].to_dict()
     input_data_frame["Protein.Names"] = input_data_frame["Protein.Ids"].map(mapper)
     return input_data_frame
-
 
 
 def _load_spectronaut(input_csv: str) -> pd.DataFrame:

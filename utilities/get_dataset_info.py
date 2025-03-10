@@ -7,6 +7,8 @@ provided as download.
 
 import requests
 
+# TODO: this does not work anymore! The concatenated JSON file is not available anymore
+
 # URLs of the JSON file
 repo_jsons = {
     "DDA quantification - precursor ions": "https://raw.githubusercontent.com/Proteobench/Results_quant_ion_DDA/main/results.json",

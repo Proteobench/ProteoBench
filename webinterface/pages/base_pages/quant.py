@@ -20,6 +20,7 @@ from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
     DDAQuantIonModule as IonModule,
 )
@@ -484,6 +485,14 @@ class QuantUIObjects:
             return None
 
         self.clear_highlight_column()
+        # MaxQuant fixed modification handling
+        if self.user_input["input_format"] == "MaxQuant":
+            st.session_state[self.variables_quant.result_perf] = add_maxquant_fixed_modifications(
+                params, st.session_state[self.variables_quant.result_perf]
+            )
+            # Overwrite the dataframes for submission
+            self.copy_dataframes_for_submission()
+
         pr_url = self.create_pull_request(params)
 
         if pr_url:
@@ -822,6 +831,8 @@ class QuantUIObjects:
         )
 
         self.user_input["input_csv"].getbuffer()
+
+        st.session_state[self.variables_quant.result_performance_submission].to_csv("test.csv", index=False)
 
         if "storage" in st.secrets.keys():
             logger.info("Save intermediate raw")

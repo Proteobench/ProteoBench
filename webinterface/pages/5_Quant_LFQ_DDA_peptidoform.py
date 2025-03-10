@@ -8,14 +8,12 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
+from pages.pages_variables.Quant.lfq_DDA_peptidoform_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
     DDAQuantPeptidoformModule,
-)
-from webinterface.pages.pages_variables.Quant.lfq_DDA_peptidoform_variables import (
-    VariablesDDAQuant,
 )
 
 

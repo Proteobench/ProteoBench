@@ -28,6 +28,7 @@ dependencies = [
   "toml",
   "PyGithub",
   "GitPython",
+  "psm-utils",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"

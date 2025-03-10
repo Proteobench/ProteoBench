@@ -189,7 +189,10 @@ class GithubProteobotRepo:
                 with open(file_path, "r") as f:
                     data.append(pd.read_json(f, typ="series"))
         if not data:
-            self.read_results_json_repo_single_file()
+            try:
+                self.read_results_json_repo_single_file()
+            except FileNotFoundError:
+                data = []
 
         return pd.DataFrame(data)
 

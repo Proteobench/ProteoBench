@@ -1,5 +1,5 @@
 """
-Streamlit UI for the DDA quantification - precursor ions module.
+Main Streamlit UI for the DDA quantification - peptidoform module.
 """
 
 import logging
@@ -11,20 +11,22 @@ from pages.base_pages.quant import QuantUIObjects
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
-from webinterface.pages.pages_variables.Quant.lfq_ion_DDA_variables import (
+from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
+    DDAQuantPeptidoformModule,
+)
+from webinterface.pages.pages_variables.Quant.lfq_DDA_peptidoform_variables import (
     VariablesDDAQuant,
 )
 
 
 class StreamlitUI:
     """
-    Streamlit UI for the DDA quantification - precursor ions module.
+    Streamlit UI for the DDA quantification - peptidoform module.
     """
 
     def __init__(self):
         """
-        Initialize the Streamlit UI for the DDA quantification - precursor ions module.
+        Initialize the Streamlit UI for the DDA quantification - peptidoform module.
         """
         self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
@@ -39,18 +41,22 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: DDAQuantIonModule = DDAQuantIonModule(token=token)
+
+        self.peptidoform_module: DDAQuantPeptidoformModule = DDAQuantPeptidoformModule(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder(
-            module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dda_quant.parse_settings_dir
+            parse_settings_dir=self.variables_dda_quant.parse_settings_dir, module_id=self.peptidoform_module.module_id
         )
 
-        self.quant_uiobjects = QuantUIObjects(self.variables_dda_quant, self.ionmodule, self.parsesettingsbuilder)
+        self.quant_uiobjects = QuantUIObjects(
+            self.variables_dda_quant, self.peptidoform_module, self.parsesettingsbuilder
+        )
 
         self._main_page()
 
     def _main_page(self) -> None:
         """
         Set up the main page layout for the Streamlit application.
+        This includes the title, module descriptions, input forms, and configuration settings.
         """
         # Create tabs
         (
@@ -81,7 +87,6 @@ class StreamlitUI:
         # Tab 2: Submission Details
         with tab_submission_details:
             st.title(self.variables_dda_quant.title)
-
             st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
@@ -92,7 +97,6 @@ class StreamlitUI:
         # Tab 2.5: in-depth plots current data
         with tab_indepth_plots:
             st.title(self.variables_dda_quant.title)
-
             st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             if self.variables_dda_quant.beta_warning:
                 st.warning(

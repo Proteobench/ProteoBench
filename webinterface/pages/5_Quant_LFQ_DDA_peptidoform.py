@@ -15,6 +15,9 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
     DDAQuantPeptidoformModule,
 )
+from webinterface.pages.pages_variables.Quant.lfq_peptidoform_DDA_variables import (
+    VariablesDDAQuant,
+)
 
 
 class StreamlitUI:

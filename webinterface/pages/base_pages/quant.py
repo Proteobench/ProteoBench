@@ -24,7 +24,7 @@ from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
     DDAQuantIonModule as IonModule,
 )
 from proteobench.plotting.plot_quant import PlotDataPoint
-from webinterface.pages.pages_variables.Quant.lfq_ion_DDA_variables import (
+from webinterface.pages.pages_variables.Quant.lfq_DDA_ion_variables import (
     VariablesDDAQuant,
 )
 

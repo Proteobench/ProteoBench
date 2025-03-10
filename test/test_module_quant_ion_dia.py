@@ -29,8 +29,8 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "io_parse_settings",
         "Quant",
         "lfq",
-        "ion",
         "DIA",
+        "ion",
         "AIF",
     )
 )

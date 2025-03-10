@@ -8,11 +8,13 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
-from pages.pages_variables.Quant.lfq.ion.DDA.variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
+from webinterface.pages.pages_variables.Quant.lfq_ion_DDA_variables import (
+    VariablesDDAQuant,
+)
 
 
 class StreamlitUI:

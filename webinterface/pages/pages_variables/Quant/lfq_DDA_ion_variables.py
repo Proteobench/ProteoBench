@@ -63,7 +63,7 @@ class VariablesDDAQuant:
     description_results_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/result_description.md"
     description_submission_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/ion/DDA"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion"
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"

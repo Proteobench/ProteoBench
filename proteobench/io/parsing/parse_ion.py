@@ -297,30 +297,108 @@ def get_proforma_bracketed(
 
 
 def _load_maxquant(input_csv: str) -> pd.DataFrame:
+    """
+    Load a MaxQuant output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the MaxQuant output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     return pd.read_csv(input_csv, sep="\t", low_memory=False)
 
 
 def _load_alphapept(input_csv: str) -> pd.DataFrame:
+    """
+    Load a AlphaPept output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the AlphaPept output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     return pd.read_csv(input_csv, low_memory=False, dtype={"charge": int})
 
 
 def _load_sage(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Sage output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the Sage output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     return pd.read_csv(input_csv, sep="\t", low_memory=False)
 
 
 def _load_fragpipe(input_csv: str) -> pd.DataFrame:
+    """
+    Load a FragPipe output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the FragPipe output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
     return input_data_frame
 
 
 def _load_wombat(input_csv: str) -> pd.DataFrame:
+    """
+    Load a WOMBAT output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the WOMBAT output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
     return input_data_frame
 
 
 def _load_prolinestudio_msangel(input_csv: str) -> pd.DataFrame:
+    """
+    Load a MSAngel/ProlineStudio output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the MSAngel/ProlineStudio output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_excel(
         input_csv,
         sheet_name="Quantified peptide ions",
@@ -352,18 +430,57 @@ def _load_prolinestudio_msangel(input_csv: str) -> pd.DataFrame:
 
 
 def _load_i2masschroq(input_csv: str) -> pd.DataFrame:
+    """
+    Load a i2MassChroQ output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the i2MassChroQ output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     input_data_frame["proforma"] = input_data_frame["ProForma"]
     return input_data_frame
 
 
 def _load_custom(input_csv: str) -> pd.DataFrame:
+    """
+    Load a custom output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the custom output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     input_data_frame["proforma"] = input_data_frame["Modified sequence"]
     return input_data_frame
 
 
 def _load_diann(input_csv: str) -> pd.DataFrame:
+    """
+    Load a DIA-NN output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the DIA-NN output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     if isinstance(input_csv, str):
         filename = input_csv
     else:  # streamlit OpenedFile object
@@ -376,6 +493,19 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
 
 
 def _load_alphadia(input_csv: str) -> pd.DataFrame:
+    """
+    Load a AlphaDIA output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the AlphaDIA output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
@@ -391,6 +521,19 @@ def _load_alphadia(input_csv: str) -> pd.DataFrame:
 
 
 def _load_fragpipe_diann_quant(input_csv: str) -> pd.DataFrame:
+    """
+    Load a FragPipe (DIA-NN) output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the FragPipe (DIA-NN) output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
@@ -400,6 +543,19 @@ def _load_fragpipe_diann_quant(input_csv: str) -> pd.DataFrame:
 
 
 def _load_spectronaut(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Spectronaut output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the Spectronaut output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     if input_data_frame["FG.Quantity"].dtype == object:
         input_csv.seek(0)
@@ -417,14 +573,53 @@ def _load_spectronaut(input_csv: str) -> pd.DataFrame:
 
 
 def _load_msaid(input_csv: str) -> pd.DataFrame:
+    """
+    Load a MSAID output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the MSAID output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     return pd.read_csv(input_csv, low_memory=False, sep="\t")
 
 
 def _load_peaks(input_csv: str) -> pd.DataFrame:
+    """
+    Load a PEAKS output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the PEAKS output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     return pd.read_csv(input_csv, low_memory=False, sep=",")
 
 
 def _load_quantms(input_csv: str) -> pd.DataFrame:
+    """
+    Load a QuantMS output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the QuantMS output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False)
     input_data_frame = input_data_frame.assign(
         proforma=input_data_frame["PeptideSequence"].str.replace(

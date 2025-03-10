@@ -316,6 +316,19 @@ def get_proforma_bracketed(
 
 
 def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Proteome Discoverer output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the Proteome Discoverer output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     input_data_frame["Modifications"].fillna("", inplace=True)
     input_data_frame["proforma"] = input_data_frame.apply(
@@ -326,18 +339,57 @@ def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
 
 
 def _load_wombat(input_csv: str) -> pd.DataFrame:
+    """
+    Load a WOMBAT output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the WOMBAT output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
     input_data_frame["proforma"] = input_data_frame["modified_peptide"]
     return input_data_frame
 
 
 def _load_custom(input_csv: str) -> pd.DataFrame:
+    """
+    Load a custom output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the custom output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     input_data_frame["proforma"] = input_data_frame["Modified sequence"]
     return input_data_frame
 
 
 def _load_peaks(input_csv: str) -> pd.DataFrame:
+    """
+    Load a PEAKS output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the PEAKS output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
     return input_data_frame
 

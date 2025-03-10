@@ -65,7 +65,7 @@ class VariablesDDAQuant:
     description_results_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/result_description.md"
     description_submission_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/peptidoform/DDA"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/peptidoform/"
 
     texts: Type[WebpageTexts] = WebpageTexts
 

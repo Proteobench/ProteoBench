@@ -17,7 +17,7 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
-from webinterface.pages.pages_variables.Quant.lfq_ion_DIA_diaPASEF_variables import (
+from webinterface.pages.pages_variables.Quant.lfq_DIA_ion_diaPASEF_variables import (
     VariablesDIAQuantdiaPASEF,
 )
 

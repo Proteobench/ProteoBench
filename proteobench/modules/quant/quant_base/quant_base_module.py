@@ -353,10 +353,6 @@ class QuantModule:
             return False
 
         branch_name = current_datapoint["id"].replace(" ", "_").replace("(", "").replace(")", "")
-        path_write = os.path.join(self.t_dir_pr, "results.json")
-        logging.info(f"Writing the json to: {path_write}")
-        with open(path_write, "w") as f:
-            all_datapoints.to_json(f, orient="records", indent=2)
 
         path_write_individual_point = os.path.join(self.t_dir_pr, current_datapoint["intermediate_hash"] + ".json")
         logging.info(f"Writing the json (single point) to: {path_write_individual_point}")
@@ -392,6 +388,9 @@ class QuantModule:
         str
             The path to the written JSON file.
         """
+
+        # TODO: need to test if this still works...
+
         os.mkdir(self.t_dir_pr)
 
         current_datapoint = temporary_datapoints.iloc[-1]

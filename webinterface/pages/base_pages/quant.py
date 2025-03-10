@@ -13,7 +13,6 @@ from typing import Any, Dict, Optional
 import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import plotly.graph_objects as go
-import psm_utils as pu
 import streamlit as st
 import streamlit_utils
 from pages.pages_variables.Quant.lfq.ion.DDA.variables import VariablesDDAQuant

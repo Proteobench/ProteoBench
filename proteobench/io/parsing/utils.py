@@ -7,7 +7,6 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def add_fixed_mod(proforma: str, mod_name: str, aas: str) -> str:
-
     proforma, charge = proforma.split("|")
     peptidoform = pu.Peptidoform(proforma)
     peptidoform.add_fixed_modifications([(mod_name, aas)])

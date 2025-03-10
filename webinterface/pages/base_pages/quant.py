@@ -23,9 +23,6 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule as IonModule
 from proteobench.plotting.plot_quant import PlotDataPoint
-from webinterface.pages.pages_variables.Quant.lfq_DDA_ion_variables import (
-    VariablesDDAQuant,
-)
 
 logger: logging.Logger = logging.getLogger(__name__)
 

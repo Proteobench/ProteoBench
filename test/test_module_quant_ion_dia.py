@@ -6,9 +6,7 @@ import pytest
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.lfq.ion.DIA.quant_lfq_ion_DIA_AIF import (
-    DIAQuantIonModule,
-)
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
 from proteobench.score.quant.quantscores import QuantScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")

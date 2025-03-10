@@ -5,7 +5,7 @@ import pytest
 
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
 from proteobench.score.quant.quantscores import QuantScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")

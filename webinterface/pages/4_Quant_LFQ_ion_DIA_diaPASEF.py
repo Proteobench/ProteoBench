@@ -8,14 +8,14 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
-from pages.pages_variables.Quant.lfq.ion.DIA.ion_diaPASEF import (
-    VariablesDIAQuantdiaPASEF,
-)
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.lfq.ion.DIA.quant_lfq_ion_DIA_diaPASEF import (
+from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
+)
+from webinterface.pages.pages_variables.Quant.lfq_ion_DIA_diaPASEF_variables import (
+    VariablesDIAQuantdiaPASEF,
 )
 
 

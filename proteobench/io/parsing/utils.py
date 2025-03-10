@@ -1,5 +1,3 @@
-from typing import DataFrame
-
 import pandas as pd
 import psm_utils as pu
 

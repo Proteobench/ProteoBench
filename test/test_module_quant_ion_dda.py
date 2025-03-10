@@ -31,8 +31,8 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "io_parse_settings",
         "Quant",
         "lfq",
-        "ion",
         "DDA",
+        "ion",
     )
 )
 TESTED_SOFTWARE_TOOLS = (

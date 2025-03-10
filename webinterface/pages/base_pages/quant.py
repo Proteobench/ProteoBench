@@ -15,6 +15,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
+from pages.pages_variables.Quant.lfq_DDA_ion_variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.params import ProteoBenchParameters
@@ -24,9 +25,6 @@ from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
     DDAQuantIonModule as IonModule,
 )
 from proteobench.plotting.plot_quant import PlotDataPoint
-from webinterface.pages.pages_variables.Quant.lfq_DDA_ion_variables import (
-    VariablesDDAQuant,
-)
 
 logger: logging.Logger = logging.getLogger(__name__)
 

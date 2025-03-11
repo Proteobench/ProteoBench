@@ -93,9 +93,9 @@ def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
     return next((clean_text(re.split(search_term, line)[1]) for line in lines if re.search(search_term, line)), None)
 
 
-def get_items_between(lines: list, start: str, end: str) -> list:
+def get_items_between(lines: list, start: str, end: str, only_last: bool = False) -> list:
     """
-    Find all lines starting with '-' that appear between 'Fixed Modifications:' and 'Variable Modifications:'.
+    Find all lines starting with '-' that appear between 'start' and 'end'.
     Return them as a list of strings, without the leading dash.
 
     Parameters
@@ -106,6 +106,8 @@ def get_items_between(lines: list, start: str, end: str) -> list:
         The start term to search for in the lines.
     end : str
         The end term to search for in the lines.
+    only_last : bool
+        If True, only the items found between the last occurrence of start and end will be returned.
 
     Returns
     -------
@@ -114,34 +116,43 @@ def get_items_between(lines: list, start: str, end: str) -> list:
     """
     capturing = False
     items = []
+    temp_items = []
 
     for line in lines:
         stripped = line.strip()
 
         if stripped.startswith(start):
             capturing = True
+            temp_items = []
             continue
 
-        if stripped.startswith(end):
+        if capturing and stripped.startswith(end):
             capturing = False
-            break
+            if only_last:
+                items = temp_items[:]
+            else:
+                items.extend(temp_items)
+            temp_items = []
 
         if capturing and stripped.startswith("- "):
             # Remove the dash and leading space
             item = stripped[2:].strip()
-            items.append(item)
+            temp_items.append(item)
+
+    if only_last and capturing:
+        items = temp_items
 
     return items
 
 
 def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     """
-    Read a Spectronaut settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
+    Read a PEAKS settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 
     Parameters
     ----------
     file_path : str
-        The path to the Spectronaut settings file.
+        The path to the PEAKS settings file.
 
     Returns
     -------
@@ -161,14 +172,17 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
 
     params = ProteoBenchParameters()
 
-    params.software_name = "Peaks"
+    params.software_name = "PEAKS"
     params.software_version = None
-    params.search_engine = "Peaks"
+    params.search_engine = "PEAKS"
     params.search_engine_version = params.software_version
 
     params.ident_fdr_psm = None
     fdr = extract_value(lines, "Peptide FDR:")
-    fdr = float(fdr[:-1]) / 100  # Convert percentage to a decimal
+    try:
+        fdr = float(fdr[:-1]) / 100  # Convert percentage to a decimal
+    except TypeError:
+        fdr = None
     params.ident_fdr_peptide = fdr
     # peaks uses  Proteins -10LgP >= 15.0  instead of FDR
     params.ident_fdr_protein = None
@@ -177,17 +191,23 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     params.fragment_mass_tolerance = extract_mass_tolerance(lines, "Fragment Mass Error Tolerance:")
     params.enzyme = extract_value(lines, "Enzyme:")
     params.allowed_miscleavages = int(extract_value(lines, "Max Missed Cleavage:"))
-
-    peptide_length_range = extract_value(lines, "Peptide Length between:").split(",")
+    try:
+        peptide_length_range = extract_value(lines, "Peptide Length between:").split(",")
+    except AttributeError:
+        peptide_length_range = extract_value(lines, "Peptide Length Range:").split(" - ")
     params.max_peptide_length = int(peptide_length_range[1])
     params.min_peptide_length = int(peptide_length_range[0])
-    fixed = get_items_between(lines, "Fixed Modifications:", "Variable Modifications:")
+    fixed = get_items_between(lines, "Fixed Modifications:", "Variable Modifications:", only_last=True)
     params.fixed_mods = " ,".join(fixed)
-    varmods = get_items_between(lines, "Variable Modifications:", "Database:")
+    varmods = get_items_between(lines, "Variable Modifications:", "Database:", only_last=True)
     params.variable_mods = " ,".join(varmods)
     params.max_mods = int(extract_value(lines, "Max Variable PTM per Peptide:"))
-
-    precursor_charge_between = extract_value(lines, "Precursor Charge between:").split(",")
+    try:
+        precursor_charge_between = extract_value(lines, "Precursor Charge between:").split(",")
+    except AttributeError:
+        precursor_charge_between = (
+            extract_value(lines, "Charge between:").replace("[", "").replace("]", "").split(" - ")
+        )
     params.min_precursor_charge = int(precursor_charge_between[0])
     params.max_precursor_charge = int(precursor_charge_between[1])
 
@@ -205,9 +225,9 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
 
 if __name__ == "__main__":
     """
-    Reads Spectronaut settings files, extracts parameters, and writes them to CSV files.
+    Reads PEAKS settings files, extracts parameters, and writes them to CSV files.
     """
-    fnames = ["../../../test/params/PEAKS_parameters.txt"]
+    fnames = ["../../../test/params/PEAKS_parameters.txt", "../../../test/params/PEAKS_parameters_DDA.txt"]
 
     for file in fnames:
         # Extract parameters from the settings file

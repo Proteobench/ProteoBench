@@ -30,9 +30,7 @@ class ProteoBenchParameters:
         Other keyword arguments.
     """
 
-    def __init__(
-        self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/lfq/ion/DDA/fields.json"), **kwargs
-    ):
+    def __init__(self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"), **kwargs):
         """
         Read the JSON file and initializes only the attributes present in the file.
 

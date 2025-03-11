@@ -200,7 +200,6 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     fixed = get_items_between(lines, "Fixed Modifications:", "Variable Modifications:", only_last=True)
     params.fixed_mods = " ,".join(fixed)
     varmods = get_items_between(lines, "Variable Modifications:", "Database:", only_last=True)
-    print(varmods)
     params.variable_mods = " ,".join(varmods)
     params.max_mods = int(extract_value(lines, "Max Variable PTM per Peptide:"))
     try:

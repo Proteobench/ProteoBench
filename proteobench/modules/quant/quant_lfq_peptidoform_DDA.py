@@ -1,5 +1,5 @@
 """
-DIA Quantification Module for Ion level Quantification for diaPASEF.
+DDA Quantification Module for Peptidoform level Quantification.
 """
 
 from __future__ import annotations
@@ -19,25 +19,25 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
-from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
+from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class DIAQuantIonModulediaPASEF(QuantModule):
+class DDAQuantPeptidoformModule(QuantModule):
     """
-    DIA Quantification Module for Ion level Quantification for diaPASEF.
+    DDA Quantification Module for Peptidoform level Quantification.
 
     Parameters
     ----------
     token : str
         GitHub token for the user.
     proteobot_repo_name : str, optional
-        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_diaPASEF".
+        Repository for pull requests and adding new points, by default "Proteobot/Results_quant_peptidoform_DDA".
     proteobench_repo_name : str, optional
-        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_diaPASEF".
+        Repository for storing benchmarking results, by default "Proteobench/Results_quant_peptidoform_DDA".
 
     Attributes
     ----------
@@ -47,25 +47,25 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_ion_DIA_diaPASEF"
+    module_id: str = "quant_lfq_DDA_peptidoform"
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_diaPASEF",
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_diaPASEF",
+        proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
+        proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
     ):
         """
-        Initialize the DIA Quantification Module for Ion level Quantification for diaPASEF.
+        Initialize the DDA Quantification Module for Peptidoform level Quantification.
 
         Parameters
         ----------
         token : str
             GitHub token for the user.
         proteobot_repo_name : str, optional
-            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_diaPASEF".
+            Repository for pull requests and adding new points, by default "Proteobot/Results_quant_peptidoform_DDA".
         proteobench_repo_name : str, optional
-            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_diaPASEF".
+            Repository for storing benchmarking results, by default "Proteobench/Results_quant_peptidoform_DDA".
         """
         super().__init__(
             token,
@@ -74,7 +74,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
         )
-        self.precursor_name = "precursor ion"
+        self.precursor_name = "peptidoform"
 
     def is_implemented(self) -> bool:
         """
@@ -173,9 +173,4 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         except Exception as e:
             raise DatapointAppendError(f"Error adding current data point: {e}")
 
-        # Return intermediate data structure, all datapoints, and input DataFrame
-        return (
-            intermediate_data_structure,
-            all_datapoints,
-            input_df,
-        )
+        return intermediate_data_structure, all_datapoints, input_df

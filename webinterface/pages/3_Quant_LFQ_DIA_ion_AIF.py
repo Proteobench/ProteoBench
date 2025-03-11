@@ -1,5 +1,5 @@
 """
-Main Streamlit UI for the DDA quantification - peptidoform module.
+Streamlit UI for the DIA quantification - precursor ions module - AIF.
 """
 
 import logging
@@ -8,55 +8,47 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
-from pages.pages_variables.Quant.lfq.peptidoform.DDA.peptidoform_variables import (
-    VariablesDDAQuant,
-)
+from pages.pages_variables.Quant.lfq_DIA_ion_AIF_variables import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.lfq.peptidoform.DDA.quant_lfq_peptidoform_DDA import (
-    DDAQuantPeptidoformModule,
-)
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
 
 
 class StreamlitUI:
     """
-    Streamlit UI for the DDA quantification - peptidoform module.
+    Streamlit UI for the DIA quantification - precursor ions module - AIF.
     """
 
     def __init__(self):
         """
-        Initialize the Streamlit UI for the DDA quantification - peptidoform module.
+        Initialize the Streamlit UI for the DIA quantification - precursor ions module - AIF.
         """
-        self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
+        self.variables_dia_quant: VariablesDIAQuant = VariablesDIAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
 
         self.user_input: Dict[str, Any] = dict()
 
         pbb.proteobench_page_config()
 
-        if self.variables_dda_quant.submit not in st.session_state:
-            st.session_state[self.variables_dda_quant.submit] = False
+        if self.variables_dia_quant.submit not in st.session_state:
+            st.session_state[self.variables_dia_quant.submit] = False
         try:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-
-        self.peptidoform_module: DDAQuantPeptidoformModule = DDAQuantPeptidoformModule(token=token)
+        self.ionmodule: DIAQuantIonModule = DIAQuantIonModule(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder(
-            parse_settings_dir=self.variables_dda_quant.parse_settings_dir, module_id=self.peptidoform_module.module_id
+            module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dia_quant.parse_settings_dir
         )
 
-        self.quant_uiobjects = QuantUIObjects(
-            self.variables_dda_quant, self.peptidoform_module, self.parsesettingsbuilder
-        )
+        self.quant_uiobjects = QuantUIObjects(self.variables_dia_quant, self.ionmodule, self.parsesettingsbuilder)
 
         self._main_page()
 
     def _main_page(self) -> None:
         """
         Set up the main page layout for the Streamlit application.
-        This includes the title, module descriptions, input forms, and configuration settings.
         """
         # Create tabs
         (
@@ -75,10 +67,11 @@ class StreamlitUI:
             ]
         )
 
+        # Tab 1: Results (All Data)
         with tab_results_all:
-            st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
-            if self.variables_dda_quant.beta_warning:
+            st.title(self.variables_dia_quant.title)
+            st.write(f"The full description of the module is available [here]({self.variables_dia_quant.doc_url})")
+            if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
@@ -86,9 +79,9 @@ class StreamlitUI:
 
         # Tab 2: Submission Details
         with tab_submission_details:
-            st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
-            if self.variables_dda_quant.beta_warning:
+            st.title(self.variables_dia_quant.title)
+            st.write(f"The full description of the module is available [here]({self.variables_dia_quant.doc_url})")
+            if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
@@ -96,9 +89,9 @@ class StreamlitUI:
 
         # Tab 2.5: in-depth plots current data
         with tab_indepth_plots:
-            st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
-            if self.variables_dda_quant.beta_warning:
+            st.title(self.variables_dia_quant.title)
+            st.write(f"The full description of the module is available [here]({self.variables_dia_quant.doc_url})")
+            if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
@@ -106,20 +99,19 @@ class StreamlitUI:
 
         # Tab 3: Results (New Submissions)
         with tab_results_new:
-            st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
-            if self.variables_dda_quant.beta_warning:
+            st.title(self.variables_dia_quant.title)
+            st.write(f"The full description of the module is available [here]({self.variables_dia_quant.doc_url})")
+            if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
-
             self.quant_uiobjects.display_all_data_results_submitted()
 
         # Tab 4: Public Submission
         with tab_public_submission:
-            st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
-            if self.variables_dda_quant.beta_warning:
+            st.title(self.variables_dia_quant.title)
+            st.write(f"The full description of the module is available [here]({self.variables_dia_quant.doc_url})")
+            if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )

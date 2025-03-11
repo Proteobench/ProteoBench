@@ -123,7 +123,7 @@ In the "combined_ion.tsv", we consider that decoys are already removed, and the 
 
 ### i2MassChroQ
 
-A ProteoBench-compatible format is available in i2MassChroQ through the button `ProteoBench export`. It generates a tab-delimited file containing one row per quantified ion for metric calculation ("proteobench_export.tsv"; column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"); and a parameter file for public submission ("Project parameters.tsv"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN". 
+A ProteoBench-compatible format is available in i2MassChroQ through the button "ProteoBench export". After running the identification step, you can select "MassChroQ" via the File menu for quantification. The results can then be loaded into MCQR, which also includes the ProteoBench export functionality. The export generates a tab-delimited file containing one row per quantified ion for metric calculation ("proteobench_export.tsv"; column headers are: "rawfile", "sequence", "ProForma", "charge", "proteins" and "area"); and a parameter file for public submission ("Project parameters.tsv"). Like with the other tools, the protein identifiers should be in the format "sp|P49327|FAS_HUMAN".
 Link to the i2MassChroQ documentation [here](http://pappso.inrae.fr/bioinfo/i2masschroq/documentation/html/). In the outputs of i2MassChroQ, we consider that decoys are already removed.
 #### Specific information for searches with X!Tandem
 Among the default parameters of X!Tandem, "quick acetyl" and "quick pyrolidone" seach for the variable modifications N-ter acetylation and pyrolidone. Please turn these off if you don't want to include such modifications in your search. 

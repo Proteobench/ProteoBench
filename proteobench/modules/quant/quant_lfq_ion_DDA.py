@@ -18,7 +18,7 @@ from proteobench.exceptions import (
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
-from proteobench.modules.quant.quant_base.quant_base_module import QuantModule
+from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
@@ -43,7 +43,7 @@ class DDAQuantIonModule(QuantModule):
         Level of quantification.
     """
 
-    module_id = "quant_lfq_ion_DDA"
+    module_id = "quant_lfq_DDA_ion"
 
     def __init__(
         self,

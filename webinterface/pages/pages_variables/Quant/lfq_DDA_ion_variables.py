@@ -55,20 +55,20 @@ class VariablesDDAQuant:
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA.git"
 
-    description_module_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/introduction_DDA_quan_ions.md"
-    description_files_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/slider_description.md"
-    description_table_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/table_description.md"
-    description_results_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/result_description.md"
-    description_submission_md: str = "pages/markdown_files/Quant/lfq/ion/DDA/submit_description.md"
+    description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/introduction_DDA_quan_ions.md"
+    description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/slider_description.md"
+    description_table_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/table_description.md"
+    description_results_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/result_description.md"
+    description_submission_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/ion/DDA"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion"
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"
 
-    additional_params_json: str = "../proteobench/io/params/json/Quant/lfq/ion/DDA/fields.json"
+    additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Ion quantification"
     prefix_params: str = "lfq_ion_dda_quant_"
     params_json_dict: str = "params_json_dict_lfq_ion_dda_quant"

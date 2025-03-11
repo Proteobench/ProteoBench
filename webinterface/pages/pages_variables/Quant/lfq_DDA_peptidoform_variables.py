@@ -57,22 +57,22 @@ class VariablesDDAQuant:
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 
-    description_module_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/introduction_DDA_quan_peptidoforms.md"
-    description_files_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/file_description.md"
-    description_input_file_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/input_file_description.md"
-    description_slider_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/slider_description.md"
-    description_table_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/table_description.md"
-    description_results_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/result_description.md"
-    description_submission_md: str = "pages/markdown_files/Quant/lfq/peptidoform/DDA/submit_description.md"
+    description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/introduction_DDA_quan_peptidoforms.md"
+    description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/file_description.md"
+    description_input_file_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/input_file_description.md"
+    description_slider_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/slider_description.md"
+    description_table_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/table_description.md"
+    description_results_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/result_description.md"
+    description_submission_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/peptidoform/DDA"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/peptidoform/"
 
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/3-quant-lfq-peptidoform-dda/"
     title: str = "DDA peptidoform quantification"
 
-    additional_params_json: str = "../proteobench/io/params/json/Quant/lfq/peptidoform/DDA/fields.json"
+    additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_peptidoform.json"
     prefix_params: str = "lfq_peptidoform_dda_quant_"
     params_json_dict: str = "params_json_dict_lfq_peptidoform_dda_quant"
     params_file_dict: str = "params_file_dict_lfq_peptidoform_dda_quant"

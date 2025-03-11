@@ -1,7 +1,7 @@
 ,0
-software_name,Peaks
+software_name,PEAKS
 software_version,
-search_engine,Peaks
+search_engine,PEAKS
 search_engine_version,
 ident_fdr_psm,
 ident_fdr_peptide,0.01

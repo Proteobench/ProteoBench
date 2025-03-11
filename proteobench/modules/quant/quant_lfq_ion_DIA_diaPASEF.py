@@ -47,7 +47,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_ion_DIA_diaPASEF"
+    module_id: str = "quant_lfq_DIA_ion_diaPASEF"
 
     def __init__(
         self,

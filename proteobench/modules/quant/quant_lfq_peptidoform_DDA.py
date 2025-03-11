@@ -47,7 +47,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_peptidoform_DDA"
+    module_id: str = "quant_lfq_DDA_peptidoform"
 
     def __init__(
         self,

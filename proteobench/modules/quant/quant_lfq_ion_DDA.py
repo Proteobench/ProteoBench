@@ -43,7 +43,7 @@ class DDAQuantIonModule(QuantModule):
         Level of quantification.
     """
 
-    module_id = "quant_lfq_ion_DDA"
+    module_id = "quant_lfq_DDA_ion"
 
     def __init__(
         self,

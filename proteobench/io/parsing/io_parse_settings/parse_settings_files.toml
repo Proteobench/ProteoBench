@@ -1,4 +1,4 @@
-[quant_lfq_ion_DDA]
+[quant_lfq_DDA_ion]
 "AlphaPept" = "parse_settings_alphapept.toml"
 "FragPipe" = "parse_settings_fragpipe.toml"
 "i2MassChroQ" = "parse_settings_i2massChroQ.toml"
@@ -10,13 +10,13 @@
 "quantms" = "parse_settings_msstats.toml"
 "Custom" = "parse_settings_custom.toml"
 
-[quant_lfq_peptidoform_DDA]
+[quant_lfq_DDA_peptidoform]
 "WOMBAT" = "parse_settings_wombat.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 "Proteome Discoverer" = "parse_settings_proteomediscoverer.toml"
 "Custom" = "parse_settings_custom.toml"
 
-[quant_lfq_ion_DIA_AIF]
+[quant_lfq_DIA_ion_AIF]
 "DIA-NN" = "parse_settings_diann.toml"
 "MaxQuant" = "parse_settings_maxdia.toml"
 "FragPipe (DIA-NN quant)" = "parse_settings_diann.toml"
@@ -27,7 +27,7 @@
 "PEAKS" = "parse_settings_peaks.toml"
 "Custom" = "parse_settings_custom.toml"
 
-[quant_lfq_ion_DIA_diaPASEF]
+[quant_lfq_DIA_ion_diaPASEF]
 "DIA-NN" = "parse_settings_diann.toml"
 "MaxQuant" = "parse_settings_maxdia.toml"
 "FragPipe (DIA-NN quant)" = "parse_settings_diann.toml"

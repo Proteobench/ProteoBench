@@ -45,7 +45,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         Level of quantification.
     """
 
-    module_id = "quant_lfq_peptidoform_DIA"
+    module_id = "quant_lfq_DIA_peptidoform"
 
     def __init__(
         self,

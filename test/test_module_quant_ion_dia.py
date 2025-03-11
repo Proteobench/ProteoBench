@@ -54,7 +54,7 @@ def load_file(format_name: str):
 class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_valid_and_supported_search_tool_settings_exists(self, software_tool):
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DIA_AIF")
+        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DIA_ion_AIF")
         assert software_tool in parse_settings.INPUT_FORMATS
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
@@ -65,7 +65,7 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_settings_parser_created_successfully(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+            module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         assert parse_settings is not None
@@ -73,7 +73,7 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_software_tool_output_converted_to_standard_format(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+            module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         input_df = load_file(software_tool)
@@ -87,7 +87,7 @@ class TestQuantScores:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_intermediate_generated_from_software_tool_output(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+            module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
 

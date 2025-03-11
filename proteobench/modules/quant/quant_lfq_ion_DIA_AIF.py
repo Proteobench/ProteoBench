@@ -47,7 +47,7 @@ class DIAQuantIonModule(QuantModule):
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_ion_DIA_AIF"
+    module_id: str = "quant_lfq_DIA_ion_AIF"
 
     def __init__(
         self,

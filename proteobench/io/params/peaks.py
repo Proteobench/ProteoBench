@@ -136,12 +136,12 @@ def get_items_between(lines: list, start: str, end: str) -> list:
 
 def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     """
-    Read a Spectronaut settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
+    Read a PEAKS settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 
     Parameters
     ----------
     file_path : str
-        The path to the Spectronaut settings file.
+        The path to the PEAKS settings file.
 
     Returns
     -------
@@ -205,7 +205,7 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
 
 if __name__ == "__main__":
     """
-    Reads Spectronaut settings files, extracts parameters, and writes them to CSV files.
+    Reads PEAKS settings files, extracts parameters, and writes them to CSV files.
     """
     fnames = ["../../../test/params/PEAKS_parameters.txt"]
 

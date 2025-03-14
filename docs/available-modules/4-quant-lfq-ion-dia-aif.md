@@ -98,7 +98,8 @@ After upload, you will get a link to a Github pull request associated with your 
 1. Select FASTA and import .raw files in "Input files"
 2. In "Method settings" you need to define your search parameters 
 3. Turn on "Predict Library" 
-4. The input files for ProteoBench are "precursors.tsv" (peptide identification) and "log.txt" (parameter files)
+4. Turn on "Precursor Level LFQ"
+4. Because ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", it needs to be preprocessed. For this, please refer to the Jupyter Notebook "ProteoBench_input_conversion.ipynb" [HERE](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/ProteoBench_input_conversion.ipynb). Using this notebook will provide you with the correct input file that can be used in ProteoBench. The parameter file is "log.txt".
 
 ### [FragPipe - DIA-NN](https://github.com/Nesvilab/FragPipe)
 1. Load the DIA_SpecLib_Quant workflow

@@ -136,16 +136,16 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/404
 
-        :bdg-info:`in development`
+        :bdg-primary:`in development`
         ^^^
         Single-species benchmark using spacial proteomics
 
     .. grid-item-card:: DIA quantification DIA-PASEF
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/438
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DIA_diaPASEF
 
-        :bdg-primary:`in development`
+        :bdg-success:`active`
         ^^^
         additional DIA ion-level module with DIA-PASEF data
 

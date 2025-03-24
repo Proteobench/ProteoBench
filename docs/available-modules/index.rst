@@ -1,5 +1,5 @@
 #####################
-Benchmarking modules
+Modules documentation
 #####################
 
 .. toctree::
@@ -7,3 +7,9 @@ Benchmarking modules
    :maxdepth: 1
 
    *
+
+Links to active modules
+=======================
+
+- `Precursor quantification with DDA <https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DDA>`_
+- `Precursor quantification with DIA data acquired with diaPASEF <https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DDA>`_

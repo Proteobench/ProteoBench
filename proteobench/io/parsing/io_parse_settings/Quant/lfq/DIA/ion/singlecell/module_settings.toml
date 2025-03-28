@@ -1,0 +1,12 @@
+[species_expected_ratio]
+[species_expected_ratio.YEAST]
+"A_vs_B" = 0.2
+"color" = "red"
+
+[species_expected_ratio.HUMAN]
+"A_vs_B" = 1.2
+"color" = "green"
+
+[general]
+"min_count_multispec" = 1
+"level" = "ion"

@@ -85,6 +85,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |Proline Studio|<result file>.xlsx|<result file>.xlsx|
 |Sage|lfq.tsv|results.json|
 |PEAKS|lfq_features.csv|parameters.txt|
+|Quantms|<name>.sdrf_openms_design_msstats_in.csv|params_<timestamp>.json,versons.yml|
 
 ### AlphaPept
 
@@ -187,14 +188,17 @@ In the "lfq.tsv", the following columns are considered:
 - "peptide" to get the modified sequences
 - "charge" to get the charge of the precursor
 
-### Quantms (work in progress)
+### Quantms
 
 When you run the DDA workflow in QuantMS, you can upload the precursors from the process
 `ProteomicsLFQ` (using OpenMS) with the name `<project-name>.sdrf_openms_design_msstats_in.csv` 
 to ProteoBench. Several version with PTMs still have to be tested.
 
 The parameters needed for public submission can be parsed based on the `versions.yml` and 
-parameter json `params_<timestamp>.json` produced by the `pipeline-info` step.
+parameter json `params_<timestamp>.json` produced by the `pipeline-info` step. 
+
+> Quantms 1.4 and higher needed to have `params_<timestamp>.json` dumped. If you run it in
+> Seqera, you can obtain the paramaters jsons from a run there.
 
 ### Custom format
 

@@ -292,7 +292,7 @@ class PlotDataPoint:
         """
         fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points=False)
         fig.update_layout(
-            xaxis_title="Group",
+            xaxis_title="Condition",
             yaxis_title="CV",
             xaxis=dict(linecolor="black"),  # Set the X axis line color to black
             yaxis=dict(linecolor="black"),  # Set the Y axis line color to black

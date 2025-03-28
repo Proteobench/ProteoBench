@@ -38,7 +38,7 @@
 "Custom" = "parse_settings_custom.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 
-[quant_lfq_DIA_ion_singlcell]
+[quant_lfq_DIA_ion_singlecell]
 "DIA-NN" = "parse_settings_diann.toml"
 "MaxQuant" = "parse_settings_maxdia.toml"
 "FragPipe (DIA-NN quant)" = "parse_settings_diann.toml"

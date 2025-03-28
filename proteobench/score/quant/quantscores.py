@@ -14,7 +14,7 @@ class QuantScores:
 
     Parameters
     ----------
-    precursor_name : str
+    precursor_column_name : str
         Name of the precursor.
     species_expected_ratio : dict
         Dictionary containing the expected ratios for each species.
@@ -22,20 +22,20 @@ class QuantScores:
         Dictionary containing the species names.
     """
 
-    def __init__(self, precursor_name: str, species_expected_ratio, species_dict: Dict[str, str]):
+    def __init__(self, precursor_column_name: str, species_expected_ratio, species_dict: Dict[str, str]):
         """
         Initialize the QuantScores object.
 
         Parameters
         ----------
-        precursor_name : str
+        precursor_column_name : str
             Name of the precursor.
         species_expected_ratio : dict
             Dictionary containing the expected ratios for each species.
         species_dict : dict
             Dictionary containing the species names.
         """
-        self.precursor_name = precursor_name
+        self.precursor_column_name = precursor_column_name
         self.species_expected_ratio = species_expected_ratio
         self.species_dict = species_dict
 
@@ -62,7 +62,7 @@ class QuantScores:
 
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
-        relevant_columns_df = filtered_df[["Raw file", self.precursor_name, "Intensity"]].copy()
+        relevant_columns_df = filtered_df[["Raw file", self.precursor_column_name, "Intensity"]].copy()
         replicate_to_raw_df = QuantScores.convert_replicate_to_raw(replicate_to_raw)
 
         # add column "Group" to filtered_df_p1 using inner join on "Raw file"
@@ -70,14 +70,14 @@ class QuantScores:
         quant_df = QuantScores.compute_group_stats(
             relevant_columns_df,
             min_intensity=0,
-            precursor=self.precursor_name,
+            precursor=self.precursor_column_name,
         )
 
         species_prec_ion = list(self.species_dict.values())
-        species_prec_ion.append(self.precursor_name)
+        species_prec_ion.append(self.precursor_column_name)
         prec_ion_to_species = filtered_df[species_prec_ion].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
-        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_name, how="inner")
+        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_column_name, how="inner")
         species_expected_ratio = self.species_expected_ratio
         res = QuantScores.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res

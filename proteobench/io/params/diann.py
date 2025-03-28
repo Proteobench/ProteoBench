@@ -68,7 +68,7 @@ def find_cmdline_string(lines: List[str]) -> Optional[str]:
         The command line string.
     """
     for line in lines:
-        if "diann" in line and "--f" in line and "--fasta" in line:
+        if "diann" in line and "--" in line:
             return line.strip()
     return None
 
@@ -349,7 +349,9 @@ def extract_params(fname: str) -> ProteoBenchParameters:
                 parameters[proteobench_setting] = parse_setting(proteobench_setting, cmdline_dict[cmd_setting])
 
     # Parse cut parameter to standard enzyme name
-    if parameters["enzyme"] == "K*,R*":
+    if "enzyme" not in parameters.keys(): # This happens when running fragpipe-diann
+        parameters["enzyme"] = "cut"
+    elif parameters["enzyme"] == "K*,R*":
         parameters["enzyme"] = "Trypsin/P"
     elif parameters["enzyme"] == "K*,R*,!*P":
         parameters["enzyme"] = "Trypsin"

@@ -65,9 +65,9 @@ class QuantScores:
         relevant_columns_df = filtered_df[["Raw file", self.precursor_column_name, "Intensity"]].copy()
         replicate_to_raw_df = QuantScores.convert_replicate_to_raw(replicate_to_raw)
 
-        # add column "Group" to filtered_df_p1 using inner join on "Raw file"
+        # add column "Condition" to filtered_df_p1 using inner join on "Raw file"
         relevant_columns_df = pd.merge(relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner")
-        quant_df = QuantScores.compute_group_stats(
+        quant_df = QuantScores.compute_condition_stats(
             relevant_columns_df,
             min_intensity=0,
             precursor=self.precursor_column_name,
@@ -97,18 +97,18 @@ class QuantScores:
         pd.DataFrame
             DataFrame containing the replicate to raw mapping.
         """
-        replicate_to_raw_df = pd.DataFrame(replicate_to_raw.items(), columns=["Group", "Raw file"])
+        replicate_to_raw_df = pd.DataFrame(replicate_to_raw.items(), columns=["Condition", "Raw file"])
         replicate_to_raw_df = replicate_to_raw_df.explode("Raw file")
         return replicate_to_raw_df
 
     @staticmethod
-    def compute_group_stats(
+    def compute_condition_stats(
         relevant_columns_df: pd.DataFrame,
         min_intensity=0,
         precursor="precursor ion",
     ) -> pd.DataFrame:
         """
-        Method used to precursor statistics, such as number of observations, CV, mean per group etc.
+        Method used to precursor statistics, such as number of observations, CV, mean per condition etc.
 
         Parameters
         ----------
@@ -131,7 +131,7 @@ class QuantScores:
         # TODO: check if this is still needed
         # sum intensity values of the same precursor and "Raw file" using the sum
         quant_raw_df_int = (
-            relevant_columns_df.groupby([precursor, "Raw file", "Group"])["Intensity"]
+            relevant_columns_df.groupby([precursor, "Raw file", "Condition"])["Intensity"]
             .agg(Intensity="sum", Count="size")
             .reset_index()
         )
@@ -139,7 +139,7 @@ class QuantScores:
         # add column "log_Intensity" to quant_raw_df
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
 
-        # compute the mean of the log_Intensity per precursor and "Group"
+        # compute the mean of the log_Intensity per precursor and "Condition"
         quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(nr_observed=("Raw file", "size"))
 
         # pivot filtered_df_p1 to wide where index peptide ion, columns Raw file and values Intensity
@@ -147,7 +147,7 @@ class QuantScores:
         intensities_wide = quant_raw_df_int.pivot(index=precursor, columns="Raw file", values="Intensity").reset_index()
 
         quant_raw_df = (
-            quant_raw_df_int.groupby([precursor, "Group"])
+            quant_raw_df_int.groupby([precursor, "Condition"])
             .agg(
                 log_Intensity_mean=("log_Intensity", "mean"),
                 log_Intensity_std=("log_Intensity", "std"),
@@ -161,10 +161,10 @@ class QuantScores:
 
         # compute coefficient of variation (CV) of the log_Intensity_mean and log_Intensity_std
         quant_raw_df["CV"] = quant_raw_df["Intensity_std"] / quant_raw_df["Intensity_mean"]
-        # pivot dataframe wider so for each Group variable there is a column with log_Intensity_mean, log_Intensity_std, Intensity_mean, Intensity_std and CV
+        # pivot dataframe wider so for each condition variable there is a column with log_Intensity_mean, log_Intensity_std, Intensity_mean, Intensity_std and CV
         quant_raw_df = quant_raw_df.pivot(
             index=precursor,
-            columns="Group",
+            columns="Condition",
             values=[
                 "log_Intensity_mean",
                 "log_Intensity_std",

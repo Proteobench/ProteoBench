@@ -3,11 +3,12 @@
 "FragPipe" = "parse_settings_fragpipe.toml"
 "i2MassChroQ" = "parse_settings_i2massChroQ.toml"
 "MaxQuant" = "parse_settings_maxquant.toml"
-"ProlineStudio" = "parse_settings_proline.toml"
 "MSAngel" = "parse_settings_msangel.toml"
-"Sage" = "parse_settings_sage.toml"
 "PEAKS" = "parse_settings_peaks.toml"
+"ProlineStudio" = "parse_settings_proline.toml"
 "quantms" = "parse_settings_msstats.toml"
+"Sage" = "parse_settings_sage.toml"
+"WOMBAT" = "parse_settings_wombat.toml"
 "Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_peptidoform_DDA]

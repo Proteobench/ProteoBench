@@ -23,6 +23,16 @@
 "_ECOLI" = "ECOLI"
 "_HUMAN" = "HUMAN"
 
+[modifications_parser]
+"parse_column" = "Modified Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern"="(?<=\\[).+?(?=\\])"
+"modification_dict" = {"160" = "Carbamidomethyl", "147" = "Oxidation", "80" = "Phospho", "111" = "Glu->pyro-Glu", "43" = "Acetyl"}
+
+
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+

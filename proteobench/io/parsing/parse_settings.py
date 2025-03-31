@@ -174,6 +174,7 @@ class ParseSettingsQuant:
 
         df.rename(columns=self.mapper, inplace=True)
 
+
         replicate_to_raw = defaultdict(list)
         for k, v in self.condition_mapper.items():
             replicate_to_raw[v].append(k)

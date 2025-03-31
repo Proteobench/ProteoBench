@@ -28,6 +28,18 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
     elif input_format == "WOMBAT":
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+        mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+        mapper = mapper_df["description"].to_dict()
+        
+        print(input_data_frame["protein_group"].head())
+        non_strings = input_data_frame["protein_group"][~input_data_frame["protein_group"].apply(lambda x: isinstance(x, str))]
+        print(non_strings)
+
+        input_data_frame["protein_group"] = input_data_frame["protein_group"].map(
+            lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(",")])
+        )
+
         input_data_frame["proforma"] = input_data_frame["modified_peptide"]
     elif (
         input_format == "ProlineStudio" or input_format == "MSAngel"

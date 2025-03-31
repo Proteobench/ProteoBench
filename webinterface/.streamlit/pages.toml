@@ -17,3 +17,7 @@ name = "DIA Quant Ion Level - AIF -BETA-"
 [[pages]]
 path = "pages/module_pages/quant_lfq_DIA_ion_diaPASEF.py"
 name = "DIA Quant Ion Level - diaPASEF -BETA-"
+
+[[pages]]
+path = "pages/module_pages/quant_lfq_DIA_ion_singlecell.py"
+name = "DIA Quant Ion Level - Single Cell (Astral) -BETA-"

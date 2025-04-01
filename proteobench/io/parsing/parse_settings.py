@@ -210,7 +210,9 @@ class ParseSettingsQuant:
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
         if self.modification_parser is not None:
-            df_filtered_melted = self.modification_parser.convert_to_standard_format(df_filtered_melted)
+            df_filtered_melted = self.modification_parser.convert_to_standard_format(
+                df_filtered_melted, self.analysis_level
+            )
 
         if self.analysis_level == "ion":
             if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
@@ -259,7 +261,9 @@ class ParseModificationSettings:
         self.modifications_pattern = rf"{self.modifications_pattern}"
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
 
-    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+    def convert_to_standard_format(
+        self, df: pd.DataFrame, analysis_level: str
+    ) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert the DataFrame to a standard format, adding modifications to the 'proforma' column.
 
@@ -282,7 +286,7 @@ class ParseModificationSettings:
             modification_dict=self.modifications_mapper,
         )
 
-        if self.parser.analysis_level == "ion":
+        if analysis_level == "ion":
             try:
                 df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
             except KeyError as e:
@@ -293,7 +297,7 @@ class ParseModificationSettings:
 
             return df
 
-        elif self.parser.analysis_level == "peptidoform":
+        elif analysis_level == "peptidoform":
             if "proforma" in df.columns:
                 df["peptidoform"] = df["proforma"]
             return df

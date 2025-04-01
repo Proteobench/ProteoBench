@@ -32,11 +32,11 @@ class PlotDataPoint:
         go.Figure
             A Plotly figure object representing the histogram.
         """
-        SPECIES = [species for species in species_ratio.keys()]
+        species_list = list(species_ratio.keys())
 
         # Filter data to include only known species
-        result_df = result_df[result_df[SPECIES].any(axis=1)]
-        result_df["kind"] = result_df[SPECIES].apply(lambda x: SPECIES[np.argmax(x)], axis=1)
+        result_df = result_df[result_df[species_list].any(axis=1)]
+        result_df["kind"] = result_df[species_list].apply(lambda x: species_list[np.argmax(x)], axis=1)
 
         # Map colors based on species ratio
         color_map = {species: data["color"] for species, data in species_ratio.items()}

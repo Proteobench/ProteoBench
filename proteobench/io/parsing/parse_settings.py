@@ -210,7 +210,7 @@ class ParseSettingsQuant:
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
         if self.modification_parser is not None:
-            self.modification_parser.convert_to_standard_format(df_filtered_melted)
+            df_filtered_melted = self.modification_parser.convert_to_standard_format(df_filtered_melted)
 
         if self.analysis_level == "ion":
             if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
@@ -273,7 +273,6 @@ class ParseModificationSettings:
         tuple[pd.DataFrame, Dict[int, List[str]]]
             The converted DataFrame and a dictionary mapping replicates to raw data.
         """
-        df, replicate_to_raw = self.parser.convert_to_standard_format(df)
         df["proforma"] = df[self.modifications_parse_column].apply(
             get_proforma_bracketed,
             before_aa=self.modifications_before_aa,
@@ -292,12 +291,12 @@ class ParseModificationSettings:
                     " Is the charge available in the input file?"
                 ) from e
 
-            return df, replicate_to_raw
+            return df
 
         elif self.parser.analysis_level == "peptidoform":
             if "proforma" in df.columns:
                 df["peptidoform"] = df["proforma"]
-            return df, replicate_to_raw
+            return df
 
 
 MODULE_TO_CLASS = {

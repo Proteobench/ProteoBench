@@ -253,6 +253,28 @@ class ParseModificationSettings:
         self.modifications_pattern = rf"{self.modifications_pattern}"
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
 
+    def species_dict(self) -> Dict[str, str]:
+        """
+        Get the species dictionary.
+
+        Returns
+        -------
+        Dict[str, str]
+            A dictionary of species mappings.
+        """
+        return self.parser.species_dict()
+
+    def species_expected_ratio(self) -> float:
+        """
+        Get the expected species ratio.
+
+        Returns
+        -------
+        float
+            The expected ratio of species.
+        """
+        return self.parser.species_expected_ratio()
+
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert the DataFrame to a standard format, adding modifications to the 'proforma' column.

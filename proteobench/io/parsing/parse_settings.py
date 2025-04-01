@@ -61,7 +61,7 @@ class ParseSettingsBuilder:
         if missing_files:
             raise FileNotFoundError(f"The following parse settings files are missing: {missing_files}")
 
-    def build_parser(self, input_format: str) -> ParseSettings:
+    def build_parser(self, input_format: str) -> object:
         """
         Build the parser for a given input format using the corresponding TOML files.
 
@@ -79,14 +79,17 @@ class ParseSettingsBuilder:
         parse_settings = toml.load(toml_file)
         parse_settings_module = toml.load(self.PARSE_SETTINGS_FILES_MODULE)
 
-        parser = ParseSettings(parse_settings, parse_settings_module)
+        cls_parser_str = self.PARSE_SETTINGS_FILES["ParseSettingsClass"]
+        cls_parser = globals().get(cls_parser_str)
+
+        parser = cls_parser(parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
             parser = ParseModificationSettings(parser, parse_settings)
 
         return parser
 
 
-class ParseSettings:
+class ParseSettingsQuant:
     """
     Structure that contains all the parameters used to parse
     the given benchmark run output depending on the software tool used.
@@ -228,7 +231,7 @@ class ParseModificationSettings:
         The modifications-specific parse settings.
     """
 
-    def __init__(self, parser: ParseSettings, parse_settings: Dict[str, Any]):
+    def __init__(self, parser: ParseSettingsQuant, parse_settings: Dict[str, Any]):
         """
         Initialize the ParseModificationSettings object.
 
@@ -247,28 +250,6 @@ class ParseModificationSettings:
         self.modifications_pattern = parse_settings["modifications_parser"]["pattern"]
         self.modifications_pattern = rf"{self.modifications_pattern}"
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
-
-    def species_dict(self) -> Dict[str, str]:
-        """
-        Get the species dictionary from the parser.
-
-        Returns
-        -------
-        Dict[str, str]
-            The species dictionary.
-        """
-        return self.parser.species_dict()
-
-    def species_expected_ratio(self) -> float:
-        """
-        Get the expected species ratio from the parser.
-
-        Returns
-        -------
-        float
-            The expected species ratio.
-        """
-        return self.parser.species_expected_ratio()
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """

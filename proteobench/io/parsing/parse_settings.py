@@ -11,6 +11,10 @@ import toml
 
 from .parse_ion import get_proforma_bracketed
 
+# IMPORTANT: it is defined here, but filled in after defining the classes
+# new classes need to be filled in there too!!!
+MODULE_TO_CLASS = {}
+
 
 class ParseSettingsBuilder:
     """
@@ -52,6 +56,7 @@ class ParseSettingsBuilder:
 
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
+        self.MODULE_ID = module_id
 
         # Check if all files are present
         missing_files = [file for file in self.PARSE_SETTINGS_FILES.values() if not os.path.isfile(file)]
@@ -61,7 +66,7 @@ class ParseSettingsBuilder:
         if missing_files:
             raise FileNotFoundError(f"The following parse settings files are missing: {missing_files}")
 
-    def build_parser(self, input_format: str) -> ParseSettings:
+    def build_parser(self, input_format: str) -> object:
         """
         Build the parser for a given input format using the corresponding TOML files.
 
@@ -79,14 +84,14 @@ class ParseSettingsBuilder:
         parse_settings = toml.load(toml_file)
         parse_settings_module = toml.load(self.PARSE_SETTINGS_FILES_MODULE)
 
-        parser = ParseSettings(parse_settings, parse_settings_module)
+        parser = MODULE_TO_CLASS[self.MODULE_ID](parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
-            parser = ParseModificationSettings(parser, parse_settings)
+            parser.add_modification_parser(ParseModificationSettings(parse_settings))
 
         return parser
 
 
-class ParseSettings:
+class ParseSettingsQuant:
     """
     Structure that contains all the parameters used to parse
     the given benchmark run output depending on the software tool used.
@@ -119,6 +124,7 @@ class ParseSettings:
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
+        self.modification_parser = None
 
     def species_dict(self) -> Dict[str, str]:
         """
@@ -141,6 +147,9 @@ class ParseSettings:
             The expected ratio of species.
         """
         return self._species_expected_ratio
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        self.modification_parser = parser
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
@@ -200,6 +209,9 @@ class ParseSettings:
         df_filtered_melted["replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
+        if self.modification_parser is not None:
+            df_filtered_melted = self.modification_parser.convert_to_proforma(df_filtered_melted, self.analysis_level)
+
         if self.analysis_level == "ion":
             if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
                 df_filtered_melted["precursor ion"] = (
@@ -228,7 +240,7 @@ class ParseModificationSettings:
         The modifications-specific parse settings.
     """
 
-    def __init__(self, parser: ParseSettings, parse_settings: Dict[str, Any]):
+    def __init__(self, parse_settings: Dict[str, Any]):
         """
         Initialize the ParseModificationSettings object.
 
@@ -239,7 +251,6 @@ class ParseModificationSettings:
         parse_settings : Dict[str, Any]
             The modifications-specific parse settings.
         """
-        self.parser = parser
         self.modifications_mapper = parse_settings["modifications_parser"]["modification_dict"]
         self.modifications_isalpha = parse_settings["modifications_parser"]["isalpha"]
         self.modifications_isupper = parse_settings["modifications_parser"]["isupper"]
@@ -248,29 +259,7 @@ class ParseModificationSettings:
         self.modifications_pattern = rf"{self.modifications_pattern}"
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
 
-    def species_dict(self) -> Dict[str, str]:
-        """
-        Get the species dictionary from the parser.
-
-        Returns
-        -------
-        Dict[str, str]
-            The species dictionary.
-        """
-        return self.parser.species_dict()
-
-    def species_expected_ratio(self) -> float:
-        """
-        Get the expected species ratio from the parser.
-
-        Returns
-        -------
-        float
-            The expected species ratio.
-        """
-        return self.parser.species_expected_ratio()
-
-    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+    def convert_to_proforma(self, df: pd.DataFrame, analysis_level: str) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert the DataFrame to a standard format, adding modifications to the 'proforma' column.
 
@@ -284,7 +273,6 @@ class ParseModificationSettings:
         tuple[pd.DataFrame, Dict[int, List[str]]]
             The converted DataFrame and a dictionary mapping replicates to raw data.
         """
-        df, replicate_to_raw = self.parser.convert_to_standard_format(df)
         df["proforma"] = df[self.modifications_parse_column].apply(
             get_proforma_bracketed,
             before_aa=self.modifications_before_aa,
@@ -294,7 +282,7 @@ class ParseModificationSettings:
             modification_dict=self.modifications_mapper,
         )
 
-        if self.parser.analysis_level == "ion":
+        if analysis_level == "ion":
             try:
                 df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
             except KeyError as e:
@@ -303,9 +291,18 @@ class ParseModificationSettings:
                     " Is the charge available in the input file?"
                 ) from e
 
-            return df, replicate_to_raw
+            return df
 
-        elif self.parser.analysis_level == "peptidoform":
+        elif analysis_level == "peptidoform":
             if "proforma" in df.columns:
                 df["peptidoform"] = df["proforma"]
-            return df, replicate_to_raw
+            return df
+
+
+MODULE_TO_CLASS = {
+    "quant_lfq_DDA_ion": ParseSettingsQuant,
+    "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
+}

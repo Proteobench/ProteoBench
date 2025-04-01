@@ -11,6 +11,10 @@ import toml
 
 from .parse_ion import get_proforma_bracketed
 
+# IMPORTANT: it is defined here, but filled in after defining the classes
+# new classes need to be filled in there too!!!
+MODULE_TO_CLASS = {}
+
 
 class ParseSettingsBuilder:
     """
@@ -52,6 +56,7 @@ class ParseSettingsBuilder:
 
         self.PARSE_SETTINGS_FILES_MODULE = os.path.join(parse_settings_dir, "module_settings.toml")
         self.INPUT_FORMATS = list(self.PARSE_SETTINGS_FILES.keys())
+        self.MODULE_ID = module_id
 
         # Check if all files are present
         missing_files = [file for file in self.PARSE_SETTINGS_FILES.values() if not os.path.isfile(file)]
@@ -79,10 +84,7 @@ class ParseSettingsBuilder:
         parse_settings = toml.load(toml_file)
         parse_settings_module = toml.load(self.PARSE_SETTINGS_FILES_MODULE)
 
-        cls_parser_str = self.PARSE_SETTINGS_FILES["ParseSettingsClass"]
-        cls_parser = globals().get(cls_parser_str)
-
-        parser = cls_parser(parse_settings, parse_settings_module)
+        parser = MODULE_TO_CLASS[self.MODULE_ID](parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
             parser = ParseModificationSettings(parser, parse_settings)
 
@@ -290,3 +292,12 @@ class ParseModificationSettings:
             if "proforma" in df.columns:
                 df["peptidoform"] = df["proforma"]
             return df, replicate_to_raw
+
+
+MODULE_TO_CLASS = {
+    "quant_lfq_DDA_ion": ParseSettingsQuant,
+    "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
+}

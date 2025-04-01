@@ -10,14 +10,12 @@
 "Sage" = "parse_settings_sage.toml"
 "WOMBAT" = "parse_settings_wombat.toml"
 "Custom" = "parse_settings_custom.toml"
-"ParseSettingsClass" = "ParseSettingsQuant"
 
 [quant_lfq_DDA_peptidoform]
 "WOMBAT" = "parse_settings_wombat.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 "Proteome Discoverer" = "parse_settings_proteomediscoverer.toml"
 "Custom" = "parse_settings_custom.toml"
-"ParseSettingsClass" = "ParseSettingsQuant"
 
 [quant_lfq_DIA_ion_AIF]
 "DIA-NN" = "parse_settings_diann.toml"
@@ -29,7 +27,6 @@
 "MSAID" = "parse_settings_msaid.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 "Custom" = "parse_settings_custom.toml"
-"ParseSettingsClass" = "ParseSettingsQuant"
 
 [quant_lfq_DIA_ion_diaPASEF]
 "DIA-NN" = "parse_settings_diann.toml"

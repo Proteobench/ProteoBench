@@ -86,7 +86,7 @@ class ParseSettingsBuilder:
 
         parser = MODULE_TO_CLASS[self.MODULE_ID](parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
-            parser = ParseModificationSettings(parser, parse_settings)
+            parser.add_modification_parser(ParseModificationSettings(parse_settings))
 
         return parser
 
@@ -124,6 +124,7 @@ class ParseSettingsQuant:
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
+        self.modification_parser = None
 
     def species_dict(self) -> Dict[str, str]:
         """
@@ -146,6 +147,9 @@ class ParseSettingsQuant:
             The expected ratio of species.
         """
         return self._species_expected_ratio
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        self.modification_parser = parser
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
@@ -205,6 +209,8 @@ class ParseSettingsQuant:
         df_filtered_melted["replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
+        self.modification_parser.convert_to_standard_format(df_filtered_melted)
+
         if self.analysis_level == "ion":
             if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
                 df_filtered_melted["precursor ion"] = (
@@ -233,7 +239,7 @@ class ParseModificationSettings:
         The modifications-specific parse settings.
     """
 
-    def __init__(self, parser: ParseSettingsQuant, parse_settings: Dict[str, Any]):
+    def __init__(self, parse_settings: Dict[str, Any]):
         """
         Initialize the ParseModificationSettings object.
 
@@ -244,7 +250,6 @@ class ParseModificationSettings:
         parse_settings : Dict[str, Any]
             The modifications-specific parse settings.
         """
-        self.parser = parser
         self.modifications_mapper = parse_settings["modifications_parser"]["modification_dict"]
         self.modifications_isalpha = parse_settings["modifications_parser"]["isalpha"]
         self.modifications_isupper = parse_settings["modifications_parser"]["isupper"]
@@ -252,28 +257,6 @@ class ParseModificationSettings:
         self.modifications_pattern = parse_settings["modifications_parser"]["pattern"]
         self.modifications_pattern = rf"{self.modifications_pattern}"
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
-
-    def species_dict(self) -> Dict[str, str]:
-        """
-        Get the species dictionary.
-
-        Returns
-        -------
-        Dict[str, str]
-            A dictionary of species mappings.
-        """
-        return self.parser.species_dict()
-
-    def species_expected_ratio(self) -> float:
-        """
-        Get the expected species ratio.
-
-        Returns
-        -------
-        float
-            The expected ratio of species.
-        """
-        return self.parser.species_expected_ratio()
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """

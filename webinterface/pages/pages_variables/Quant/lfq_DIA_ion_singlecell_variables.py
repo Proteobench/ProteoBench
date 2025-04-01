@@ -47,7 +47,7 @@ class VariablesDIAQuantSC:
     slider_id_uuid: str = "slider_id_dia_quant_singlecell"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_singlecell"
     table_id_uuid: str = "table_id_dia_quant_singlecell"
-    
+
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/input_file_description.md"

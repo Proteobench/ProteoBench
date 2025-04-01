@@ -209,7 +209,8 @@ class ParseSettingsQuant:
         df_filtered_melted["replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
         df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
 
-        self.modification_parser.convert_to_standard_format(df_filtered_melted)
+        if self.modification_parser is not None:
+            self.modification_parser.convert_to_standard_format(df_filtered_melted)
 
         if self.analysis_level == "ion":
             if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:

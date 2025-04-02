@@ -419,6 +419,8 @@ class QuantModule:
         result_performance: pd.DataFrame,
         param_loc: List[Any],
         comment: str,
+        extension_input_file: str = ".txt",
+        extension_input_parameter_file: str = ".txt",
     ) -> None:
         """
         Write intermediate and raw data to a directory in zipped form.
@@ -452,7 +454,7 @@ class QuantModule:
             with zipfile.ZipFile(zip_file_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
                 # Save the input file-like object content to the zip file
                 input_file_obj.seek(0)
-                zf.writestr("input_file.txt", input_file_obj.read())
+                zf.writestr(f"input_file{extension_input_file}", input_file_obj.read())
 
                 # Save the result performance DataFrame as a CSV in the zip file
                 result_csv = result_performance.to_csv(index=False)
@@ -461,7 +463,7 @@ class QuantModule:
                 # Save parameter files in the zip file
                 for i, _file in enumerate(param_loc):
                     _file.seek(0)
-                    param_filename = f"param_{i}.txt"  # Adjust the extension if needed
+                    param_filename = f"param_{i}.{extension_input_parameter_file}"  # Adjust the extension if needed
                     zf.writestr(param_filename, _file.read())
 
                 # Save the user comment in the zip file

@@ -36,6 +36,7 @@
 "AlphaDIA" = "parse_settings_alphadia.toml"
 "MSAID" = "parse_settings_msaid.toml"
 "Custom" = "parse_settings_custom.toml"
+"PEAKS" = "parse_settings_peaks.toml"
 
 [quant_lfq_DIA_ion_singlecell]
 "DIA-NN" = "parse_settings_diann.toml"

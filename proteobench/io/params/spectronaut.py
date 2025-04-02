@@ -176,7 +176,10 @@ if __name__ == "__main__":
     """
     Reads Spectronaut settings files, extracts parameters, and writes them to CSV files.
     """
-    fnames = ["../../../test/params/spectronaut_Experiment1_ExperimentSetupOverview_BGS_Factory_Settings.txt"]
+    fnames = [
+        "../../../test/params/spectronaut_Experiment1_ExperimentSetupOverview_BGS_Factory_Settings.txt",
+        "../../../test/params/Spectronaut_dynamic.txt",
+    ]
 
     for file in fnames:
         # Extract parameters from the settings file

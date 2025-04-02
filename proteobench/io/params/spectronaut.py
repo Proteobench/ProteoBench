@@ -137,7 +137,7 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     params.ident_fdr_psm = float(extract_value(lines, "Precursor Qvalue Cutoff:"))
     params.ident_fdr_peptide = None
     params.ident_fdr_protein = float(extract_value(lines, "Protein Qvalue Cutoff (Experiment):"))
-    params.enable_match_between_runs = False
+    params.enable_match_between_runs = False  # https://x.com/OliverMBernhar1/status/1656220095553601537
     _precursor_mass_tolerance = extract_mass_tolerance(lines, "MS1 Mass Tolerance Strategy:")
     params.precursor_mass_tolerance = f"[-{_precursor_mass_tolerance}, {_precursor_mass_tolerance}]"
     _fragment_mass_tolerance = extract_mass_tolerance(lines, "MS2 Mass Tolerance Strategy:")
@@ -165,9 +165,8 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     params.quantification_method = extract_value(
         lines, "Quantity MS Level:"
     )  # "Quantity MS Level:" or "Protein LFQ Method:" or "Quantity Type:"
-    params.second_pass = extract_value(lines, "directDIA Workflow:")
     params.protein_inference = extract_value(lines, "Inference Algorithm:")  # or Protein Inference Workflow:
-    params.predictors_library = extract_value(lines, "Hybrid (DDA + DIA) Library").replace(":", "").strip()
+    params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Cross-Run Normalization:")
     return params
 

@@ -216,7 +216,6 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     params.quantification_method = extract_value(
         lines, "LFQ Method:"
     )  # "Quantity MS Level:" or "Protein LFQ Method:" or "Quantity Type:"
-    params.second_pass = None
     params.protein_inference = None
     params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Normalization Method:")

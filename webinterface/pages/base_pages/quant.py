@@ -20,8 +20,8 @@ from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule as IonModule
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
+from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule as IonModule
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def compare_dictionaries(old_dict, new_dict):
     for key in all_keys:
         old_value = old_dict.get(key, "[MISSING]")
         new_value = new_dict.get(key, "[MISSING]")
-        if str(old_value) != str(new_value):
+        if str(old_value) != str(new_value) and not (old_value == None and new_value == "[MISSING]"):
             changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
 
     if changes:
@@ -1142,7 +1142,7 @@ class QuantUIObjects:
             )
             col1.plotly_chart(fig_logfc, use_container_width=True)
 
-            col2.subheader("Coefficient of variation distribution in Group A and B.")
+            col2.subheader("Coefficient of variation distribution in Condition A and B.")
             col2.markdown(
                 """
                     Right Panel Panel : CV calculated from your data

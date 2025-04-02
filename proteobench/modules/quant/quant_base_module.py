@@ -119,7 +119,7 @@ class QuantModule:
         self.github_repo.clone_repo()
         self.parse_settings_dir = parse_settings_dir
 
-        self.precursor_name = ""
+        self.precursor_column_name = ""
         self.module_id = module_id
 
     def is_implemented(self) -> bool:
@@ -264,17 +264,17 @@ class QuantModule:
 
         # Get quantification data
         quant_score = QuantScores(
-            self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
-        intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
         current_datapoint = QuantDatapoint.generate_datapoint(
-            intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 
-        return intermediate_data_structure, all_datapoints, input_df
+        return intermediate_metric_structure, all_datapoints, input_df
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """

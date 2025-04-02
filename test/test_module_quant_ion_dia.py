@@ -12,7 +12,7 @@ from proteobench.score.quant.quantscores import QuantScores
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
 TESTDATA_FILES = {
     "DIA-NN": os.path.join(TESTDATA_DIR, "DIANN_1.9_beta_sample_report.tsv"),
-    "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.7.2_sample.tsv"),
+    "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.10_sample.tsv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxDIA_sample_test.txt"),
     "FragPipe (DIA-NN quant)": os.path.join(TESTDATA_DIR, "MSFraggerDIA_sample_test.tsv"),
     "Spectronaut": os.path.join(TESTDATA_DIR, "Spectronaut_test_sample_default_PG.tsv"),
@@ -125,10 +125,10 @@ class TestDIAQuantIonModule:
         }
 
     def test_benchmarking_return_types_are_correct(self):
-        intermediate_df, all_datapoints, input_df = DIAQuantIonModule("").benchmarking(
+        intermediate_metric_df, all_datapoints, input_df = DIAQuantIonModule("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
-        assert isinstance(intermediate_df, pd.DataFrame)
+        assert isinstance(intermediate_metric_df, pd.DataFrame)
         assert isinstance(all_datapoints, pd.DataFrame)
         assert isinstance(input_df, pd.DataFrame)
 

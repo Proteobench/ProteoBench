@@ -315,7 +315,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters = {
         "software_name": "DIA-NN",
         "search_engine": "DIA-NN",
-        "enable_match_between_runs": True,
+        "enable_match_between_runs": False,
         "quantification_method": "QuantUMS high-precision",
         "protein_inference": "Heuristic protein inference",
     }

@@ -7,9 +7,9 @@ import re
 from typing import Any
 
 import pandas as pd
-from .maxquant import build_Series_from_records
-from .maxquant import extract_params as extract_params_mq
-from .maxquant import read_file
+from maxquant import build_Series_from_records
+from maxquant import extract_params as extract_params_mq
+from maxquant import read_file
 
 from proteobench.io.params import ProteoBenchParameters
 
@@ -60,5 +60,6 @@ if __name__ == "__main__":
         data_dict = params.__dict__
         series = pd.Series(data_dict)
 
+        print(series)
         # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".csv"))

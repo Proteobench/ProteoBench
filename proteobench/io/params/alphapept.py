@@ -64,7 +64,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
         f'[-{search["frag_tol"]} {_tolerance_unit}, {search["frag_tol"]} {_tolerance_unit}]'
     )
     params.ident_fdr_protein = search["protein_fdr"]
-    params.ident_fdr_peptide = search["peptide_fdr"]
+    params.ident_fdr_psm = search["peptide_fdr"]
 
     # Extract features and workflow details
     params.min_precursor_charge = record["features"]["iso_charge_min"]
@@ -85,4 +85,5 @@ if __name__ == "__main__":
         params = extract_params(file)
         data_dict = params.__dict__
         series = pd.Series(data_dict)
+        print(series)
         series.to_csv(file.with_suffix(".csv"))

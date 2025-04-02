@@ -833,6 +833,10 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.result_performance_submission].to_csv("test.csv", index=False)
 
         if "storage" in st.secrets.keys():
+            extension_input_file = os.path.splitext(self.user_input["input_csv"].name)[1]
+            extension_input_parameter_file = os.path.splitext(self.user_input[self.variables_quant.meta_data][0].name)[
+                1
+            ]
             logger.info("Save intermediate raw")
             self.ionmodule.write_intermediate_raw(
                 dir=st.secrets["storage"]["dir"],
@@ -841,6 +845,8 @@ class QuantUIObjects:
                 result_performance=st.session_state[self.variables_quant.result_performance_submission],
                 param_loc=self.user_input[self.variables_quant.meta_data],
                 comment=st.session_state[self.variables_quant.meta_data_text],
+                extension_input_file=extension_input_file,
+                extension_input_parameter_file=extension_input_parameter_file,
             )
 
     def copy_dataframes_for_submission(self) -> None:

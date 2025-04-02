@@ -50,25 +50,28 @@ def parse_line(line: str) -> Tuple[str, Dict[str, Tuple[Optional[str], Optional[
         - A dictionary of setting names and their associated values (and flags, if any).
         - The indentation level as an integer, indicating the depth of the setting in the hierarchy.
     """
-    line = clean_line(line[22:])
-    tab, setting = line.split("──")
-    setting_list = setting.split(":")
+    if line:
+        line = clean_line(line[22:])
+        tab, setting = line.split("──")
+        setting_list = setting.split(":")
 
-    if len(setting_list) == 1:
-        setting_dict = {setting_list[0]: (None, None)}
-    else:
-        value = setting_list[1].strip()
-        if "(user defined)" in value:
-            value = value.replace("(user defined)", "").strip()
-            setting_dict = {setting_list[0]: (value, "user defined")}
-        elif "(default)" in value:
-            value = value.replace("(default)", "").strip()
-            setting_dict = {setting_list[0]: (value, "default")}
+        if len(setting_list) == 1:
+            setting_dict = {setting_list[0]: (None, None)}
         else:
-            setting_dict = {setting_list[0]: (value, None)}
+            value = setting_list[1].strip()
+            if "(user defined)" in value:
+                value = value.replace("(user defined)", "").strip()
+                setting_dict = {setting_list[0]: (value, "user defined")}
+            elif "(default)" in value:
+                value = value.replace("(default)", "").strip()
+                setting_dict = {setting_list[0]: (value, "default")}
+            else:
+                setting_dict = {setting_list[0]: (value, None)}
 
-    level = levels.index(len(tab))  # Convert tab count to level
-    return setting_list[0], setting_dict, level
+        level = levels.index(len(tab))  # Convert tab count to level
+        return setting_list[0], setting_dict, level
+    else:
+        return "", {}, 0
 
 
 def process_nested_values(
@@ -272,7 +275,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     line_generator = iter(lines)
     first_line = next(line_generator)
-
     parsed_settings, level, line = parse_section(line=parse_line(first_line), line_generator=line_generator)
 
     peptide_lengths = get_min_max(parsed_settings["library_prediction"]["precursor_len"])
@@ -303,8 +305,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "fixed_mods": parsed_settings["library_prediction"]["fixed_modifications"].strip(),
         "variable_mods": parsed_settings["library_prediction"]["variable_modifications"].strip(),
         "max_mods": int(parsed_settings["library_prediction"]["max_var_mod_num"]),
-        "scan_window": int(parsed_settings["selection_config"]["max_size_rt"]),
-        "second_pass": None,
+        "scan_window": None,
         "protein_inference": parsed_settings["fdr"]["inference_strategy"].strip(),
         "predictors_library": "Built-in",
     }

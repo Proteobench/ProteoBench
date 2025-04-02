@@ -148,10 +148,11 @@ class PlotDataPoint:
                 )
                 if "comments" in benchmark_metrics_df.columns:
                     comment = benchmark_metrics_df.submission_comments[idx]
-                    datapoint_text = (
-                        datapoint_text
-                        + f"Comment (private submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
-                    )
+                    if isinstance(comment, str):
+                        datapoint_text = (
+                            datapoint_text
+                            + f"Comment (private submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
+                        )
             else:
                 # TODO: Determine parameters based on module
                 datapoint_text = (

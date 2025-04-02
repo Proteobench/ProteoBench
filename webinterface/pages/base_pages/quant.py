@@ -51,7 +51,7 @@ def compare_dictionaries(old_dict, new_dict):
     for key in all_keys:
         old_value = old_dict.get(key, "[MISSING]")
         new_value = new_dict.get(key, "[MISSING]")
-        if str(old_value) != str(new_value):
+        if str(old_value) != str(new_value) and not (old_value == None and new_value == "[MISSING]"):
             changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
 
     if changes:

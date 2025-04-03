@@ -3,13 +3,13 @@ software_name,AlphaDIA
 software_version,1.7.2
 search_engine,AlphaDIA
 search_engine_version,1.7.2
-ident_fdr_psm,
+ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,0.01
-enable_match_between_runs,?
-precursor_mass_tolerance,4.0
-fragment_mass_tolerance,7.0
-enzyme,trypsin
+enable_match_between_runs,False
+precursor_mass_tolerance,"[-4.0 ppm, 4.0 ppm]"
+fragment_mass_tolerance,"[-7.0 ppm, 7.0 ppm]"
+enzyme,Trypsin
 allowed_miscleavages,1
 min_peptide_length,7
 max_peptide_length,35
@@ -18,8 +18,6 @@ variable_mods,Oxidation@M;Acetyl@Protein N-term
 max_mods,2
 min_precursor_charge,2
 max_precursor_charge,4
-scan_window,15
-quantification_method,
-second_pass,
+quantification_method,None
 protein_inference,heuristic
-predictors_library,Built-in
+abundance_normalization_ions,None

@@ -4,7 +4,7 @@
         "label": "Software name",
         "placeholder": "None"
     },
-	"software_version": {
+    "software_version": {
         "type": "text_input",
         "label": "Software tool version",
         "placeholder": "1.0"
@@ -34,7 +34,7 @@
         "label": "FDR protein",
         "placeholder": "None"
     },
-	"enable_match_between_runs": {
+    "enable_match_between_runs": {
         "type": "checkbox",
         "label": "Quantified with MBR",
         "value": false
@@ -59,7 +59,7 @@
         "label": "Maximum allowed number of missed cleavage",
         "placeholder": "None"
     },
-	"min_peptide_length": {
+    "min_peptide_length": {
         "type": "text_input",
         "label": "Minimum peptide length",
         "placeholder": "None"
@@ -79,7 +79,7 @@
         "label": "Specify the variable mods that were set (separated by a comma)",
         "placeholder": "None"
     },
-	"max_mods": {
+    "max_mods": {
         "type": "text_input",
         "label": "Maximum number of modifications",
         "placeholder": "None"
@@ -99,29 +99,24 @@
         "label": "Quantification method",
         "placeholder": "None"
     },
-	"protein_inference": {
+    "protein_inference": {
         "type": "text_input",
         "label": "Protein inference method",
         "placeholder": "None"
     },
-	"abundance_normalization_ions": {
+    "abundance_normalization_ions": {
         "type": "text_input",
         "label": "Abundance normalization method",
         "placeholder": "None"
     },
-	"predictors_library": {
+    "predictors_library": {
         "type": "text_input",
         "label": "Utilized spectral library",
         "placeholder": "None"
     },
-	"scan_window": {
+    "scan_window": {
         "type": "text_input",
         "label": "Window scanning size",
         "placeholder": "None"
-    },
-	"second_pass": {
-        "type": "checkbox",
-        "label": "Second pass DIA",
-        "value": false
     }
 }

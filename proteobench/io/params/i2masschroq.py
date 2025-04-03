@@ -45,11 +45,6 @@ def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
         max_cleavage = int(params.loc["refine, maximum missed cleavage sites"])
 
     _enzyme = str(params.loc["protein, cleavage site"])
-    # Replace the enzyme pattern with the enzyme name used in ProteoBench
-    if _enzyme == "[RK]|{P}":
-        _enzyme = "Trypsin"
-    elif _enzyme == "[RK]":
-        _enzyme = "Trypsin/P"
 
     fixed_mods_list = list(params.loc[params.index.str.contains("residue, modification mass")].dropna())
     var_mods_list = list(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())

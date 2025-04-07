@@ -32,7 +32,7 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
         mapper = mapper_df["description"].to_dict()
         
-        print(input_data_frame["protein_group"].head())
+        print(input_data_frame["protein_group"][5040:5050])
         non_strings = input_data_frame["protein_group"][~input_data_frame["protein_group"].apply(lambda x: isinstance(x, str))]
         print(non_strings)
 

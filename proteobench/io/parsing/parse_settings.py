@@ -81,7 +81,6 @@ class ParseSettingsBuilder:
             The parser for the specified input format.
         """
         toml_file = self.PARSE_SETTINGS_FILES[input_format]
-        print("Loading parse settings from:", toml_file)
         parse_settings = toml.load(toml_file)
         parse_settings_module = toml.load(self.PARSE_SETTINGS_FILES_MODULE)
 

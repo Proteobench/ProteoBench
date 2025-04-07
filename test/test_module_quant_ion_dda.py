@@ -20,6 +20,7 @@ TESTDATA_FILES = {
     "MSAngel": os.path.join(TESTDATA_DIR, "MSAngel_DDA_quan_ions_subset.xlsx"),
     "i2MassChroQ": os.path.join(TESTDATA_DIR, "i2MassChroQ_DDA_quant_ions_test_new_random_subset.tsv"),
     "quantms": os.path.join(TESTDATA_DIR, "sample_dda_quantms.sdrf_openms_design_msstats_in.csv"),
+    "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_ion_quant_mergedproline.csv")
 }
 PARSE_SETTINGS_DIR = os.path.abspath(
     os.path.join(
@@ -43,7 +44,7 @@ TESTED_SOFTWARE_TOOLS = (
     "ProlineStudio",
     "MSAngel",
     "i2MassChroQ",
-    # "WOMBAT",
+    "WOMBAT",
     "quantms",
 )
 

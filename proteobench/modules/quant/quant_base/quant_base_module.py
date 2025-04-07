@@ -32,6 +32,7 @@ from proteobench.io.params.peaks import read_peaks_settings as extract_params_pe
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.quantms import extract_params as extract_params_quantms
 from proteobench.io.params.sage import extract_params as extract_params_sage
+from proteobench.io.params.wombat import extract_params as extract_params_wombat
 from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
@@ -74,8 +75,7 @@ class QuantModule:
         "MSAID": extract_params_msaid,
         "Spectronaut": extract_params_spectronaut,
         "PEAKS": extract_params_peaks,
-        # TODO needs to be replace with parameter extraction function
-        "WOMBAT": extract_params_spectronaut,
+        "WOMBAT": extract_params_wombat,
         # TODO needs to be replace with parameter extraction function
         "Proteome Discoverer": extract_params_spectronaut,
         "quantms": extract_params_quantms,

@@ -27,7 +27,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
             record = yaml.safe_load(f)
 
     # Extracting the summary data
-    summary = record["params]
+    summary = record["params"]
     params = ProteoBenchParameters()
 
     # Set software details
@@ -53,6 +53,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     params.fragment_mass_tolerance = summary["fragment_mass_tolerance"]
     params.ident_fdr_protein = summary["ident_fdr_protein"]
     params.ident_fdr_peptide = summary["ident_fdr_peptide"]
+    params.ident_fdr_psm = summary["ident_fdr_psm"]
 
     # Extract features and workflow details
     params.min_precursor_charge = summary["min_precursor_charge"]

@@ -34,7 +34,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     params.software_name = "Wombat"
     params.software_version = record["version"]
     params.search_engine = "various"
-    #params.search_engine_version = params.software_version
+    # params.search_engine_version = params.software_version
 
     # Extract FASTA related details
     fasta = record["fastafile"]
@@ -66,9 +66,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
 
 if __name__ == "__main__":
     # Create test CSV files for each YAML configuration
-    for fname in [
-        "../../../test/params/wombat_params.yaml"
-    ]:
+    for fname in ["../../../test/params/wombat_params.yaml"]:
         file = pathlib.Path(fname)
         params = extract_params(file)
         data_dict = params.__dict__

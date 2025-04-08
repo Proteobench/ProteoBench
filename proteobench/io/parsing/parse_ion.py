@@ -2,6 +2,10 @@
 Module for parsing ion data from various formats.
 """
 
+"""
+Module for parsing ion data from various formats.
+"""
+
 import math
 import os
 import re
@@ -13,7 +17,14 @@ import pandas as pd
 def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     """
     Load a dataframe from a CSV file depending on its format.
+    Load a dataframe from a CSV file depending on its format.
 
+    Parameters
+    ----------
+    input_csv : str
+        The path to the CSV file.
+    input_format : str
+        The format of the input file (e.g., "MaxQuant", "AlphaPept", etc.).
     Parameters
     ----------
     input_csv : str
@@ -25,7 +36,25 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     -------
     pd.DataFrame
         The loaded dataframe.
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
     """
+    try:
+        if input_format == "MaxQuant":
+            warnings.warn(
+                """
+                WARNING: MaxQuant proforma parsing does not take into account fixed modifications\n
+                because they are implicit. Only after providing the appropriate parameter file,\n
+                fixed modifications will be added correctly.
+                """
+            )
+        load_function = _LOAD_FUNCTIONS[input_format]
+    except KeyError as e:
+        raise ValueError(f"Invalid input format: {input_format}") from e
+
+    return load_function(input_csv)
     try:
         if input_format == "MaxQuant":
             warnings.warn(
@@ -55,6 +84,14 @@ def aggregate_modification_column(
     """
     Aggregate modifications into a string representing the modified sequence.
 
+    Parameters
+    ----------
+    input_string_seq : str
+        The input sequence string.
+    input_string_modifications : str
+        The modifications applied to the sequence.
+    special_locations : dict, optional
+        A dictionary specifying special locations for modifications.
     Parameters
     ----------
     input_string_seq : str
@@ -389,8 +426,19 @@ def _load_wombat(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-    input_data_frame["Protein"] = input_data_frame["Protein"] + "," + input_data_frame["Mapped Proteins"].fillna("")
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+
+    non_strings = input_data_frame["protein_group"][
+        ~input_data_frame["protein_group"].apply(lambda x: isinstance(x, str))
+    ]
+
+    input_data_frame["protein_group"] = input_data_frame["protein_group"].map(
+        lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(",")])
+    )
+    input_data_frame["proforma"] = input_data_frame["modified_peptide"]
     return input_data_frame
 
 

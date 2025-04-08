@@ -24,6 +24,4 @@ def test_read_wombat_settings(file):
     actual = pd.Series(actual.__dict__)
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=0).squeeze("columns")
     expected = expected.loc[actual.index]
-    print(actual)
-    print(expected)
     assert expected.equals(actual)

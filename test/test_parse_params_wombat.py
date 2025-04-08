@@ -17,7 +17,7 @@ fnames = [TESTDATA_DIR / f for f in fnames]
 
 
 @pytest.mark.parametrize("file", fnames)
-def test_read_peaks_settings(file):
+def test_read_wombat_settings(file):
     expected = pd.read_csv(file.with_suffix(".csv"), index_col=0).squeeze("columns")
     actual = wombat_params.read_wombat_settings(file)
     print(actual.software_name)

@@ -1,14 +1,6 @@
 """Streamlit utils."""
 
-import base64
-import io
 import logging
-import os
-import re
-import tempfile
-import uuid
-import zipfile
-from typing import BinaryIO
 
 import streamlit as st
 from typing_extensions import get_origin

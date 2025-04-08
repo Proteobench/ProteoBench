@@ -1,3 +1,7 @@
+"""
+AlphaDIA parameter parsing.
+"""
+
 import pathlib
 import re
 from typing import Dict, Iterable, Optional, Tuple
@@ -14,13 +18,17 @@ ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
 
 def clean_line(line: str) -> str:
     """
-    Cleans up a line by removing ANSI escape codes and leading/trailing whitespace.
+    Clean up a line by removing ANSI escape codes and leading/trailing whitespace.
 
-    Args:
-        line (str): The line to be cleaned.
+    Parameters
+    ----------
+    line : str
+        The line to be cleaned.
 
-    Returns:
-        str: The cleaned line with no ANSI codes and stripped whitespace.
+    Returns
+    -------
+    str
+        The cleaned line with no ANSI codes and stripped whitespace.
     """
     line = ANSI_REGEX.sub("", line)
     return line.strip()
@@ -28,53 +36,67 @@ def clean_line(line: str) -> str:
 
 def parse_line(line: str) -> Tuple[str, Dict[str, Tuple[Optional[str], Optional[str]]], int]:
     """
-    Parses a log line into a tuple containing the setting name, a dictionary of settings, and the indentation level.
+    Parse a log line into a tuple containing the setting name, a dictionary of settings, and the indentation level.
 
-    Args:
-        line (str): A log line to parse.
+    Parameters
+    ----------
+    line : str
+        A log line to parse.
 
-    Returns:
-        Tuple[str, dict, int]:
-            - The setting name as a string.
-            - A dictionary of setting names and their associated values (and flags, if any).
-            - The indentation level as an integer, indicating the depth of the setting in the hierarchy.
+    Returns
+    -------
+    Tuple[str, Dict[str, Tuple[Optional[str], Optional[str]]], int]
+        - The setting name as a string.
+        - A dictionary of setting names and their associated values (and flags, if any).
+        - The indentation level as an integer, indicating the depth of the setting in the hierarchy.
     """
-    line = clean_line(line[22:])
-    tab, setting = line.split("──")
-    setting_list = setting.split(":")
+    if line:
+        line = clean_line(line[22:])
+        tab, setting = line.split("──")
+        setting_list = setting.split(":")
 
-    if len(setting_list) == 1:
-        setting_dict = {setting_list[0]: (None, None)}
-    else:
-        value = setting_list[1].strip()
-        if "(user defined)" in value:
-            value = value.replace("(user defined)", "").strip()
-            setting_dict = {setting_list[0]: (value, "user defined")}
-        elif "(default)" in value:
-            value = value.replace("(default)", "").strip()
-            setting_dict = {setting_list[0]: (value, "default")}
+        if len(setting_list) == 1:
+            setting_dict = {setting_list[0]: (None, None)}
         else:
-            setting_dict = {setting_list[0]: (value, None)}
+            value = setting_list[1].strip()
+            if "(user defined)" in value:
+                value = value.replace("(user defined)", "").strip()
+                setting_dict = {setting_list[0]: (value, "user defined")}
+            elif "(default)" in value:
+                value = value.replace("(default)", "").strip()
+                setting_dict = {setting_list[0]: (value, "default")}
+            else:
+                setting_dict = {setting_list[0]: (value, None)}
 
-    level = levels.index(len(tab))  # Convert tab count to level
-    return setting_list[0], setting_dict, level
+        level = levels.index(len(tab))  # Convert tab count to level
+        return setting_list[0], setting_dict, level
+    else:
+        return "", {}, 0
 
 
 def process_nested_values(
     header_prev: str, current_header: Optional[str], nested_values: list, line_dict_next: dict, section: dict
 ) -> Tuple[Optional[str], list]:
     """
-    Processes nested values from a given line dictionary and updates the section dictionary.
+    Parse nested values from a given line dictionary and updates the section dictionary.
 
-    Args:
-        header_prev (str): The previous header string.
-        current_header (Optional[str]): The current header string, which can be None.
-        nested_values (list): A list of nested values to be updated.
-        line_dict_next (dict): A dictionary representing the next line to be processed.
-        section (dict): A dictionary representing the section to be updated.
+    Parameters
+    ----------
+    header_prev : str
+        The previous header string.
+    current_header : Optional[str]
+        The current header string, which can be None.
+    nested_values : list
+        A list of nested values to be updated.
+    line_dict_next : dict
+        A dictionary representing the next line to be processed.
+    section : dict
+        A dictionary representing the section to be updated.
 
-    Returns:
-        Tuple[Optional[str], list]: A tuple containing the updated current header and the list of nested values.
+    Returns
+    -------
+    Tuple[Optional[str], list]
+        A tuple containing the updated current header and the list of nested values.
     """
     if current_header is None or current_header != header_prev:
         nested_values = []
@@ -92,11 +114,14 @@ def process_nested_values(
 
 def update_section_with_line_dict(section: dict, line_dict_next: dict) -> None:
     """
-    Updates the section dictionary with values from the line_dict_next.
+    Update the section dictionary with values from the line_dict_next.
 
-    Args:
-        section (dict): The section dictionary to update.
-        line_dict_next (dict): The dictionary containing the new values to add to the section.
+    Parameters
+    ----------
+    section : dict
+        The section dictionary to update.
+    line_dict_next : dict
+        The dictionary containing the new values to add to the section.
     """
     for key, (value, flag) in line_dict_next.items():
         if key in section and flag == "user defined":
@@ -107,17 +132,21 @@ def update_section_with_line_dict(section: dict, line_dict_next: dict) -> None:
 
 def parse_section(line: Tuple[str, dict, int], line_generator: Iterable[str]) -> Tuple[dict, int, Optional[Tuple]]:
     """
-    Parses a section from a log file into a dictionary and returns the parsed section along with the indentation level and the next line.
+    Parse a section from a log file into a dictionary and returns the parsed section along with the indentation level and the next line.
 
-    Args:
-        line (Tuple[str, dict, int]): The first parsed line of a new section.
-        line_generator (Iterable[str]): The line generator of log file lines.
+    Parameters
+    ----------
+    line : Tuple[str, dict, int]
+        The first parsed line of a new section.
+    line_generator : Iterable[str]
+        The line generator of log file lines.
 
-    Returns:
-        Tuple[dict, int, Optional[Tuple]]:
-            - The parsed section as a dictionary.
-            - The indentation level of the line after the section.
-            - The next line after the section, or None if no more lines are available.
+    Returns
+    -------
+    Tuple[dict, int, Optional[Tuple]]:
+        - The parsed section as a dictionary.
+        - The indentation level of the line after the section.
+        - The next line after the section, or None if no more lines are available.
     """
     section = {}
 
@@ -178,13 +207,17 @@ def parse_section(line: Tuple[str, dict, int], line_generator: Iterable[str]) ->
 
 def extract_file_version(line: str) -> str:
     """
-    Extracts the version from a given line of an alphaDIA log file.
+    Extract the version from a given line of an alphaDIA log file.
 
-    Args:
-        line (str): The line containing the version number.
+    Parameters
+    ----------
+    line : str
+        The line containing the version number.
 
-    Returns:
-        str: The extracted version number as a string, or None if not found.
+    Returns
+    -------
+    str
+        The extracted version number as a string, or None if not found.
     """
     version_pattern = r"version:\s*([\d\.]+)"
     match = re.search(version_pattern, line)
@@ -193,14 +226,18 @@ def extract_file_version(line: str) -> str:
 
 def get_min_max(list_of_elements: list) -> Tuple[int, int]:
     """
-    Extracts the minimum and maximum values from a list of elements.
+    Extract the minimum and maximum values from a list of elements.
 
-    Args:
-        list_of_elements (list): A list containing at least two elements. The first element is the minimum,
-                                  and the second element is the maximum (if three elements, the third is used as the max).
+    Parameters
+    ----------
+    list_of_elements : list
+        A list containing at least two elements. The first element is the minimum,
+        and the second element is the maximum (if three elements, the third is used as the max).
 
-    Returns:
-        Tuple[int, int]: A tuple containing the minimum and maximum values.
+    Returns
+    -------
+    Tuple[int, int]
+        A tuple containing the minimum and maximum values.
     """
     min_value = int(list_of_elements[0])
     if len(list_of_elements) == 3:
@@ -212,13 +249,17 @@ def get_min_max(list_of_elements: list) -> Tuple[int, int]:
 
 def extract_params(fname: str) -> ProteoBenchParameters:
     """
-    Extracts parameters from a log file and returns them as a `ProteoBenchParameters` object.
+    Extract parameters from a log file and returns them as a `ProteoBenchParameters` object.
 
-    Args:
-        fname (str): The path to the log file.
+    Parameters
+    ----------
+    fname : str
+        The path to the log file.
 
-    Returns:
-        ProteoBenchParameters: An object containing the extracted parameters.
+    Returns
+    -------
+    ProteoBenchParameters
+        An object containing the extracted parameters.
     """
     try:
         with open(fname) as f:
@@ -234,7 +275,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     line_generator = iter(lines)
     first_line = next(line_generator)
-
     parsed_settings, level, line = parse_section(line=parse_line(first_line), line_generator=line_generator)
 
     peptide_lengths = get_min_max(parsed_settings["library_prediction"]["precursor_len"])
@@ -265,8 +305,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "fixed_mods": parsed_settings["library_prediction"]["fixed_modifications"].strip(),
         "variable_mods": parsed_settings["library_prediction"]["variable_modifications"].strip(),
         "max_mods": int(parsed_settings["library_prediction"]["max_var_mod_num"]),
-        "scan_window": int(parsed_settings["selection_config"]["max_size_rt"]),
-        "second_pass": None,
+        "scan_window": None,
         "protein_inference": parsed_settings["fdr"]["inference_strategy"].strip(),
         "predictors_library": "Built-in",
     }

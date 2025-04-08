@@ -1,8 +1,9 @@
-"""MSAngel creates modular pipelines that allows several search engines to identify 
+"""
+MSAngel creates modular pipelines that allows several search engines to identify
 peptides, which are then quantified with Proline.
 The parameters are provided in a .json file.
-MSAngel allows for multiple search engines to be used in the same pipeline. So it 
-requires a list of search engines and their respective parameters, which are then 
+MSAngel allows for multiple search engines to be used in the same pipeline. So it
+requires a list of search engines and their respective parameters, which are then
 concatenated.
 
 Relevant information in file:
@@ -21,7 +22,17 @@ from proteobench.io.params import ProteoBenchParameters
 def extract_search_engine(search_params: list) -> dict:
     """
     Extract search engine name from the JSON data.
-    It only works for workflows using a single search engine
+    It only works for workflows using a single search engine.
+
+    Parameters
+    ----------
+    search_params : list
+        The list of search parameters extracted from the JSON file.
+
+    Returns
+    -------
+    dict
+        The search engine name.
     """
 
     for each_search_params in search_params["operations"]:
@@ -33,6 +44,18 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
     """
     Extract search parameters from the JSON data of a workflow running Mascot.
     Adds them to the partially completed input_params ProteoBenchParameters object.
+
+    Parameters
+    ----------
+    search_params : list
+        The list of search parameters extracted from the JSON file.
+    input_params : ProteoBenchParameters
+        The partially completed input_params object.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The input_params object with the extracted parameters added.
     """
 
     for each_search_params in search_params["operations"]:
@@ -68,6 +91,18 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
     """
     Extract search parameters from the JSON data of a workflow running X!Tandem.
     Adds them to the partially completed input_params ProteoBenchParameters object.
+
+    Parameters
+    ----------
+    search_params : list
+        The list of search parameters extracted from the JSON file.
+    input_params : ProteoBenchParameters
+        The partially completed input_params object.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The input_params object with the extracted parameters added.
     """
 
     for each_search_params in search_params["operations"]:
@@ -126,11 +161,15 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
     """
     Parse MSAangel quantification tool JSON parameter file and extract relevant parameters.
 
-    Args:
-        fname (str or pathlib.Path): The path to the Sage JSON parameter file.
+    Parameters
+    ----------
+    fname : str or pathlib.Path
+        The path to the MSAngel JSON parameter file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters as a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters as a `ProteoBenchParameters` object.
     """
     params = ProteoBenchParameters()
 

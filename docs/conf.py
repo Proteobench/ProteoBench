@@ -1,3 +1,7 @@
+"""
+Configuration file for the Sphinx documentation builder.
+"""
+
 import proteobench
 
 project = "ProteoBench"

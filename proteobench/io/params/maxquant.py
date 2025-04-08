@@ -1,4 +1,4 @@
-"""Functionality to parse Maxqunt mqpar.xml parameter files"""
+"""Functionality to parse Maxqunt mqpar.xml parameter files."""
 
 from __future__ import annotations
 
@@ -16,7 +16,28 @@ logger = logging.getLogger()
 
 
 def extend_tuple(t, target_length: int):
-    """Extend tuple with None values to match target length."""
+    """
+    Extend tuple with None values to match target length.
+
+    Parameters
+    ----------
+    t : tuple
+        The tuple to extend.
+    target_length : int
+        The target length of the tuple.
+
+    Returns
+    -------
+    tuple
+        The extended tuple.
+
+    Raises
+    ------
+    TypeError
+        If the input is not a tuple.
+    ValueError
+        If the tuple is longer than the target length.
+    """
     if not isinstance(t, tuple):
         raise TypeError(f"Wrong type provided. Expected tuple, got {type(t)} : {t!r}")
     if len(t) > target_length:
@@ -25,7 +46,21 @@ def extend_tuple(t, target_length: int):
 
 
 def extend_tuples_with_none(list_of_tuples: list[tuple], target_length: int):
-    """Extend the tuples in a list of tuples with None values to match target length."""
+    """
+    Extend the tuples in a list of tuples with None values to match target length.
+
+    Parameters
+    ----------
+    list_of_tuples : list of tuple
+        The list of tuples to extend.
+    target_length : int
+        The target length of the tuples.
+
+    Returns
+    -------
+    list of tuple
+        The list of extended tuples.
+    """
     extended_tuples = []
     for tuple_ in list_of_tuples:
         # if len(tuple_) > target_length:
@@ -36,9 +71,23 @@ def extend_tuples_with_none(list_of_tuples: list[tuple], target_length: int):
 
 
 def add_record(data: dict, tag: str, record) -> dict:
-    """Add tag and record to data dict.
+    """
+    Add tag and record to data dict.
 
-    The record can be many things."""
+    Parameters
+    ----------
+    data : dict
+        The data dictionary to add the record to.
+    tag : str
+        The tag for the record.
+    record : any
+        The record to add.
+
+    Returns
+    -------
+    dict
+        The updated data dictionary.
+    """
     if tag in data:
         if isinstance(data[tag], list):
             data[tag].append(record)
@@ -50,7 +99,19 @@ def add_record(data: dict, tag: str, record) -> dict:
 
 
 def read_xml_record(element: ET.Element) -> dict:
-    """Read entire record in a nested dict structure."""
+    """
+    Read entire record in a nested dict structure.
+
+    Parameters
+    ----------
+    element : xml.etree.ElementTree.Element
+        The XML element to read.
+
+    Returns
+    -------
+    dict
+        The nested dictionary structure of the XML element.
+    """
     data = dict()
     if element.attrib:
         data.update(element.attrib)
@@ -67,7 +128,6 @@ def read_xml_record(element: ET.Element) -> dict:
                 for child in child
             ]
         elif child.text and child.text.strip():
-            # just plain text record
             data = add_record(data=data, tag=child.tag, record=child.text.strip())
         else:
             record = read_xml_record(child)
@@ -79,7 +139,19 @@ def read_xml_record(element: ET.Element) -> dict:
 
 
 def read_file(file: str) -> dict:
-    """Read all entries in a MaxQuant xml file."""
+    """
+    Read all entries in a MaxQuant xml file.
+
+    Parameters
+    ----------
+    file : str
+        The path to the XML file.
+
+    Returns
+    -------
+    dict
+        The parsed XML data as a dictionary.
+    """
     tree: ET.ElementTree = ET.parse(file)
     root: ET.Element = tree.getroot()
     params: dict = read_xml_record(root)
@@ -87,21 +159,21 @@ def read_file(file: str) -> dict:
 
 
 def flatten_dict_of_dicts(d: dict, parent_key: str = "") -> dict:
-    """Build tuples for nested dictionaries for use as `pandas.MultiIndex`.
+    """
+    Build tuples for nested dictionaries for use as `pandas.MultiIndex`.
 
     Parameters
     ----------
     d : dict
         Nested dictionary for which all keys are flattened to tuples.
     parent_key : str, optional
-        Outer key (used for recursion), by default ''
+        Outer key (used for recursion), by default ''.
 
     Returns
     -------
     dict
-        Flattend dictionary with tuple keys: {(outer_key, ..., inner_key) : value}
+        Flattened dictionary with tuple keys: {(outer_key, ..., inner_key) : value}.
     """
-    # simplified and adapted from: https://stackoverflow.com/a/6027615/9684872
     items = []
     for k, v in d.items():
         new_key = parent_key + (k,) if parent_key else (k,)
@@ -121,12 +193,42 @@ def flatten_dict_of_dicts(d: dict, parent_key: str = "") -> dict:
 
 
 def build_Series_from_records(records, index_length=4):
+    """
+    Build a pandas Series from records.
+
+    Parameters
+    ----------
+    records : dict
+        The records to build the Series from.
+    index_length : int, optional
+        The length of the index, by default 4.
+
+    Returns
+    -------
+    pandas.Series
+        The pandas Series built from the records.
+    """
     records = flatten_dict_of_dicts(records)
     idx = pd.MultiIndex.from_tuples((extend_tuple(k, index_length) for (k, _) in records))
     return pd.Series((v for (k, v) in records), index=idx)
 
 
 def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
+    """
+    Extract parameters from a MaxQuant XML file.
+
+    Parameters
+    ----------
+    fname : str
+        The path to the XML file.
+    ms2frac : str, optional
+        The MS2 fragmentation method, by default "FTMS".
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters.
+    """
     params = ProteoBenchParameters()
 
     record = read_file(fname)
@@ -134,10 +236,11 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     # MaxQuant does this to our knowledge based on the binary rawfile metadata
     record["msmsParamsArray"] = [d for d in record["msmsParamsArray"] if d["msmsParams"]["Name"] == ms2frac]
     record = build_Series_from_records(record, 4).sort_index()
+    params.software_name = "MaxQuant"
     params.search_engine = "Andromeda"
     params.software_version = record.loc["maxQuantVersion"].squeeze()
-    params.ident_fdr_psm = None
-    params.ident_fdr_peptide = float(record.loc["peptideFdr"].squeeze())
+    params.ident_fdr_psm = float(record.loc["peptideFdr"].squeeze())
+    params.ident_fdr_peptide = None
     params.ident_fdr_protein = float(record.loc["proteinFdr"].squeeze())
     params.enable_match_between_runs = record.loc["matchBetweenRuns"].squeeze().lower() == "true"
     _precursor_mass_tolerance = record.loc[

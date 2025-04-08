@@ -1,4 +1,8 @@
-from typing import Dict, Optional
+"""
+Module for plotting quantitative proteomics data.
+"""
+
+from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -7,23 +11,32 @@ import plotly.graph_objects as go
 
 
 class PlotDataPoint:
+    """
+    Class for plotting data points.
+    """
+
     @staticmethod
     def plot_fold_change_histogram(result_df: pd.DataFrame, species_ratio: Dict[str, Dict[str, str]]) -> go.Figure:
         """
         Plot a histogram of log2 fold changes using Plotly, color-coded by species.
 
-        Args:
-            result_df (pd.DataFrame): The results DataFrame containing fold changes and species data.
-            species_ratio (Dict[str, Dict[str, str]]): A dictionary mapping species to their respective colors and ratios.
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            The results DataFrame containing fold changes and species data.
+        species_ratio : Dict[str, Dict[str, str]]
+            A dictionary mapping species to their respective colors and ratios.
 
-        Returns:
-            go.Figure: A Plotly figure object representing the histogram.
+        Returns
+        -------
+        go.Figure
+            A Plotly figure object representing the histogram.
         """
+        species_list = list(species_ratio.keys())
+
         # Filter data to include only known species
-        result_df = result_df[result_df[["YEAST", "ECOLI", "HUMAN"]].any(axis=1)]
-        result_df["kind"] = result_df[["YEAST", "ECOLI", "HUMAN"]].apply(
-            lambda x: ["YEAST", "ECOLI", "HUMAN"][np.argmax(x)], axis=1
-        )
+        result_df = result_df[result_df[species_list].any(axis=1)]
+        result_df["kind"] = result_df[species_list].apply(lambda x: species_list[np.argmax(x)], axis=1)
 
         # Map colors based on species ratio
         color_map = {species: data["color"] for species, data in species_ratio.items()}
@@ -98,15 +111,25 @@ class PlotDataPoint:
         """
         Plot mean metrics in a scatter plot with Plotly, highlighting specific data points.
 
-        Args:
-            benchmark_metrics_df (pd.DataFrame): The DataFrame containing benchmark metrics data.
-            software_colors (Dict[str, str], optional): A dictionary mapping software names to their colors. Defaults to predefined colors.
-            mapping (Dict[str, int], optional): A dictionary mapping categories to scatter plot sizes. Defaults to {"old": 10, "new": 20}.
-            highlight_color (str, optional): The color used for highlighting certain points. Defaults to "#d30067".
-            label (str, optional): The column name for labeling data points. Defaults to "None".
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            The DataFrame containing benchmark metrics data.
+        metric : str, optional
+            The metric to plot, either "Median" or "Mean", by default "Median".
+        software_colors : Dict[str, str], optional
+            A dictionary mapping software names to their colors, by default predefined colors.
+        mapping : Dict[str, int], optional
+            A dictionary mapping categories to scatter plot sizes, by default {"old": 10, "new": 20}.
+        highlight_color : str, optional
+            The color used for highlighting certain points, by default "#d30067".
+        label : str, optional
+            The column name for labeling data points, by default "None".
 
-        Returns:
-            go.Figure: A Plotly figure object representing the scatter plot.
+        Returns
+        -------
+        go.Figure
+            A Plotly figure object representing the scatter plot.
         """
         all_median_abs_epsilon = [
             v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
@@ -124,9 +147,12 @@ class PlotDataPoint:
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
                 if "comments" in benchmark_metrics_df.columns:
-                    datapoint_text = (
-                        datapoint_text + f"Comment (private submission): {benchmark_metrics_df.comments[idx]}"
-                    )
+                    comment = benchmark_metrics_df.submission_comments[idx]
+                    if isinstance(comment, str):
+                        datapoint_text = (
+                            datapoint_text
+                            + f"Comment (private submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
+                        )
             else:
                 # TODO: Determine parameters based on module
                 datapoint_text = (
@@ -143,8 +169,10 @@ class PlotDataPoint:
                     + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
                 )
                 if "submission_comments" in benchmark_metrics_df.columns:
+                    comment = benchmark_metrics_df.submission_comments[idx]
                     datapoint_text = (
-                        datapoint_text + f"Comment (public submission): {benchmark_metrics_df.submission_comments[idx]}"
+                        datapoint_text
+                        + f"Comment (public submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
                     )
 
             hover_texts.append(datapoint_text)
@@ -257,15 +285,19 @@ class PlotDataPoint:
         """
         Plot the coefficient of variation (CV) for A and B groups using a violin plot.
 
-        Args:
-            result_df (pd.DataFrame): The DataFrame containing the CV values for A and B.
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            The results DataFrame containing the CV data.
 
-        Returns:
-            go.Figure: A Plotly figure object representing the violin plot.
+        Returns
+        -------
+        go.Figure:
+            A Plotly figure object representing the violin plot.
         """
         fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points=False)
         fig.update_layout(
-            xaxis_title="Group",
+            xaxis_title="Condition",
             yaxis_title="CV",
             xaxis=dict(linecolor="black"),  # Set the X axis line color to black
             yaxis=dict(linecolor="black"),  # Set the Y axis line color to black

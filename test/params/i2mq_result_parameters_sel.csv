@@ -9,7 +9,7 @@ ident_fdr_protein,0.008595988539
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-10 ppm, 10 ppm]"
 fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
-enzyme,Trypsin
+enzyme,[RK]|{P}
 allowed_miscleavages,2
 min_peptide_length,
 max_peptide_length,
@@ -18,9 +18,6 @@ variable_mods,15.99491@M;Acetyl(N-term);Pyrolidone(N-term)
 max_mods,
 min_precursor_charge,1
 max_precursor_charge,4
-scan_window,
 quantification_method,
-second_pass,
 protein_inference,
-predictors_library,
 abundance_normalization_ions,

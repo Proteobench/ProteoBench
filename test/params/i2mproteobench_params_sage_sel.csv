@@ -18,9 +18,6 @@ variable_mods,M:15.994915 ^E:-18.010565 ^Q:-17.026548
 max_mods,2
 min_precursor_charge,2
 max_precursor_charge,4
-scan_window,
 quantification_method,
-second_pass,
 protein_inference,
-predictors_library,
 abundance_normalization_ions,

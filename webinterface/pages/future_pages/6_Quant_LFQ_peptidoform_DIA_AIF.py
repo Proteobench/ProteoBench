@@ -1,3 +1,7 @@
+# TODO: Is this file still needed? If not, remove it.
+"""
+Streamlit UI for the DIA quantification - precursor ions module - AIF.
+"""
 import logging
 from typing import Any, Dict, Type
 
@@ -14,7 +18,14 @@ from proteobench.modules.quant.DDA.peptidoform.dda_quant_peptidoform_module impo
 
 
 class StreamlitUI:
+    """
+    Streamlit UI for the DIA quantification - precursor ions module - AIF.
+    """
+
     def __init__(self):
+        """
+        Initialize the Streamlit UI for the DIA quantification - precursor ions module - AIF.
+        """
         self.variables_dda_quant: VariablesDIAQuant = VariablesDIAQuant()
         self.texts: Type[WebpageTexts] = WebpageTexts
 
@@ -42,7 +53,7 @@ class StreamlitUI:
 
     def _main_page(self) -> None:
         """
-        Sets up the main page layout for the Streamlit application.
+        Set up the main page layout for the Streamlit application.
         This includes the title, module descriptions, input forms, and configuration settings.
         """
         self.quant_uiobjects.create_text_header()

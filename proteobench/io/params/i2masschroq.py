@@ -1,3 +1,7 @@
+"""
+I2MassChroQ parameter file parser.
+"""
+
 import pathlib
 
 import pandas as pd
@@ -6,7 +10,19 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
-    """Parse i2MassChroQ parameters when with X!Tandem is used."""
+    """
+    Parse i2MassChroQ parameters when with X!Tandem is used.
+
+    Parameters
+    ----------
+    params : pd.Series
+        The parameters extracted from the i2MassChroQ parameter file.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters encapsulated in a `ProteoBenchParameters` object.
+    """
     _tol_frag = "{} {}".format(
         params.loc["spectrum, fragment monoisotopic mass error"],
         params.loc["spectrum, fragment monoisotopic mass error units"].replace("Daltons", "Da"),
@@ -29,11 +45,6 @@ def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
         max_cleavage = int(params.loc["refine, maximum missed cleavage sites"])
 
     _enzyme = str(params.loc["protein, cleavage site"])
-    # Replace the enzyme pattern with the enzyme name used in ProteoBench
-    if _enzyme == "[RK]|{P}":
-        _enzyme = "Trypsin"
-    elif _enzyme == "[RK]":
-        _enzyme = "Trypsin/P"
 
     fixed_mods_list = list(params.loc[params.index.str.contains("residue, modification mass")].dropna())
     var_mods_list = list(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())
@@ -72,7 +83,19 @@ def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
 
 
 def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
-    """Parse i2MassChroQ parameters when Sage is used."""
+    """
+    Parse i2MassChroQ parameters when Sage is used.
+
+    Parameters
+    ----------
+    params : pd.Series
+        The parameters extracted from the i2MassChroQ parameter file.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters encapsulated in a `ProteoBenchParameters` object.
+    """
     # Construct tolerance strings for fragment and parent mass errors
     fragment_mass_tolerance = params.loc["sage_fragment_tol"]  # e.g '-0.02 0.02 da'
 
@@ -129,11 +152,15 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     """
     Extract parameters from an i2MassChroQ parameter file and return a `ProteoBenchParameters` object.
 
-    Args:
-        fname (pathlib.Path): The file path to the i2MassChroQ parameter file.
+    Parameters
+    ----------
+    fname : pathlib.Path
+        The file path to the i2MassChroQ parameter file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters encapsulated in a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
     # Read parameters from the file
     params = pd.read_csv(fname, sep="\t", header=None, index_col=0).squeeze()

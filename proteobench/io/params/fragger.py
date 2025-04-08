@@ -1,4 +1,5 @@
-"""Functionality to parse FragPipe fragger.params parameter files.
+"""
+Functionality to parse FragPipe fragger.params parameter files.
 
 FragPipe has a text based parameter file format which
 separates parameters and their value using an equal sign. Optional comments are
@@ -30,12 +31,17 @@ def parse_params(l_of_str: List[str], sep: str = " = ") -> List[Parameter]:
     """
     Parse the FragPipe parameter file and return a list of Parameter objects.
 
-    Args:
-        l_of_str (List[str]): The lines of the FragPipe parameter file as a list of strings.
-        sep (str): The separator between parameter names and values. Default is " = ".
+    Parameters
+    ----------
+    l_of_str : List[str]
+        The lines of the FragPipe parameter file as a list of strings.
+    sep : str, optional
+        The separator between parameter names and values. Default is " = ".
 
-    Returns:
-        List[Parameter]: A list of Parameter namedtuples containing the parameter name, value, and any comment.
+    Returns
+    -------
+    List[Parameter]
+        A list of Parameter namedtuples containing the parameter name, value, and any comment.
     """
     data = []
     for line in l_of_str:
@@ -67,14 +73,19 @@ def parse_params(l_of_str: List[str], sep: str = " = ") -> List[Parameter]:
 
 def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> Tuple[str, List[Parameter]]:
     """
-    Reads the FragPipe workflow file, extracting the header and parameters.
+    Read the FragPipe workflow file and return the header and a list of Parameter objects.
 
-    Args:
-        file (BytesIO): The FragPipe workflow file to read.
-        sep (str): The separator used between parameter names and values. Default is "=".
+    Parameters
+    ----------
+    file : BytesIO
+        The FragPipe workflow file to read.
+    sep : str, optional
+        The separator used between parameter names and values. Default is "=".
 
-    Returns:
-        Tuple[str, List[Parameter]]: A tuple containing the header and a list of Parameter objects.
+    Returns
+    -------
+    tuple of (str, list of Parameter)
+        A tuple containing the header and a list of Parameter objects.
     """
     l_of_str = file.read().decode("utf-8").splitlines()
     header = l_of_str[0][1:].strip()  # Skip leading '#' in the header
@@ -85,11 +96,15 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     """
     Parse FragPipe parameter files and extract relevant parameters into a `ProteoBenchParameters` object.
 
-    Args:
-        file (BytesIO): The FragPipe parameter file to parse.
+    Parameters
+    ----------
+    file : BytesIO
+        The FragPipe parameter file to parse.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters encapsulated in a ProteoBenchParameters object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
     header, fragpipe_params = read_fragpipe_workflow(file)
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(

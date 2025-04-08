@@ -1,3 +1,7 @@
+"""
+Spectronaut parameter parsing.
+"""
+
 import re
 from pathlib import Path
 from typing import List, Optional
@@ -11,11 +15,15 @@ def clean_text(text: str) -> str:
     """
     Clean the input text by removing leading and trailing spaces, colons, commas, or tabs.
 
-    Args:
-        text (str): The text to be cleaned.
+    Parameters
+    ----------
+    text : str
+        The text to be cleaned.
 
-    Returns:
-        str: The cleaned text.
+    Returns
+    -------
+    str
+        The cleaned text.
     """
     text = re.sub(r"^[\s:,\t]+|[\s:,\t]+$", "", text)
     return text
@@ -25,12 +33,17 @@ def extract_value(lines: List[str], search_term: str) -> Optional[str]:
     """
     Extract the value associated with a search term from a list of lines.
 
-    Args:
-        lines (List[str]): The list of lines to search through.
-        search_term (str): The term to search for in the lines.
+    Parameters
+    ----------
+    lines : List[str]
+        The list of lines to search through.
+    search_term : str
+        The term to search for in the lines.
 
-    Returns:
-        Optional[str]: The extracted value, or None if the search term is not found.
+    Returns
+    -------
+    Optional[str]
+        The extracted value, or None if the search term is not found.
     """
     return next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
 
@@ -39,12 +52,19 @@ def extract_mass_tolerance(lines: List[str], search_term: str, mass_analyzer="Or
     """
     Extract the mass tolerance value associated with a search term, with special handling for "System Default".
 
-    Args:
-        lines (List[str]): The list of lines to search through.
-        search_term (str): The term to search for in the lines.
+    Parameters
+    ----------
+    lines : List[str]
+        The list of lines to search through.
+    search_term : str
+        The term to search for in the lines.
+    mass_analyzer : str, optional
+        The type of mass analyzer, by default "Orbitrap".
 
-    Returns:
-        Optional[str]: The extracted mass tolerance value, or None if the search term is not found.
+    Returns
+    -------
+    Optional[str]
+        The extracted mass tolerance value, or None if the search term is not found.
     """
     value = next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
     if value == "System Default":
@@ -61,12 +81,17 @@ def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
     """
     Extract the value associated with a search term using regular expressions.
 
-    Args:
-        lines (List[str]): The list of lines to search through.
-        search_term (str): The regular expression to search for in the lines.
+    Parameters
+    ----------
+    lines : List[str]
+        The list of lines to search through.
+    search_term : str
+        The regular expression to search for in the lines.
 
-    Returns:
-        Optional[str]: The extracted value, or None if the search term is not found.
+    Returns
+    -------
+    Optional[str]
+        The extracted value, or None if the search term is not found.
     """
     return next((clean_text(re.split(search_term, line)[1]) for line in lines if re.search(search_term, line)), None)
 
@@ -75,11 +100,15 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     """
     Read a Spectronaut settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 
-    Args:
-        file_path (str): The path to the Spectronaut settings file.
+    Parameters
+    ----------
+    file_path : str
+        The path to the Spectronaut settings file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters encapsulated in a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
     # Try to read the file contents
     if hasattr(file_path, "read"):
@@ -108,7 +137,7 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     params.ident_fdr_psm = float(extract_value(lines, "Precursor Qvalue Cutoff:"))
     params.ident_fdr_peptide = None
     params.ident_fdr_protein = float(extract_value(lines, "Protein Qvalue Cutoff (Experiment):"))
-    params.enable_match_between_runs = False
+    params.enable_match_between_runs = False  # https://x.com/OliverMBernhar1/status/1656220095553601537
     _precursor_mass_tolerance = extract_mass_tolerance(lines, "MS1 Mass Tolerance Strategy:")
     params.precursor_mass_tolerance = f"[-{_precursor_mass_tolerance}, {_precursor_mass_tolerance}]"
     _fragment_mass_tolerance = extract_mass_tolerance(lines, "MS2 Mass Tolerance Strategy:")
@@ -136,9 +165,8 @@ def read_spectronaut_settings(file_path: str) -> ProteoBenchParameters:
     params.quantification_method = extract_value(
         lines, "Quantity MS Level:"
     )  # "Quantity MS Level:" or "Protein LFQ Method:" or "Quantity Type:"
-    params.second_pass = extract_value(lines, "directDIA Workflow:")
     params.protein_inference = extract_value(lines, "Inference Algorithm:")  # or Protein Inference Workflow:
-    params.predictors_library = extract_value(lines, "Hybrid (DDA + DIA) Library").replace(":", "").strip()
+    params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Cross-Run Normalization:")
     return params
 
@@ -147,7 +175,10 @@ if __name__ == "__main__":
     """
     Reads Spectronaut settings files, extracts parameters, and writes them to CSV files.
     """
-    fnames = ["../../../test/params/spectronaut_Experiment1_ExperimentSetupOverview_BGS_Factory_Settings.txt"]
+    fnames = [
+        "../../../test/params/spectronaut_Experiment1_ExperimentSetupOverview_BGS_Factory_Settings.txt",
+        "../../../test/params/Spectronaut_dynamic.txt",
+    ]
 
     for file in fnames:
         # Extract parameters from the settings file

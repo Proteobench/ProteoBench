@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-import proteobench.io.params.peaks as peaks_params
+import proteobench.io.params.wombat as wombat_params
 
 TESTDATA_DIR = Path(__file__).parent / "params"
 

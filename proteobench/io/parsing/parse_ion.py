@@ -394,7 +394,9 @@ def _load_wombat(input_csv: str) -> pd.DataFrame:
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
        
-    non_strings = input_data_frame["protein_group"][~input_data_frame["protein_group"].apply(lambda x: isinstance(x, str))]
+    non_strings = input_data_frame["protein_group"][
+        ~input_data_frame["protein_group"].apply(lambda x: isinstance(x, str))
+    ]
 
     input_data_frame["protein_group"] = input_data_frame["protein_group"].map(
         lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(",")])

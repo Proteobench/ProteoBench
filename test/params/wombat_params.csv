@@ -1,7 +1,7 @@
 ,0
 software_name,Wombat
 software_version,0.9.8
-search_engine,
+search_engine,various
 search_engine_version,
 ident_fdr_psm,0.01
 ident_fdr_peptide,0.01

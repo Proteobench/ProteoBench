@@ -32,4 +32,4 @@ params:
 rawfiles: None
 
 fastafile: ProteoBenchFASTA_DDAQuantification.fasta
-version: 0.9.6
+version: 0.9.8

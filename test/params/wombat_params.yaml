@@ -11,9 +11,9 @@ params:
   num_hits: 1
   miscleavages: 1
   min_precursor_charge: 2
-  max_precursor_charge: 4
+  max_precursor_charge: 3
   min_peptide_length: 5
-  max_peptide_length: 35
+  max_peptide_length: 20
   max_mods: 4
   ident_fdr_psm: 0.01
   ident_fdr_peptide: 0.01

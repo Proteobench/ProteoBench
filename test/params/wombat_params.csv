@@ -1,0 +1,23 @@
+,0
+software_name,Wombat
+software_version,0.9.8
+search_engine,various
+search_engine_version,
+ident_fdr_psm,0.01
+ident_fdr_peptide,0.01
+ident_fdr_protein,0.01
+enable_match_between_runs,True
+precursor_mass_tolerance,"20 ppm"
+fragment_mass_tolerance,"0.02 Da"
+enzyme,Trypsin
+allowed_miscleavages,1
+min_peptide_length,5
+max_peptide_length,20
+fixed_mods,Carbamidomethyl of C
+variable_mods,"Acetyl of Protein N-term,Oxidation of M"
+max_mods,4
+min_precursor_charge,2
+max_precursor_charge,3
+quantification_method,
+protein_inference,
+abundance_normalization_ions,median

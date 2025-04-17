@@ -2,7 +2,7 @@
 "FG.LabeledSequence" = "Sequence"
 "R.FileName" = "Raw file"
 "FG.Charge" = "Charge"
-"FG.Quantity" = "Intensity"
+"EG.TotalQuantity (Settings)" = "Intensity"
 "PG.ProteinGroups" = "Proteins"
 
 [condition_mapper]

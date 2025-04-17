@@ -22,9 +22,14 @@ Using a virtual environment is highly recommended.
 To run the tests run the command:
 
 ```
-python -m unittest test/test_module_dda_quant.py
+pytest test/
 ```
 
+You can also indicate specific tests to run:
+
+```
+pytest test/test_parse_params_alphapept.py
+```
 
 ### Testing the web interface locally
 

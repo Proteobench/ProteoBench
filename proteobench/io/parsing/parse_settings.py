@@ -305,4 +305,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
 }

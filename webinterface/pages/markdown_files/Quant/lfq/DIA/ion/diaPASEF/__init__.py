@@ -1,3 +1,3 @@
 """
-Markdown files for the diaPASEF DIA ion page.
+Markdown files for the Astral DIA ion page.
 """

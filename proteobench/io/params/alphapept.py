@@ -46,8 +46,17 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     if params.enzyme == "trypsin":
         params.enzyme = "Trypsin"
     params.allowed_miscleavages = fasta["n_missed_cleavages"]
-    params.fixed_mods = ",".join(fasta["mods_fixed"])
-    params.variable_mods = ",".join(fasta["mods_variable"])
+
+    mods_fixed = fasta["mods_fixed"]
+    mods_fixed.extend(fasta["mods_fixed_terminal"])
+    mods_fixed.extend(fasta["mods_fixed_terminal_prot"])
+    params.fixed_mods = ",".join(mods_fixed)
+
+    mods_variable = fasta["mods_variable"]
+    mods_variable.extend(fasta["mods_variable_terminal"])
+    mods_variable.extend(fasta["mods_variable_terminal"])
+    params.variable_mods = ",".join(mods_variable)
+
     params.max_mods = fasta["n_modifications_max"]
     params.min_peptide_length = fasta["pep_length_min"]
     params.max_peptide_length = fasta["pep_length_max"]

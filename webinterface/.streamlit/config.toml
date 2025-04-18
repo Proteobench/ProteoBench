@@ -1,0 +1,10 @@
+[theme]
+base="light"
+#FFFFFF
+
+[global]
+disableWidgetStateDuplicationWarning = true
+
+[server]
+enableStaticServing = true
+maxUploadSize = 1000

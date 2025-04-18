@@ -147,7 +147,7 @@ class PlotDataPoint:
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
                 if "comments" in benchmark_metrics_df.columns:
-                    comment = benchmark_metrics_df.submission_comments[idx]
+                    comment = benchmark_metrics_df.comments[idx]
                     if isinstance(comment, str):
                         datapoint_text = (
                             datapoint_text

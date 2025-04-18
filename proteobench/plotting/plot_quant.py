@@ -147,7 +147,7 @@ class PlotDataPoint:
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
                 if "comments" in benchmark_metrics_df.columns:
-                    comment = benchmark_metrics_df.submission_comments[idx]
+                    comment = benchmark_metrics_df.comments[idx]
                     if isinstance(comment, str):
                         datapoint_text = (
                             datapoint_text
@@ -170,10 +170,11 @@ class PlotDataPoint:
                 )
                 if "submission_comments" in benchmark_metrics_df.columns:
                     comment = benchmark_metrics_df.submission_comments[idx]
-                    datapoint_text = (
-                        datapoint_text
-                        + f"Comment (public submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
-                    )
+                    if isinstance(comment, str):
+                        datapoint_text = (
+                            datapoint_text
+                            + f"Comment (public submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
+                        )
 
             hover_texts.append(datapoint_text)
 

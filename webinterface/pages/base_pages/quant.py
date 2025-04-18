@@ -873,7 +873,7 @@ class QuantUIObjects:
         self.user_input[self.variables_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.variables_quant.texts.Help.meta_data_file,
-            accept_multiple_files=True,
+            accept_multiple_files=False,
         )
 
     def generate_comments_section(self) -> None:
@@ -1080,7 +1080,9 @@ class QuantUIObjects:
             self.generate_submission_ui_elements()
 
         if self.user_input[self.variables_quant.meta_data]:
+            print(self.user_input)
             params = self.load_user_parameters()
+            print(params)
             st.session_state[self.variables_quant.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
             print(self.params_file_dict_copy)

@@ -145,3 +145,6 @@ results.json
 
 # wew
 build.sh
+
+# temp results
+jupyter_notebooks/analysis/temp_results/*

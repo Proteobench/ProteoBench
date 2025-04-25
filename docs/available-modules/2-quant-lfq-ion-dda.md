@@ -44,7 +44,7 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-Click [here](https://proteobench.cubimed.rub.de/DDA%20Quant%20Ion%20Level%20-BETA-) if you want to submit your results or when you want to explore the DDA quantification module.
+Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion) if you want to submit your results or when you want to explore the DDA quantification module.
 
 ### Input data for private visualisation of your benchmark run(s)
 

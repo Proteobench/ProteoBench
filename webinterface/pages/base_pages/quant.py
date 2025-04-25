@@ -873,7 +873,7 @@ class QuantUIObjects:
         self.user_input[self.variables_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.variables_quant.texts.Help.meta_data_file,
-            accept_multiple_files=False,
+            accept_multiple_files=True,
         )
 
     def generate_comments_section(self) -> None:

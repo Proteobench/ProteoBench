@@ -4,322 +4,232 @@ AlphaDIA parameter parsing.
 
 import pathlib
 import re
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Tuple, List
 
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
 
-levels = [0, 1, 5, 9, 13, 17]
-
-# Regular expression to remove ANSI escape codes from strings (used for terminal color codes)
+# Regular expression to clean up lines from ANSI escape codes
 ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
+TIMESTAMP_REGEX = re.compile(r"(\d+ day,)|(\d+):\d{2}:\d{2}\.?\d*")
+DEBUG_LEVEL_REGEX = re.compile(r'(PROGRESS|INFO|WARNING|ERROR|CRITICAL|DEBUG):')
+TREE_REGEX = re.compile(r"^\s*(├──|└──|\│)\s*|\s*(├──|└──|\│)\s*")
+USER_DEFINED_REGEX = re.compile(r"(\[|\()?user defined(\]|\))?")
+DEFAULT_REGEX = re.compile(r"(\[|\()?default:?(\]|\))?")
 
+CONFIG_KEY_MAPPER = {
+    "version": "version",
+    "software_name": "software_name",
+    "search_engine": "search_engine",
+    "search_engine_version": "search_engine_version",
+    "fdr":["ident_fdr_psm", "ident_fdr_protein"],
+    "mbr_step_enabled": "enable_match_between_runs",
+    "target_ms1_tolerance": "precursor_mass_tolerance",
+    "target_ms2_tolerance": "fragment_mass_tolerance",
+    "enzyme": "enzyme",
+    "missed_cleavages": "allowed_miscleavages",
+    "min_peptide_length": "min_peptide_length",
+    "max_peptide_length": "max_peptide_length",
+    "fixed_modifications": "fixed_mods",
+    "variable_modifications": "variable_mods",
+    "max_var_mod_num": "max_mods",
+    "min_precursor_charge": "min_precursor_charge",
+    "max_precursor_charge": "max_precursor_charge",
+    "quantification_method": "quantification_method",
+    "inference_strategy": "protein_inference",
+    "predictors_library": "predictors_library",
+}
 
 def clean_line(line: str) -> str:
-    """
-    Clean up a line by removing ANSI escape codes and leading/trailing whitespace.
-
-    Parameters
-    ----------
-    line : str
-        The line to be cleaned.
-
-    Returns
-    -------
-    str
-        The cleaned line with no ANSI codes and stripped whitespace.
-    """
+    """Clean up a line by removing ANSI escape codes and trimming whitespace, as well as removing timestamps."""
     line = ANSI_REGEX.sub("", line)
+    line = TIMESTAMP_REGEX.sub("", line)
+    line = DEBUG_LEVEL_REGEX.sub("", line)
+    line = TREE_REGEX.sub("", line)
     return line.strip()
 
-
-def parse_line(line: str) -> Tuple[str, Dict[str, Tuple[Optional[str], Optional[str]]], int]:
+def parse_key_value(line: str) -> Tuple[str, str]:
     """
-    Parse a log line into a tuple containing the setting name, a dictionary of settings, and the indentation level.
-
+    Parse a key-value pair from a line in the log. It assumes the format 'key: value'.
+    
     Parameters
     ----------
     line : str
-        A log line to parse.
+        The line to parse.
 
     Returns
     -------
-    Tuple[str, Dict[str, Tuple[Optional[str], Optional[str]]], int]
-        - The setting name as a string.
-        - A dictionary of setting names and their associated values (and flags, if any).
-        - The indentation level as an integer, indicating the depth of the setting in the hierarchy.
+    Tuple[str, str]
+        The parsed key and value.
     """
-    if line:
-        line = clean_line(line[22:])
-        tab, setting = line.split("──")
-        setting_list = setting.split(":")
+    key, value = line.split(":", 1)
+    return key.strip(), value.strip()
 
-        if len(setting_list) == 1:
-            setting_dict = {setting_list[0]: (None, None)}
+def extract_values_from_nested_lines(lines: List[str], start_index: int) -> List[int]:
+    """
+    Extract values from lines that are indented, following the format for parameters like precursor_len.
+
+    Parameters
+    ----------
+    lines : List[str]
+        List of log lines.
+    start_index : int
+        Index of the line where the key (e.g., precursor_len) is found.
+
+    Returns
+    -------
+    List[int]
+        A list of integers representing the values extracted from the nested lines.
+    """
+    newer_version = False
+    values = []
+    for line in lines[start_index:]:
+        if len(values) == 3:
+            break
+        cleaned_line = clean_line(line)
+        
+        if cleaned_line:
+            if "user defined" in cleaned_line:
+                cleaned_line = USER_DEFINED_REGEX.sub("", cleaned_line)
+                number = re.search(r"\d+", cleaned_line)
+                
+                if number and values and not newer_version:
+                    values[-1] = number.group(0)
+                elif number:
+                    newer_version = True
+                    values.append(number.group(0))
+                elif number and values and newer_version:
+                    values.append(number.group(0))
+            else:
+                number = re.search(r"\d+", cleaned_line)
+                if number:
+                    values.append(number.group(0))
+
+    return values[:-1]
+
+def read_file_lines(file_path: str) -> List[str]:
+    """Read lines from a file."""
+    with open(file_path, 'r') as f:
+        return f.readlines()
+
+
+def initialize_default_parameters() -> Dict[str, str]:
+    """Initialize default parameters."""
+    return {
+        'software_name': "AlphaDIA",
+        'search_engine': "AlphaDIA",
+        "quantification_method": "DirectLFQ",
+        "predictors_library": "AlphaPeptDeep",
+    }
+
+
+def process_key_value_line(cleaned_line: str, all_parameters: Dict[str, str], version_filled: bool) -> bool:
+    """Process a line containing a key-value pair."""
+    key, value = parse_key_value(cleaned_line)
+    if key and value:
+        if key == "version" and version_filled:
+            return version_filled
+        if key == "version":
+            version_filled = True
+        if key in all_parameters:
+            all_parameters[key] += f", {value}"
         else:
-            value = setting_list[1].strip()
-            if "(user defined)" in value:
-                value = value.replace("(user defined)", "").strip()
-                setting_dict = {setting_list[0]: (value, "user defined")}
-            elif "(default)" in value:
-                value = value.replace("(default)", "").strip()
-                setting_dict = {setting_list[0]: (value, "default")}
+            all_parameters[key] = value
+    return version_filled
+
+
+def process_precursor_len(lines: List[str], index: int, all_parameters: Dict[str, str]) -> None:
+    """Process precursor length parameters."""
+    values = extract_values_from_nested_lines(lines, index + 1)
+    all_parameters["min_peptide_length"] = values[0]
+    all_parameters["max_peptide_length"] = values[-1]
+
+
+def process_precursor_charge(lines: List[str], index: int, all_parameters: Dict[str, str]) -> None:
+    """Process precursor charge parameters."""
+    values = extract_values_from_nested_lines(lines, index + 1)
+    all_parameters["min_precursor_charge"] = values[0]
+    all_parameters["max_precursor_charge"] = values[-1]
+
+
+def map_keys_to_desired_format(all_parameters: Dict[str, str]) -> None:
+    """Map keys to the desired format."""
+    for key in list(all_parameters.keys()):
+        if key in CONFIG_KEY_MAPPER:
+            mapped_keys = CONFIG_KEY_MAPPER[key]
+            if isinstance(mapped_keys, list):
+                for mapped_key in mapped_keys:
+                    all_parameters[mapped_key] = all_parameters[key]
             else:
-                setting_dict = {setting_list[0]: (value, None)}
-
-        level = levels.index(len(tab))  # Convert tab count to level
-        return setting_list[0], setting_dict, level
-    else:
-        return "", {}, 0
+                all_parameters[mapped_keys] = all_parameters[key]
 
 
-def process_nested_values(
-    header_prev: str, current_header: Optional[str], nested_values: list, line_dict_next: dict, section: dict
-) -> Tuple[Optional[str], list]:
-    """
-    Parse nested values from a given line dictionary and updates the section dictionary.
+def clean_up_parameters(all_parameters: Dict[str, str]) -> None:
+    """Clean up parameters by removing redundant keys and processing values."""
+    keys_to_remove = [key for key in all_parameters if key not in CONFIG_KEY_MAPPER.values()]
+    for key in keys_to_remove:
+        del all_parameters[key]
 
-    Parameters
-    ----------
-    header_prev : str
-        The previous header string.
-    current_header : Optional[str]
-        The current header string, which can be None.
-    nested_values : list
-        A list of nested values to be updated.
-    line_dict_next : dict
-        A dictionary representing the next line to be processed.
-    section : dict
-        A dictionary representing the section to be updated.
-
-    Returns
-    -------
-    Tuple[Optional[str], list]
-        A tuple containing the updated current header and the list of nested values.
-    """
-    if current_header is None or current_header != header_prev:
-        nested_values = []
-        current_header = header_prev
-
-    value = list(line_dict_next.keys())[0].split()[0]  # Extract value before space
-    nested_values.append(int(value))
-
-    if "(user defined)" in list(line_dict_next.keys())[0]:
-        nested_values.pop(-2)  # Remove the default value if overridden by user defined
-
-    section[header_prev] = nested_values
-    return current_header, nested_values
-
-
-def update_section_with_line_dict(section: dict, line_dict_next: dict) -> None:
-    """
-    Update the section dictionary with values from the line_dict_next.
-
-    Parameters
-    ----------
-    section : dict
-        The section dictionary to update.
-    line_dict_next : dict
-        The dictionary containing the new values to add to the section.
-    """
-    for key, (value, flag) in line_dict_next.items():
-        if key in section and flag == "user defined":
-            section[key] = value
-        elif key not in section:
-            section[key] = value
-
-
-def parse_section(line: Tuple[str, dict, int], line_generator: Iterable[str]) -> Tuple[dict, int, Optional[Tuple]]:
-    """
-    Parse a section from a log file into a dictionary and returns the parsed section along with the indentation level and the next line.
-
-    Parameters
-    ----------
-    line : Tuple[str, dict, int]
-        The first parsed line of a new section.
-    line_generator : Iterable[str]
-        The line generator of log file lines.
-
-    Returns
-    -------
-    Tuple[dict, int, Optional[Tuple]]:
-        - The parsed section as a dictionary.
-        - The indentation level of the line after the section.
-        - The next line after the section, or None if no more lines are available.
-    """
-    section = {}
-
-    # Parse the current line and add to the section
-    header_prev, line_dict, level_prev = line
-    section.update(line_dict)
-
-    try:
-        next_line = next(line_generator)
-        header_next, line_dict_next, level_next = parse_line(next_line)
-    except StopIteration:
-        return {k: v[0] if isinstance(v, tuple) else v for k, v in section.items()}, 0, None
-
-    nested_values = []
-    current_header = None
-
-    while True:
-        try:
-            header_next, line_dict_next, level_next = parse_line(next_line)
-        except StopIteration:
-            break
-
-        if not isinstance(line_dict_next, dict):
-            continue
-
-        if level_next > level_prev:  # Start of a new section
-            if header_prev in ["precursor_len", "precursor_charge", "precursor_mz", "fragment_mz"]:
-                current_header, nested_values = process_nested_values(
-                    header_prev, current_header, nested_values, line_dict_next, section
-                )
-                try:
-                    next_line = next(line_generator)
-                    continue
-                except StopIteration:
-                    break
+    for key, value in all_parameters.items():
+        if isinstance(value, str):
+            value_list = list(set(value.split(", ")))
+            if len(value_list) == 1:
+                all_parameters[key] = DEFAULT_REGEX.sub("", value_list[0])
             else:
-                subsection, _, next_line = parse_section(
-                    line=parse_line(next_line),
-                    line_generator=line_generator,
-                )
-                section[header_prev] = subsection
-                continue
+                for val in value_list:
+                    if "default" in val:
+                        all_parameters[key] = DEFAULT_REGEX.sub("", val).replace("]", "").strip()
+                        break
+                    if "user defined" in val:
+                        all_parameters[key] = USER_DEFINED_REGEX.sub("", val)
+                        break
+        elif isinstance(value, list):
+            all_parameters[key] = list(set(value))
 
-        elif level_prev == level_next:  # Same level
-            update_section_with_line_dict(section, line_dict_next)
-            header_prev = header_next
-            level_prev = level_next
-            try:
-                next_line = next(line_generator)
-            except StopIteration:
-                break
-
-        else:  # Going up a level
-            break
-
-    return {k: v[0] if isinstance(v, tuple) else v for k, v in section.items()}, level_next, next_line
-
-
-def extract_file_version(line: str) -> str:
+def extract_params(file_path: str) -> Dict[str, str]:
     """
-    Extract the version from a given line of an alphaDIA log file.
+    Extract parameters from the log file and return them as a dictionary.
 
     Parameters
     ----------
-    line : str
-        The line containing the version number.
-
-    Returns
-    -------
-    str
-        The extracted version number as a string, or None if not found.
-    """
-    version_pattern = r"version:\s*([\d\.]+)"
-    match = re.search(version_pattern, line)
-    return match.group(1) if match else None
-
-
-def get_min_max(list_of_elements: list) -> Tuple[int, int]:
-    """
-    Extract the minimum and maximum values from a list of elements.
-
-    Parameters
-    ----------
-    list_of_elements : list
-        A list containing at least two elements. The first element is the minimum,
-        and the second element is the maximum (if three elements, the third is used as the max).
-
-    Returns
-    -------
-    Tuple[int, int]
-        A tuple containing the minimum and maximum values.
-    """
-    min_value = int(list_of_elements[0])
-    if len(list_of_elements) == 3:
-        max_value = int(list_of_elements[2])
-    else:
-        max_value = int(list_of_elements[1])
-    return min_value, max_value
-
-
-def extract_params(fname: str) -> ProteoBenchParameters:
-    """
-    Extract parameters from a log file and returns them as a `ProteoBenchParameters` object.
-
-    Parameters
-    ----------
-    fname : str
+    file_path : str
         The path to the log file.
 
     Returns
     -------
-    ProteoBenchParameters
-        An object containing the extracted parameters.
+    Dict[str, str]
+        A dictionary containing the extracted parameters.
     """
-    try:
-        with open(fname) as f:
-            lines_read = f.readlines()
-            lines = [line for line in lines_read if "──" in line]
-            version_line = [line for line in lines_read if "version" in line][0]
-        version = extract_file_version(version_line)
-    except:
-        lines_read = [l for l in fname.read().decode("utf-8").splitlines()]
-        lines = [line for line in lines_read if "──" in line]
-        version_line = [line for line in lines_read if "version" in line][0]
-        version = extract_file_version(version_line)
+    lines = read_file_lines(file_path)
+    all_parameters = initialize_default_parameters()
+    version_filled = False
 
-    line_generator = iter(lines)
-    first_line = next(line_generator)
-    parsed_settings, level, line = parse_section(line=parse_line(first_line), line_generator=line_generator)
+    for i, line in enumerate(lines):
+        cleaned_line = clean_line(line)
+        if ":" in cleaned_line:
+            version_filled = process_key_value_line(cleaned_line, all_parameters, version_filled)
 
-    peptide_lengths = get_min_max(parsed_settings["library_prediction"]["precursor_len"])
-    precursor_charges = get_min_max(parsed_settings["library_prediction"]["precursor_charge"])
+        if "precursor_len" in cleaned_line:
+            process_precursor_len(lines, i, all_parameters)
 
-    prec_tol = float(parsed_settings["search"]["target_ms1_tolerance"])
-    prec_tol_string = f"[-{prec_tol} ppm, {prec_tol} ppm]"
-    frag_tol = float(parsed_settings["search"]["target_ms2_tolerance"])
-    frag_tol_string = f"[-{frag_tol} ppm, {frag_tol} ppm]"
+        if "precursor_charge" in cleaned_line:
+            process_precursor_charge(lines, i, all_parameters)
 
-    parameters = {
-        "software_name": "AlphaDIA",
-        "search_engine": "AlphaDIA",
-        "software_version": version,
-        "search_engine_version": version,
-        "enable_match_between_runs": False,
-        "precursor_mass_tolerance": prec_tol_string,
-        "fragment_mass_tolerance": frag_tol_string,
-        "ident_fdr_psm": parsed_settings["fdr"]["fdr"],
-        "ident_fdr_peptide": None,
-        "ident_fdr_protein": parsed_settings["fdr"]["fdr"],
-        "enzyme": parsed_settings["library_prediction"]["enzyme"].strip().capitalize(),
-        "allowed_miscleavages": int(parsed_settings["library_prediction"]["missed_cleavages"]),
-        "min_peptide_length": peptide_lengths[0],
-        "max_peptide_length": peptide_lengths[1],
-        "min_precursor_charge": precursor_charges[0],
-        "max_precursor_charge": precursor_charges[1],
-        "fixed_mods": parsed_settings["library_prediction"]["fixed_modifications"].strip(),
-        "variable_mods": parsed_settings["library_prediction"]["variable_modifications"].strip(),
-        "max_mods": int(parsed_settings["library_prediction"]["max_var_mod_num"]),
-        "scan_window": None,
-        "protein_inference": parsed_settings["fdr"]["inference_strategy"].strip(),
-        "predictors_library": "Built-in",
-    }
+    map_keys_to_desired_format(all_parameters)
+    clean_up_parameters(all_parameters)
 
-    return ProteoBenchParameters(**parameters)
-
+    return ProteoBenchParameters(**all_parameters)
 
 if __name__ == "__main__":
     for fname in [
         "../../../test/params/log_alphadia_1.txt",
         "../../../test/params/log_alphadia_2.txt",
+        "../../../test/params/log_alphadia_1.8.txt",
+        "../../../test/params/log_alphadia_1.10.txt",
     ]:
         file = pathlib.Path(fname)
-        params = extract_params(file)
-        data_dict = params.__dict__
-        series = pd.Series(data_dict)
+        pb_params = extract_params(file)
+        params = pb_params.__dict__
+        series = pd.Series(params)
         series.to_csv(file.with_suffix(".csv"))

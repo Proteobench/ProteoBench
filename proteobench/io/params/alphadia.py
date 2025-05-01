@@ -225,7 +225,11 @@ def extract_params(file_path: str) -> Dict[str, str]:
     clean_up_parameters(all_parameters)
     # Format some values
     all_parameters["precursor_mass_tolerance"] = (
-        "[-" + all_parameters["precursor_mass_tolerance"] + "ppm," + all_parameters["precursor_mass_tolerance"] + "ppm]"
+        "[-"
+        + all_parameters["precursor_mass_tolerance"]
+        + "ppm, "
+        + all_parameters["precursor_mass_tolerance"]
+        + "ppm]"
     )
     all_parameters["fragment_mass_tolerance"] = (
         "[-" + all_parameters["fragment_mass_tolerance"] + "ppm, " + all_parameters["fragment_mass_tolerance"] + "ppm]"

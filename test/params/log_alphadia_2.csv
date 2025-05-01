@@ -7,7 +7,7 @@ ident_fdr_psm,None
 ident_fdr_peptide,None
 ident_fdr_protein,None
 enable_match_between_runs,False
-precursor_mass_tolerance,"[-4 ppm,4 ppm]"
+precursor_mass_tolerance,"[-4 ppm, 4 ppm]"
 fragment_mass_tolerance,"[-7 ppm, 7 ppm]"
 enzyme,trypsin
 allowed_miscleavages,1

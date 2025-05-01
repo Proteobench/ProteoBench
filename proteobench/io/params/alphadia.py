@@ -19,7 +19,7 @@ USER_DEFINED_REGEX = re.compile(r"(\[|\()?user defined(\]|\))?")
 DEFAULT_REGEX = re.compile(r"(\[|\()?default:?(\]|\))?")
 
 CONFIG_KEY_MAPPER = {
-    "version": "version",
+    "version": "software_version",
     "software_name": "software_name",
     "search_engine": "search_engine",
     "search_engine_version": "search_engine_version",
@@ -171,7 +171,7 @@ def clean_up_parameters(all_parameters: Dict[str, str]) -> None:
     for key in keys_to_remove:
         del all_parameters[key]
 
-    for key, value in all_parameters.items():
+    for key, value in all_parameters.items(): 
         if isinstance(value, str):
             value_list = list(set(value.split(", ")))
             if len(value_list) == 1:
@@ -180,7 +180,7 @@ def clean_up_parameters(all_parameters: Dict[str, str]) -> None:
                 for val in value_list:
                     if "default" in val:
                         all_parameters[key] = DEFAULT_REGEX.sub("", val).replace("]", "").strip()
-                        break
+                        
                     if "user defined" in val:
                         all_parameters[key] = USER_DEFINED_REGEX.sub("", val)
                         break

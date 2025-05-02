@@ -175,7 +175,15 @@ def map_keys_to_desired_format(all_parameters: Dict[str, str]) -> None:
 
 def clean_up_parameters(all_parameters: Dict[str, str]) -> None:
     """Clean up parameters by removing redundant keys and processing values."""
-    keys_to_remove = [key for key in all_parameters if key not in CONFIG_KEY_MAPPER.values()]
+    keys_to_remove = []
+    for key in all_parameters.keys():
+        if key == "fdr":
+            all_parameters["ident_fdr_psm"] = all_parameters[key]
+            all_parameters["ident_fdr_protein"] = all_parameters[key]
+            keys_to_remove.append(key)
+        elif (key not in CONFIG_KEY_MAPPER.values()) and (key not in ["ident_fdr_psm", "ident_fdr_protein"]):
+            keys_to_remove.append(key)
+
     for key in keys_to_remove:
         del all_parameters[key]
 
@@ -238,7 +246,6 @@ def extract_params(file_path: str) -> Dict[str, str]:
     all_parameters["fragment_mass_tolerance"] = (
         "[-" + all_parameters["fragment_mass_tolerance"] + "ppm, " + all_parameters["fragment_mass_tolerance"] + "ppm]"
     )
-
     return ProteoBenchParameters(**all_parameters)
 
 
@@ -254,3 +261,4 @@ if __name__ == "__main__":
         params = pb_params.__dict__
         series = pd.Series(params)
         series.to_csv(file.with_suffix(".csv"))
+        print("\n" * 3)

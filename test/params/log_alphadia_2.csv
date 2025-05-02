@@ -3,9 +3,9 @@ software_name,AlphaDIA
 software_version,1.7.2
 search_engine,AlphaDIA
 search_engine_version,None
-ident_fdr_psm,None
+ident_fdr_psm,0.01
 ident_fdr_peptide,None
-ident_fdr_protein,None
+ident_fdr_protein,0.01
 enable_match_between_runs,False
 precursor_mass_tolerance,"[-4 ppm, 4 ppm]"
 fragment_mass_tolerance,"[-7 ppm, 7 ppm]"

@@ -13,8 +13,7 @@ import pathlib
 import re
 from collections import namedtuple
 from io import BytesIO
-from pathlib import PureWindowsPath
-from typing import List, Optional, Tuple
+from typing import List
 
 import pandas as pd
 
@@ -24,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 Parameter = namedtuple("Parameter", ["name", "value", "comment"])
 
-VERSION_NO_PATTERN = r"\d+(\.\d+)*"
+VERSION_NO_PATTERN = r"MSFragger-(.+)\.jar"
 
 
 def parse_params(l_of_str: List[str], sep: str = " = ") -> List[Parameter]:
@@ -71,7 +70,7 @@ def parse_params(l_of_str: List[str], sep: str = " = ") -> List[Parameter]:
     return data
 
 
-def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> Tuple[str, List[Parameter]]:
+def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | None, list[Parameter]]:
     """
     Read the FragPipe workflow file and return the header and a list of Parameter objects.
 
@@ -89,7 +88,23 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> Tuple[str, List[Par
     """
     l_of_str = file.read().decode("utf-8").splitlines()
     header = l_of_str[0][1:].strip()  # Skip leading '#' in the header
-    return header, parse_params(l_of_str, sep=sep)
+    msfragger_version = None
+    for ss in l_of_str[1:]:
+        if ss.startswith("# MSFragger version"):
+            msfragger_version = ss.split(" ")[-1].strip()
+            break
+        elif ss.startswith("fragpipe-config.bin-msfragger"):
+            path = ss.split("=")[-1].strip()
+            if "/" in path:
+                filename = path.split("/")[-1]
+            elif "\\" in path:
+                filename = path.split("\\")[-1]
+            else:
+                filename = path
+            match = re.search(VERSION_NO_PATTERN, filename)
+            if match:
+                msfragger_version = match.group(1)
+    return header, msfragger_version, parse_params(l_of_str, sep=sep)
 
 
 def extract_params(file: BytesIO) -> ProteoBenchParameters:
@@ -106,7 +121,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
-    header, fragpipe_params = read_fragpipe_workflow(file)
+    header, msfragger_version, fragpipe_params = read_fragpipe_workflow(file)
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
     )["value"]
@@ -121,18 +136,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     params.software_name = "FragPipe"
     params.software_version = header
     params.search_engine = "MSFragger"
-
-    try:
-        # Extract MSFragger executable version
-        msfragger_executable = fragpipe_params.loc["fragpipe-config.bin-msfragger"]
-        msfragger_executable = PureWindowsPath(msfragger_executable).name
-        match = re.search(VERSION_NO_PATTERN, msfragger_executable)
-        if match:
-            msfragger_executable = match.group()
-    except KeyError:
-        msfragger_executable = ""
-
-    params.search_engine_version = msfragger_executable
+    params.search_engine_version = msfragger_version
 
     # Enzyme and cleavage settings
     enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
@@ -223,7 +227,7 @@ if __name__ == "__main__":
     for file_path in files:
         file = pathlib.Path(file_path)
         with open(file, "rb") as f:
-            _, data = read_fragpipe_workflow(f)
+            _, _, data = read_fragpipe_workflow(f)
         df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
         df.to_csv(file.with_suffix(".csv"))
         with open(file, "rb") as f:

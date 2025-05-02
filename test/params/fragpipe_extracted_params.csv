@@ -1,6 +1,6 @@
 ,0
 software_name,FragPipe
-software_version,21.0
+software_version,FragPipe (21.0) runtime properties
 search_engine,MSFragger
 search_engine_version,4.0
 ident_fdr_psm,0.01
@@ -18,9 +18,6 @@ variable_mods,"15.9949,M,true,3; 42.0106,[^,true,1; 79.96633,STY,false,3; -17.02
 max_mods,3
 min_precursor_charge,1
 max_precursor_charge,
-scan_window,
 quantification_method,
-second_pass,
 protein_inference,ProteinProphet: --maxppmdiff 2000000
-predictors_library,
 abundance_normalization_ions,1

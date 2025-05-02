@@ -22,5 +22,7 @@ quantification_method,Identification Directed Quantification
 protein_inference,
 abundance_normalization_ions,Use TIC
 scan_window,
+quantification_method,Identification Directed Quantification
 second_pass,
 predictors_library,
+abundance_normalization_ions,Use TIC

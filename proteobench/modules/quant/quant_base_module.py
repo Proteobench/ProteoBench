@@ -40,6 +40,10 @@ from proteobench.io.params.wombat import extract_params as extract_params_wombat
 from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
+from proteobench.io.params.peaks import (
+    read_peaks_settings as extract_params_peaks,
+)
+
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.score.quant.quantscores import QuantScores

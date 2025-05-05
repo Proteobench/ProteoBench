@@ -129,6 +129,7 @@ def initialize_default_parameters() -> Dict[str, str]:
         "search_engine": "AlphaDIA",
         "quantification_method": "DirectLFQ",
         "predictors_library": "AlphaPeptDeep",
+        "enable_match_between_runs": False,
     }
 
 

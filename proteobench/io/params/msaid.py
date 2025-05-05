@@ -60,7 +60,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters["quantification_method"] = params_dict["Quantification Type"]
 
     # Set flag for enabling match between runs based on quantification method
-    if "Quan in all file" in parameters["quantification_method"]:
+    if "Quan in all file" in parameters["quantification_method"] or "MBR" in parameters["quantification_method"]:
         parameters["enable_match_between_runs"] = True
     else:
         parameters["enable_match_between_runs"] = False

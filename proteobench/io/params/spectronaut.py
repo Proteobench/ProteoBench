@@ -134,7 +134,6 @@ def extract_mass_tolerance(lines: List[str], system="Thermo Orbitrap") -> Option
     MS1_tol = MS2_tol = None
 
     for line in lines:
-
         if line.startswith("Pulsar Search\\Tolerances"):
             tolerance_section = True
         elif tolerance_section:

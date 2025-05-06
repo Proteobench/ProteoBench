@@ -129,6 +129,7 @@ def initialize_default_parameters() -> Dict[str, str]:
         "search_engine": "AlphaDIA",
         "quantification_method": "DirectLFQ",
         "predictors_library": "AlphaPeptDeep",
+        "enable_match_between_runs": False,
     }
 
 
@@ -246,6 +247,10 @@ def extract_params(file_path: str) -> Dict[str, str]:
     all_parameters["fragment_mass_tolerance"] = (
         "[-" + all_parameters["fragment_mass_tolerance"] + "ppm, " + all_parameters["fragment_mass_tolerance"] + "ppm]"
     )
+
+    # 'True' and 'False' to boolean
+    all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"] == "True"
+
     return ProteoBenchParameters(**all_parameters)
 
 

@@ -10,6 +10,11 @@ import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
 
+VENDOR_SYSTEM_MAP = {
+    "Thermo": "Thermo Orbitrap",
+    "Bruker": "TOF",
+}
+
 
 def clean_text(text: str) -> str:
     """
@@ -204,6 +209,14 @@ def read_spectronaut_settings(file_path: str, system="Thermo Orbitrap") -> Prote
     # Remove any trailing newline characters from each line
     lines = [line.strip() for line in lines]
 
+    system = extract_value(lines, "Vendor:")
+    if system in VENDOR_SYSTEM_MAP:
+        system = VENDOR_SYSTEM_MAP[system]
+    else:
+        raise ValueError(
+            f"Unknown system: {system}. Supported systems are: {', '.join(VENDOR_SYSTEM_MAP.keys())}. Did you upload the correct settings file?"
+        )
+
     params = ProteoBenchParameters()
     params.software_name = "Spectronaut"
     params.software_version = lines[0].split()[1]
@@ -212,9 +225,6 @@ def read_spectronaut_settings(file_path: str, system="Thermo Orbitrap") -> Prote
 
     # Clean up the lines and extract the relevant parameters
     lines = [re.sub(r"^[\s│├─└]*", "", line).strip() for line in lines]
-    # Find index of the first line that contains "[END-SETTINGS]"
-    end_index = next((i for i, line in enumerate(lines) if "[END-SETTINGS]" in line), None)
-    lines = lines[:end_index] if end_index is not None else lines
 
     params.ident_fdr_psm = float(extract_value(lines, "Precursor Qvalue Cutoff:"))
     params.ident_fdr_peptide = None

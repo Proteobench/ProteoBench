@@ -193,9 +193,9 @@ Settings Used: BGS Factory Settings
    │        ├─ Calibration Search:	Relative
    │        │  ├─ MS1 Tolerance (ppm):	20
    │        │  └─ MS2 Tolerance (ppm):	20
-   │        └─ Main Search:	Static
-   │           ├─  MS1 Tolerance (Th):	5
-   │           └─  MS2 Tolerance (Th):	5
+   │        └─ Main Search:	Relative
+   │           ├─  MS1 Tolerance (ppm):	5
+   │           └─  MS2 Tolerance (ppm):	5
    └─ Pulsar Search\Workflow
       ├─ Fragment Ion Selection Strategy:	Intensity Based
       ├─ In-Silico Generate Missing Channels:	False

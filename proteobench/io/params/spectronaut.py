@@ -102,24 +102,24 @@ def extract_tolerances_with_regex(
     without overwriting existing values.
 
     Args:
-    - line: The line from which tolerances should be extracted.
-    - MS1_tol: The current value for MS1 tolerance (to retain existing values).
-    - MS2_tol: The current value for MS2 tolerance (to retain existing values).
-    - ms1_tolerance_regex: The regex pattern for extracting MS1 tolerance.
-    - ms2_tolerance_regex: The regex pattern for extracting MS2 tolerance.
+        line: The line from which tolerances should be extracted.
+        MS1_tol: Existing MS1 tolerance (retained if already set).
+        MS2_tol: Existing MS2 tolerance (retained if already set).
+        ms1_tolerance_regex: Regex pattern for MS1 tolerance.
+        ms2_tolerance_regex: Regex pattern for MS2 tolerance.
 
     Returns:
-    - A tuple containing the (potentially updated) MS1 and MS2 tolerances.
+        A tuple (MS1_tol, MS2_tol) with updated or retained values.
     """
-    if MS1_tol is None:
-        MS1_tol_match = ms1_tolerance_regex.search(line)
-        if MS1_tol_match:
-            MS1_tol = MS1_tol_match.group(1)
 
-    if MS2_tol is None:
-        MS2_tol_match = ms2_tolerance_regex.search(line)
-        if MS2_tol_match:
-            MS2_tol = MS2_tol_match.group(1)
+    def extract_if_none(current: Optional[str], pattern: re.Pattern) -> Optional[str]:
+        if current is None:
+            match = pattern.search(line)
+            return match.group(1) if match else None
+        return current
+
+    MS1_tol = extract_if_none(MS1_tol, ms1_tolerance_regex)
+    MS2_tol = extract_if_none(MS2_tol, ms2_tolerance_regex)
 
     return MS1_tol, MS2_tol
 

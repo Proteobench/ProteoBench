@@ -14,6 +14,11 @@ VENDOR_SYSTEM_MAP = {
     "Thermo": "Thermo Orbitrap",
     "Bruker": "TOF",
 }
+ms1_tolerance_static = re.compile(r"MS1 Tolerance \(Th\):\s*(\d*)")
+ms2_tolerance_static = re.compile(r"MS2 Tolerance \(Th\):\s*(\d*)")
+ms1_tolerance_relative = re.compile(r"MS1 Tolerance \(ppm\):\s*(\d*)")
+ms2_tolerance_relative = re.compile(r"MS2 Tolerance \(ppm\):\s*(\d*)")
+main_search_regex = re.compile(r"Main Search:\s*(.*)")
 
 
 def clean_text(text: str) -> str:
@@ -51,14 +56,6 @@ def extract_value(lines: List[str], search_term: str) -> Optional[str]:
         The extracted value, or None if the search term is not found.
     """
     return next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
-
-
-# Precompiled regular expressions for efficiency
-ms1_tolerance_static = re.compile(r"MS1 Tolerance \(Th\):\s*(\d*)")
-ms2_tolerance_static = re.compile(r"MS2 Tolerance \(Th\):\s*(\d*)")
-ms1_tolerance_relative = re.compile(r"MS1 Tolerance \(ppm\):\s*(\d*)")
-ms2_tolerance_relative = re.compile(r"MS2 Tolerance \(ppm\):\s*(\d*)")
-main_search_regex = re.compile(r"Main Search:\s*(.*)")
 
 
 def extract_calibration_method(line: str) -> Optional[str]:

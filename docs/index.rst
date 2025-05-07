@@ -163,6 +163,15 @@ Available ProteoBench modules
         ^^^
         Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy
 
+    .. grid-item-card:: LFQ in Human Plasma
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/659
+
+        :bdg-info:`proposed`
+        ^^^
+        Benchmarking with a high dynamic range multispecies dataset
+
 .. button-ref:: available-modules/index
     :ref-type: doc
     :class: sd-px-4

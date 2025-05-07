@@ -107,6 +107,15 @@ Available ProteoBench modules
         ^^^
         additional DIA ion-level module with DIA-PASEF data
 
+.. grid-item-card:: DIA quantification Astral data
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
+
+        :bdg-success:`active`
+        ^^^
+        additional DIA ion-level module with Astral DIA data
+
     .. grid-item-card:: DDA identification
         :columns: 6 6 4 4
         :padding: 1

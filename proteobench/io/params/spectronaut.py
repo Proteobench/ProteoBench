@@ -222,9 +222,9 @@ def read_spectronaut_settings(file_path: str, system="Thermo Orbitrap") -> Prote
     # Clean up the lines and extract the relevant parameters
     lines = [re.sub(r"^[\s│├─└]*", "", line).strip() for line in lines]
 
-    params.ident_fdr_psm = float(extract_value(lines, "Precursor Qvalue Cutoff:"))
+    params.ident_fdr_psm = float(extract_value(lines, "Precursor Qvalue Cutoff:").replace(",", "."))
     params.ident_fdr_peptide = None
-    params.ident_fdr_protein = float(extract_value(lines, "Protein Qvalue Cutoff (Experiment):"))
+    params.ident_fdr_protein = float(extract_value(lines, "Protein Qvalue Cutoff (Experiment):").replace(",", "."))
     params.enable_match_between_runs = False  # https://x.com/OliverMBernhar1/status/1656220095553601537
     params.precursor_mass_tolerance, params.fragment_mass_tolerance = extract_mass_tolerance(lines, system=system)
     params.enzyme = extract_value(lines, "Enzymes / Cleavage Rules:")

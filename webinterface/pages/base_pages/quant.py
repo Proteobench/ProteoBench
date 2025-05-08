@@ -55,7 +55,7 @@ def compare_dictionaries(old_dict, new_dict):
             changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
 
     if changes:
-        return "\n ### Parameter changes Detected:\n" + "\n".join(changes)
+        return "\n ### Parameter changes detected:\n" + "\n".join(changes)
     else:
         return "\n ### No parameter changes detected. \n"
 
@@ -120,7 +120,7 @@ class QuantUIObjects:
         if submit_button:
             self.process_submission_form()
 
-    def generate_input_widget(self, input_format: str, content: dict, key: str = "") -> Any:
+    def generate_input_widget(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
         """
         Generate input fields in the Streamlit UI based on the specified format and content.
 
@@ -132,6 +132,8 @@ class QuantUIObjects:
             The content of the input fields.
         key : str
             The key of the input fields.
+        editable : bool
+            Whether the input fields are editable.
 
         Returns
         -------
@@ -140,15 +142,15 @@ class QuantUIObjects:
         """
         field_type = content.get("type")
         if field_type == "text_area":
-            return self.generate_text_area_widget(input_format, content, key)
+            return self.generate_text_area_widget(input_format, content, key, editable=editable)
         elif field_type == "text_input":
-            return self._generate_text_input(input_format, content, key)
+            return self._generate_text_input(input_format, content, key, editable=editable)
         elif field_type == "number_input":
-            return self._generate_number_input(content, key)
+            return self._generate_number_input(content, key, editable=editable)
         elif field_type == "selectbox":
-            return self._generate_selectbox(input_format, content, key)
+            return self._generate_selectbox(input_format, content, key, editable=editable)
         elif field_type == "checkbox":
-            return self._generate_checkbox(input_format, content, key)
+            return self._generate_checkbox(input_format, content, key, editable=editable)
 
     def _generate_text_area(self, input_format: str, content: dict, key: str = "") -> Any:
         """
@@ -204,7 +206,7 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.params_json_dict] = {}
             st.session_state[self.variables_quant.params_json_dict][field] = value
 
-    def _generate_text_input(self, input_format: str, content: dict, key: str = "") -> Any:
+    def _generate_text_input(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
         """
         Generate a text input field.
 
@@ -236,9 +238,10 @@ class QuantUIObjects:
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
-    def _generate_number_input(self, content: dict, key: str = "") -> Any:
+    def _generate_number_input(self, content: dict, key: str = "", editable: bool = True) -> Any:
         """
         Generate a number input field.
 
@@ -248,6 +251,8 @@ class QuantUIObjects:
             The content of the number input field.
         key : str
             The key of the number input field.
+        editable : bool
+            Whether the number input field is editable.
 
         Returns
         -------
@@ -268,9 +273,10 @@ class QuantUIObjects:
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
-    def _generate_selectbox(self, input_format: str, content: dict, key: str = "") -> Any:
+    def _generate_selectbox(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
         """
         Generate a selectbox input field.
 
@@ -282,6 +288,8 @@ class QuantUIObjects:
             The content of the selectbox.
         key : str
             The key of the selectbox.
+        editable : bool
+            Whether the selectbox is editable.
 
         Returns
         -------
@@ -303,9 +311,10 @@ class QuantUIObjects:
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
-    def _generate_checkbox(self, input_format: str, content: dict, key: str = "") -> Any:
+    def _generate_checkbox(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
         """
         Generate a checkbox input field.
 
@@ -317,6 +326,8 @@ class QuantUIObjects:
             The content of the checkbox.
         key : str
             The key of the checkbox.
+        editable : bool
+            Whether the checkbox is editable.
 
         Returns
         -------
@@ -333,6 +344,7 @@ class QuantUIObjects:
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
     def initialize_main_slider(self) -> None:
@@ -556,8 +568,13 @@ class QuantUIObjects:
         with open(self.variables_quant.additional_params_json) as file:
             config = json.load(file)
         for key, value in config.items():
+            if key == "Software_name":
+                editable = False
+            else:
+                editable = True
+
             if key == "comments_for_plotting":
-                self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value)
+                self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, editable)
             else:
                 self.user_input[key] = None
 
@@ -581,7 +598,7 @@ class QuantUIObjects:
             "Form submitted successfully! Please navigate to the 'Results In-Depth' or 'Results New Data' tab for the next step."
         )
 
-    def generate_text_area_widget(self, input_format: str, content: dict) -> Any:
+    def generate_text_area_widget(self, input_format: str, content: dict, editable: bool = True) -> Any:
         """
         Generate a text area input field.
 
@@ -591,6 +608,8 @@ class QuantUIObjects:
             The input format.
         content : dict
             The content of the text area.
+        editable : bool
+            Whether the text area is editable.
 
         Returns
         -------
@@ -600,7 +619,9 @@ class QuantUIObjects:
         placeholder = content.get("placeholder")
         value = content.get("value", {}).get(input_format)
         height = content.get("height", 200)
-        return st.text_area(content["label"], placeholder=placeholder, value=value, height=height)
+        return st.text_area(
+            content["label"], placeholder=placeholder, value=value, height=height, disabled=not editable
+        )
 
     def initialize_main_data_points(self) -> None:
         """

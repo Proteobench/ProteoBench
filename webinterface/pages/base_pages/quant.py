@@ -494,7 +494,6 @@ class QuantUIObjects:
         if not button_pressed:  # if button_pressed is None
             return None
 
-        self.clear_highlight_column()
         # MaxQuant fixed modification handling
         if self.user_input["input_format"] == "MaxQuant":
             st.session_state[self.variables_quant.result_perf] = add_maxquant_fixed_modifications(
@@ -502,6 +501,8 @@ class QuantUIObjects:
             )
             # Overwrite the dataframes for submission
             self.copy_dataframes_for_submission()
+
+        self.clear_highlight_column()
 
         pr_url = self.create_pull_request(params)
 

@@ -569,7 +569,7 @@ class QuantUIObjects:
         with open(self.variables_quant.additional_params_json) as file:
             config = json.load(file)
         for key, value in config.items():
-            if key == "Software_name":
+            if key.lower() == "software_name":
                 editable = False
             else:
                 editable = True
@@ -1043,15 +1043,27 @@ class QuantUIObjects:
         input_param_len = int(len(config.items()) / 3)
 
         for idx, (key, value) in enumerate(config.items()):
+            if key.lower() == "software_name":
+                editable = False
+            else:
+                editable = True
+
             if idx < input_param_len:
+                print(key, editable)
                 with st_col1:
-                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+                    self.user_input[key] = self.generate_input_widget(
+                        self.user_input["input_format"], value, key, editable=editable
+                    )
             elif idx < input_param_len * 2:
                 with st_col2:
-                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+                    self.user_input[key] = self.generate_input_widget(
+                        self.user_input["input_format"], value, key, editable=editable
+                    )
             else:
                 with st_col3:
-                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+                    self.user_input[key] = self.generate_input_widget(
+                        self.user_input["input_format"], value, key, editable=editable
+                    )
 
     def generate_sample_name(self) -> str:
         """

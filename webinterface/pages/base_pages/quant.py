@@ -1049,7 +1049,6 @@ class QuantUIObjects:
                 editable = True
 
             if idx < input_param_len:
-                print(key, editable)
                 with st_col1:
                     self.user_input[key] = self.generate_input_widget(
                         self.user_input["input_format"], value, key, editable=editable

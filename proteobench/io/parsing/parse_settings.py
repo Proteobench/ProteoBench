@@ -212,6 +212,14 @@ class ParseSettingsQuant:
         if self.modification_parser is not None:
             df_filtered_melted = self.modification_parser.convert_to_proforma(df_filtered_melted, self.analysis_level)
 
+        # Filter out rows with 0 intensity
+        print(
+            "WARNING: {} rows with 0 intensity were removed.".format(
+                len(df_filtered_melted[df_filtered_melted["Intensity"] <= 0])
+            )
+        )
+        df_filtered_melted = df_filtered_melted[df_filtered_melted["Intensity"] > 0]
+
         if self.analysis_level == "ion":
             if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
                 df_filtered_melted["precursor ion"] = (

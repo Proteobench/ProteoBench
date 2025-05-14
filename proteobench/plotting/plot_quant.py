@@ -107,6 +107,9 @@ class PlotDataPoint:
         mapping: Dict[str, int] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "None",
+        legend_name_map: Dict[str, str] = {
+            "AlphaPept": "AlphaPept (legacy tool)",
+        },
     ) -> go.Figure:
         """
         Plot mean metrics in a scatter plot with Plotly, highlighting specific data points.
@@ -125,6 +128,9 @@ class PlotDataPoint:
             The color used for highlighting certain points, by default "#d30067".
         label : str, optional
             The column name for labeling data points, by default "None".
+        legend_name_map : Dict[str, str], optional
+            A dictionary mapping software names to legend names, by default None.
+            If None, the software names will be used as legend names.
 
         Returns
         -------
@@ -244,7 +250,7 @@ class PlotDataPoint:
                     text=tmp_df[label] if label != "None" else None,
                     marker=dict(color=tmp_df["color"], showscale=False),
                     marker_size=tmp_df["scatter_size"],
-                    name=tmp_df["software_name"].iloc[0],
+                    name=legend_name_map.get(tmp_df["software_name"].iloc[0], tmp_df["software_name"].iloc[0]),
                 )
             )
 

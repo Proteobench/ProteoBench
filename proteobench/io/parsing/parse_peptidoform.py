@@ -4,6 +4,8 @@ Module for parsing peptidoform strings and extracting modifications.
 
 import re
 import warnings
+import os
+import math
 from typing import Dict
 
 import pandas as pd
@@ -346,7 +348,6 @@ def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
     )
     return input_data_frame
 
-
 def _load_wombat(input_csv: str) -> pd.DataFrame:
     """
     Load a WOMBAT output file.
@@ -361,7 +362,19 @@ def _load_wombat(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
+    print(input_csv)
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+
+    non_strings = input_data_frame["protein_group"][
+        ~input_data_frame["protein_group"].apply(lambda x: isinstance(x, str))
+    ]
+
+    input_data_frame["protein_group"] = input_data_frame["protein_group"].map(
+        lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in str(x).split(",")])
+    )
     input_data_frame["proforma"] = input_data_frame["modified_peptide"]
     return input_data_frame
 

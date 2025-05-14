@@ -4,10 +4,13 @@ Quant Base Module.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
+import uuid
 import zipfile
+from datetime import datetime
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
@@ -332,7 +335,8 @@ class QuantModule:
         str
             The URL of the created pull request.
         """
-        self.github_repo.clone_repo_pr()
+        repo = self.github_repo.clone_repo_pr()
+
         current_datapoint = temporary_datapoints.iloc[-1]
         current_datapoint["is_temporary"] = False
         for k, v in datapoint_params.__dict__.items():
@@ -352,7 +356,13 @@ class QuantModule:
             logging.error("The run was previously submitted. Will not submit.")
             return False
 
-        branch_name = current_datapoint["id"].replace(" ", "_").replace("(", "").replace(")", "")
+        # Create a new branch for the pull request with a unique branch name, this unique
+        # branch name is important for batch resubmission to avoid clashes. We do guarentee
+        # the same identifier name.
+        hash_input = f"{datetime.now().isoformat()}_{uuid.uuid4()}".encode("utf-8")
+        short_hash = hashlib.sha256(hash_input).hexdigest()[:10]  # First 10 hex characters
+
+        branch_name = current_datapoint["id"].replace(" ", "_").replace("(", "").replace(")", "") + "_" + short_hash
 
         path_write_individual_point = os.path.join(self.t_dir_pr, current_datapoint["intermediate_hash"] + ".json")
         logging.info(f"Writing the json (single point) to: {path_write_individual_point}")

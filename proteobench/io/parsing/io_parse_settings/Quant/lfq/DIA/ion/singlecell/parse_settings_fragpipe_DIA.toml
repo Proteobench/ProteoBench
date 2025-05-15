@@ -1,0 +1,36 @@
+[mapper]
+"Peptide Sequence" = "Sequence"
+"Protein" = "Proteins" # For FragPipe outputs, we combine the values in "Proteins" and "Mapped Proteins"
+"Charge" = "Charge"
+
+[condition_mapper]
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1" = "B"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2" = "B"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3" = "B"
+
+[run_mapper]
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1" = "Condition_A_Sample_1"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2" = "Condition_A_Sample_2"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3" = "Condition_A_Sample_3"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1" = "Condition_B_Sample_1"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2" = "Condition_B_Sample_2"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3" = "Condition_B_Sample_3"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Modified Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern"="\\[([^]]+)\\]"
+"modification_dict" = {"[57.0215]" = "Carbamidomethyl", "[57.0216]" = "Carbamidomethyl", "[15.9949]" = "Oxidation", "[-17.026548]" = "Gln->pyro-Glu", "[-18.010565]" = "Glu->pyro-Glu", "[42.0106]" = "Acetyl"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = false

@@ -60,5 +60,6 @@ if __name__ == "__main__":
         data_dict = params.__dict__
         series = pd.Series(data_dict)
 
+        print(series)
         # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".csv"))

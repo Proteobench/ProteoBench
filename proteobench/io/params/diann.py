@@ -11,13 +11,13 @@ from packaging.version import Version
 
 from proteobench.io.params import ProteoBenchParameters
 
-mass_tolerance_regex = r"(?<=Optimised mass accuracy: )\d*\.?\d+(?= ppm)"
+fragment_mass_tolerance_regex = r"(?<=Optimised mass accuracy: )\d*\.?\d+(?= ppm)"
+precursor_mass_tolerance_regex = r"(?<=Recommended MS1 mass accuracy setting: )\d*\.?\d+(?= ppm)"
 software_version_regex = r"(?<=DIA-NN\s)(.*?)(?=\s\(Data-Independent Acquisition by Neural Networks\))"
 scan_window_regex = r"(?<=Scan window radius set to )\d+"
 
 PARAM_CMD_DICT = {
-    "ident_fdr_peptide": "qvalue",
-    "ident_fdr_protein": "qvalue",
+    "ident_fdr_psm": "qvalue",
     "enable_match_between_runs": "reanalyse",
     "precursor_mass_tolerance": "mass-acc-ms1",
     "fragment_mass_tolerance": "mass-acc",
@@ -31,6 +31,7 @@ PARAM_CMD_DICT = {
     "min_precursor_charge": "min-pr-charge",
     "max_precursor_charge": "max-pr-charge",
     "scan_window": "window",
+    "protein_inference": "pg-level",
 }
 SETTINGS_PB_FLOAT = [
     "ident_fdr_psm",
@@ -68,7 +69,7 @@ def find_cmdline_string(lines: List[str]) -> Optional[str]:
         The command line string.
     """
     for line in lines:
-        if "diann" in line and "--f" in line and "--fasta" in line:
+        if "diann" in line and "--" in line:
             return line.strip()
     return None
 
@@ -335,7 +336,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     cmdline_string = find_cmdline_string(lines)
     cmdline_dict = parse_cmdline_string(cmdline_string, software_version)
 
-    parameters["second_pass"] = "double-search" in cmdline_dict.keys() or "double-pass" in cmdline_dict.keys()
     parameters["quantification_method"] = parse_quantification_strategy(cmdline_dict)
     parameters["protein_inference"] = parse_protein_inference_method(cmdline_dict)
     parameters["predictors_library"] = parse_predictors_library(cmdline_dict)
@@ -349,16 +349,32 @@ def extract_params(fname: str) -> ProteoBenchParameters:
                 parameters[proteobench_setting] = parse_setting(proteobench_setting, cmdline_dict[cmd_setting])
 
     # Parse cut parameter to standard enzyme name
-    if parameters["enzyme"] == "K*,R*":
+    if "enzyme" not in parameters.keys():  # This happens when running fragpipe-diann
+        parameters["enzyme"] = "cut"
+    elif parameters["enzyme"] == "K*,R*":
         parameters["enzyme"] = "Trypsin/P"
     elif parameters["enzyme"] == "K*,R*,!*P":
         parameters["enzyme"] = "Trypsin"
 
     # If mass-acc flag is not present in cmdline string, extract it from the log file
+    if "fragment_mass_tolerance" not in parameters.keys():
+        fragment_mass_tol = extract_with_regex(lines, fragment_mass_tolerance_regex)
+        parameters["fragment_mass_tolerance"] = "[-" + fragment_mass_tol + " ppm" + ", " + fragment_mass_tol + " ppm]"
+    else:
+        parameters["fragment_mass_tolerance"] = (
+            "[-"
+            + str(parameters["fragment_mass_tolerance"])
+            + " ppm"
+            + ", "
+            + str(parameters["fragment_mass_tolerance"])
+            + " ppm]"
+        )
+
     if "precursor_mass_tolerance" not in parameters.keys():
-        mass_tol = extract_with_regex(lines, mass_tolerance_regex)
-        parameters["precursor_mass_tolerance"] = "[-" + mass_tol + " ppm" + ", " + mass_tol + " ppm]"
-        parameters["fragment_mass_tolerance"] = "[-" + mass_tol + " ppm" + ", " + mass_tol + " ppm]"
+        precursor_mass_tol = extract_with_regex(lines, precursor_mass_tolerance_regex)
+        parameters["precursor_mass_tolerance"] = (
+            "[-" + precursor_mass_tol + " ppm" + ", " + precursor_mass_tol + " ppm]"
+        )
     else:
         parameters["precursor_mass_tolerance"] = (
             "[-"
@@ -366,14 +382,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
             + " ppm"
             + ", "
             + str(parameters["precursor_mass_tolerance"])
-            + " ppm]"
-        )
-        parameters["fragment_mass_tolerance"] = (
-            "[-"
-            + str(parameters["fragment_mass_tolerance"])
-            + " ppm"
-            + ", "
-            + str(parameters["fragment_mass_tolerance"])
             + " ppm]"
         )
 

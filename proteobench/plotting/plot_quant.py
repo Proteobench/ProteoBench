@@ -32,11 +32,11 @@ class PlotDataPoint:
         go.Figure
             A Plotly figure object representing the histogram.
         """
+        species_list = list(species_ratio.keys())
+
         # Filter data to include only known species
-        result_df = result_df[result_df[["YEAST", "ECOLI", "HUMAN"]].any(axis=1)]
-        result_df["kind"] = result_df[["YEAST", "ECOLI", "HUMAN"]].apply(
-            lambda x: ["YEAST", "ECOLI", "HUMAN"][np.argmax(x)], axis=1
-        )
+        result_df = result_df[result_df[species_list].any(axis=1)]
+        result_df["kind"] = result_df[species_list].apply(lambda x: species_list[np.argmax(x)], axis=1)
 
         # Map colors based on species ratio
         color_map = {species: data["color"] for species, data in species_ratio.items()}
@@ -107,6 +107,9 @@ class PlotDataPoint:
         mapping: Dict[str, int] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "None",
+        legend_name_map: Dict[str, str] = {
+            "AlphaPept": "AlphaPept (legacy tool)",
+        },
     ) -> go.Figure:
         """
         Plot mean metrics in a scatter plot with Plotly, highlighting specific data points.
@@ -125,6 +128,9 @@ class PlotDataPoint:
             The color used for highlighting certain points, by default "#d30067".
         label : str, optional
             The column name for labeling data points, by default "None".
+        legend_name_map : Dict[str, str], optional
+            A dictionary mapping software names to legend names, by default None.
+            If None, the software names will be used as legend names.
 
         Returns
         -------
@@ -147,9 +153,12 @@ class PlotDataPoint:
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
                 if "comments" in benchmark_metrics_df.columns:
-                    datapoint_text = (
-                        datapoint_text + f"Comment (private submission): {benchmark_metrics_df.comments[idx]}"
-                    )
+                    comment = benchmark_metrics_df.comments[idx]
+                    if isinstance(comment, str):
+                        datapoint_text = (
+                            datapoint_text
+                            + f"Comment (private submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
+                        )
             else:
                 # TODO: Determine parameters based on module
                 datapoint_text = (
@@ -166,9 +175,12 @@ class PlotDataPoint:
                     + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
                 )
                 if "submission_comments" in benchmark_metrics_df.columns:
-                    datapoint_text = (
-                        datapoint_text + f"Comment (public submission): {benchmark_metrics_df.submission_comments[idx]}"
-                    )
+                    comment = benchmark_metrics_df.submission_comments[idx]
+                    if isinstance(comment, str):
+                        datapoint_text = (
+                            datapoint_text
+                            + f"Comment (public submission): {comment[:10] + '...' if len(comment) > 10 else comment}..."
+                        )
 
             hover_texts.append(datapoint_text)
 
@@ -238,7 +250,7 @@ class PlotDataPoint:
                     text=tmp_df[label] if label != "None" else None,
                     marker=dict(color=tmp_df["color"], showscale=False),
                     marker_size=tmp_df["scatter_size"],
-                    name=tmp_df["software_name"].iloc[0],
+                    name=legend_name_map.get(tmp_df["software_name"].iloc[0], tmp_df["software_name"].iloc[0]),
                 )
             )
 
@@ -292,7 +304,7 @@ class PlotDataPoint:
         """
         fig = px.violin(result_df, y=["CV_A", "CV_B"], box=True, title=None, points=False)
         fig.update_layout(
-            xaxis_title="Group",
+            xaxis_title="Condition",
             yaxis_title="CV",
             xaxis=dict(linecolor="black"),  # Set the X axis line color to black
             yaxis=dict(linecolor="black"),  # Set the Y axis line color to black

@@ -125,10 +125,10 @@ class TestDIAQuantIonModule:
         }
 
     def test_benchmarking_return_types_are_correct(self):
-        intermediate_df, all_datapoints, input_df = DIAQuantIonModule("").benchmarking(
+        intermediate_metric_df, all_datapoints, input_df = DIAQuantIonModule("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
-        assert isinstance(intermediate_df, pd.DataFrame)
+        assert isinstance(intermediate_metric_df, pd.DataFrame)
         assert isinstance(all_datapoints, pd.DataFrame)
         assert isinstance(input_df, pd.DataFrame)
 

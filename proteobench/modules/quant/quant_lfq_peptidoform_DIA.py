@@ -41,7 +41,7 @@ class DIAQuantPeptidoformModule(QuantModule):
     ----------
     module_id : str
         Module identifier for configuration.
-    precursor_name: str
+    precursor_column_name: str
         Level of quantification.
     """
 
@@ -76,7 +76,7 @@ class DIAQuantPeptidoformModule(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
         )
-        self.precursor_name = "peptidoform"
+        self.precursor_column_name = "peptidoform"
 
     def is_implemented(self) -> bool:
         """
@@ -150,21 +150,21 @@ class DIAQuantPeptidoformModule(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScores(
-                self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+                self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
 
         # Generate intermediate data structure
         try:
-            intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+            intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
         # Generate current data point
         try:
             current_datapoint = QuantDatapoint.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+                intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
@@ -176,7 +176,7 @@ class DIAQuantPeptidoformModule(QuantModule):
             raise DatapointAppendError(f"Error adding current data point: {e}")
 
         return (
-            intermediate_data_structure,
+            intermediate_metric_structure,
             all_datapoints,
             input_df,
         )

@@ -236,10 +236,11 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     # MaxQuant does this to our knowledge based on the binary rawfile metadata
     record["msmsParamsArray"] = [d for d in record["msmsParamsArray"] if d["msmsParams"]["Name"] == ms2frac]
     record = build_Series_from_records(record, 4).sort_index()
+    params.software_name = "MaxQuant"
     params.search_engine = "Andromeda"
     params.software_version = record.loc["maxQuantVersion"].squeeze()
-    params.ident_fdr_psm = None
-    params.ident_fdr_peptide = float(record.loc["peptideFdr"].squeeze())
+    params.ident_fdr_psm = float(record.loc["peptideFdr"].squeeze())
+    params.ident_fdr_peptide = None
     params.ident_fdr_protein = float(record.loc["proteinFdr"].squeeze())
     params.enable_match_between_runs = record.loc["matchBetweenRuns"].squeeze().lower() == "true"
     _precursor_mass_tolerance = record.loc[

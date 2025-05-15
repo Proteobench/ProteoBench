@@ -1,0 +1,38 @@
+[mapper]
+"MODIFIED_SEQUENCE" = "Sequence"
+"RAW_FILE_NAME" = "Raw file"
+"PRECURSOR_CHARGE" = "Charge"
+"QUANTIFICATION" = "Intensity"
+"FASTA_HEADERS" = "Proteins"
+
+[condition_mapper]
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1.raw" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2.raw" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3.raw" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1.raw" = "B"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2.raw" = "B"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3.raw" = "B"
+
+[run_mapper]
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1.raw" = "Condition_A_Sample_1"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2.raw" = "Condition_A_Sample_2"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3.raw" = "Condition_A_Sample_3"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1.raw" = "Condition_B_Sample_1"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2.raw" = "Condition_B_Sample_2"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3.raw" = "Condition_B_Sample_3"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\[(.*?)\\]"
+"modification_dict" = {"[unimod:4]" = "Carbamidomethyl", "[unimod:1]" = "Acetyl", "[unimod:35]" = "Oxidation"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = false

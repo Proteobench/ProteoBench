@@ -3,11 +3,11 @@ software_name,DIA-NN
 software_version,1.9
 search_engine,DIA-NN
 search_engine_version,1.9
-ident_fdr_psm,None
-ident_fdr_peptide,0.01
-ident_fdr_protein,0.01
+ident_fdr_psm,0.01
+ident_fdr_peptide,None
+ident_fdr_protein,None
 enable_match_between_runs,True
-precursor_mass_tolerance,"[-13.7907 ppm, 13.7907 ppm]"
+precursor_mass_tolerance,"[-8.36737 ppm, 8.36737 ppm]"
 fragment_mass_tolerance,"[-13.7907 ppm, 13.7907 ppm]"
 enzyme,Trypsin/P
 allowed_miscleavages,1
@@ -19,5 +19,5 @@ max_mods,1
 min_precursor_charge,1
 max_precursor_charge,4
 quantification_method,QuantUMS high-precision
-protein_inference,Protein_names
+protein_inference,1
 abundance_normalization_ions,

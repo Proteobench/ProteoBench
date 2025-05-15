@@ -1,3 +1,7 @@
+"""
+This module provides functionality for handling and processing quantitative datapoints in the ProteoBench framework.
+"""
+
 from __future__ import annotations
 
 import dataclasses
@@ -17,12 +21,19 @@ def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: 
     """
     Extract the 'median_abs_epsilon' value from a row (assumed to be a dictionary).
 
-    Args:
-        row (dict): The row from which to extract the value. Expected to be a dictionary.
-        min_quant (int or str, optional): The key for the desired value. Defaults to 3.
+    Parameters
+    ----------
+    row : dict
+        The row from which to extract the value. Expected to be a dictionary.
+    min_quant : int or str, optional
+        The key for the desired value. Defaults to 3.
+    metric : str
+        The metric to be calculated. Should be either median or mean, defaults to median.
 
-    Returns:
-        float or None: The 'median_abs_epsilon' value if found, otherwise None.
+    Returns
+    -------
+    float or None
+        The 'median_abs_epsilon' value if found, otherwise None.
     """
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
@@ -36,12 +47,17 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
     """
     Extract the 'nr_prec' value from a row (assumed to be a dictionary).
 
-    Args:
-        row (pd.Series or dict): The row from which to extract the value. Expected to be a dictionary or Series.
-        min_quant (int or str, optional): The key for the desired value. Defaults to 3.
+    Parameters
+    ----------
+    row : pd.Series
+        The row from which to extract the value. Expected to be a dictionary or Series.
+    min_quant : int or str, optional
+        The key for the desired value. Defaults to 3.
 
-    Returns:
-        int or None: The 'nr_prec' value if found, otherwise None.
+    Returns
+    -------
+    int, None
+        The 'nr_prec' value if found, otherwise None.
     """
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
@@ -107,7 +123,7 @@ class QuantDatapoint:
 
     def generate_id(self) -> None:
         """
-        Generates a unique ID for the benchmark run by combining the software name and a timestamp.
+        Generate a unique ID for the benchmark run by combining the software name and a timestamp.
 
         This ID is used to uniquely identify each run of the benchmark.
         """
@@ -120,16 +136,23 @@ class QuantDatapoint:
         intermediate: pd.DataFrame, input_format: str, user_input: dict, default_cutoff_min_prec: int = 3
     ) -> pd.Series:
         """
-        Generates a Datapoint object containing metadata and results from the benchmark run.
+        Generate a Datapoint object containing metadata and results from the benchmark run.
 
-        Args:
-            intermediate (pd.DataFrame): The intermediate DataFrame containing benchmark results.
-            input_format (str): The format of the input data (e.g., file format).
-            user_input (dict): User-defined input values for the benchmark.
-            default_cutoff_min_prec (int, optional): The default minimum precursor cutoff value. Defaults to 3.
+        Parameters
+        ----------
+        intermediate : pd.DataFrame
+            The intermediate DataFrame containing benchmark results.
+        input_format : str
+            The format of the input data (e.g., file format).
+        user_input : dict
+            User-defined input values for the benchmark.
+        default_cutoff_min_prec : int, optional
+            The default minimum precursor cutoff value. Defaults to 3.
 
-        Returns:
-            pd.Series: A Pandas Series containing the Datapoint's attributes as key-value pairs.
+        Returns
+        -------
+        pd.Series
+            A Pandas Series containing the Datapoint's attributes as key-value pairs.
         """
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
@@ -183,14 +206,19 @@ class QuantDatapoint:
     @staticmethod
     def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> Dict[int, Dict[str, float]]:
         """
-        Computes various statistical metrics from the provided DataFrame for the benchmark.
+        Compute various statistical metrics from the provided DataFrame for the benchmark.
 
-        Args:
-            df (pd.DataFrame): The DataFrame containing the benchmark results.
-            min_nr_observed (int, optional): The minimum number of observed values for a valid computation. Defaults to 1.
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The DataFrame containing the benchmark results.
+        min_nr_observed : int, optional
+            The minimum number of observed values for a valid computation. Defaults to 1.
 
-        Returns:
-            dict: A dictionary containing computed metrics such as 'median_abs_epsilon', 'variance_epsilon', etc.
+        Returns
+        -------
+        dict
+            A dictionary containing computed metrics such as 'median_abs_epsilon', 'variance_epsilon', etc.
         """
         # Filter DataFrame by the minimum number of observations
         df_slice = df[df["nr_observed"] >= min_nr_observed]

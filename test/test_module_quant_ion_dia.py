@@ -6,15 +6,13 @@ import pytest
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.lfq.ion.DIA.quant_lfq_ion_DIA_AIF import (
-    DIAQuantIonModule,
-)
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
 from proteobench.score.quant.quantscores import QuantScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
 TESTDATA_FILES = {
     "DIA-NN": os.path.join(TESTDATA_DIR, "DIANN_1.9_beta_sample_report.tsv"),
-    "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.7.2_sample.tsv"),
+    "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.10_sample.tsv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxDIA_sample_test.txt"),
     "FragPipe (DIA-NN quant)": os.path.join(TESTDATA_DIR, "MSFraggerDIA_sample_test.tsv"),
     "Spectronaut": os.path.join(TESTDATA_DIR, "Spectronaut_test_sample_default_PG.tsv"),
@@ -31,8 +29,8 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "io_parse_settings",
         "Quant",
         "lfq",
-        "ion",
         "DIA",
+        "ion",
         "AIF",
     )
 )
@@ -56,7 +54,7 @@ def load_file(format_name: str):
 class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_valid_and_supported_search_tool_settings_exists(self, software_tool):
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_ion_DIA_AIF")
+        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DIA_ion_AIF")
         assert software_tool in parse_settings.INPUT_FORMATS
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
@@ -67,7 +65,7 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_settings_parser_created_successfully(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+            module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         assert parse_settings is not None
@@ -75,7 +73,7 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_software_tool_output_converted_to_standard_format(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+            module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         input_df = load_file(software_tool)
@@ -89,7 +87,7 @@ class TestQuantScores:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_intermediate_generated_from_software_tool_output(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            module_id="quant_lfq_ion_DIA_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
+            module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
 
@@ -127,10 +125,10 @@ class TestDIAQuantIonModule:
         }
 
     def test_benchmarking_return_types_are_correct(self):
-        intermediate_df, all_datapoints, input_df = DIAQuantIonModule("").benchmarking(
+        intermediate_metric_df, all_datapoints, input_df = DIAQuantIonModule("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
-        assert isinstance(intermediate_df, pd.DataFrame)
+        assert isinstance(intermediate_metric_df, pd.DataFrame)
         assert isinstance(all_datapoints, pd.DataFrame)
         assert isinstance(input_df, pd.DataFrame)
 

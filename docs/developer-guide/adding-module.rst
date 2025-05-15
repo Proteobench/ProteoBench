@@ -36,11 +36,11 @@ that allow for a more modular and portable implementation.
 
 Each module implementation should contain the following classes:
 
-1. :func:`~proteobench.modules.template.module.Module` contains the main functions reading the and processing the uploaded data set, generating the _intermediate_ structure and creating the _datapoint_, as well as adding it to our collection of _datapoints_.
+1. :func:`~proteobench.modules.template.module.Module` contains the main functions reading the and processing the uploaded data set, generating the _intermediate_ metric structure and creating the _datapoint_, as well as adding it to our collection of _datapoints_.
 2. :func:`~proteobench.modules.template.parse.ParseInputs` interfaces with the Streamlit interface providing formatting parameter definitions to create a standardized format from the uploaded files with respect to the given file format (e.g. MaxQuant output file)
 3. :func:`~proteobench.modules.template.datapoint.Datapoint` is the data structure of _Datapoint_. It contains data set properties from the acquisition and processing (e.g. used peptide fdr) and functions to calculate the benchmarking metrics.
 4. :func:`~proteobench.modules.template.plot.PlotDataPoint` are the functions to visualize the benchmarking metrics from the data points.
-5. :func:`~proteobench.modules.template.parse.ParseInputs` contains the functions to parse the uploaded data files into the _intermediate_ structure. The input file parameters should be defined in the toml file like `proteobench/modules/template/io_parse_settings/parse_settings_format1.toml <https://github.com/Proteobench/ProteoBench/blob/main/proteobench/modules/template/io_parse_settings/parse_settings_format1.toml>`\_.
+5. :func:`~proteobench.modules.template.parse.ParseInputs` contains the functions to parse the uploaded data files into the _intermediate_ metric structure. The input file parameters should be defined in the toml file like `proteobench/modules/template/io_parse_settings/parse_settings_format1.toml <https://github.com/Proteobench/ProteoBench/blob/main/proteobench/modules/template/io_parse_settings/parse_settings_format1.toml>`\_.
 
 **Web interface**
 

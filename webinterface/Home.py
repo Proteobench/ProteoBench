@@ -4,7 +4,14 @@ from _base import StreamlitPage
 
 
 class StreamlitPageHome(StreamlitPage):
+    """
+    This class sets up the main page layout for the Streamlit application.
+    """
+
     def _main_page(self):
+        """
+        Set up the main page layout for the Streamlit application.
+        """
         pass
 
 

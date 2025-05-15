@@ -1,4 +1,5 @@
-"""Proline Studio is a quantification tool. The search engine is often Mascot.
+"""
+Proline Studio is a quantification tool. The search engine is often Mascot.
 The parameters are provided per raw file in separate sheets of an Excel file.
 
 Relevant information in sheets:
@@ -44,11 +45,15 @@ def find_charge(string: str) -> List[int]:
     """
     Extract charge states from a string using a regular expression.
 
-    Args:
-        string (str): The string containing charge states.
+    Parameters
+    ----------
+    string : str
+        The string containing charge states.
 
-    Returns:
-        List[int]: A list of charge states as integers.
+    Returns
+    -------
+    List[int]
+        A list of charge states as integers.
     """
     charges = re.findall(PATTERN_CHARGE, string)
     charges = [int(c[:-1]) for c in charges]  # Remove any trailing non-digit characters
@@ -59,11 +64,15 @@ def find_min_pep_length(string: str) -> int:
     """
     Extract the minimum peptide length from a string using a regular expression.
 
-    Args:
-        string (str): The string containing the minimum peptide length.
+    Parameters
+    ----------
+    string : str
+        The string containing the minimum peptide length.
 
-    Returns:
-        int: The minimum peptide length as an integer.
+    Returns
+    -------
+    int
+        The minimum peptide length as an integer.
     """
     min_length = re.findall(PATTERN_MIN_PEP_LENGTH, string)[0]
     return int(min_length)
@@ -73,11 +82,15 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     """
     Parse Proline Studio parameter file (Excel) and extract relevant parameters.
 
-    Args:
-        fname (str): The path to the Proline Studio Excel parameter file.
+    Parameters
+    ----------
+    fname : str
+        The path to the Proline Studio Excel parameter file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters encapsulated in a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
     params = ProteoBenchParameters()
     excel = pd.ExcelFile(fname)

@@ -5,6 +5,6 @@ It is based on the DDA quantification module "ion-level" described [here](#2-qua
 
 ## How to use
 
-Click [here](https://proteobench.cubimed.rub.de/DDA%20Quant%20Peptidoform%20Level%20-BETA-) if you want to submit your results or when you want to explore the module.
+Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform) if you want to submit your results or when you want to explore the module.
 
 **We are working on the documentation: more information comming soon.**

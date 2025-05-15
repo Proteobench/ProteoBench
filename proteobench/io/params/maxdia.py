@@ -1,3 +1,7 @@
+"""
+MaxDIA parameter file parser for ProteoBench.
+"""
+
 import pathlib
 import re
 from typing import Any
@@ -14,11 +18,15 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     """
     Parse MaxDIA parameters using MaxQuant's parser and extract additional parameters.
 
-    Args:
-        fname (str): The file path to the MaxDIA parameter file.
+    Parameters
+    ----------
+    fname : str
+        The file path to the MaxDIA parameter file.
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters as a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters as a `ProteoBenchParameters` object.
     """
     # Use MaxQuant's extract_params to parse the base parameters
     parameters = extract_params_mq(fname)
@@ -52,5 +60,6 @@ if __name__ == "__main__":
         data_dict = params.__dict__
         series = pd.Series(data_dict)
 
+        print(series)
         # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".csv"))

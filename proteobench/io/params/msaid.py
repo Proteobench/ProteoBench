@@ -1,3 +1,7 @@
+"""
+MSAID parameter parsing.
+"""
+
 import pathlib
 from typing import Dict
 
@@ -10,11 +14,15 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     """
     Parse the MSAID parameter file and extract relevant parameters.
 
-    Args:
-        fname (str): The path to the MSAID parameter file (CSV format).
+    Parameters
+    ----------
+    fname : str
+        The path to the MSAID parameter file (CSV format).
 
-    Returns:
-        ProteoBenchParameters: The extracted parameters encapsulated in a `ProteoBenchParameters` object.
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
     # Default and flag settings
     parameters = {
@@ -52,7 +60,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters["quantification_method"] = params_dict["Quantification Type"]
 
     # Set flag for enabling match between runs based on quantification method
-    if "Quan in all file" in parameters["quantification_method"]:
+    if "Quan in all file" in parameters["quantification_method"] or "MBR" in parameters["quantification_method"]:
         parameters["enable_match_between_runs"] = True
     else:
         parameters["enable_match_between_runs"] = False

@@ -1,38 +1,44 @@
+"""
+Module for parsing peptidoform strings and extracting modifications.
+"""
+
 import re
-from typing import Dict, Optional
+import warnings
+from typing import Dict
 
 import pandas as pd
 
 
 def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
     """
-    Loads a dataframe from a CSV file depending on its format.
+    Load a dataframe from a CSV file depending on its format.
 
-    Args:
-        input_csv (str): The path to the CSV file.
-        input_format (str): The format of the input file (e.g., "WOMBAT", "Custom").
+    Parameters
+    ----------
+    input_csv : str
+        The path to the CSV file.
+    input_format : str
+        The format of the input file (e.g., "WOMBAT", "Custom").
 
-    Returns:
-        pd.DataFrame: The loaded dataframe with the required columns added (like "proforma").
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe with the required columns added (like "proforma").
     """
-    input_data_frame: pd.DataFrame
-    if input_format == "Proteome Discoverer":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["Modifications"].fillna("", inplace=True)
-        input_data_frame["proforma"] = input_data_frame.apply(
-            lambda x: aggregate_modification_column(x["Sequence"], x["Modifications"]),
-            axis=1,
-        )
-    if input_format == "WOMBAT":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
-        input_data_frame["proforma"] = input_data_frame["modified_peptide"]
-    elif input_format == "Custom":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-        input_data_frame["proforma"] = input_data_frame["Modified sequence"]
-    elif input_format == "PEAKS":
-        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    try:
+        if input_format == "MaxQuant":
+            warnings.warn(
+                """
+                WARNING: MaxQuant proforma parsing does not take into account fixed modifications\n
+                because they are implicit. Only after providing the appropriate parameter file,\n
+                fixed modifications will be added correctly.
+                """
+            )
+        load_function = _LOAD_FUNCTIONS[input_format]
+    except KeyError as e:
+        raise ValueError(f"Invalid input format: {input_format}") from e
 
-    return input_data_frame
+    return load_function(input_csv)
 
 
 def aggregate_modification_column(
@@ -54,13 +60,19 @@ def aggregate_modification_column(
     - Original format (e.g. "Methylation (C11)" or "Carbamidomethyl (Any N-term)")
     - New format (e.g. "1xCarbamidomethyl [C11]", "1xOxidation [M4]", "1xAcetyl [N-Term]")
 
-    Args:
-        input_string_seq (str): The input sequence string.
-        input_string_modifications (str): The modifications applied to the sequence.
-        special_locations (Dict[str, int], optional): A dictionary specifying special locations for modifications.
+    Parameters
+    ----------
+    input_string_seq : str
+        The input sequence string.
+    input_string_modifications : str
+        The modifications applied to the sequence.
+    special_locations : dict, optional
+        A dictionary specifying special locations for modifications.
 
-    Returns:
-        str: The modified sequence string with aggregated modifications.
+    Returns
+    -------
+    str
+        The modified sequence string with aggregated modifications.
     """
 
     # If no modifications, return the original sequence unchanged
@@ -146,14 +158,21 @@ def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True) -
     """
     Count the number of characters in the string that match the given criteria.
 
-    Args:
-        input_string (str): The input string.
-        isalpha (bool, optional): Whether to count alphabetic characters. Defaults to True.
-        isupper (bool, optional): Whether to count uppercase characters. Defaults to True.
+    Parameters
+    ----------
+    input_string : str
+        The input string.
+    isalpha : bool, optional
+        Whether to count alphabetic characters. Defaults to True.
+    isupper : bool, optional
+        Whether to count uppercase characters. Defaults to True.
 
-    Returns:
-        int: The count of characters that match the criteria.
+    Returns
+    -------
+    int
+        The count of characters that match the criteria.
     """
+
     if isalpha and isupper:
         return sum(1 for char in input_string if char.isalpha() and char.isupper())
     if isalpha:
@@ -166,13 +185,19 @@ def get_stripped_seq(input_string: str, isalpha: bool = True, isupper: bool = Tr
     """
     Get a stripped version of the sequence containing only characters that match the given criteria.
 
-    Args:
-        input_string (str): The input string.
-        isalpha (bool, optional): Whether to include alphabetic characters. Defaults to True.
-        isupper (bool, optional): Whether to include uppercase characters. Defaults to True.
+    Parameters
+    ----------
+    input_string : str
+        The input string.
+    isalpha : bool, optional
+        Whether to include alphabetic characters. Defaults to True.
+    isupper : bool, optional
+        Whether to include uppercase characters. Defaults to True.
 
-    Returns:
-        str: The stripped sequence.
+    Returns
+    -------
+    str
+        The stripped sequence.
     """
     if isalpha and isupper:
         return "".join(char for char in input_string if char.isalpha() and char.isupper())
@@ -191,14 +216,21 @@ def match_brackets(
     """
     Match and extract bracketed modifications from the string.
 
-    Args:
-        input_string (str): The input string.
-        pattern (str, optional): The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
-        isalpha (bool, optional): Whether to match alphabetic characters. Defaults to True.
-        isupper (bool, optional): Whether to match uppercase characters. Defaults to True.
+    Parameters
+    ----------
+    input_string : str
+        The input string.
+    pattern : str, optional
+        The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
+    isalpha : bool, optional
+        Whether to match alphabetic characters. Defaults to True.
+    isupper : bool, optional
+        Whether to match uppercase characters. Defaults to True.
 
-    Returns:
-        tuple: A tuple containing the matched modifications and their positions.
+    Returns
+    -------
+    tuple
+        A tuple containing the matched modifications and their positions.
     """
     matches = [(match.group(), match.start(), match.end()) for match in re.finditer(pattern, input_string)]
     positions = (count_chars(input_string[0 : m[1]], isalpha=isalpha, isupper=isupper) for m in matches)
@@ -210,11 +242,15 @@ def to_lowercase(match: re.Match) -> str:
     """
     Convert a match to lowercase.
 
-    Args:
-        match (re.Match): The match object from a regular expression.
+    Parameters
+    ----------
+    match : re.Match
+        The match object from a regular expression.
 
-    Returns:
-        str: The lowercase version of the matched string.
+    Returns
+    -------
+    str
+        The lowercase version of the matched string.
     """
     return match.group(0).lower()
 
@@ -234,18 +270,27 @@ def get_proforma_bracketed(
     },
 ) -> str:
     """
-    Generate a proforma string with bracketed modifications.
+    Get the proforma sequence with bracketed modifications.
 
-    Args:
-        input_string (str): The input sequence string.
-        before_aa (bool, optional): Whether to add the modification before the amino acid. Defaults to True.
-        isalpha (bool, optional): Whether to include alphabetic characters. Defaults to True.
-        isupper (bool, optional): Whether to include uppercase characters. Defaults to True.
-        pattern (str, optional): The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
-        modification_dict (Dict[str, str], optional): A dictionary of modifications and their names.
+    Parameters
+    ----------
+    input_string : str
+        The input sequence string.
+    before_aa : bool, optional
+        Whether to add the modification before the amino acid. Defaults to True.
+    isalpha : bool, optional
+        Whether to include alphabetic characters. Defaults to True.
+    isupper : bool, optional
+        Whether to include uppercase characters. Defaults to True.
+    pattern : str, optional
+        The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
+    modification_dict : dict, optional
+        A dictionary of modifications and their names.
 
-    Returns:
-        str: The proforma sequence with bracketed modifications.
+    Returns
+    -------
+    str
+        The proforma sequence with bracketed modifications.
     """
     input_string = re.sub(pattern, to_lowercase, input_string)
     modifications, positions = match_brackets(input_string, pattern=pattern, isalpha=isalpha, isupper=isupper)
@@ -277,3 +322,90 @@ def get_proforma_bracketed(
             new_seq += aa
 
     return new_seq
+
+
+def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Proteome Discoverer output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the Proteome Discoverer output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["Modifications"].fillna("", inplace=True)
+    input_data_frame["proforma"] = input_data_frame.apply(
+        lambda x: aggregate_modification_column(x["Sequence"], x["Modifications"]),
+        axis=1,
+    )
+    return input_data_frame
+
+
+def _load_wombat(input_csv: str) -> pd.DataFrame:
+    """
+    Load a WOMBAT output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the WOMBAT output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    input_data_frame["proforma"] = input_data_frame["modified_peptide"]
+    return input_data_frame
+
+
+def _load_custom(input_csv: str) -> pd.DataFrame:
+    """
+    Load a custom output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the custom output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["proforma"] = input_data_frame["Modified sequence"]
+    return input_data_frame
+
+
+def _load_peaks(input_csv: str) -> pd.DataFrame:
+    """
+    Load a PEAKS output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the PEAKS output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    return input_data_frame
+
+
+_LOAD_FUNCTIONS = {
+    "Proteome Discoverer": _load_proteome_discoverer,
+    "WOMBAT": _load_wombat,
+    "Custom": _load_custom,
+    "PEAKS": _load_peaks,
+}

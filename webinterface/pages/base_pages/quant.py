@@ -15,21 +15,34 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.Quant.lfq.ion.DDA.variables import VariablesDDAQuant
+from pages.pages_variables.Quant.lfq_DDA_ion_variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.lfq.ion.DDA.quant_lfq_ion_DDA import (
-    DDAQuantIonModule as IonModule,
-)
+from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
+from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule as IonModule
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
 def compare_dictionaries(old_dict, new_dict):
-    """Generate a human-readable string describing differences between two dictionaries."""
+    """
+    Generate a human-readable string describing differences between two dictionaries.
+
+    Parameters
+    ----------
+    old_dict : dict
+        The old dictionary.
+    new_dict : dict
+        The new dictionary.
+
+    Returns
+    -------
+    str
+        The human-readable string describing the differences between the two dictionaries.
+    """
     changes = []
 
     # Get all unique keys across both dictionaries
@@ -38,11 +51,11 @@ def compare_dictionaries(old_dict, new_dict):
     for key in all_keys:
         old_value = old_dict.get(key, "[MISSING]")
         new_value = new_dict.get(key, "[MISSING]")
-        if str(old_value) != str(new_value):
+        if str(old_value) != str(new_value) and not (old_value == None and new_value == "[MISSING]"):
             changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
 
     if changes:
-        return "\n ### Parameter changes Detected:\n" + "\n".join(changes)
+        return "\n ### Parameter changes detected:\n" + "\n".join(changes)
     else:
         return "\n ### No parameter changes detected. \n"
 
@@ -52,12 +65,32 @@ class QuantUIObjects:
     Main class for the Streamlit interface of ProteoBench quantification.
     This class handles the creation of the Streamlit UI elements, including the main page layout,
     input forms, results display, and data submission elements.
+
+    Parameters
+    ----------
+    variables_quant : VariablesDDAQuant
+        The variables for the quantification module.
+    ionmodule : IonModule
+        The quantification module.
+    parsesettingsbuilder : ParseSettingsBuilder
+        The parse settings builder.
     """
 
     def __init__(
         self, variables_quant: VariablesDDAQuant, ionmodule: IonModule, parsesettingsbuilder: ParseSettingsBuilder
     ) -> None:
-        """Initializes the Streamlit UI objects for the quantification modules."""
+        """
+        Initialize the Streamlit UI objects for the quantification modules.
+
+        Parameters
+        ----------
+        variables_quant : VariablesDDAQuant
+            The variables for the quantification module.
+        ionmodule : IonModule
+            The quantification module.
+        parsesettingsbuilder : ParseSettingsBuilder
+            The parse settings builder.
+        """
         self.variables_quant: VariablesDDAQuant = variables_quant
         self.ionmodule: IonModule = ionmodule
         self.parsesettingsbuilder: ParseSettingsBuilder = parsesettingsbuilder
@@ -75,7 +108,9 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.params_file_dict] = dict()
 
     def display_submission_form(self) -> None:
-        """Creates the main submission form for the Streamlit UI."""
+        """
+        Create the main submission form for the Streamlit UI.
+        """
         with st.form(key="main_form"):
             self.generate_input_fields()
             self.generate_additional_parameters_fields()
@@ -85,22 +120,56 @@ class QuantUIObjects:
         if submit_button:
             self.process_submission_form()
 
-    def generate_input_widget(self, input_format: str, content: dict, key: str = "") -> Any:
-        """Generates input fields in the Streamlit UI based on the specified format and content."""
+    def generate_input_widget(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
+        """
+        Generate input fields in the Streamlit UI based on the specified format and content.
+
+        Parameters
+        ----------
+        input_format : str
+            The input format.
+        content : dict
+            The content of the input fields.
+        key : str
+            The key of the input fields.
+        editable : bool
+            Whether the input fields are editable.
+
+        Returns
+        -------
+        Any
+            The input fields.
+        """
         field_type = content.get("type")
         if field_type == "text_area":
-            return self.generate_text_area_widget(input_format, content, key)
+            return self.generate_text_area_widget(input_format, content, key, editable=editable)
         elif field_type == "text_input":
-            return self._generate_text_input(input_format, content, key)
+            return self._generate_text_input(input_format, content, key, editable=editable)
         elif field_type == "number_input":
-            return self._generate_number_input(content, key)
+            return self._generate_number_input(content, key, editable=editable)
         elif field_type == "selectbox":
-            return self._generate_selectbox(input_format, content, key)
+            return self._generate_selectbox(input_format, content, key, editable=editable)
         elif field_type == "checkbox":
-            return self._generate_checkbox(input_format, content, key)
+            return self._generate_checkbox(input_format, content, key, editable=editable)
 
     def _generate_text_area(self, input_format: str, content: dict, key: str = "") -> Any:
-        """Generates a text area input field."""
+        """
+        Generate a text area input field.
+
+        Parameters
+        ----------
+        input_format : str
+            The input format.
+        content : dict
+            The content of the text area.
+        key : str
+            The key of the text area.
+
+        Returns
+        -------
+        Any
+            The text area input field.
+        """
         placeholder = content.get("placeholder")
         if key in st.session_state[self.variables_quant.params_file_dict].keys():
             value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
@@ -121,14 +190,40 @@ class QuantUIObjects:
         # Function to update session state dictionary
 
     def update_parameters_submission_form(self, field, value) -> None:
+        """
+        Update the session state dictionary with the specified field and value.
+
+        Parameters
+        ----------
+        field : str
+            The field to update.
+        value : Any
+            The value to update the field with.
+        """
         try:
             st.session_state[self.variables_quant.params_json_dict][field] = value
         except KeyError:
             st.session_state[self.variables_quant.params_json_dict] = {}
             st.session_state[self.variables_quant.params_json_dict][field] = value
 
-    def _generate_text_input(self, input_format: str, content: dict, key: str = "") -> Any:
-        """Generates a text input field."""
+    def _generate_text_input(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
+        """
+        Generate a text input field.
+
+        Parameters
+        ----------
+        input_format : str
+            The input format.
+        content : dict
+            The content of the text input field.
+        key : str
+            The key of the text input field.
+
+        Returns
+        -------
+        Any
+            The text input field.
+        """
         placeholder = content.get("placeholder")
         if key in st.session_state[self.variables_quant.params_file_dict].keys():
             value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
@@ -143,10 +238,27 @@ class QuantUIObjects:
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
-    def _generate_number_input(self, content: dict, key: str = "") -> Any:
-        """Generates a number input field."""
+    def _generate_number_input(self, content: dict, key: str = "", editable: bool = True) -> Any:
+        """
+        Generate a number input field.
+
+        Parameters
+        ----------
+        content : dict
+            The content of the number input field.
+        key : str
+            The key of the number input field.
+        editable : bool
+            Whether the number input field is editable.
+
+        Returns
+        -------
+        Any
+            The number input field.
+        """
         if key in st.session_state[self.variables_quant.params_file_dict].keys():
             value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
         else:
@@ -161,10 +273,29 @@ class QuantUIObjects:
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
-    def _generate_selectbox(self, input_format: str, content: dict, key: str = "") -> Any:
-        """Generates a selectbox input field."""
+    def _generate_selectbox(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
+        """
+        Generate a selectbox input field.
+
+        Parameters
+        ----------
+        input_format : str
+            The input format.
+        content : dict
+            The content of the selectbox.
+        key : str
+            The key of the selectbox.
+        editable : bool
+            Whether the selectbox is editable.
+
+        Returns
+        -------
+        Any
+            The selectbox input field.
+        """
         options = content.get("options", [])
         if key in st.session_state[self.variables_quant.params_file_dict].keys():
             value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
@@ -180,21 +311,46 @@ class QuantUIObjects:
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
-    def _generate_checkbox(self, input_format: str, content: dict, key: str = "") -> Any:
-        """Generates a checkbox input field."""
-        # value = content.get("value", {}).get(input_format, False)
+    def _generate_checkbox(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
+        """
+        Generate a checkbox input field.
+
+        Parameters
+        ----------
+        input_format : str
+            The input format.
+        content : dict
+            The content of the checkbox.
+        key : str
+            The key of the checkbox.
+        editable : bool
+            Whether the checkbox is editable.
+
+        Returns
+        -------
+        Any
+            The checkbox input field.
+        """
+        value = content.get("value", {})
+        if key in st.session_state[self.variables_quant.params_file_dict].keys():
+            value = st.session_state[self.variables_quant.params_file_dict].get(key)
         return st.checkbox(
             content["label"],
             key=self.variables_quant.prefix_params + key,
-            value=False,
+            value=value,
             on_change=self.update_parameters_submission_form(
                 key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
             ),
+            disabled=not editable,
         )
 
     def initialize_main_slider(self) -> None:
+        """
+        Initialize the slider for the main data.
+        """
         if self.variables_quant.slider_id_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
@@ -203,7 +359,9 @@ class QuantUIObjects:
             )
 
     def generate_main_selectbox(self) -> None:
-        """Creates the selectbox for the Streamlit UI."""
+        """
+        Create the selectbox for the Streamlit UI.
+        """
         if self.variables_quant.selectbox_id_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.selectbox_id_uuid] = uuid.uuid4()
 
@@ -218,7 +376,9 @@ class QuantUIObjects:
             st.error(f"Unable to create the selectbox: {e}", icon="🚨")
 
     def generate_submitted_selectbox(self) -> None:
-        """Creates the selectbox for the Streamlit UI."""
+        """
+        Create the selectbox for the Streamlit UI.
+        """
         if self.variables_quant.selectbox_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.selectbox_id_submitted_uuid] = uuid.uuid4()
 
@@ -232,6 +392,9 @@ class QuantUIObjects:
             st.error(f"Unable to create the selectbox: {e}", icon="🚨")
 
     def initialize_submitted_slider(self) -> None:
+        """
+        Initialize the slider for the submitted data.
+        """
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
@@ -240,7 +403,9 @@ class QuantUIObjects:
             )
 
     def display_submitted_results(self) -> None:
-        """Displays the results section of the page for submitted data."""
+        """
+        Display the results section of the page for submitted data.
+        """
         # handled_submission = self.process_submission_form()
         # if handled_submission == False:
         #    return
@@ -256,7 +421,7 @@ class QuantUIObjects:
         )
 
         if len(data_points_filtered) == 0:
-            st.error(f"No datapoints available for plotting", icon="🚨")
+            st.error("No datapoints available for plotting", icon="🚨")
 
         try:
             fig_metric = PlotDataPoint.plot_metric(
@@ -281,7 +446,9 @@ class QuantUIObjects:
         )
 
     def display_existing_results(self) -> None:
-        """Displays the results section of the page for existing data."""
+        """
+        Display the results section of the page for existing data.
+        """
         self.initialize_main_data_points()
         data_points_filtered = self.filter_data_main_slider()
 
@@ -292,7 +459,7 @@ class QuantUIObjects:
         )
 
         if len(data_points_filtered) == 0:
-            st.error(f"No datapoints available for plotting", icon="🚨")
+            st.error("No datapoints available for plotting", icon="🚨")
 
         try:
             fig_metric = PlotDataPoint.plot_metric(
@@ -308,14 +475,35 @@ class QuantUIObjects:
         self.display_download_section()
 
     def submit_to_repository(self, params) -> Optional[str]:
-        """Handles the submission process of the benchmark results to the ProteoBench repository."""
+        """
+        Handle the submission process of the benchmark results to the ProteoBench repository.
+
+        Parameters
+        ----------
+        params : ProteoBenchParameters
+            The parameters for the submission.
+
+        Returns
+        -------
+        str, optional
+            The URL of the pull request if the submission was successful.
+        """
         st.session_state[self.variables_quant.submit] = True
         button_pressed = self.generate_submission_button()  # None or 'button_pressed'
 
         if not button_pressed:  # if button_pressed is None
             return None
 
+        # MaxQuant fixed modification handling
+        if self.user_input["input_format"] == "MaxQuant":
+            st.session_state[self.variables_quant.result_perf] = add_maxquant_fixed_modifications(
+                params, st.session_state[self.variables_quant.result_perf]
+            )
+            # Overwrite the dataframes for submission
+            self.copy_dataframes_for_submission()
+
         self.clear_highlight_column()
+
         pr_url = self.create_pull_request(params)
 
         if pr_url:
@@ -324,7 +512,14 @@ class QuantUIObjects:
         return pr_url
 
     def show_submission_success_message(self, pr_url) -> None:
-        """Handles the UI updates and notifications after a successful submission."""
+        """
+        Handle the UI updates and notifications after a successful submission.
+
+        Parameters
+        ----------
+        pr_url : str
+            The URL of the pull request.
+        """
         if st.session_state[self.variables_quant.submit]:
             st.subheader("SUCCESS")
             st.markdown(self.variables_quant.texts.ShortMessages.submission_processing_warning)
@@ -337,7 +532,9 @@ class QuantUIObjects:
             rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 
     def generate_submission_ui_elements(self) -> None:
-        """Creates the UI elements necessary for data submission, including metadata uploader and comments section."""
+        """
+        Create the UI elements necessary for data submission, including metadata uploader and comments section.
+        """
         try:
             self.copy_dataframes_for_submission()
             self.submission_ready = True
@@ -349,7 +546,9 @@ class QuantUIObjects:
         self.generate_confirmation_checkbox()
 
     def generate_input_fields(self) -> None:
-        """Creates the input section of the form."""
+        """
+        Create the input section of the form.
+        """
         st.subheader("Input files")
         st.markdown(open(self.variables_quant.description_input_file_md, "r").read())
         self.user_input["input_format"] = st.selectbox(
@@ -363,18 +562,32 @@ class QuantUIObjects:
 
     # TODO: change additional_params_json for other modules, to capture relevant parameters
     def generate_additional_parameters_fields(self) -> None:
-        """Creates the additional parameters section of the form and initializes the parameter fields."""
+        """
+        Create the additional parameters section of the form and initializes the parameter fields.
+        """
         st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
         with open(self.variables_quant.additional_params_json) as file:
             config = json.load(file)
         for key, value in config.items():
+            if key.lower() == "software_name":
+                editable = False
+            else:
+                editable = True
+
             if key == "comments_for_plotting":
-                self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value)
+                self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, editable)
             else:
                 self.user_input[key] = None
 
     def process_submission_form(self) -> None:
-        """Handles the form submission logic."""
+        """
+        Handle the form submission logic.
+
+        Returns
+        -------
+        bool, optional
+            Whether the submission was handled unsuccessfully.
+        """
         if not self.user_input["input_csv"]:
             st.error(":x: Please provide a result file", icon="🚨")
             return False
@@ -386,15 +599,35 @@ class QuantUIObjects:
             "Form submitted successfully! Please navigate to the 'Results In-Depth' or 'Results New Data' tab for the next step."
         )
 
-    def generate_text_area_widget(self, input_format: str, content: dict) -> Any:
-        """Generates a text area input field."""
+    def generate_text_area_widget(self, input_format: str, content: dict, editable: bool = True) -> Any:
+        """
+        Generate a text area input field.
+
+        Parameters
+        ----------
+        input_format : str
+            The input format.
+        content : dict
+            The content of the text area.
+        editable : bool
+            Whether the text area is editable.
+
+        Returns
+        -------
+        Any
+            The text area input field.
+        """
         placeholder = content.get("placeholder")
         value = content.get("value", {}).get(input_format)
         height = content.get("height", 200)
-        return st.text_area(content["label"], placeholder=placeholder, value=value, height=height)
+        return st.text_area(
+            content["label"], placeholder=placeholder, value=value, height=height, disabled=not editable
+        )
 
     def initialize_main_data_points(self) -> None:
-        """Initializes the all_datapoints variable in the session state."""
+        """
+        Initialize the all_datapoints variable in the session state.
+        """
         if self.variables_quant.all_datapoints not in st.session_state.keys():
             st.session_state[self.variables_quant.all_datapoints] = None
             st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_points(
@@ -402,23 +635,39 @@ class QuantUIObjects:
             )
 
     def initialize_submitted_data_points(self) -> None:
-        """Initializes the all_datapoints variable in the session state."""
+        """
+        Initialize the all_datapoints variable in the session state.
+        """
         if self.variables_quant.all_datapoints_submitted not in st.session_state.keys():
             st.session_state[self.variables_quant.all_datapoints_submitted] = None
             st.session_state[self.variables_quant.all_datapoints_submitted] = self.ionmodule.obtain_all_data_points(
                 all_datapoints=st.session_state[self.variables_quant.all_datapoints_submitted]
             )
 
-    def filter_data_main_slider(self) -> None:
-        """Filters the data points based on the slider value."""
+    def filter_data_main_slider(self) -> pd.DataFrame:
+        """
+        Filter the data points based on the slider value.
+
+        Returns
+        -------
+        pd.DataFrame
+            The filtered data points.
+        """
         if self.variables_quant.slider_id_uuid in st.session_state.keys():
             return self.ionmodule.filter_data_point(
                 st.session_state[self.variables_quant.all_datapoints],
                 st.session_state[st.session_state[self.variables_quant.slider_id_uuid]],
             )
 
-    def filter_data_submitted_slider(self) -> None:
-        """Filters the data points based on the slider value."""
+    def filter_data_submitted_slider(self) -> pd.DataFrame:
+        """
+        Filter the data points based on the slider value.
+
+        Returns
+        -------
+        pd.DataFrame
+            The filtered data points.
+        """
         if (
             self.variables_quant.slider_id_submitted_uuid in st.session_state.keys()
             and self.variables_quant.all_datapoints_submitted in st.session_state.keys()
@@ -429,7 +678,9 @@ class QuantUIObjects:
             )
 
     def set_highlight_column_in_submitted_data(self) -> None:
-        """Initializes the highlight column in the data points."""
+        """
+        Initialize the highlight column in the data points.
+        """
         df = st.session_state[self.variables_quant.all_datapoints_submitted]
         if (
             self.variables_quant.highlight_list_submitted not in st.session_state.keys()
@@ -445,7 +696,9 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.all_datapoints_submitted] = df
 
     def generate_main_slider(self) -> None:
-        """Creates a slider input."""
+        """
+        Create a slider input.
+        """
         if self.variables_quant.slider_id_uuid not in st.session_state:
             st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
         slider_key = st.session_state[self.variables_quant.slider_id_uuid]
@@ -460,7 +713,9 @@ class QuantUIObjects:
         )
 
     def generate_submitted_slider(self) -> None:
-        """Creates a slider input."""
+        """
+        Create a slider input.
+        """
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state:
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
         slider_key = st.session_state[self.variables_quant.slider_id_submitted_uuid]
@@ -475,7 +730,14 @@ class QuantUIObjects:
         )
 
     def display_download_section(self, reset_uuid=False) -> None:
-        """Render the selector and area for raw data download."""
+        """
+        Render the selector and area for raw data download.
+
+        Parameters
+        ----------
+        reset_uuid : bool, optional
+            Whether to reset the UUID, by default False.
+        """
         if len(st.session_state[self.variables_quant.all_datapoints]) == 0:
             st.error("No data available for download.", icon="🚨")
             return
@@ -517,7 +779,14 @@ class QuantUIObjects:
                     st.write("Directory for this dataset does not exist, this should not happen.")
 
     def generate_submission_button(self) -> Optional[str]:
-        """Creates a button for public submission and returns the PR URL if the button is pressed."""
+        """
+        Create a button for public submission and returns the PR URL if the button is pressed.
+
+        Returns
+        -------
+        Optional[str]
+            The URL of the pull request.
+        """
         if self.variables_quant.button_submission_uuid not in st.session_state.keys():
             button_submission_uuid = uuid.uuid4()
             st.session_state[self.variables_quant.button_submission_uuid] = button_submission_uuid
@@ -531,12 +800,26 @@ class QuantUIObjects:
         return "button_pressed"
 
     def clear_highlight_column(self) -> None:
-        """Removes the highlight column from the submission data if it exists."""
+        """
+        Remove the highlight column from the submission data if it exists.
+        """
         if "Highlight" in st.session_state[self.variables_quant.all_datapoints_submission].columns:
             st.session_state[self.variables_quant.all_datapoints_submission].drop("Highlight", inplace=True, axis=1)
 
     def create_pull_request(self, params: Any) -> Optional[str]:
-        """Submits the pull request with the benchmark results and returns the PR URL."""
+        """
+        Submit the pull request with the benchmark results and returns the PR URL.
+
+        Parameters
+        ----------
+        params : Any
+            The parameters object.
+
+        Returns
+        -------
+        Optional[str]
+            The URL of the pull request.
+        """
         user_comments = self.user_input["comments_for_submission"]
 
         changed_params_str = compare_dictionaries(self.params_file_dict_copy, params.__dict__)
@@ -558,7 +841,9 @@ class QuantUIObjects:
         return pr_url
 
     def save_intermediate_submission_data(self) -> None:
-        """Stores intermediate and input data to the storage directory if available."""
+        """
+        Store intermediate and input data to the storage directory if available.
+        """
         _id = str(
             st.session_state[self.variables_quant.all_datapoints_submission][
                 st.session_state[self.variables_quant.all_datapoints_submission]["old_new"] == "new"
@@ -567,7 +852,13 @@ class QuantUIObjects:
 
         self.user_input["input_csv"].getbuffer()
 
+        st.session_state[self.variables_quant.result_performance_submission].to_csv("test.csv", index=False)
+
         if "storage" in st.secrets.keys():
+            extension_input_file = os.path.splitext(self.user_input["input_csv"].name)[1]
+            extension_input_parameter_file = os.path.splitext(self.user_input[self.variables_quant.meta_data][0].name)[
+                1
+            ]
             logger.info("Save intermediate raw")
             self.ionmodule.write_intermediate_raw(
                 dir=st.secrets["storage"]["dir"],
@@ -576,10 +867,14 @@ class QuantUIObjects:
                 result_performance=st.session_state[self.variables_quant.result_performance_submission],
                 param_loc=self.user_input[self.variables_quant.meta_data],
                 comment=st.session_state[self.variables_quant.meta_data_text],
+                extension_input_file=extension_input_file,
+                extension_input_parameter_file=extension_input_parameter_file,
             )
 
     def copy_dataframes_for_submission(self) -> None:
-        """Creates copies of the dataframes before submission."""
+        """
+        Create copies of the dataframes before submission.
+        """
         if st.session_state[self.variables_quant.all_datapoints_submitted] is not None:
             st.session_state[self.variables_quant.all_datapoints_submission] = st.session_state[
                 self.variables_quant.all_datapoints_submitted
@@ -594,7 +889,9 @@ class QuantUIObjects:
             ].copy()
 
     def generate_metadata_uploader(self) -> None:
-        """Creates the file uploader for meta data."""
+        """
+        Create the file uploader for meta data.
+        """
         self.user_input[self.variables_quant.meta_data] = st.file_uploader(
             "Meta data for searches",
             help=self.variables_quant.texts.Help.meta_data_file,
@@ -602,7 +899,9 @@ class QuantUIObjects:
         )
 
     def generate_comments_section(self) -> None:
-        """Creates the text area for submission comments."""
+        """
+        Create the text area for submission comments.
+        """
         self.user_input["comments_for_submission"] = st.text_area(
             "Comments for submission",
             placeholder=self.variables_quant.texts.ShortMessages.parameters_additional,
@@ -611,14 +910,18 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.meta_data_text] = self.user_input["comments_for_submission"]
 
     def generate_confirmation_checkbox(self) -> None:
-        """Creates the confirmation checkbox for metadata correctness."""
+        """
+        Create the confirmation checkbox for metadata correctness.
+        """
         st.session_state[self.variables_quant.check_submission] = st.checkbox(
             "I confirm that the metadata is correct",
         )
         self.stop_duplicating = True
 
     def execute_proteobench(self) -> None:
-        """Executes the ProteoBench benchmarking process."""
+        """
+        Execute the ProteoBench benchmarking process.
+        """
         if self.variables_quant.all_datapoints_submitted not in st.session_state:
             self.initialize_main_data_points()
 
@@ -632,7 +935,14 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.input_df] = input_df
 
     def run_benchmarking_process(self):
-        """Executes the benchmarking process and returns the results."""
+        """
+        Execute the benchmarking process and returns the results.
+
+        Returns
+        -------
+        Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+            The benchmarking results, all data points, and the input data frame.
+        """
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_file.write(self.user_input["input_csv"].getbuffer())
 
@@ -674,7 +984,7 @@ class QuantUIObjects:
         ]
 
         if len(st.session_state[self.variables_quant.all_datapoints]) == 0:
-            st.error(f"No datapoints available for plotting", icon="🚨")
+            st.error("No datapoints available for plotting", icon="🚨")
 
         try:
             fig_metric = PlotDataPoint.plot_metric(
@@ -687,7 +997,14 @@ class QuantUIObjects:
         st.session_state[self.variables_quant.fig_metric] = fig_metric
 
     def load_user_parameters(self) -> Any:
-        """Reads and processes the parameter files provided by the user."""
+        """
+        Read and process the parameter files provided by the user.
+
+        Returns
+        -------
+        Any
+            The parsed parameters.
+        """
         params = None
 
         try:
@@ -699,7 +1016,7 @@ class QuantUIObjects:
             )
 
             st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
-        except KeyError as e:
+        except KeyError:
             st.error("Parsing of meta parameters file for this software is not supported yet.", icon="🚨")
         except Exception as e:
             input_f = self.user_input["input_format"]
@@ -710,7 +1027,9 @@ class QuantUIObjects:
         return params
 
     def generate_additional_parameters_fields_submission(self) -> None:
-        """Creates the additional parameters section of the form and initializes the parameter fields."""
+        """
+        Create the additional parameters section of the form and initializes the parameter fields.
+        """
         st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
 
         # Load JSON config
@@ -724,18 +1043,36 @@ class QuantUIObjects:
         input_param_len = int(len(config.items()) / 3)
 
         for idx, (key, value) in enumerate(config.items()):
+            if key.lower() == "software_name":
+                editable = False
+            else:
+                editable = True
+
             if idx < input_param_len:
                 with st_col1:
-                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+                    self.user_input[key] = self.generate_input_widget(
+                        self.user_input["input_format"], value, key, editable=editable
+                    )
             elif idx < input_param_len * 2:
                 with st_col2:
-                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+                    self.user_input[key] = self.generate_input_widget(
+                        self.user_input["input_format"], value, key, editable=editable
+                    )
             else:
                 with st_col3:
-                    self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, key)
+                    self.user_input[key] = self.generate_input_widget(
+                        self.user_input["input_format"], value, key, editable=editable
+                    )
 
     def generate_sample_name(self) -> str:
-        """Generates a unique sample name based on the input format, software version, and the current timestamp."""
+        """
+        Generate a unique sample name based on the input format, software version, and the current timestamp.
+
+        Returns
+        -------
+        str
+            The generated sample name.
+        """
         time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         sample_name = "-".join(
             [
@@ -747,7 +1084,14 @@ class QuantUIObjects:
         return sample_name
 
     def get_form_values(self) -> Dict[str, Any]:
-        """Retrieves all user inputs from Streamlit session state and returns them as a dictionary."""
+        """
+        Retrieve all user inputs from Streamlit session state and returns them as a dictionary.
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary containing all user inputs.
+        """
         form_values = {}
 
         # Load JSON config (same file used to create fields)
@@ -762,11 +1106,16 @@ class QuantUIObjects:
         return form_values
 
     def display_public_submission_ui(self) -> None:
+        """
+        Display the public submission section of the page.
+        """
         if self.variables_quant.first_new_plot:
             self.generate_submission_ui_elements()
 
         if self.user_input[self.variables_quant.meta_data]:
+            print(self.user_input)
             params = self.load_user_parameters()
+            print(params)
             st.session_state[self.variables_quant.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
             print(self.params_file_dict_copy)
@@ -789,7 +1138,19 @@ class QuantUIObjects:
             self.show_submission_success_message(pr_url)
 
     def generate_current_data_plots(self, recalculate: bool) -> go.Figure:
-        """Generates and returns plots based on the current benchmark data."""
+        """
+        Generate and return plots based on the current benchmark data.
+
+        Parameters
+        ----------
+        recalculate : bool
+            Whether to recalculate the plots.
+
+        Returns
+        -------
+        go.Figure
+            The generated plot.
+        """
         if self.variables_quant.result_perf not in st.session_state.keys():
             st.error(":x: Please provide a result file", icon="🚨")
             return False
@@ -822,7 +1183,7 @@ class QuantUIObjects:
             )
             col1.plotly_chart(fig_logfc, use_container_width=True)
 
-            col2.subheader("Coefficient of variation distribution in Group A and B.")
+            col2.subheader("Coefficient of variation distribution in Condition A and B.")
             col2.markdown(
                 """
                     Right Panel Panel : CV calculated from your data
@@ -852,7 +1213,7 @@ class QuantUIObjects:
         return fig_logfc
 
     def display_all_data_results_main(self) -> None:
-        """Displays the results for all data in Tab 1."""
+        """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
         self.initialize_main_slider()
         self.generate_main_slider()
@@ -860,7 +1221,7 @@ class QuantUIObjects:
         self.display_existing_results()
 
     def display_all_data_results_submitted(self) -> None:
-        """Displays the results for all data in Tab 1."""
+        """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
         self.initialize_submitted_slider()
         self.generate_submitted_slider()

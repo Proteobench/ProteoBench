@@ -14,12 +14,12 @@ classifiers = [
 ]
 
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 dynamic = ["version"]
 dependencies = [
   "pandas",
   "openpyxl",
-  "numpy",
+  "numpy>1.24.4",
   "plotly",
   "streamlit>=1.31",
   "streamlit_extras",
@@ -28,6 +28,7 @@ dependencies = [
   "toml",
   "PyGithub",
   "GitPython",
+  "psm-utils",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"
@@ -78,7 +79,21 @@ profile = "black"
 
 [tool.black]
 line-length = 120
-target-version = ['py39']
+target-version = ['py311']
 
 [tool.flake8]
 max-line-length = 120
+
+[tool.numpydoc_validation]
+checks = [
+    "all",   # report on all checks, except the below
+    "EX01",
+    "SA01",
+    "ES01",
+    "RT03",
+    "SS06",
+]
+
+exclude = [
+'^test/.*',
+]

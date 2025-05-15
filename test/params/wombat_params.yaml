@@ -1,0 +1,35 @@
+params:
+  fixed_mods: Carbamidomethyl of C
+  variable_mods: Acetyl of Protein N-term,Oxidation of M
+  precursor_mass_tolerance: 20 ppm
+  fragment_mass_tolerance: 0.02 Da
+  enzyme: Trypsin
+  fions: b
+  rions: y
+  isotope_error_range: 1
+  add_decoys: true
+  num_hits: 1
+  miscleavages: 1
+  min_precursor_charge: 2
+  max_precursor_charge: 3
+  min_peptide_length: 5
+  max_peptide_length: 20
+  max_mods: 4
+  ident_fdr_psm: 0.01
+  ident_fdr_peptide: 0.01
+  ident_fdr_protein: 0.01
+  enable_match_between_runs: True
+  protein_inference: unique
+  quantification_method: precursor
+  summarization_proteins: median
+  min_num_peptides: 2
+  summarization_psms: sum_abs
+  quant_transformation: log
+  normalization_method: median
+  run_statistics: true
+  fdr_method: qvalue
+  fdr_threshold: 0.01
+rawfiles: None
+
+fastafile: ProteoBenchFASTA_DDAQuantification.fasta
+version: 0.9.8

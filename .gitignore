@@ -118,6 +118,7 @@ env.bak/
 venv.bak/
 .vscode
 .idea
+*.code-workspace
 
 # Spyder project settings
 .spyderproject
@@ -145,3 +146,6 @@ results.json
 
 # wew
 build.sh
+
+# temp results
+jupyter_notebooks/analysis/temp_results/*

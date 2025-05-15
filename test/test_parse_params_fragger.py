@@ -24,7 +24,7 @@ parameters = [(fname, (fname.with_suffix(".csv"))) for fname in parameter_files]
 def test_read_fragpipe_workflow(file, csv_expected):
     expected = pd.read_csv(csv_expected, index_col=0)
     with open(file, "rb") as f:
-        _, data = fragger_params.read_fragpipe_workflow(f)
+        _, _, data = fragger_params.read_fragpipe_workflow(f)
     actual = pd.DataFrame.from_records(data, columns=(fragger_params.Parameter._fields)).set_index(
         fragger_params.Parameter._fields[0]
     )

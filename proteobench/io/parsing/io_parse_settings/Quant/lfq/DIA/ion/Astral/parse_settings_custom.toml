@@ -1,0 +1,31 @@
+[mapper]
+"Proteins" = "Proteins"
+"Sequence" = "Sequence"
+"Charge" = "Charge"
+"Modified sequence" = "Modified sequence"
+
+
+[condition_mapper]
+"LFQ_Astral_DIA_15min_50ng_Condition_A_REP1" = "A"
+"LFQ_Astral_DIA_15min_50ng_Condition_A_REP2" = "A"
+"LFQ_Astral_DIA_15min_50ng_Condition_A_REP3" = "A"
+"LFQ_Astral_DIA_15min_50ng_Condition_B_REP1" = "B"
+"LFQ_Astral_DIA_15min_50ng_Condition_B_REP2" = "B"
+"LFQ_Astral_DIA_15min_50ng_Condition_B_REP3" = "B"
+
+[run_mapper]
+"LFQ_Astral_DIA_15min_50ng_Condition_A_REP1" = "Condition_A_Sample_Alpha_01"
+"LFQ_Astral_DIA_15min_50ng_Condition_A_REP2" = "Condition_A_Sample_Alpha_02"
+"LFQ_Astral_DIA_15min_50ng_Condition_A_REP3" = "Condition_A_Sample_Alpha_03"
+"LFQ_Astral_DIA_15min_50ng_Condition_B_REP1" = "Condition_B_Sample_Alpha_01"
+"LFQ_Astral_DIA_15min_50ng_Condition_B_REP2" = "Condition_B_Sample_Alpha_02"
+"LFQ_Astral_DIA_15min_50ng_Condition_B_REP3" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

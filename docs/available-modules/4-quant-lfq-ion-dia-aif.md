@@ -30,7 +30,7 @@ Alternatively, you can download them from the ProteoBench server here: [proteobe
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/datasets/fasta/ProteoBenchFASTA_DDAQuantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
+Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_Quantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
@@ -98,7 +98,8 @@ After upload, you will get a link to a Github pull request associated with your 
 1. Select FASTA and import .raw files in "Input files"
 2. In "Method settings" you need to define your search parameters 
 3. Turn on "Predict Library" 
-4. The input files for ProteoBench are "precursors.tsv" (peptide identification) and "log.txt" (parameter files)
+4. Turn on "Precursor Level LFQ"
+4. Because ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", it needs to be preprocessed. For this, please refer to the Jupyter Notebook "ProteoBench_input_conversion.ipynb" [HERE](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/ProteoBench_input_conversion.ipynb). Using this notebook will provide you with the correct input file that can be used in ProteoBench. The parameter file is "log.txt".
 
 ### [FragPipe - DIA-NN](https://github.com/Nesvilab/FragPipe)
 1. Load the DIA_SpecLib_Quant workflow
@@ -109,14 +110,15 @@ After upload, you will get a link to a Github pull request associated with your 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
 ### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
-
+We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.s
+etup" file for parameter parsing when doing public upload.
 
 ### [MaxDIA](https://www.maxquant.org/) (work in progress)
 By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
 
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
-### [PEAKS](https://www.bioinfor.com//)/) (work in progress)
+### [PEAKS](https://www.bioinfor.com//) (work in progress)
 When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that Sample 1 -> 3 are Condition "A" and Sample 4 -> 6 are condition "B".
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
@@ -254,4 +256,3 @@ the reviewers will accept it and make your data public.
 Please contact us if you have any issue. To do so, you can create an 
 [issue](https://github.com/Proteobench/ProteoBench/issues/new) on our 
 github, or [send us an email](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
-

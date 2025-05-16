@@ -2,10 +2,10 @@
 Module for parsing peptidoform strings and extracting modifications.
 """
 
+import math
+import os
 import re
 import warnings
-import os
-import math
 from typing import Dict
 
 import pandas as pd
@@ -223,7 +223,7 @@ def match_brackets(
     input_string : str
         The input string.
     pattern : str, optional
-        The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
+        The regular expression pattern for matching modifications. Defaults to `r"\\[([^]]+)\\]"`.
     isalpha : bool, optional
         Whether to match alphabetic characters. Defaults to True.
     isupper : bool, optional
@@ -347,6 +347,7 @@ def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
         axis=1,
     )
     return input_data_frame
+
 
 def _load_wombat(input_csv: str) -> pd.DataFrame:
     """

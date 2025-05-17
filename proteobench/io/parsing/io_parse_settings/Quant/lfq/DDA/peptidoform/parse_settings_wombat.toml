@@ -24,7 +24,7 @@
 "_HUMAN" = "HUMAN"
 
 [modifications_parser]
-"parse_column" = "Modified Sequence"
+"parse_column" = "Sequence"
 "before_aa" = false
 "isalpha" = true
 "isupper" = true

@@ -86,7 +86,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |Sage|lfq.tsv|results.json|
 |PEAKS|lfq_features.csv|parameters.txt|
 
-### AlphaPept
+### AlphaPept (legacy tool\*)
 
 To generate data compatible with ProteoBench, you can:
 1. Load folder that contains the data files.
@@ -104,6 +104,7 @@ In the "result_peptides.tsv", the following columns are considered:
 - "decoy" to identify decoy matches ("true")
 - "ms1_int_sum_apex_dn" to get the intensity values
 
+\* AlphaPept has been labelled "legacy tool" since it has not been developped for more than a year. It may thus underperform compared to the most recent versions of other tools.
 
 ### FragPipe
 

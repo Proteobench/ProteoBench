@@ -12,6 +12,15 @@ Developer guide
     modifying-module
     changelog
 
+.. toctree:: 
+    :caption: Architecture and new modules
+    :maxdepth: 2
+    :hidden:
+
+    repo_layout
+    adding-module
+    
+    modules/index
 
 .. toctree::
    :caption: Python API

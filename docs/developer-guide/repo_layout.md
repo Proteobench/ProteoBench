@@ -51,25 +51,23 @@ proteobench
 ├── github
 │   └── gh.py # sync with benchmark repos (retrieving and uploading result metrics)
 ├── io
-│   ├── __init__.py
 │   ├── data
 │   ├── params # parameter parsing (module unspecific) of data analysis software
-│   └── parsing # parsing of output files of data analysis software
+│   └── parsing # parsing of output files of data analysis software, configuration tomls
+│   ├── __init__.py
 ├── modules
 │   ├── __init__.py
-│   ├── constants.py
-│   ├── dda_quant_ion
-│   ├── dia_quant_ion
-│   ├── quant          # ? quant contains the module specific code for quantification
+│   ├── quant          # quant contains the module specific code for quantification
 │   └── rescoring
+│   ├── constants.py
 ├── plotting
 │   └── plot_quant.py  # only example code for Base Module
 ├── score
-│   ├── __init__.py
 │   └── quant
+│   ├── __init__.py
 └── utils
-    ├── __init__.py
     └── plotting
+    ├── __init__.py
 ```
 
 ## Webinterface

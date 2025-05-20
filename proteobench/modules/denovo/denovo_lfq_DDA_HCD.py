@@ -16,6 +16,7 @@ from proteobench.exceptions import (
 )
 
 from proteobench.io.parsing.parse_denovo import load_input_file
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.denovo.denovo_base import DeNovoModule
 # from proteobench.score.quant.quantscores import QuantScores
@@ -25,13 +26,13 @@ class DDAHCDDeNovoModule(DeNovoModule):
     De Novo Module.
     """
 
-    module_id = 'denovo_lfq_dda_hcd'
+    module_id = 'denovo_lfq_DDA_HCD'
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_denovo_lfq_dda_hcd",
-        proteobench_repo_name: str = "Proteobench/Results_denovo_lfq_dda_hcd",
+        proteobot_repo_name: str = "Proteobot/Results_denovo_lfq_DDA_HCD",
+        proteobench_repo_name: str = "Proteobench/Results_denovo_lfq_DDA_HCD",
     ):
         """
         Initialize the DDA Quantification Module for Ion level Quantification.
@@ -107,4 +108,23 @@ class DDAHCDDeNovoModule(DeNovoModule):
         
 
         # Parse settings file
-        
+        try:
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+        except KeyError as e:
+            raise ParseSettingsError(
+                f"Error parsing settings file for parsing, settings seem to be missing: {msg}"
+            ) from e
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {msg}") from e
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {msg}") from e
+
+        # Instantiate de novo scores
+
+
+        # Generate intermediate data structure
+
+
+        # Generate datapoint

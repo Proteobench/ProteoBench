@@ -60,3 +60,11 @@
 "MSAID" = "parse_settings_msaid.toml"
 "Custom" = "parse_settings_custom.toml"
 "PEAKS" = "parse_settings_peaks.toml"
+
+[denovo_lfq_DDA_HCD]
+"AdaNovo" = "parse_settings_adanovo.toml"
+"Casanovo" = "parse_settings_casanovo.toml"
+"DeepNovo" = "parse_settings_deepnovo.toml"
+"InstaNovo" = "parse_settings_instanovo.toml"
+"Pi-HelixNovo" = "parse_settings_pihelixnovo.toml"
+"Pi-PrimeNovo" = "parse_settings_piprimenovo.toml"

@@ -7,6 +7,15 @@ from __future__ import annotations
 import pandas as pd
 from pandas import DataFrame
 
+from proteobench.exceptions import (
+    ConvertStandardFormatError,
+    IntermediateFormatGenerationError,
+    ParseError,
+    ParseSettingsError,
+    QuantificationError,
+)
+
+from proteobench.io.parsing.parse_denovo import load_input_file
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.denovo.denovo_base import DeNovoModule
 # from proteobench.score.quant.quantscores import QuantScores
@@ -83,4 +92,19 @@ class DDAHCDDeNovoModule(DeNovoModule):
             Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
         """
         # TODO
-        return
+
+        # Parse workflow output file
+        try:
+            input_df = load_input_file(input_file_loc, input_format)
+        except pd.errors.ParserError as e:
+            raise ParseError(
+                f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
+            ) from e
+        except Exception as e:
+            raise ParseSettingsError("Error parsing the input file.") from e
+        
+        msg = f"Folder: {self.parse_settings_dir}, Module: {self.module_id}"
+        
+
+        # Parse settings file
+        

@@ -20,7 +20,7 @@ dependencies = [
   "pandas",
   "openpyxl",
   "numpy>1.24.4",
-  "plotly",
+  "plotly==5.24.0",
   "upsetplot",
   "seaborn",
   "streamlit>=1.31",

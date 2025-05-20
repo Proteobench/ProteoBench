@@ -21,3 +21,7 @@ name = "DIA Quant Ion Level - diaPASEF -BETA-"
 [[pages]]
 path = "pages/module_pages/quant_lfq_DIA_ion_singlecell.py"
 name = "DIA Quant Ion Level - Single Cell (Astral) -BETA-"
+
+[[pages]]
+path = "pages/module_pages/denovo_lfq_DDA_HCD.py"
+name = "De Novo - DDA HCD -BETA-"

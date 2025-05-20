@@ -14,6 +14,14 @@ import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
+from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
+from proteobench.io.params.instanovo import extract_params as extract_params_instanovo
+from proteobench.io.params.casanovo import extract_params as extract_params_casanovo
+from proteobench.io.params.deepnovo import extract_params as extract_params_deepnovo
+from proteobench.io.params.pihelixnovo import extract_params as extract_params_pihelixnovo
+from proteobench.io.params.piprimenovo import extract_params as extract_params_piprimenovo
+from proteobench.io.params.pointnovo import extract_params as extract_params_pointnovo
+
 from proteobench.datapoint.quant_datapoint import (
     QuantDatapoint,
     filter_df_numquant_epsilon,

@@ -10,17 +10,17 @@ Here we provide a comprehensive overview of how to set up a new module in Proteo
 Terms
 =====
 
-We suggest to understand the following terms as they are crucial components:
+The following terms capture the crucial components:
 
-    **Module**: All code and definitions for creating and comparing
-    benchmarks of a new data type.
+   *Module*: All code and definitions for creating and comparing
+   benchmarks of a new data type.
 
-    **Intermediate data structure** (`DataFrame`): Data structure needed for the
-    calculation of the `datapoint`. It contains
-    the transformed and annotated data of an uploaded data file.
+   *Intermediate data structure* (:class:`DataFrame`): Data structure needed for the
+   calculation of the ``datapoint``, e.g. :class:`QuantDatapoint`. It contains
+   the transformed and annotated data of an uploaded data file.
 
-    **Datapoint**: Metadata and benchmarking metrics for a given data set. A `datapoint`
-    is the data needed for the benchmarking and should also be represented by a json object.
+   *Datapoint*: Metadata and benchmarking metrics for a given data set. A ``datapoint``, e.g. :class:`QuantDatapoint`,
+   is the data needed for the benchmarking and should also be represented by a json object.
 
 Naming convention
 =================
@@ -37,24 +37,38 @@ The modules are located in the
 directory. We separated the benchmarking modules into a different steps
 that allow for a more modular and portable implementation.
 
-**Backend**
+Backend
+------   
 
 Each module implementation should contain the following classes:
 
-1. :class:`~proteobench.modules.template.module.Module` contains the main functions reading the and processing the uploaded data set, generating the _intermediate_ metric structure and creating the _datapoint_, as well as adding it to our collection of _datapoints_.
-2. :class:`~proteobench.modules.template.parse.ParseInputs` interfaces with the Streamlit interface providing formatting parameter definitions to create a standardized format from the uploaded files with respect to the given file format (e.g. MaxQuant output file)
-3. :class:`~proteobench.modules.template.datapoint.Datapoint` is the data structure of :class:`Datapoint`. It contains data set properties from the acquisition and processing (e.g. used peptide fdr) and functions to calculate the benchmarking metrics.
-4. :class:`~proteobench.modules.template.plot.PlotDataPoint` are the functions to visualize the benchmarking metrics from the data points.
-5. :class:`~proteobench.modules.template.parse.ParseInputs` contains the functions to parse the uploaded data files into the _intermediate_ metric structure. The input file parameters should be defined in the toml file like `proteobench/modules/template/io_parse_settings/parse_settings_format1.toml <https://github.com/Proteobench/ProteoBench/blob/main/proteobench/modules/template/io_parse_settings/parse_settings_format1.toml>`\_.
+1. :class:`~proteobench.modules.template.module.Module` contains the main functions reading 
+   the and processing the uploaded data set, generating the *intermediate* metric structure
+   and creating the ``datapoint``, as well as adding it to our collection of ``datapoints``.
+2. :class:`~proteobench.modules.template.parse.ParseInputs` interfaces with the Streamlit 
+   interface providing formatting parameter definitions to create a standardized format 
+   from the uploaded files with respect to the given file format (e.g. MaxQuant output file)
+3. :class:`~proteobench.modules.template.datapoint.Datapoint` is the data structure of 
+   :class:`Datapoint`. It contains data set properties from the acquisition and processing 
+   (e.g. used peptide fdr) and functions to calculate the benchmarking metrics.
+4. :class:`~proteobench.modules.template.plot.PlotDataPoint` are the functions to visualize
+   the benchmarking metrics from the data points.
+5. :class:`~proteobench.modules.template.parse.ParseInputs` contains the functions to 
+   parse the uploaded data files into the *intermediate* metric structure. The input file
+   parameters should be defined in the toml file like 
+   :file:`proteobench/modules/template/io_parse_settings/parse_settings_toolname.toml`,
+   for example `parse_settings_alphadia <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral/parse_settings_alphadia.toml>`_.
 
-**Web interface**
+Web interface
+-------------
 
 The web interface is written in Streamlit. Each module gets assigned a specific "page".
 There are only few changes necessary as the main calculations are done in
 
 :class:`~webinterface.pages.TEMPLATE.StreamlitUI` contains the functions to create the web interface for the module.
 
-**Relevant functions**
+Relevant functions
+-----------------
 
 :func:`~webinterface.pages.TEMPLATE.StreamlitUI.generate_input_field` creates the input fields for the metadate and the
 input file format and type. They are given by in the `proteobench/modules/template/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/template/io_parse_settings>`_ folder,
@@ -66,9 +80,10 @@ to show the respective figures with the right metadata.
 
 :class:`webinterface.pages.TEMPLATE.WebpageTexts` contains the text for the different parts of the web interface.
 
-Change the text and the field names accordingly
+Change the text and the field names accordingly.
 
-**Documentation**
+Documentation
+-------------
 
 We strongly recommend to keep documenting your code. The documentation is written in Sphinx and
 can be found in the `docs <https://github.com/Proteobench/ProteoBench/tree/main/docs>`_ folder.
@@ -120,6 +135,6 @@ meant to be exhaustive, but it should cover the most important steps.
 7. Copy `webinterface.pages.TEMPLATE <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/TEMPLATE>`_
    to `webinterface.pages.my_module` and modify the functions to display the figures. Adapt the code
    according to ensure loading the right figures and data points.
-8. Copy :doc:`api/proteobench/template` to
+8. Copy ``api/proteobench/template`` to
    `developer-guide/api/proteobench/my_module` and modify the documentation accordingly. Add entries
    to :doc:`api/proteobench/modules/index` and :doc:`api/webinterface/index`

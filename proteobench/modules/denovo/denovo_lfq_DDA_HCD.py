@@ -121,6 +121,14 @@ class DDAHCDDeNovoModule(DeNovoModule):
         except Exception as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing: {msg}") from e
 
+        try:
+            standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        except KeyError as e:
+            raise ConvertStandardFormatError("Error converting to standard format, key missing.") from e
+        except Exception as e:
+            raise ConvertStandardFormatError("Error converting to standard format.") from e
+
+
         # Instantiate de novo scores
 
 

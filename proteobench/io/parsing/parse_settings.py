@@ -307,6 +307,11 @@ class ParseModificationSettings:
             return df
 
 
+class ParseSettingsDeNovo:
+    def __init__(self):
+        pass
+
+
 MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
@@ -314,4 +319,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
+    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo
 }

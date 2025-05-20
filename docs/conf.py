@@ -1,6 +1,7 @@
 """
 Configuration file for the Sphinx documentation builder.
 """
+import os
 
 import proteobench
 
@@ -59,3 +60,54 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "plotly": ("https://plotly.com/python-api-reference/", None),
 }
+
+# -- Setup for sphinx-apidoc -------------------------------------------------
+
+# sphinx-apidoc needs to be called manually if Sphinx is running there.
+# https://github.com/readthedocs/readthedocs.org/issues/1139
+
+if os.environ.get("READTHEDOCS") == "True":
+    from pathlib import Path
+
+    PROJECT_ROOT = Path(__file__).parent.parent
+    PACKAGE_ROOT = PROJECT_ROOT / "proteobench"
+
+    def run_apidoc(_):
+        from sphinx.ext import apidoc
+
+        apidoc.main(
+            [
+                "--force",
+                "--implicit-namespaces",
+                "--module-first",
+                "--separate",
+                "-o",
+                str(PROJECT_ROOT / "docs" / "api" / 'proteobench'),
+                str(PACKAGE_ROOT),
+                str(PACKAGE_ROOT / "*.c"),
+                str(PACKAGE_ROOT / "*.so"),
+            ]
+        )
+        
+    APP_ROOT = PROJECT_ROOT / "webinterface"
+        
+    def run_apidoc_webinterface(_):
+        from sphinx.ext import apidoc
+
+        apidoc.main(
+            [
+                "--force",
+                "--implicit-namespaces",
+                "--module-first",
+                "--separate",
+                "-o",
+                str(PROJECT_ROOT / "docs" / "api" / 'webinterface'),
+                str(APP_ROOT),
+                str(APP_ROOT / "*.c"),
+                str(APP_ROOT / "*.so"),
+            ]
+        )
+
+    def setup(app):
+        app.connect("builder-inited", run_apidoc)
+        app.connect("builder-inited", run_apidoc_webinterface)

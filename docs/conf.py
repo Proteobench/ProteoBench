@@ -19,6 +19,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
+    "sphinx_new_tab_link",
+    "sphinx_copybutton"
 ]
 
 source_suffix = [".rst"]

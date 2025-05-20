@@ -88,6 +88,9 @@ if os.environ.get("READTHEDOCS") == "True":
                 str(PACKAGE_ROOT / "*.so"),
             ]
         )
+        
+    # webinterface is not a package, so it's not in the list of installed packages
+    # autodoc cannot build the documentation for it.
 
     APP_ROOT = PROJECT_ROOT / "webinterface"
 
@@ -107,7 +110,7 @@ if os.environ.get("READTHEDOCS") == "True":
                 str(APP_ROOT / "*.so"),
             ]
         )
-
+    
     def setup(app):
         app.connect("builder-inited", run_apidoc)
-        app.connect("builder-inited", run_apidoc_webinterface)
+        # app.connect("builder-inited", run_apidoc_webinterface)

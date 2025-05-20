@@ -1,0 +1,86 @@
+"""
+De Novo Module DDA-HCD spectra.
+"""
+
+from __future__ import annotations
+
+import pandas as pd
+from pandas import DataFrame
+
+from proteobench.modules.constants import MODULE_SETTINGS_DIRS
+from proteobench.modules.denovo.denovo_base import DeNovoModule
+# from proteobench.score.quant.quantscores import QuantScores
+
+class DDAHCDDeNovoModule(DeNovoModule):
+    """
+    De Novo Module.
+    """
+
+    module_id = 'denovo_lfq_dda_hcd'
+
+    def __init__(
+        self,
+        token: str,
+        proteobot_repo_name: str = "Proteobot/Results_denovo_lfq_dda_hcd",
+        proteobench_repo_name: str = "Proteobench/Results_denovo_lfq_dda_hcd",
+    ):
+        """
+        Initialize the DDA Quantification Module for Ion level Quantification.
+
+        Parameters
+        ----------
+        token : str
+            GitHub token for the user.
+        proteobot_repo_name : str, optional
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DDA".
+        proteobench_repo_name : str, optional
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DDA".
+        """
+
+        super().__init__(
+            token,
+            proteobot_repo_name=proteobot_repo_name,
+            proteobench_repo_name=proteobench_repo_name,
+            parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
+            module_id=self.module_id,
+        )
+
+    def is_implemented(self) -> bool:
+        """
+        Return whether the module is fully implemented.
+
+        Returns
+        -------
+        bool
+            Always returns True in this implementation.
+        """
+        return False
+    
+    def benchmarking(
+        self,
+        input_file_loc: any,
+        input_format: str,
+        user_input: dict,
+        all_datapoints: pd.DataFrame  
+    ) -> tuple[DataFrame, DataFrame, DataFrame]:
+        """
+        Main workflow of the module. Used to benchmark workflow results.
+
+        Parameters
+        ----------
+        input_file_loc : any
+            Path to the workflow output file.
+        input_format : str
+            Format of the workflow output file.
+        user_input : dict
+            User provided parameters for plotting.
+        all_datapoints : pd.DataFrame
+            DataFrame containing all datapoints from the proteobench repo.
+
+        Returns
+        -------
+        tuple[DataFrame, DataFrame, DataFrame]
+            Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
+        """
+        # TODO
+        return

@@ -7,6 +7,29 @@ import zipfile
 import io
 import os
 import json
+import toml
+
+from collections import defaultdict
+
+from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
+from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import DIAQuantIonModulediaPASEF
+from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import DIAQuantIonModulediaSC
+from proteobench.modules.quant.quant_lfq_peptidoform_DDA import DDAQuantPeptidoformModule
+from proteobench.modules.quant.quant_lfq_peptidoform_DIA import DIAQuantPeptidoformModule
+
+# Dictionary mapping module name strings to their classes
+MODULE_CLASSES = {
+    "DDAQuantIonModule": DDAQuantIonModule,
+    "DIAQuantIonModule" : DIAQuantIonModule,
+    "DIAQuantIonModuleAstral" : DIAQuantIonModuleAstral,
+    "DIAQuantIonModulediaPASEF" : DIAQuantIonModulediaPASEF,
+    "DIAQuantIonModulediaSC" : DIAQuantIonModulediaSC,
+    "DDAQuantPeptidoformModule" : DDAQuantPeptidoformModule,
+    "DIAQuantPeptidoformModule" : DIAQuantPeptidoformModule,
+}
+
 
 def get_merged_json(
         outfile_name="combined_results.json",
@@ -114,3 +137,48 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
             extracted_dirs.append(extract_dir)
 
     return extracted_dirs
+
+def make_submission(token=toml.load("../webinterface/.streamlit/secrets.toml")["gh"]["token"], module_name=""):
+    for submission_settings in submission_files:
+        # TODO change to the correct module
+        # Dictionary mapping module name strings to their classes
+        if module_name not in MODULE_CLASSES:
+            raise ValueError(f"Module {module_name} not recognized. Available modules: {list(MODULE_CLASSES.keys())}")
+
+        module_class = MODULE_CLASSES[module_name]
+        module_obj = module_class(token="")
+        results_df = module_obj.obtain_all_data_points(all_datapoints=None)
+
+        param_file = submission_settings["param_file"]
+        input_file = submission_settings["input_file"]
+        input_type = submission_settings["input_type"]
+        default_cutoff_min_prec = submission_settings["default_cutoff_min_prec"]
+        user_comments = submission_settings["user_comments"]
+
+        user_config = defaultdict(lambda: "")
+
+        results_intermediates, results_df_new, parsed_input = module_obj.benchmarking(
+            input_file,
+            input_type,
+            user_config,
+            results_df,
+            default_cutoff_min_prec=default_cutoff_min_prec,
+        )
+
+        results_df_new.tail(5)
+
+        try:
+            param_obj = module_obj.load_params_file(
+                [param_file], input_type
+            )
+        except:
+            continue
+
+        pr_url = module_obj.clone_pr(
+            results_df_new,
+            param_obj,
+            remote_git="",
+            submission_comments=user_comments,
+        )
+
+        return pr_url

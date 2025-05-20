@@ -311,3 +311,59 @@ class PlotDataPoint:
         )
 
         return fig
+
+    @staticmethod
+    def plot_ma_plot(result_df: pd.DataFrame, species_ratio: Dict[str, Dict[str, str]]) -> go.Figure:
+        """
+        Plot a MA plot using Plotly.
+
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            The results DataFrame containing the MA plot data.
+        species_ratio : Dict[str, Dict[str, str]]
+            A dictionary mapping species to their respective colors and ratios.
+
+        Returns
+        -------
+        go.Figure
+            A Plotly figure object representing the MA plot.
+        """
+        color_map = {species: data["color"] for species, data in species_ratio.items()}
+
+        # take mean of log intensity mean a and log intensity mean b
+        result_df["logIntensityMean"] = (
+            result_df["log_Intensity_mean_A"] + result_df["log_Intensity_mean_B"]
+        ) / 2
+
+        fig = px.scatter(
+            result_df,
+            x="log2_A_vs_B",
+            y="logIntensityMean",
+            color="species",
+            color_discrete_map=color_map,
+            labels={
+                "log2_A_vs_B": "log2_FC(A:B)",
+                "logIntensityMean": "log2_Intensity_Mean",
+                "species": "Organism"
+            },
+            title="log2FC vs logIntensityMean",
+            size_max=10,
+            opacity=0.6
+        )
+
+        # Add vertical lines as shapes
+        fig.add_shape(type="line", x0=0, x1=0, y0=result_df["logIntensityMean"].min(), y1=result_df["logIntensityMean"].max(),
+                    line=dict(color="green", dash="dash"), xref='x', yref='y', name="log2FC = 0")
+        fig.add_shape(type="line", x0=1, x1=1, y0=result_df["logIntensityMean"].min(), y1=result_df["logIntensityMean"].max(),
+                    line=dict(color="red", dash="dash"), xref='x', yref='y', name="log2FC = 1")
+        fig.add_shape(type="line", x0=-2, x1=-2, y0=result_df["logIntensityMean"].min(), y1=result_df["logIntensityMean"].max(),
+                    line=dict(color="blue", dash="dash"), xref='x', yref='y', name="log2FC = -2")
+
+        # To show vertical lines in the legend, add dummy traces
+        fig.add_trace(go.Scatter(x=[None], y=[None], mode='lines', line=dict(color='green', dash='dash'), name='log2FC = 0'))
+        fig.add_trace(go.Scatter(x=[None], y=[None], mode='lines', line=dict(color='red', dash='dash'), name='log2FC = 1'))
+        fig.add_trace(go.Scatter(x=[None], y=[None], mode='lines', line=dict(color='blue', dash='dash'), name='log2FC = -2'))
+
+        fig.update_traces(marker=dict(size=6))  # Marker size approx. equivalent to s=10 in seaborn
+        return fig

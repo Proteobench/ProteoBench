@@ -1167,11 +1167,16 @@ class QuantUIObjects:
                 st.session_state[self.variables_quant.result_perf], parse_settings.species_expected_ratio()
             )
             fig_CV = PlotDataPoint.plot_CV_violinplot(st.session_state[self.variables_quant.result_perf])
+            fig_MA = PlotDataPoint.plot_ma_plot(
+                st.session_state[self.variables_quant.result_perf],
+                parse_settings.species_expected_ratio(),
+            )
             st.session_state[self.variables_quant.fig_cv] = fig_CV
             st.session_state[self.variables_quant.fig_logfc] = fig_logfc
         else:
             fig_logfc = st.session_state[self.variables_quant.fig_logfc]
             fig_CV = st.session_state[self.variables_quant.fig_cv]
+            fig_MA = st.session_state[self.variables_quant.fig_ma]
 
         if self.variables_quant.first_new_plot:
             col1, col2 = st.columns(2)
@@ -1190,6 +1195,19 @@ class QuantUIObjects:
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
+
+            col1.markdown("---")  # optional horizontal separator
+
+            col1.subheader("MA plot")
+            col1.markdown(
+                """
+                The log-fold plots to the left depict the distribution of the peptidoform ion ratios in the x-axis as a function of their intensity in the y-axis.
+                """
+            )
+            # Example: plot another figure or add any other Streamlit element
+            #st.plotly_chart(fig_additional, use_container_width=True)
+            col1.plotly_chart(fig_MA, use_container_width=True)
+
         else:
             pass
 

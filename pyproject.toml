@@ -21,6 +21,7 @@ dependencies = [
   "openpyxl",
   "numpy>1.24.4",
   "plotly",
+  "upsetplot",
   "streamlit>=1.31",
   "streamlit_extras",
   "streamlit-plotly-events",

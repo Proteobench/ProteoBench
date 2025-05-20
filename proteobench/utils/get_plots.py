@@ -5,7 +5,7 @@ from proteobench.plotting import plot_quant
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
 
-def make_plots(hash_vis_dirs, intermediate_hash, filtered_df):
+def make_indepth_plots(hash_vis_dirs, intermediate_hash, filtered_df):
     """
     hash_vis_dirs dict 
         dict[hash] = Path

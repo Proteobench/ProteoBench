@@ -21,7 +21,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx_new_tab_link",
-    "sphinx_copybutton"
+    "sphinx_copybutton",
 ]
 
 source_suffix = [".rst"]
@@ -82,15 +82,15 @@ if os.environ.get("READTHEDOCS") == "True":
                 "--module-first",
                 "--separate",
                 "-o",
-                str(PROJECT_ROOT / "docs" / "api" / 'proteobench'),
+                str(PROJECT_ROOT / "docs" / "developer-guide" / "api" / "proteobench"),
                 str(PACKAGE_ROOT),
                 str(PACKAGE_ROOT / "*.c"),
                 str(PACKAGE_ROOT / "*.so"),
             ]
         )
-        
+
     APP_ROOT = PROJECT_ROOT / "webinterface"
-        
+
     def run_apidoc_webinterface(_):
         from sphinx.ext import apidoc
 
@@ -101,7 +101,7 @@ if os.environ.get("READTHEDOCS") == "True":
                 "--module-first",
                 "--separate",
                 "-o",
-                str(PROJECT_ROOT / "docs" / "api" / 'webinterface'),
+                str(PROJECT_ROOT / "docs" / "developer-guide" / "api" / "webinterface"),
                 str(APP_ROOT),
                 str(APP_ROOT / "*.c"),
                 str(APP_ROOT / "*.so"),

@@ -295,7 +295,7 @@ class ParseModificationSettings:
                 df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
             except KeyError as e:
                 raise KeyError(
-                    "Not all columns required for making the ion are available."
+                    "Not all columns required for making the precursor ion are available."
                     " Is the charge available in the input file?"
                 ) from e
 

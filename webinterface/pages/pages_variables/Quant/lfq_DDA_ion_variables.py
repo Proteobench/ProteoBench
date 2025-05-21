@@ -70,7 +70,7 @@ class VariablesDDAQuant:
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
-    title: str = "DDA Ion quantification"
+    title: str = "DDA Precursor quantification"
     prefix_params: str = "lfq_ion_dda_quant_"
     params_json_dict: str = "params_json_dict_lfq_ion_dda_quant"
     params_file_dict: str = "params_file_dict_lfq_ion_dda_quant"

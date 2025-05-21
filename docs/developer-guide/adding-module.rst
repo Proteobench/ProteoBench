@@ -62,16 +62,22 @@ certain classes and do the following steps:
    :file:`proteobench/io/parse/io_parse_settings/Quant/lfq/DDA/ion/`,
    for example
    `parse_settings_alphadia <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral/parse_settings_alphadia.toml>`_.
+   New data analysis software has to be added to :func:`~proteobench.io.parsing.parse_ion.load_input_file`
+   and the settings are parsed by :class:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant`,
+   which most important method is :meth:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant.convert_to_standard_format`.
 4. :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint` is the data structure 
    (as a dataclass) of :class:`DataPoint` for quant modules. It contains data set properties 
    from the acquisition and processing 
    (e.g. used peptide fdr).
 5. :class:`~proteobench.plotting.plot_quant.PlotDataPoint` is the class with methods to visualize
    the benchmarking metrics from the ``DataPoints``.
-6. Functions in :file:`proteobench/io/params` provide the functions used to parse
+6. Functionality for calculating score can be found in
+   :class:`~proteobench/score/quant/quantscores.QuantScores`, which also generates the 
+   ``intermediate`` output.
+7. Functions in :file:`proteobench/io/params` provide the functions used to parse
    parameter setting files for data analysis tools
    (`open on GitHub <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_)
-7. The possibility to adapt the parsed results before submission is customized based on
+8. The possibility to adapt the parsed results before submission is customized based on
    a module specific json file in
    `proteobench/io/params/json/Quant <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/params/json/Quant>`_
 

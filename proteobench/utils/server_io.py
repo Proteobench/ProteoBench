@@ -72,8 +72,9 @@ def get_merged_json(
     df = pd.json_normalize(combined_json)
     return df
 
+
 def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",output_directory="extracted_files"):
-    extracted_dirs = []
+    hash_vis_dir = {}
     
     # Extract the hash list from the DataFrame
     hash_list = df["intermediate_hash"].tolist()
@@ -136,9 +137,9 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
             # Cleanup downloaded .zip file
             os.remove(zip_filename)
 
-            extracted_dirs.append(extract_dir)
+            hash_vis_dir[folder] = extract_dir
 
-    return extracted_dirs
+    return hash_vis_dir
 
 def make_submission(token="", module_name=""):
     for submission_settings in submission_files:

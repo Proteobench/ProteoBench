@@ -84,11 +84,11 @@ Table 2 provides an overview of the required input files for public submission. 
 |Tool|Input file|Parameter File|
 |---------|-----|-|
 |AlphaDIA|precursors.tsv|log.txt|
-|DIA-NN|*_report.tsv|*report.log.txt|
+|DIA-NN|*_report.tsv or *_report.parquet|*report.log.txt|
 |FragPipe|*_report.tsv|fragpipe.workflow|
 |MaxDIA|evidence.txt|mqpar.xml|
 |Spectronaut|*.tsv|*.txt|
-|PEAKS|lfq.dia.peptides.csv|parameters.txt|
+|PEAKS|lfq.dia.features.csv|parameters.txt|
 
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
@@ -126,12 +126,20 @@ By default, MaxDIA uses a contaminants-only fasta file that is located in the so
 
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
-### [PEAKS](https://www.bioinfor.com//) (work in progress)
-When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that Sample 1 -> 3 are Condition "A" and Sample 4 -> 6 are condition "B".
-Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DIA.
+### [PEAKS](https://www.bioinfor.com//)
+When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS, so they match the exact .RAW file names. 
+More specifically, 
+LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
+LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
+LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
+LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
+LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
+LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
+
+Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
-In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide FDR and Protein Group FDR are set to 1%. 
-Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Peptide CSV" from the Label Free Quantification Exports in the "Export" tab. 
+In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Precursor or Peptide FDR and Protein Group FDR are set to 1%. 
+Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
 
 #### Troubleshooting: 
 

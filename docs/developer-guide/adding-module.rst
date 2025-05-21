@@ -53,15 +53,17 @@ certain classes and do the following steps:
    method, initializing it with custom parameters in the ``__init__`` method.
 2. Functions in :file:`proteobench/io/parsing/parse_ion.py` provide the functions used to parse
    precursor (`open on GitHub <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_)
-3. :file:`~proteobench/io/parsing.io_parse_settings/parse_settings_file.toml` links the settings to 
-   parse the uploaded data files into the **intermediate** metric structure used by
+3. :file:`proteobench/io/parsing/io_parse_settings/parse_settings_file.toml`
+   `(link) <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/parse_settings_file.toml>`_
+   links the settings to parse the uploaded data files into the **intermediate** metric 
+   structure used by
    :file:`proteobench/io/parsing/parse_ion.py` per module. The settings file 
    parameters should be defined in the toml file in a folder for a module 
    :file:`proteobench/io/parse/io_parse_settings/Quant/lfq/DDA/ion/`,
    for example
    `parse_settings_alphadia <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral/parse_settings_alphadia.toml>`_.
 4. :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint` is the data structure 
-   (as a dataclass)of :class:`DataPoint` for quant modules. It contains data set properties 
+   (as a dataclass) of :class:`DataPoint` for quant modules. It contains data set properties 
    from the acquisition and processing 
    (e.g. used peptide fdr).
 5. :class:`~proteobench.plotting.plot_quant.PlotDataPoint` is the class with methods to visualize

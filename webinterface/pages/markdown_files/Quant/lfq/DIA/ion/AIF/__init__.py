@@ -1,3 +1,3 @@
 """
-Markdown files for the AIF DIA ion page.
+Markdown files for the AIF DIA precursor page.
 """

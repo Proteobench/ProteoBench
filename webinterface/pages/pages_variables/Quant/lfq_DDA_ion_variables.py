@@ -22,6 +22,7 @@ class VariablesDDAQuant:
     fig_logfc: str = "fig_logfc"
     fig_metric: str = "fig_metric"
     fig_cv: str = "fig_CV_violinplot"
+    fig_ma_plot: str = "fig_ma_plot"
     result_perf: str = "result_perf"
     meta_data: str = "meta_data"
     input_df: str = "input_df"
@@ -69,7 +70,7 @@ class VariablesDDAQuant:
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
-    title: str = "DDA Ion quantification"
+    title: str = "DDA Precursor quantification"
     prefix_params: str = "lfq_ion_dda_quant_"
     params_json_dict: str = "params_json_dict_lfq_ion_dda_quant"
     params_file_dict: str = "params_file_dict_lfq_ion_dda_quant"

@@ -20,7 +20,7 @@ def proteobench_page_config(page_layout="wide"):
     try:
         st.set_page_config(
             page_title="Proteobench",
-            page_icon=":rocket:",
+            page_icon=":balloon:",
             layout=page_layout,
             initial_sidebar_state="expanded",
         )

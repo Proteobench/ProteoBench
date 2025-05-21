@@ -29,6 +29,9 @@ New modules and classes should be given descriptive names, and fit into existing
 Go from general to specific properties, and make clear what distinguishes the module 
 from existing ones, e.g. :class:`DIAQuantPeptidoformModule`.
 
+The modules are stored in the Python package ``proteobench`` in the
+``modules`` subpackage: `proteobench.modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/quant/>`_. 
+
 Programmatic structure
 ======================
 
@@ -40,75 +43,86 @@ that allow for a more modular and portable implementation.
 Backend
 ------   
 
-Each module implementation should contain the following classes:
+We make an example of an ``quant`` module implementation, where you should use or extend
+certain classes and do the following steps:
 
-1. :class:`~proteobench.modules.template.module.Module` contains the main functions reading 
+1. :class:`~proteobench.modules.quant.quant_base_module.QuantModule` contains the main functions reading 
    the and processing the uploaded data set, generating the *intermediate* metric structure
    and creating the ``datapoint``, as well as adding it to our collection of ``datapoints``.
-2. :class:`~proteobench.modules.template.parse.ParseInputs` interfaces with the Streamlit 
-   interface providing formatting parameter definitions to create a standardized format 
-   from the uploaded files with respect to the given file format (e.g. MaxQuant output file)
-3. :class:`~proteobench.modules.template.datapoint.Datapoint` is the data structure of 
-   :class:`Datapoint`. It contains data set properties from the acquisition and processing 
-   (e.g. used peptide fdr) and functions to calculate the benchmarking metrics.
-4. :class:`~proteobench.modules.template.plot.PlotDataPoint` are the functions to visualize
-   the benchmarking metrics from the data points.
+   You can subclass it and implement the ``benchmarking`` method and the ``is_implemented``
+   method, initializing it with custom parameters in the ``__init__`` method.
+2. Functions in :file:`proteobench/io/parsing/parse_ion.py` provide the functions used to parse
+   precursor (`open on GitHub <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_)
+3. :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint` is the data structure 
+   (as a dataclass)of :class:`DataPoint` for quant modules. It contains data set properties 
+   from the acquisition and processing 
+   (e.g. used peptide fdr).
+4. :class:`~proteobench.plotting.plot_quant.PlotDataPoint` is the class with methods to visualize
+   the benchmarking metrics from the ``DataPoints``.
 5. :class:`~proteobench.modules.template.parse.ParseInputs` contains the functions to 
    parse the uploaded data files into the *intermediate* metric structure. The input file
    parameters should be defined in the toml file like 
    :file:`proteobench/modules/template/io_parse_settings/parse_settings_toolname.toml`,
    for example `parse_settings_alphadia <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral/parse_settings_alphadia.toml>`_.
+6. Functions in :file:`proteobench/io/params` provide the functions used to parse
+   parameter setting files for data analysis tools 
+   (`open on GitHub <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_)
 
 Web interface
 -------------
 
-The web interface is written in Streamlit. Each module gets assigned a specific "page".
+The web interface is written in Streamlit. Each module gets assigned a specific ``page``.
 There are only few changes necessary as the main calculations are done in
 
-:class:`~webinterface.pages.TEMPLATE.StreamlitUI` contains the functions to create the web interface for the module.
+:class:`~webinterface.pages.base_pages.quant.QuantUIObjects` contains most functionionality to 
+create the web interface for each quantification module.
 
-Relevant functions
------------------
+.. warning::
+   QuantUIObjects should be simplified.
 
-:func:`~webinterface.pages.TEMPLATE.StreamlitUI.generate_input_field` creates the input fields for the metadate and the
+:file:`webinterface.pages.pages_variables` contains files with ``dataclass``\ es for the 
+text for the different modules in the interface.
+
+Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObjects`
+...................................................................................
+
+:meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_input_field` creates the input fields for the metadate and the
 input file format and type. They are given by in the `proteobench/modules/template/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/template/io_parse_settings>`_ folder,
 same as for the backend of the module.
 
-:func:`webinterface.pages.TEMPLATE.StreamlitUI.generate_results` gathers the data from the backend
+:meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_results` gathers the data from the backend
 and displays them in several figures. Here you will need to edit and adapt the code
 to show the respective figures with the right metadata.
 
-:class:`webinterface.pages.TEMPLATE.WebpageTexts` contains the text for the different parts of the web interface.
-
-Change the text and the field names accordingly.
+Change the text and the field names accordingly in the ``dataclass``
+in :file:`webinterface.pages.pages_variables`.
 
 Documentation
 -------------
 
-We strongly recommend to keep documenting your code. The documentation is written in Sphinx and
-can be found in the `docs <https://github.com/Proteobench/ProteoBench/tree/main/docs>`_ folder.
+We strongly recommend to keep documenting your code. The documentation is written in Markdown or richtext
+and can be found in the `docs <https://github.com/Proteobench/ProteoBench/tree/main/docs>`_ folder. We
+use Sphinx and myst-parser to build the website.
 
-1.  `docs/proteobench/modules.rst <https://github.com/Proteobench/ProteoBench/tree/main/docs/proteobench/modules.rst>`_ Here you can add a link to your new module
-2.  `docs/proteobench/template.rst <https://github.com/Proteobench/ProteoBench/tree/main/docs/proteobench/template.rst>`_ This template can be used to creat your own documentation file in reStructuredText (rst) format.
-3.  `docs/webinterface/webinterface.rst <https://github.com/Proteobench/ProteoBench/tree/main/docs/webinterface/webinterface.rst>`_ Here you should add a link to the new page in the web interface.
+1. `docs/proteobench/available-modules <https://github.com/Proteobench/ProteoBench/tree/main/docs/proteobench/available-modules>`_
+   Here you can add a file for your new module, using any of the existing module descriptions as a template.
+2. `API documentation for your module <https://proteobench.readthedocs.io/en/latest/developer-guide/api/webinterface/webinterface.pages/#submodulest>`_ 
+   will be added automatically. You can see it on the readthedocs page built specifically for your pull request.
 
-To work on the documentation and get a live preview, install the requirements and run
+To work locally on the documentation and get a live preview, install the requirements and run
 `sphinx-autobuild`:
 
 .. code-block:: sh
 
-    pip install .[docs]
-    sphinx-autobuild  --watch ./ms2rescore ./docs/source/ ./docs/_build/html/
+    pip install '.[docs]'
+    # selecting the docs folder to watch for changes
+    sphinx-autobuild  --watch ./docs ./docs/source/ ./docs/_build/html/
 
 Then browse to http://localhost:8000 to watch the live preview.
 
-.. note::
 
-    Ensure to have changed all occurrences of ``template`` to the name of your new module.
-
-
-Checklist
-=========
+Checklist (outdated)
+===================
 
 This checklist is meant to help you add a new module to ProteoBench. It is not
 meant to be exhaustive, but it should cover the most important steps.

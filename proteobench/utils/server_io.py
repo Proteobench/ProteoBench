@@ -140,7 +140,7 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
 
     return extracted_dirs
 
-def make_submission(token=toml.load("../../webinterface/.streamlit/secrets.toml")["gh"]["token"], module_name=""):
+def make_submission(token="", module_name=""):
     for submission_settings in submission_files:
         # TODO change to the correct module
         # Dictionary mapping module name strings to their classes

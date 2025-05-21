@@ -22,6 +22,7 @@ class VariablesDIAQuant:
     fig_logfc: str = "fig_logfc_dia_quant"
     fig_metric: str = "fig_metric_dia_quant"
     fig_cv: str = "fig_CV_violinplot_dia_quant"
+    fig_ma_plot: str = "fig_ma_plot_dia_quant"
     result_perf: str = "result_perf_dia_quant"
     meta_data: str = "meta_data_dia_quant"
     input_df: str = "input_df_dia_quant"

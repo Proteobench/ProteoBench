@@ -22,6 +22,7 @@ class VariablesDDAQuant:
     fig_logfc: str = "fig_logfc"
     fig_metric: str = "fig_metric"
     fig_cv: str = "fig_CV_violinplot"
+    fig_ma_plot: str = "fig_ma_plot"
     result_perf: str = "result_perf"
     meta_data: str = "meta_data"
     input_df: str = "input_df"

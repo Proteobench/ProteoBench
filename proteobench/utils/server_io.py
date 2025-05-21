@@ -32,8 +32,9 @@ MODULE_CLASSES = {
 
 
 def get_merged_json(
+        repo_url = "https://github.com/Proteobench/Results_quant_ion_DDA/archive/refs/heads/main.zip",
+        write_to_file=False,
         outfile_name="combined_results.json",
-        repo_url = "https://github.com/Proteobench/Results_quant_ion_DDA/archive/refs/heads/main.zip"
     ):
     # Download ZIP archive from GitHub
     response = requests.get(repo_url)
@@ -61,9 +62,10 @@ def get_merged_json(
                     except json.JSONDecodeError as e:
                         print(f"Error reading {file_path}: {e}")
 
-    # Write combined JSON to a single output file (optional)
-    with open(outfile_name, "w", encoding="utf-8") as out_file:
-        json.dump(combined_json, out_file, ensure_ascii=False, indent=2)
+    if write_to_file:
+        # Write combined JSON to a single output file (optional)
+        with open(outfile_name, "w", encoding="utf-8") as out_file:
+            json.dump(combined_json, out_file, ensure_ascii=False, indent=2)
 
     print(f"Combined {len(combined_json)} JSON files into 'combined_results.json'.")
 
@@ -138,7 +140,7 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
 
     return extracted_dirs
 
-def make_submission(token=toml.load("../webinterface/.streamlit/secrets.toml")["gh"]["token"], module_name=""):
+def make_submission(token=toml.load("../../webinterface/.streamlit/secrets.toml")["gh"]["token"], module_name=""):
     for submission_settings in submission_files:
         # TODO change to the correct module
         # Dictionary mapping module name strings to their classes

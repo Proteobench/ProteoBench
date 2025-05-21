@@ -74,7 +74,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from DIA-NN, AlphaDIA, FragPipe, MaxDIA and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from AlphaDIA, DIA-NN, FragPipe, MaxDIA, PEAKS and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
 `I really want to upload it` will appear to trigger the submission.
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
@@ -90,7 +90,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |PEAKS|lfq.dia.features.csv|parameters.txt|
 
 
-After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
+After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `DIANN_20250505_083341`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 
 ## Important Tool-specific settings
 
@@ -126,8 +126,7 @@ By default, MaxDIA uses a contaminants-only fasta file that is located in the so
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
 ### [PEAKS](https://www.bioinfor.com//)
-When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS, so they match the exact .RAW file names. 
-More specifically, 
+When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS (Sample 1->6), so they match exactly with the .RAW file names:
 LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
 LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
 LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
@@ -154,12 +153,12 @@ If you do not use a tool that is compatible with ProteoBench, you can upload a t
 - Proteins: column containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
 - Charge: Charge state of measured peptide ions
 - Modified sequence: column containing the sequences and the localised modifications in the [ProForma standard](https://www.psidev.info/proforma) format. 
-- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01: Quantitative column sample 1
-- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02: Quantitative column sample 2
-- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03: Quantitative column sample 3
-- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01: Quantitative column sample 4
-- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02: Quantitative column sample 5
-- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+- LFQ_Astral_DIA_15min_50ng_Condition_A_REP1: Quantitative column sample 1
+- LFQ_Astral_DIA_15min_50ng_Condition_A_REP2: Quantitative column sample 2
+- LFQ_Astral_DIA_15min_50ng_Condition_A_REP3: Quantitative column sample 3
+- LFQ_Astral_DIA_15min_50ng_Condition_B_REP1: Quantitative column sample 4
+- LFQ_Astral_DIA_15min_50ng_Condition_B_REP2: Quantitative column sample 5
+- LFQ_Astral_DIA_15min_50ng_Condition_B_REP3: Quantitative column sample 6
 
 the table must not contain non-validated ions. If you have any issue, contact us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
 
@@ -222,7 +221,7 @@ After uploading an output file, a table is generated that contains the following
 - standard deviations calculated for the intensity values in condition A and B
 - coefficient of variation (CV) for condition A and B
 - differences of the mean log2-transformed values between condition A and B
-- MS signal from the input table ("abundance_DDA_Condition_A_Sample_Alpha_01" to "abundance_DDA_Condition_B_Sample_Alpha_03")
+- MS signal from the input table ("abundance_DIA_Condition_A_Sample_Alpha_01" to "abundance_DIA_Condition_B_Sample_Alpha_03")
 - Count = number of runs with non-missing values
 - species the sequence matches to
 - unique = TRUE if the sequence is species-specific
@@ -245,7 +244,7 @@ that some important information is missing, please add it in the
 `Comments for submission` field. 
   - software tool name and version
   - search engine name and version (if different from software tool)
-  - FDR threshold for PSM, peptide and protein level
+  - FDR threshold for PSM, precursor, peptide and protein level
   - match between run (or not)
   - Precursor and fragment m/z range
   - precursor and fragment mass tolerance

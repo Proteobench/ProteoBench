@@ -308,8 +308,45 @@ class ParseModificationSettings:
 
 
 class ParseSettingsDeNovo:
-    def __init__(self):
-        pass
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+        self.mapper = parse_settings["mapper"]
+        self.modification_parser = None
+        self.analysis_level = "peptidoform"
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        self.modification_parser = parser
+
+    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+        """
+        Convert a software tool output into a generic format supported by the module.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
+
+        Returns
+        -------
+        tuple[pd.DataFrame, Dict[int, List[str]]]
+            The converted DataFrame and a dictionary mapping replicates to raw data.
+        """
+        # TODO: Add functionality/steps in docstring.
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected de novo tool."
+            )
+
+        df = df.rename(columns=self.mapper, inplace=False)
+
+        # TODO: any transfrormations needed spectrum_id? 
+
+        if self.modification_parser is not None:
+            df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
+
+        if "proforma" in df.columns:
+            df["peptidoform"] = df["proforma"]
+        return df
 
 
 MODULE_TO_CLASS = {

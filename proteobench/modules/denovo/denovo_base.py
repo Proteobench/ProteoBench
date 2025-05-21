@@ -29,7 +29,7 @@ from proteobench.datapoint.quant_datapoint import (
 )
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_denovo import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
 class DeNovoModule:
@@ -68,7 +68,7 @@ class DeNovoModule:
         module_id: str,
     ):
         """
-        Initialize the QuantModule with GitHub repo and settings.
+        Initialize the DeNovoModule with GitHub repo and settings.
 
         Parameters
         ----------
@@ -212,7 +212,7 @@ class DeNovoModule:
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_prec: int = 3, # TODO: remove? 
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -242,13 +242,13 @@ class DeNovoModule:
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        standard_format = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data
         quant_score = QuantScores(
             self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        intermediate_metric_structure = quant_score.generate_intermediate(standard_format)
 
         current_datapoint = QuantDatapoint.generate_datapoint(
             intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec

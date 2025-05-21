@@ -1,0 +1,12 @@
+[mapper]
+"spectra_ref" = "spectrum_id" # might change to scan_id?
+"search_engine_score[1]" = "score"
+"opt_ms_run[1]_aa_scores" = "aa_scores" # Optional (not all tools do have)
+
+[modifications_parser]
+"parse_column" = "sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\(([^)]+)\\)"
+"modification_dict" = {"(+57.02)" = "[UNIMOD:4]", "(+15.99)" = "[UNIMOD:15]", "(+.98)" = "[UNIMOD:7]", "(+42.01)" = "[UNIMOD:1]", "(+43.00)" = "[UNIMOD:5]", "(-17.02)" = "[UNIMOD:385]"}

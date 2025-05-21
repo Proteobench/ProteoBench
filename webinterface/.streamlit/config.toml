@@ -6,5 +6,4 @@ base="light"
 disableWidgetStateDuplicationWarning = true
 
 [server]
-enableStaticServing = true
 maxUploadSize = 1000

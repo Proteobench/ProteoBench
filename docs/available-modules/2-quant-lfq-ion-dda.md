@@ -147,7 +147,7 @@ In the "evidence.txt", we consider that decoys are already removed, and the foll
 #### Troubleshooting: 
 ##### Fasta header parsing
 The field "Proteins" in **the "evidence.txt" table should report proteins in the format "sp|O75822|EIF3J_HUMAN" (and separated with ";" in the case of protein groups)**. 
-In the recent versions of MaxQuant, the default settings work perfectly (`Identifier rule = >([^\s]*)`; `Description rule = >(.*)`).
+In the recent versions of MaxQuant, the default settings work perfectly (`Identifier rule = >([^ ]*)`; `Description rule = >(.*)`).
 Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.
 
 ### Proline Studio 

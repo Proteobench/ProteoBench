@@ -3,9 +3,11 @@
 Anyone can start a discussion or more formally propose new module.
 
 Proposals can be started by opening a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/new?category=potential-new-module-to-discuss), using a specific template. One of the ProteoBench maintainers will be assigned as editor.  
-At least two reviewers, independent from both existing ProteoBench contributors and from the proposal submitters, should be contacted to review the proposal.
+At least one expert, independent from both existing ProteoBench contributors and from the proposal submitters, should be contacted to give inputs on the proposal. It needs to be done when the module is ready for release, we also recommand to do it before starting development.
 
-Required information for a proposal:
+## Sending a new module proposal
+
+Open a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/new?category=potential-new-module-to-discuss) with the following information:
 
 1. A **description of the new module**:
     - Which aspect of proteomics data analysis is benchmarked?
@@ -22,5 +24,21 @@ Required information for a proposal:
     - Description of the benchmark metrics
     - Methodology for calculating benchmark metrics
 7. How can the metric for each benchmark run be shown in a **single visualization** (optionally add a mock figure)
-8. **External reviewers**: Optionally propose at least two reviewers (see above)
+8. **External experts**: Optionally propose at least two experts who did not participate to the full design of the module proposed. They can choose to give inputs and/or can fully collaborate to the module design and/or development.
 9. Will you be able to work on the implementation (coding) yourself, with additional help from the ProteoBench maintainers?
+
+## Before starting the development
+
+Send an email to minimum one expert that can provide feedbacks on the proposal such as:
+
+* Would some specific metrics be better tailored to the module objective?
+* Are there some biases that are not accounted for in the proposal?
+* Is the proposed data well suited for the aim of the module?
+* What workflow runs (tools, parameters) should be included in the comparison when we release the module?
+
+If they accept to help out, experts should be listed as contributors of the module. 
+**A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
+This email template(TODO) can be sent to them to explain how they can contribute to the module proposal discussion. 
+
+
+## When the module is ready to be released

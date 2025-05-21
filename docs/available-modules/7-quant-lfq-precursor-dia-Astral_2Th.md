@@ -42,7 +42,7 @@ Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
-Note that this is the same FASTA as used in Module 2 - DDA Quantification.
+Note that this is the same FASTA as used in other Quantification Modules.
 
 ## Metric calculation
 
@@ -61,9 +61,9 @@ The module is flexible in terms of what workflow the participants can run. Howev
 |Maximum number of missed cleavages|1|
 |PSM FDR|0.01|
 |Spectral Library|Predicted spectral library from FASTA|
-|Precursor charge state|1-4|
-|Precursor m/z range|400-1000|
-|Fragment ion m/z range|50-2000|
+|Precursor charge state|1-5|
+|Precursor m/z range|380-980|
+|Fragment ion m/z range|150-2000|
 |Endopeptidase|Trypsin/P|
 |Fixed modifications|Carbamidomethylation (C)|
 |Variable modifications|Oxidation (M), Acetyl (Protein N-term)|

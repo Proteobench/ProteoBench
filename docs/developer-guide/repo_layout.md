@@ -6,9 +6,9 @@ make up the project ProteoBench.
 We will dive into the following two main components:
 
 - `proteobench`: The main package of the project, containing the core functionality and
-   module-specific code
-- `webinterface`: The streamlit web interface, where each module has it's own page with 
-   several tabs.
+  module-specific code
+- `webinterface`: The streamlit web interface, where each module has it's own page with
+  several tabs.
 
 ## Overall repository layout
 
@@ -72,7 +72,6 @@ proteobench
 
 ## Webinterface
 
-
 ```bash
 webinterface
 ├── .streamlit                            # Streamlit configuration
@@ -82,7 +81,7 @@ webinterface
 │   ├── future_pages
 │   ├── markdown_files                    # text snippets for the web interface
 │   ├── pages_variables                   # variables each module (dataclasses)
-│   └── texts                             # text scopes for the web interface (short and help msgs) 
+│   └── texts                             # text scopes for the web interface (short and help msgs)
 │   ├── __init__.py
 │   ├── 2_Quant_LFQ_DDA_ion.py
 │   ├── 3_Quant_LFQ_DIA_ion_AIF.py
@@ -90,8 +89,8 @@ webinterface
 │   ├── 5_Quant_LFQ_DDA_peptidoform.py
 │   ├── 6_Quant_LFQ_DIA_ion_Astral.py
 ├── __init__.py
-├── _base.py                              # Homepage 
-├── Home.py                               # EntryPoint (using Homepage) 
+├── _base.py                              # Homepage
+├── Home.py                               # EntryPoint (using Homepage)
 ├── README.md
 ├── requirements.txt
 └── streamlit_utils.py                    # mainly logging functionality (is it used?)

@@ -147,10 +147,10 @@ to see which files these authors had to add or modify.
    `proteobench/io/parsing <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_
    e.g. :file:`parse_ion.py` or :file:`parse_peptidoform.py`.
 4. Check, modify or add datapoint classes to
-   `proteobench/datapoint <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/datapoint>_`
+   `proteobench/datapoint <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/datapoint>`_
    for storing the intermediate data structure.
 5. Check, modify or add plotting classes to
-   `proteobench/plotting <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/plotting>_`
+   `proteobench/plotting <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/plotting>`_
    to create the figures for the web interface.
 6. Check, modify or add parameter parsing for new tools in
    `proteobench/io/params <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/params>`_

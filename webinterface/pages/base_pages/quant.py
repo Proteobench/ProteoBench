@@ -142,7 +142,7 @@ class QuantUIObjects:
         """
         field_type = content.get("type")
         if field_type == "text_area":
-            return self.generate_text_area_widget(input_format, content, key, editable=editable)
+            return self.generate_text_area_widget(input_format, content, key, editable=editable)  # key does not exist in method
         elif field_type == "text_input":
             return self._generate_text_input(input_format, content, key, editable=editable)
         elif field_type == "number_input":
@@ -650,7 +650,7 @@ class QuantUIObjects:
 
         Returns
         -------
-        pd.DataFrame
+        pandas.DataFrame
             The filtered data points.
         """
         if self.variables_quant.slider_id_uuid in st.session_state.keys():

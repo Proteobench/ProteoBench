@@ -38,7 +38,7 @@ Alternatively, you can download them from a private server here: [proteobench.cu
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_Quantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
+Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip" download>ProteoBenchFASTA_MixedSpecies_HYE.zip</a>.
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))

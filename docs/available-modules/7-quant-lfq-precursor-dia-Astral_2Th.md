@@ -1,6 +1,6 @@
-# DIA quantification - precursor ions - Astral_2Th data
+# DIA quantification - precursor ions - Astral 2Th
 
-This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Narrow-window 2 Th, on an Astral (Thermo Fisher).
+This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Narrow-window 2 Th, on an Orbitrap Astral (Thermo Fisher Scientific).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
 **This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
@@ -17,18 +17,24 @@ Other modules will be more suited to explore further post-pocessing steps.
 A not yet released Astral (Thermo Fisher) data independent acquisition (DIA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)] was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
 Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
-Data acquisition parameters are as following: 
+Data acquisition parameters were as following: 
+Peptides were loaded directly onto the analytical column and were separated by reversed-phase chromatography using a 50 cm μPAC™ column (Thermo Scientific, cat # COL-NANO050NEOB), featuring a structured pillar array bed with a 180 µm bed width. Chromatographic gradient was initiated with 96% buffer A and 4% buffer B at a flow rate of 750 nL/min durig 1 minute. The flow rate was then reduced to 250 nL/min, and the percentage of buffer B was further increased to 40% over 15 minutes. Buffer A: 0.1% formic acid in water. Buffer B: 0.1% formic acid in 80% acetonitrile.
 
-The files can be downloaded from the proteomeXchange repository [PXD028735](https://www.ebi.ac.uk/pride/archive/projects/PXD028735), make sure that you download the following raw files:
+The mass spectrometer was operated in positive ionization mode with data-independent acquisition, with a full MS scans over a mass range of m/z 380-980 with detection in the Orbitrap at a resolution of 240,000. In each cycle of data-independent acquisition, 300 windows of 2 Th were used to isolate and fragment all precursor ions from 380 to 980 m/z. A normalized collision energy of 25% was used for higher-energy collisional dissociation
+(HCD) fragmentation. MS2 scan range was set from 150 to 2000 m/z with detection in the Astral with a maximum injection time of 3 ms.
 
-- [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw)
-- [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw)
-- [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw)
-- [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw)
-- [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
-- [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
+The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/)
+For now, you can download the raw files via:
+
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](TO DO)
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](TO DO)
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw] (TO DO)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](TO DO)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](TO DO)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](TO DO)
+
+Alternatively, you can download them from a private server here: [proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://filesender.belnet.be/?s=download&token=7b7d5b37-a154-446b-9db3-ac5dffae0af5))
 
 **It is imperative not to rename the files once downloaded!**
 

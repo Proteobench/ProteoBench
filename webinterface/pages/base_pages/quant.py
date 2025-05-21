@@ -354,9 +354,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]] = (
-                self.variables_quant.default_val_slider
-            )
+            st.session_state[
+                st.session_state[self.variables_quant.slider_id_uuid]
+            ] = self.variables_quant.default_val_slider
 
     def generate_main_selectbox(self) -> None:
         """
@@ -398,9 +398,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]] = (
-                self.variables_quant.default_val_slider
-            )
+            st.session_state[
+                st.session_state[self.variables_quant.slider_id_submitted_uuid]
+            ] = self.variables_quant.default_val_slider
 
     def display_submitted_results(self) -> None:
         """
@@ -1205,7 +1205,7 @@ class QuantUIObjects:
                 """
             )
             # Example: plot another figure or add any other Streamlit element
-            #st.plotly_chart(fig_additional, use_container_width=True)
+            # st.plotly_chart(fig_additional, use_container_width=True)
             col1.plotly_chart(fig_MA, use_container_width=True)
 
         else:

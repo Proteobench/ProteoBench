@@ -29,6 +29,7 @@ Developer guide
    :hidden:
 
    api/proteobench/proteobench
+   api/webinterface/webinterface
 
 
 Organization

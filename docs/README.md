@@ -27,7 +27,7 @@ Options:
 # apidoc
 sphinx-apidoc --force --implicit-namespaces --module-first -o developer-guide/api/proteobench ../proteobench/
 # webinterface is not importable as it's not a package
-# sphinx-apidoc --force --implicit-namespaces --module-first -o developer-guide/api/webinterface ../webinterface
+sphinx-apidoc --force --implicit-namespaces --module-first -o developer-guide/api/webinterface ../webinterface
 # build docs
 sphinx-build -n -W --keep-going -b html ./ ./_build/
 ```

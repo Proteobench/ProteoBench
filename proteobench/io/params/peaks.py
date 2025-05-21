@@ -173,7 +173,7 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     params = ProteoBenchParameters()
 
     params.software_name = "PEAKS"
-    params.software_version = None
+    params.software_version = extract_value(lines, "PEAKS Version:")
     params.search_engine = "PEAKS"
     params.search_engine_version = params.software_version
 

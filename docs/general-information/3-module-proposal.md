@@ -27,7 +27,9 @@ Open a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/ne
 8. **External experts**: Optionally propose at least two experts who did not participate to the full design of the module proposed. They can choose to give inputs and/or can fully collaborate to the module design and/or development.
 9. Will you be able to work on the implementation (coding) yourself, with additional help from the ProteoBench maintainers?
 
-## Before starting the development
+Use a label "to be discussed" so that the community knows that the proposal is under discussion.
+
+## Before starting the development (OPTIONAL)
 
 Send an email to minimum one expert that can provide feedbacks on the proposal such as:
 
@@ -36,9 +38,26 @@ Send an email to minimum one expert that can provide feedbacks on the proposal s
 * Is the proposed data well suited for the aim of the module?
 * What workflow runs (tools, parameters) should be included in the comparison when we release the module?
 
+**A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
+
 If they accept to help out, experts should be listed as contributors of the module. 
 **A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
 This email template(TODO) can be sent to them to explain how they can contribute to the module proposal discussion. 
 
+Switch to the label "waiting for expert input".
 
-## When the module is ready to be released
+## When the module is ready to be released (MANDATORY)
+
+Send an email to minimum one expert that can provide feedbacks on the proposal such as:
+
+* Would some specific metrics be better tailored to the module objective?
+* Are there some biases that are not accounted for in the proposal?
+* Is the proposed data well suited for the aim of the module?
+* What workflow runs (tools, parameters) should be included in the comparison when we release the module?
+* How clear is the module overall?
+* How clear is the documentation?
+
+Expert(s) should have access to an online version of the module. 
+**A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
+
+Switch to the label "needs approval for release".

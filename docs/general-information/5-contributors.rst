@@ -126,3 +126,9 @@ People who contributed to ProteoBench, in alphabetical order:
     **Witold E. Wolski**
     *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
     *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+    *Core for Life (C4L)*
+.. line-block::
+    **Christian Panse**
+    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
+    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+    *Core for Life (C4L)*

@@ -1183,7 +1183,7 @@ class QuantUIObjects:
             col1.subheader("Log2 Fold Change distributions by species.")
             col1.markdown(
                 """
-                    Left Panel : log2 fold changes calculated from your data
+                    log2 fold changes calculated from your data
                 """
             )
             col1.plotly_chart(fig_logfc, use_container_width=True)
@@ -1191,7 +1191,7 @@ class QuantUIObjects:
             col2.subheader("Coefficient of variation distribution in Condition A and B.")
             col2.markdown(
                 """
-                    Right Panel Panel : CV calculated from your data
+                    CVs calculated from your data
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
@@ -1201,7 +1201,7 @@ class QuantUIObjects:
             col1.subheader("MA plot")
             col1.markdown(
                 """
-                The log-fold plots to the left depict the distribution of the peptidoform ion ratios in the x-axis as a function of their intensity in the y-axis.
+                    MA plot from your data
                 """
             )
             # Example: plot another figure or add any other Streamlit element

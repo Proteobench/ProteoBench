@@ -706,7 +706,7 @@ class QuantUIObjects:
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
 
         st.select_slider(
-            label="Minimal ion quantifications (# samples)",
+            label="Minimal precursor quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
             value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
             key=slider_key,
@@ -723,7 +723,7 @@ class QuantUIObjects:
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
 
         st.select_slider(
-            label="Minimal ion quantifications (# samples)",
+            label="Minimal precursor quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
             value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
             key=slider_key,

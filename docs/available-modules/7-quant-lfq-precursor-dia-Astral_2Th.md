@@ -115,6 +115,18 @@ After upload, you will get a link to a Github pull request associated with your 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
 ### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
+1. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
+2. In the "Analysis" tab, select "Set up a DirectDIA Analysis from folder"
+3. Select the folder containting the raw files in order to load the raw files
+4. Once loaded, you optionally can change the name of the project
+5. In the next tab select the proteobench fasta as the database
+6. Choose your settings in the next tab
+7. In the next tab fill in the conditions: "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02", "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" and export the conditions setup file in tsv format (..._Report.Setup.tsv)
+8. Do not tick any GO terms or Library exensions in the next tabs
+9. Finish the settings on the next tab in order to start the search
+10. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
+11. Upload the "..._Report.tsv" and "Report.Setup.tsv" to Proteobench
+
 We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.s
 etup" file for parameter parsing when doing public upload.
 

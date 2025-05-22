@@ -312,6 +312,8 @@ class ParseSettingsDeNovo:
         self.mapper = parse_settings["mapper"]
         self.modification_parser = None
         self.analysis_level = "peptidoform"
+        
+        # self.ground_truth_psms = parse_settings_module["ground_truth_psms"]
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
@@ -339,7 +341,8 @@ class ParseSettingsDeNovo:
 
         df = df.rename(columns=self.mapper, inplace=False)
 
-        # TODO: any transfrormations needed spectrum_id? 
+        # TODO: standardize transfrormations for spectrum_id
+        df["spectrum_id"] = df["spectrum_id"].apply(lambda s: s.split("index=")[-1])
 
         if self.modification_parser is not None:
             df = self.modification_parser.convert_to_proforma(df, self.analysis_level)

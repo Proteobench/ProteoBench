@@ -1,5 +1,5 @@
 """
-Module for parsing ion data from various formats.
+Module for parsing precursor ion data from various formats.
 """
 
 import math

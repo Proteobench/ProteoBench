@@ -1,3 +1,3 @@
 """
-Markdown files for the DDA ion page.
+Markdown files for the DDA precursor page.
 """

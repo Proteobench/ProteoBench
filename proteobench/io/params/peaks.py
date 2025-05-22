@@ -145,7 +145,7 @@ def get_items_between(lines: list, start: str, end: str, only_last: bool = False
     return items
 
 
-def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
+def extract_params(file_path: str) -> ProteoBenchParameters:
     """
     Read a PEAKS settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 

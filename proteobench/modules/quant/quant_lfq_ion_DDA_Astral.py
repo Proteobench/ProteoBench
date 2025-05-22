@@ -22,7 +22,7 @@ from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class DDAQuantIonModule(QuantModule):
+class DDAQuantIonAstralModule(QuantModule):
     """
     DDA Quantification Module for Ion level Quantification.
 
@@ -43,16 +43,16 @@ class DDAQuantIonModule(QuantModule):
         Level of quantification.
     """
 
-    module_id = "quant_lfq_DDA_ion"
+    module_id = "quant_lfq_DDA_ion_Astral"
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA_Astral",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA_Astral",
     ):
         """
-        Initialize the DDA Quantification Module for Ion level Quantification.
+        Initialize the DDA Quantification Module for Ion level Quantification for Astral.
 
         Parameters
         ----------

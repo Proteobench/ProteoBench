@@ -5,7 +5,7 @@ import pytest
 
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
 from proteobench.score.quant.quantscores import QuantScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")
@@ -132,7 +132,7 @@ class TestDDAQuantIonModule:
         }
 
     def test_benchmarking_return_types_are_correct(self):
-        intermediate_df, all_datapoints, input_df = DDAQuantIonModule("").benchmarking(
+        intermediate_df, all_datapoints, input_df = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
         assert isinstance(intermediate_df, pd.DataFrame)
@@ -140,7 +140,7 @@ class TestDDAQuantIonModule:
         assert isinstance(input_df, pd.DataFrame)
 
     def test_results_column_in_new_data_point_contains_correct_number_of_entries(self):
-        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
         results_entry_newest_datapoint = all_datapoints.results[len(all_datapoints.results) - 1]
@@ -152,7 +152,7 @@ class TestDDAQuantIonModule:
         input_format = self.software_tool
         empty_user_input = {}
         with pytest.raises(KeyError):
-            DDAQuantIonModule("").benchmarking(input_file_location, input_format, empty_user_input, None)
+            DDAQuantIonModuleQExactive("").benchmarking(input_file_location, input_format, empty_user_input, None)
 
     def test_new_datapoint_with_unique_hash_is_added_to_existing_ones(self, monkeypatch):
         def mock_clone_repo(*args, **kwargs):
@@ -169,10 +169,10 @@ class TestDDAQuantIonModule:
         first_software_tool = "MaxQuant"
         second_software_tool = "FragPipe"
 
-        _, previous_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, previous_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
         )
-        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
         )
 
@@ -196,10 +196,10 @@ class TestDDAQuantIonModule:
         first_software_tool = "MaxQuant"
         second_software_tool = first_software_tool
 
-        _, previous_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, previous_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
         )
-        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
         )
 

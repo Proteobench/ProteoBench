@@ -1,7 +1,7 @@
 [mapper]
-"spectra_ref" = "spectrum_id" # might change to scan_id?
+"spectra_ref" = "spectrum_id"
 "search_engine_score[1]" = "score"
-"opt_ms_run[1]_aa_scores" = "aa_scores" # Optional (not all tools do have)
+"opt_ms_run[1]_aa_scores" = "aa_scores"
 
 [modifications_parser]
 "parse_column" = "sequence"

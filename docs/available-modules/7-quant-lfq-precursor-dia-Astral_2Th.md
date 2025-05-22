@@ -56,7 +56,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 |Parameter|Value|
 |---------|-----|
 |Maximum number of missed cleavages|1|
-|PSM FDR|0.01|
+|PSM/Precursor FDR|0.01|
 |Spectral Library|Predicted spectral library from FASTA|
 |Precursor charge state|1-5|
 |Precursor m/z range|380-980|

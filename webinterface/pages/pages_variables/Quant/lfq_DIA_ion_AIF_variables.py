@@ -66,7 +66,7 @@ class VariablesDIAQuant:
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/"
 
-    title: str = "DIA Ion quantification - AIF"
+    title: str = "DIA Precursor quantification - AIF"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_aif_quant_"

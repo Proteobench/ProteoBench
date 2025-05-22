@@ -142,7 +142,7 @@ class QuantUIObjects:
         """
         field_type = content.get("type")
         if field_type == "text_area":
-            return self.generate_text_area_widget(input_format, content, key, editable=editable)
+            return self.generate_text_area_widget(input_format, content, editable=editable)
         elif field_type == "text_input":
             return self._generate_text_input(input_format, content, key, editable=editable)
         elif field_type == "number_input":
@@ -150,7 +150,7 @@ class QuantUIObjects:
         elif field_type == "selectbox":
             return self._generate_selectbox(input_format, content, key, editable=editable)
         elif field_type == "checkbox":
-            return self._generate_checkbox(input_format, content, key, editable=editable)
+            return self._generate_checkbox(content=content, key=key, editable=editable)
 
     def _generate_text_area(self, input_format: str, content: dict, key: str = "") -> Any:
         """
@@ -314,14 +314,12 @@ class QuantUIObjects:
             disabled=not editable,
         )
 
-    def _generate_checkbox(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
+    def _generate_checkbox(self, content: dict, key: str = "", editable: bool = True) -> Any:
         """
         Generate a checkbox input field.
 
         Parameters
         ----------
-        input_format : str
-            The input format.
         content : dict
             The content of the checkbox.
         key : str

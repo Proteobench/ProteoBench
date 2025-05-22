@@ -8,11 +8,11 @@ from typing import Any, Dict, Type
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
-from pages.pages_variables.Quant.lfq_DDA_ion_variables import VariablesDDAQuant
+from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
 
 
 class StreamlitUI:
@@ -37,7 +37,7 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: DDAQuantIonModule = DDAQuantIonModule(token=token)
+        self.ionmodule: DDAQuantIonModuleQExactive = DDAQuantIonModuleQExactive(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder(
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dda_quant.parse_settings_dir
         )

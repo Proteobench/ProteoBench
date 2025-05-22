@@ -22,7 +22,7 @@ from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class DDAQuantIonModule(QuantModule):
+class DDAQuantIonModuleQExactive(QuantModule):
     """
     DDA Quantification Module for precursor level Quantification.
 
@@ -43,7 +43,7 @@ class DDAQuantIonModule(QuantModule):
         Level of quantification.
     """
 
-    module_id = "quant_lfq_DDA_ion"
+    module_id = "quant_lfq_DDA_ion_QExactive"
 
     def __init__(
         self,

@@ -121,7 +121,7 @@ In FragPipe output files, the protein identifiers matching a given ion are in tw
 4. Once loaded, you optionally can change the name of the project
 5. In the next tab select the proteobench fasta as the database
 6. Choose your settings in the next tab
-7. In the next tab fill in the conditions: "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02", "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" and export the conditions setup file in tsv format (..._Report.Setup.tsv)
+7. In the next tab fill in the conditions: "LFQ_Astral_DIA_15min_50ng_Condition_A_REP1","LFQ_Astral_DIA_15min_50ng_Condition_A_REP2", "LFQ_Astral_DIA_15min_50ng_Condition_A_REP3","LFQ_Astral_DIA_15min_50ng_Condition_B_REP1","LFQ_Astral_DIA_15min_50ng_Condition_B_REP2","LFQ_Astral_DIA_15min_50ng_Condition_B_REP3" and export the conditions setup file in tsv format (..._Report.Setup.tsv)
 8. Do not tick any GO terms or Library exensions in the next tabs
 9. Finish the settings on the next tab in order to start the search
 10. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format

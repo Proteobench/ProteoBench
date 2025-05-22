@@ -68,3 +68,4 @@
 "InstaNovo" = "parse_settings_instanovo.toml"
 "Pi-HelixNovo" = "parse_settings_pihelixnovo.toml"
 "Pi-PrimeNovo" = "parse_settings_piprimenovo.toml"
+"PepNet" = "parse_settings_pepnet.toml"

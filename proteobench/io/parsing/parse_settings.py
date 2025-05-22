@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from collections import defaultdict
 from typing import Any, Dict, List
 
@@ -312,6 +313,7 @@ class ParseModificationSettings:
 class ParseSettingsDeNovo:
     def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
         self.mapper = parse_settings["mapper"]
+        self.spectrum_id_mapper = parse_settings["spectrum_id_mapper"]
         self.modification_parser = None
         self.analysis_level = "peptidoform"
 
@@ -327,6 +329,25 @@ class ParseSettingsDeNovo:
             module_settings_dir,
             parse_settings_module["ground_truth"]["path_to_ground_truth"]
         )
+
+    def extract_scan_id(self, spectrum_id) -> float:
+        """
+        Get the expected species ratio.
+
+        Returns
+        -------
+        float
+            The expected ratio of species.
+        """
+        scan_id_match = re.search(self.spectrum_id_mapper["pattern"], spectrum_id)
+        if scan_id_match is None:
+            raise ValueError(
+                f"Scan id not found in the spectrum_id string {spectrum_id}."
+                f" Spectrum id pattern is {self.spectrum_id_mapper['pattern']}."
+            )
+
+        scan_id = scan_id_match.group(1)
+        return int(scan_id)
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
@@ -355,10 +376,12 @@ class ParseSettingsDeNovo:
         df = df.rename(columns=self.mapper, inplace=False)
 
         # TODO: standardize transfrormations for spectrum_id
-        df["spectrum_id"] = df["spectrum_id"].apply(lambda s: int(s.split("index=")[-1]))
+        df["spectrum_id"] = df["spectrum_id"].apply(self.extract_scan_id)
 
         if self.modification_parser is not None:
             df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
+        else:
+            df["proforma"] = df["sequence"]
 
         if "proforma" in df.columns:
             df["peptidoform"] = df["proforma"].apply(lambda x: Peptidoform(x))

@@ -20,7 +20,7 @@ def _load_adanovo(input_mztab: str) -> pd.DataFrame:
 
     Parameters
     ----------
-    input_path: str
+    input_mztab: str
         The path to the AdaNovo output file.
     
     Returns
@@ -38,7 +38,7 @@ def _load_casanovo(input_mztab: str) -> pd.DataFrame:
 
     Parameters
     ----------
-    input_path: str
+    input_mztab: str
         The path to the Casanovo output file.
     
     Returns
@@ -56,7 +56,7 @@ def _load_instanovo(input_mztab: str) -> pd.DataFrame:
 
     Parameters
     ----------
-    input_path: str
+    input_mztab: str
         The path to the InstaNovo output file.
     
     Returns
@@ -100,10 +100,27 @@ def _load_piprimenovo(input_path: str) -> pd.DataFrame:
     """
     pass
 
+def _load_pepnet(input_csv: str) -> pd.DataFrame:
+    """
+    Load a PepNet output file.
+
+    Parameters
+    ----------
+    input_path: str
+        The path to the PepNet output file.
+    
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+
 _LOAD_FUNCTIONS = {
     "AdaNovo": _load_adanovo,
     "Casanovo": _load_casanovo,
     "InstaNovo": _load_instanovo,
     "Pi-HelixNovo": _load_pihelixnovo,
-    "Pi-PrimeNovo": _load_piprimenovo
+    "Pi-PrimeNovo": _load_piprimenovo,
+    "PepNet": _load_pepnet,
 }

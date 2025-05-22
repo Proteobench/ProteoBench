@@ -1,7 +1,11 @@
 [mapper]
 "spectra_ref" = "spectrum_id"
+"sequence" = "sequence"
 "search_engine_score[1]" = "score"
 "opt_ms_run[1]_aa_scores" = "aa_scores"
+
+[spectrum_id_mapper]
+"pattern" = "index=(\\d+)"
 
 [modifications_parser]
 "parse_column" = "sequence"

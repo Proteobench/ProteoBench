@@ -85,7 +85,7 @@ People who contributed to ProteoBench, in alphabetical order:
     *Ruhr University Bochum, Medical Faculty, Center for Protein Diagnostics (PRODI), Gesundheitscampus 4, 44801 Bochum , Germany*
 
 .. line-block::
-   **Teresa Mendes Maia**
+    **Teresa Mendes Maia**
     *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
     *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *VIB-Proteomics Core facility*
@@ -152,7 +152,12 @@ People who contributed to ProteoBench, in alphabetical order:
     *Core for Life (C4L)*
 
 .. line-block::
-   **An Staes**
+    **Martin Schneider**
+    *German Cancer Research Center (DKFZ), Foundation under Public Law, Im Neuenheimer Feld 580, 69120 Heidelberg, Germany*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **An Staes**
     *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
     *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *VIB-Proteomics Core facility*

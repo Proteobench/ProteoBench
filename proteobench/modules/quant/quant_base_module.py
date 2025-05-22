@@ -12,7 +12,7 @@ import uuid
 import zipfile
 from datetime import datetime
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 import streamlit as st
@@ -236,9 +236,9 @@ class QuantModule:
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
-    ) -> tuple[DataFrame, DataFrame, DataFrame]:
+    ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
-        Main workflow of the module. Used to benchmark workflow results.
+        Main workflow of the module for benchmarking workflow results.
 
         Parameters
         ----------
@@ -249,35 +249,77 @@ class QuantModule:
         user_input : dict
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
-            DataFrame containing all datapoints from the ProteoBench repo.
+            DataFrame containing all data points from the repo.
         default_cutoff_min_prec : int, optional
-            Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
+            Minimum number of runs a precursor ion must be identified in. Defaults to 3.
 
         Returns
         -------
-        tuple[DataFrame, DataFrame, DataFrame]
+        Tuple[DataFrame, DataFrame, DataFrame]
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
-        # Parse user config
-        input_df = load_input_file(input_file, input_format)
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
-        ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        # Parse workflow output file
+        try:
+            input_df = load_input_file(input_file, input_format)
+        except pd.errors.ParserError as e:
+            raise ParseError(
+                f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
+            )
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing the input file: {e}")
 
-        # Get quantification data
-        quant_score = QuantScores(
-            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+        # Parse settings file
+        try:
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+        except KeyError as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
+
+        try:
+            standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        except KeyError as e:
+            raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
+        except Exception as e:
+            raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
+
+        # Calculate quantification scores
+        try:
+            quant_score = QuantScores(
+                self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            )
+        except Exception as e:
+            raise QuantificationError(f"Error generating quantification scores: {e}")
+
+        # Generate intermediate data structure
+        try:
+            intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        except Exception as e:
+            raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
+
+        # Generate current data point
+        try:
+            current_datapoint = QuantDatapoint.generate_datapoint(
+                intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            )
+        except Exception as e:
+            raise DatapointGenerationError(f"Error generating datapoint: {e}")
+
+        # Add current data point to all datapoints
+        try:
+            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
+        except Exception as e:
+            raise DatapointAppendError(f"Error adding current data point: {e}")
+
+        return (
+            intermediate_metric_structure,
+            all_datapoints,
+            input_df,
         )
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
-
-        current_datapoint = QuantDatapoint.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-        )
-
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
-
-        return intermediate_metric_structure, all_datapoints, input_df
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """

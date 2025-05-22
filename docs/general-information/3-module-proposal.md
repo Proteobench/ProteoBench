@@ -58,3 +58,7 @@ Expert(s) should have access to an online version of the module, we ask that the
 **A template for this email can be found [here](docs/templates_emails_module_proposal/second_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.**
 
 Switch to the label "needs approval for release".
+
+# Information to send to experts when they accept to give inputs
+
+When an expert accepts to contribute to the discussion of a new module, the coordinator should send them a detailed description on how to create a github account and comment in the discussion. **A template for this email can be found [here](docs/templates_emails_module_proposal/help_for_contributing_expert.txt). Do not forget to put proteobench@eubic-ms.org in CC.**

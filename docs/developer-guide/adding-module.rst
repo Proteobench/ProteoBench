@@ -113,6 +113,23 @@ to show the respective figures with the right metadata.
 Change the text and the field names accordingly in the ``dataclass``
 in `webinterface.pages.pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_.
 
+Storing results
+----------------
+
+Results are stored in separate GitHub repositories, where the Webinterface first adds
+datapoints to an fork of the module-specific results directory. The core
+functionality is in
+`proteobench.github.gh <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/github>`_
+
+1. Make a new repository in the
+   `Proteobench organisation <https://github.com/Proteobench>`_
+   and give it a sensible name, e.g. ``Proteobench/Results_quant_ion_DDA``.
+2. Login to `Proteobot organisation <https://github.com/proteobot>`_
+   (ask for the login details from relevant people)
+3. Make a fork of the new repository under ``ProteoBench`` to ``Proteobot``
+
+
+
 Documentation
 -------------
 

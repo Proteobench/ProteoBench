@@ -10,7 +10,8 @@ import toml
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
+from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
@@ -28,7 +29,8 @@ from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
-    "DDAQuantIonModule": DDAQuantIonModule,
+    "DDAQuantIonAstralModule": DDAQuantIonAstralModule,
+    "DDAQuantIonModuleQExactive": DDAQuantIonModuleQExactive,
     "DIAQuantIonModule": DIAQuantIonModule,
     "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
     "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,

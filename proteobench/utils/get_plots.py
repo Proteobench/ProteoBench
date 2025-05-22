@@ -7,7 +7,8 @@ import plotly.express as px
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
+from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
@@ -26,7 +27,8 @@ from proteobench.plotting import plot_quant
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
-    "DDAQuantIonModule": DDAQuantIonModule,
+    "DDAQuantIonAstralModule": DDAQuantIonAstralModule,
+    "DDAQuantIonModuleQExactive": DDAQuantIonModuleQExactive,
     "DIAQuantIonModule": DIAQuantIonModule,
     "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
     "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,

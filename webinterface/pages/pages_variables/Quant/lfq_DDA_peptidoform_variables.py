@@ -22,6 +22,7 @@ class VariablesDDAQuant:
     fig_logfc: str = "fig_logfc_dda_quant_peptidoform"
     fig_metric: str = "fig_metric_dda_quant_peptidoform"
     fig_cv: str = "fig_CV_violinplot_dda_quant_peptidoform"
+    fig_ma_plot: str = "fig_ma_plot_dda_quant_peptidoform"
     result_perf: str = "result_perf_dda_quant_peptidoform"
     meta_data: str = "meta_data_dda_quant_peptidoform"
     input_df: str = "input_df_dda_quant_peptidoform"

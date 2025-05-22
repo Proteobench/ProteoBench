@@ -312,8 +312,19 @@ class ParseSettingsDeNovo:
         self.mapper = parse_settings["mapper"]
         self.modification_parser = None
         self.analysis_level = "peptidoform"
-        
-        # self.ground_truth_psms = parse_settings_module["ground_truth_psms"]
+
+        module_settings_dir = os.path.join(
+            os.path.dirname(__file__),
+            "io_parse_settings",
+            "denovo",
+            "lfq",
+            "DDA",
+            "HCD",
+        )
+        self.path_to_ground_truth = os.path.join(
+            module_settings_dir,
+            parse_settings_module["ground_truth"]["path_to_ground_truth"]
+        )
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
@@ -342,13 +353,22 @@ class ParseSettingsDeNovo:
         df = df.rename(columns=self.mapper, inplace=False)
 
         # TODO: standardize transfrormations for spectrum_id
-        df["spectrum_id"] = df["spectrum_id"].apply(lambda s: s.split("index=")[-1])
+        df["spectrum_id"] = df["spectrum_id"].apply(lambda s: int(s.split("index=")[-1]))
 
         if self.modification_parser is not None:
             df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
 
         if "proforma" in df.columns:
             df["peptidoform"] = df["proforma"]
+
+        # TODO: add aa_scores if absent
+
+        columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]
+        df = df[columns_to_keep]
+
+        # Load ground truth PSMs
+        df_ground_truth = pd.read_csv(self.path_to_ground_truth)
+        df = pd.merge(df, df_ground_truth, on=["spectrum_id"], suffixes=("", "_ground_truth"))
         return df
 
 

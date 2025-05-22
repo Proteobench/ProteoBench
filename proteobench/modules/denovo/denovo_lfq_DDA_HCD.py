@@ -123,7 +123,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
             raise ParseSettingsError(f"Error parsing settings file for parsing: {msg}") from e
 
         try:
-            standard_format = parse_settings.convert_to_standard_format(input_df)
+            standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
         except KeyError as e:
             raise ConvertStandardFormatError("Error converting to standard format, key missing.") from e
         except Exception as e:
@@ -143,7 +143,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
 
         # try:
         current_datapoint = DenovoDatapoint.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            intermediate_metric_structure, input_format, user_input
         )
 
         # Generate intermediate data structure

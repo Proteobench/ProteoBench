@@ -154,7 +154,7 @@ class ParseSettingsQuant:
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert a software tool output into a generic format supported by the module.
-        
+
         Steps:
         1. Validate and rename columns
         2. Create replicate mapping
@@ -164,7 +164,7 @@ class ParseSettingsQuant:
         6. Process modifications if needed
         7. Filter zero intensities
         8. Format based on analysis level
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -179,7 +179,7 @@ class ParseSettingsQuant:
         replicate_to_raw = self._create_replicate_mapping()
         df_filtered = self._filter_decoys_and_contaminants(df)
         df_filtered = self._process_species_information(df_filtered)
-        
+
         df_filtered = self._process_modifications(df_filtered)
         df_filtered_melted = self._handle_data_format(df_filtered)
         df_filtered_melted = self._filter_zero_intensities(df_filtered_melted)
@@ -208,18 +208,18 @@ class ParseSettingsQuant:
             df_filtered = df[df["Reverse"] != self.decoy_flag].copy()
         else:
             df_filtered = df.copy()
-        
+
         df_filtered.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
         return df_filtered
 
     def _process_species_information(self, df: pd.DataFrame) -> pd.DataFrame:
         """Process species information and filter multi-species entries."""
         df["contaminant"] = df["Proteins"].str.contains(self.contaminant_flag)
-        
+
         # Process species flags
         for flag, species in self._species_dict.items():
             df[species] = df["Proteins"].str.contains(flag)
-        
+
         # Filter multi-species
         df["MULTI_SPEC"] = df[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
         return df[df["MULTI_SPEC"] == False]
@@ -236,7 +236,7 @@ class ParseSettingsQuant:
             )
         else:
             df_melted = df.copy()
-        
+
         df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
         return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)
 

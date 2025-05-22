@@ -17,7 +17,7 @@ ProteoBench
 ├── .github                 # GitHub Actions, Issue and Discussion templates
 ├── .vscode                 # VSCode settings for repository
 ├── docs                    # Documentation website using Sphinx
-├── files_provided_to_users # probably exidently added
+├── files_provided_to_users # probably accidentally added
 ├── img                     # Logos and Icons used in documentation
 ├── jupyter_notebooks       # Data Analysis for Paper and manual correction of results scripts
 ├── proteobench             # Main package of the project

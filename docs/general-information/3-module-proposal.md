@@ -2,7 +2,7 @@
 
 Anyone can start a discussion or more formally propose new module.
 
-Proposals can be started by opening a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/new?category=potential-new-module-to-discuss), using a specific template. One of the ProteoBench maintainers will be assigned as editor.  
+Proposals can be started by opening a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/new?category=potential-new-module-to-discuss), using a specific template. 
 At least one expert, independent from both existing ProteoBench contributors and from the proposal submitters, should be contacted to give input on the proposal. This needs to be done when the module is ready for release. We also recommend to do it before starting development.
 
 ## Sending a new module proposal
@@ -29,7 +29,7 @@ Open a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/ne
 
 Use a label "to be discussed" so that the community knows that the proposal is under discussion.
 
-## Before starting the development (OPTIONAL)
+## Before starting the development (MANDATORY)
 
 Send an email to minimum one expert that can provide feedback on the proposal such as:
 
@@ -38,11 +38,8 @@ Send an email to minimum one expert that can provide feedback on the proposal su
 * Is the proposed data well suited for the aim of the module?
 * What workflow runs (tools, parameters) should be included in the comparison when we release the module?
 
-**A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
-
+**A template for this email can be found [here](docs/templates_emails_module_proposal/first_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.**
 We ask in the email that experts answer within two weeks. 
-**A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
-This email template(TODO) can be sent to them to explain how they can contribute to the module proposal discussion. 
 
 Switch to the label "waiting for expert input". It can be switched to "under development" after discussions with expert(s). In such case, experts should be listed as contributors of the module and mentionned in all communications about it. 
 
@@ -58,6 +55,6 @@ Send an email to minimum one expert that can provide feedback on the proposal su
 * How clear is the documentation?
 
 Expert(s) should have access to an online version of the module, we ask that they signify they acceptance/refusal within two weeks. 
-**A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
+**A template for this email can be found [here](docs/templates_emails_module_proposal/second_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.**
 
 Switch to the label "needs approval for release".

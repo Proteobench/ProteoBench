@@ -1,5 +1,5 @@
-
 from pathlib import Path
+
 
 def get_submission_dict(df):
     extra_path = Path("extracted_files")

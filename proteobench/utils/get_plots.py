@@ -1,32 +1,38 @@
 import os
 from collections import defaultdict
 
-from proteobench.io.parsing.parse_ion import load_input_file
 import pandas as pd
 import plotly.express as px
 
+from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
-from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import DIAQuantIonModulediaPASEF
-from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import DIAQuantIonModulediaSC
-from proteobench.modules.quant.quant_lfq_peptidoform_DDA import DDAQuantPeptidoformModule
-from proteobench.modules.quant.quant_lfq_peptidoform_DIA import DIAQuantPeptidoformModule
-
+from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
+    DIAQuantIonModulediaPASEF,
+)
+from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
+    DIAQuantIonModulediaSC,
+)
+from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
+    DDAQuantPeptidoformModule,
+)
+from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
+    DIAQuantPeptidoformModule,
+)
 from proteobench.plotting import plot_quant
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-
-from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
     "DDAQuantIonModule": DDAQuantIonModule,
-    "DIAQuantIonModule" : DIAQuantIonModule,
-    "DIAQuantIonModuleAstral" : DIAQuantIonModuleAstral,
-    "DIAQuantIonModulediaPASEF" : DIAQuantIonModulediaPASEF,
-    "DIAQuantIonModulediaSC" : DIAQuantIonModulediaSC,
-    "DDAQuantPeptidoformModule" : DDAQuantPeptidoformModule,
-    "DIAQuantPeptidoformModule" : DIAQuantPeptidoformModule,
+    "DIAQuantIonModule": DIAQuantIonModule,
+    "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
+    "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
+    "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,
+    "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
+    "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
 }
 
 
@@ -85,14 +91,17 @@ def make_indepth_plots(hash_vis_dirs, intermediate_hash, filtered_df, module_nam
         module_id="quant_lfq_DDA_ion",
     ).build_parser(software_name)
 
-    fig2 = plot_quant.PlotDataPoint.plot_fold_change_histogram(results_performance, parse_settings.species_expected_ratio())
+    fig2 = plot_quant.PlotDataPoint.plot_fold_change_histogram(
+        results_performance, parse_settings.species_expected_ratio()
+    )
 
     return fig1, fig2, matching_file_params, result_df
 
-def get_plot_dict(hash_vis_dirs,intermediate_hash,df, module_name="DDAQuantIonModule"):
+
+def get_plot_dict(hash_vis_dirs, intermediate_hash, df, module_name="DDAQuantIonModule"):
     performance_dict = {}
 
-    for idx,row in df.iterrows():
+    for idx, row in df.iterrows():
         location = hash_vis_dirs[row["intermediate_hash"]]
         software_name = row["software_name"]
 
@@ -104,7 +113,8 @@ def get_plot_dict(hash_vis_dirs,intermediate_hash,df, module_name="DDAQuantIonMo
 
         # Filter for files that start with 'input_file' and ignore their extensions
         matching_file = os.path.join(
-            location, [f for f in all_files if f.startswith("input_file") and os.path.isfile(os.path.join(location, f))][0]
+            location,
+            [f for f in all_files if f.startswith("input_file") and os.path.isfile(os.path.join(location, f))][0],
         )
         matching_file_params = os.path.join(
             location, [f for f in all_files if f.startswith("param") and os.path.isfile(os.path.join(location, f))][0]
@@ -130,9 +140,7 @@ def get_plot_dict(hash_vis_dirs,intermediate_hash,df, module_name="DDAQuantIonMo
 
         results_performance_runs = results_performance.loc[:, runs]
         total_missing = results_performance.loc[:, runs].isna().sum().sum()
-        total_max = results_performance_runs.shape[
-            0
-        ] * results_performance_runs.shape[1]
+        total_max = results_performance_runs.shape[0] * results_performance_runs.shape[1]
         total_peptide_ions = results_performance_runs.shape[0]
         total_runs = results_performance_runs.shape[1]
 
@@ -146,6 +154,7 @@ def get_plot_dict(hash_vis_dirs,intermediate_hash,df, module_name="DDAQuantIonMo
         }
 
     return performance_dict
+
 
 def get_missing_percentage_plot(performance_df):
     performance_df["IDX"] = performance_df.index

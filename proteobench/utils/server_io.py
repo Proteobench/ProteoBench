@@ -1,41 +1,48 @@
+import io
+import json
+import os
+import zipfile
+from collections import defaultdict
+
 import pandas as pd
+import requests
+import toml
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-
-import requests
-import zipfile
-import io
-import os
-import json
-import toml
-
-from collections import defaultdict
 
 from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
-from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import DIAQuantIonModulediaPASEF
-from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import DIAQuantIonModulediaSC
-from proteobench.modules.quant.quant_lfq_peptidoform_DDA import DDAQuantPeptidoformModule
-from proteobench.modules.quant.quant_lfq_peptidoform_DIA import DIAQuantPeptidoformModule
+from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
+    DIAQuantIonModulediaPASEF,
+)
+from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
+    DIAQuantIonModulediaSC,
+)
+from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
+    DDAQuantPeptidoformModule,
+)
+from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
+    DIAQuantPeptidoformModule,
+)
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
     "DDAQuantIonModule": DDAQuantIonModule,
-    "DIAQuantIonModule" : DIAQuantIonModule,
-    "DIAQuantIonModuleAstral" : DIAQuantIonModuleAstral,
-    "DIAQuantIonModulediaPASEF" : DIAQuantIonModulediaPASEF,
-    "DIAQuantIonModulediaSC" : DIAQuantIonModulediaSC,
-    "DDAQuantPeptidoformModule" : DDAQuantPeptidoformModule,
-    "DIAQuantPeptidoformModule" : DIAQuantPeptidoformModule,
+    "DIAQuantIonModule": DIAQuantIonModule,
+    "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
+    "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
+    "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,
+    "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
+    "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
 }
 
 
 def get_merged_json(
-        repo_url = "https://github.com/Proteobench/Results_quant_ion_DDA/archive/refs/heads/main.zip",
-        write_to_file=False,
-        outfile_name="combined_results.json",
-    ):
+    repo_url="https://github.com/Proteobench/Results_quant_ion_DDA/archive/refs/heads/main.zip",
+    write_to_file=False,
+    outfile_name="combined_results.json",
+):
     # Download ZIP archive from GitHub
     response = requests.get(repo_url)
     zip_bytes = io.BytesIO(response.content)
@@ -73,9 +80,9 @@ def get_merged_json(
     return df
 
 
-def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",output_directory="extracted_files"):
+def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", output_directory="extracted_files"):
     hash_vis_dir = {}
-    
+
     # Extract the hash list from the DataFrame
     hash_list = df["intermediate_hash"].tolist()
 
@@ -84,7 +91,7 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
     response.raise_for_status()  # Check for errors
 
     soup = BeautifulSoup(response.text, "html.parser")
-    folder_links = [link['href'].strip("/") for link in soup.find_all("a") if link['href'].endswith("/")]
+    folder_links = [link["href"].strip("/") for link in soup.find_all("a") if link["href"].endswith("/")]
 
     # Filter folder links based on the hash list
     matching_folders = [folder for folder in folder_links if folder in hash_list]
@@ -99,7 +106,7 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
         folder_response.raise_for_status()
 
         folder_soup = BeautifulSoup(folder_response.text, "html.parser")
-        zip_files = [link['href'] for link in folder_soup.find_all("a") if link['href'].endswith(".zip")]
+        zip_files = [link["href"] for link in folder_soup.find_all("a") if link["href"].endswith(".zip")]
 
         # Process each .zip file
         for zip_file in zip_files:
@@ -111,24 +118,27 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
             zip_response.raise_for_status()
 
             zip_filename = os.path.basename(zip_file)
-            total_size = int(zip_response.headers.get('content-length', 0))
+            total_size = int(zip_response.headers.get("content-length", 0))
             block_size = 1024  # 1 KB
 
             # Save the zip file
-            with open(zip_filename, "wb") as f, tqdm(
-                desc=f"Downloading {zip_filename}",
-                total=total_size,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-            ) as progress:
+            with (
+                open(zip_filename, "wb") as f,
+                tqdm(
+                    desc=f"Downloading {zip_filename}",
+                    total=total_size,
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=1024,
+                ) as progress,
+            ):
                 for data in zip_response.iter_content(block_size):
                     f.write(data)
                     progress.update(len(data))
 
             # Extract the zip file
             extract_dir = f"{output_directory}/{folder}"
-            
+
             os.makedirs(extract_dir, exist_ok=True)
             with zipfile.ZipFile(zip_filename, "r") as zip_ref:
                 zip_ref.extractall(extract_dir)
@@ -140,6 +150,7 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/",out
             hash_vis_dir[folder] = extract_dir
 
     return hash_vis_dir
+
 
 def make_submission(token="", module_name=""):
     for submission_settings in submission_files:
@@ -171,9 +182,7 @@ def make_submission(token="", module_name=""):
         results_df_new.tail(5)
 
         try:
-            param_obj = module_obj.load_params_file(
-                [param_file], input_type
-            )
+            param_obj = module_obj.load_params_file([param_file], input_type)
         except:
             continue
 

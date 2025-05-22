@@ -152,7 +152,7 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", ou
     return hash_vis_dir
 
 
-def make_submission(token="", module_name=""):
+def make_submission(submission_files=[], token="", module_name=""):
     for submission_settings in submission_files:
         # TODO change to the correct module
         # Dictionary mapping module name strings to their classes

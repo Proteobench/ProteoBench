@@ -67,8 +67,8 @@ People who contributed to ProteoBench, in alphabetical order:
 
 .. line-block::
     **Olivier Langella**
-    *Université Paris-Saclay, INRAE, CNRS, AgroParisTech, GQE - Le Moulon, PAPPSO, 91190, Gif-Sur-Yvette, France*
-    *PAPPSO - Plateforme d'Analyse Protéomique de Paris Sud Ouest (France)*
+    *UniversitÃ© Paris-Saclay, INRAE, CNRS, AgroParisTech, GQE - Le Moulon, PAPPSO, 91190, Gif-Sur-Yvette, France*
+    *PAPPSO - Plateforme d'Analyse ProtÃ©omique de Paris Sud Ouest (France)*
 
 .. line-block::
     **Caroline Lennartsson**

@@ -105,7 +105,7 @@ Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObject
 
 - Tab 1: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_main`
   shows the description of the module, which is defined in
-  `webinterface/pages/pages_variables <www.github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
+  `webinterface/pages/pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
   where we define custom text and **unique** component names for each module
   (e.g. for the main plot)
   to not display on several pages the same plot in the streamlit webinterface.

@@ -40,13 +40,13 @@ Send an email to minimum one expert that can provide feedbacks on the proposal s
 
 **A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
 
-If they accept to help out, experts should be listed as contributors of the module. 
+We ask in the email that experts answer within two weeks. 
 **A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
 This email template(TODO) can be sent to them to explain how they can contribute to the module proposal discussion. 
 
-Switch to the label "waiting for expert input".
+Switch to the label "waiting for expert input". It can be switched to "under development" after discussions with expert(s). In such case, experts should be listed as contributors of the module and mentionned in all communications about it. 
 
-## When the module is ready to be released (MANDATORY)
+## When the module is ready to be released (MANDATORY if no expert aggreed to collaborate already)
 
 Send an email to minimum one expert that can provide feedbacks on the proposal such as:
 
@@ -57,7 +57,7 @@ Send an email to minimum one expert that can provide feedbacks on the proposal s
 * How clear is the module overall?
 * How clear is the documentation?
 
-Expert(s) should have access to an online version of the module. 
+Expert(s) should have access to an online version of the module, we ask that they signify they acceptance/refusal within two weeks. 
 **A template for this email can be found here(TODO). Please put proteobench@eubic-ms.org in CC.**
 
 Switch to the label "needs approval for release".

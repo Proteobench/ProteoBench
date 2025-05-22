@@ -1,5 +1,5 @@
 """
-DDA Quantification Module for Ion level Quantification.
+DDA Quantification Module for precursor level Quantification.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from proteobench.score.quant.quantscores import QuantScores
 
 class DDAQuantIonModuleQExactive(QuantModule):
     """
-    DDA Quantification Module for Ion level Quantification.
+    DDA Quantification Module for precursor level Quantification.
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
     ):
         """
-        Initialize the DDA Quantification Module for Ion level Quantification.
+        Initialize the DDA Quantification Module for precursor level Quantification.
 
         Parameters
         ----------
@@ -106,7 +106,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
         default_cutoff_min_prec : int
-            Minimum number of runs an ion has to be identified in.
+            Minimum number of runs a precursor ion has to be identified in.
 
         Returns
         -------

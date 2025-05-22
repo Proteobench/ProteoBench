@@ -131,7 +131,20 @@ class DDAHCDDeNovoModule(DeNovoModule):
 
 
         # Instantiate de novo scores
+        denovo_score = DenovoScores()
 
+        # generate intermediate data structure (Calculate the scores)
+        try:
+            intermediate_metric_structure = denovo_score.generate_intermediate(
+                standard_format
+            )
+        except Exception as e:
+            raise IntermediateFormatGenerationError("Error generating intermediate data structure.") from e
+
+        # try:
+        current_datapoint = DenovoDatapoint.generate_datapoint(
+            intermediate_metric_structure, input_format, user_input
+        )
 
         # Generate intermediate data structure
 

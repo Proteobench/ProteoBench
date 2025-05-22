@@ -48,6 +48,11 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **Quentin Giai Gianetto**
+    *Institut Pasteur, Université Paris Cité, Bioinformatics and Biostatistics HUB*
+    *Institut Pasteur, Université Paris Cité, Proteomics Platform, Mass Spectrometry for Biology Unit, UAR CNRS 2024*
+
+.. line-block::
     **David M. Hollenstein**
     *Mass Spectrometry Facility, Max Perutz Labs, Vienna Biocenter Campus (VBC), Vienna, Austria*
 

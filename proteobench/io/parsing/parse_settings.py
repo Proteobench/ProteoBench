@@ -361,7 +361,7 @@ class ParseSettingsDeNovo:
             df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
 
         if "proforma" in df.columns:
-            df["peptidoform"] = Peptidoform(df["proforma"])
+            df["peptidoform"] = df["proforma"].apply(lambda x: Peptidoform(x))
 
         # TODO: add aa_scores if absent
 

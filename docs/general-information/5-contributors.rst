@@ -85,6 +85,13 @@ People who contributed to ProteoBench, in alphabetical order:
     *Ruhr University Bochum, Medical Faculty, Center for Protein Diagnostics (PRODI), Gesundheitscampus 4, 44801 Bochum , Germany*
 
 .. line-block::
+   **Teresa Mendes Maia**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
+
+.. line-block::
     **Emmanuelle Mouton-Barbosa**
     *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
     *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*

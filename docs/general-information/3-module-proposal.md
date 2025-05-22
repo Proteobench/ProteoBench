@@ -3,14 +3,14 @@
 Anyone can start a discussion or more formally propose new module.
 
 Proposals can be started by opening a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/new?category=potential-new-module-to-discuss), using a specific template. One of the ProteoBench maintainers will be assigned as editor.  
-At least one expert, independent from both existing ProteoBench contributors and from the proposal submitters, should be contacted to give inputs on the proposal. It needs to be done when the module is ready for release, we also recommand to do it before starting development.
+At least one expert, independent from both existing ProteoBench contributors and from the proposal submitters, should be contacted to give input on the proposal. This needs to be done when the module is ready for release. We also recommend to do it before starting development.
 
 ## Sending a new module proposal
 
 Open a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/new?category=potential-new-module-to-discuss) with the following information:
 
 1. A **description of the new module**:
-    - Which aspect of proteomics data analysis is benchmarked?
+    - Which aspect(s) of proteomics data analysis is benchmarked?
     - Added value compared to already existing modules?
 2. **Input data**:
     - Provide a persistent identifier for the dataset (e.g., PXD, or DOI) (If this does not exist yet, publish the data on Zenodo and provide this DOI)
@@ -31,7 +31,7 @@ Use a label "to be discussed" so that the community knows that the proposal is u
 
 ## Before starting the development (OPTIONAL)
 
-Send an email to minimum one expert that can provide feedbacks on the proposal such as:
+Send an email to minimum one expert that can provide feedback on the proposal such as:
 
 * Would some specific metrics be better tailored to the module objective?
 * Are there some biases that are not accounted for in the proposal?
@@ -48,7 +48,7 @@ Switch to the label "waiting for expert input".
 
 ## When the module is ready to be released (MANDATORY)
 
-Send an email to minimum one expert that can provide feedbacks on the proposal such as:
+Send an email to minimum one expert that can provide feedback on the proposal such as:
 
 * Would some specific metrics be better tailored to the module objective?
 * Are there some biases that are not accounted for in the proposal?

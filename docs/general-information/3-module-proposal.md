@@ -43,7 +43,7 @@ We ask in the email that experts answer within two weeks.
 
 Switch to the label "waiting for expert input". It can be switched to "under development" after discussions with expert(s). In such case, experts should be listed as contributors of the module and mentionned in all communications about it. 
 
-## When the module is ready to be released (MANDATORY if no expert aggreed to collaborate already)
+## When the module is ready to be released (MANDATORY if no expert agreed to collaborate already)
 
 Send an email to minimum one expert that can provide feedback on the proposal such as:
 

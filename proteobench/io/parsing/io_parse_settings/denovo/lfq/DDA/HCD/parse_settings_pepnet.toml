@@ -1,0 +1,8 @@
+[mapper]
+"TITLE" = "spectrum_id"
+"DENOVO" = "sequence"
+"Score" = "score"
+"Positional Score" = "aa_scores"
+
+[spectrum_id_mapper]
+"pattern" = "scan=(\\d+)"

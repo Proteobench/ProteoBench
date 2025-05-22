@@ -9,6 +9,8 @@ from typing import Any, Dict, List
 import pandas as pd
 import toml
 
+from psm_utils import Peptidoform
+
 from .parse_ion import get_proforma_bracketed
 
 # IMPORTANT: it is defined here, but filled in after defining the classes
@@ -359,7 +361,7 @@ class ParseSettingsDeNovo:
             df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
 
         if "proforma" in df.columns:
-            df["peptidoform"] = df["proforma"]
+            df["peptidoform"] = Peptidoform(df["proforma"])
 
         # TODO: add aa_scores if absent
 

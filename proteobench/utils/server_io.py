@@ -26,6 +26,9 @@ from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
 from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
     DIAQuantPeptidoformModule,
 )
+import re
+from github import Github
+
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
@@ -196,3 +199,77 @@ def make_submission(submission_files=[], token="", module_name=""):
         )
 
         return pr_url
+
+
+class GithubPRParser:
+    def __init__(self, token: str = ""):
+        self.github = Github(token) if token else Github()
+
+    def get_repo(self, repo_name: str):
+        return self.github.get_repo(repo_name)
+
+    @staticmethod
+    def clean_key(key: str) -> str:
+        """Clean string to valid key format."""
+        return re.sub(r'[^a-zA-Z0-9_]+', '', key.strip())
+
+    @staticmethod
+    def extract_identifier(title: str) -> str:
+        """Extract unique identifier from PR title."""
+        match = re.search(r'([A-Za-z0-9]+_\d{8}_\d{6})', title)
+        return match.group(0) if match else None
+
+    @staticmethod
+    def parse_parameter_changes(body: str) -> dict:
+        """
+        Parse the parameter changes from the pull request body.
+        Returns a dictionary with keys and [old_val, new_val] lists.
+        """
+        param_dict = {}
+        match = re.search(r"Parameter changes Detected:\s*(.*)", body, re.DOTALL)
+        if not match:
+            return param_dict
+
+        section_text = body[match.start():]
+        lines = section_text.splitlines()
+
+        param_lines = []
+        found_header = False
+        for line in lines:
+            if found_header:
+                if line.strip() == "" or line.strip().endswith(":") or line.strip().startswith("Dataset URL"):
+                    break
+                param_lines.append(line.strip())
+            elif line.strip() == "Parameter changes Detected:":
+                found_header = True
+
+        for line in param_lines:
+            m = re.match(r'([^:]+):\s*(.*?)\s*→\s*(.*)', line)
+            if m:
+                key = GithubPRParser.clean_key(m.group(1))
+                old_val = m.group(2).strip(' `')
+                new_val = m.group(3).strip(' `')
+                param_dict[key] = [old_val, new_val]
+        return param_dict
+
+    def collect_pulls_info(self, repo_name: str):
+        repo = self.get_repo(repo_name)
+        pulls = repo.get_pulls(state="all", sort="created", direction="desc")
+        pulls_dict_params = {}
+        pulls_dict_all = {}
+
+        for pull in pulls:
+            title = pull.title
+            body = pull.body or ""
+            param_changes = self.parse_parameter_changes(body)
+            identifier = self.extract_identifier(title)
+
+            pulls_dict_all[identifier] = {
+                "pr_number": pull.number,
+                "title": title,
+                "body": body,
+                "param_changes": param_changes,
+            }
+            if param_changes:
+                pulls_dict_params[identifier] = pulls_dict_all[identifier]
+        return pulls_dict_all, pulls_dict_params

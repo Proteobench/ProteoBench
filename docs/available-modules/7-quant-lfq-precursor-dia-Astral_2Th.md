@@ -136,12 +136,12 @@ For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant s
 
 ### [PEAKS](https://www.bioinfor.com//)
 When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS (Sample 1->6), so they match exactly with the .RAW file names:
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
 
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 

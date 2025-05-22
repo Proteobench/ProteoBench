@@ -75,7 +75,7 @@ def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
         fixed_mods=";".join(fixed_mods_list),
         variable_mods=";".join(var_mods_list),
         max_mods=None,
-        min_precursor_charge=1,
+        min_precursor_charge=None,
         max_precursor_charge=int(params.loc["spectrum, maximum parent charge"]),
     )
     params.fill_none()

@@ -34,6 +34,7 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "lfq",
         "DDA",
         "ion",
+        "QExactive",
     )
 )
 TESTED_SOFTWARE_TOOLS = (

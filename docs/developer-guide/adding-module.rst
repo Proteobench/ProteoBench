@@ -3,8 +3,9 @@ Adding a new quantification module
 #################################
 
 Here we provide a comprehensive overview of how to set up a new module in ProteoBench,
-currently focused on quantification modules. As more module types are added, we might need
-to create a verson of this page for non-quant modules.
+currently focused on quantification modules, where you only need to check and maybe 
+slightly modify some components. For entirely new module types, you will need
+to create a new version if it says 'check, modify or add' of a component.
 
 
 Terms
@@ -101,7 +102,7 @@ Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObject
 
 :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_input_field` creates 
 the input fields for the metadate and the
-input file format and type. They are given by in the
+input file format and type. They are given in the
 `proteobench/modules/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/io/io_parse_settings>`_ folder,
 same as for the backend of the module.
 

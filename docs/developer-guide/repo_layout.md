@@ -40,7 +40,7 @@ ProteoBench
 
 ## ProteoBench python package
 
-Let's see the current overview for proteobench `0.8.11`:
+Let's see the overview for proteobench `0.8.11`:
 
 ```bash
 proteobench

@@ -90,8 +90,6 @@ if os.environ.get("READTHEDOCS") == "True":
                 "-o",
                 str(PROJECT_ROOT / "docs" / "developer-guide" / "api" / "proteobench"),
                 str(PACKAGE_ROOT),
-                str(PACKAGE_ROOT / "*.c"),
-                str(PACKAGE_ROOT / "*.so"),
             ]
         )
         
@@ -111,8 +109,6 @@ if os.environ.get("READTHEDOCS") == "True":
                 "-o",
                 str(PROJECT_ROOT / "docs" / "developer-guide" / "api" / "webinterface"),
                 str(APP_ROOT),
-                str(APP_ROOT / "*.c"),
-                str(APP_ROOT / "*.so"),
             ]
         )
     

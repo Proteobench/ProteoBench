@@ -30,17 +30,16 @@ Alternatively, you can download them from the ProteoBench server here: [proteobe
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_Quantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
+Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip" download>ProteoBenchFASTA_MixedSpecies_HYE.zip</a>.
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
-Note that this is the same FASTA as used in Module 2 - DDA Quantification.
 
 ## Metric calculation
 
 For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file. Contaminant sequences flagged with the prefix "Cont_" in the fasta file are removed, as well as the peptide ions that match proteins from several species and the peptide ions that are not quantified in any raw file. When applicable, "0" are replaced by NAs and missing values are ignored.
 Then we log2-transform the values, and calculate the mean signal per condition, with the standard deviation and coefficient of variation (CV). For each precursor ion, we calculate the difference between the mean(log2) in A and B, and compare it to its expected value. The difference between measured and expected mean(log2) is called "epsilon".
-The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
+The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
 
 ## How to use
 

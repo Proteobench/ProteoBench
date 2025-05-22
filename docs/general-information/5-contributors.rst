@@ -48,6 +48,11 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **Quentin Giai Gianetto**
+    *Institut Pasteur, Université Paris Cité, Bioinformatics and Biostatistics HUB*
+    *Institut Pasteur, Université Paris Cité, Proteomics Platform, Mass Spectrometry for Biology Unit, UAR CNRS 2024*
+
+.. line-block::
     **David M. Hollenstein**
     *Mass Spectrometry Facility, Max Perutz Labs, Vienna Biocenter Campus (VBC), Vienna, Austria*
 
@@ -59,6 +64,11 @@ People who contributed to ProteoBench, in alphabetical order:
 .. line-block::
     **Vedran Kasalica**
     *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
+
+.. line-block::
+    **Olivier Langella**
+    *Université Paris-Saclay, INRAE, CNRS, AgroParisTech, GQE - Le Moulon, PAPPSO, 91190, Gif-Sur-Yvette, France*
+    *PAPPSO - Plateforme d'Analyse Protéomique de Paris Sud Ouest (France)*
 
 .. line-block::
     **Caroline Lennartsson**
@@ -73,6 +83,13 @@ People who contributed to ProteoBench, in alphabetical order:
     **Dominik Lux**
     *Ruhr University Bochum, Medical Faculty, Medizinisches Proteom-Center, Gesundheitscampus 4, 44801 Bochum, Germany*
     *Ruhr University Bochum, Medical Faculty, Center for Protein Diagnostics (PRODI), Gesundheitscampus 4, 44801 Bochum , Germany*
+
+.. line-block::
+   **Teresa Mendes Maia**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
 
 .. line-block::
     **Emmanuelle Mouton-Barbosa**
@@ -127,8 +144,16 @@ People who contributed to ProteoBench, in alphabetical order:
     *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
     *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
     *Core for Life (C4L)*
+
 .. line-block::
     **Christian Panse**
     *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
     *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+    *Core for Life (C4L)*
+
+.. line-block::
+   **An Staes**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
     *Core for Life (C4L)*

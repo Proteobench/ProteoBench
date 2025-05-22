@@ -20,6 +20,7 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.denovo.denovo_base import DeNovoModule
 from proteobench.score.denovo.denovoscores import DenovoScores
+from proteobench.datapoint.denovo_datapoint import DenovoDatapoint
 
 class DDAHCDDeNovoModule(DeNovoModule):
     """

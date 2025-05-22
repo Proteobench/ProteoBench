@@ -39,8 +39,8 @@ body:
   - type: textarea
     id: reviewers
     attributes:
-      label: "potential reviewers"
-      description: "Please provide the name of potential reviewers for this module proposal"
+      label: "potential external expert(s)"
+      description: "Please provide the name of potential experts who did not participate to the full design of the module proposed. They can choose to give inputs and/or can fully collaborate to the module design and/or development."
       value: |
         ...
       render: bash

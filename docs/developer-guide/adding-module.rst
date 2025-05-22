@@ -54,21 +54,24 @@ certain classes and do the following steps:
    method, initializing it with custom parameters in the ``__init__`` method.
 2. Functions in :file:`proteobench/io/parsing/parse_ion.py` provide the functions used to parse
    precursor (`open on GitHub <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_)
-3. :file:`proteobench/io/parsing/io_parse_settings/parse_settings_file.toml`
-   `(link) <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/parse_settings_file.toml>`_
-   links the settings to parse the uploaded data files into the **intermediate** metric 
+3. :file:`proteobench/io/parsing/io_parse_settings/parse_settings_files.toml`
+   `(link) <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/parse_settings_files.toml>`_
+   links the settings to parse the uploaded data files into the **intermediate** metric
    structure used by
-   :file:`proteobench/io/parsing/parse_ion.py` per module. The settings file 
-   parameters should be defined in the toml file in a folder for a module 
+   :file:`proteobench/io/parsing/parse_ion.py` per module. The settings file
+   parameters should be defined in the toml file in a folder for a module
    :file:`proteobench/io/parse/io_parse_settings/Quant/lfq/DDA/ion/`,
    for example
    `parse_settings_alphadia <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral/parse_settings_alphadia.toml>`_.
-   New data analysis software has to be added to :func:`~proteobench.io.parsing.parse_ion.load_input_file`
-   and the settings are parsed by :class:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant`,
-   which most important method is :meth:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant.convert_to_standard_format`.
-4. :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint` is the data structure 
-   (as a dataclass) of :class:`DataPoint` for quant modules. It contains data set properties 
-   from the acquisition and processing 
+   New data analysis software has to be added to 
+   :func:`~proteobench.io.parsing.parse_ion.load_input_file`
+   and the settings are parsed by
+   :class:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant`,
+   which most important method is
+   :meth:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant.convert_to_standard_format`.
+4. :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint` is the
+   data structure (as a dataclass) of :class:`DataPoint` for quant modules.
+   It contains data set properties from the acquisition and processing
    (e.g. used peptide fdr).
 5. :class:`~proteobench.plotting.plot_quant.PlotDataPoint` is the class with methods to visualize
    the benchmarking metrics from the ``DataPoints``.
@@ -85,11 +88,11 @@ certain classes and do the following steps:
 Web interface
 -------------
 
-The web interface is written in Streamlit. Each module gets assigned a specific ``page``.
-There are only few changes necessary as the main calculations are done in
-
-:class:`~webinterface.pages.base_pages.quant.QuantUIObjects` contains most functionionality to 
-create the web interface for each quantification module.
+The web interface is written in Streamlit. Each module gets assigned a
+specific ``page``. There are only few changes necessary
+as the main calculations are done in
+:class:`~webinterface.pages.base_pages.quant.QuantUIObjects`. It contains most
+functionality to create the web interface for each quantification module.
 
 .. warning::
    QuantUIObjects should be simplified.
@@ -100,8 +103,20 @@ text for the different modules in the interface.
 Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObjects`
 ...................................................................................
 
-:meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_input_field` creates 
-the input fields for the metadate and the
+- Tab 1: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_main`
+  shows the description of the module, which is defined in
+  `webinterface/pages/pages_variables <www.github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
+  where we define custom text and **unique** component names for each module
+  (e.g. for the main plot)
+  to not display on several pages the same plot in the streamlit webinterface.
+- Tab 2: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_submission_form`
+  displays the submission form based on the module toml configurations in
+  `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_.
+- Tab 2.5: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_current_data_plots`
+  displays the metric plot if a new results were added to the module.
+- Tab 3: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_submitted`
+- Tab 4: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_public_submission_ui`
+creates  the input fields for the metadata and the
 input file format and type. They are given in the
 `proteobench/modules/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/io/io_parse_settings>`_ folder,
 same as for the backend of the module.
@@ -137,7 +152,7 @@ We strongly recommend to keep documenting your code. The documentation is writte
 and can be found in the `docs <https://github.com/Proteobench/ProteoBench/tree/main/docs>`_ folder. We
 use Sphinx and myst-parser to build the website.
 
-1. `docs/proteobench/available-modules <https://github.com/Proteobench/ProteoBench/tree/main/docs/proteobench/available-modules>`_
+1. `docs/available-modules <https://github.com/Proteobench/ProteoBench/tree/main/docs/available-modules>`_
    Here you can add a file for your new module, using any of the existing module descriptions as a template.
 2. `API documentation for your module <https://proteobench.readthedocs.io/en/latest/developer-guide/api/webinterface/webinterface.pages/#submodulest>`_ 
    will be added automatically. You can see it on the readthedocs page built specifically for your pull request.
@@ -175,11 +190,16 @@ to see which files these authors had to add or modify.
 4. Check, modify or add datapoint classes to
    `proteobench/datapoint <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/datapoint>`_
    for storing the intermediate data structure.
-5. Check, modify or add plotting classes to
+5. Check, modify or add the score classes to compute the scoring metrics in
+   `proteobench/score <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/score>`_
+6. Check, modify or add plotting classes to
    `proteobench/plotting <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/plotting>`_
    to create the figures for the web interface.
-6. Check, modify or add parameter parsing for new tools in
+7. Check, modify or add parameter parsing for new tools in
    `proteobench/io/params <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/params>`_
-7. Add a new page defining the module webinterface to
+8. Add a new page defining the module webinterface to
    `webinterface/pages <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages>`_
    using the base functionality and adding ``pages_variables`` dataclasses.
+9. Create a new results repository for the module in
+   `Proteobench <https://github.com/Proteobench>`_ and 
+   a fork in `Proteobot <https://github.com/proteobot>`_

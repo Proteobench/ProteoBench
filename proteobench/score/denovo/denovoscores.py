@@ -47,7 +47,7 @@ class DenovoScores:
 
         # Add match type label (exact, mass, mismatch) and the amino acid-level evaluations
         standard_format["match_dict"] = standard_format.apply(
-            lambda x: self.evaluate_match(ground_truth=x["peptidoform_gt"], de_novo=x["peptidoform_dn"]), axis=1
+            lambda x: self.evaluate_match(ground_truth=x["peptidoform_ground_truth"], de_novo=x["peptidoform"]), axis=1
         )
         standard_format["match_type"] = standard_format["match_dict"].apply(lambda x: x["match_type"])
         standard_format["aa_matches_dn"] = standard_format["match_dict"].apply(lambda x: x["aa_matches_dn"])

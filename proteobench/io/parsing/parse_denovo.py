@@ -50,6 +50,22 @@ def _load_casanovo(input_mztab: str) -> pd.DataFrame:
     input_data_frame = input_data_frame.spectrum_match_table
     return input_data_frame
 
+def _load_deepnovo(input_csv: str) -> pd.DataFrame:
+    """
+    Load a DeepNovo output file.
+
+    Parameters
+    ----------
+    input_path: str
+        The path to the DeepNovo output file.
+    
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+
 def _load_instanovo(input_mztab: str) -> pd.DataFrame:
     """
     Load an InstaNovo output file.
@@ -67,6 +83,22 @@ def _load_instanovo(input_mztab: str) -> pd.DataFrame:
     input_data_frame = MzTab(input_mztab)
     input_data_frame = input_data_frame.spectrum_match_table
     return input_data_frame
+
+def _load_pepnet(input_csv: str) -> pd.DataFrame:
+    """
+    Load a PepNet output file.
+
+    Parameters
+    ----------
+    input_path: str
+        The path to the PepNet output file.
+    
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    return pd.read_csv(input_csv, sep="\t", low_memory=False)
 
 def _load_pihelixnovo(input_path: str) -> pd.DataFrame:
     """
@@ -100,27 +132,12 @@ def _load_piprimenovo(input_path: str) -> pd.DataFrame:
     """
     pass
 
-def _load_pepnet(input_csv: str) -> pd.DataFrame:
-    """
-    Load a PepNet output file.
-
-    Parameters
-    ----------
-    input_path: str
-        The path to the PepNet output file.
-    
-    Returns
-    -------
-    pd.DataFrame
-        The loaded dataframe.
-    """
-    return pd.read_csv(input_csv, sep="\t", low_memory=False)
-
 _LOAD_FUNCTIONS = {
     "AdaNovo": _load_adanovo,
     "Casanovo": _load_casanovo,
+    "DeepNovo": _load_deepnovo,
     "InstaNovo": _load_instanovo,
+    "PepNet": _load_pepnet,
     "Pi-HelixNovo": _load_pihelixnovo,
     "Pi-PrimeNovo": _load_piprimenovo,
-    "PepNet": _load_pepnet,
 }

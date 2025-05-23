@@ -7,6 +7,8 @@
 [spectrum_id_mapper]
 "pattern" = "index=(\\d+)"
 
+[sequence_mapper]
+
 [modifications_parser]
 "parse_column" = "sequence"
 "before_aa" = false

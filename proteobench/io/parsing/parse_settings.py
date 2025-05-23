@@ -314,6 +314,7 @@ class ParseSettingsDeNovo:
     def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
         self.mapper = parse_settings["mapper"]
         self.spectrum_id_mapper = parse_settings["spectrum_id_mapper"]
+        self.sequence_mapper = parse_settings["sequence_mapper"]
         self.modification_parser = None
         self.analysis_level = "peptidoform"
 
@@ -330,14 +331,19 @@ class ParseSettingsDeNovo:
             parse_settings_module["ground_truth"]["path_to_ground_truth"]
         )
 
-    def extract_scan_id(self, spectrum_id) -> float:
+    def extract_scan_id(self, spectrum_id: str) -> int:
         """
-        Get the expected species ratio.
+        Extract the scan ID from the spectrum ID string.
 
+        Parameters
+        ----------
+        spectrum_id : str
+            The input spectrum ID string.
+        
         Returns
         -------
-        float
-            The expected ratio of species.
+        int
+            The extracted scan ID (a number).
         """
         scan_id_match = re.search(self.spectrum_id_mapper["pattern"], spectrum_id)
         if scan_id_match is None:
@@ -348,6 +354,50 @@ class ParseSettingsDeNovo:
 
         scan_id = scan_id_match.group(1)
         return int(scan_id)
+
+    def format_sequence(self, sequence: str) -> str:
+        """
+        Format the sequence string.
+
+        Parameters
+        ----------
+        sequence : str
+            The input sequence string.
+
+        Returns
+        -------
+        str
+            The formatted sequence string.
+        """
+        if not isinstance(sequence, str):
+            return ""
+
+        if "replacement_dict" in self.sequence_mapper:
+            for key, value in self.sequence_mapper["replacement_dict"].items():
+                sequence = sequence.replace(key, value)
+        return sequence
+
+    def format_scores(self, aa_scores: Any) -> List[float]:
+        """
+        Format the amino acid scores into a list of float numbers.
+
+        Parameters
+        ----------
+        aa_scores : List[float]
+            The input list of scores.
+
+        Returns
+        -------
+        List[float]
+            The formatted list of scores.
+        """
+        if isinstance(aa_scores, list) and all(isinstance(i, float) for i in aa_scores):
+            return aa_scores
+
+        if isinstance(aa_scores, str):
+            aa_scores = aa_scores.split(",") # TODO: make it cofigurable separator?
+            aa_scores = [float(score) for score in aa_scores]
+        return aa_scores
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
@@ -375,8 +425,11 @@ class ParseSettingsDeNovo:
 
         df = df.rename(columns=self.mapper, inplace=False)
 
-        # TODO: standardize transfrormations for spectrum_id
-        df["spectrum_id"] = df["spectrum_id"].apply(self.extract_scan_id)
+        if self.spectrum_id_mapper:
+            df["spectrum_id"] = df["spectrum_id"].apply(self.extract_scan_id)
+
+        if self.sequence_mapper:
+            df["sequence"] = df["sequence"].apply(self.format_sequence)
 
         if self.modification_parser is not None:
             df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
@@ -386,14 +439,17 @@ class ParseSettingsDeNovo:
         if "proforma" in df.columns:
             df["peptidoform"] = df["proforma"].apply(lambda x: Peptidoform(x))
 
-        # TODO: add aa_scores if absent
+        # If AA scores are not provided, simulate them from peptide score
+        if "aa_scores" not in df.columns:
+            df["aa_scores"] = df.apply(lambda row: [row["score"]] * len(row["peptidoform"]), axis=1)
+        df["aa_scores"] = df["aa_scores"].apply(self.format_scores)
 
         columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]
         df = df[columns_to_keep]
 
         # Load ground truth PSMs
         df_ground_truth = pd.read_csv(self.path_to_ground_truth)
-        df = pd.merge(df, df_ground_truth, on=["spectrum_id"], suffixes=("", "_ground_truth"))
+        df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
         return df
 
 

@@ -6,3 +6,5 @@
 
 [spectrum_id_mapper]
 "pattern" = "scan=(\\d+)"
+
+[sequence_mapper]

@@ -26,7 +26,7 @@ from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.score.quant.quantscores import QuantScores
 
 
-class DIAQuantIonModule(QuantModule):
+class DIAQuantIonModuleAIF(QuantModule):
     """
     DIA Quantification Module for precursor level Quantification.
 

@@ -26,7 +26,7 @@ from proteobench.score.quant.quantscores import QuantScores
 def handle_benchmarking_error(error_type: Type[Exception], error_message: str):
     """
     Decorator to handle benchmarking errors with custom error messages.
-    
+
     Parameters
     ----------
     error_type : Type[Exception]
@@ -34,6 +34,7 @@ def handle_benchmarking_error(error_type: Type[Exception], error_message: str):
     error_message : str
         The error message to raise if the exception occurs
     """
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -43,7 +44,9 @@ def handle_benchmarking_error(error_type: Type[Exception], error_message: str):
                 raise error_type(f"{error_message}: {e}")
             except Exception as e:
                 raise error_type(f"Unexpected error in {func.__name__}: {e}")
+
         return wrapper
+
     return decorator
 
 
@@ -56,10 +59,7 @@ def _load_input(input_file: str, input_format: str) -> DataFrame:
 @handle_benchmarking_error(ParseSettingsError, "Error parsing settings")
 def _load_settings(parse_settings_dir: str, module_id: str, input_format: str):
     """Load and parse the settings file."""
-    return ParseSettingsBuilder(
-        parse_settings_dir=parse_settings_dir,
-        module_id=module_id
-    ).build_parser(input_format)
+    return ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(input_format)
 
 
 @handle_benchmarking_error(ConvertStandardFormatError, "Error converting to standard format")
@@ -71,11 +71,7 @@ def _convert_format(parse_settings, input_df: DataFrame):
 @handle_benchmarking_error(QuantificationError, "Error generating quantification scores")
 def _create_quant_scores(precursor_column_name: str, parse_settings):
     """Create quantification scores."""
-    return QuantScores(
-        precursor_column_name,
-        parse_settings.species_expected_ratio(),
-        parse_settings.species_dict()
-    )
+    return QuantScores(precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict())
 
 
 @handle_benchmarking_error(IntermediateFormatGenerationError, "Error generating intermediate data structure")
@@ -88,10 +84,7 @@ def _generate_intermediate(quant_score, standard_format, replicate_to_raw):
 def _generate_datapoint(intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec):
     """Generate datapoint."""
     return QuantDatapoint.generate_datapoint(
-        intermediate_metric_structure,
-        input_format,
-        user_input,
-        default_cutoff_min_prec=default_cutoff_min_prec
+        intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
     )
 
 
@@ -143,27 +136,24 @@ def run_benchmarking(
     """
     # Load and parse input file
     input_df = _load_input(input_file, input_format)
-    
+
     # Load and parse settings
     parse_settings = _load_settings(parse_settings_dir, module_id, input_format)
-    
+
     # Convert to standard format
     standard_format, replicate_to_raw = _convert_format(parse_settings, input_df)
-    
+
     # Create quantification scores
     quant_score = _create_quant_scores(precursor_column_name, parse_settings)
-    
+
     # Generate intermediate structure
     intermediate_metric_structure = _generate_intermediate(quant_score, standard_format, replicate_to_raw)
-    
+
     # Generate datapoint
     current_datapoint = _generate_datapoint(
-        intermediate_metric_structure,
-        input_format,
-        user_input,
-        default_cutoff_min_prec
+        intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec
     )
-    
+
     # Add datapoint if function provided
     if add_datapoint_func is not None:
         all_datapoints = _append_datapoint(add_datapoint_func, current_datapoint, all_datapoints)
@@ -231,45 +221,33 @@ def run_benchmarking_with_timing(
         input_df = load_input_file(input_file, input_format)
 
     with time_block("parse_settings"):
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=parse_settings_dir,
-            module_id=module_id
-        ).build_parser(input_format)
+        parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(
+            input_format
+        )
 
     with time_block("convert_to_standard_format"):
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
     with time_block("instantiate_quant_scores"):
         quant_score = QuantScores(
-            precursor_column_name,
-            parse_settings.species_expected_ratio(),
-            parse_settings.species_dict()
+            precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
 
     with time_block("generate_intermediate"):
-        intermediate_metric_structure = quant_score.generate_intermediate(
-            standard_format,
-            replicate_to_raw
-        )
+        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
     with time_block("generate_datapoint"):
         current_datapoint = QuantDatapoint.generate_datapoint(
-            intermediate_metric_structure,
-            input_format,
-            user_input,
-            default_cutoff_min_prec=default_cutoff_min_prec
+            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 
     if add_datapoint_func is not None:
         with time_block("append_datapoint"):
-            all_datapoints = add_datapoint_func(
-                current_datapoint,
-                all_datapoints=all_datapoints
-            )
+            all_datapoints = add_datapoint_func(current_datapoint, all_datapoints=all_datapoints)
 
     return (
         intermediate_metric_structure,
         all_datapoints,
         input_df,
         timings,
-    ) 
+    )

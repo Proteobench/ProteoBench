@@ -37,7 +37,7 @@ def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: 
     """
     if not row:  # Handle empty dictionary
         return None
-        
+
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
@@ -206,7 +206,6 @@ class QuantDatapoint:
 
         return results_series
 
-
     def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> dict[int, dict[str, float]]:
         """
         Compute various statistical metrics from the provided DataFrame for the benchmark,
@@ -232,9 +231,9 @@ class QuantDatapoint:
                 "variance_epsilon": df_slice["epsilon"].var(),
                 "nr_prec": nr_prec,
                 "CV_median": cv_avg.loc[0.50],
-                "CV_q75"   : cv_avg.loc[0.75],
-                "CV_q90"   : cv_avg.loc[0.90],
-                "CV_q95"   : cv_avg.loc[0.95],
+                "CV_q75": cv_avg.loc[0.75],
+                "CV_q90": cv_avg.loc[0.90],
+                "CV_q95": cv_avg.loc[0.95],
             }
         }
 

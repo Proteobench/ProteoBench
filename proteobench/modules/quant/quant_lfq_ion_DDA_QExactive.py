@@ -125,5 +125,3 @@ class DDAQuantIonModuleQExactive(QuantModule):
             default_cutoff_min_prec=default_cutoff_min_prec,
             add_datapoint_func=self.add_current_data_point,
         )
-
-

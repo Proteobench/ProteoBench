@@ -368,7 +368,7 @@ class ParseSettingsDeNovo:
         ----------
         spectrum_id : str
             The input spectrum ID string.
-        
+
         Returns
         -------
         int
@@ -424,7 +424,7 @@ class ParseSettingsDeNovo:
             return aa_scores
 
         if isinstance(aa_scores, str):
-            aa_scores = aa_scores.split(",") # TODO: make it cofigurable separator?
+            aa_scores = aa_scores.split(",")  # TODO: make it cofigurable separator?
             aa_scores = [float(score) for score in aa_scores]
         return aa_scores
 
@@ -479,7 +479,7 @@ class ParseSettingsDeNovo:
         # Load ground truth PSMs
         df_ground_truth = pd.read_csv(self.path_to_ground_truth)
         df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
-        df['peptidoform_ground_truth'] = df['peptidoform_ground_truth'].apply(lambda x: Peptidoform(x))
+        df["peptidoform_ground_truth"] = df["peptidoform_ground_truth"].apply(lambda x: Peptidoform(x))
         return df
 
 

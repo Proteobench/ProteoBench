@@ -47,7 +47,6 @@ def get_prc_curve(t, n_spectra):
     covs = []
 
     for threshold in np.linspace(t.score.max(), t.score.min()):
-
         if np.isnan(threshold):
             continue
 

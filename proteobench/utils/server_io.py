@@ -211,12 +211,12 @@ class GithubPRParser:
     @staticmethod
     def clean_key(key: str) -> str:
         """Clean string to valid key format."""
-        return re.sub(r'[^a-zA-Z0-9_]+', '', key.strip())
+        return re.sub(r"[^a-zA-Z0-9_]+", "", key.strip())
 
     @staticmethod
     def extract_identifier(title: str) -> str:
         """Extract unique identifier from PR title."""
-        match = re.search(r'([A-Za-z0-9]+_\d{8}_\d{6})', title)
+        match = re.search(r"([A-Za-z0-9]+_\d{8}_\d{6})", title)
         return match.group(0) if match else None
 
     @staticmethod
@@ -230,7 +230,7 @@ class GithubPRParser:
         if not match:
             return param_dict
 
-        section_text = body[match.start():]
+        section_text = body[match.start() :]
         lines = section_text.splitlines()
 
         param_lines = []
@@ -244,11 +244,11 @@ class GithubPRParser:
                 found_header = True
 
         for line in param_lines:
-            m = re.match(r'([^:]+):\s*(.*?)\s*→\s*(.*)', line)
+            m = re.match(r"([^:]+):\s*(.*?)\s*→\s*(.*)", line)
             if m:
                 key = GithubPRParser.clean_key(m.group(1))
-                old_val = m.group(2).strip(' `')
-                new_val = m.group(3).strip(' `')
+                old_val = m.group(2).strip(" `")
+                new_val = m.group(3).strip(" `")
                 param_dict[key] = [old_val, new_val]
         return param_dict
 

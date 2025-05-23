@@ -14,27 +14,25 @@ Other modules will be more suited to explore further post-pocessing steps.
 
 ## Data set
 
-A not yet released Astral (Thermo Fisher) data independent acquisition (DIA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)] was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
+A not yet released Astral (Thermo Fisher) data independent acquisition (DIA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli.
 Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
 Data acquisition parameters were as following: 
-Peptides were loaded directly onto the analytical column and were separated by reversed-phase chromatography using a 50 cm μPAC™ column (Thermo Scientific, cat # COL-NANO050NEOB), featuring a structured pillar array bed with a 180 µm bed width. Chromatographic gradient was initiated with 96% buffer A and 4% buffer B at a flow rate of 750 nL/min durig 1 minute. The flow rate was then reduced to 250 nL/min, and the percentage of buffer B was further increased to 40% over 15 minutes. Buffer A: 0.1% formic acid in water. Buffer B: 0.1% formic acid in 80% acetonitrile.
+Peptides were loaded directly onto the analytical column and were separated by reversed-phase chromatography using a 50 cm μPAC™ column (Thermo Scientific, cat # COL-NANO050NEOB), featuring a structured pillar array bed with a 180 µm bed width. The chromatographic gradient was initiated with 96% buffer A and 4% buffer B at a flow rate of 750 nL/min durig 1 minute. The flow rate was then reduced to 250 nL/min, and the percentage of buffer B was further increased to 40% over 15 minutes. Buffer A: 0.1% formic acid in water. Buffer B: 0.1% formic acid in 80% acetonitrile.
 
 The mass spectrometer was operated in positive ionization mode with data-independent acquisition, with a full MS scans over a mass range of m/z 380-980 with detection in the Orbitrap at a resolution of 240,000. In each cycle of data-independent acquisition, 300 windows of 2 Th were used to isolate and fragment all precursor ions from 380 to 980 m/z. A normalized collision energy of 25% was used for higher-energy collisional dissociation
 (HCD) fragmentation. MS2 scan range was set from 150 to 2000 m/z with detection in the Astral with a maximum injection time of 3 ms.
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-For now, you can download the raw files via:
+For now, you can download the raw files via a private server:
 
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw] (TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](TO DO)
-
-Alternatively, you can download them from a private server here: [proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://filesender.belnet.be/?s=download&token=7b7d5b37-a154-446b-9db3-ac5dffae0af5))
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -58,7 +56,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 |Parameter|Value|
 |---------|-----|
 |Maximum number of missed cleavages|1|
-|PSM FDR|0.01|
+|PSM/Precursor FDR|0.01|
 |Spectral Library|Predicted spectral library from FASTA|
 |Precursor charge state|1-5|
 |Precursor m/z range|380-980|
@@ -116,9 +114,20 @@ After upload, you will get a link to a Github pull request associated with your 
 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
-### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
-We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.s
-etup" file for parameter parsing when doing public upload.
+### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE)
+1. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
+2. In the "Analysis" tab, select "Set up a DirectDIA Analysis from folder"
+3. Select the folder containting the raw files in order to load the raw files
+4. Once loaded, you optionally can change the name of the project
+5. In the next tab select the proteobench fasta as the database
+6. Choose your settings in the next tab
+7. In the next tab fill in the conditions: "LFQ_Astral_DIA_15min_50ng_Condition_A_REP1","LFQ_Astral_DIA_15min_50ng_Condition_A_REP2", "LFQ_Astral_DIA_15min_50ng_Condition_A_REP3","LFQ_Astral_DIA_15min_50ng_Condition_B_REP1","LFQ_Astral_DIA_15min_50ng_Condition_B_REP2","LFQ_Astral_DIA_15min_50ng_Condition_B_REP3"
+8. Do not tick any GO terms or Library exensions in the next tabs
+9. Finish the settings on the next tab in order to start the search
+10. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
+11. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
+
+We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.setup.txt" file for parameter parsing when doing public upload.
 
 ### [MaxDIA](https://www.maxquant.org/) (work in progress)
 By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
@@ -127,12 +136,12 @@ For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant s
 
 ### [PEAKS](https://www.bioinfor.com//)
 When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS (Sample 1->6), so they match exactly with the .RAW file names:
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
 
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 

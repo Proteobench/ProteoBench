@@ -339,10 +339,11 @@ class ParseModificationSettings:
 
 
 MODULE_TO_CLASS = {
-    "quant_lfq_DDA_ion": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
 }

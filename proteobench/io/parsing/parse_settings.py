@@ -423,6 +423,7 @@ class ParseSettingsDeNovo:
         # Load ground truth PSMs
         df_ground_truth = pd.read_csv(self.path_to_ground_truth)
         df = pd.merge(df, df_ground_truth, on=["spectrum_id"], suffixes=("", "_ground_truth"))
+        df['peptidoform_ground_truth'] = df['peptidoform_ground_truth'].apply(lambda x: Peptidoform(x))
         return df
 
 

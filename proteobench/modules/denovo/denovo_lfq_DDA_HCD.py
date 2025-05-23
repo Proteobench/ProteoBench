@@ -7,6 +7,7 @@ from __future__ import annotations
 import pandas as pd
 from pandas import DataFrame
 
+from proteobench.datapoint.denovo_datapoint import DenovoDatapoint
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     IntermediateFormatGenerationError,
@@ -14,20 +15,19 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
-
 from proteobench.io.parsing.parse_denovo import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.denovo.denovo_base import DeNovoModule
 from proteobench.score.denovo.denovoscores import DenovoScores
-from proteobench.datapoint.denovo_datapoint import DenovoDatapoint
+
 
 class DDAHCDDeNovoModule(DeNovoModule):
     """
     De Novo Module.
     """
 
-    module_id = 'denovo_lfq_DDA_HCD'
+    module_id = "denovo_lfq_DDA_HCD"
 
     def __init__(
         self,
@@ -66,13 +66,15 @@ class DDAHCDDeNovoModule(DeNovoModule):
             Always returns True in this implementation.
         """
         return False
-    
+
     def benchmarking(
         self,
         input_file_loc: any,
         input_format: str,
         user_input: dict,
-        all_datapoints: pd.DataFrame  
+        all_datapoints: pd.DataFrame,
+        level: str = "peptide",
+        evaluation_type: str = "mass",
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -87,6 +89,10 @@ class DDAHCDDeNovoModule(DeNovoModule):
             User provided parameters for plotting.
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
+        level : str
+            The level precision and recall is calculated. Either `peptide` or `aa`
+        evaluation_type : str
+            The evaluation type for precision calculation. Either `exact` or `mass`-based
 
         Returns
         -------
@@ -104,9 +110,8 @@ class DDAHCDDeNovoModule(DeNovoModule):
             ) from e
         except Exception as e:
             raise ParseSettingsError("Error parsing the input file.") from e
-        
+
         msg = f"Folder: {self.parse_settings_dir}, Module: {self.module_id}"
-        
 
         # Parse settings file
         try:
@@ -129,24 +134,23 @@ class DDAHCDDeNovoModule(DeNovoModule):
         except Exception as e:
             raise ConvertStandardFormatError("Error converting to standard format.") from e
 
-
         # Instantiate de novo scores
         denovo_score = DenovoScores()
 
         # generate intermediate data structure (Calculate the scores)
         try:
-            intermediate_metric_structure = denovo_score.generate_intermediate(
-                standard_format
-            )
+            intermediate_metric_structure = denovo_score.generate_intermediate(standard_format)
         except Exception as e:
             raise IntermediateFormatGenerationError("Error generating intermediate data structure.") from e
 
         # try:
         current_datapoint = DenovoDatapoint.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input
+            intermediate_metric_structure, input_format, user_input, level=level, evaluation_type=evaluation_type
         )
+        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 
-        # Generate intermediate data structure
-
-
-        # Generate datapoint
+        return (
+            intermediate_metric_structure,
+            all_datapoints,
+            input_df,
+        )

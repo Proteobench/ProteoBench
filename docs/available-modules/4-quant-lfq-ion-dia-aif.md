@@ -30,17 +30,16 @@ Alternatively, you can download them from the ProteoBench server here: [proteobe
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_Quantification.zip" download>ProteoBenchFASTA_DDAQuantification.zip</a>.
+Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip" download>ProteoBenchFASTA_MixedSpecies_HYE.zip</a>.
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
-Note that this is the same FASTA as used in Module 2 - DDA Quantification.
 
 ## Metric calculation
 
 For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file. Contaminant sequences flagged with the prefix "Cont_" in the fasta file are removed, as well as the peptide ions that match proteins from several species and the peptide ions that are not quantified in any raw file. When applicable, "0" are replaced by NAs and missing values are ignored.
 Then we log2-transform the values, and calculate the mean signal per condition, with the standard deviation and coefficient of variation (CV). For each precursor ion, we calculate the difference between the mean(log2) in A and B, and compare it to its expected value. The difference between measured and expected mean(log2) is called "epsilon".
-The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. Precursors matched to contaminant sequences and/or to multiple species are excluded for error calculation. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
+The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
 
 ## How to use
 
@@ -110,8 +109,21 @@ After upload, you will get a link to a Github pull request associated with your 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
 ### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
-We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.s
-etup" file for parameter parsing when doing public upload.
+We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.setup.txt" file for parameter parsing when doing public upload.
+
+In the windowsGUI:
+
+1. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
+2. In the "Analysis" tab, select "Set up a DirectDIA Analysis from folder"
+3. Select the folder containting the raw files in order to load the raw files
+4. Once loaded, you optionally can change the name of the project
+5. In the next tab select the proteobench fasta as the database
+6. Choose your settings in the next tab
+7. In the next tab fill in the conditions: "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02", "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" 
+8. Do not tick any GO terms or Library exensions in the next tabs
+9. Finish the settings on the next tab in order to start the search
+10. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
+11. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
 
 ### [MaxDIA](https://www.maxquant.org/) (work in progress)
 By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 

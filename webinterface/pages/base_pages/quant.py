@@ -15,13 +15,13 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.Quant.lfq_DDA_ion_variables import VariablesDDAQuant
+from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule as IonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive as IonModule
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -354,9 +354,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]] = (
-                self.variables_quant.default_val_slider
-            )
+            st.session_state[
+                st.session_state[self.variables_quant.slider_id_uuid]
+            ] = self.variables_quant.default_val_slider
 
     def generate_main_selectbox(self) -> None:
         """
@@ -398,9 +398,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]] = (
-                self.variables_quant.default_val_slider
-            )
+            st.session_state[
+                st.session_state[self.variables_quant.slider_id_submitted_uuid]
+            ] = self.variables_quant.default_val_slider
 
     def display_submitted_results(self) -> None:
         """
@@ -706,7 +706,7 @@ class QuantUIObjects:
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
 
         st.select_slider(
-            label="Minimal ion quantifications (# samples)",
+            label="Minimal precursor quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
             value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
             key=slider_key,
@@ -723,7 +723,7 @@ class QuantUIObjects:
         st.markdown(open(self.variables_quant.description_slider_md, "r").read())
 
         st.select_slider(
-            label="Minimal ion quantifications (# samples)",
+            label="Minimal precursor quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
             value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
             key=slider_key,
@@ -1167,18 +1167,23 @@ class QuantUIObjects:
                 st.session_state[self.variables_quant.result_perf], parse_settings.species_expected_ratio()
             )
             fig_CV = PlotDataPoint.plot_CV_violinplot(st.session_state[self.variables_quant.result_perf])
+            fig_MA = PlotDataPoint.plot_ma_plot(
+                st.session_state[self.variables_quant.result_perf],
+                parse_settings.species_expected_ratio(),
+            )
             st.session_state[self.variables_quant.fig_cv] = fig_CV
             st.session_state[self.variables_quant.fig_logfc] = fig_logfc
         else:
             fig_logfc = st.session_state[self.variables_quant.fig_logfc]
             fig_CV = st.session_state[self.variables_quant.fig_cv]
+            fig_MA = st.session_state[self.variables_quant.fig_ma]
 
         if self.variables_quant.first_new_plot:
             col1, col2 = st.columns(2)
             col1.subheader("Log2 Fold Change distributions by species.")
             col1.markdown(
                 """
-                    Left Panel : log2 fold changes calculated from your data
+                    log2 fold changes calculated from your data
                 """
             )
             col1.plotly_chart(fig_logfc, use_container_width=True)
@@ -1186,10 +1191,23 @@ class QuantUIObjects:
             col2.subheader("Coefficient of variation distribution in Condition A and B.")
             col2.markdown(
                 """
-                    Right Panel Panel : CV calculated from your data
+                    CVs calculated from your data
                 """
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
+
+            col1.markdown("---")  # optional horizontal separator
+
+            col1.subheader("MA plot")
+            col1.markdown(
+                """
+                    MA plot from your data
+                """
+            )
+            # Example: plot another figure or add any other Streamlit element
+            # st.plotly_chart(fig_additional, use_container_width=True)
+            col1.plotly_chart(fig_MA, use_container_width=True)
+
         else:
             pass
 

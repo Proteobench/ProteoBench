@@ -22,6 +22,7 @@ class VariablesDIAQuant:
     fig_logfc: str = "fig_logfc_dia_quant"
     fig_metric: str = "fig_metric_dia_quant"
     fig_cv: str = "fig_CV_violinplot_dia_quant"
+    fig_ma_plot: str = "fig_ma_plot_dia_quant"
     result_perf: str = "result_perf_dia_quant"
     meta_data: str = "meta_data_dia_quant"
     input_df: str = "input_df_dia_quant"
@@ -65,7 +66,7 @@ class VariablesDIAQuant:
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/"
 
-    title: str = "DIA Ion quantification - AIF"
+    title: str = "DIA Precursor quantification - AIF"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_aif_quant_"

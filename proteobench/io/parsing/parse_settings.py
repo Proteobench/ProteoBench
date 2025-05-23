@@ -9,7 +9,6 @@ from typing import Any, Dict, List
 
 import pandas as pd
 import toml
-
 from psm_utils import Peptidoform
 
 from .parse_ion import get_proforma_bracketed
@@ -158,6 +157,16 @@ class ParseSettingsQuant:
         """
         Convert a software tool output into a generic format supported by the module.
 
+        Steps:
+        1. Validate and rename columns
+        2. Create replicate mapping
+        3. Filter decoys and contaminants
+        4. Process species information
+        5. Handle data format (long vs short)
+        6. Process modifications if needed
+        7. Filter zero intensities
+        8. Format based on analysis level
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -168,75 +177,96 @@ class ParseSettingsQuant:
         tuple[pd.DataFrame, Dict[int, List[str]]]
             The converted DataFrame and a dictionary mapping replicates to raw data.
         """
-        # TODO: Add functionality/steps in docstring.
+        df = self._validate_and_rename_columns(df)
+        replicate_to_raw = self._create_replicate_mapping()
+        df_filtered = self._filter_decoys_and_contaminants(df)
+        df_filtered = self._process_species_information(df_filtered)
+
+        df_filtered = self._process_modifications(df_filtered)
+        df_filtered_melted = self._handle_data_format(df_filtered)
+        df_filtered_melted = self._filter_zero_intensities(df_filtered_melted)
+        return self._format_by_analysis_level(df_filtered_melted), replicate_to_raw
+
+    def _validate_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Validate required columns and rename them according to mapper."""
         if not all(k in df.columns for k in self.mapper.keys()):
             raise ValueError(
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
                 " Please check input file and selected software tool."
             )
-
         df.rename(columns=self.mapper, inplace=True)
+        return df
 
+    def _create_replicate_mapping(self) -> Dict[int, List[str]]:
+        """Create mapping from replicates to raw data."""
         replicate_to_raw = defaultdict(list)
         for k, v in self.condition_mapper.items():
             replicate_to_raw[v].append(k)
+        return replicate_to_raw
 
+    def _filter_decoys_and_contaminants(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Filter out decoys and clean up column names."""
         if "Reverse" in self.mapper:
             df_filtered = df[df["Reverse"] != self.decoy_flag].copy()
         else:
             df_filtered = df.copy()
 
         df_filtered.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
+        return df_filtered
 
-        df_filtered["contaminant"] = df_filtered["Proteins"].str.contains(self.contaminant_flag)
+    def _process_species_information(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Process species information and filter multi-species entries."""
+        df["contaminant"] = df["Proteins"].str.contains(self.contaminant_flag)
+
+        # Process species flags
         for flag, species in self._species_dict.items():
-            df_filtered[species] = df_filtered["Proteins"].str.contains(flag)
-        df_filtered["MULTI_SPEC"] = (
-            df_filtered[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
-        )
+            df[species] = df["Proteins"].str.contains(flag)
 
-        df_filtered = df_filtered[df_filtered["MULTI_SPEC"] == False]
+        # Filter multi-species
+        df["MULTI_SPEC"] = df[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
+        return df[df["MULTI_SPEC"] == False]
 
-        # If there is "Raw file" then it is a long format, otherwise short format
+    def _handle_data_format(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Handle long vs short format conversion."""
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
-            df_filtered_melted = df_filtered.melt(
-                id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
+            df_melted = df.melt(
+                id_vars=list(set(df.columns).difference(set(melt_vars))),
                 value_vars=melt_vars,
                 var_name="Raw file",
                 value_name="Intensity",
             )
         else:
-            df_filtered_melted = df_filtered.copy()
+            df_melted = df.copy()
 
-        df_filtered_melted["replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
-        df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
+        df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
+        return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)
 
+    def _process_modifications(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Process modifications if a modification parser is available."""
         if self.modification_parser is not None:
-            df_filtered_melted = self.modification_parser.convert_to_proforma(df_filtered_melted, self.analysis_level)
+            return self.modification_parser.convert_to_proforma(df, self.analysis_level)
+        return df
 
-        # Filter out rows with 0 intensity
-        print(
-            "WARNING: {} rows with 0 intensity were removed.".format(
-                len(df_filtered_melted[df_filtered_melted["Intensity"] <= 0])
-            )
-        )
-        df_filtered_melted = df_filtered_melted[df_filtered_melted["Intensity"] > 0]
+    def _filter_zero_intensities(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Filter out rows with zero or negative intensity."""
+        zero_intensity_count = len(df[df["Intensity"] <= 0])
+        if zero_intensity_count > 0:
+            print(f"WARNING: {zero_intensity_count} rows with 0 intensity were removed.")
+        return df[df["Intensity"] > 0]
 
+    def _format_by_analysis_level(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format the DataFrame based on the analysis level."""
         if self.analysis_level == "ion":
-            if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
-                df_filtered_melted["precursor ion"] = (
-                    df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
-                )
-            return df_filtered_melted, replicate_to_raw
-
+            if "proforma" in df.columns and "Charge" in df.columns:
+                df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+            return df
         elif self.analysis_level == "peptidoform":
-            if "proforma" in df_filtered_melted.columns:
-                df_filtered_melted["peptidoform"] = df_filtered_melted["proforma"]
-            return df_filtered_melted, replicate_to_raw
-
+            if "proforma" in df.columns:
+                df["peptidoform"] = df["proforma"]
+            return df
         else:
-            raise ValueError("Analysis level not supported.")
+            raise ValueError(f"Analysis level '{self.analysis_level}' not supported.")
 
 
 class ParseModificationSettings:
@@ -298,7 +328,7 @@ class ParseModificationSettings:
                 df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
             except KeyError as e:
                 raise KeyError(
-                    "Not all columns required for making the ion are available."
+                    "Not all columns required for making the precursor ion are available."
                     " Is the charge available in the input file?"
                 ) from e
 
@@ -327,8 +357,7 @@ class ParseSettingsDeNovo:
             "HCD",
         )
         self.path_to_ground_truth = os.path.join(
-            module_settings_dir,
-            parse_settings_module["ground_truth"]["path_to_ground_truth"]
+            module_settings_dir, parse_settings_module["ground_truth"]["path_to_ground_truth"]
         )
 
     def extract_scan_id(self, spectrum_id: str) -> int:
@@ -454,11 +483,11 @@ class ParseSettingsDeNovo:
 
 
 MODULE_TO_CLASS = {
-    "quant_lfq_DDA_ion": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
-    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo
+    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo,
 }

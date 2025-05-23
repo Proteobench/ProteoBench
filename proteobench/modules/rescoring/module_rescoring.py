@@ -1,4 +1,4 @@
-""" Main interface of the module."""
+"""Main interface of the module."""
 
 
 def is_implemented() -> bool:

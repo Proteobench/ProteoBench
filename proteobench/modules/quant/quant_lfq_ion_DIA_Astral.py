@@ -1,5 +1,5 @@
 """
-DIA Quantification Module for Ion level Quantification for Astral.
+DIA Quantification Module for precursor level Quantification for Astral.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from proteobench.score.quant.quantscores import QuantScores
 
 class DIAQuantIonModuleAstral(QuantModule):
     """
-    DIA Quantification Module for Ion level Quantification for Astral.
+    DIA Quantification Module for precursor level Quantification for Astral.
 
     Parameters
     ----------
@@ -56,7 +56,7 @@ class DIAQuantIonModuleAstral(QuantModule):
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_Astral",
     ):
         """
-        Initialize the DIA Quantification Module for Ion level Quantification for Astral.
+        Initialize the DIA Quantification Module for precursor level Quantification for Astral.
 
         Parameters
         ----------
@@ -109,7 +109,7 @@ class DIAQuantIonModuleAstral(QuantModule):
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all data points from the repo.
         default_cutoff_min_prec : int, optional
-            Minimum number of runs an ion must be identified in. Defaults to 3.
+            Minimum number of runs an precursor ion must be identified in. Defaults to 3.
 
         Returns
         -------

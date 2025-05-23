@@ -41,7 +41,7 @@ class ProteoBenchParameters:
         **kwargs : dict[str, Any]
             Other keyword arguments.
         """
-        filename = os.path.join(os.path.dirname(__file__), 'json', json_path)
+        filename = os.path.join(os.path.dirname(__file__), "json", json_path)
 
         if not os.path.isfile(filename):
             print(f"Error: File '{filename}' not found.")

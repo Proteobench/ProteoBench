@@ -22,6 +22,7 @@ class VariablesDIAQuantSC:
     fig_logfc: str = "fig_logfc_dia_quant_singlecell"
     fig_metric: str = "fig_metric_dia_quant_singlecell"
     fig_cv: str = "fig_CV_violinplot_dia_quant_singlecell"
+    fig_ma_plot: str = "fig_ma_plot_dia_quant_singlecell"
     result_perf: str = "result_perf_dia_quant_singlecell"
     meta_data: str = "meta_data_dia_quant_singlecell"
     input_df: str = "input_df_dia_quant_singlecell"
@@ -66,7 +67,7 @@ class VariablesDIAQuantSC:
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/6-quant-lfq-ion-dia-singlecell/"
 
-    title: str = "DIA Ion quantification - singlecell"
+    title: str = "DIA Precursor quantification - singlecell"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_singlecell_quant_"

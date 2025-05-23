@@ -1,4 +1,4 @@
-[quant_lfq_DDA_ion]
+[quant_lfq_DDA_ion_QExactive]
 "AlphaPept" = "parse_settings_alphapept.toml"
 "FragPipe" = "parse_settings_fragpipe.toml"
 "i2MassChroQ" = "parse_settings_i2massChroQ.toml"

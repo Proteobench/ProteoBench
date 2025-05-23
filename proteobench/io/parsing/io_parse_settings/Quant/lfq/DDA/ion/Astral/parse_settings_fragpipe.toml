@@ -1,0 +1,37 @@
+[mapper]
+"Peptide Sequence" = "Sequence"
+"Protein" = "Proteins" # For FragPipe outputs, we combine the values in "Proteins" and "Mapped Proteins"
+"Charge" = "Charge"
+
+[condition_mapper]
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP1 Intensity" = "A"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP2 Intensity" = "A"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP3 Intensity" = "A"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP1 Intensity" = "B"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP2 Intensity" = "B"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP3 Intensity" = "B"
+
+[run_mapper]
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP1 Intensity" = "Condition_A_Sample_Alpha_01"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP2 Intensity" = "Condition_A_Sample_Alpha_02"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP3 Intensity" = "Condition_A_Sample_Alpha_03"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP1 Intensity" = "Condition_B_Sample_Alpha_01"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP2 Intensity" = "Condition_B_Sample_Alpha_02"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP3 Intensity" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Modified Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern"="(?<=\\[).+?(?=\\])"
+"modification_dict" = {"57.0215" = "Carbamidomethyl", "57.0216" = "Carbamidomethyl", "15.9949" = "Oxidation", "-17.026548" = "Gln->pyro-Glu", "-18.010565" = "Glu->pyro-Glu", "42.0106" = "Acetyl"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = false

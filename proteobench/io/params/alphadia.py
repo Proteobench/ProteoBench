@@ -4,7 +4,7 @@ AlphaDIA parameter parsing.
 
 import pathlib
 import re
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 
 import pandas as pd
 
@@ -115,7 +115,7 @@ def extract_values_from_nested_lines(lines: List[str], start_index: int) -> List
 def read_file_lines(file_path: str) -> List[str]:
     """Read lines from a file."""
     try:
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
     except:
         lines = [l for l in file_path.read().decode("utf-8").splitlines()]

@@ -2,10 +2,12 @@
 Module containing the DenovoScores class.
 """
 
-from psm_utils import Peptidoform
 from typing import List, Tuple
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+from psm_utils import Peptidoform
+
 
 class DenovoScores:
     """
@@ -41,21 +43,17 @@ class DenovoScores:
         }
 
     def generate_intermediate(self, standard_format: pd.DataFrame) -> pd.DataFrame:
-        #TODO: Evaluate which PSMs match, and which don't and return new table
+        # TODO: Evaluate which PSMs match, and which don't and return new table
 
         # Add match type label (exact, mass, mismatch) and the amino acid-level evaluations
-        standard_format['match_dict'] = standard_format.apply(
-            lambda x: self.evaluate_match(
-                ground_truth=x['peptidoform_gt'],
-                de_novo=x['peptidoform_dn']
-            ),
-            axis=1
+        standard_format["match_dict"] = standard_format.apply(
+            lambda x: self.evaluate_match(ground_truth=x["peptidoform_gt"], de_novo=x["peptidoform_dn"]), axis=1
         )
-        standard_format['match_type'] = standard_format['match_dict'].apply(lambda x: x['match_type'])
-        standard_format['aa_matches_dn'] = standard_format['match_dict'].apply(lambda x: x['aa_matches_dn'])
-        standard_format['aa_matches_gt'] = standard_format['match_dict'].apply(lambda x: x['aa_matches_gt'])
-        standard_format['pep_match'] = standard_format['match_dict'].apply(lambda x: x['pep_match'])
-        _ = standard_format.pop('match_dict')
+        standard_format["match_type"] = standard_format["match_dict"].apply(lambda x: x["match_type"])
+        standard_format["aa_matches_dn"] = standard_format["match_dict"].apply(lambda x: x["aa_matches_dn"])
+        standard_format["aa_matches_gt"] = standard_format["match_dict"].apply(lambda x: x["aa_matches_gt"])
+        standard_format["pep_match"] = standard_format["match_dict"].apply(lambda x: x["pep_match"])
+        _ = standard_format.pop("match_dict")
         return standard_format
 
     def evaluate_match(self, ground_truth: Peptidoform, de_novo: Peptidoform):
@@ -67,29 +65,29 @@ class DenovoScores:
 
         if ground_truth == de_novo:
             return {
-                'match_type': 'exact',
-                'aa_matches_gt': np.full(len(gt), True),
-                'aa_matches_dn': np.full(len(dn), True),
-                'pep_match': True
+                "match_type": "exact",
+                "aa_matches_gt": np.full(len(gt), True),
+                "aa_matches_dn": np.full(len(dn), True),
+                "pep_match": True,
             }
-        
+
         aa_matches, pep_match, (aa_matches_1, aa_matches_2) = self.aa_match(
             gt,
             dn,
         )
         if pep_match:
             return {
-                'match_type': 'mass',
-                'aa_matches_gt': aa_matches_1,
-                'aa_matches_dn': aa_matches_2,
-                'pep_match': pep_match
+                "match_type": "mass",
+                "aa_matches_gt": aa_matches_1,
+                "aa_matches_dn": aa_matches_2,
+                "pep_match": pep_match,
             }
         else:
             return {
-                'match_type': 'mismatch',
-                'aa_matches_gt': aa_matches_1,
-                'aa_matches_dn': aa_matches_2,
-                'pep_match': pep_match
+                "match_type": "mismatch",
+                "aa_matches_gt": aa_matches_1,
+                "aa_matches_dn": aa_matches_2,
+                "pep_match": pep_match,
             }
 
     def aa_match(
@@ -137,17 +135,17 @@ class DenovoScores:
         # Find longest mass-matching suffix.
         i1, i2 = len(peptide1) - 1, len(peptide2) - 1
         i_stop = np.argwhere(~aa_matches)[0]
-        cum_mass1, cum_mass2 = 0.0, 0.0 
-        
+        cum_mass1, cum_mass2 = 0.0, 0.0
+
         while i1 >= i_stop and i2 >= i_stop:
             aa_mass1 = self.get_token_mass(peptide1[i1])
             aa_mass2 = self.get_token_mass(peptide2[i2])
             tol_suffix = abs(self.mass_diff(cum_mass1 + aa_mass1, cum_mass2 + aa_mass2, False))
             tol_aa = abs(self.mass_diff(aa_mass1, aa_mass2, False))
 
-            if (tol_suffix < cum_mass_threshold):
+            if tol_suffix < cum_mass_threshold:
 
-                match = tol_aa < ind_mass_threshold                
+                match = tol_aa < ind_mass_threshold
                 aa_matches[max(i1, i2)] = match
                 aa_matches_1[i1] = match
                 aa_matches_2[i2] = match
@@ -205,10 +203,8 @@ class DenovoScores:
             aa_mass2 = self.get_token_mass(peptide2[i2])
             tol_prefix = abs(self.mass_diff(cum_mass1 + aa_mass1, cum_mass2 + aa_mass2, False))
             tol = abs(self.mass_diff(aa_mass1, aa_mass2, False))
-            if (tol_prefix < cum_mass_threshold):
-                match = (
-                    tol < ind_mass_threshold
-                )
+            if tol_prefix < cum_mass_threshold:
+                match = tol < ind_mass_threshold
                 aa_matches[max(i1, i2)] = match
                 aa_matches_1[i1] = match
                 aa_matches_2[i2] = match
@@ -221,7 +217,6 @@ class DenovoScores:
             else:
                 i2, cum_mass2 = i2 + 1, cum_mass2 + aa_mass2
         return aa_matches, aa_matches.all(), (aa_matches_1, aa_matches_2)
-
 
     def convert_peptidoform(self, peptidoform: Peptidoform):
         out = []
@@ -240,11 +235,8 @@ class DenovoScores:
 
             out.append((aa, mod))
         return out
-    
-    def get_token_mass(
-        self,
-        token: tuple
-    ) -> float:
+
+    def get_token_mass(self, token: tuple) -> float:
         """
         Convert the amino acid to a mass while considering modifications as well.
         """
@@ -255,7 +247,7 @@ class DenovoScores:
                 continue
             mass += mod.mass
         return mass
-    
+
     def mass_diff(self, mz1, mz2, mode_is_da):
         """
         Calculate the mass difference(s).

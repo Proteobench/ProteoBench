@@ -1,47 +1,45 @@
 """
 This module provides functionality for storing the de novo metrics.
 """
+
 from __future__ import annotations
 
 import dataclasses
 import hashlib
 import logging
-import numpy as np
 from collections import ChainMap, defaultdict
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict
 from itertools import chain
+from typing import Any, Dict
 
+import numpy as np
 import pandas as pd
 
 import proteobench
 
-def calculate_prc(
-    scores_correct,
-    scores_all,
-    n_spectra,
-    threshold=None
-):
+
+def calculate_prc(scores_correct, scores_all, n_spectra, threshold=None):
     if threshold is None:
         c = len(scores_correct)
         ci = len(scores_all)
     else:
         c = sum([score > threshold for score in scores_correct])
         ci = sum([score > threshold for score in scores_all])
-    
-    u = n_spectra-ci
+
+    u = n_spectra - ci
 
     # precision
-    precision = c/ci
+    precision = c / ci
 
     # recall (This is an alternative definition and the line will stop at x=y)
-    recall = c/n_spectra
+    recall = c / n_spectra
 
     # coverage
-    coverage = ci/n_spectra
+    coverage = ci / n_spectra
 
-    return {'precision': precision, 'recall': recall, 'coverage': coverage}
+    return {"precision": precision, "recall": recall, "coverage": coverage}
+
 
 def get_prc_curve(t, n_spectra):
 
@@ -53,32 +51,30 @@ def get_prc_curve(t, n_spectra):
 
         if np.isnan(threshold):
             continue
-        
+
         prc_dict = calculate_prc(
             scores_correct=t[t.match].score.to_numpy(),
             scores_all=t.score.to_numpy(),
             n_spectra=n_spectra,
-            threshold=threshold
+            threshold=threshold,
         )
-        pr, rec, cov = prc_dict['precision'], prc_dict['recall'], prc_dict['coverage']
+        pr, rec, cov = prc_dict["precision"], prc_dict["recall"], prc_dict["coverage"]
         prs.append(pr)
         recs.append(rec)
         covs.append(cov)
 
-    return pd.DataFrame(
-        {'precision': prs,
-        'recall': recs,
-        'coverage': covs}
-    )
+    return pd.DataFrame({"precision": prs, "recall": recs, "coverage": covs})
+
 
 def collapse_aa_scores(df: pd.DataFrame):
     df_aa = {}
-    aa_scores = df['aa_scores'].apply(lambda x: [float(i) for i in x.split(',')])
-    df_aa['aa_score'] = list(chain(*aa_scores.tolist()))
-    df_aa['aa_match'] = list(chain(*df['aa_matches_dn'].apply(list).tolist()))
-    
-    n_aa = df['aa_matches_gt'].apply(len).sum()
+    aa_scores = df["aa_scores"].apply(lambda x: [float(i) for i in x.split(",")])
+    df_aa["aa_score"] = list(chain(*aa_scores.tolist()))
+    df_aa["aa_match"] = list(chain(*df["aa_matches_dn"].apply(list).tolist()))
+
+    n_aa = df["aa_matches_gt"].apply(len).sum()
     return pd.DataFrame(df_aa), n_aa
+
 
 @dataclass
 class DenovoDatapoint:
@@ -154,13 +150,13 @@ class DenovoDatapoint:
         intermediate: pd.DataFrame,
         input_format: str,
         user_input: dict,
-        level: str = 'peptide',
-        evaluation_type: str = 'mass'
+        level: str = "peptide",
+        evaluation_type: str = "mass",
         # Maybe add here aa/peptide precision
         # And also type of match required (exact/mass-based)
     ) -> pd.Series:
         """
-         Generate a Datapoint object containing metadata and results from the benchmark run.
+        Generate a Datapoint object containing metadata and results from the benchmark run.
         """
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
@@ -203,15 +199,15 @@ class DenovoDatapoint:
 
         result_datapoint.generate_id()
 
-        results = {'peptide': {}, 'aa': {}}
-        for l in ['peptide', 'aa']:
-            for e_type in ['exact', 'mass']:
+        results = {"peptide": {}, "aa": {}}
+        for l in ["peptide", "aa"]:
+            for e_type in ["exact", "mass"]:
                 results[l][e_type] = DenovoDatapoint.get_metrics(intermediate, l, e_type)
 
         result_datapoint.results = results
         print(results)
-        result_datapoint.precision = result_datapoint.results[level][evaluation_type]['precision']
-        result_datapoint.recall = result_datapoint.results[level][evaluation_type]['recall']
+        result_datapoint.precision = result_datapoint.results[level][evaluation_type]["precision"]
+        result_datapoint.recall = result_datapoint.results[level][evaluation_type]["recall"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 
@@ -222,38 +218,29 @@ class DenovoDatapoint:
         """
         Compute various statistical metrics from the provided DataFrame for the benchmark.
         """
-        df_filtered = df.fillna('peptidoform_dn')
+        df_filtered = df.fillna("peptidoform_dn")
 
-        if evaluation == 'mass':
-            evaluation_list = ['mass', 'exact']
-        elif evaluation == 'exact':
-            evaluation_list = ['exact']
+        if evaluation == "mass":
+            evaluation_list = ["mass", "exact"]
+        elif evaluation == "exact":
+            evaluation_list = ["exact"]
         else:
-            raise Exception('Only `exact` and `mass` evaluation types are supported. Should never happen.')
-        
-        if level=='peptide':
-            scores_correct = df_filtered.loc[
-                    df_filtered['match_type'].isin(evaluation_list),
-                    'score'
-                ].tolist()
-            scores_all = df_filtered['score'].tolist()
-            n = len(df_filtered)
-        elif level == 'aa':
-            df_aa, n_aa = collapse_aa_scores(df)
-            scores_correct = df_aa.loc[
-                df_aa['aa_match'],
-                'aa_score'
-            ].tolist()
-            scores_all = df_aa['aa_score'].tolist()
-            n = n_aa
-        
-        else: 
-            raise Exception('Only `aa` and `peptide` levels for accuracy calculation are supported. Should never happen.')
+            raise Exception("Only `exact` and `mass` evaluation types are supported. Should never happen.")
 
-        res = calculate_prc(
-            scores_correct=scores_correct,
-            scores_all=scores_all,
-            n_spectra=n,
-            threshold=None
-        )
+        if level == "peptide":
+            scores_correct = df_filtered.loc[df_filtered["match_type"].isin(evaluation_list), "score"].tolist()
+            scores_all = df_filtered["score"].tolist()
+            n = len(df_filtered)
+        elif level == "aa":
+            df_aa, n_aa = collapse_aa_scores(df)
+            scores_correct = df_aa.loc[df_aa["aa_match"], "aa_score"].tolist()
+            scores_all = df_aa["aa_score"].tolist()
+            n = n_aa
+
+        else:
+            raise Exception(
+                "Only `aa` and `peptide` levels for accuracy calculation are supported. Should never happen."
+            )
+
+        res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
         return res

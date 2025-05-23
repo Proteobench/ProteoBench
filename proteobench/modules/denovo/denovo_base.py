@@ -14,14 +14,6 @@ import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
-from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
-from proteobench.io.params.instanovo import extract_params as extract_params_instanovo
-from proteobench.io.params.casanovo import extract_params as extract_params_casanovo
-from proteobench.io.params.deepnovo import extract_params as extract_params_deepnovo
-from proteobench.io.params.pihelixnovo import extract_params as extract_params_pihelixnovo
-from proteobench.io.params.piprimenovo import extract_params as extract_params_piprimenovo
-from proteobench.io.params.pointnovo import extract_params as extract_params_pointnovo
-
 from proteobench.datapoint.quant_datapoint import (
     QuantDatapoint,
     filter_df_numquant_epsilon,
@@ -29,8 +21,20 @@ from proteobench.datapoint.quant_datapoint import (
 )
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
+from proteobench.io.params.casanovo import extract_params as extract_params_casanovo
+from proteobench.io.params.deepnovo import extract_params as extract_params_deepnovo
+from proteobench.io.params.instanovo import extract_params as extract_params_instanovo
+from proteobench.io.params.pihelixnovo import (
+    extract_params as extract_params_pihelixnovo,
+)
+from proteobench.io.params.piprimenovo import (
+    extract_params as extract_params_piprimenovo,
+)
+from proteobench.io.params.pointnovo import extract_params as extract_params_pointnovo
 from proteobench.io.parsing.parse_denovo import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+
 
 class DeNovoModule:
     """
@@ -49,6 +53,7 @@ class DeNovoModule:
     module_id : str
         The module identifier for configuration.
     """
+
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "AdaNovo": extract_params_adanovo,
         "Casanovo": extract_params_casanovo,
@@ -56,7 +61,7 @@ class DeNovoModule:
         "InstaNovo": extract_params_instanovo,
         "Pi-HelixNovo": extract_params_pihelixnovo,
         "Pi-PrimeNovo": extract_params_piprimenovo,
-        "PointNovo": extract_params_pointnovo
+        "PointNovo": extract_params_pointnovo,
     }
 
     def __init__(
@@ -127,8 +132,6 @@ class DeNovoModule:
         pd.DataFrame
             A DataFrame with the current data point added.
         """
-        return
-        # TODO: Adapt for de novo
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
@@ -212,7 +215,7 @@ class DeNovoModule:
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3, # TODO: remove? 
+        default_cutoff_min_prec: int = 3,  # TODO: remove?
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -236,27 +239,6 @@ class DeNovoModule:
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
         return
-        # TODO: Adapt
-        # Parse user config
-        input_df = load_input_file(input_file, input_format)
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
-        ).build_parser(input_format)
-        standard_format = parse_settings.convert_to_standard_format(input_df)
-
-        # Get quantification data
-        quant_score = QuantScores(
-            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
-        )
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format)
-
-        current_datapoint = QuantDatapoint.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
-        )
-
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
-
-        return intermediate_metric_structure, all_datapoints, input_df
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """

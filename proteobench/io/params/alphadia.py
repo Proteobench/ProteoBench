@@ -4,7 +4,7 @@ AlphaDIA parameter parsing.
 
 import pathlib
 import re
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 
 import pandas as pd
 

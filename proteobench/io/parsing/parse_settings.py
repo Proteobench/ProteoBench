@@ -9,7 +9,6 @@ from typing import Any, Dict, List
 
 import pandas as pd
 import toml
-
 from psm_utils import Peptidoform
 
 from .parse_ion import get_proforma_bracketed
@@ -357,8 +356,7 @@ class ParseSettingsDeNovo:
             "HCD",
         )
         self.path_to_ground_truth = os.path.join(
-            module_settings_dir,
-            parse_settings_module["ground_truth"]["path_to_ground_truth"]
+            module_settings_dir, parse_settings_module["ground_truth"]["path_to_ground_truth"]
         )
 
     def extract_scan_id(self, spectrum_id) -> float:
@@ -435,5 +433,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
-    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo
+    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo,
 }

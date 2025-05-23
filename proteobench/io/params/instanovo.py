@@ -10,7 +10,19 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(file_path: str) -> ProteoBenchParameters:
+    """
+    Extract parameters from the config file.
 
+    Parameters
+    ----------
+    file_path : str
+        The path to the config file.
+
+    Returns
+    -------
+    ProteoBenchParameters
+        The extracted parameters as a ProteoBenchParameters object.
+    """
     params = ProteoBenchParameters(json_path="denovo/denovo_lfq_DDA_HCD.json")
 
     with open(file_path) as f:

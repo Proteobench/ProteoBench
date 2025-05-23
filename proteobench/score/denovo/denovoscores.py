@@ -144,7 +144,6 @@ class DenovoScores:
             tol_aa = abs(self.mass_diff(aa_mass1, aa_mass2, False))
 
             if tol_suffix < cum_mass_threshold:
-
                 match = tol_aa < ind_mass_threshold
                 aa_matches[max(i1, i2)] = match
                 aa_matches_1[i1] = match

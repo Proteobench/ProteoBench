@@ -42,7 +42,6 @@ def calculate_prc(scores_correct, scores_all, n_spectra, threshold=None):
 
 
 def get_prc_curve(t, n_spectra):
-
     prs = []
     recs = []
     covs = []

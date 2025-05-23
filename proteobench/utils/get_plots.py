@@ -124,7 +124,7 @@ def get_plot_dict(hash_vis_dirs, intermediate_hash, df, module_name="DDAQuantIon
 
         user_config = defaultdict(lambda: "")
 
-        module_obj = DDAQuantIonModule(token="")
+        module_obj = DDAQuantIonModuleQExactive(token="")
         results_df = module_obj.obtain_all_data_points(all_datapoints=None)
 
         input_df = load_input_file(matching_file, software_name)

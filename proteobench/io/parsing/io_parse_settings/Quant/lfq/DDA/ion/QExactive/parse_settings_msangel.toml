@@ -1,0 +1,31 @@
+[mapper]
+"proteins" = "Proteins" # this will be the combination of samesets_accessions and subset_accessions after import. Specific to ProlineStudio and MSAngel.
+"sequence" = "Sequence"
+"modifications" = "Modifications"
+"master_quant_peptide_ion_charge" = "Charge"
+
+
+[condition_mapper]
+"abundance_DDA_Condition_A_Sample_Alpha_01" = "A"
+"abundance_DDA_Condition_A_Sample_Alpha_02" = "A"
+"abundance_DDA_Condition_A_Sample_Alpha_03" = "A"
+"abundance_DDA_Condition_B_Sample_Alpha_01" = "B"
+"abundance_DDA_Condition_B_Sample_Alpha_02" = "B"
+"abundance_DDA_Condition_B_Sample_Alpha_03" = "B"
+
+[run_mapper]
+"abundance_DDA_Condition_A_Sample_Alpha_01" = "Condition_A_Sample_Alpha_01"
+"abundance_DDA_Condition_A_Sample_Alpha_02" = "Condition_A_Sample_Alpha_02"
+"abundance_DDA_Condition_A_Sample_Alpha_03" = "Condition_A_Sample_Alpha_03"
+"abundance_DDA_Condition_B_Sample_Alpha_01" = "Condition_B_Sample_Alpha_01"
+"abundance_DDA_Condition_B_Sample_Alpha_02" = "Condition_B_Sample_Alpha_02"
+"abundance_DDA_Condition_B_Sample_Alpha_03" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

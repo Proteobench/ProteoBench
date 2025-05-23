@@ -23,6 +23,7 @@ class VariablesDIAQuantAstral:
     fig_logfc: str = "fig_logfc_dia_quant_Astral"
     fig_metric: str = "fig_metric_dia_quant_Astral"
     fig_cv: str = "fig_CV_violinplot_dia_quant_Astral"
+    fig_ma_plot: str = "fig_ma_plot_dia_quant_Astral"
     result_perf: str = "result_perf_dia_quant_Astral"
     meta_data: str = "meta_data_dia_quant_Astral"
     input_df: str = "input_df_dia_quant_Astral"
@@ -66,9 +67,9 @@ class VariablesDIAQuantAstral:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/5-quant-lfq-ion-dia-Astral/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/"
 
-    title: str = "DIA Ion quantification - Astral"
+    title: str = "DIA Precursor ion quantification - Astral 2 Th"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_Astral_quant_"

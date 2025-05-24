@@ -1,15 +1,15 @@
 ,0
 software_name,FragPipe
-software_version,FragPipe (21.1) runtime properties
+software_version,FragPipe (22.1-build02) runtime properties
 search_engine,MSFragger
-search_engine_version,4.0
+search_engine_version,
 ident_fdr_psm,0.01
-ident_fdr_peptide,0.01
+ident_fdr_peptide,0.2
 ident_fdr_protein,0.01
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-20 ppm, 20 ppm]"
-fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
-enzyme,Trypsin/P
+fragment_mass_tolerance,"[-20 ppm, 20 ppm]"
+enzyme,Trypsin
 allowed_miscleavages,2
 min_peptide_length,7
 max_peptide_length,50

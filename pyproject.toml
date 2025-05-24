@@ -46,6 +46,8 @@ docs = [
   "sphinx-autobuild",
   "myst-parser>=0.3.0",
   "pydata-sphinx-theme",
+  "sphinx_new_tab_link",
+  "sphinx_copybutton",
 ]
 web = ["streamlit>1.27", "scipy"]
 

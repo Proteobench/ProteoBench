@@ -1,3 +1,4 @@
 """
-This module contains the proteobench benchmarking modules.
+This subpackage contains the proteobench benchmarking modules organized by
+type of benchmarking type.
 """

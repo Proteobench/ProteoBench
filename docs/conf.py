@@ -1,8 +1,15 @@
 """
 Configuration file for the Sphinx documentation builder.
 """
+import os
+import sys
+from pathlib import Path
 
 import proteobench
+
+# Patch in webinterface to be an importable module (needed for API documentation)
+sys.path.insert(0, str(Path('..', 'webinterface').resolve()))
+sys.path.insert(0, str(Path('..').resolve()))
 
 project = "ProteoBench"
 author = "EuBIC-MS"
@@ -19,6 +26,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
+    "sphinx_new_tab_link",
+    "sphinx_copybutton",
 ]
 
 source_suffix = [".rst"]
@@ -57,3 +66,52 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "plotly": ("https://plotly.com/python-api-reference/", None),
 }
+
+# -- Setup for sphinx-apidoc -------------------------------------------------
+
+# sphinx-apidoc needs to be called manually if Sphinx is running there.
+# https://github.com/readthedocs/readthedocs.org/issues/1139
+
+if os.environ.get("READTHEDOCS") == "True":
+    from pathlib import Path
+
+    PROJECT_ROOT = Path(__file__).parent.parent
+    PACKAGE_ROOT = PROJECT_ROOT / "proteobench"
+
+    def run_apidoc(_):
+        from sphinx.ext import apidoc
+
+        apidoc.main(
+            [
+                "--force",
+                "--implicit-namespaces",
+                "--module-first",
+                "--separate",
+                "-o",
+                str(PROJECT_ROOT / "docs" / "developer-guide" / "api" / "proteobench"),
+                str(PACKAGE_ROOT),
+            ]
+        )
+        
+    # webinterface is not a package, so it was added to the path manually above
+ 
+    APP_ROOT = PROJECT_ROOT / "webinterface"
+
+    def run_apidoc_webinterface(_):
+        from sphinx.ext import apidoc
+
+        apidoc.main(
+            [
+                "--force",
+                "--implicit-namespaces",
+                "--module-first",
+                "--separate",
+                "-o",
+                str(PROJECT_ROOT / "docs" / "developer-guide" / "api" / "webinterface"),
+                str(APP_ROOT),
+            ]
+        )
+    
+    def setup(app):
+        app.connect("builder-inited", run_apidoc)
+        app.connect("builder-inited", run_apidoc_webinterface)

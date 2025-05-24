@@ -1,14 +1,7 @@
 ## Development setup
 
 ### Local installation
-Install the package and dependencies with [Flit](https://flit.pypa.io/en/stable/):
-
-```
-pip install flit
-flit install -s
-```
-
-Alternatively, use pip directly:
+Install the package aber cloning it locally.
 
 ```
 pip install --editable .
@@ -21,13 +14,13 @@ Using a virtual environment is highly recommended.
 
 To run the tests run the command:
 
-```
+```bash
 pytest test/
 ```
 
 You can also indicate specific tests to run:
 
-```
+```bash
 pytest test/test_parse_params_alphapept.py
 ```
 
@@ -35,7 +28,7 @@ pytest test/test_parse_params_alphapept.py
 
 Start the web server locally with:
 
-```
+```bash
 cd ./webinterface/
 streamlit run Home.py
 ```
@@ -53,8 +46,8 @@ to be included.
 To work on the documentation and get a live preview, install the requirements
 and run `sphinx-autobuild`:
 
-```
-flit install -s
+```bash
+pip install -e '.[docs]'
 sphinx-autobuild  --watch ./proteobench ./docs/ ./docs/_build/html/
 ```
 

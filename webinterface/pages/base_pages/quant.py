@@ -1111,7 +1111,8 @@ class QuantUIObjects:
         Display the public submission section of the page.
         """
         # Initialize Unchecked submission box variable
-        st.session_state[self.variables_quant.check_submission] = False
+        if self.variables_quant.check_submission not in st.session_state:
+            st.session_state[self.variables_quant.check_submission] = False
         if self.variables_quant.first_new_plot:
             self.generate_submission_ui_elements()
 

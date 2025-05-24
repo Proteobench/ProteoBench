@@ -15,13 +15,17 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
+from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
+    VariablesDDAQuant,
+)
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive as IonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
+    DDAQuantIonModuleQExactive as IonModule,
+)
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -113,6 +117,7 @@ class QuantUIObjects:
         """
         with st.form(key="main_form"):
             self.generate_input_fields()
+            # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
             self.generate_additional_parameters_fields()
             st.markdown(self.variables_quant.texts.ShortMessages.run_instructions)
             submit_button = st.form_submit_button("Parse and bench", help=self.variables_quant.texts.Help.parse_button)
@@ -354,9 +359,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
-            st.session_state[
-                st.session_state[self.variables_quant.slider_id_uuid]
-            ] = self.variables_quant.default_val_slider
+            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]] = (
+                self.variables_quant.default_val_slider
+            )
 
     def generate_main_selectbox(self) -> None:
         """
@@ -398,9 +403,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
-            st.session_state[
-                st.session_state[self.variables_quant.slider_id_submitted_uuid]
-            ] = self.variables_quant.default_val_slider
+            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]] = (
+                self.variables_quant.default_val_slider
+            )
 
     def display_submitted_results(self) -> None:
         """
@@ -565,7 +570,6 @@ class QuantUIObjects:
         """
         Create the additional parameters section of the form and initializes the parameter fields.
         """
-        st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
         with open(self.variables_quant.additional_params_json) as file:
             config = json.load(file)
         for key, value in config.items():

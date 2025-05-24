@@ -16,7 +16,7 @@
     },
     "n_beams": {
         "type": "text_input",
-        "label": "Number of beamse",
+        "label": "Number of beams",
         "placeholder": "None"
     },
     "n_peaks": {

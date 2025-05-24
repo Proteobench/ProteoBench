@@ -26,6 +26,39 @@ Parameter = namedtuple("Parameter", ["name", "value", "comment"])
 VERSION_NO_PATTERN = r"MSFragger-(.+)\.jar"
 
 
+def parse_phi_report_filters(phi_report_cmd: str) -> tuple[float, float, float]:
+    """
+    Parse the filters from the phi-report command string.
+
+    Parameters
+    ----------
+    phi_report_cmd : str
+        The command string from the phi-report filter.
+
+    Returns
+    -------
+    tuple of (float, float, float)
+        A tuple containing the PSM, peptide, and protein FDR values.
+    """
+    # Define default FDR values
+    default_fdr = 0.01
+
+    # Define regex patterns for FDR values
+    fdr_patterns = {
+        "psm": r"--psm\s+(\d+\.\d+)",
+        "peptide": r"--pep\s+(\d+\.\d+)",
+        "protein": r"--prot\s+(\d+\.\d+)",
+    }
+
+    # Extract FDR values using regex
+    fdr_values = {
+        key: float(match.group(1)) if (match := re.search(pattern, phi_report_cmd)) else default_fdr
+        for key, pattern in fdr_patterns.items()
+    }
+
+    return fdr_values["psm"], fdr_values["peptide"], fdr_values["protein"]
+
+
 def parse_params(l_of_str: List[str], sep: str = " = ") -> List[Parameter]:
     """
     Parse the FragPipe parameter file and return a list of Parameter objects.
@@ -170,18 +203,17 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         fragment_mass_units = "ppm"
     params.fragment_mass_tolerance = f'[-{fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}, {fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}]'
 
-    # Quantification settings
-    if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
-        params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr"]
-        params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr"]
-        params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr"]
-        params.abundance_normalization_ions = fragpipe_params.loc["ionquant.normalization"]
-
-    elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
+    if fragpipe_params.loc["diann.run-dia-nn"] == "true":
         params.ident_fdr_protein = fragpipe_params.loc["diann.q-value"]
         params.ident_fdr_peptide = None
         params.ident_fdr_psm = fragpipe_params.loc["diann.q-value"]
         params.abundance_normalization_ions = None
+
+    else:
+        phi_report_cmd = fragpipe_params.loc["phi-report.filter"]
+        params.ident_fdr_psm, params.ident_fdr_peptide, params.ident_fdr_protein = parse_phi_report_filters(
+            phi_report_cmd
+        )
 
     # Precursor charge settings
     if fragpipe_params.loc["msfragger.override_charge"] == "true":
@@ -222,6 +254,7 @@ if __name__ == "__main__":
         "../../../test/params/fragpipe.workflow",
         "../../../test/params/fragpipe_win_paths.workflow",
         "../../../test/params/fragpipe_v22.workflow",
+        "../../../test/params/fragpipe_fdr_test.workflow",
     ]
 
     for file_path in files:

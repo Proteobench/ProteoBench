@@ -18,7 +18,7 @@ We thank you very much for accepting to contribute to the ProteoBench module [NA
     Scroll to the bottom and write your comment in the comment field.
     Click "Comment" to post it.
 
-This way, you cand send input on the project, more specifically: 
+This way, you can send input on the project, more specifically: 
     * Are there some biases that are not accounted for in the proposal?
     * Is the proposed data well suited for the aim of the module?
     * Would some specific metrics be better tailored to the module objective?  

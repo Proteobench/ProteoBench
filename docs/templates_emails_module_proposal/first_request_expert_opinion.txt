@@ -4,7 +4,7 @@
 
 Dear [NAME OF THE EXPERT],
 
-I am [YOUR NAME], and I contact you to require your help with the design of a new module for the ProteoBench platform. 
+I am [YOUR NAME], and I contact you to request your help with the design of a new module for the ProteoBench platform. 
 
 ProteoBench is a standalone platform that brings together developers and software users to provide an ever-evolving comparison of state-of-the-art proteomics data processing tools, workflows or analysis steps. This open resource is structured in independent benchmark modules proposed and openly discussed by the community. Each module is designed to cover a specific aspect of proteomics data analysis performed on the same input data. 
 You can find ProteoBench here: https://proteobench.cubimed.rub.de/

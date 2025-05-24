@@ -117,7 +117,7 @@ class QuantUIObjects:
         """
         with st.form(key="main_form"):
             self.generate_input_fields()
-            # Why do we need to generate additional parameters fields in the first tab?
+            # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
             self.generate_additional_parameters_fields()
             st.markdown(self.variables_quant.texts.ShortMessages.run_instructions)
             submit_button = st.form_submit_button("Parse and bench", help=self.variables_quant.texts.Help.parse_button)

@@ -237,8 +237,8 @@ def extract_with_regex(lines: List[str], regex) -> str:
     for line in lines:
         regex_match = re.search(regex, line)
         if regex_match:
-            x = regex_match.group(1)
-            return x
+            match_str = regex_match.group(1)
+            return match_str
     return None
 
 

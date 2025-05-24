@@ -1,0 +1,23 @@
+[mapper]
+"scan" = "spectrum_id"
+"output_seq" = "sequence"
+"output_score" = "score"
+
+[spectrum_id_mapper]
+"pattern" = ":(\\d+)"
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"Cmod" = "C(+57.02)"
+"Mmod" = "M(+15.99)"
+"Nmod" = "N(+.98)"
+"Qmod" = "Q(+.98)"
+"," = ""
+
+[modifications_parser]
+"parse_column" = "sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\(([^)]+)\\)"
+"modification_dict" = {"(+57.02)" = "UNIMOD:4", "(+15.99)" = "UNIMOD:35", "(+.98)" = "UNIMOD:7"}

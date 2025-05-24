@@ -402,7 +402,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     # Get settings from the execution command string
     cmdline_string = find_cmdline_string(lines)
-    if "--cfg" in cmdline_string:
+    if cmdline_string and "--cfg" in cmdline_string:
         cfg_used = True
         # If a configuration file was used, the parameters are specified in the free text below the cmd line.
     cmdline_dict = parse_cmdline_string(cmdline_string, software_version)

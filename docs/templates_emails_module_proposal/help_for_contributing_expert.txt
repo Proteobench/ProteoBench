@@ -1,0 +1,34 @@
+# You can copy and paste this email after filling out the module-specific information.
+# Please don't forget to send a copy of all exchanges to proteobench@eubic-ms.org
+
+
+Dear [NAME OF THE EXPERT],
+
+We thank you very much for accepting to contribute to the ProteoBench module [NAME OF THE MODULE].
+
+1. Create a GitHub Account:
+    Open your browser and go to GitHub (https://github.com).
+    Click on "Sign up" in the top-right corner to register and create an account.
+    Enter your email address, a user name (this will your public identity on GitHub), create a password and choose if you want to receive updates via email.
+    Click "Create account" and verify your email.
+    Verify your email by going to your email inbox and click the verification link GitHub sent you.
+    Choose the GitHub free plan and complete the setup.
+2. Contribute the module discussion:
+    Go to the module discussion ([ADD LINK TO DISCUSSION])
+    Scroll to the bottom and write your comment in the comment field.
+    Click "Comment" to post it.
+
+This way, you can send input on the project, more specifically: 
+    * Are there some biases that are not accounted for in the proposal?
+    * Is the proposed data well suited for the aim of the module?
+    * Would some specific metrics be better tailored to the module objective?  
+    * Is the main figure of the module clear and understandable?
+    * Is the documentation of the module clear and exhaustive?
+    * Are the limitations of the module clearly explained?
+    * What workflow runs (tools, parameters) should be included in the comparison when we release the module?  
+
+You can also comment on any other topic or question that you may have.
+Of course, if you'd like to discuss this further in a meeting, let us know when would suit you best.
+
+Thank you again for your help, 
+[YOUR NAME]

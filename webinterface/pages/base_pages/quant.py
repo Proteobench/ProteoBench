@@ -117,6 +117,7 @@ class QuantUIObjects:
         """
         with st.form(key="main_form"):
             self.generate_input_fields()
+            # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
             self.generate_additional_parameters_fields()
             st.markdown(self.variables_quant.texts.ShortMessages.run_instructions)
             submit_button = st.form_submit_button("Parse and bench", help=self.variables_quant.texts.Help.parse_button)
@@ -567,7 +568,6 @@ class QuantUIObjects:
         """
         Create the additional parameters section of the form and initializes the parameter fields.
         """
-        st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
         with open(self.variables_quant.additional_params_json) as file:
             config = json.load(file)
         for key, value in config.items():

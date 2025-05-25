@@ -1,0 +1,366 @@
+
+DIA-NN 2.1.0 Academia  (Data-Independent Acquisition by Neural Networks)
+Compiled on Mar 23 2025 15:49:03
+Current date and time: Thu May 22 13:28:16 2025
+Logical CPU cores: 64
+diann-linux --threads 32 --lib ProteoBenchFASTA_DDAQuantification.predicted.speclib --cfg used_search_params.cfg-- --f /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw --f /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw --f /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw --f /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw --f /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw --f /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw 
+
+Thread number set to 32
+Output will be filtered at 0.01 FDR
+Precursor/protein x samples expression level matrices will be saved along with the main report
+N-terminal methionine excision enabled
+Min peptide length set to 6
+Max peptide length set to 30
+Min precursor m/z set to 380
+Max precursor m/z set to 980
+Min precursor charge set to 2
+Max precursor charge set to 4
+Min fragment m/z set to 200
+Max fragment m/z set to 1800
+In silico digest will involve cuts at K*,R*
+But excluding cuts at *P
+Maximum number of missed cleavages set to 2
+Cysteine carbamidomethylation enabled as a fixed modification
+Modification Acetyl with mass delta 200 at A will be considered as fixed
+Maximum number of variable modifications set to 3
+Modification UniMod:35 with mass delta 15.9949 at M will be considered as variable
+Modification UniMod:1 with mass delta 42.0106 at *n will be considered as variable
+Peptidoform scoring enabled
+MBR enabled; .quant files will only be saved to disk during the first pass
+Heuristic protein grouping will be used, to reduce the number of protein groups obtained; this mode is recommended for benchmarking protein ID numbers, GO/pathway and system-scale analyses
+The spectral library (if generated) will retain the original spectra but will include empirically-aligned RTs
+Legacy (direct) quantification mode
+Precursor/protein x samples expression level matrices will be saved along with the main report
+WARNING: unrecognised option [--]
+DIA-NN will automatically optimise the mass accuracy for the first run of the experiment, use this mode for preliminary analyses only
+WARNING: protein inference is enabled but no FASTA provided - is this intended?
+The following variable modifications will be localised: UniMod:35 UniMod:1 
+
+6 files will be processed
+[0:00] Loading spectral library ProteoBenchFASTA_DDAQuantification.predicted.speclib
+[0:03] Library annotated with sequence database(s): ProteoBenchFASTA_DDAQuantification.fasta
+[0:03] Protein names missing for some isoforms
+[0:03] Gene names missing for some isoforms
+[0:03] Library contains 31669 proteins, and 0 genes
+[0:04] Spectral library loaded: 31813 protein isoforms, 45877 protein groups and 7768155 precursors in 4179633 elution groups.
+[0:10] Initialising library
+
+First pass: generating a spectral library from DIA data
+
+[0:34] File #1/6
+[0:34] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw
+[1:30] Pre-processing...
+[1:33] 2931 MS1 and 293271 MS2 scans in 977 (inferred) and 977 (encoded) cycles, 7762093 precursors in range
+[1:34] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[2:08] RT window set to 1.14919
+[2:08] Peak width: 2.656
+[2:08] Scan window radius set to 5
+[2:08] Recommended MS1 mass accuracy setting: 2.3 ppm
+[2:48] Optimised mass accuracy: 6 ppm
+[3:04] Searching decoys
+[3:28] Main search
+[4:17] Removing low confidence identifications
+[4:29] Removing interfering precursors
+[4:39] Training neural networks on 212185 target and 130847 decoy PSMs
+[5:18] Training neural networks on 212185 target and 131993 decoy PSMs
+[5:50] Number of IDs at 0.01 FDR: 102318
+[5:51] Precursors at 1% peptidoform FDR: 99594
+[5:52] Calculating protein q-values
+[5:52] Number of protein isoforms identified at 1% FDR: 10993 (precursor-level), 10040 (protein-level) (inference performed using proteotypic peptides only)
+[5:52] Quantification
+[5:53] Precursors with scored PTMs at 1% FDR: 3371 out of 3626 considered
+[5:53] Precursors with all scored PTM sites unoccupied at 1% FDR: 96223
+[5:53] Precursors with PTMs localised (when required) with > 90% confidence: 2373 out of 3371
+[5:55] Quantification information saved to /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw.quant
+
+[5:55] File #2/6
+[5:55] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw
+[6:50] Pre-processing...
+[6:53] 2932 MS1 and 293358 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 7762093 precursors in range
+[6:54] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[7:28] RT window set to 1.03549
+[7:28] Recommended MS1 mass accuracy setting: 2.3 ppm
+[7:52] Searching decoys
+[8:14] Main search
+[8:59] Removing low confidence identifications
+[9:10] Removing interfering precursors
+[9:20] Training neural networks on 211053 target and 129776 decoy PSMs
+[10:00] Training neural networks on 211053 target and 130425 decoy PSMs
+[10:31] Number of IDs at 0.01 FDR: 103547
+[10:32] Precursors at 1% peptidoform FDR: 100491
+[10:33] Calculating protein q-values
+[10:34] Number of protein isoforms identified at 1% FDR: 11060 (precursor-level), 10037 (protein-level) (inference performed using proteotypic peptides only)
+[10:34] Quantification
+[10:34] Precursors with scored PTMs at 1% FDR: 3472 out of 3747 considered
+[10:34] Precursors with all scored PTM sites unoccupied at 1% FDR: 97019
+[10:34] Precursors with PTMs localised (when required) with > 90% confidence: 2489 out of 3472
+[10:36] Quantification information saved to /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw.quant
+
+[10:36] File #3/6
+[10:36] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw
+[11:31] Pre-processing...
+[11:34] 2933 MS1 and 293382 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 7762093 precursors in range
+[11:35] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[12:09] RT window set to 1.15766
+[12:10] Recommended MS1 mass accuracy setting: 2.5 ppm
+[12:36] Searching decoys
+[12:59] Main search
+[13:49] Removing low confidence identifications
+[14:01] Removing interfering precursors
+[14:11] Training neural networks on 212597 target and 132425 decoy PSMs
+[14:50] Training neural networks on 212597 target and 132539 decoy PSMs
+[15:22] Number of IDs at 0.01 FDR: 103887
+[15:23] Precursors at 1% peptidoform FDR: 101253
+[15:24] Calculating protein q-values
+[15:24] Number of protein isoforms identified at 1% FDR: 10810 (precursor-level), 9708 (protein-level) (inference performed using proteotypic peptides only)
+[15:24] Quantification
+[15:25] Precursors with scored PTMs at 1% FDR: 4091 out of 4395 considered
+[15:25] Precursors with all scored PTM sites unoccupied at 1% FDR: 97162
+[15:25] Precursors with PTMs localised (when required) with > 90% confidence: 3044 out of 4091
+[15:27] Quantification information saved to /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw.quant
+
+[15:27] File #4/6
+[15:27] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw
+[16:22] Pre-processing...
+[16:25] 2933 MS1 and 293330 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 7762093 precursors in range
+[16:26] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[17:01] RT window set to 1.21667
+[17:01] Recommended MS1 mass accuracy setting: 2.4 ppm
+[17:28] Searching decoys
+[17:53] Main search
+[18:44] Removing low confidence identifications
+[18:56] Removing interfering precursors
+[19:06] Training neural networks on 214304 target and 133671 decoy PSMs
+[19:47] Training neural networks on 214304 target and 133799 decoy PSMs
+[20:19] Number of IDs at 0.01 FDR: 103913
+[20:19] Precursors at 1% peptidoform FDR: 101001
+[20:20] Calculating protein q-values
+[20:21] Number of protein isoforms identified at 1% FDR: 10906 (precursor-level), 9833 (protein-level) (inference performed using proteotypic peptides only)
+[20:21] Quantification
+[20:22] Precursors with scored PTMs at 1% FDR: 4147 out of 4479 considered
+[20:22] Precursors with all scored PTM sites unoccupied at 1% FDR: 96854
+[20:22] Precursors with PTMs localised (when required) with > 90% confidence: 3113 out of 4147
+[20:23] Quantification information saved to /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw.quant
+
+[20:23] File #5/6
+[20:23] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw
+[21:17] Pre-processing...
+[21:20] 2934 MS1 and 293446 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 7762093 precursors in range
+[21:21] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[21:56] RT window set to 1.2472
+[21:56] Recommended MS1 mass accuracy setting: 2.4 ppm
+[22:18] Searching decoys
+[22:44] Main search
+[23:35] Removing low confidence identifications
+[23:47] Removing interfering precursors
+[23:57] Training neural networks on 217885 target and 136757 decoy PSMs
+[24:38] Training neural networks on 217885 target and 136191 decoy PSMs
+[25:11] Number of IDs at 0.01 FDR: 104768
+[25:11] Precursors at 1% peptidoform FDR: 101985
+[25:12] Calculating protein q-values
+[25:13] Number of protein isoforms identified at 1% FDR: 10915 (precursor-level), 9853 (protein-level) (inference performed using proteotypic peptides only)
+[25:13] Quantification
+[25:14] Precursors with scored PTMs at 1% FDR: 4163 out of 4413 considered
+[25:14] Precursors with all scored PTM sites unoccupied at 1% FDR: 97822
+[25:14] Precursors with PTMs localised (when required) with > 90% confidence: 3110 out of 4163
+[25:15] Quantification information saved to /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw.quant
+
+[25:15] File #6/6
+[25:15] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw
+[26:06] Pre-processing...
+[26:09] 2933 MS1 and 293433 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 7762093 precursors in range
+[26:10] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[26:44] RT window set to 1.11988
+[26:44] Recommended MS1 mass accuracy setting: 2.5 ppm
+[27:06] Searching decoys
+[27:29] Main search
+[28:17] Removing low confidence identifications
+[28:29] Removing interfering precursors
+[28:39] Training neural networks on 213636 target and 131790 decoy PSMs
+[29:19] Training neural networks on 213636 target and 132323 decoy PSMs
+[29:51] Number of IDs at 0.01 FDR: 103482
+[29:51] Precursors at 1% peptidoform FDR: 100688
+[29:52] Calculating protein q-values
+[29:53] Number of protein isoforms identified at 1% FDR: 11053 (precursor-level), 10049 (protein-level) (inference performed using proteotypic peptides only)
+[29:53] Quantification
+[29:54] Precursors with scored PTMs at 1% FDR: 3539 out of 3806 considered
+[29:54] Precursors with all scored PTM sites unoccupied at 1% FDR: 97149
+[29:54] Precursors with PTMs localised (when required) with > 90% confidence: 2531 out of 3539
+[29:55] Quantification information saved to /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw.quant
+
+[29:55] Cross-run analysis
+[29:55] Reading quantification information: 6 files
+[30:18] Quantifying peptides
+[32:05] Assembling protein groups
+[32:07] Quantifying proteins
+[32:08] Calculating q-values for protein and gene groups
+[32:09] Calculating global q-values for protein and gene groups
+[32:09] Protein groups with global q-value <= 0.01: 11547
+[32:12] Compressed report saved to report-first-pass.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[32:12] Saving precursor levels matrix
+[32:12] Precursor levels matrix (1% precursor and protein group FDR) saved to report-first-pass.pr_matrix.tsv.
+[32:12] Manifest saved to report-first-pass.manifest.txt
+[32:12] Stats report saved to report-first-pass.stats.tsv
+[32:12] Generating spectral library:
+[32:14] 134404 target and 1359 decoy precursors saved
+[32:14] Spectral library saved to report-lib.parquet
+
+[32:14] Loading spectral library report-lib.parquet
+[32:15] Spectral library loaded: 13387 protein isoforms, 13224 protein groups and 135763 precursors in 126702 elution groups.
+[32:16] Initialising library
+[32:16] Saving the library to report-lib.parquet.skyline.speclib
+
+
+Second pass: using the newly created spectral library to reanalyse the data
+
+[32:16] File #1/6
+[32:16] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw
+[33:10] Pre-processing...
+[33:12] 2931 MS1 and 293271 MS2 scans in 977 (inferred) and 977 (encoded) cycles, 134404 precursors in range
+[33:12] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[33:13] RT window set to 0.359595
+[33:13] Recommended MS1 mass accuracy setting: 2.4 ppm
+[33:13] Searching decoys
+[33:13] Main search
+[33:14] Removing low confidence identifications
+[33:17] Removing interfering precursors
+[33:18] Training neural networks on 116604 target and 54105 decoy PSMs
+[33:33] Training neural networks on 116551 target and 59939 decoy PSMs
+[33:48] Number of IDs at 0.01 FDR: 112631
+[33:48] Precursors at 1% peptidoform FDR: 110497
+[33:48] Calculating protein q-values
+[33:48] Number of protein isoforms identified at 1% FDR: 11031 (precursor-level), 10084 (protein-level) (inference performed using proteotypic peptides only)
+[33:48] Quantification
+[33:49] Precursors with scored PTMs at 1% FDR: 4065 out of 4190 considered
+[33:49] Precursors with all scored PTM sites unoccupied at 1% FDR: 106432
+[33:49] Precursors with PTMs localised (when required) with > 90% confidence: 2902 out of 4065
+
+[33:49] File #2/6
+[33:49] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw
+[34:45] Pre-processing...
+[34:48] 2932 MS1 and 293358 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 134404 precursors in range
+[34:48] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[34:48] RT window set to 0.41083
+[34:48] Recommended MS1 mass accuracy setting: 2.6 ppm
+[34:49] Searching decoys
+[34:49] Main search
+[34:50] Removing low confidence identifications
+[34:53] Removing interfering precursors
+[34:54] Training neural networks on 117229 target and 55836 decoy PSMs
+[35:09] Training neural networks on 117181 target and 61522 decoy PSMs
+[35:25] Number of IDs at 0.01 FDR: 114144
+[35:25] Precursors at 1% peptidoform FDR: 112467
+[35:25] Calculating protein q-values
+[35:25] Number of protein isoforms identified at 1% FDR: 11065 (precursor-level), 10075 (protein-level) (inference performed using proteotypic peptides only)
+[35:25] Quantification
+[35:26] Precursors with scored PTMs at 1% FDR: 4162 out of 4280 considered
+[35:26] Precursors with all scored PTM sites unoccupied at 1% FDR: 108305
+[35:26] Precursors with PTMs localised (when required) with > 90% confidence: 2991 out of 4162
+
+[35:26] File #3/6
+[35:26] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw
+[36:17] Pre-processing...
+[36:19] 2933 MS1 and 293382 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 134404 precursors in range
+[36:19] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[36:20] RT window set to 0.4446
+[36:20] Recommended MS1 mass accuracy setting: 2.5 ppm
+[36:20] Searching decoys
+[36:20] Main search
+[36:22] Removing low confidence identifications
+[36:24] Removing interfering precursors
+[36:25] Training neural networks on 117650 target and 57052 decoy PSMs
+[36:41] Training neural networks on 117603 target and 62672 decoy PSMs
+[36:57] Number of IDs at 0.01 FDR: 114541
+[36:57] Precursors at 1% peptidoform FDR: 112940
+[36:57] Calculating protein q-values
+[36:57] Number of protein isoforms identified at 1% FDR: 10991 (precursor-level), 10052 (protein-level) (inference performed using proteotypic peptides only)
+[36:57] Quantification
+[36:58] Precursors with scored PTMs at 1% FDR: 4500 out of 4579 considered
+[36:58] Precursors with all scored PTM sites unoccupied at 1% FDR: 108440
+[36:58] Precursors with PTMs localised (when required) with > 90% confidence: 3328 out of 4500
+
+[36:59] File #4/6
+[36:59] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw
+[37:54] Pre-processing...
+[37:57] 2933 MS1 and 293330 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 134404 precursors in range
+[37:57] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[37:57] RT window set to 0.43967
+[37:57] Recommended MS1 mass accuracy setting: 2.3 ppm
+[37:58] Searching decoys
+[37:58] Main search
+[37:59] Removing low confidence identifications
+[38:02] Removing interfering precursors
+[38:03] Training neural networks on 117831 target and 56895 decoy PSMs
+[38:18] Training neural networks on 117778 target and 62454 decoy PSMs
+[38:34] Number of IDs at 0.01 FDR: 115444
+[38:34] Precursors at 1% peptidoform FDR: 113741
+[38:34] Calculating protein q-values
+[38:34] Number of protein isoforms identified at 1% FDR: 11138 (precursor-level), 10106 (protein-level) (inference performed using proteotypic peptides only)
+[38:34] Quantification
+[38:35] Precursors with scored PTMs at 1% FDR: 4544 out of 4646 considered
+[38:35] Precursors with all scored PTM sites unoccupied at 1% FDR: 109197
+[38:35] Precursors with PTMs localised (when required) with > 90% confidence: 3375 out of 4544
+
+[38:35] File #5/6
+[38:35] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw
+[39:31] Pre-processing...
+[39:34] 2934 MS1 and 293446 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 134404 precursors in range
+[39:34] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[39:34] RT window set to 0.443132
+[39:34] Recommended MS1 mass accuracy setting: 2.5 ppm
+[39:34] Searching decoys
+[39:35] Main search
+[39:36] Removing low confidence identifications
+[39:39] Removing interfering precursors
+[39:40] Training neural networks on 117634 target and 56791 decoy PSMs
+[39:56] Training neural networks on 117584 target and 62672 decoy PSMs
+[40:12] Number of IDs at 0.01 FDR: 114919
+[40:12] Precursors at 1% peptidoform FDR: 112973
+[40:12] Calculating protein q-values
+[40:12] Number of protein isoforms identified at 1% FDR: 11104 (precursor-level), 10101 (protein-level) (inference performed using proteotypic peptides only)
+[40:12] Quantification
+[40:13] Precursors with scored PTMs at 1% FDR: 4523 out of 4608 considered
+[40:13] Precursors with all scored PTM sites unoccupied at 1% FDR: 108450
+[40:13] Precursors with PTMs localised (when required) with > 90% confidence: 3331 out of 4523
+
+[40:13] File #6/6
+[40:13] Loading run /g/pcf/01_users/Frank/proteobench/DIA_Astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw
+[41:07] Pre-processing...
+[41:09] 2933 MS1 and 293433 MS2 scans in 978 (inferred) and 978 (encoded) cycles, 134404 precursors in range
+[41:09] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[41:09] RT window set to 0.357648
+[41:09] Recommended MS1 mass accuracy setting: 2.4 ppm
+[41:10] Searching decoys
+[41:10] Main search
+[41:11] Removing low confidence identifications
+[41:14] Removing interfering precursors
+[41:15] Training neural networks on 116931 target and 53573 decoy PSMs
+[41:30] Training neural networks on 116877 target and 59549 decoy PSMs
+[41:45] Number of IDs at 0.01 FDR: 113709
+[41:45] Precursors at 1% peptidoform FDR: 112197
+[41:45] Calculating protein q-values
+[41:45] Number of protein isoforms identified at 1% FDR: 11051 (precursor-level), 10076 (protein-level) (inference performed using proteotypic peptides only)
+[41:45] Quantification
+[41:46] Precursors with scored PTMs at 1% FDR: 4182 out of 4274 considered
+[41:46] Precursors with all scored PTM sites unoccupied at 1% FDR: 108015
+[41:46] Precursors with PTMs localised (when required) with > 90% confidence: 3014 out of 4182
+
+[41:46] Cross-run analysis
+[41:46] Reading quantification information: 6 files
+[41:48] Quantifying peptides
+[43:29] Quantifying proteins
+[43:29] Calculating q-values for protein and gene groups
+[43:30] Calculating global q-values for protein and gene groups
+[43:30] Protein groups with global q-value <= 0.01: 11058
+[43:32] Compressed report saved to report.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[43:32] Saving precursor levels matrix
+[43:33] Precursor levels matrix (1% precursor and protein group FDR) saved to report.pr_matrix.tsv.
+[43:33] Saving protein group levels matrix
+[43:33] Protein groups matrix saved to report.pg_matrix.tsv.
+[43:33] Saving gene group levels matrix
+[43:33] Gene groups matrix saved to report.gg_matrix.tsv.
+[43:33] Saving unique genes levels matrix
+[43:33] Unique genes matrix saved to report.unique_genes_matrix.tsv.
+[43:33] Manifest saved to report.manifest.txt
+[43:33] Stats report saved to report.stats.tsv
+

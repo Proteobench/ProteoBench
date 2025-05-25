@@ -113,7 +113,7 @@ class QuantUIObjects:
 
     def display_submission_form(self) -> None:
         """
-        Create the main submission form for the Streamlit UI.
+        Create the main submission form for the Streamlit UI in Tab 2.
         """
         with st.form(key="main_form"):
             self.generate_input_fields()
@@ -147,7 +147,7 @@ class QuantUIObjects:
         """
         field_type = content.get("type")
         if field_type == "text_area":
-            return self.generate_text_area_widget(input_format, content, key, editable=editable)
+            return self.generate_text_area_widget(input_format, content, editable=editable)
         elif field_type == "text_input":
             return self._generate_text_input(input_format, content, key, editable=editable)
         elif field_type == "number_input":
@@ -155,7 +155,7 @@ class QuantUIObjects:
         elif field_type == "selectbox":
             return self._generate_selectbox(input_format, content, key, editable=editable)
         elif field_type == "checkbox":
-            return self._generate_checkbox(input_format, content, key, editable=editable)
+            return self._generate_checkbox(content=content, key=key, editable=editable)
 
     def _generate_text_area(self, input_format: str, content: dict, key: str = "") -> Any:
         """
@@ -319,14 +319,12 @@ class QuantUIObjects:
             disabled=not editable,
         )
 
-    def _generate_checkbox(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
+    def _generate_checkbox(self, content: dict, key: str = "", editable: bool = True) -> Any:
         """
         Generate a checkbox input field.
 
         Parameters
         ----------
-        input_format : str
-            The input format.
         content : dict
             The content of the checkbox.
         key : str
@@ -1108,7 +1106,7 @@ class QuantUIObjects:
 
     def display_public_submission_ui(self) -> None:
         """
-        Display the public submission section of the page.
+        Display the public submission section of the page in Tab 4.
         """
         # Initialize Unchecked submission box variable
         if self.variables_quant.check_submission not in st.session_state:
@@ -1143,7 +1141,7 @@ class QuantUIObjects:
 
     def generate_current_data_plots(self, recalculate: bool) -> go.Figure:
         """
-        Generate and return plots based on the current benchmark data.
+        Generate and return plots based on the current benchmark data in Tab 2.5.
 
         Parameters
         ----------
@@ -1243,7 +1241,7 @@ class QuantUIObjects:
         self.display_existing_results()
 
     def display_all_data_results_submitted(self) -> None:
-        """Display the results for all data in Tab 1."""
+        """Display the results for all data in Tab 3."""
         st.title("Results (All Data)")
         self.initialize_submitted_slider()
         self.generate_submitted_slider()

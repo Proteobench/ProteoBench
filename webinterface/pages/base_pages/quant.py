@@ -15,13 +15,17 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
+from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
+    VariablesDDAQuant,
+)
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive as IonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
+    DDAQuantIonModuleQExactive as IonModule,
+)
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -113,6 +117,7 @@ class QuantUIObjects:
         """
         with st.form(key="main_form"):
             self.generate_input_fields()
+            # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
             self.generate_additional_parameters_fields()
             st.markdown(self.variables_quant.texts.ShortMessages.run_instructions)
             submit_button = st.form_submit_button("Parse and bench", help=self.variables_quant.texts.Help.parse_button)
@@ -352,9 +357,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
-            st.session_state[
-                st.session_state[self.variables_quant.slider_id_uuid]
-            ] = self.variables_quant.default_val_slider
+            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]] = (
+                self.variables_quant.default_val_slider
+            )
 
     def generate_main_selectbox(self) -> None:
         """
@@ -396,9 +401,9 @@ class QuantUIObjects:
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
         if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
-            st.session_state[
-                st.session_state[self.variables_quant.slider_id_submitted_uuid]
-            ] = self.variables_quant.default_val_slider
+            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]] = (
+                self.variables_quant.default_val_slider
+            )
 
     def display_submitted_results(self) -> None:
         """
@@ -540,8 +545,6 @@ class QuantUIObjects:
             self.submission_ready = False
             st.error(":x: Please provide a result file", icon="🚨")
         self.generate_metadata_uploader()
-        self.generate_comments_section()
-        self.generate_confirmation_checkbox()
 
     def generate_input_fields(self) -> None:
         """
@@ -563,7 +566,6 @@ class QuantUIObjects:
         """
         Create the additional parameters section of the form and initializes the parameter fields.
         """
-        st.markdown(self.variables_quant.texts.ShortMessages.initial_parameters)
         with open(self.variables_quant.additional_params_json) as file:
             config = json.load(file)
         for key, value in config.items():
@@ -1013,7 +1015,6 @@ class QuantUIObjects:
                 params.__dict__ if hasattr(params, "__dict__") else params
             )
 
-            st.text(f"Parsed and selected parameters:\n{pformat(params.__dict__)}")
         except KeyError:
             st.error("Parsing of meta parameters file for this software is not supported yet.", icon="🚨")
         except Exception as e:
@@ -1107,17 +1108,20 @@ class QuantUIObjects:
         """
         Display the public submission section of the page in Tab 4.
         """
+        # Initialize Unchecked submission box variable
+        if self.variables_quant.check_submission not in st.session_state:
+            st.session_state[self.variables_quant.check_submission] = False
         if self.variables_quant.first_new_plot:
             self.generate_submission_ui_elements()
 
         if self.user_input[self.variables_quant.meta_data]:
-            print(self.user_input)
             params = self.load_user_parameters()
-            print(params)
             st.session_state[self.variables_quant.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
             print(self.params_file_dict_copy)
             self.generate_additional_parameters_fields_submission()
+            self.generate_comments_section()
+            self.generate_confirmation_checkbox()
         else:
             params = None
 

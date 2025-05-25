@@ -14,7 +14,7 @@ Other modules will be more suited to explore further post-pocessing steps.
 
 ## Data set
 
-A not yet released Astral (Thermo Fisher) data independent acquisition (DIA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)] was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
+A not yet released Astral (Thermo Fisher) data independent acquisition (DIA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli.
 Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
 Data acquisition parameters were as following: 
@@ -121,14 +121,13 @@ In FragPipe output files, the protein identifiers matching a given ion are in tw
 4. Once loaded, you optionally can change the name of the project
 5. In the next tab select the proteobench fasta as the database
 6. Choose your settings in the next tab
-7. In the next tab fill in the conditions: "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02", "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" and export the conditions setup file in tsv format (..._Report.Setup.tsv)
+7. In the next tab fill in the conditions: "LFQ_Astral_DIA_15min_50ng_Condition_A_REP1","LFQ_Astral_DIA_15min_50ng_Condition_A_REP2", "LFQ_Astral_DIA_15min_50ng_Condition_A_REP3","LFQ_Astral_DIA_15min_50ng_Condition_B_REP1","LFQ_Astral_DIA_15min_50ng_Condition_B_REP2","LFQ_Astral_DIA_15min_50ng_Condition_B_REP3"
 8. Do not tick any GO terms or Library exensions in the next tabs
 9. Finish the settings on the next tab in order to start the search
 10. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
-11. Upload the "..._Report.tsv" and "Report.Setup.tsv" to Proteobench
+11. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
 
-We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.s
-etup" file for parameter parsing when doing public upload.
+We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.setup.txt" file for parameter parsing when doing public upload.
 
 ### [MaxDIA](https://www.maxquant.org/) (work in progress)
 By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
@@ -137,12 +136,12 @@ For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant s
 
 ### [PEAKS](https://www.bioinfor.com//)
 When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS (Sample 1->6), so they match exactly with the .RAW file names:
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
+-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
+-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
 
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 

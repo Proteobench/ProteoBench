@@ -10,6 +10,7 @@ Developer guide
     development-setup
     local-usage
     modifying-module
+    reviewing-new-point-pr
     changelog
 
 .. toctree:: 

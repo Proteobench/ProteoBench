@@ -173,10 +173,13 @@ Checklist
 =========
 
 This checklist is meant to help you add a new module to ProteoBench. It is not
-meant to be exhaustive, but it should cover the most important steps. See one of the
-recent examples of adding modules, e.g in
-`PR 638 <https://github.com/Proteobench/ProteoBench/pull/638/files>`_
-to see which files these authors had to add or modify.
+meant to be exhaustive, but it should cover the most important steps. To see which 
+files need to change for adding a module, have a look at one of the
+recent examples. Adding a quant module (based on other quant modules):
+`PR 703 <https://github.com/Proteobench/ProteoBench/pull/703/files>`_. Or for adding
+a new type of module: 
+`PR 727 <https://github.com/Proteobench/ProteoBench/pull/727/files>`_. 
+
 
 1. Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule` and replace
    the :func:`benchmarking` method with your own implementation. You can copy from other

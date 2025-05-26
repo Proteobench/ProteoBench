@@ -27,6 +27,7 @@ The parameters that are retrieve from the parameter files are the following:
 - "protein_inference": 
 - "predictors_library": lybrary used for the analysis in DIA. With the current module, we do not support experimentally generated libraries, but some software tools allow to use different in-silico-generated libraries.
 - "abundance_normalization_ions":
+- "scan_window":
 
 
 
@@ -35,3 +36,14 @@ The parameters that are retrieve from the parameter files are the following:
 ### alphaDIA
 
 We give as "search_engine" the name "AlphaDIA". The "quantification_method" is set by default to "DirectLFQ", the "predictors_library" to "AlphaPeptDeep", and "enable_match_between_runs" to False.
+
+### DIA-NN
+
+We use the log file and extract the software version. Then, find the command line string that was used to run DIA-NN and parse it to extract settings.
+Default values are set for parameters that are not specified in the command line:
+
+- "enable_match_between_runs": False
+- "quantification_method": "QuantUMS high-precision"
+- "protein_inference": "Genes"
+
+If the --cfg flag is used (meaning a configuration file was used), the parameters are parsed from the free text underneath the cmd line.

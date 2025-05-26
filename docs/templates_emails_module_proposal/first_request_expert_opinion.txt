@@ -19,7 +19,7 @@ You can:
     * Are there some biases that are not accounted for in the proposal?
     * Is the proposed data well suited for the aim of the module?
     * What workflow runs (tools, parameters) should be included in the comparison when we release the module?  
-  2. Participate to the discussions, design, preliminary tests with all contributors
+  2. Give your opinion as described in 1., andparticipate to the discussions, design, preliminary tests with all contributors.
 All your comments will be publicly available, together with the discussion that follows. And whatever you decide in terms of involvement (solution 1. or 2.), you would be listed as contributor on the website, and in communications about the module. 
 
 We would be happy to organise a meeting if you would like to discuss this further. Let us know when would be best for you.

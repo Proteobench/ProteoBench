@@ -1,6 +1,6 @@
-#################################
-Adding a new quantification module
-#################################
+###################
+Adding a new module
+###################
 
 Here we provide a comprehensive overview of how to set up a new module in ProteoBench,
 currently focused on quantification modules, where you only need to check and maybe 

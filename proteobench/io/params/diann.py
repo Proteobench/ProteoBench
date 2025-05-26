@@ -488,7 +488,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
         protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
         parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")
-        print(parameters)
 
     return ProteoBenchParameters(**parameters)
 

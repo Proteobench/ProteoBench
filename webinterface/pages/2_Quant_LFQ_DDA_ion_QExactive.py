@@ -116,7 +116,6 @@ class StreamlitUI:
         # Tab 4: Public Submission
         with tab_public_submission:
             st.title(self.variables_dda_quant.title)
-            #st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
             st.link_button("Go to module documentation", url = self.variables_dda_quant.doc_url, type="secondary", help = "link to the module documentation")
             if self.variables_dda_quant.beta_warning:
                 st.warning(

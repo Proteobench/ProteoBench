@@ -650,7 +650,7 @@ class QuantUIObjects:
 
         Returns
         -------
-        pd.DataFrame
+        pandas.DataFrame
             The filtered data points.
         """
         if self.variables_quant.slider_id_uuid in st.session_state.keys():

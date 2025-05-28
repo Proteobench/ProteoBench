@@ -778,6 +778,36 @@ class QuantUIObjects:
                 else:
                     st.write("Directory for this dataset does not exist, this should not happen.")
 
+    def display_indepth_plots(self) -> Optional[str]:
+        """
+        Display the dataset selection dropdown and plot the selected dataset.
+
+        Returns
+        -------
+        Optional[str]
+            The selected dataset or None if no dataset is selected.
+        """
+        downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
+        downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
+
+        if self.variables_quant.placeholder_dataset_selection_container not in st.session_state.keys():
+            st.session_state[self.variables_quant.placeholder_dataset_selection_container] = st.empty()
+            st.session_state[self.variables_quant.dataset_selector_id_uuid] = uuid.uuid4()
+
+        #with st.session_state[self.variables_dda_quant.placeholder_dataset_selection_container].container(border=True):
+        st.subheader("Select dataset to plot")
+
+        dataset_selection = st.selectbox(
+            "Select dataset",
+            pd.concat([pd.Series(["uploaded_dataset"]), downloads_df["intermediate_hash"]]),
+            index=None,
+            key=st.session_state[self.variables_quant.dataset_selector_id_uuid],
+            format_func=lambda x: "Uploaded dataset" if x == "uploaded_dataset" else downloads_df["id"][x]
+        )
+
+        self.generate_indepth_plots(True, dataset_selection=dataset_selection)
+
+
     def generate_submission_button(self) -> Optional[str]:
         """
         Create a button for public submission and returns the PR URL if the button is pressed.
@@ -1137,7 +1167,7 @@ class QuantUIObjects:
         ):
             self.show_submission_success_message(pr_url)
 
-    def generate_current_data_plots(self, recalculate: bool, dataset_selection = None) -> go.Figure:
+    def generate_indepth_plots(self, recalculate: bool, dataset_selection = None) -> go.Figure:
         """
         Generate and return plots based on the current benchmark data.
 
@@ -1206,7 +1236,7 @@ class QuantUIObjects:
         else:
             fig_logfc = st.session_state[self.variables_quant.fig_logfc]
             fig_CV = st.session_state[self.variables_quant.fig_cv]
-            fig_MA = st.session_state[self.variables_quant.fig_ma]
+            fig_MA = st.session_state[self.variables_quant.fig_ma_plot]
 
         if self.variables_quant.first_new_plot:
             col1, col2 = st.columns(2)

@@ -4,8 +4,10 @@ Streamlit UI for the DIA quantification - precursor ions module - Astral.
 
 import logging
 from typing import Any, Dict, Type
+import uuid
 
 import pages.texts.proteobench_builder as pbb
+import pandas as pd
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DIA_ion_Astral_variables import (
@@ -96,7 +98,9 @@ class StreamlitUI:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
-            self.quant_uiobjects.generate_current_data_plots(True)
+
+            self.quant_uiobjects.display_indepth_plots()
+
 
         # Tab 3: Results (New Submissions)
         with tab_results_new:

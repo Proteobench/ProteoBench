@@ -1176,7 +1176,7 @@ class QuantUIObjects:
         recalculate : bool
             Whether to recalculate the plots.
         public_id : Optional[str], optional
-            The dataset to plot, either "uploaded_dataset" or name of public run.
+            The dataset to plot, either "Uploaded dataset" or name of public run.
         public_hash : Optional[str], optional
             The hash of the selected public dataset. If None, the uploaded dataset is displayed.
 
@@ -1187,26 +1187,21 @@ class QuantUIObjects:
         """
         # no uploaded dataset and no public dataset selected? nothing to plot!
         if self.variables_quant.result_perf not in st.session_state.keys():
-            if public_id is None:
+            if public_hash is None:
                 st.error(":x: Please submit a result file or select a public run for display", icon="🚨")
                 return False
             elif public_id == "Uploaded dataset":
                 st.error(":x: Please submit a result file in the Submit New Data Tab", icon="🚨")
                 return False
 
-        # If dataset_selection is provided, either plot uploaded or public dataset
-        if public_id is not None:
-            if public_id == "Uploaded dataset":
-                performance_data = st.session_state[self.variables_quant.result_perf]
-            else:
-                # Downloading the public performance data
-                performance_data = None
-                if st.secrets["storage"]["dir"] != None:
-                    dataset_path = st.secrets["storage"]["dir"] + "/" + public_hash
-                    performance_data = pd.read_csv(dataset_path + "/result_performance.csv")
-        else:
-            # If nothing was selected, directly display the user-provided data
+        if public_id == "Uploaded dataset":
             performance_data = st.session_state[self.variables_quant.result_perf]
+        else:
+            # Downloading the public performance data
+            performance_data = None
+            if st.secrets["storage"]["dir"] != None:
+                dataset_path = st.secrets["storage"]["dir"] + "/" + public_hash
+                performance_data = pd.read_csv(dataset_path + "/result_performance.csv")
 
         # Filter the data based on the slider condition (as before)
         performance_data = performance_data[

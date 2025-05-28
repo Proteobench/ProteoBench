@@ -4,6 +4,30 @@ from pathlib import Path
 import requests
 
 
+def stat_box(title, value, icon, color="#000", url=None):
+    content = f"""
+    <div style="
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        padding: 20px;
+        text-align: center;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: transform 0.2s ease;
+    ">
+        <div style="font-size: 2rem; color: {color}; margin-bottom: 10px;">{icon}</div>
+        <div style="color: #37475E; font-weight: 600;">{title}</div>
+        <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px; color: #37475E;">{value}</div>
+    </div>
+    """
+    if url:
+        return f"""<a href="{url}" target="_blank" style="text-decoration: none;">{content}</a>"""
+    return content
+
+
 def get_n_modules():
     """
     Get the number of modules in ProteoBench.

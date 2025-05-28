@@ -2,32 +2,17 @@
 
 import streamlit as st
 from _base import StreamlitPage
-from WI_utils import get_n_modules, get_n_submitted_points, get_n_supported_tools
+from WI_utils import (
+    get_n_modules,
+    get_n_submitted_points,
+    get_n_supported_tools,
+    stat_box,
+)
 
 
 class StreamlitPageHome(StreamlitPage):
     """
     This class sets up the main page layout for the Streamlit application.
-    """
-
-    @staticmethod
-    def stat_box(title, value, icon, color="#000"):
-        return f"""
-        <div style="
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-            padding: 20px;
-            text-align: center;
-            min-height: 180px;  /* 👈 Forces consistent height */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        ">
-            <div style="font-size: 2rem; color: {color}; margin-bottom: 10px;">{icon}</div>
-            <div style="color: #37475E; font-weight: 600;">{title}</div>
-            <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px; color: #37475E;">{value}</div>
-        </div>
     """
 
     def _main_page(self):
@@ -92,11 +77,24 @@ class StreamlitPageHome(StreamlitPage):
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:
             st.markdown(
-                self.stat_box("Number of modules (total)", n_modules_all, "🧩", "#37475E"), unsafe_allow_html=True
+                stat_box(
+                    "Number of modules (total)",
+                    n_modules_all,
+                    "🧩",
+                    "#37475E",
+                    "https://proteobench.readthedocs.io/en/stable/available-modules/",
+                ),
+                unsafe_allow_html=True,
             )
         with row1_col2:
             st.markdown(
-                self.stat_box("Number of modules (expert validated)", n_modules_reviewed, "✅", "#37475E"),
+                stat_box(
+                    "Number of modules (expert validated)",
+                    n_modules_reviewed,
+                    "✅",
+                    "#37475E",
+                    # TODO: link to expert validation docs
+                ),
                 unsafe_allow_html=True,
             )
         st.markdown("<br>", unsafe_allow_html=True)
@@ -104,11 +102,24 @@ class StreamlitPageHome(StreamlitPage):
         row2_col1, row2_col2 = st.columns(2)
         with row2_col1:
             st.markdown(
-                self.stat_box("Number of tools supported", n_tools_supported, "🔨", "#37475E"), unsafe_allow_html=True
+                stat_box(
+                    "Number of tools supported",
+                    n_tools_supported,
+                    "🔨",
+                    "#37475E",
+                    # TODO: parameter parsing docs url
+                ),
+                unsafe_allow_html=True,
             )
         with row2_col2:
             st.markdown(
-                self.stat_box("Number of submitted points", n_of_points_submitted, "⭕", "#37475E"),
+                stat_box(
+                    "Number of submitted points",
+                    n_of_points_submitted,
+                    "⭕",
+                    "#37475E",
+                    "https://proteobench.cubimed.rub.de/datasets/",
+                ),
                 unsafe_allow_html=True,
             )
         st.markdown("<br>", unsafe_allow_html=True)
@@ -116,7 +127,7 @@ class StreamlitPageHome(StreamlitPage):
         # Third row
         row3 = st.columns(1)
         with row3[0]:
-            st.markdown(self.stat_box("Monthly visitors", monthly_visitors, "🌐", "#37475E"), unsafe_allow_html=True)
+            st.markdown(stat_box("Monthly visitors", monthly_visitors, "🌐", "#37475E"), unsafe_allow_html=True)
 
 
 if __name__ == "__main__":

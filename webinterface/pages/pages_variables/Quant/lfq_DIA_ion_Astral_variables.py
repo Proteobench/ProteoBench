@@ -70,7 +70,9 @@ class VariablesDIAQuantAstral:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/"
+    )
 
     title: str = "DIA Precursor ion quantification - Astral 2 Th"
 

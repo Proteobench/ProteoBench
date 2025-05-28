@@ -101,7 +101,6 @@ class StreamlitUI:
 
             self.quant_uiobjects.display_indepth_plots()
 
-
         # Tab 3: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables_dia_quant.title)

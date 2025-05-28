@@ -791,19 +791,20 @@ class QuantUIObjects:
 
         st.subheader("Select dataset to plot")
 
-        dataset_options = [("Uploaded dataset", None)] + list(zip(downloads_df["id"], downloads_df["intermediate_hash"]))
+        dataset_options = [("Uploaded dataset", None)] + list(
+            zip(downloads_df["id"], downloads_df["intermediate_hash"])
+        )
 
         dataset_selection = st.selectbox(
             "Select dataset",
             dataset_options,
             index=0,
             key=st.session_state[self.variables_quant.dataset_selector_id_uuid],
-            format_func=lambda x: x[0]
+            format_func=lambda x: x[0],
         )
 
         public_id, selected_hash = dataset_selection
         self.generate_indepth_plots(True, public_id=public_id, public_hash=selected_hash)
-
 
     def generate_submission_button(self) -> Optional[str]:
         """
@@ -1164,7 +1165,9 @@ class QuantUIObjects:
         ):
             self.show_submission_success_message(pr_url)
 
-    def generate_indepth_plots(self, recalculate: bool, public_id: Optional[str], public_hash: Optional[str]) -> go.Figure:
+    def generate_indepth_plots(
+        self, recalculate: bool, public_id: Optional[str], public_hash: Optional[str]
+    ) -> go.Figure:
         """
         Generate and return plots based on the current benchmark data.
 
@@ -1196,19 +1199,11 @@ class QuantUIObjects:
             if public_id == "Uploaded dataset":
                 performance_data = st.session_state[self.variables_quant.result_perf]
             else:
-            # Downloading the public performance data
+                # Downloading the public performance data
                 performance_data = None
-                if (
-                    st.secrets["storage"]["dir"] != None
-                ):
-                    dataset_path = (
-                        st.secrets["storage"]["dir"]
-                        + "/"
-                        + public_hash
-                    )
-                    performance_data = pd.read_csv(
-                        dataset_path + "/result_performance.csv"
-                    )
+                if st.secrets["storage"]["dir"] != None:
+                    dataset_path = st.secrets["storage"]["dir"] + "/" + public_hash
+                    performance_data = pd.read_csv(dataset_path + "/result_performance.csv")
         else:
             # If nothing was selected, directly display the user-provided data
             performance_data = st.session_state[self.variables_quant.result_perf]
@@ -1242,7 +1237,9 @@ class QuantUIObjects:
             col1.markdown(
                 """
                     log2 fold changes calculated from {}
-                """.format(public_id)
+                """.format(
+                    public_id
+                )
             )
             col1.plotly_chart(fig_logfc, use_container_width=True)
 
@@ -1250,7 +1247,9 @@ class QuantUIObjects:
             col2.markdown(
                 """
                     CVs calculated from {}
-                """.format(public_id)
+                """.format(
+                    public_id
+                )
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
 
@@ -1260,7 +1259,9 @@ class QuantUIObjects:
             col1.markdown(
                 """
                     MA plot calculated from {}
-                """.format(public_id)
+                """.format(
+                    public_id
+                )
             )
             # Example: plot another figure or add any other Streamlit element
             # st.plotly_chart(fig_additional, use_container_width=True)
@@ -1271,9 +1272,7 @@ class QuantUIObjects:
 
         st.subheader("Sample of the processed file for {}".format(public_id))
         st.markdown(open(self.variables_quant.description_table_md, "r").read())
-        st.session_state[self.variables_quant.df_head] = st.dataframe(
-            performance_data.head(100)
-        )
+        st.session_state[self.variables_quant.df_head] = st.dataframe(performance_data.head(100))
 
         st.subheader("Download table")
         random_uuid = uuid.uuid4()

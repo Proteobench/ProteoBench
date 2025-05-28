@@ -11,28 +11,24 @@ class StreamlitPageHome(StreamlitPage):
     """
 
     @staticmethod
-    def stat_box(title, value, icon, color):
+    def stat_box(title, value, icon, color="#000"):
         return f"""
-            <div style="
-                background-color: #ffffff;
-                border-radius: 12px;
-                padding: 16px 20px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                display: flex;
-                align-items: center;
-                height: 100px;
-            ">
-                <div style="
-                    font-size: 28px;
-                    margin-right: 16px;
-                    color: {color};
-                ">{icon}</div>
-                <div>
-                    <div style='font-size: 14px; color: #666;'>{title}</div>
-                    <div style='font-size: 24px; font-weight: 600; color: #222;'>{value}</div>
-                </div>
-            </div>
-            """
+        <div style="
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            padding: 20px;
+            text-align: center;
+            min-height: 180px;  /* 👈 Forces consistent height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="font-size: 2rem; color: {color}; margin-bottom: 10px;">{icon}</div>
+            <div style="color: #37475E; font-weight: 600;">{title}</div>
+            <div style="font-size: 1.8rem; font-weight: 700; margin-top: 10px; color: #37475E;">{value}</div>
+        </div>
+    """
 
     def _main_page(self):
         """
@@ -46,6 +42,51 @@ class StreamlitPageHome(StreamlitPage):
         monthly_visitors = "Coming soon"  # TODO
 
         st.header("ProteoBench Overview")
+        st.markdown(
+            """
+        <style>
+        .row-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .row-container > div {
+            flex: 1;
+            display: flex;
+        }
+
+        .stat-card-glass {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        .stat-card-glass h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .stat-card-glass .metric {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .stat-card-glass .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        </style>
+        """,
+            unsafe_allow_html=True,
+        )
 
         # First row
         row1_col1, row1_col2 = st.columns(2)

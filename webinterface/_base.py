@@ -24,6 +24,7 @@ class StreamlitPage(ABC):
 
         self._preface()
         self._main_page()
+        self._logos()
 
     def _preface(self):
         """
@@ -49,7 +50,6 @@ class StreamlitPage(ABC):
             ),
             unsafe_allow_html=True,
         )
-        st.image("logos/logo_participants/proteobench-contributing-institutes.png")
 
         # add hosting information if provided
         try:
@@ -66,3 +66,11 @@ class StreamlitPage(ABC):
         Set up the main page layout for the Streamlit application.
         """
         raise NotImplementedError()
+
+    def _logos(self):
+        """
+        Set up the logos for the Streamlit application.
+        """
+        # Add newline
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.image("logos/logo_participants/proteobench-contributing-institutes.png")

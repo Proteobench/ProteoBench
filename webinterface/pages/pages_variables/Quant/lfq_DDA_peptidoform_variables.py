@@ -49,6 +49,9 @@ class VariablesDDAQuant:
     placeholder_table: str = "placeholder_table_dda_quant_peptidoform"
     placeholder_slider: str = "placeholder_slider_dda_quant_peptidoform"
 
+    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dda_quant_peptidoform"
+    dataset_selector_id_uuid: str = "dataset_selector_id_dda_quant_peptidoform"
+
     placeholder_downloads_container: str = "placeholder_downloads_container_dda_quant_peptidoform"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True

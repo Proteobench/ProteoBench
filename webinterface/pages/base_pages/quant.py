@@ -778,14 +778,9 @@ class QuantUIObjects:
                 else:
                     st.write("Directory for this dataset does not exist, this should not happen.")
 
-    def display_indepth_plots(self) -> Optional[str]:
+    def display_indepth_plots(self) -> None:
         """
         Display the dataset selection dropdown and plot the selected dataset.
-
-        Returns
-        -------
-        Optional[str]
-            The selected dataset or None if no dataset is selected.
         """
         downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
@@ -794,18 +789,20 @@ class QuantUIObjects:
             st.session_state[self.variables_quant.placeholder_dataset_selection_container] = st.empty()
             st.session_state[self.variables_quant.dataset_selector_id_uuid] = uuid.uuid4()
 
-        #with st.session_state[self.variables_dda_quant.placeholder_dataset_selection_container].container(border=True):
         st.subheader("Select dataset to plot")
+
+        dataset_options = [("Uploaded dataset", None)] + list(zip(downloads_df["id"], downloads_df["intermediate_hash"]))
 
         dataset_selection = st.selectbox(
             "Select dataset",
-            pd.concat([pd.Series(["uploaded_dataset"]), downloads_df["intermediate_hash"]]),
-            index=None,
+            dataset_options,
+            index=0,
             key=st.session_state[self.variables_quant.dataset_selector_id_uuid],
-            format_func=lambda x: "Uploaded dataset" if x == "uploaded_dataset" else downloads_df["id"][x]
+            format_func=lambda x: x[0]
         )
 
-        self.generate_indepth_plots(True, dataset_selection=dataset_selection)
+        public_id, selected_hash = dataset_selection
+        self.generate_indepth_plots(True, public_id=public_id, public_hash=selected_hash)
 
 
     def generate_submission_button(self) -> Optional[str]:
@@ -1167,7 +1164,7 @@ class QuantUIObjects:
         ):
             self.show_submission_success_message(pr_url)
 
-    def generate_indepth_plots(self, recalculate: bool, dataset_selection = None) -> go.Figure:
+    def generate_indepth_plots(self, recalculate: bool, public_id: Optional[str], public_hash: Optional[str]) -> go.Figure:
         """
         Generate and return plots based on the current benchmark data.
 
@@ -1175,27 +1172,28 @@ class QuantUIObjects:
         ----------
         recalculate : bool
             Whether to recalculate the plots.
-        dataset_selection : Optional[str], optional
-            The dataset to plot, either "uploaded_dataset" or hash of public.
-            If None, the uploaded dataset is displayed.
+        public_id : Optional[str], optional
+            The dataset to plot, either "uploaded_dataset" or name of public run.
+        public_hash : Optional[str], optional
+            The hash of the selected public dataset. If None, the uploaded dataset is displayed.
 
         Returns
         -------
         go.Figure
             The generated plots for the selected dataset.
         """
-        # no uploaded dataset and no public dataset selected? no service.
+        # no uploaded dataset and no public dataset selected? nothing to plot!
         if self.variables_quant.result_perf not in st.session_state.keys():
-            if dataset_selection is None:
-                st.error(":x: Please provide a result file or select a public run for display", icon="🚨")
+            if public_id is None:
+                st.error(":x: Please submit a result file or select a public run for display", icon="🚨")
                 return False
-            elif dataset_selection == "uploaded_dataset":
+            elif public_id == "Uploaded dataset":
                 st.error(":x: Please submit a result file in the Submit New Data Tab", icon="🚨")
                 return False
 
         # If dataset_selection is provided, either plot uploaded or public dataset
-        if dataset_selection is not None:
-            if dataset_selection == "uploaded_dataset":
+        if public_id is not None:
+            if public_id == "Uploaded dataset":
                 performance_data = st.session_state[self.variables_quant.result_perf]
             else:
             # Downloading the public performance data
@@ -1206,7 +1204,7 @@ class QuantUIObjects:
                     dataset_path = (
                         st.secrets["storage"]["dir"]
                         + "/"
-                        + dataset_selection
+                        + public_hash
                     )
                     performance_data = pd.read_csv(
                         dataset_path + "/result_performance.csv"
@@ -1243,16 +1241,16 @@ class QuantUIObjects:
             col1.subheader("Log2 Fold Change distributions by species.")
             col1.markdown(
                 """
-                    log2 fold changes calculated from your data
-                """
+                    log2 fold changes calculated from {}
+                """.format(public_id)
             )
             col1.plotly_chart(fig_logfc, use_container_width=True)
 
             col2.subheader("Coefficient of variation distribution in Condition A and B.")
             col2.markdown(
                 """
-                    CVs calculated from your data
-                """
+                    CVs calculated from {}
+                """.format(public_id)
             )
             col2.plotly_chart(fig_CV, use_container_width=True)
 
@@ -1261,8 +1259,8 @@ class QuantUIObjects:
             col1.subheader("MA plot")
             col1.markdown(
                 """
-                    MA plot from your data
-                """
+                    MA plot calculated from {}
+                """.format(public_id)
             )
             # Example: plot another figure or add any other Streamlit element
             # st.plotly_chart(fig_additional, use_container_width=True)
@@ -1271,7 +1269,7 @@ class QuantUIObjects:
         else:
             pass
 
-        st.subheader("Sample of the processed file")
+        st.subheader("Sample of the processed file for {}".format(public_id))
         st.markdown(open(self.variables_quant.description_table_md, "r").read())
         st.session_state[self.variables_quant.df_head] = st.dataframe(
             performance_data.head(100)
@@ -1279,7 +1277,12 @@ class QuantUIObjects:
 
         st.subheader("Download table")
         random_uuid = uuid.uuid4()
-        sample_name = self.generate_sample_name()
+        if public_id == "Uploaded dataset":
+            # user uploaded data does not have sample name yet
+            sample_name = self.generate_sample_name()
+        else:
+            # use public run name as sample name
+            sample_name = public_id
         st.download_button(
             label="Download",
             data=streamlit_utils.save_dataframe(performance_data),

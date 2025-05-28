@@ -1137,7 +1137,7 @@ class QuantUIObjects:
         ):
             self.show_submission_success_message(pr_url)
 
-    def generate_current_data_plots(self, recalculate: bool) -> go.Figure:
+    def generate_current_data_plots(self, recalculate: bool, dataset_selection = None) -> go.Figure:
         """
         Generate and return plots based on the current benchmark data.
 
@@ -1145,30 +1145,60 @@ class QuantUIObjects:
         ----------
         recalculate : bool
             Whether to recalculate the plots.
+        dataset_selection : Optional[str], optional
+            The dataset to plot, either "uploaded_dataset" or hash of public.
+            If None, the uploaded dataset is displayed.
 
         Returns
         -------
         go.Figure
-            The generated plot.
+            The generated plots for the selected dataset.
         """
+        # no uploaded dataset and no public dataset selected? no service.
         if self.variables_quant.result_perf not in st.session_state.keys():
-            st.error(":x: Please provide a result file", icon="🚨")
-            return False
+            if dataset_selection is None:
+                st.error(":x: Please provide a result file or select a public run for display", icon="🚨")
+                return False
+            elif dataset_selection == "uploaded_dataset":
+                st.error(":x: Please submit a result file in the Submit New Data Tab", icon="🚨")
+                return False
 
-        st.session_state[self.variables_quant.result_perf] = st.session_state[self.variables_quant.result_perf][
-            st.session_state[self.variables_quant.result_perf]["nr_observed"]
-            >= st.session_state[st.session_state[self.variables_quant.slider_id_uuid]]
+        # If dataset_selection is provided, either plot uploaded or public dataset
+        if dataset_selection is not None:
+            if dataset_selection == "uploaded_dataset":
+                performance_data = st.session_state[self.variables_quant.result_perf]
+            else:
+            # Downloading the public performance data
+                performance_data = None
+                if (
+                    st.secrets["storage"]["dir"] != None
+                ):
+                    dataset_path = (
+                        st.secrets["storage"]["dir"]
+                        + "/"
+                        + dataset_selection
+                    )
+                    performance_data = pd.read_csv(
+                        dataset_path + "/result_performance.csv"
+                    )
+        else:
+            # If nothing was selected, directly display the user-provided data
+            performance_data = st.session_state[self.variables_quant.result_perf]
+
+        # Filter the data based on the slider condition (as before)
+        performance_data = performance_data[
+            performance_data["nr_observed"] >= st.session_state[st.session_state[self.variables_quant.slider_id_uuid]]
         ]
 
         if recalculate:
             parse_settings = self.parsesettingsbuilder.build_parser(self.user_input["input_format"])
 
             fig_logfc = PlotDataPoint.plot_fold_change_histogram(
-                st.session_state[self.variables_quant.result_perf], parse_settings.species_expected_ratio()
+                performance_data, parse_settings.species_expected_ratio()
             )
-            fig_CV = PlotDataPoint.plot_CV_violinplot(st.session_state[self.variables_quant.result_perf])
+            fig_CV = PlotDataPoint.plot_CV_violinplot(performance_data)
             fig_MA = PlotDataPoint.plot_ma_plot(
-                st.session_state[self.variables_quant.result_perf],
+                performance_data,
                 parse_settings.species_expected_ratio(),
             )
             st.session_state[self.variables_quant.fig_cv] = fig_CV
@@ -1214,7 +1244,7 @@ class QuantUIObjects:
         st.subheader("Sample of the processed file")
         st.markdown(open(self.variables_quant.description_table_md, "r").read())
         st.session_state[self.variables_quant.df_head] = st.dataframe(
-            st.session_state[self.variables_quant.result_perf].head(100)
+            performance_data.head(100)
         )
 
         st.subheader("Download table")
@@ -1222,7 +1252,7 @@ class QuantUIObjects:
         sample_name = self.generate_sample_name()
         st.download_button(
             label="Download",
-            data=streamlit_utils.save_dataframe(st.session_state[self.variables_quant.result_perf]),
+            data=streamlit_utils.save_dataframe(performance_data),
             file_name=f"{sample_name}.csv",
             mime="text/csv",
             key=f"{random_uuid}",

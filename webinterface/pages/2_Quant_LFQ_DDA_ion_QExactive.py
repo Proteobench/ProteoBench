@@ -3,9 +3,11 @@ Streamlit UI for the DDA quantification - precursor ions module.
 """
 
 import logging
+import uuid
 from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
+import pandas as pd
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
@@ -96,7 +98,26 @@ class StreamlitUI:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
-            self.quant_uiobjects.generate_current_data_plots(True)
+
+            downloads_df = st.session_state[self.variables_dda_quant.all_datapoints][["id", "intermediate_hash"]]
+            downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
+
+            if self.variables_dda_quant.placeholder_dataset_selection_container not in st.session_state.keys():
+                st.session_state[self.variables_dda_quant.placeholder_dataset_selection_container] = st.empty()
+                st.session_state[self.variables_dda_quant.dataset_selector_id_uuid] = uuid.uuid4()
+
+            #with st.session_state[self.variables_dda_quant.placeholder_dataset_selection_container].container(border=True):
+            st.subheader("Select dataset to plot")
+
+            dataset_selection = st.selectbox(
+                "Select dataset",
+                pd.concat([pd.Series(["uploaded_dataset"]), downloads_df["intermediate_hash"]]),
+                index=None,
+                key=st.session_state[self.variables_dda_quant.dataset_selector_id_uuid],
+                format_func=lambda x: "Uploaded dataset" if x == "uploaded_dataset" else downloads_df["id"][x]
+            )
+
+            self.quant_uiobjects.generate_current_data_plots(True, dataset_selection=dataset_selection)
 
         # Tab 3: Results (New Submissions)
         with tab_results_new:

@@ -2,6 +2,7 @@
 
 import streamlit as st
 from _base import StreamlitPage
+from WI_utils import get_n_modules, get_n_submitted_points, get_n_supported_tools
 
 
 class StreamlitPageHome(StreamlitPage):
@@ -38,11 +39,11 @@ class StreamlitPageHome(StreamlitPage):
         Set up the main page layout for the Streamlit application.
         """
         # Placeholders TODO: replace with actual data
-        n_modules_all = 12345
-        n_modules_reviewed = 6789
-        n_tools_supported = 100
-        n_of_points_submitted = 5000  # TODO
-        monthly_visitors = 100
+        n_modules_all = get_n_modules()
+        n_modules_reviewed = "Coming soon"  # Since we don't have a review system and banner in place yet
+        n_tools_supported = get_n_supported_tools()
+        n_of_points_submitted = get_n_submitted_points()  # This function should return the number of submitted points
+        monthly_visitors = "Coming soon"  # TODO
 
         st.header("ProteoBench Overview")
 

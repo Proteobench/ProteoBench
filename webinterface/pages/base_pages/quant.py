@@ -1157,10 +1157,10 @@ class QuantUIObjects:
             st.error(":x: Please provide a result file", icon="🚨")
             return False
 
-        st.session_state[self.variables_quant.result_perf] = st.session_state[self.variables_quant.result_perf][
-            st.session_state[self.variables_quant.result_perf]["nr_observed"]
-            >= st.session_state[st.session_state[self.variables_quant.slider_id_uuid]]
-        ]
+        #st.session_state[self.variables_quant.result_perf] = st.session_state[self.variables_quant.result_perf][
+        #    st.session_state[self.variables_quant.result_perf]["nr_observed"]
+        #    >= st.session_state[st.session_state[self.variables_quant.slider_id_uuid]]
+        #]
 
         if recalculate:
             parse_settings = self.parsesettingsbuilder.build_parser(self.user_input["input_format"])

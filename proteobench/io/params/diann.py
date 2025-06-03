@@ -351,8 +351,11 @@ def extract_modifications(lines: List[str], regexes: List[str]) -> Optional[str]
     """Extract and join modifications from a list of regexes."""
     modifications = []
     for regex in regexes:
-        modifications.extend(re.findall(regex, "".join(lines)))
-    return ",".join(modifications) if modifications else None
+        modifications.extend(
+            match.group(1) if match.group(1).endswith("\n") else match.group(1) + "\n"
+            for match in re.finditer(regex, "\n".join(lines))
+        )
+    return ",".join(modifications).replace("\n", "") if modifications else None
 
 
 def extract_params(fname: str) -> ProteoBenchParameters:
@@ -462,6 +465,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     # If cfg file is used, extract the parameters from the free text below the cmd line.
     if cfg_used:
+        print("DEBUG: Extracting parameters from the configuration file.")
         parameters.update(
             {
                 "ident_fdr_psm": extract_cfg_parameter(lines, fdr_regex, float),

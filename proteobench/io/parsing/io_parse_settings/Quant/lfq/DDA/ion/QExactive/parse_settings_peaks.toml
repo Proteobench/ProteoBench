@@ -4,20 +4,20 @@
 "z" = "Charge"
 
 [condition_mapper]
-"Sample 1 Normalized Area" = "A"
-"Sample 2 Normalized Area" = "A"
-"Sample 3 Normalized Area" = "A"
-"Sample 4 Normalized Area" = "B"
-"Sample 5 Normalized Area" = "B"
-"Sample 6 Normalized Area" = "B"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 Normalized Area" = "A"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 Normalized Area" = "A"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 Normalized Area" = "A"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 Normalized Area" = "B"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 Normalized Area" = "B"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 Normalized Area" = "B"
 
 [run_mapper]
-"Sample 1 Normalized Area" = "Condition_A_Sample_Alpha_01"
-"Sample 2 Normalized Area" = "Condition_A_Sample_Alpha_02"
-"Sample 3 Normalized Area" = "Condition_A_Sample_Alpha_03"
-"Sample 4 Normalized Area" = "Condition_B_Sample_Alpha_01"
-"Sample 5 Normalized Area" = "Condition_B_Sample_Alpha_02"
-"Sample 6 Normalized Area" = "Condition_B_Sample_Alpha_03"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 Normalized Area" = "Condition_A_Sample_Alpha_01"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 Normalized Area" = "Condition_A_Sample_Alpha_02"
+"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 Normalized Area" = "Condition_A_Sample_Alpha_03"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 Normalized Area" = "Condition_B_Sample_Alpha_01"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 Normalized Area" = "Condition_B_Sample_Alpha_02"
+"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 Normalized Area" = "Condition_B_Sample_Alpha_03"
 
 [species_mapper]
 "_YEAST" = "YEAST"

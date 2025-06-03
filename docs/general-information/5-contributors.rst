@@ -66,6 +66,11 @@ People who contributed to ProteoBench, in alphabetical order:
     *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
 
 .. line-block::
+    **Olivier Langella**
+    *Université Paris-Saclay, INRAE, CNRS, AgroParisTech, GQE - Le Moulon, PAPPSO, 91190, Gif-Sur-Yvette, France*
+    *PAPPSO - Plateforme d'Analyse Protéomique de Paris Sud Ouest (France)*
+
+.. line-block::
     **Caroline Lennartsson**
     *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
@@ -78,6 +83,13 @@ People who contributed to ProteoBench, in alphabetical order:
     **Dominik Lux**
     *Ruhr University Bochum, Medical Faculty, Medizinisches Proteom-Center, Gesundheitscampus 4, 44801 Bochum, Germany*
     *Ruhr University Bochum, Medical Faculty, Center for Protein Diagnostics (PRODI), Gesundheitscampus 4, 44801 Bochum , Germany*
+
+.. line-block::
+    **Teresa Mendes Maia**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
 
 .. line-block::
     **Emmanuelle Mouton-Barbosa**
@@ -140,7 +152,12 @@ People who contributed to ProteoBench, in alphabetical order:
     *Core for Life (C4L)*
 
 .. line-block::
-   **An Staes**
+    **Martin Schneider**
+    *German Cancer Research Center (DKFZ), Foundation under Public Law, Im Neuenheimer Feld 580, 69120 Heidelberg, Germany*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **An Staes**
     *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
     *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *VIB-Proteomics Core facility*

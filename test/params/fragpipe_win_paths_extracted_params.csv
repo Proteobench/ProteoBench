@@ -4,8 +4,8 @@ software_version,FragPipe (21.1) runtime properties
 search_engine,MSFragger
 search_engine_version,4.0
 ident_fdr_psm,0.01
-ident_fdr_peptide,1
-ident_fdr_protein,1
+ident_fdr_peptide,0.01
+ident_fdr_protein,0.01
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-20 ppm, 20 ppm]"
 fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
@@ -20,4 +20,4 @@ min_precursor_charge,1
 max_precursor_charge,
 quantification_method,
 protein_inference,ProteinProphet: --maxppmdiff 2000000
-abundance_normalization_ions,1
+abundance_normalization_ions,

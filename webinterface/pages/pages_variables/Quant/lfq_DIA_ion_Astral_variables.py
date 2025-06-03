@@ -31,7 +31,7 @@ class VariablesDIAQuantAstral:
     comments_submission_uuid: str = "comments_submission_uuid_dia_quant_Astral"
     check_submission_uuid: str = "check_submission_uuid_dia_quant_Astral"
     meta_data_text: str = "comments_for_submission_dia_quant_Astral"
-    check_submission: str = "heck_submission_dia_quant_Astral"
+    check_submission: str = "check_submission_dia_quant_Astral"
     button_submission_uuid: str = "button_submission_uuid_dia_quant_Astral"
     df_head: str = "df_head_dia_quant_Astral"
     placeholder_fig_compare: str = "placeholder_fig_compare_dia_quant_diPASEF"

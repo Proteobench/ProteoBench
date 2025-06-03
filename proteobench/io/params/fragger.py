@@ -234,11 +234,9 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
             4: "Robust LC (high precision)",
         }
         params.enable_match_between_runs = (
-            ("diann.fragpipe.cmd-opts" in fragpipe_params.index and
-             "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]) or
-            ("diann.cmd-opts" in fragpipe_params.index and
-             "--reanalyse" in fragpipe_params.loc["diann.cmd-opts"])
-        )
+            "diann.fragpipe.cmd-opts" in fragpipe_params.index
+            and "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]
+        ) or ("diann.cmd-opts" in fragpipe_params.index and "--reanalyse" in fragpipe_params.loc["diann.cmd-opts"])
         params.quantification_method = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
 
     # Protein inference settings

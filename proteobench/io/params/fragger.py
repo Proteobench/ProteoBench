@@ -233,10 +233,10 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
             3: "Robust LC (high accuracy)",
             4: "Robust LC (high precision)",
         }
-        if "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]:
-            params.enable_match_between_runs = True
-        else:
-            params.enable_match_between_runs = False
+        params.enable_match_between_runs = (
+            "diann.fragpipe.cmd-opts" in fragpipe_params.index
+            and "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]
+        ) or ("diann.cmd-opts" in fragpipe_params.index and "--reanalyse" in fragpipe_params.loc["diann.cmd-opts"])
         params.quantification_method = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
 
     # Protein inference settings
@@ -252,6 +252,7 @@ if __name__ == "__main__":
     # Process FragPipe workflow file and extract parameters
     files = [
         "../../../test/params/fragpipe.workflow",
+        "../../../test/params/fragpipe_older.workflow",
         "../../../test/params/fragpipe_win_paths.workflow",
         "../../../test/params/fragpipe_v22.workflow",
         "../../../test/params/fragpipe_fdr_test.workflow",

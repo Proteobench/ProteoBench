@@ -8,7 +8,7 @@ The parameters that are retrieve from the parameter files are the following:
 
 - "software_name": name of the software tool.
 - "software_version": version of the software tool used to generate the run.
-- "search_engine": name of the search engine used for MS-based identification. Often the same as the software name, but is relevant for data analysis workflows that allow multiple search engines to be used (TODO: example)
+- "search_engine": name of the search engine used for MS-based identification. Often the same as the software name, but is relevant for data analysis workflows that allow multiple search engines to be used (e.g. quantms)
 - "search_engine_version": version of the search engine.
 - "ident_fdr_psm": target or obtained FDR at PSM level.
 - "enable_match_between_runs": TRUE if match between run is enabled.

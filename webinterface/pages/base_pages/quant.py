@@ -110,6 +110,8 @@ class QuantUIObjects:
 
         if self.variables_quant.params_file_dict not in st.session_state.keys():
             st.session_state[self.variables_quant.params_file_dict] = dict()
+        if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.slider_id_submitted_uuid] = str()
 
     def display_submission_form(self) -> None:
         """
@@ -782,6 +784,9 @@ class QuantUIObjects:
         """
         Display the dataset selection dropdown and plot the selected dataset.
         """
+        if st.session_state[self.variables_quant.all_datapoints].empty:
+            st.error("No data available for plotting.", icon="🚨")
+            return
         downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 

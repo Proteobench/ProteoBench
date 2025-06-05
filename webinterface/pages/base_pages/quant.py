@@ -889,8 +889,6 @@ class QuantUIObjects:
 
         self.user_input["input_csv"].getbuffer()
 
-        st.session_state[self.variables_quant.result_performance_submission].to_csv("test.csv", index=False)
-
         if "storage" in st.secrets.keys():
             extension_input_file = os.path.splitext(self.user_input["input_csv"].name)[1]
             extension_input_parameter_file = os.path.splitext(self.user_input[self.variables_quant.meta_data][0].name)[

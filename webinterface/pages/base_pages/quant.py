@@ -784,10 +784,14 @@ class QuantUIObjects:
         """
         Display the dataset selection dropdown and plot the selected dataset.
         """
-        if st.session_state[self.variables_quant.all_datapoints].empty:
+
+        if self.variables_quant.all_datapoints_submitted not in st.session_state.keys():
             st.error("No data available for plotting.", icon="🚨")
             return
-        downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
+        if st.session_state[self.variables_quant.all_datapoints_submitted].empty:
+            st.error("No data available for plotting.", icon="🚨")
+            return
+        downloads_df = st.session_state[self.variables_quant.all_datapoints_submitted][["id", "intermediate_hash"]]
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
         if self.variables_quant.placeholder_dataset_selection_container not in st.session_state.keys():

@@ -110,6 +110,8 @@ class QuantUIObjects:
 
         if self.variables_quant.params_file_dict not in st.session_state.keys():
             st.session_state[self.variables_quant.params_file_dict] = dict()
+        if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
+            st.session_state[self.variables_quant.slider_id_submitted_uuid] = str()
 
     def display_submission_form(self) -> None:
         """
@@ -782,7 +784,14 @@ class QuantUIObjects:
         """
         Display the dataset selection dropdown and plot the selected dataset.
         """
-        downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
+
+        if self.variables_quant.all_datapoints_submitted not in st.session_state.keys():
+            st.error("No data available for plotting.", icon="🚨")
+            return
+        if st.session_state[self.variables_quant.all_datapoints_submitted].empty:
+            st.error("No data available for plotting.", icon="🚨")
+            return
+        downloads_df = st.session_state[self.variables_quant.all_datapoints_submitted][["id", "intermediate_hash"]]
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
         if self.variables_quant.placeholder_dataset_selection_container not in st.session_state.keys():
@@ -879,8 +888,6 @@ class QuantUIObjects:
         )
 
         self.user_input["input_csv"].getbuffer()
-
-        st.session_state[self.variables_quant.result_performance_submission].to_csv("test.csv", index=False)
 
         if "storage" in st.secrets.keys():
             extension_input_file = os.path.splitext(self.user_input["input_csv"].name)[1]

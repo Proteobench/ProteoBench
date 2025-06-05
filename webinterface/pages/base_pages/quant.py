@@ -1202,8 +1202,8 @@ class QuantUIObjects:
             # Downloading the public performance data
             performance_data = None
             if st.secrets["storage"]["dir"] != None:
-                dataset_path = st.secrets["storage"]["dir"] + "/" + public_hash
-                performance_data = pd.read_csv(dataset_path + "/result_performance.csv")
+                dataset_path = os.path.join(st.secrets["storage"]["dir"], public_hash)
+                performance_data = pd.read_csv(os.path.join(dataset_path, "/result_performance.csv"))
 
         # Filter the data based on the slider condition (as before)
         performance_data = performance_data[

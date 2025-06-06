@@ -1,25 +1,25 @@
 # Version info:
-# FragPipe version 23.0
+# FragPipe version 23.0-build39
 # DIA-Umpire version 2.3.2
 # diaTracer version 1.2.5
-# MSFragger version 4.2
-# Crystal-C version 1.5.8
-# MSBooster version 1.3.9
+# MSFragger version 4.2-rc24
+# Crystal-C version 1.5.7
+# MSBooster version 1.3.8
 # Percolator version 3.7.1
-# Philosopher version 5.1.1
+# Philosopher version 5.1.1-RC32
 # PTM-Shepherd version 3.0.1
-# IonQuant version 1.11.9
+# IonQuant version 1.11.8
 # TMT-Integrator version 6.1.1
 # EasyPQP version 0.1.52
 # DIA-NN version 1.8.2 beta 8
-# Skyline version N/A
+# Skyline version 25.0.9.111
 # Pandas version 2.2.3
 # Numpy version 1.26.4
 
 
 # Please edit the following path to point to the correct location.
 # In Windows, please replace single '\' with '\\'
-database.db-path=D\:\\Proteobench_manuscript_data\\2024-10-30-decoys-ProteoBenchFASTA_DDAQuantification.fasta.fas
+database.db-path=G\:\\dev\\ionquant\\PXD028735_ProteoBench\\2024-12-28-decoys-ProteoBenchFASTA_DDAQuantification.fasta.fas
 
 crystalc.run-crystalc=false
 database.decoy-tag=rev_
@@ -35,7 +35,7 @@ diann.mod-tag=
 diann.q-value=0.01
 diann.quantification-strategy=3
 diann.quantification-strategy-2=2
-diann.run-dia-nn=true
+diann.run-dia-nn=false
 diann.run-dia-plex=false
 diann.run-specific-protein-q-value=false
 diann.unrelated-runs=false
@@ -77,9 +77,10 @@ fpop.fragpipe.fpop.label_fpop=
 fpop.fragpipe.fpop.region_size=1
 fpop.fragpipe.fpop.run-fpop=false
 fpop.fragpipe.fpop.subtract-control=false
-fragpipe-config.bin-diann=C\:\\FragPipe\\FragPipe-23.0\\tools\\diann\\1.8.2_beta_8\\windows\\DiaNN.exe
-fragpipe-config.bin-python=C\:\\FragPipe\\FragPipe-23.0\\python\\python.exe
-fragpipe-config.tools-folder=C\:\\FragPipe\\FragPipe-23.0\\tools
+fragger-config.bin-msfragger=C\:\\FragPipe\\FragPipe-23.0-build37\\tools\\MSFragger-4.2-rc24.jar
+fragpipe-config.bin-diann=C\:\\FragPipe\\FragPipe-23.0-build37\\tools\\diann\\1.8.2_beta_8\\windows\\DiaNN.exe
+fragpipe-config.bin-python=G\:\\Dropbox\\code\\FragPipe\\FragPipe-GUI\\build\\github-release\\FragPipe-23.0-build39-windows\\fragpipe-23.0-build39\\python\\python.exe
+fragpipe-config.tools-folder=G\:\\bin
 freequant.mz-tol=10
 freequant.rt-tol=0.4
 freequant.run-freequant=false
@@ -91,7 +92,7 @@ ionquant.ionfdr=0.01
 ionquant.light=
 ionquant.locprob=0.75
 ionquant.maxlfq=1
-ionquant.mbr=0
+ionquant.mbr=1
 ionquant.mbrimtol=0.05
 ionquant.mbrmincorr=0
 ionquant.mbrrttol=1
@@ -99,7 +100,7 @@ ionquant.mbrtoprun=10
 ionquant.medium=
 ionquant.minfreq=0
 ionquant.minions=1
-ionquant.minisotopes=1
+ionquant.minisotopes=2
 ionquant.minscans=3
 ionquant.mztol=10
 ionquant.normalization=1
@@ -128,19 +129,19 @@ msbooster.spectra-model=DIA-NN
 msbooster.spectral-library-path=
 msfragger.Y_type_masses=
 msfragger.activation_types=all
-msfragger.allowed_missed_cleavage_1=1
-msfragger.allowed_missed_cleavage_2=1
+msfragger.allowed_missed_cleavage_1=2
+msfragger.allowed_missed_cleavage_2=2
 msfragger.analyzer_types=all
 msfragger.calibrate_mass=2
-msfragger.check_spectral_files=false
+msfragger.check_spectral_files=true
 msfragger.clip_nTerm_M=true
 msfragger.deisotope=1
 msfragger.delta_mass_exclude_ranges=(-1.5,3.5)
 msfragger.deneutralloss=1
 msfragger.diagnostic_fragments=
 msfragger.diagnostic_intensity_filter=0
-msfragger.digest_max_length=30
-msfragger.digest_min_length=6
+msfragger.digest_max_length=50
+msfragger.digest_min_length=7
 msfragger.fragment_ion_series=b,y
 msfragger.fragment_mass_tolerance=20
 msfragger.fragment_mass_units=1
@@ -155,20 +156,20 @@ msfragger.mass_offsets=0
 msfragger.mass_offsets_detailed=
 msfragger.max_fragment_charge=2
 msfragger.max_variable_mods_combinations=5000
-msfragger.max_variable_mods_per_peptide=1
+msfragger.max_variable_mods_per_peptide=3
 msfragger.min_fragments_modelling=2
 msfragger.min_matched_fragments=4
 msfragger.min_sequence_matches=2
 msfragger.minimum_peaks=15
-msfragger.minimum_ratio=0.00
+msfragger.minimum_ratio=0.01
 msfragger.misc.fragger.clear-mz-hi=0
 msfragger.misc.fragger.clear-mz-lo=0
-msfragger.misc.fragger.digest-mass-hi=4000
-msfragger.misc.fragger.digest-mass-lo=400
+msfragger.misc.fragger.digest-mass-hi=5000
+msfragger.misc.fragger.digest-mass-lo=500
 msfragger.misc.fragger.enzyme-dropdown-1=stricttrypsin
 msfragger.misc.fragger.enzyme-dropdown-2=null
 msfragger.misc.fragger.precursor-charge-hi=4
-msfragger.misc.fragger.precursor-charge-lo=2
+msfragger.misc.fragger.precursor-charge-lo=1
 msfragger.misc.fragger.remove-precursor-range-hi=1.5
 msfragger.misc.fragger.remove-precursor-range-lo=-1.5
 msfragger.misc.slice-db=1
@@ -201,11 +202,11 @@ msfragger.search_enzyme_nocut_2=
 msfragger.search_enzyme_sense_1=C
 msfragger.search_enzyme_sense_2=C
 msfragger.table.fix-mods=0.0,C-Term Peptide,true,-1; 0.0,N-Term Peptide,true,-1; 0.0,C-Term Protein,true,-1; 0.0,N-Term Protein,true,-1; 0.0,G (glycine),true,-1; 0.0,A (alanine),true,-1; 0.0,S (serine),true,-1; 0.0,P (proline),true,-1; 0.0,V (valine),true,-1; 0.0,T (threonine),true,-1; 57.02146,C (cysteine),true,-1; 0.0,L (leucine),true,-1; 0.0,I (isoleucine),true,-1; 0.0,N (asparagine),true,-1; 0.0,D (aspartic acid),true,-1; 0.0,Q (glutamine),true,-1; 0.0,K (lysine),true,-1; 0.0,E (glutamic acid),true,-1; 0.0,M (methionine),true,-1; 0.0,H (histidine),true,-1; 0.0,F (phenylalanine),true,-1; 0.0,R (arginine),true,-1; 0.0,Y (tyrosine),true,-1; 0.0,W (tryptophan),true,-1; 0.0,B ,true,-1; 0.0,J,true,-1; 0.0,O,true,-1; 0.0,U,true,-1; 0.0,X,true,-1; 0.0,Z,true,-1
-msfragger.table.var-mods=15.9949,M,true,1; 42.0106,[^,true,1; 79.96633,STY,false,3; -17.0265,nQnC,false,1; -18.0106,nE,false,1; 0.0,site_06,false,1; 0.0,site_07,false,1; 0.0,site_08,false,1; 0.0,site_09,false,1; 0.0,site_10,false,1; 0.0,site_11,false,1; 0.0,site_12,false,1; 0.0,site_13,false,1; 0.0,site_14,false,1; 0.0,site_15,false,1; 0.0,site_16,false,1
+msfragger.table.var-mods=15.9949,M,true,3; 42.0106,[^,true,1; 79.96633,STY,false,3; -17.0265,nQnC,false,1; -18.0106,nE,false,1; 4.025107,K,false,2; 6.020129,R,false,2; 8.014199,K,false,2; 10.008269,R,false,2; 0.0,site_10,false,1; 0.0,site_11,false,1; 0.0,site_12,false,1; 0.0,site_13,false,1; 0.0,site_14,false,1; 0.0,site_15,false,1; 0.0,site_16,false,1
 msfragger.track_zero_topN=0
 msfragger.use_all_mods_in_first_search=false
 msfragger.use_detailed_offsets=false
-msfragger.use_topN_peaks=1000
+msfragger.use_topN_peaks=150
 msfragger.write_calibrated_mzml=false
 msfragger.zero_bin_accept_expect=0
 msfragger.zero_bin_mult_expect=1
@@ -227,20 +228,20 @@ opair.single_scan_type=false
 peptide-prophet.cmd-opts=--decoyprobs --ppm --accmass --nonparam --expectscore
 peptide-prophet.combine-pepxml=false
 peptide-prophet.run-peptide-prophet=false
-percolator.cmd-opts=--no-terminate --post-processing-tdc --subset-max-train 500000
+percolator.cmd-opts=--only-psms --no-terminate --post-processing-tdc
 percolator.keep-tsv-files=false
-percolator.min-prob=0.7
+percolator.min-prob=0.5
 percolator.run-percolator=true
 phi-report.dont-use-prot-proph-file=false
-phi-report.filter=--picked --prot 0.01 --minPepLen 8
+phi-report.filter=--sequential --prot 0.01 --picked
 phi-report.pep-level-summary=false
 phi-report.print-decoys=false
 phi-report.prot-level-summary=false
 phi-report.remove-contaminants=false
 phi-report.run-report=true
-protein-prophet.cmd-opts=--maxppmdiff 2000000 --minprob 0.5
+protein-prophet.cmd-opts=--maxppmdiff 2000000
 protein-prophet.run-protein-prophet=true
-ptmprophet.cmdline=
+ptmprophet.cmdline=NOSTACK KEEPOLD STATIC FRAGPPMTOL\=10 EM\=1 NIONS\=b M\:15.9949,n\:42.0106 MINPROB\=0.5
 ptmprophet.override-defaults=false
 ptmprophet.run-ptmprophet=false
 ptmshepherd.adv_params=false
@@ -255,14 +256,14 @@ ptmshepherd.cap_y_ions=
 ptmshepherd.decoy_type=1
 ptmshepherd.diag_ions=
 ptmshepherd.diagmine_diagMinFoldChange=3.0
-ptmshepherd.diagmine_diagMinSpecDiff=25
+ptmshepherd.diagmine_diagMinSpecDiff=00.2
 ptmshepherd.diagmine_fragMinFoldChange=3.0
-ptmshepherd.diagmine_fragMinPropensity=12.5
-ptmshepherd.diagmine_fragMinSpecDiff=25
+ptmshepherd.diagmine_fragMinPropensity=00.1
+ptmshepherd.diagmine_fragMinSpecDiff=00.1
 ptmshepherd.diagmine_minIonsPerSpec=2
 ptmshepherd.diagmine_minPeps=25
 ptmshepherd.diagmine_pepMinFoldChange=3.0
-ptmshepherd.diagmine_pepMinSpecDiff=25
+ptmshepherd.diagmine_pepMinSpecDiff=00.2
 ptmshepherd.glyco_fdr=1.00
 ptmshepherd.glyco_isotope_max=3
 ptmshepherd.glyco_isotope_min=-1
@@ -271,10 +272,10 @@ ptmshepherd.glycodatabase=
 ptmshepherd.histo_smoothbins=2
 ptmshepherd.iontype_a=false
 ptmshepherd.iontype_b=true
-ptmshepherd.iontype_c=true
+ptmshepherd.iontype_c=false
 ptmshepherd.iontype_x=false
 ptmshepherd.iontype_y=true
-ptmshepherd.iontype_z=true
+ptmshepherd.iontype_z=false
 ptmshepherd.localization_allowed_res=
 ptmshepherd.n_glyco=true
 ptmshepherd.normalization-psms=true
@@ -302,7 +303,7 @@ ptmshepherd.spectra_maxfragcharge=2
 ptmshepherd.spectra_ppmtol=20
 ptmshepherd.use_msfragger_localization=false
 ptmshepherd.varmod_masses=
-quantitation.run-label-free-quant=false
+quantitation.run-label-free-quant=true
 run-psm-validation=true
 run-validation-tab=true
 saintexpress.cmd-opts=
@@ -337,7 +338,8 @@ speclibgen.easypqp.rt-cal=noiRT
 speclibgen.easypqp.select-file.text=
 speclibgen.easypqp.select-im-file.text=
 speclibgen.keep-intermediate-files=false
-speclibgen.run-speclibgen=true
+speclibgen.run-speclibgen=false
+tab-run.delete_calibrated_mzml=false
 tab-run.delete_temp_files=false
 tab-run.export_matched_fragments=false
 tab-run.sub_mzml_prob_threshold=0.5
@@ -376,10 +378,10 @@ tmtintegrator.tolerance=20
 tmtintegrator.unique_gene=0
 tmtintegrator.unique_pep=false
 tmtintegrator.use_glycan_composition=false
-workdir=D\:\\Proteobench_manuscript_data\\run_output_Astral\\fragpipe_23_default
+workdir=G\:\\dev\\ionquant\\PXD028735_ProteoBench\\yufe_1
 workflow.input.data-type.im-ms=false
 workflow.input.data-type.regular-ms=true
 workflow.misc.save-sdrf=true
 workflow.misc.sdrf-type=Default
 workflow.ram=0
-workflow.threads=31
+workflow.threads=11

@@ -1,6 +1,6 @@
 ,0
 software_name,FragPipe
-software_version,FragPipe (22.1-build02) runtime properties
+software_version,22.1-build02
 search_engine,MSFragger
 search_engine_version,
 ident_fdr_psm,0.01

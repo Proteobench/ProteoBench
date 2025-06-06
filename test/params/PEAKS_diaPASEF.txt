@@ -1,0 +1,67 @@
+Project:
+* Name: Proteobench_timsTOF_SCP_A_vs_B
+* Description: 
+* Created at: 2025-03-26 11:43:26
++ Test
+  Description: 
+  Created at: 2025-03-27 14:09:46
+
+  DIA Db Search Parameters:
+    Precursor Mass Error Tolerance: Auto Detected
+    Fragment Mass Error Tolerance: Auto Detected
+    CCS Error Tolerance: 0.05
+    Match Between Run: Yes
+    Enzyme: Trypsin
+    Max Missed Cleavage: 1
+    Digest Mode: Specific
+    Max Variable PTM per Peptide: 1
+    Fixed Modifications: 
+    - Carbamidomethylation (+57.02)
+    Variable Modifications: 
+    - Oxidation (M) (+15.99)
+    - Acetylation (Protein N-term) (+42.01)
+    Database: 
+    - ProteobenchModule2
+      - Taxonomy: all species
+      - Searched Entries: 31887
+     Peptide Length between: 6,30
+     Precursor M/Z between: 300,1800
+     Fragment M/Z between: 200,1800
+     Precursor Charge between: 1,4
+    Report Filter: 
+      Precursor FDR: 1.0%
+      Protein Group FDR: 1.0%
+      Proteins Unique Peptides >= 1
+
+  LFQ Parameters:
+    Quantification Type: Label Free Quantification
+    LFQ Method: Identification Directed Quantification
+    Retention Time Range: [0.0 - Max]
+    Base Sample: LFQ_timstofSCP_diaPASEF_Condition_A_Sample_Alpha_01
+    Peptide Feature Filter:
+      Avg Area >= 0.0
+      Quality >= 0.0
+      Charge between: [1 - 5]
+      Detected in at least 0 samples per group
+      Use in Group Coefficient of Variation Filter: No
+    Protein:
+      Significance Method: ANOVA
+      Modified Form Exclusion: Yes
+      Significance >= 0.0
+      Fold Change between: [1.0 - 64.0]
+      Has at least 1 Used Peptide
+    Samples: 6 Samples in 6 Groups
+      Group 1: 
+        LFQ_timstofSCP_diaPASEF_Condition_A_Sample_Alpha_01;
+      Group 2: 
+        LFQ_timstofSCP_diaPASEF_Condition_A_Sample_Alpha_02;
+      Group 3: 
+        LFQ_timstofSCP_diaPASEF_Condition_A_Sample_Alpha_03;
+      Group 4: 
+        LFQ_timstofSCP_diaPASEF_Condition_B_Sample_Alpha_01;
+      Group 5: 
+        LFQ_timstofSCP_diaPASEF_Condition_B_Sample_Alpha_02;
+      Group 6: 
+        LFQ_timstofSCP_diaPASEF_Condition_B_Sample_Alpha_03;
+    Normalization Method: Use TIC
+

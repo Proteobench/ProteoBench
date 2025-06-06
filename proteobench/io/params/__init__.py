@@ -1,6 +1,6 @@
 """
 This module provides the `ProteoBenchParameters` dataclass for handling parameters
-related to ProteoBench.
+related to ProteoBench. The parsing is done per data analysis software.
 
 Classes
 ProteoBenchParameters

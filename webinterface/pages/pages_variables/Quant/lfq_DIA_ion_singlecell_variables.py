@@ -62,6 +62,9 @@ class VariablesDIAQuantSC:
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant_singlecell"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
+    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dia_quant_singlecell"
+    dataset_selector_id_uuid: str = "dataset_selector_id_dia_quant_singlecell"
+
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/singlecell"
 
     texts: Type[WebpageTexts] = WebpageTexts

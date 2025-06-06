@@ -122,6 +122,7 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
     l_of_str = file.read().decode("utf-8").splitlines()
     header = l_of_str[0][1:].strip()  # Skip leading '#' in the header
     msfragger_version = None
+    fragpipe_version = None
     for ss in l_of_str[1:]:
         if ss.startswith("# MSFragger version"):
             msfragger_version = ss.split(" ")[-1].strip()
@@ -137,7 +138,9 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
             match = re.search(VERSION_NO_PATTERN, filename)
             if match:
                 msfragger_version = match.group(1)
-    return header, msfragger_version, parse_params(l_of_str, sep=sep)
+        if ss.startswith("# FragPipe version"):
+            fragpipe_version = ss.split(" ")[-1].strip()
+    return header, msfragger_version, fragpipe_version, parse_params(l_of_str, sep=sep)
 
 
 def extract_params(file: BytesIO) -> ProteoBenchParameters:
@@ -154,20 +157,19 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
-    header, msfragger_version, fragpipe_params = read_fragpipe_workflow(file)
+    header, msfragger_version, fragpipe_version, fragpipe_params = read_fragpipe_workflow(file)
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
     )["value"]
 
     # Extract version from header
-    match = re.search(VERSION_NO_PATTERN, header)
-    if match:
-        header = match.group()
+    if not fragpipe_version:
+        fragpipe_version = re.match(r"FragPipe \((\d+\.\d+.*)\)", header).group(1)
 
     # Initialize ProteoBenchParameters
     params = ProteoBenchParameters()
     params.software_name = "FragPipe"
-    params.software_version = header
+    params.software_version = fragpipe_version
     params.search_engine = "MSFragger"
     params.search_engine_version = msfragger_version
 
@@ -233,10 +235,10 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
             3: "Robust LC (high accuracy)",
             4: "Robust LC (high precision)",
         }
-        if "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]:
-            params.enable_match_between_runs = True
-        else:
-            params.enable_match_between_runs = False
+        params.enable_match_between_runs = (
+            "diann.fragpipe.cmd-opts" in fragpipe_params.index
+            and "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]
+        ) or ("diann.cmd-opts" in fragpipe_params.index and "--reanalyse" in fragpipe_params.loc["diann.cmd-opts"])
         params.quantification_method = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
 
     # Protein inference settings
@@ -252,19 +254,22 @@ if __name__ == "__main__":
     # Process FragPipe workflow file and extract parameters
     files = [
         "../../../test/params/fragpipe.workflow",
+        "../../../test/params/fragpipe_older.workflow",
         "../../../test/params/fragpipe_win_paths.workflow",
         "../../../test/params/fragpipe_v22.workflow",
         "../../../test/params/fragpipe_fdr_test.workflow",
+        "../../../test/params/fragpipe-version.workflow",
     ]
 
     for file_path in files:
         file = pathlib.Path(file_path)
         with open(file, "rb") as f:
-            _, _, data = read_fragpipe_workflow(f)
+            _, _, _, data = read_fragpipe_workflow(f)
         df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
         df.to_csv(file.with_suffix(".csv"))
         with open(file, "rb") as f:
             params = extract_params(f)
         series = pd.Series(params.__dict__)
         print(series)
+        print("\n")
         series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")

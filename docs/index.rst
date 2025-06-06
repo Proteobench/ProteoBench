@@ -78,36 +78,46 @@ Available ProteoBench modules
 
 .. grid::
 
-    .. grid-item-card:: DDA quantification ion-level
+    .. grid-item-card:: Label-free quantification of precursor ions with DDA (QExactive)
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DDA
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive
 
         :bdg-success:`active`
         ^^^
         Benchmark the ion-level quantification accuracy of label-free data dependent acquisition
         workflows using a multi-species sample
 
-    .. grid-item-card:: DIA quantification (AIF)
+    .. grid-item-card:: Label-free quantification of peptidoforms with DDA (QExactive)
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DIA_AIF
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform
 
         :bdg-success:`active`
         ^^^
-        Benchmark the quantification accuracy of label-free data independent acquisition workflows (All-Ion Fragmentation - AIF)
-        using a multi-species sample analysed with an Orbitrap
+        Benchmark the peptidoform-level quantification accuracy of label-free data dependent
+        acquisition workflows using a multi-species sample. Data associated to this module is the same as for the module Quant LFQ DDA precursors (QExactive).
 
-    .. grid-item-card:: DIA quantification DIA-PASEF
+    .. grid-item-card:: Label-free quantification of precursor ions with DDA (Astral)
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_ion_DIA_diaPASEF
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
+
+        :bdg-success:`active`
+        ^^^
+        Benchmark the ion-level quantification accuracy of label-free data dependent acquisition
+        workflows using a multi-species sample
+
+    .. grid-item-card:: Label-free quantification of precursor ions with DIA-PASEF
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF
 
         :bdg-success:`active`
         ^^^
         additional DIA ion-level module with DIA-PASEF data
 
-    .. grid-item-card:: DIA quantification Astral data
+    .. grid-item-card:: Label-free quantification of precursor ions with Astral data
         :columns: 6 6 4 4
         :padding: 1
         :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
@@ -116,41 +126,32 @@ Available ProteoBench modules
         ^^^
         additional DIA ion-level module with Astral DIA data
 
-    .. grid-item-card:: DDA identification
+    .. grid-item-card:: Label-free quantification of precursor ions with DIA (AIF)
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/373
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF
 
-        :bdg-primary:`in development`
+        :bdg-success:`active`
         ^^^
-        Benchmark the identification sensitivity and specificity of data dependent acquisition
-        workflows using an entrapment strategy
+        Benchmark the quantification accuracy of label-free data independent acquisition workflows (All-Ion Fragmentation - AIF)
+        using a multi-species sample analysed with an Orbitrap.
+        *A discussion on oxydation-related issues with the data used for this module can be found here:* https://github.com/orgs/Proteobench/discussions/641.
 
     .. grid-item-card:: benchmark with Dynamic Organellar Mapping
         :columns: 6 6 4 4
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/404
 
-        :bdg-primary:`in development`
+        :bdg-info:`in development`
         ^^^
         Single-species benchmark using spacial proteomics
-
-    .. grid-item-card:: DDA quantification peptidoform-level
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/proteobench/proteobench/discussions/202
-
-        :bdg-primary:`in development`
-        ^^^
-        Benchmark the peptidoform-level quantification accuracy of label-free data dependent
-        acquisition workflows using a multi-species sample
 
     .. grid-item-card:: single-cell label free DIA quantification
         :columns: 6 6 4 4
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/426
 
-        :bdg-primary:`in development`
+        :bdg-info:`in development`
         ^^^
         benchmarking identification and quantification workflows for low-input and single cell proteomics (SCP)
 
@@ -159,7 +160,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/356
 
-        :bdg-info:`proposed`
+        :bdg-info:`in development`
         ^^^
         Benchmark the identification sensitivity and specificity of de novo sequencing workflows
 
@@ -168,7 +169,7 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/625
 
-        :bdg-info:`proposed`
+        :bdg-warning:`in discussion`
         ^^^
         Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy
 
@@ -177,9 +178,19 @@ Available ProteoBench modules
         :padding: 1
         :link: https://github.com/orgs/Proteobench/discussions/659
 
-        :bdg-info:`proposed`
+        :bdg-warning:`in discussion`
         ^^^
         Benchmarking with a high dynamic range multispecies dataset
+
+    .. grid-item-card:: Identification with DDA
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/373
+
+        :bdg-warning:`in discussion`
+        ^^^
+        Benchmark the identification sensitivity and specificity of data dependent acquisition
+        workflows using an entrapment strategy
 
 .. button-ref:: available-modules/index
     :ref-type: doc

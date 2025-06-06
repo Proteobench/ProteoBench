@@ -6,6 +6,7 @@ import logging
 import os
 import tempfile
 import uuid
+import zipfile
 from datetime import datetime
 from pprint import pformat
 from typing import Any, Dict, Optional
@@ -1210,7 +1211,10 @@ class QuantUIObjects:
             performance_data = None
             if st.secrets["storage"]["dir"] != None:
                 dataset_path = os.path.join(st.secrets["storage"]["dir"], public_hash)
-                performance_data = pd.read_csv(os.path.join(dataset_path, "/result_performance.csv"))
+
+                with zipfile.ZipFile(os.path.join(dataset_path, "*_data.zip ")) as z:
+                    with z.open("result_performance.csv.csv") as f:
+                        performance_data = pd.read_csv(f)
 
         # Filter the data based on the slider condition (as before)
         performance_data = performance_data[

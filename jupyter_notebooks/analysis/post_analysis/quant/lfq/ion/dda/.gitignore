@@ -1,6 +1,6 @@
 0c88ca16d30d2911dc78febe087650427365e963_data.zip
 Results_quant_ion_DDA/
-indepth_module_analysis_files/
+*_files/
 performance_metrics.tsv
 performance_metrics_new.tsv
 performance_newplot.png

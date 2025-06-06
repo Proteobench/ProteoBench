@@ -1,0 +1,23 @@
+,0
+software_name,DIA-NN
+software_version,2.1.0 Academia 
+search_engine,DIA-NN
+search_engine_version,2.1.0 Academia 
+ident_fdr_psm,0.01
+ident_fdr_peptide,None
+ident_fdr_protein,0.01
+enable_match_between_runs,True
+precursor_mass_tolerance,"[-2.3 ppm, 2.3 ppm]"
+fragment_mass_tolerance,"[-6 ppm, 6 ppm]"
+enzyme,"K*,R*,!*P"
+allowed_miscleavages,2
+min_peptide_length,6
+max_peptide_length,30
+fixed_mods,"Cysteine carbamidomethylation,Acetyl"
+variable_mods,"UniMod:35,UniMod:1"
+max_mods,3
+min_precursor_charge,2
+max_precursor_charge,4
+quantification_method,Legacy (direct)
+protein_inference,Genes
+abundance_normalization_ions,

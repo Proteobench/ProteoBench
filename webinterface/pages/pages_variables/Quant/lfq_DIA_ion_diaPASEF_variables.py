@@ -23,6 +23,7 @@ class VariablesDIAQuantdiaPASEF:
     fig_logfc: str = "fig_logfc_dia_quant_diaPASEF"
     fig_metric: str = "fig_metric_dia_quant_diaPASEF"
     fig_cv: str = "fig_CV_violinplot_dia_quant_diaPASEF"
+    fig_ma_plot: str = "fig_ma_plot_dia_quant_diaPASEF"
     result_perf: str = "result_perf_dia_quant_diaPASEF"
     meta_data: str = "meta_data_dia_quant_diaPASEF"
     input_df: str = "input_df_dia_quant_diaPASEF"
@@ -62,13 +63,16 @@ class VariablesDIAQuantdiaPASEF:
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant_diaPASEF"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
+    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dia_quant_diaPASEF"
+    dataset_selector_id_uuid: str = "dataset_selector_id_dia_quant_diaPASEF"
+
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/diaPASEF"
 
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/5-quant-lfq-ion-dia-diapasef/"
 
-    title: str = "DIA Ion quantification - diaPASEF"
+    title: str = "DIA Precursor quantification - diaPASEF"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_diapasef_quant_"

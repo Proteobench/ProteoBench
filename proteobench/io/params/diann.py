@@ -11,10 +11,47 @@ from packaging.version import Version
 
 from proteobench.io.params import ProteoBenchParameters
 
-fragment_mass_tolerance_regex = r"(?<=Optimised mass accuracy: )\d*\.?\d+(?= ppm)"
-precursor_mass_tolerance_regex = r"(?<=Recommended MS1 mass accuracy setting: )\d*\.?\d+(?= ppm)"
-software_version_regex = r"(?<=DIA-NN\s)(.*?)(?=\s\(Data-Independent Acquisition by Neural Networks\))"
-scan_window_regex = r"(?<=Scan window radius set to )\d+"
+# Regexes
+fragment_mass_tolerance_regex = r"Optimised mass accuracy: (\d*\.?\d+) ppm"
+precursor_mass_tolerance_regex = r"Recommended MS1 mass accuracy setting: (\d*\.?\d+) ppm"
+software_version_regex = r"DIA-NN\s(.*?)\s\(Data-Independent Acquisition by Neural Networks\)"
+scan_window_regex = r"Scan window radius set to (\d+)"
+fdr_regex = r"Output will be filtered at (\d+\.\d+) FDR"
+min_pep_len_regex = r"Min peptide length set to (\d+)"
+max_pep_len_regex = r"Max peptide length set to (\d+)"
+min_z_regex = r"Min precursor charge set to (\d+)"
+max_z_regex = r"Max precursor charge set to (\d+)"
+cleavage_regex = r"In silico digest will involve cuts at (.*)"
+cleavage_exc_regex = r"But excluding cuts at (.*)"
+missed_cleavages_regex = r"Maximum number of missed cleavages set to (\d+)"
+max_mods_regex = r"Maximum number of variable modifications set to (\d+)"
+fixed_mods_regex_1 = r"(.*) enabled as a fixed modification"
+fixed_mods_regex_2 = r"Modification (.*) with mass delta \d+\.*\d* at .+ will be considered as fixed"
+var_mods_regex = r"Modification (.*) with mass delta \d+\.*\d* at .+ will be considered as variable"
+quant_mode_regex = r"(.*?) quantification mode"
+protein_inference_regex = r"Implicit protein grouping: (.*);"
+
+# Flags
+enable_match_between_runs_regex = "MBR enabled"  # If present, MBR is enabled
+
+PARAM_REGEX_DICT = {
+    "ident_fdr_psm": fdr_regex,
+    "ident_fdr_protein": fdr_regex,
+    "precursor_mass_tolerance": precursor_mass_tolerance_regex,
+    "fragment_mass_tolerance": fragment_mass_tolerance_regex,
+    "enzyme": cleavage_regex,
+    "allowed_miscleavages": missed_cleavages_regex,
+    "min_peptide_length": min_pep_len_regex,
+    "max_peptide_length": max_pep_len_regex,
+    "fixed_mods": [fixed_mods_regex_1, fixed_mods_regex_2],
+    "variable_mods": var_mods_regex,
+    "max_mods": max_mods_regex,
+    "min_precursor_charge": min_z_regex,
+    "max_precursor_charge": max_z_regex,
+    "scan_window": scan_window_regex,
+    "enable_match_between_runs": enable_match_between_runs_regex,
+}
+
 
 PARAM_CMD_DICT = {
     "ident_fdr_psm": "qvalue",
@@ -50,6 +87,8 @@ SETTINGS_PB_INT = [
     "scan_window",
 ]
 SETTINGS_PB_MOD = ["fixed_mods", "variable_mods"]
+
+PROT_INF_MAP = {"isoform IDs": "Isoforms", "protein names": "Protein_names", "genes": "Genes"}
 
 
 def find_cmdline_string(lines: List[str]) -> Optional[str]:
@@ -198,8 +237,8 @@ def extract_with_regex(lines: List[str], regex) -> str:
     for line in lines:
         regex_match = re.search(regex, line)
         if regex_match:
-            x = regex_match.group(0)
-            return x
+            match_str = regex_match.group(1)
+            return match_str
     return None
 
 
@@ -297,9 +336,40 @@ def parse_predictors_library(cmdline_dict: dict):
             return {"RT": "User defined speclib", "IM": "User defined speclib", "MS2_int": "User defined speclib"}
 
 
+def extract_cfg_parameter(lines: List[str], regex: str, cast_type: type = str, default=None):
+    """Extract and cast a parameter using a regex pattern."""
+    match = extract_with_regex(lines, regex)
+    if match is None:
+        return default
+    try:
+        return cast_type(match)
+    except ValueError:
+        return default
+
+
+def extract_modifications(lines: List[str], regexes: List[str]) -> Optional[str]:
+    """Extract and join modifications from a list of regexes."""
+    modifications = []
+    for regex in regexes:
+        modifications.extend(
+            match.group(1) if match.group(1).endswith("\n") else match.group(1) + "\n"
+            for match in re.finditer(regex, "\n".join(lines))
+        )
+    return ",".join(modifications).replace("\n", "") if modifications else None
+
+
 def extract_params(fname: str) -> ProteoBenchParameters:
     """
     Parse DIA-NN log file and extract relevant parameters.
+
+    Logic:
+    1. Read the log file and extract the software version.
+    2. Find the command line string that was used to run DIA-NN.
+    3. Parse the command line string to extract settings.
+    Default values are set for parameters that are not specified in the command line.
+    4. If the --cfg flag is used (meaning a configuration file was used),
+      the parameters are parsed from the free text underneath the cmd line.
+
 
     Parameters
     ----------
@@ -311,13 +381,14 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     ProteoBenchParameters
         The parsed ProteoBenchParameters object.
     """
+    cfg_used = False
     # Some default and flag settings
     parameters = {
         "software_name": "DIA-NN",
         "search_engine": "DIA-NN",
         "enable_match_between_runs": False,
         "quantification_method": "QuantUMS high-precision",
-        "protein_inference": "Heuristic protein inference",
+        "protein_inference": "Genes",  # Default value, if not specified in the command line
     }
 
     try:
@@ -334,6 +405,9 @@ def extract_params(fname: str) -> ProteoBenchParameters:
 
     # Get settings from the execution command string
     cmdline_string = find_cmdline_string(lines)
+    if cmdline_string and "--cfg" in cmdline_string:
+        cfg_used = True
+        # If a configuration file was used, the parameters are specified in the free text below the cmd line.
     cmdline_dict = parse_cmdline_string(cmdline_string, software_version)
 
     parameters["quantification_method"] = parse_quantification_strategy(cmdline_dict)
@@ -388,6 +462,33 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     # If scan window is not customely set, extract it from the log file
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
     parameters["abundance_normalization_ions"] = None
+
+    # If cfg file is used, extract the parameters from the free text below the cmd line.
+    if cfg_used:
+        print("DEBUG: Extracting parameters from the configuration file.")
+        parameters.update(
+            {
+                "ident_fdr_psm": extract_cfg_parameter(lines, fdr_regex, float),
+                "ident_fdr_protein": extract_cfg_parameter(lines, fdr_regex, float),
+                "enable_match_between_runs": bool(re.search(enable_match_between_runs_regex, "".join(lines))),
+                "enzyme": (
+                    f"{extract_cfg_parameter(lines, cleavage_regex) or ''},!{extract_cfg_parameter(lines, cleavage_exc_regex) or ''}"
+                ),
+                "allowed_miscleavages": extract_cfg_parameter(lines, missed_cleavages_regex, int),
+                "min_peptide_length": extract_cfg_parameter(lines, min_pep_len_regex, int),
+                "max_peptide_length": extract_cfg_parameter(lines, max_pep_len_regex, int),
+                "min_precursor_charge": extract_cfg_parameter(lines, min_z_regex, int),
+                "max_precursor_charge": extract_cfg_parameter(lines, max_z_regex, int),
+                "max_mods": extract_cfg_parameter(lines, max_mods_regex, int),
+                "quantification_method": extract_cfg_parameter(lines, quant_mode_regex, str, "QuantUMS high-precision"),
+                "fixed_mods": extract_modifications(lines, PARAM_REGEX_DICT["fixed_mods"]),
+                "variable_mods": extract_modifications(lines, [PARAM_REGEX_DICT["variable_mods"]]),
+            }
+        )
+
+        protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
+        parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")
+
     return ProteoBenchParameters(**parameters)
 
 
@@ -397,6 +498,7 @@ if __name__ == "__main__":
         "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
         "../../../test/params/DIANN_WU304578_report.log.txt",
         "../../../test/params/DIANN_1.7.16.log.txt",
+        "../../../test/params/DIANN_cfg_settings.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

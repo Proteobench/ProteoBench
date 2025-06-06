@@ -169,7 +169,13 @@ MSAngel allows to build piplenes for bottom-up MS analysis with a choice of sear
 More information can be found [here](https://www.profiproteomics.fr/ms-angel/)
 
 ### PEAKS (work in progress)
-When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that Sample 1 -> 3 are Condition "A" and Sample 4 -> 6 are condition "B".
+When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that the sample names correspond to:
+- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01
+- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02
+- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03
+- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01
+- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02
+- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03
 Make sure to set Enzyme as trypsin,  Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DDA.
 In workflow section use the PEAKS Q (de novo assisted search quantification) option. Set the different parameters in "Data refine" and "DB search". In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide FDR and Protein Group FDR are set to 1%. 
 Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 

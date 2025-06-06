@@ -31,7 +31,7 @@ class VariablesDIAQuantAstral:
     comments_submission_uuid: str = "comments_submission_uuid_dia_quant_Astral"
     check_submission_uuid: str = "check_submission_uuid_dia_quant_Astral"
     meta_data_text: str = "comments_for_submission_dia_quant_Astral"
-    check_submission: str = "heck_submission_dia_quant_Astral"
+    check_submission: str = "check_submission_dia_quant_Astral"
     button_submission_uuid: str = "button_submission_uuid_dia_quant_Astral"
     df_head: str = "df_head_dia_quant_Astral"
     placeholder_fig_compare: str = "placeholder_fig_compare_dia_quant_diPASEF"
@@ -63,11 +63,16 @@ class VariablesDIAQuantAstral:
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant_Astral"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
+    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dia_quant_Astral"
+    dataset_selector_id_uuid: str = "dataset_selector_id_dia_quant_Astral"
+
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/"
+    )
 
     title: str = "DIA Precursor ion quantification - Astral 2 Th"
 

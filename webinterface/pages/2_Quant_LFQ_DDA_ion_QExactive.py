@@ -4,8 +4,10 @@ Streamlit UI for the DDA quantification - precursor ions module.
 
 import logging
 from typing import Any, Dict, Type
+import uuid
 
 import pages.texts.proteobench_builder as pbb
+import pandas as pd
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
@@ -73,7 +75,7 @@ class StreamlitUI:
 
         with tab_results_all:
             st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
+            st.link_button("Go to module documentation", url = self.variables_dda_quant.doc_url, type="secondary", help = "link to the module documentation")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -84,7 +86,7 @@ class StreamlitUI:
         with tab_submission_details:
             st.title(self.variables_dda_quant.title)
 
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
+            st.link_button("Go to module documentation", url = self.variables_dda_quant.doc_url, type="secondary", help = "link to the module documentation")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -95,17 +97,18 @@ class StreamlitUI:
         with tab_indepth_plots:
             st.title(self.variables_dda_quant.title)
 
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
+            st.link_button("Go to module documentation", url = self.variables_dda_quant.doc_url, type="secondary", help = "link to the module documentation")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
-            self.quant_uiobjects.generate_current_data_plots(True)
+
+            self.quant_uiobjects.display_indepth_plots()
 
         # Tab 3: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
+            st.link_button("Go to module documentation", url = self.variables_dda_quant.doc_url, type="secondary", help = "link to the module documentation")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -116,7 +119,7 @@ class StreamlitUI:
         # Tab 4: Public Submission
         with tab_public_submission:
             st.title(self.variables_dda_quant.title)
-            st.write(f"The full description of the module is available [here]({self.variables_dda_quant.doc_url})")
+            st.link_button("Go to module documentation", url = self.variables_dda_quant.doc_url, type="secondary", help = "link to the module documentation")
             if self.variables_dda_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."

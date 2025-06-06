@@ -22,6 +22,7 @@ class VariablesDDAQuantAstral:
     fig_logfc: str = "fig_logfc_dda_quant_Astral"
     fig_metric: str = "fig_metric_dda_quant_Astral"
     fig_cv: str = "fig_CV_violinplot_dda_quant_Astral"
+    fig_ma_plot: str = "fig_ma_plot_dda_quant_Astral"
     result_perf: str = "result_perf_dda_quant_Astral"
     meta_data: str = "meta_data_dda_quant_Astral"
     input_df: str = "input_df_dda_quant_Astral"
@@ -48,6 +49,9 @@ class VariablesDDAQuantAstral:
     placeholder_table: str = "placeholder_table_dda_quant_Astral"
     placeholder_slider: str = "placeholder_slider_dda_quant_Astral"
 
+    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dda_quant_Astral"
+    dataset_selector_id_uuid: str = "dataset_selector_id_dda_quant_Astral"
+
     placeholder_downloads_container: str = "placeholder_downloads_container_dda_quant_Astral"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
@@ -66,7 +70,7 @@ class VariablesDDAQuantAstral:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/8-quant-lfq-ion-dda-astral/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/8-quant-lfq-precursor-dda-Astral/"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Ion quantification (Astral)"

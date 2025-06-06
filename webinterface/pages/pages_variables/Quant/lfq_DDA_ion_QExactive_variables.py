@@ -49,6 +49,9 @@ class VariablesDDAQuant:
     placeholder_table: str = "placeholder_table"
     placeholder_slider: str = "placeholder_slider"
 
+    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container"
+    dataset_selector_id_uuid: str = "dataset_selector_id"
+
     placeholder_downloads_container: str = "placeholder_downloads_container"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True

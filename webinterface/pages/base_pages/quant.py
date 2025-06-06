@@ -1,6 +1,7 @@
 """Streamlit-based web interface for ProteoBench."""
 
 import copy
+import glob
 import json
 import logging
 import os
@@ -1211,8 +1212,22 @@ class QuantUIObjects:
             performance_data = None
             if st.secrets["storage"]["dir"] != None:
                 dataset_path = os.path.join(st.secrets["storage"]["dir"], public_hash)
+                # Define the path and the pattern
+                pattern = os.path.join(dataset_path, "*_data.zip")
 
-                with zipfile.ZipFile(os.path.join(dataset_path, "*_data.zip ")) as z:
+                # Use glob to find files matching the pattern
+                zip_files = glob.glob(pattern)
+
+                # Check that at least one match was found
+                if not zip_files:
+                    st.error(":x: Could not find the files on the server", icon="🚨")
+                    return
+
+                # (Optional) handle multiple matches if necessary
+                zip_path = zip_files[0]  # Assumes first match is the desired one
+
+                # Open the ZIP file and extract the desired CSV
+                with zipfile.ZipFile(zip_path) as z:
                     with z.open("result_performance.csv.csv") as f:
                         performance_data = pd.read_csv(f)
 

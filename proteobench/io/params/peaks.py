@@ -179,12 +179,14 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
 
     psm_fdr = extract_value(lines, "Precursor FDR:")
     # Its either "Precursor FDR:" (DIA) or "PSM FDR:" (DDA)
-    psm_fdr = extract_value(lines, "PSM FDR:")
+    if not psm_fdr:
+        psm_fdr = extract_value(lines, "PSM FDR:")
     peptide_fdr = extract_value(lines, "Peptide FDR:")
     params.ident_fdr_peptide = peptide_fdr
     params.ident_fdr_psm = psm_fdr
     # peaks uses  Proteins -10LgP >= 15.0  instead of FDR
-    params.ident_fdr_protein = None
+    protein_fdr = extract_value(lines, "Protein Group FDR:")
+    params.ident_fdr_protein = protein_fdr
     params.enable_match_between_runs = True if extract_value(lines, "Match Between Run:") == "Yes" else False
     params.precursor_mass_tolerance = extract_mass_tolerance(lines, "Precursor Mass Error Tolerance:")
     params.fragment_mass_tolerance = extract_mass_tolerance(lines, "Fragment Mass Error Tolerance:")
@@ -230,6 +232,7 @@ if __name__ == "__main__":
         "../../../test/params/PEAKS_parameters_DDA.txt",
         "../../../test/params/PEAKS_parameters_DIA.txt",
         "../../../test/params/PEAKS_parameters_DDA_new.txt",
+        "../../../test/params/PEAKS_diaPASEF.txt",
     ]
 
     for file in fnames:

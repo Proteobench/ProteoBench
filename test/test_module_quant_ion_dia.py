@@ -6,7 +6,7 @@ import pytest
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.score.quant.quantscores import QuantScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
@@ -125,7 +125,7 @@ class TestDIAQuantIonModule:
         }
 
     def test_benchmarking_return_types_are_correct(self):
-        intermediate_metric_df, all_datapoints, input_df = DIAQuantIonModule("").benchmarking(
+        intermediate_metric_df, all_datapoints, input_df = DIAQuantIonModuleAIF("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
         assert isinstance(intermediate_metric_df, pd.DataFrame)
@@ -133,7 +133,7 @@ class TestDIAQuantIonModule:
         assert isinstance(input_df, pd.DataFrame)
 
     def test_results_column_in_new_data_point_contains_correct_number_of_entries(self):
-        _, all_datapoints, _ = DIAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DIAQuantIonModuleAIF("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
         results_entry_newest_datapoint = all_datapoints.results[len(all_datapoints.results) - 1]
@@ -145,7 +145,7 @@ class TestDIAQuantIonModule:
         input_format = self.software_tool
         empty_user_input = {}
         with pytest.raises(DatapointGenerationError):
-            DIAQuantIonModule("").benchmarking(input_file_location, input_format, empty_user_input, None)
+            DIAQuantIonModuleAIF("").benchmarking(input_file_location, input_format, empty_user_input, None)
 
     def test_new_datapoint_with_unique_hash_is_added_to_existing_ones(self, monkeypatch):
         def mock_clone_repo(*args, **kwargs):
@@ -161,10 +161,10 @@ class TestDIAQuantIonModule:
         first_software_tool = "DIA-NN"
         second_software_tool = "AlphaDIA"
 
-        _, previous_datapoints, _ = DIAQuantIonModule("").benchmarking(
+        _, previous_datapoints, _ = DIAQuantIonModuleAIF("").benchmarking(
             TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
         )
-        _, all_datapoints, _ = DIAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DIAQuantIonModuleAIF("").benchmarking(
             TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
         )
 
@@ -188,10 +188,10 @@ class TestDIAQuantIonModule:
         first_software_tool = "DIA-NN"
         second_software_tool = first_software_tool
 
-        _, previous_datapoints, _ = DIAQuantIonModule("").benchmarking(
+        _, previous_datapoints, _ = DIAQuantIonModuleAIF("").benchmarking(
             TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
         )
-        _, all_datapoints, _ = DIAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DIAQuantIonModuleAIF("").benchmarking(
             TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
         )
 

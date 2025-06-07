@@ -1,6 +1,7 @@
 # Benchmark module life cycle
 
 Anybody can propose a new benchmark module, and discuss on the validity of current modules. There are 6 phases in the benchmark modules life cycle:
+
 1. Module proposal
 2. Implementation
 3. Beta 
@@ -13,13 +14,13 @@ Anybody can propose a new benchmark module, and discuss on the validity of curre
 
 Anyone can start a discussion or more formally propose new module, as described in ["How to propose/discuss a new module" section](./3-module-proposal.md).
 
-The proposal will be public, and discussed with the community before being implemented. We are currently setting up a reviewing process through [GitHub discussions](https://github.com/orgs/Proteobench/discussions).
+The proposal will be public, and discussed with the community before being implemented. Additionaly, we require input from external expert(s). Modules that were not openly discussed with the community and expert(s) are highlited with a "caution" message on the top of their page.
 
 ## Implementation
 
 *Implementation may or may not be done by the people who made the proposal.*
 
-Once fully reviewed and accepted, the editor moves the Proposal from Discussions to Issues. Based on this new issue (which can be labeled as “new benchmark module”), describing the finalized Proposal, the module can be implemented and documented in the ProteoBench codebase. Finally, a pull request (PR) can be opened.
+When starting development, proposal can be moved from Discussions to Issues. Based on this new issue (which can be labeled as “new benchmark module”), describing the finalized Proposal, the module can be implemented and documented in the ProteoBench codebase. Finally, a pull request (PR) can be opened.
 
 After two positive code reviews by ProteoBench maintainers, the PR can be merged. The PR MUST meet the following requirements:
 1. Proper documentation of the benchmarking module
@@ -29,7 +30,8 @@ After two positive code reviews by ProteoBench maintainers, the PR can be merged
 
 ## Beta
 
-When the PR is merged, the new module enters a beta stage, where its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in “Beta”. After a minimal period of one month and approval by the initial proposers and external reviewers, the beta label can be removed.
+When the PR is merged, the new module enters a beta stage, where its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in “Beta”. After a minimal period of one month and approval by the initial proposers and external expert(s), the beta label can be removed.
+Additionally, a banner will indicate if the module did not receive yet external expert(s) input. The "Beta" mention can last longer than the caution banner "No external expert input yet" if workflow results may change. This can happen if we expect new tools to be included (and potential parsing mistakes), or if the module is very new.
 
 ## Live
 

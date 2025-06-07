@@ -1228,7 +1228,7 @@ class QuantUIObjects:
 
                 # Open the ZIP file and extract the desired CSV
                 with zipfile.ZipFile(zip_path) as z:
-                    with z.open("result_performance.csv.csv") as f:
+                    with z.open("result_performance.csv") as f:
                         performance_data = pd.read_csv(f)
 
         # Filter the data based on the slider condition (as before)

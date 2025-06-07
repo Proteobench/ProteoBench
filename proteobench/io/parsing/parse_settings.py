@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import os
+import re
 from collections import defaultdict
 from typing import Any, Dict, List
 
 import pandas as pd
 import toml
+from psm_utils import Peptidoform
 
 from .parse_ion import get_proforma_bracketed
 
@@ -338,6 +340,149 @@ class ParseModificationSettings:
             return df
 
 
+class ParseSettingsDeNovo:
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+        self.mapper = parse_settings["mapper"]
+        self.spectrum_id_mapper = parse_settings["spectrum_id_mapper"]
+        self.sequence_mapper = parse_settings["sequence_mapper"]
+        self.modification_parser = None
+        self.analysis_level = "peptidoform"
+
+        module_settings_dir = os.path.join(
+            os.path.dirname(__file__),
+            "io_parse_settings",
+            "denovo",
+            "lfq",
+            "DDA",
+            "HCD",
+        )
+        self.path_to_ground_truth = os.path.join(
+            module_settings_dir, parse_settings_module["ground_truth"]["path_to_ground_truth"]
+        )
+
+    def extract_scan_id(self, spectrum_id: str) -> int:
+        """
+        Extract the scan ID from the spectrum ID string.
+
+        Parameters
+        ----------
+        spectrum_id : str
+            The input spectrum ID string.
+
+        Returns
+        -------
+        int
+            The extracted scan ID (a number).
+        """
+        scan_id_match = re.search(self.spectrum_id_mapper["pattern"], spectrum_id)
+        if scan_id_match is None:
+            raise ValueError(
+                f"Scan id not found in the spectrum_id string {spectrum_id}."
+                f" Spectrum id pattern is {self.spectrum_id_mapper['pattern']}."
+            )
+
+        scan_id = scan_id_match.group(1)
+        return int(scan_id)
+
+    def format_sequence(self, sequence: str) -> str:
+        """
+        Format the sequence string.
+
+        Parameters
+        ----------
+        sequence : str
+            The input sequence string.
+
+        Returns
+        -------
+        str
+            The formatted sequence string.
+        """
+        if not isinstance(sequence, str):
+            return ""
+
+        if "replacement_dict" in self.sequence_mapper:
+            for key, value in self.sequence_mapper["replacement_dict"].items():
+                sequence = sequence.replace(key, value)
+        return sequence
+
+    def format_scores(self, aa_scores: Any) -> List[float]:
+        """
+        Format the amino acid scores into a list of float numbers.
+
+        Parameters
+        ----------
+        aa_scores : List[float]
+            The input list of scores.
+
+        Returns
+        -------
+        List[float]
+            The formatted list of scores.
+        """
+        if isinstance(aa_scores, list) and all(isinstance(i, float) for i in aa_scores):
+            return aa_scores
+
+        if isinstance(aa_scores, str):
+            aa_scores = aa_scores.split(",")  # TODO: make it cofigurable separator?
+            aa_scores = [float(score) for score in aa_scores]
+        return aa_scores
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        self.modification_parser = parser
+
+    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+        """
+        Convert a software tool output into a generic format supported by the module.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
+
+        Returns
+        -------
+        tuple[pd.DataFrame, Dict[int, List[str]]]
+            The converted DataFrame and a dictionary mapping replicates to raw data.
+        """
+        # TODO: Add functionality/steps in docstring.
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected de novo tool."
+            )
+
+        df = df.rename(columns=self.mapper, inplace=False)
+
+        if self.spectrum_id_mapper:
+            df["spectrum_id"] = df["spectrum_id"].apply(self.extract_scan_id)
+
+        if self.sequence_mapper:
+            df["sequence"] = df["sequence"].apply(self.format_sequence)
+
+        if self.modification_parser is not None:
+            df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
+        else:
+            df["proforma"] = df["sequence"]
+
+        if "proforma" in df.columns:
+            df["peptidoform"] = df["proforma"].apply(lambda x: Peptidoform(x))
+
+        # If AA scores are not provided, simulate them from peptide score
+        if "aa_scores" not in df.columns:
+            df["aa_scores"] = df.apply(lambda row: [row["score"]] * len(row["peptidoform"]), axis=1)
+        df["aa_scores"] = df["aa_scores"].apply(self.format_scores)
+
+        columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]
+        df = df[columns_to_keep]
+
+        # Load ground truth PSMs
+        df_ground_truth = pd.read_csv(self.path_to_ground_truth)
+        df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
+        df["peptidoform_ground_truth"] = df["peptidoform_ground_truth"].apply(lambda x: Peptidoform(x))
+        return df
+
+
 MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
@@ -345,5 +490,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
-    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
+    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo,
 }

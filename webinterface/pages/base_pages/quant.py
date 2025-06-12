@@ -1,11 +1,13 @@
 """Streamlit-based web interface for ProteoBench."""
 
 import copy
+import glob
 import json
 import logging
 import os
 import tempfile
 import uuid
+import zipfile
 from datetime import datetime
 from pprint import pformat
 from typing import Any, Dict, Optional
@@ -1211,7 +1213,24 @@ class QuantUIObjects:
             performance_data = None
             if st.secrets["storage"]["dir"] != None:
                 dataset_path = os.path.join(st.secrets["storage"]["dir"], public_hash)
-                performance_data = pd.read_csv(os.path.join(dataset_path, "/result_performance.csv"))
+                # Define the path and the pattern
+                pattern = os.path.join(dataset_path, "*_data.zip")
+
+                # Use glob to find files matching the pattern
+                zip_files = glob.glob(pattern)
+
+                # Check that at least one match was found
+                if not zip_files:
+                    st.error(":x: Could not find the files on the server", icon="🚨")
+                    return
+
+                # (Optional) handle multiple matches if necessary
+                zip_path = zip_files[0]  # Assumes first match is the desired one
+
+                # Open the ZIP file and extract the desired CSV
+                with zipfile.ZipFile(zip_path) as z:
+                    with z.open("result_performance.csv") as f:
+                        performance_data = pd.read_csv(f)
 
         # Filter the data based on the slider condition (as before)
         performance_data = performance_data[

@@ -198,6 +198,8 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     params.allowed_miscleavages = pipeline_params["allowed_missed_cleavages"]
     params.quantification_method = pipeline_params["quantification_method"]
     params.protein_inference = pipeline_params["protein_inference_method"]
+    # if off-targets are allowed, not identified peaks can be used for quantification
+    params.enable_match_between_runs = not pipeline_params["targeted_only"]
 
     # maybe (also) in sdrf infos?
     # params.quantification_method =

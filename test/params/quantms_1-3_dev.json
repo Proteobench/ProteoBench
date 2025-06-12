@@ -98,7 +98,7 @@
     "protocol": "automatic",
     "skip_experimental_design_validation": false,
     "add_triqler_output": false,
-    "targeted_only": true,
+    "targeted_only": false,
     "max_multiqc_email_size": "25.MB",
     "msstatsiso_useunique_peptide": true,
     "min_consensus_support": 0,

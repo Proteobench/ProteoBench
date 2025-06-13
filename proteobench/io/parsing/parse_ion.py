@@ -202,7 +202,7 @@ def match_brackets(
     input_string : str
         The input string.
     pattern : str, optional
-        The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
+        The regular expression pattern for matching modifications. Defaults to "\\[([^]]+)\\]".
     isalpha : bool, optional
         Whether to match alphabetic characters. Defaults to True.
     isupper : bool, optional
@@ -264,7 +264,7 @@ def get_proforma_bracketed(
     isupper : bool, optional
         Whether to include uppercase characters. Defaults to True.
     pattern : str, optional
-        The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
+        The regular expression pattern for matching modifications. Defaults to "\\[([^]]+)\\]".
     modification_dict : dict, optional
         A dictionary of modifications and their names.
 
@@ -420,10 +420,7 @@ def _load_prolinestudio_msangel(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_excel(
-        input_csv,
-        sheet_name="Quantified peptide ions",
-        header=0,
-        index_col=None,
+        input_csv, sheet_name="Quantified peptide ions", header=0, index_col=None, engine="calamine"
     )
     input_data_frame["modifications"] = input_data_frame["modifications"].fillna("")
     input_data_frame["subsets_accessions"] = input_data_frame["subsets_accessions"].fillna("")

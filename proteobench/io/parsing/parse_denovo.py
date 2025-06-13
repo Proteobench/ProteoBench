@@ -120,7 +120,14 @@ def _load_pihelixnovo(input_path: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    pass
+    input_data_frame = pd.read_csv(input_path, sep="\t", low_memory=False, header=None)
+    return input_data_frame.rename(
+        columns={
+            0: "0",
+            1: "1",
+            2: "2"
+        }
+    )
 
 
 def _load_piprimenovo(input_path: str) -> pd.DataFrame:
@@ -137,7 +144,7 @@ def _load_piprimenovo(input_path: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    pass
+    return pd.read_csv(input_path, sep="\t")
 
 
 _LOAD_FUNCTIONS = {

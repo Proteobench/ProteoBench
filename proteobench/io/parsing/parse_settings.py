@@ -424,12 +424,18 @@ class ParseSettingsDeNovo:
             return aa_scores
 
         if isinstance(aa_scores, str):
-            aa_scores = aa_scores.split(",")  # TODO: make it cofigurable separator?
-            aa_scores = [float(score) for score in aa_scores]
+            aa_scores = eval(aa_scores)
+            # aa_scores = aa_scores.split(",")  # TODO: make it cofigurable separator?
+            # aa_scores = [float(score) for score in aa_scores]
         return aa_scores
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
+
+    def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
+        if peptidoform.properties['n_term'] is None:
+            return len(peptidoform)
+        return len(peptidoform) + len(peptidoform.properties['n_term'])
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
@@ -470,7 +476,11 @@ class ParseSettingsDeNovo:
 
         # If AA scores are not provided, simulate them from peptide score
         if "aa_scores" not in df.columns:
-            df["aa_scores"] = df.apply(lambda row: [row["score"]] * len(row["peptidoform"]), axis=1)
+            df["aa_scores"] = df.apply(
+                lambda row: [row["score"]] * self.get_length_peptidoform_with_nterm(row["peptidoform"]),
+                axis=1
+            )
+        
         df["aa_scores"] = df["aa_scores"].apply(self.format_scores)
 
         columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]

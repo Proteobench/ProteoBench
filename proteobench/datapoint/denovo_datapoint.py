@@ -66,12 +66,11 @@ def get_prc_curve(t, n_spectra):
 
 def collapse_aa_scores(df: pd.DataFrame):
     df_aa = {}
-    aa_scores = df["aa_scores"].apply(lambda x: [float(i) for i in x.split(",")])
-    df_aa["aa_score"] = list(chain(*aa_scores.tolist()))
-    df_aa["aa_match"] = list(chain(*df["aa_matches_dn"].apply(list).tolist()))
 
-    n_aa = df["aa_matches_gt"].apply(len).sum()
-    return pd.DataFrame(df_aa), n_aa
+    df_aa['aa_score'] = list(chain(*df['aa_scores'].tolist()))
+    df_aa['aa_match'] = list(chain(*df['aa_matches_dn'].tolist()))
+
+    return pd.DataFrame(df_aa)
 
 
 @dataclass
@@ -203,7 +202,6 @@ class DenovoDatapoint:
                 results[l][e_type] = DenovoDatapoint.get_metrics(intermediate, l, e_type)
 
         result_datapoint.results = results
-        print(results)
         result_datapoint.precision = result_datapoint.results[level][evaluation_type]["precision"]
         result_datapoint.recall = result_datapoint.results[level][evaluation_type]["recall"]
 
@@ -216,7 +214,6 @@ class DenovoDatapoint:
         """
         Compute various statistical metrics from the provided DataFrame for the benchmark.
         """
-        df_filtered = df.fillna("peptidoform_dn")
 
         if evaluation == "mass":
             evaluation_list = ["mass", "exact"]
@@ -226,11 +223,15 @@ class DenovoDatapoint:
             raise Exception("Only `exact` and `mass` evaluation types are supported. Should never happen.")
 
         if level == "peptide":
+            n = len(df)
+            df_filtered = df.dropna(subset='peptidoform')
             scores_correct = df_filtered.loc[df_filtered["match_type"].isin(evaluation_list), "score"].tolist()
             scores_all = df_filtered["score"].tolist()
-            n = len(df_filtered)
+
         elif level == "aa":
-            df_aa, n_aa = collapse_aa_scores(df)
+            n_aa = df["aa_matches_gt"].apply(len).sum()
+            df_filtered = df.dropna(subset='peptidoform')
+            df_aa = collapse_aa_scores(df_filtered)
             scores_correct = df_aa.loc[df_aa["aa_match"], "aa_score"].tolist()
             scores_all = df_aa["aa_score"].tolist()
             n = n_aa

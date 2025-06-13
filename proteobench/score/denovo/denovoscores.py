@@ -63,6 +63,14 @@ class DenovoScores:
         gt = self.convert_peptidoform(ground_truth)
         dn = self.convert_peptidoform(de_novo)
 
+        if dn is None:
+            return {
+                "match_type": "mismatch",
+                "aa_matches_gt": np.full(len(gt), False),
+                "aa_matches_dn": np.full(len(gt), False),
+                "pep_match": False
+            }
+
         if ground_truth == de_novo:
             return {
                 "match_type": "exact",
@@ -218,6 +226,9 @@ class DenovoScores:
         return aa_matches, aa_matches.all(), (aa_matches_1, aa_matches_2)
 
     def convert_peptidoform(self, peptidoform: Peptidoform):
+        if not isinstance(peptidoform, Peptidoform):
+            return None
+
         out = []
         n_mod = peptidoform.properties["n_term"]
         if n_mod is None:

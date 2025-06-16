@@ -429,7 +429,10 @@ class QuantUIObjects:
 
         if len(data_points_filtered) == 0:
             st.error("No datapoints available for plotting", icon="🚨")
-
+            return
+        if "new" not in data_points_filtered["old_new"]:
+            st.error("No datapoints available for plotting", icon="🚨")
+            return
         try:
             fig_metric = PlotDataPoint.plot_metric(
                 data_points_filtered,

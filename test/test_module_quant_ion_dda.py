@@ -7,6 +7,8 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
 from proteobench.score.quant.quantscores import QuantScores
+from proteobench.exceptions import DatapointGenerationError
+
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")
 TESTDATA_FILES = {
@@ -152,7 +154,7 @@ class TestDDAQuantIonModule:
         input_file_location = TESTDATA_FILES[self.software_tool]
         input_format = self.software_tool
         empty_user_input = {}
-        with pytest.raises(KeyError):
+        with pytest.raises(DatapointGenerationError):
             DDAQuantIonModuleQExactive("").benchmarking(input_file_location, input_format, empty_user_input, None)
 
     def test_new_datapoint_with_unique_hash_is_added_to_existing_ones(self, monkeypatch):

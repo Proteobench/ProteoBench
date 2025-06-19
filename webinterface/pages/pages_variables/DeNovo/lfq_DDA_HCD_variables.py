@@ -19,6 +19,8 @@ class VariablesDDADeNovo:
     input_df_submission: str = "input_df_submission_dda_hcd_denovo"
     result_performance_submission: str = "result_performance_submission_dda_hcd_denovo"
     submit: str = "submit_dda_hcd_denovo"
+    fig_metric: str = "fig_metric_dda_hcd_denovo"
+    fig_metric_submitted: str = "fig_metric_dda_hcd_denovo_submitted"
     # fig_logfc: str = "fig_logfc_dda_hcd_denovo"
     # fig_metric: str = "fig_metric_dda_hcd_denovo"
     # fig_cv: str = "fig_CV_violinplot_dda_hcd_denovo"

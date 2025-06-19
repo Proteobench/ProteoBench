@@ -81,12 +81,13 @@ class DeNovoUIObjects():
 
         if self.variables_denovo.params_file_dict not in st.session_state.keys():
             st.session_state[self.variables_denovo.params_file_dict] = dict()
-        if self.variables_denovo.radio_level_id_submitted_uuid not in st.session_state.keys():
-            st.session_state[self.variables_denovo.radio_level_id_submitted_uuid] = str()
-        if self.variables_denovo.radio_evaluation_id_submitted_uuid not in st.session_state.keys():
-            st.session_state[self.variables_denovo.radio_evaluation_id_submitted_uuid] = str()
+        # if self.variables_denovo.radio_level_id_submitted_uuid not in st.session_state.keys():
+        #     st.session_state[self.variables_denovo.radio_level_id_submitted_uuid] = str()
+        # if self.variables_denovo.radio_evaluation_id_submitted_uuid not in st.session_state.keys():
+        #     st.session_state[self.variables_denovo.radio_evaluation_id_submitted_uuid] = str()
 
         self.level_mapping = {"Peptide": "peptide", "Amino Acid": "aa"}
+        self.level_mapping_submitted = {"Peptide": "peptide", "Amino Acid": "aa"}
         self.evaluation_type_mapping = {"Exact": "exact", "Mass-based": "mass"}
 
     ####################
@@ -227,21 +228,19 @@ class DeNovoUIObjects():
             ).read()
         )
 
-        radio_level_key = st.session_state[self.variables_denovo.radio_level_id_uuid]
         st.radio(
             "Select at which level precision is calculated",
             options=["Peptide", "Amino Acid"],
             horizontal=True,
-            key=radio_level_key,
+            key=st.session_state[self.variables_denovo.radio_level_id_uuid],
             help="Toggle between different levels of precision calculation"
         )
 
-        radio_evaluation_key = st.session_state[self.variables_denovo.radio_evaluation_id_uuid]
         st.radio(
             "Select the stringency of evaluation",
             options=["Exact", "Mass-based"],
             horizontal=True,
-            key=radio_evaluation_key,
+            key=st.session_state[self.variables_denovo.radio_evaluation_id_uuid],
             help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching."
         )
 
@@ -285,7 +284,11 @@ class DeNovoUIObjects():
                     st.session_state[st.session_state[self.variables_denovo.radio_evaluation_id_uuid]]
                 ]
             )
-            st.plotly_chart(fig_metric, use_container_width=True)
+            st.plotly_chart(
+                fig_metric,
+                use_container_width=True,
+                key=self.variables_denovo.fig_metric
+            )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
         
@@ -494,7 +497,26 @@ class DeNovoUIObjects():
     #####################
     ### TAB 3 METHODS ###
     #####################
-    def _generate_indepth_plots(self) -> None:
+    def _generate_indepth_plots(
+        self, recalculate: bool, public_id: Optional[str], public_hash: Optional[str]
+    ) -> go.Figure:
+        """
+        Generate and return plots based on the current benchmark data in Tab 2.5.
+
+        Parameters
+        ----------
+        recalculate : bool
+            Whether to recalculate the plots.
+        public_id : Optional[str], optional
+            The dataset to plot, either "Uploaded dataset" or name of public run.
+        public_hash : Optional[str], optional
+            The hash of the selected public dataset. If None, the uploaded dataset is displayed.
+
+        Returns
+        -------
+        go.Figure
+            The generated plots for the selected dataset.
+        """
         raise NotImplementedError()
 
     #####################
@@ -529,21 +551,21 @@ class DeNovoUIObjects():
             ).read()
         )
 
-        radio_level_key = st.session_state[self.variables_denovo.radio_level_id_submitted_uuid]
         st.radio(
             "Select at which level precision is calculated",
             options=["Peptide", "Amino Acid"],
+            index=0,
             horizontal=True,
-            key=radio_level_key,
+            key=st.session_state[self.variables_denovo.radio_level_id_submitted_uuid],
             help="Toggle between different levels of precision calculation"
         )
 
-        radio_evaluation_key = st.session_state[self.variables_denovo.radio_evaluation_id_submitted_uuid]
         st.radio(
             "Select the stringency of evaluation",
             options=["Exact", "Mass-based"],
+            index=0,
             horizontal=True,
-            key=radio_evaluation_key,
+            key=st.session_state[self.variables_denovo.radio_evaluation_id_submitted_uuid],
             help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching."
         )
 
@@ -580,7 +602,11 @@ class DeNovoUIObjects():
                 benchmark_metrics_df=st.session_state[self.variables_denovo.all_datapoints_submitted],
                 label=st.session_state[st.session_state[self.variables_denovo.selectbox_id_submitted_uuid]],
             )
-            st.plotly_chart(fig_metric, use_container_width=True)
+            st.plotly_chart(
+                fig_metric,
+                use_container_width=True,
+                key=self.variables_denovo.fig_metric_submitted
+            )
         except Exception as e:
             st.error(f"Umable to plot the datapoints: {e}", icon="🚨")
 

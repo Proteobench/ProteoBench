@@ -64,11 +64,17 @@ def get_prc_curve(t, n_spectra):
     return pd.DataFrame({"precision": prs, "recall": recs, "coverage": covs})
 
 
-def collapse_aa_scores(df: pd.DataFrame):
+def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str):
     df_aa = {}
 
-    df_aa['aa_score'] = list(chain(*df['aa_scores'].tolist()))
-    df_aa['aa_match'] = list(chain(*df['aa_matches_dn'].tolist()))
+    if evaluation_type == 'mass':
+        df_aa['aa_score'] = list(chain(*df['aa_scores'].tolist()))
+        df_aa['aa_match'] = list(chain(*df['aa_matches_dn'].tolist()))
+    elif evaluation_type == 'exact':
+        df_aa['aa_score'] = list(chain(*df['aa_scores'].tolist()))
+        df_aa['aa_match'] = list(chain(*df['aa_exact_dn'].tolist()))
+    else:
+        raise Exception('Evaluation type should be mass or exact, but {} was provided.'.format(evaluation_type))
 
     return pd.DataFrame(df_aa)
 
@@ -231,7 +237,7 @@ class DenovoDatapoint:
         elif level == "aa":
             n_aa = df["aa_matches_gt"].apply(len).sum()
             df_filtered = df.dropna(subset='peptidoform')
-            df_aa = collapse_aa_scores(df_filtered)
+            df_aa = collapse_aa_scores(df_filtered, evaluation_type=evaluation)
             scores_correct = df_aa.loc[df_aa["aa_match"], "aa_score"].tolist()
             scores_all = df_aa["aa_score"].tolist()
             n = n_aa
@@ -243,3 +249,102 @@ class DenovoDatapoint:
 
         res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
         return res
+
+
+    def get_indepth_metrics(self, df: pd.DataFrame, level: str, evaluation: str):
+        extra_metrics = {}
+        
+        extra_metrics['PTM'] = self.get_ptm_metrics(df)
+        extra_metrics['Spectrum'] = self.get_spectrum_metrics(df)
+        extra_metrics['Species'] = self.get_species_metrics(df)
+
+        pass
+
+    def get_ptm_metrics(self, df: pd.DataFrame):
+        mod_counts = {}
+        mod_labels_gt = {
+            "M-Oxidation": "M[UNIMOD:35]",
+            "Q-Deamidation": "Q[UNIMOD:7]",
+            "N-Deamidation": "N[UNIMOD:7]",
+            "N-term Acetylation": "[UNIMOD:1]-",
+            "N-term Carbamylation": "[UNIMOD:385]-",
+            "N-term Ammonia-loss": "[UNIMOD:5]-",
+        }
+        mod_labels_dn = {
+            "M-Oxidation (denovo)": "M[UNIMOD:35]",
+            "Q-Deamidation (denovo)": "Q[UNIMOD:7]",
+            "N-Deamidation (denovo)": "N[UNIMOD:7]",
+            "N-term Acetylation (denovo)": "[UNIMOD:1]-",
+            "N-term Carbamylation (denovo)": "[UNIMOD:385]-",
+            "N-term Ammonia-loss (denovo)": "[UNIMOD:5]-",
+        }
+
+        # Init the mod_counts
+        mod_counts = {
+            mod_label: {
+                'counts_gt': 0,
+                'correct_gt': 0,
+                'counts_dn': 0,
+                'correct_dn': 0
+            } for mod_label in list(mod_labels_gt.keys())
+        }
+
+        # On ground-truth
+        for mod_label, unimod_tag in mod_labels_gt.items():
+            mod_count = 0
+            correct = 0
+            for i, row in df[df[mod_label]].iterrows():
+                
+                mod_count, correct = self.evaluate_ptm(
+                    mod_label=mod_label,
+                    mod_tag=unimod_tag,
+                    peptidoform=row['peptidoform_ground_truth'],
+                    match_array=row['aa_exact_gt']
+                )
+                mod_counts[mod_label]['counts_gt'] += mod_count
+                mod_counts[mod_label]['correct_gt'] += correct
+            
+        # On predicted
+        for mod_label, unimod_tag in mod_labels_dn.items():
+            mod_count = 0
+            correct = 0
+            for i, row in df[df[mod_label]].iterrows():
+                
+                mod_count, correct = self.evaluate_ptm(
+                    mod_label=mod_label,
+                    mod_tag=unimod_tag,
+                    peptidoform=row['peptidoform'],
+                    match_array=row['aa_exact_dn']
+                )
+                mod_counts[mod_label.split('(denovo)')[0].strip()]['counts_dn'] += mod_count
+                mod_counts[mod_label.split('(denovo)')[0].strip()]['correct_dn'] += correct
+        return mod_counts
+    
+    @staticmethod
+    def evaluate_ptm(mod_label, mod_tag, peptidoform, match_array):
+        mod_count = 0
+        correct = 0
+        if mod_label.startswith('N-term'):
+            mod_count += 1
+            if match_array[0]:
+                correct += 1
+        
+        else:
+            mod_count += peptidoform.modified_sequence.count(mod_tag)
+            parsed_seq = peptidoform.parsed_sequence
+            # N-term mod is seperatly tokenized and thus seperatly evaluated (aa_match list is longer than peptide length)
+            if isinstance(peptidoform.properties['n_term'], list):
+                parsed_seq = [(None, None)] + parsed_seq
+
+            assert len(parsed_seq) == len(match_array)
+            for match_bool, aa in zip(match_array, parsed_seq):
+                if isinstance(aa[1], list) and '{}[UNIMOD:{}]'.format(aa[0], aa[1][0].id)==mod_tag and match_bool:
+                    correct += 1
+        return mod_count, correct
+
+    @staticmethod
+    def get_spectrum_metrics(df):
+        pass
+
+    def get_species_metrics():
+        pass

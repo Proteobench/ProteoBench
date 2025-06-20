@@ -52,6 +52,8 @@ class DenovoScores:
         standard_format["match_type"] = standard_format["match_dict"].apply(lambda x: x["match_type"])
         standard_format["aa_matches_dn"] = standard_format["match_dict"].apply(lambda x: x["aa_matches_dn"])
         standard_format["aa_matches_gt"] = standard_format["match_dict"].apply(lambda x: x["aa_matches_gt"])
+        standard_format["aa_exact_gt"] = standard_format["match_dict"].apply(lambda x: x["aa_exact_gt"])
+        standard_format["aa_exact_dn"] = standard_format["match_dict"].apply(lambda x: x["aa_exact_dn"])
         standard_format["pep_match"] = standard_format["match_dict"].apply(lambda x: x["pep_match"])
         _ = standard_format.pop("match_dict")
         return standard_format
@@ -68,6 +70,8 @@ class DenovoScores:
                 "match_type": "mismatch",
                 "aa_matches_gt": np.full(len(gt), False),
                 "aa_matches_dn": np.full(len(gt), False),
+                "aa_exact_gt": np.full(len(gt), False),
+                "aa_exact_dn": np.full(len(gt), False),
                 "pep_match": False
             }
 
@@ -76,10 +80,12 @@ class DenovoScores:
                 "match_type": "exact",
                 "aa_matches_gt": np.full(len(gt), True),
                 "aa_matches_dn": np.full(len(dn), True),
+                "aa_exact_gt": np.full(len(gt), True),
+                "aa_exact_dn": np.full(len(dn), True),
                 "pep_match": True,
             }
 
-        aa_matches, pep_match, (aa_matches_1, aa_matches_2) = self.aa_match(
+        aa_matches, pep_match, (aa_matches_1, aa_matches_2), (exact_match_1, exact_match_2) = self.aa_match(
             gt,
             dn,
         )
@@ -88,6 +94,8 @@ class DenovoScores:
                 "match_type": "mass",
                 "aa_matches_gt": aa_matches_1,
                 "aa_matches_dn": aa_matches_2,
+                "aa_exact_gt": exact_match_1,
+                "aa_exact_dn": exact_match_2,
                 "pep_match": pep_match,
             }
         else:
@@ -95,6 +103,8 @@ class DenovoScores:
                 "match_type": "mismatch",
                 "aa_matches_gt": aa_matches_1,
                 "aa_matches_dn": aa_matches_2,
+                "aa_exact_gt": exact_match_1,
+                "aa_exact_dn": exact_match_2,
                 "pep_match": pep_match,
             }
 
@@ -104,7 +114,7 @@ class DenovoScores:
         peptide2: List[str],
         cum_mass_threshold: float = 50,
         ind_mass_threshold: float = 20,
-    ) -> Tuple[np.ndarray, bool, Tuple[np.ndarray]]:
+    ) -> Tuple[np.ndarray, bool, Tuple[np.ndarray], Tuple[np.ndarray]]:
         """
         Find the matching prefix and suffix amino acids between two peptide
         sequences.
@@ -132,13 +142,13 @@ class DenovoScores:
             TODO.
         """
         # Find longest mass-matching prefix.
-        aa_matches, pep_match, (aa_matches_1, aa_matches_2) = self.aa_match_prefix(
+        aa_matches, pep_match, (aa_matches_1, aa_matches_2), (aa_exact_1, aa_exact_2) = self.aa_match_prefix(
             peptide1, peptide2, cum_mass_threshold, ind_mass_threshold
         )
 
         # No need to evaluate the suffixes if the sequences already fully match.
         if pep_match:
-            return aa_matches, pep_match, (aa_matches_1, aa_matches_2)
+            return aa_matches, pep_match, (aa_matches_1, aa_matches_2), (aa_exact_1, aa_exact_2)
 
         # Find longest mass-matching suffix.
         i1, i2 = len(peptide1) - 1, len(peptide2) - 1
@@ -165,7 +175,7 @@ class DenovoScores:
             else:
                 i2, cum_mass2 = i2 - 1, cum_mass2 + aa_mass2
 
-        return aa_matches, aa_matches.all(), (aa_matches_1, aa_matches_2)
+        return aa_matches, aa_matches.all(), (aa_matches_1, aa_matches_2), (aa_exact_1, aa_exact_2)
 
     def aa_match_prefix(
         self,
@@ -173,7 +183,7 @@ class DenovoScores:
         peptide2: List[str],
         cum_mass_threshold: float = 50,
         ind_mass_threshold: float = 20,
-    ) -> Tuple[np.ndarray, bool, Tuple[np.ndarray]]:
+    ) -> Tuple[np.ndarray, bool, Tuple[np.ndarray], Tuple[np.ndarray]]:
         """
         Find the matching prefix amino acids between two peptide sequences.
 
@@ -200,12 +210,23 @@ class DenovoScores:
             TODO.
         """
         aa_matches = np.zeros(max(len(peptide1), len(peptide2)), np.bool_)
+
+        aa_exact_1 = np.zeros(len(peptide1), np.bool_)
+        aa_exact_2 = np.zeros(len(peptide2), np.bool_)
         aa_matches_1 = np.zeros(len(peptide1), np.bool_)
         aa_matches_2 = np.zeros(len(peptide2), np.bool_)
 
         # Find longest mass-matching prefix.
         i1, i2, cum_mass1, cum_mass2 = 0, 0, 0.0, 0.0
         while i1 < len(peptide1) and i2 < len(peptide2):
+            # Exact
+            aa_str1 = self.get_token_str(peptide1[i1])
+            aa_str2 = self.get_token_str(peptide2[i2])
+            exact_match = aa_str1 == aa_str2
+            aa_exact_1[i1] = exact_match
+            aa_exact_2[i2] = exact_match
+                
+            # mass-based
             aa_mass1 = self.get_token_mass(peptide1[i1])
             aa_mass2 = self.get_token_mass(peptide2[i2])
             tol_prefix = abs(self.mass_diff(cum_mass1 + aa_mass1, cum_mass2 + aa_mass2, False))
@@ -223,7 +244,7 @@ class DenovoScores:
                 i1, cum_mass1 = i1 + 1, cum_mass1 + aa_mass1
             else:
                 i2, cum_mass2 = i2 + 1, cum_mass2 + aa_mass2
-        return aa_matches, aa_matches.all(), (aa_matches_1, aa_matches_2)
+        return aa_matches, aa_matches.all(), (aa_matches_1, aa_matches_2), (aa_exact_1, aa_exact_2)
 
     def convert_peptidoform(self, peptidoform: Peptidoform):
         if not isinstance(peptidoform, Peptidoform):
@@ -257,6 +278,18 @@ class DenovoScores:
                 continue
             mass += mod.mass
         return mass
+    
+    def get_token_str(self, token: tuple) -> str:
+        """
+        Convert the amino acid to string format including the modification if present.
+        """
+        aa, mods = token
+        token_str = aa
+        for mod in mods:
+            if mod is None:
+                continue
+            token_str += "[{}]".format(mod.id)
+        return token_str
 
     def mass_diff(self, mz1, mz2, mode_is_da):
         """

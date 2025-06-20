@@ -567,6 +567,76 @@ class ParseSettingsDeNovo:
             return len(peptidoform)
         return len(peptidoform) + len(peptidoform.properties['n_term'])
 
+    def add_features(self, df: pd.DataFrame):
+        columns_to_keep_gt = [
+            "spectrum_id",
+            "peptidoform",
+            "peptidoform_ground_truth",
+            "proforma",
+            "precursor_mz",
+            "retention_time",
+            "title",
+            "score",
+            "aa_scores",
+            ### FEATURES
+            # 1. MFR
+            "missing_frag_sites",
+            "missing_frag_pct",
+            # 2. Explained intensity
+            "explained_y_pct",
+            "explained_b_pct",
+            "explained_by_pct",
+            "explained_all_pct",
+            # 3. peptide length
+            "peptide_length",
+            # 4. cosine similarity with MS2PIP
+            "cos",
+            "cos_ionb",
+            "cos_iony",
+            "spec_pearson",
+            "dotprod",
+            ### PTM-features
+            # GT
+            "M-Oxidation",
+            "Q-Deamidation",
+            "N-Deamidation",
+            "N-term Acetylation",
+            "N-term Carbamylation",
+            "N-term Ammonia-loss",
+            # Predicted
+            "M-Oxidation (denovo)",
+            "Q-Deamidation (denovo)",
+            "N-Deamidation (denovo)",
+            "N-term Acetylation (denovo)",
+            "N-term Carbamylation (denovo)",
+            "N-term Ammonia-loss (denovo)",
+            # TODO
+            ### SPECIES
+        ]
+        
+        # PTM-features
+        df['M-Oxidation'] = df.peptidoform_ground_truth.apply(lambda x: "M[UNIMOD:35]" in x)
+        df['Q-Deamidation'] = df.peptidoform_ground_truth.apply(lambda x: "Q[UNIMOD:7]" in x)
+        df['N-Deamidation'] = df.peptidoform_ground_truth.apply(lambda x: "N[UNIMOD:7]" in x)
+        df['N-term Acetylation'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:1]-" in x)
+        df['N-term Carbamylation'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:385]-" in x)
+        df['N-term Ammonia-loss'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:5]-" in x)
+
+        df['M-Oxidation (denovo)'] = df.peptidoform.apply(lambda x: "M[UNIMOD:35]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df['Q-Deamidation (denovo)'] = df.peptidoform.apply(lambda x: "Q[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df['N-Deamidation (denovo)'] = df.peptidoform.apply(lambda x: "N[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df['N-term Acetylation (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:1]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df['N-term Carbamylation (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:385]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df['N-term Ammonia-loss (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:5]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+
+        df['peptidoform_ground_truth'] = df.peptidoform_ground_truth.apply(lambda x: Peptidoform(Peptidoform(x).modified_sequence)) # Removing precursor charge from peptidoform
+        
+        # Peptide length
+        df['peptide_length'] = df.peptidoform_ground_truth.apply(lambda x: len(x))
+
+        return df[columns_to_keep_gt]
+
+
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert a software tool output into a generic format supported by the module.
@@ -617,9 +687,15 @@ class ParseSettingsDeNovo:
         df = df[columns_to_keep]
 
         # Load ground truth PSMs
+
         df_ground_truth = pd.read_csv(self.path_to_ground_truth)
+        df_ground_truth = pd.concat([
+            df_ground_truth,
+            pd.DataFrame(df_ground_truth['rescoring_features'].apply(eval).tolist())
+        ], axis=1)
         df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
-        df["peptidoform_ground_truth"] = df["peptidoform_ground_truth"].apply(lambda x: Peptidoform(x))
+        df = self.add_features(df=df)
+
         return df
 
 

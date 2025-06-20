@@ -120,6 +120,11 @@ class DeNovoUIObjects():
         """
         Display the dataset selection dropdown and plot the selected dataset (Tab 3).
         """
+        if self.variables_denovo.all_datapoints_submitted not in st.session_state:
+            self._initialize_main_data_points()
+            st.session_state[self.variables_denovo.all_datapoints_submitted] = self.ionmodule.obtain_all_data_points(
+                all_datapoints=st.session_state[self.variables_denovo.all_datapoints]
+            )
 
         if self.variables_denovo.all_datapoints_submitted not in st.session_state.keys():
             st.error("No data available for plotting.", icon="🚨")
@@ -140,16 +145,23 @@ class DeNovoUIObjects():
             zip(downloads_df["id"], downloads_df["intermediate_hash"])
         )
 
-        dataset_selection = st.selectbox(
-            "Select dataset",
-            dataset_options,
-            index=0,
+        dataset_selection = st.multiselect(
+            label="Select datasets",
+            options=dataset_options,
             key=st.session_state[self.variables_denovo.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
+            default=[dataset_options[0]]
         )
+        # dataset_selection = st.selectbox(
+        #     "Select dataset",
+        #     dataset_options,
+        #     index=0,
+        #     key=st.session_state[self.variables_denovo.dataset_selector_id_uuid],
+        #     format_func=lambda x: x[0],
+        # )
 
-        public_id, selected_hash = dataset_selection
-        self._generate_indepth_plots(True, public_id=public_id, public_hash=selected_hash)
+        public_id_selected_hash_list = dataset_selection
+        # self._generate_indepth_plots(True, public_id=public_id, public_hash=selected_hash)
 
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
@@ -427,7 +439,7 @@ class DeNovoUIObjects():
         if self.variables_denovo.all_datapoints_submitted not in st.session_state:
             self._initialize_main_data_points()
         
-        result_performance, all_datapoints, input_df = self.run_benchmarking_process()
+        result_performance, all_datapoints, input_df = self._run_benchmarking_process()
         st.session_state[self.variables_denovo.all_datapoints_submitted] = all_datapoints
 
         self._set_highlight_column_in_submitted_data()
@@ -444,9 +456,9 @@ class DeNovoUIObjects():
         Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
             The benchmarking results, all data points, and the input data frame.
         """
-        pass
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(self.user_input["input_csv"].getbuffer())
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as tmp_file:
+            tmp_file.write(self.user_input["input_csv"].getvalue().decode("utf-8"))
+            temp_file_path = tmp_file.name
 
         # reload buffer: https://stackoverflow.com/a/64478151/9684872
         self.user_input["input_csv"].seek(0)
@@ -468,13 +480,25 @@ class DeNovoUIObjects():
         else:
             all_datapoints = st.session_state[self.variables_denovo.all_datapoints]
 
+        st.markdown(
+        f"""**Benchmarking Inputs:**
+
+            - `input_file_loc`: `{temp_file_path}`
+            - `input_format`: `{self.user_input["input_format"]}`
+            - `user_input keys`: `{list(self.user_input.keys())}`
+            - `all_datapoints`: `{type(all_datapoints)} with {len(all_datapoints)} entries`
+            - `level`: `{set_level_val}`
+            - `evaluation_type`: `{set_evaluation_val}`
+            """
+        )
+
         return self.ionmodule.benchmarking(
-            input_file_loc=self.user_input["input_csv"],
+            input_file_loc=temp_file_path,
             input_format=self.user_input["input_format"],
             user_input=self.user_input,
             all_datapoints=all_datapoints,
-            level=set_level_val,
-            evaluation_type=set_evaluation_val,
+            level=self.level_mapping[set_level_val],
+            evaluation_type=self.evaluation_type_mapping[set_evaluation_val],
         )
 
     def _set_highlight_column_in_submitted_data(self):

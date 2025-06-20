@@ -99,8 +99,6 @@ class DDAHCDDeNovoModule(DeNovoModule):
         tuple[DataFrame, DataFrame, DataFrame]
             Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
         """
-        # TODO
-
         # Parse workflow output file
         try:
             input_df = load_input_file(input_file_loc, input_format)
@@ -152,17 +150,6 @@ class DDAHCDDeNovoModule(DeNovoModule):
             user_input=user_input,
             level=level,
             evaluation_type=evaluation_type
-        )
-
-        # generate intermediate data structure (Calculate the scores)
-        try:
-            intermediate_metric_structure = denovo_score.generate_intermediate(standard_format)
-        except Exception as e:
-            raise IntermediateFormatGenerationError("Error generating intermediate data structure.") from e
-
-        # try:
-        current_datapoint = DenovoDatapoint.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, level=level, evaluation_type=evaluation_type
         )
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 

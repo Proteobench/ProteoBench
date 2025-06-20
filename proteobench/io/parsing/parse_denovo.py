@@ -29,7 +29,7 @@ def _load_adanovo(input_mztab: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    input_data_frame = MzTab(input_mztab)
+    input_data_frame = MzTab(input_mztab, encoding='utf-8')
     input_data_frame = input_data_frame.spectrum_match_table
     return input_data_frame
 

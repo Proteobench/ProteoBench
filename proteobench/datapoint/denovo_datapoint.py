@@ -205,7 +205,12 @@ class DenovoDatapoint:
         results = {"peptide": {}, "aa": {}}
         for l in ["peptide", "aa"]:
             for e_type in ["exact", "mass"]:
-                results[l][e_type] = DenovoDatapoint.get_metrics(intermediate, l, e_type)
+                results[l][e_type] = DenovoDatapoint.get_metrics(
+                    self=DenovoDatapoint(),
+                    df=intermediate,
+                    level=l,
+                    evaluation=e_type
+                )
 
         result_datapoint.results = results
         result_datapoint.precision = result_datapoint.results[level][evaluation_type]["precision"]
@@ -215,8 +220,7 @@ class DenovoDatapoint:
 
         return results_series
 
-    @staticmethod
-    def get_metrics(df: pd.DataFrame, level: str, evaluation: str):
+    def get_metrics(self, df: pd.DataFrame, level: str, evaluation: str):
         """
         Compute various statistical metrics from the provided DataFrame for the benchmark.
         """
@@ -248,17 +252,18 @@ class DenovoDatapoint:
             )
 
         res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
+        res['in_depth'] = self.get_indepth_metrics(df=df)
         return res
 
 
-    def get_indepth_metrics(self, df: pd.DataFrame, level: str, evaluation: str):
+    def get_indepth_metrics(self, df: pd.DataFrame):
         extra_metrics = {}
         
         extra_metrics['PTM'] = self.get_ptm_metrics(df)
         extra_metrics['Spectrum'] = self.get_spectrum_metrics(df)
         extra_metrics['Species'] = self.get_species_metrics(df)
 
-        pass
+        return extra_metrics
 
     def get_ptm_metrics(self, df: pd.DataFrame):
         mod_counts = {}
@@ -306,9 +311,10 @@ class DenovoDatapoint:
             
         # On predicted
         for mod_label, unimod_tag in mod_labels_dn.items():
+            df_filtered = df.dropna() # Due to no predictions for certain spectra
             mod_count = 0
             correct = 0
-            for i, row in df[df[mod_label]].iterrows():
+            for i, row in df_filtered[df_filtered[mod_label]].iterrows():
                 
                 mod_count, correct = self.evaluate_ptm(
                     mod_label=mod_label,
@@ -343,8 +349,77 @@ class DenovoDatapoint:
         return mod_count, correct
 
     @staticmethod
-    def get_spectrum_metrics(df):
-        pass
+    def get_spectrum_metrics(df: pd.DataFrame):
+        def record_proportions_to_results_feature(
+                series: pd.Series,
+                min_el: int=1,
+                max_el: int=30,
+                all_elements=None
+            ) -> dict:
+            data = {}
 
-    def get_species_metrics():
+            if isinstance(all_elements, list):
+                iteration = all_elements
+            else:
+                iteration = range(min_el, max_el+1)
+
+            for i in iteration:
+                try:
+                    proportions = series[i]
+                    
+                    try:
+                        exact = proportions['exact']
+                    except KeyError:
+                        exact = 0.0
+
+                    try:
+                        mass_based = 1-proportions['mismatch']
+                    except:
+                        mass_based = 1.0
+
+
+                except KeyError as e:
+                    exact = None
+                    mass_based = None
+
+                if isinstance(i, float) and np.isnan(i):
+                    continue
+
+                data[i] = {
+                    'exact': exact,
+                    'mass': mass_based
+                }
+            return data
+
+        results = {}
+        intermediate = df.dropna()
+    
+        # Missing fragmentation sites
+        series = intermediate.groupby('missing_frag_sites')['match_type'].value_counts(normalize=True)
+        results['MF'] = record_proportions_to_results_feature(series, min_el=0, max_el=30)
+
+        # Peptide length
+        series = intermediate.groupby('peptide_length')['match_type'].value_counts(normalize=True)
+        results['peptide_length'] = record_proportions_to_results_feature(series, min_el=5, max_el=30)
+
+        # Explained intensity
+        intermediate_selection = intermediate[['explained_by_pct', 'match_type']].copy()
+        intermediate_selection['intensity_binned'] = pd.Series(pd.cut(
+            intermediate_selection['explained_by_pct'].tolist(), bins=np.arange(0, 1, 0.03)
+        )).astype(str)
+        indices = intermediate_selection['intensity_binned'].sort_values().drop_duplicates().tolist()
+        series = intermediate_selection.groupby('intensity_binned').match_type.value_counts(normalize=True)
+        series.name = 'percentage'
+        results['explained_intensity'] = record_proportions_to_results_feature(series, all_elements=indices)
+        
+        # Cosine similarity
+        # results['cosine'] = {
+        #     'exact': intermediate[intermediate['match_type']=='exact'],
+        #     'mass': intermediate[intermediate['match_type'].isin(['exact', 'mass'])]
+        # }
+
+        return results
+
+    @staticmethod
+    def get_species_metrics(df):
         pass

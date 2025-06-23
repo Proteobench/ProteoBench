@@ -2,7 +2,7 @@
 Module for plotting results of de novo models
 """
 
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -219,4 +219,145 @@ class PlotDataPoint:
 
         fig.update_layout(clickmode="event+select")
 
+        return fig
+    
+    def plot_ptm_overview(
+            self,
+            benchmark_metrics_df: pd.DataFrame,
+            mod_labels: List[str],
+            software_colors: Dict[str, str] = {
+                "AdaNovo": "#8b26ff",
+                "Casanovo": "#8bc6fd",
+                "DeepNovo": "#108E2E",
+                "PepNet": "#F89008",
+                "Pi-HelixNovo": "#E43924",
+                "Pi-PrimeNovo": "#663200",
+                "PEAKS": "#f032e6",
+            }
+        ):
+        
+        fig = go.Figure()
+        for i, row in benchmark_metrics_df.iterrows():
+            x, y = self.get_modification_scores(
+                row['results']['aa']['exact']['in_depth']['PTM'],
+                mod_labels=mod_labels
+            )
+            tool = row['software_name']
+
+            fig.add_trace(
+                go.Scatter(
+                    x=x,
+                    y=y,
+                    mode='lines+markers',
+                    name=tool,
+                    marker=dict(color=software_colors[tool])
+                )
+            )
+        
+        fig.update_layout(
+            width=700,
+            height=400,
+            xaxis=dict(title="Modification", color="black", gridwidth=2, linecolor="black"),
+            yaxis=dict(linecolor="black")
+        )
+        fig.update_yaxes(title="Precision", color="black", gridwidth=2)
+        fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
+
+        return fig
+
+    def plot_ptm_specific(
+            self,
+            benchmark_metrics_df,
+            mod_label,
+            software_colors: Dict[str, str] = {
+                "AdaNovo": "#8b26ff",
+                "Casanovo": "#8bc6fd",
+                "DeepNovo": "#108E2E",
+                "PepNet": "#F89008",
+                "Pi-HelixNovo": "#E43924",
+                "Pi-PrimeNovo": "#663200",
+                "PEAKS": "#f032e6",
+            }
+        ):
+        fig = go.Figure()
+        for i, row in benchmark_metrics_df.iterrows():
+            ptm_data = row['results']['aa']['exact']['in_depth']['PTM']
+            x = ptm_data[mod_label]['correct_gt'] / (ptm_data[mod_label]['counts_gt']+.0001)
+            y = ptm_data[mod_label]['correct_dn'] / (ptm_data[mod_label]['counts_dn']+.0001)
+            tool = row['software_name']
+            fig.add_trace(
+                go.Scatter(
+                    x=[x],
+                    y=[y],
+                    name=tool,
+                    marker=dict(color=software_colors[tool])
+                )
+            )
+        
+        fig.update_layout(
+            width=500,
+            height=500,
+            xaxis=dict(title="Precision (Ground-truth)", color='black', gridwidth=2),
+            yaxis=dict(title="Precision (denovo)", color='black', gridwidth=2)
+        )
+
+        return fig
+
+
+    @staticmethod
+    def get_modification_scores(mod_dict, mod_labels):
+        x = []
+        y = []
+
+        for mod_label in mod_labels:
+            x.append(mod_label)
+            y.append(
+                mod_dict[mod_label]['correct_gt'] / mod_dict[mod_label]['counts_gt'] + .0001
+            )
+        return x, y
+
+
+    def plot_spectrum_feature(
+            self,
+            benchmark_metrics_df,
+            feature,
+            evaluation_type='mass',
+            software_colors={
+                "AdaNovo": "#8b26ff",
+                "Casanovo": "#8bc6fd",
+                "DeepNovo": "#108E2E",
+                "PepNet": "#F89008",
+                "Pi-HelixNovo": "#E43924",
+                "Pi-PrimeNovo": "#663200",
+                "PEAKS": "#f032e6",
+                'test': 'black'
+            }
+    ):
+        fig = go.Figure()
+
+
+        for i, row in benchmark_metrics_df.iterrows():
+            data = row['results']['peptide']['exact']['in_depth']['Spectrum'][feature]
+            x = []
+            y = []
+            for k, v in data.items():
+                x.append(k)
+                y.append(v[evaluation_type])
+
+            fig.add_trace(
+                go.Scatter(
+                    x=x,
+                    y=y,
+                    name=row['software_name'],
+                    marker=dict(color=software_colors[row['software_name']]),
+                    mode='lines+markers'
+                )
+        )
+            
+        fig.update_layout(
+            width=500,
+            height=500,
+            xaxis=dict(title=f"{feature}", color='black', gridwidth=2),
+            yaxis=dict(title="Precision", color='black', gridwidth=2)
+        )
         return fig

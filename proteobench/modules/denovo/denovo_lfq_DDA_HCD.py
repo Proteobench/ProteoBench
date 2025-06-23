@@ -144,7 +144,8 @@ class DDAHCDDeNovoModule(DeNovoModule):
             raise IntermediateFormatGenerationError("Error generating intermediate data structure.") from e
 
         # try:
-        current_datapoint = DenovoDatapoint.generate_datapoint(
+        dtp = DenovoDatapoint()
+        current_datapoint = dtp.generate_datapoint(
             intermediate=intermediate_metric_structure,
             input_format=input_format,
             user_input=user_input,

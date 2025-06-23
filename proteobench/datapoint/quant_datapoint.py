@@ -35,6 +35,9 @@ def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: 
     float or None
         The 'median_abs_epsilon' value if found, otherwise None.
     """
+    if not row:  # Handle empty dictionary
+        return None
+
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
@@ -203,8 +206,39 @@ class QuantDatapoint:
 
         return results_series
 
+    def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> dict[int, dict[str, float]]:
+        """
+        Compute various statistical metrics from the provided DataFrame for the benchmark,
+        but optimized to do fewer passes over the data.
+        """
+        # 1) Filter once
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        nr_prec = len(df_slice)
+
+        # 2) Compute abs-epsilon only once
+        eps = df_slice["epsilon"].abs()
+
+        # 3) Batch the CV quantiles in one go
+        #    This returns a DataFrame with index [0.50, 0.75, 0.90, 0.95]
+        cv_q = df_slice[["CV_A", "CV_B"]].quantile([0.5, 0.75, 0.9, 0.95])
+        #    Then average across the two columns for each quantile
+        cv_avg = cv_q.mean(axis=1)
+
+        return {
+            min_nr_observed: {
+                "median_abs_epsilon": eps.median(),
+                "mean_abs_epsilon": eps.mean(),
+                "variance_epsilon": df_slice["epsilon"].var(),
+                "nr_prec": nr_prec,
+                "CV_median": cv_avg.loc[0.50],
+                "CV_q75": cv_avg.loc[0.75],
+                "CV_q90": cv_avg.loc[0.90],
+                "CV_q95": cv_avg.loc[0.95],
+            }
+        }
+
     @staticmethod
-    def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> Dict[int, Dict[str, float]]:
+    def get_metrics_old(df: pd.DataFrame, min_nr_observed: int = 1) -> Dict[int, Dict[str, float]]:
         """
         Compute various statistical metrics from the provided DataFrame for the benchmark.
 

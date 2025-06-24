@@ -14,7 +14,7 @@ from pages.pages_variables.Quant.lfq_DIA_ion_AIF_variables import VariablesDIAQu
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF as DIAQuantIonModule
 
 
 class StreamlitUI:

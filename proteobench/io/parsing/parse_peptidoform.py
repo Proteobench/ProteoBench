@@ -285,7 +285,7 @@ def get_proforma_bracketed(
     isupper : bool, optional
         Whether to include uppercase characters. Defaults to True.
     pattern : str, optional
-        The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
+        The regular expression pattern for matching modifications. Defaults to `r"\\[([^]]+)\\]"`.
     modification_dict : dict, optional
         A dictionary of modifications and their names.
 

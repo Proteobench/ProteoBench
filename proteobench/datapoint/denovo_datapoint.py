@@ -355,6 +355,7 @@ class DenovoDatapoint:
     def get_spectrum_metrics(df: pd.DataFrame):
         def record_proportions_to_results_feature(
                 series: pd.Series,
+                counts: dict,
                 min_el: int=1,
                 max_el: int=30,
                 all_elements=None
@@ -388,9 +389,15 @@ class DenovoDatapoint:
                 if isinstance(i, float) and np.isnan(i):
                     continue
 
+                try:
+                    count_subset = counts[i]
+                except:
+                    count_subset = 0
+                
                 data[i] = {
                     'exact': exact,
-                    'mass': mass_based
+                    'mass': mass_based,
+                    'n_spectra': count_subset
                 }
             return data
 
@@ -399,11 +406,14 @@ class DenovoDatapoint:
     
         # Missing fragmentation sites
         series = intermediate.groupby('missing_frag_sites')['match_type'].value_counts(normalize=True)
-        results['Missing Fragmentation Sites'] = record_proportions_to_results_feature(series, min_el=0, max_el=30)
+        counts = intermediate.groupby('missing_frag_sites').count()['match_type'].to_dict()
+        results['Missing Fragmentation Sites'] = record_proportions_to_results_feature(series, counts, min_el=0, max_el=30)
+                
 
         # Peptide length
         series = intermediate.groupby('peptide_length')['match_type'].value_counts(normalize=True)
-        results['Peptide Length'] = record_proportions_to_results_feature(series, min_el=5, max_el=30)
+        counts = intermediate.groupby('peptide_length').count()['match_type'].to_dict()
+        results['Peptide Length'] = record_proportions_to_results_feature(series, counts, min_el=5, max_el=30)
 
         # Explained intensity
         intermediate_selection = intermediate[['explained_by_pct', 'match_type']].copy()
@@ -412,8 +422,9 @@ class DenovoDatapoint:
         )).astype(str)
         indices = intermediate_selection['intensity_binned'].sort_values().drop_duplicates().tolist()
         series = intermediate_selection.groupby('intensity_binned').match_type.value_counts(normalize=True)
+        counts = intermediate_selection.groupby('intensity_binned').count()['match_type'].to_dict()
         series.name = 'percentage'
-        results['% Explained Intensity'] = record_proportions_to_results_feature(series, all_elements=indices)
+        results['% Explained Intensity'] = record_proportions_to_results_feature(series, counts, all_elements=indices)
         
         # Cosine similarity
         # results['cosine'] = {

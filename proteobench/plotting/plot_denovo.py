@@ -239,7 +239,7 @@ class PlotDataPoint:
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
             x, y = self.get_modification_scores(
-                row['results']['aa']['exact']['in_depth']['PTM'],
+                row['results']['in_depth']['PTM'],
                 mod_labels=mod_labels
             )
             tool = row['software_name']
@@ -281,7 +281,7 @@ class PlotDataPoint:
         ):
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
-            ptm_data = row['results']['aa']['exact']['in_depth']['PTM']
+            ptm_data = row['results']['in_depth']['PTM']
             x = ptm_data[mod_label]['correct_gt'] / (ptm_data[mod_label]['counts_gt']+.0001)
             y = ptm_data[mod_label]['correct_dn'] / (ptm_data[mod_label]['counts_dn']+.0001)
             tool = row['software_name']
@@ -337,7 +337,7 @@ class PlotDataPoint:
 
 
         for i, row in benchmark_metrics_df.iterrows():
-            data = row['results']['peptide']['exact']['in_depth']['Spectrum'][feature]
+            data = row['results']['in_depth']['Spectrum'][feature]
             x = []
             y = []
             for k, v in data.items():

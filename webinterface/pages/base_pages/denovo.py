@@ -154,7 +154,11 @@ class DeNovoUIObjects():
         )
 
         modifications = ['M-Oxidation', 'Q-Deamidation', 'N-Deamidation', 'N-term Acetylation', 'N-term Carbamylation', 'N-term Ammonia-loss']
-        feature_names = ['MF', 'peptide_length', 'explained_intensity']
+        feature_names = [
+            'Missing Fragmentation Sites',
+            'Peptide Length',
+            '% Explained Intensity'
+        ]
 
         selected_dtps = st.session_state[self.variables_denovo.all_datapoints_submitted][
             st.session_state[self.variables_denovo.all_datapoints_submitted]['id'].isin(
@@ -574,7 +578,7 @@ class DeNovoUIObjects():
         st.plotly_chart(
             fig,
             use_container_width=True,
-            key='test_3'
+            key=self.variables_denovo.fig_ptm_overview
         )
 
         st.markdown('### Precision per modification')
@@ -594,7 +598,7 @@ class DeNovoUIObjects():
                 st.plotly_chart(
                     fig,
                     use_container_width=True,
-                    key='test_key_'+mod_label
+                    key=self.variables_denovo.fig_ptm_specific + mod_label
                 )
 
 
@@ -604,28 +608,21 @@ class DeNovoUIObjects():
         exact_mode = st.toggle(
             label='Exact evaluation mode',
             value=False,
-            key='test_toggle'
+            key=self.variables_denovo.evaluation_mode_toggle_tab3
         )
         if exact_mode:
             evaluation_type = 'exact'
         else:
             evaluation_type = 'mass'
 
-        feature_name_mapping = {
-            'MF': 'Missing fragmentation sites',
-            'peptide_length': "Peptide length",
-            'explained_intensity': "Explained intensity (ratio)"
-        }
-        feature_labels = [feature_name_mapping[fn] for fn in feature_names]
-
-        tabs = st.tabs(feature_labels)
+        tabs = st.tabs(feature_names)
         tab_dict = {
-            feature_name: tab for feature_name, tab in zip(feature_labels, tabs)
+            feature_name: tab for feature_name, tab in zip(feature_names, tabs)
         }
 
-        for feature_name, (feature_label, tab) in zip(feature_names, tab_dict.items()):
+        for feature_name, tab in tab_dict.items():
             with tab:
-                st.header(feature_label)
+                st.header(feature_name)
                 fig = PlotDataPoint.plot_spectrum_feature(
                     self=PlotDataPoint(),
                     benchmark_metrics_df=df,
@@ -635,7 +632,7 @@ class DeNovoUIObjects():
                 st.plotly_chart(
                     fig,
                     use_container_width=True,
-                    key='test_key'+feature_name
+                    key=self.variables_denovo.fig_spectrum_feature + feature_name
                 )
 
     #####################

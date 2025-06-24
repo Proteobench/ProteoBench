@@ -212,6 +212,10 @@ class DenovoDatapoint:
                     evaluation=e_type
                 )
 
+        results['in_depth'] = DenovoDatapoint.get_indepth_metrics(
+            self=DenovoDatapoint(),
+            df=intermediate
+        )
         result_datapoint.results = results
         result_datapoint.precision = result_datapoint.results[level][evaluation_type]["precision"]
         result_datapoint.recall = result_datapoint.results[level][evaluation_type]["recall"]
@@ -252,7 +256,6 @@ class DenovoDatapoint:
             )
 
         res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
-        res['in_depth'] = self.get_indepth_metrics(df=df)
         return res
 
 
@@ -396,11 +399,11 @@ class DenovoDatapoint:
     
         # Missing fragmentation sites
         series = intermediate.groupby('missing_frag_sites')['match_type'].value_counts(normalize=True)
-        results['MF'] = record_proportions_to_results_feature(series, min_el=0, max_el=30)
+        results['Missing Fragmentation Sites'] = record_proportions_to_results_feature(series, min_el=0, max_el=30)
 
         # Peptide length
         series = intermediate.groupby('peptide_length')['match_type'].value_counts(normalize=True)
-        results['peptide_length'] = record_proportions_to_results_feature(series, min_el=5, max_el=30)
+        results['Peptide Length'] = record_proportions_to_results_feature(series, min_el=5, max_el=30)
 
         # Explained intensity
         intermediate_selection = intermediate[['explained_by_pct', 'match_type']].copy()
@@ -410,7 +413,7 @@ class DenovoDatapoint:
         indices = intermediate_selection['intensity_binned'].sort_values().drop_duplicates().tolist()
         series = intermediate_selection.groupby('intensity_binned').match_type.value_counts(normalize=True)
         series.name = 'percentage'
-        results['explained_intensity'] = record_proportions_to_results_feature(series, all_elements=indices)
+        results['% Explained Intensity'] = record_proportions_to_results_feature(series, all_elements=indices)
         
         # Cosine similarity
         # results['cosine'] = {

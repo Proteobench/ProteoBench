@@ -19,12 +19,22 @@ class VariablesDDADeNovo:
     input_df_submission: str = "input_df_submission_dda_hcd_denovo"
     result_performance_submission: str = "result_performance_submission_dda_hcd_denovo"
     submit: str = "submit_dda_hcd_denovo"
+
+    # TAB 1
     fig_metric: str = "fig_metric_dda_hcd_denovo"
+
+    # TAB 3 (in-depth plots)
+    fig_ptm_overview: str = "fig_ptm_overview_dda_hcd_denovo"
+    fig_ptm_specific: str = "fig_ptm_specific_dda_hcd_denovo"
+    fig_spectrum_feature: str = "fig_spectrum_feature_dda_hcd_denovo"
+
+    evaluation_mode_toggle_tab3: str = "evaluation_mode_toggle_tab3_dda_hcd_denovo"
+
+    # Tab 4
     fig_metric_submitted: str = "fig_metric_dda_hcd_denovo_submitted"
-    # fig_logfc: str = "fig_logfc_dda_hcd_denovo"
-    # fig_metric: str = "fig_metric_dda_hcd_denovo"
-    # fig_cv: str = "fig_CV_violinplot_dda_hcd_denovo"
-    # fig_ma_plot: str = "fig_ma_plot_dda_hcd_denovo"
+
+
+
     result_perf: str = "result_perf_dda_hcd_denovo"
     meta_data: str = "meta_data_dda_hcd_denovo"
     input_df: str = "input_df_dda_hcd_denovo"

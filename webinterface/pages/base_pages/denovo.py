@@ -152,13 +152,30 @@ class DeNovoUIObjects():
             format_func=lambda x: x[0],
             default=[dataset_options[0]]
         )
-        # dataset_selection = st.selectbox(
-        #     "Select dataset",
-        #     dataset_options,
-        #     index=0,
-        #     key=st.session_state[self.variables_denovo.dataset_selector_id_uuid],
-        #     format_func=lambda x: x[0],
-        # )
+
+        modifications = ['M-Oxidation', 'Q-Deamidation', 'N-Deamidation', 'N-term Acetylation', 'N-term Carbamylation', 'N-term Ammonia-loss']
+        feature_names = ['MF', 'peptide_length', 'explained_intensity']
+
+        selected_dtps = st.session_state[self.variables_denovo.all_datapoints_submitted][
+            st.session_state[self.variables_denovo.all_datapoints_submitted]['id'].isin(
+                [dtp_id for dtp_id, _ in dataset_selection]
+            )
+        ]
+
+        self._generate_ptm_plots(
+            df=selected_dtps,
+            modifications=modifications
+        )
+
+        self._generate_spectrum_feature_plots(
+            df=selected_dtps,
+            feature_names=feature_names
+        )
+
+        st.markdown("# Species")
+
+        st.markdown("# Spectrum overlap")
+    
 
         public_id_selected_hash_list = dataset_selection
         # self._generate_indepth_plots(True, public_id=public_id, public_hash=selected_hash)
@@ -542,6 +559,84 @@ class DeNovoUIObjects():
             The generated plots for the selected dataset.
         """
         raise NotImplementedError()
+
+
+    def _generate_ptm_plots(self, df, modifications):
+        st.markdown('# PTMs')
+        st.markdown('### Overview PTM precision')
+
+        fig = PlotDataPoint.plot_ptm_overview(
+            self=PlotDataPoint(),
+            benchmark_metrics_df=df,
+            mod_labels=modifications
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+            key='test_3'
+        )
+
+        st.markdown('### Precision per modification')
+        tabs = st.tabs(modifications)
+        tab_dict = {
+            mod_label: tab for mod_label, tab in zip(modifications, tabs)
+        }
+
+        for mod_label, tab in tab_dict.items():
+            with tab:
+                st.header(mod_label)
+                fig = PlotDataPoint.plot_ptm_specific(
+                    self=PlotDataPoint(),
+                    benchmark_metrics_df=df,
+                    mod_label=mod_label
+                )
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    key='test_key_'+mod_label
+                )
+
+
+    def _generate_spectrum_feature_plots(self, df, feature_names):
+        st.markdown("# Spectrum features")
+
+        exact_mode = st.toggle(
+            label='Exact evaluation mode',
+            value=False,
+            key='test_toggle'
+        )
+        if exact_mode:
+            evaluation_type = 'exact'
+        else:
+            evaluation_type = 'mass'
+
+        feature_name_mapping = {
+            'MF': 'Missing fragmentation sites',
+            'peptide_length': "Peptide length",
+            'explained_intensity': "Explained intensity (ratio)"
+        }
+        feature_labels = [feature_name_mapping[fn] for fn in feature_names]
+
+        tabs = st.tabs(feature_labels)
+        tab_dict = {
+            feature_name: tab for feature_name, tab in zip(feature_labels, tabs)
+        }
+
+        for feature_name, (feature_label, tab) in zip(feature_names, tab_dict.items()):
+            with tab:
+                st.header(feature_label)
+                fig = PlotDataPoint.plot_spectrum_feature(
+                    self=PlotDataPoint(),
+                    benchmark_metrics_df=df,
+                    feature=feature_name,
+                    evaluation_type=evaluation_type
+                )
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    key='test_key'+feature_name
+                )
 
     #####################
     ### TAB 4 METHODS ###

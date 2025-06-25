@@ -32,7 +32,7 @@ quant_mode_regex = r"(.*?) quantification mode"
 protein_inference_regex = r"Implicit protein grouping: (.*);"
 
 # Flags
-enable_match_between_runs_regex = "MBR enabled"  # If present, MBR is enabled
+enable_match_between_runs_regex = r"(MBR enabled)|(reanalyse them)"  # If present, MBR is enabled
 
 PARAM_REGEX_DICT = {
     "ident_fdr_psm": fdr_regex,
@@ -499,6 +499,7 @@ if __name__ == "__main__":
         "../../../test/params/DIANN_WU304578_report.log.txt",
         "../../../test/params/DIANN_1.7.16.log.txt",
         "../../../test/params/DIANN_cfg_settings.txt",
+        "../../../test/params/DIANN_cfg_MBR.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

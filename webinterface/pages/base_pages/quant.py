@@ -430,16 +430,19 @@ class QuantUIObjects:
         if len(data_points_filtered) == 0:
             st.error("No datapoints available for plotting", icon="🚨")
             return
-        if "new" not in data_points_filtered["old_new"]:
-            st.error("No datapoints available for plotting", icon="🚨")
-            return
+
         try:
             fig_metric = PlotDataPoint.plot_metric(
                 data_points_filtered,
                 metric=metric,
                 label=st.session_state[st.session_state[self.variables_quant.selectbox_id_submitted_uuid]],
             )
-            st.plotly_chart(fig_metric, use_container_width=True)
+
+            try:
+                st.plotly_chart(fig_metric, use_container_width=True)
+            except Exception as e:
+                st.error("No (new) datapoints available for plotting", icon="🚨")
+                return
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 

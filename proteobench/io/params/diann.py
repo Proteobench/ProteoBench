@@ -218,7 +218,7 @@ def parse_setting(setting_name: str, setting_list: list) -> Any:
     return "".join(setting_list)
 
 
-def extract_with_regex(lines: List[str], regex) -> str:
+def extract_with_regex(lines: List[str], regex, search_all=False) -> str:
     """
     If no mass accuracy was specified in the cmd string, extract it from the log-file.
 
@@ -234,11 +234,16 @@ def extract_with_regex(lines: List[str], regex) -> str:
     str:
         The MS1 and MS2 mass accuracy specified in ppm.
     """
+    if search_all:
+        container = []
     for line in lines:
         regex_match = re.search(regex, line)
-        if regex_match:
-            match_str = regex_match.group(1)
-            return match_str
+        if search_all and regex_match:
+            container.append(regex_match.group(1))
+        if not search_all and regex_match:
+            return regex_match.group(1)
+    if search_all and container:
+        return container[-1]  # Return the last match if multiple matches are found
     return None
 
 
@@ -336,9 +341,9 @@ def parse_predictors_library(cmdline_dict: dict):
             return {"RT": "User defined speclib", "IM": "User defined speclib", "MS2_int": "User defined speclib"}
 
 
-def extract_cfg_parameter(lines: List[str], regex: str, cast_type: type = str, default=None):
+def extract_cfg_parameter(lines: List[str], regex: str, cast_type: type = str, default=None, search_all=False) -> Any:
     """Extract and cast a parameter using a regex pattern."""
-    match = extract_with_regex(lines, regex)
+    match = extract_with_regex(lines, regex, search_all=search_all)
     if match is None:
         return default
     try:
@@ -480,7 +485,9 @@ def extract_params(fname: str) -> ProteoBenchParameters:
                 "min_precursor_charge": extract_cfg_parameter(lines, min_z_regex, int),
                 "max_precursor_charge": extract_cfg_parameter(lines, max_z_regex, int),
                 "max_mods": extract_cfg_parameter(lines, max_mods_regex, int),
-                "quantification_method": extract_cfg_parameter(lines, quant_mode_regex, str, "QuantUMS high-precision"),
+                "quantification_method": extract_cfg_parameter(
+                    lines, quant_mode_regex, str, "QuantUMS high-precision", search_all=True
+                ),
                 "fixed_mods": extract_modifications(lines, PARAM_REGEX_DICT["fixed_mods"]),
                 "variable_mods": extract_modifications(lines, [PARAM_REGEX_DICT["variable_mods"]]),
             }
@@ -500,6 +507,7 @@ if __name__ == "__main__":
         "../../../test/params/DIANN_1.7.16.log.txt",
         "../../../test/params/DIANN_cfg_settings.txt",
         "../../../test/params/DIANN_cfg_MBR.txt",
+        "../../../test/params/DIA-NN_cfg_directq.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

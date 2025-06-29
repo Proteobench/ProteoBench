@@ -83,6 +83,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |i2MassChroQ|_export.tsv|Project parameters.tsv|
 |MaxQuant|evidence.txt|mqpar.xml|
 |Proline Studio|<result file>.xlsx|<result file>.xlsx|
+|quantms|<project-name>.sdrf_openms_design_msstats_in.csv|nf_core_quantms_software_mqc_versions.yml, params_<timestamp>.json|
 |Sage|lfq.tsv|results.json|
 |PEAKS|lfq_features.csv|parameters.txt|
 
@@ -194,14 +195,38 @@ In the "lfq.tsv", the following columns are considered:
 - "peptide" to get the modified sequences
 - "charge" to get the charge of the precursor
 
-### Quantms (work in progress)
+### Quantms
 
 When you run the DDA workflow in QuantMS, you can upload the precursors from the process
-`ProteomicsLFQ` (using OpenMS) with the name `<project-name>.sdrf_openms_design_msstats_in.csv` 
-to ProteoBench. Several version with PTMs still have to be tested.
+`ProteomicsLFQ` (using OpenMS) with the name `<project-name>.sdrf_openms_design_msstats_in.csv`,
+which is located in the `results` folder of your QuantMS project in `quant_tables`,
+to ProteoBench. Following the recommended parameters in Table 1, you can run the workflow 
+with the following settings (using the `yaml` parameter file format in nextflow):
+
+```yaml
+input: path/to/dda_lfq_proteobench.sdrf.tsv # adapted to this module
+database: path/to/ProteoBenchFASTA_MixedSpecies_HYE.fasta
+outdir: az://seqera/proteobench/precursors_dda_module/run_quantms_140
+# files
+root_folder: az://seqera/test-data/LFQ_DDA/raw # download raw files
+local_input_type: raw
+# search settings
+min_peptide_length: 7
+min_precursor_charge: 2
+precursor_mass_tolerance: 10
+precursor_mass_tolerance_unit: ppm
+fragment_mass_tolerance: 0.02
+fragment_mass_tolerance_unit: Da
+add_decoys: true
+```
 
 The parameters needed for public submission can be parsed based on the `versions.yml` and 
-parameter json `params_<timestamp>.json` produced by the `pipeline-info` step.
+parameter json `params_<timestamp>.json` produced by the `pipeline-info` step, which can
+be found under `results/pipeline_info`.
+
+:::{note}
+The `results` folder is set through the `outdir` parameter of the `bigbio/quantms` workflow.
+:::
 
 ### Custom format
 

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.figure_factory import create_distplot
 
 
 class PlotDataPoint:
@@ -18,7 +19,7 @@ class PlotDataPoint:
     @staticmethod
     def plot_fold_change_histogram(result_df: pd.DataFrame, species_ratio: Dict[str, Dict[str, str]]) -> go.Figure:
         """
-        Plot a histogram of log2 fold changes using Plotly, color-coded by species.
+        Plot smooth shaded density distributions of log2 fold changes using Plotly, color-coded by species.
 
         Parameters
         ----------
@@ -30,44 +31,45 @@ class PlotDataPoint:
         Returns
         -------
         go.Figure
-            A Plotly figure object representing the histogram.
+            A Plotly figure object representing the shaded density plots.
         """
         species_list = list(species_ratio.keys())
 
-        # Filter data to include only known species
+        # Filter to include only rows where any of the species columns are True
         result_df = result_df[result_df[species_list].any(axis=1)]
         result_df["kind"] = result_df[species_list].apply(lambda x: species_list[np.argmax(x)], axis=1)
 
-        # Map colors based on species ratio
-        color_map = {species: data["color"] for species, data in species_ratio.items()}
+        # Prepare lists for create_distplot
+        data = []
+        group_labels = []
+        colors = []
+        for species in species_list:
+            data.append(result_df.loc[result_df["kind"] == species, "log2_A_vs_B"].dropna().tolist())
+            group_labels.append(species)
+            colors.append(species_ratio[species]["color"])
 
-        fig = px.histogram(
-            result_df,
-            x="log2_A_vs_B",
-            color="kind",
-            histnorm="probability density",
-            barmode="overlay",
-            opacity=0.7,
-            nbins=100,
-            color_discrete_map=color_map,
-        )
+        # Create the distplot without histogram or rug
+        fig = create_distplot(data, group_labels, colors=colors, show_hist=False, show_rug=False)
 
+        # Update each density trace to fill under the curve
+        for trace in fig.data:
+            if trace.mode == "lines":
+                trace.update(fill="tozeroy", opacity=0.4)  # adjust opacity as needed
+
+        # Customize layout
         fig.update_layout(
             width=700,
             height=700,
-            xaxis=dict(title="log2_A_vs_B", color="white", gridwidth=2, linecolor="black"),
-            yaxis=dict(linecolor="black"),
+            xaxis=dict(title="log2_A_vs_B", color="black", gridwidth=1, linecolor="black", range=[-4, 4]),
+            yaxis=dict(title="Density", color="black", gridwidth=1, linecolor="black"),
         )
 
-        fig.update_yaxes(title="Density", color="white", gridwidth=2)
-        fig.update_xaxes(range=[-4, 4])
-        fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
-        fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
-
-        # Add vertical lines for expected ratios (log2 transformed)
+        # Add vertical lines for expected ratios
         ratio_map = {species: np.log2(data["A_vs_B"]) for species, data in species_ratio.items()}
         for species, ratio in ratio_map.items():
-            fig.add_vline(x=ratio, line_dash="dash", line_color=color_map[species], annotation_text=species)
+            fig.add_vline(
+                x=ratio, line_dash="dash", line_color=species_ratio[species]["color"], annotation_text=species
+            )
 
         fig.add_annotation(
             x=0.5,

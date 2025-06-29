@@ -11,8 +11,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
-from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
-from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
@@ -32,9 +31,8 @@ from github import Github
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
-    "DDAQuantIonAstralModule": DDAQuantIonAstralModule,
     "DDAQuantIonModuleQExactive": DDAQuantIonModuleQExactive,
-    "DIAQuantIonModule": DIAQuantIonModule,
+    "DIAQuantIonModuleAIF": DIAQuantIonModuleAIF,
     "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
     "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
     "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,

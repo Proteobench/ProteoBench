@@ -429,6 +429,7 @@ class QuantUIObjects:
 
         if len(data_points_filtered) == 0:
             st.error("No datapoints available for plotting", icon="🚨")
+            return
 
         try:
             fig_metric = PlotDataPoint.plot_metric(
@@ -436,7 +437,12 @@ class QuantUIObjects:
                 metric=metric,
                 label=st.session_state[st.session_state[self.variables_quant.selectbox_id_submitted_uuid]],
             )
-            st.plotly_chart(fig_metric, use_container_width=True)
+
+            try:
+                st.plotly_chart(fig_metric, use_container_width=True)
+            except Exception as e:
+                st.error("No (new) datapoints available for plotting", icon="🚨")
+                return
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
@@ -756,12 +762,17 @@ class QuantUIObjects:
         with st.session_state[self.variables_quant.placeholder_downloads_container].container(border=True):
             st.subheader("Download raw datasets")
 
+            # Sort the intermediate_hash values and get the corresponding ids
+            sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"][i])
+            sorted_intermediate_hash = [downloads_df["intermediate_hash"][i] for i in sorted_indices]
+            sorted_ids = [downloads_df["id"][i] for i in sorted_indices]
+
             st.selectbox(
                 "Select dataset",
-                downloads_df["intermediate_hash"],
+                sorted_intermediate_hash,
                 index=None,
                 key=st.session_state[self.variables_quant.download_selector_id_uuid],
-                format_func=lambda x: downloads_df["id"][x],
+                format_func=lambda x: sorted_ids[sorted_intermediate_hash.index(x)],
             )
 
             if (

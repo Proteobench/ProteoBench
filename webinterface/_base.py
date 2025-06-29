@@ -32,29 +32,6 @@ class StreamlitPage(ABC):
             unsafe_allow_html=True,
         )
 
-        st.markdown(
-            """
-            <style>
-            /* Make all buttons have rounded corners and custom color */
-            button {
-                border-radius: 8px !important;
-                background-color: #4CAF50 !important; /* Green */
-                color: white !important;
-                border: none !important;
-                padding: 0.5em 1em !important;
-                font-size: 1em !important;
-                cursor: pointer !important;
-            }
-
-            /* Change color on hover */
-            button:hover {
-                background-color: #45a049 !important;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
         pbb.proteobench_sidebar()
 
         self._preface()

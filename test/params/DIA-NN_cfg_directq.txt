@@ -1,0 +1,351 @@
+DIA-NN 1.9.2 (Data-Independent Acquisition by Neural Networks)
+Compiled on Oct 20 2024 02:59:53
+Current date and time: Thu Jun 19 17:09:05 2025
+Logical CPU cores: 384
+/diann-1.9.2/diann-linux --cfg ./ProteoBench/Search4/Search4.txt-- 
+
+Thread number set to 100
+Output will be filtered at 0.01 FDR
+Min fragment m/z set to 50
+Max fragment m/z set to 2000
+Min precursor m/z set to 400
+Max precursor m/z set to 1000
+In silico digest will involve cuts at K*,R*
+Maximum number of missed cleavages set to 1
+Min peptide length set to 6
+Max peptide length set to 30
+Min precursor charge set to 1
+Max precursor charge set to 4
+Modification UniMod:4 with mass delta 57.0215 at C will be considered as fixed
+Maximum number of variable modifications set to 2
+Modification UniMod:35 with mass delta 15.9949 at M will be considered as variable
+Modification UniMod:1 with mass delta 42.0106 at *n will be considered as variable
+A spectral library will be generated
+N-terminal methionine excision enabled
+The spectral library (if generated) will retain the original spectra but will include empirically-aligned RTs
+DIA-NN will carry out FASTA digest for in silico lib generation
+High accuracy quantification mode enabled
+Deep learning will be used to generate a new in silico spectral library from peptides provided
+N-terminal methionine excision enabled
+Precursor/protein x samples expression level matrices will be saved along with the main report
+A spectral library will be created from the DIA runs and used to reanalyse them; .quant files will only be saved to disk during the first step
+Peptidoform scoring enabled
+The spectral library (if generated) will include empirical spectra and empirically-aligned RTs
+Legacy (direct) quantification mode
+WARNING: unrecognised option [--]
+DIA-NN will optimise the mass accuracy automatically using the first run in the experiment. This is useful primarily for quick initial analyses, when it is not yet known which mass accuracy setting works best for a particular acquisition scheme.
+WARNING: it is strongly recommended to first generate an in silico-predicted library in a separate pipeline step and then use it to process the raw data, now without activating FASTA digest
+The following variable modifications will be scored: UniMod:35 UniMod:1 
+
+6 files will be processed
+[0:00] Loading FASTA /nas/longleaf/home/slyon/DIANN/ProteoBench/ProteoBenchFASTA_MixedSpecies_HYE.fasta
+[0:05] Processing FASTA
+[0:11] Assembling elution groups
+[0:16] 5441048 precursors generated
+[0:16] Protein names missing for some isoforms
+[0:16] Gene names missing for some isoforms
+[0:16] Library contains 31685 proteins, and 0 genes
+[0:23] [0:32] [4:03] [4:35] [4:40] [4:43] Saving the library to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-lib.predicted.speclib
+[4:52] Initialising library
+[5:04] Loading spectral library /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-lib.predicted.speclib
+[5:10] Library annotated with sequence database(s): /nas/longleaf/home/slyon/DIANN/ProteoBench/ProteoBenchFASTA_MixedSpecies_HYE.fasta
+[5:11] Spectral library loaded: 31837 protein isoforms, 51765 protein groups and 5441048 precursors in 2890025 elution groups.
+[5:11] Loading protein annotations from FASTA /nas/longleaf/home/slyon/DIANN/ProteoBench/ProteoBenchFASTA_MixedSpecies_HYE.fasta
+[5:11] Annotating library proteins with information from the FASTA database
+[5:11] Protein names missing for some isoforms
+[5:11] Gene names missing for some isoforms
+[5:11] Library contains 31685 proteins, and 0 genes
+[5:16] Initialising library
+
+First pass: generating a spectral library from DIA data
+
+[5:29] File #1/6
+[5:29] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.mzML
+[7:14] 5337568 library precursors are potentially detectable
+[7:14] Calibrating with mass accuracies 30 (MS1), 20 (MS2)
+[7:26] RT window set to 0.836988
+[7:26] Peak width: 2.744
+[7:26] Scan window radius set to 6
+[7:26] Recommended MS1 mass accuracy setting: 2.31639 ppm
+[7:43] Optimised mass accuracy: 8.45298 ppm
+[8:20] Removing low confidence identifications
+[8:36] Precursors at 1% peptidoform FDR: 61805
+[8:37] Removing interfering precursors
+[8:42] Training neural networks on 311141 PSMs
+[8:48] Number of IDs at 0.01 FDR: 96935
+[8:51] Precursors at 1% peptidoform FDR: 83143
+[8:51] Calculating protein q-values
+[8:52] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[8:52] Quantification
+[8:52] Precursors with monitored PTMs at 1% FDR: 2649 out of 21553 considered
+[8:52] Unmodified precursors with monitored PTM sites at 1% FDR: 15955
+[8:52] Precursors with PTMs localised (when required) with > 90% confidence: 2582 out of 2649
+[8:53] Quantification information saved to /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.mzML.quant
+
+[8:53] File #2/6
+[8:53] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.mzML
+[10:17] 5337568 library precursors are potentially detectable
+[10:18] Calibrating with mass accuracies 30 (MS1), 18.8884 (MS2)
+[10:29] RT window set to 0.849495
+[10:29] Recommended MS1 mass accuracy setting: 2.15375 ppm
+[11:02] Removing low confidence identifications
+[11:20] Precursors at 1% peptidoform FDR: 63850
+[11:20] Removing interfering precursors
+[11:25] Training neural networks on 330675 PSMs
+[11:34] Number of IDs at 0.01 FDR: 99221
+[11:37] Precursors at 1% peptidoform FDR: 82795
+[11:37] Calculating protein q-values
+[11:37] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[11:37] Quantification
+[11:38] Precursors with monitored PTMs at 1% FDR: 2501 out of 21962 considered
+[11:38] Unmodified precursors with monitored PTM sites at 1% FDR: 15267
+[11:38] Precursors with PTMs localised (when required) with > 90% confidence: 2445 out of 2501
+[11:39] Quantification information saved to /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.mzML.quant
+
+[11:39] File #3/6
+[11:39] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.mzML
+[13:05] 5337568 library precursors are potentially detectable
+[13:05] Calibrating with mass accuracies 30 (MS1), 18.2184 (MS2)
+[13:15] RT window set to 0.911571
+[13:15] Recommended MS1 mass accuracy setting: 2.18489 ppm
+[13:49] Removing low confidence identifications
+[14:07] Precursors at 1% peptidoform FDR: 62763
+[14:07] Removing interfering precursors
+[14:12] Training neural networks on 322967 PSMs
+[14:18] Number of IDs at 0.01 FDR: 97505
+[14:22] Precursors at 1% peptidoform FDR: 83267
+[14:22] Calculating protein q-values
+[14:23] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[14:23] Quantification
+[14:23] Precursors with monitored PTMs at 1% FDR: 2464 out of 21442 considered
+[14:23] Unmodified precursors with monitored PTM sites at 1% FDR: 15800
+[14:23] Precursors with PTMs localised (when required) with > 90% confidence: 2401 out of 2464
+[14:24] Quantification information saved to /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.mzML.quant
+
+[14:24] File #4/6
+[14:24] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.mzML
+[15:46] 5337568 library precursors are potentially detectable
+[15:47] Calibrating with mass accuracies 30 (MS1), 18.8708 (MS2)
+[15:58] RT window set to 0.899983
+[15:58] Recommended MS1 mass accuracy setting: 2.30006 ppm
+[16:32] Removing low confidence identifications
+[16:51] Precursors at 1% peptidoform FDR: 65713
+[16:51] Removing interfering precursors
+[16:56] Training neural networks on 334895 PSMs
+[17:04] Number of IDs at 0.01 FDR: 99536
+[17:07] Precursors at 1% peptidoform FDR: 85696
+[17:07] Calculating protein q-values
+[17:08] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[17:08] Quantification
+[17:08] Precursors with monitored PTMs at 1% FDR: 3059 out of 22418 considered
+[17:08] Unmodified precursors with monitored PTM sites at 1% FDR: 16394
+[17:08] Precursors with PTMs localised (when required) with > 90% confidence: 2984 out of 3059
+[17:09] Quantification information saved to /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.mzML.quant
+
+[17:09] File #5/6
+[17:09] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.mzML
+[18:36] 5337568 library precursors are potentially detectable
+[18:37] Calibrating with mass accuracies 30 (MS1), 19.0406 (MS2)
+[18:46] RT window set to 0.830139
+[18:46] Recommended MS1 mass accuracy setting: 2.44179 ppm
+[19:19] Removing low confidence identifications
+[19:36] Precursors at 1% peptidoform FDR: 64943
+[19:36] Removing interfering precursors
+[19:41] Training neural networks on 331523 PSMs
+[19:49] Number of IDs at 0.01 FDR: 99136
+[19:53] Precursors at 1% peptidoform FDR: 84708
+[19:53] Calculating protein q-values
+[19:54] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[19:54] Quantification
+[19:54] Precursors with monitored PTMs at 1% FDR: 3115 out of 22470 considered
+[19:54] Unmodified precursors with monitored PTM sites at 1% FDR: 16273
+[19:54] Precursors with PTMs localised (when required) with > 90% confidence: 3048 out of 3115
+[19:55] Quantification information saved to /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.mzML.quant
+
+[19:55] File #6/6
+[19:55] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.mzML
+[21:26] 5337568 library precursors are potentially detectable
+[21:27] Calibrating with mass accuracies 30 (MS1), 19.024 (MS2)
+[21:39] RT window set to 0.792754
+[21:39] Recommended MS1 mass accuracy setting: 2.07223 ppm
+[22:10] Removing low confidence identifications
+[22:27] Precursors at 1% peptidoform FDR: 65038
+[22:28] Removing interfering precursors
+[22:32] Training neural networks on 330676 PSMs
+[22:39] Number of IDs at 0.01 FDR: 99090
+[22:42] Precursors at 1% peptidoform FDR: 83869
+[22:42] Calculating protein q-values
+[22:43] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[22:43] Quantification
+[22:43] Precursors with monitored PTMs at 1% FDR: 2914 out of 22675 considered
+[22:43] Unmodified precursors with monitored PTM sites at 1% FDR: 15953
+[22:43] Precursors with PTMs localised (when required) with > 90% confidence: 2834 out of 2914
+[22:44] Quantification information saved to /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.mzML.quant
+
+[22:44] Cross-run analysis
+[22:44] Reading quantification information: 6 files
+[22:50] Quantifying peptides
+[23:19] Assembling protein groups
+[23:21] Quantifying proteins
+[23:21] Calculating q-values for protein and gene groups
+[23:22] Calculating global q-values for protein and gene groups
+[23:22] Protein groups with global q-value <= 0.01: 13167
+[23:25] Compressed report saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-first-pass.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[23:25] Writing report
+[23:32] Report saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-first-pass.tsv.
+[23:32] Saving precursor levels matrix
+[23:33] Precursor levels matrix (1% precursor and protein group FDR) saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-first-pass.pr_matrix.tsv.
+[23:33] Manifest saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-first-pass.manifest.txt
+[23:33] Stats report saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-first-pass.stats.tsv
+[23:33] Generating spectral library:
+[23:34] 125107 target and 1165 decoy precursors saved
+WARNING: 2370 precursors without any fragments annotated were skipped
+[23:34] Spectral library saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-lib.parquet
+
+[23:35] Loading spectral library /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-lib.parquet
+[23:36] Spectral library loaded: 13820 protein isoforms, 14718 protein groups and 126272 precursors in 118414 elution groups.
+[23:36] Loading protein annotations from FASTA /nas/longleaf/home/slyon/DIANN/ProteoBench/ProteoBenchFASTA_MixedSpecies_HYE.fasta
+[23:36] Annotating library proteins with information from the FASTA database
+[23:36] Gene names missing for some isoforms
+[23:36] Library contains 13791 proteins, and 0 genes
+[23:36] Initialising library
+[23:36] Saving the library to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report-lib.parquet.skyline.speclib
+
+
+Second pass: using the newly created spectral library to reanalyse the data
+
+[23:36] File #1/6
+[23:36] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.mzML
+[25:13] 125107 library precursors are potentially detectable
+[25:13] Calibrating with mass accuracies 30 (MS1), 18.1137 (MS2)
+[25:14] RT window set to 0.431886
+[25:14] Recommended MS1 mass accuracy setting: 2.7569 ppm
+[25:15] Removing low confidence identifications
+[25:17] Precursors at 1% peptidoform FDR: 77717
+[25:18] Removing interfering precursors
+[25:18] Training neural networks on 163773 PSMs
+[25:21] Number of IDs at 0.01 FDR: 107406
+[25:24] Precursors at 1% peptidoform FDR: 91520
+[25:24] Calculating protein q-values
+[25:24] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[25:24] Quantification
+[25:24] Precursors with monitored PTMs at 1% FDR: 3153 out of 22987 considered
+[25:24] Unmodified precursors with monitored PTM sites at 1% FDR: 17233
+[25:24] Precursors with PTMs localised (when required) with > 90% confidence: 3081 out of 3153
+
+[25:24] File #2/6
+[25:24] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.mzML
+[26:53] 125107 library precursors are potentially detectable
+[26:53] Calibrating with mass accuracies 30 (MS1), 18.4272 (MS2)
+[26:54] RT window set to 0.435939
+[26:54] Recommended MS1 mass accuracy setting: 2.50782 ppm
+[26:55] Removing low confidence identifications
+[26:57] Precursors at 1% peptidoform FDR: 77541
+[26:58] Removing interfering precursors
+[26:58] Training neural networks on 164412 PSMs
+[27:02] Number of IDs at 0.01 FDR: 108207
+[27:05] Precursors at 1% peptidoform FDR: 92665
+[27:05] Calculating protein q-values
+[27:05] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[27:05] Quantification
+[27:05] Precursors with monitored PTMs at 1% FDR: 3178 out of 23325 considered
+[27:05] Unmodified precursors with monitored PTM sites at 1% FDR: 17465
+[27:05] Precursors with PTMs localised (when required) with > 90% confidence: 3112 out of 3178
+
+[27:06] File #3/6
+[27:06] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.mzML
+[28:42] 125107 library precursors are potentially detectable
+[28:42] Calibrating with mass accuracies 30 (MS1), 17.8176 (MS2)
+[28:42] RT window set to 0.420622
+[28:42] Recommended MS1 mass accuracy setting: 2.50367 ppm
+[28:44] Removing low confidence identifications
+[28:46] Precursors at 1% peptidoform FDR: 77674
+[28:46] Removing interfering precursors
+[28:47] Training neural networks on 164384 PSMs
+[28:49] Number of IDs at 0.01 FDR: 108077
+[28:51] Precursors at 1% peptidoform FDR: 92782
+[28:51] Calculating protein q-values
+[28:51] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[28:51] Quantification
+[28:52] Precursors with monitored PTMs at 1% FDR: 3123 out of 23377 considered
+[28:52] Unmodified precursors with monitored PTM sites at 1% FDR: 17534
+[28:52] Precursors with PTMs localised (when required) with > 90% confidence: 3055 out of 3123
+
+[28:52] File #4/6
+[28:52] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.mzML
+[30:20] 125107 library precursors are potentially detectable
+[30:20] Calibrating with mass accuracies 30 (MS1), 18.4731 (MS2)
+[30:21] RT window set to 0.440139
+[30:21] Recommended MS1 mass accuracy setting: 2.89755 ppm
+[30:22] Removing low confidence identifications
+[30:24] Precursors at 1% peptidoform FDR: 80631
+[30:24] Removing interfering precursors
+[30:25] Training neural networks on 165365 PSMs
+[30:29] Number of IDs at 0.01 FDR: 109673
+[30:31] Precursors at 1% peptidoform FDR: 94397
+[30:31] Calculating protein q-values
+[30:32] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[30:32] Quantification
+[30:32] Precursors with monitored PTMs at 1% FDR: 3393 out of 23744 considered
+[30:32] Unmodified precursors with monitored PTM sites at 1% FDR: 17951
+[30:32] Precursors with PTMs localised (when required) with > 90% confidence: 3325 out of 3393
+
+[30:32] File #5/6
+[30:32] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.mzML
+[32:01] 125107 library precursors are potentially detectable
+[32:01] Calibrating with mass accuracies 30 (MS1), 18.5952 (MS2)
+[32:02] RT window set to 0.434946
+[32:02] Recommended MS1 mass accuracy setting: 2.50422 ppm
+[32:03] Removing low confidence identifications
+[32:06] Precursors at 1% peptidoform FDR: 80711
+[32:06] Removing interfering precursors
+[32:07] Training neural networks on 165196 PSMs
+[32:10] Number of IDs at 0.01 FDR: 109340
+[32:12] Precursors at 1% peptidoform FDR: 94513
+[32:12] Calculating protein q-values
+[32:12] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[32:12] Quantification
+[32:12] Precursors with monitored PTMs at 1% FDR: 3398 out of 23816 considered
+[32:12] Unmodified precursors with monitored PTM sites at 1% FDR: 17910
+[32:12] Precursors with PTMs localised (when required) with > 90% confidence: 3333 out of 3398
+
+[32:13] File #6/6
+[32:13] Loading run /work/users/s/l/slyon/ProteoBench_Astral_DIA/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.mzML
+[33:36] 125107 library precursors are potentially detectable
+[33:36] Calibrating with mass accuracies 30 (MS1), 18.7354 (MS2)
+[33:37] RT window set to 0.390185
+[33:37] Recommended MS1 mass accuracy setting: 3.3719 ppm
+[33:38] Removing low confidence identifications
+[33:41] Precursors at 1% peptidoform FDR: 79630
+[33:41] Removing interfering precursors
+[33:42] Training neural networks on 164962 PSMs
+[33:44] Number of IDs at 0.01 FDR: 108817
+[33:47] Precursors at 1% peptidoform FDR: 92965
+[33:47] Calculating protein q-values
+[33:47] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[33:47] Quantification
+[33:47] Precursors with monitored PTMs at 1% FDR: 3380 out of 23437 considered
+[33:47] Unmodified precursors with monitored PTM sites at 1% FDR: 17554
+[33:47] Precursors with PTMs localised (when required) with > 90% confidence: 3304 out of 3380
+
+[33:47] Cross-run analysis
+[33:47] Reading quantification information: 6 files
+[33:49] Quantifying peptides
+[34:17] Quantifying proteins
+[34:17] Calculating q-values for protein and gene groups
+[34:18] Calculating global q-values for protein and gene groups
+[34:18] Protein groups with global q-value <= 0.01: 13304
+[34:20] Compressed report saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[34:20] Writing report
+[34:28] Report saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.tsv.
+[34:28] Saving precursor levels matrix
+[34:28] Precursor levels matrix (1% precursor and protein group FDR) saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.pr_matrix.tsv.
+[34:28] Saving protein group levels matrix
+[34:28] Protein group levels matrix (1% precursor FDR and protein group FDR) saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.pg_matrix.tsv.
+[34:28] Saving gene group levels matrix
+[34:28] Gene groups levels matrix (1% precursor FDR and protein group FDR) saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.gg_matrix.tsv.
+[34:28] Saving unique genes levels matrix
+[34:28] Unique genes levels matrix (1% precursor FDR and protein group FDR) saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.unique_genes_matrix.tsv.
+[34:28] Manifest saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.manifest.txt
+[34:28] Stats report saved to /nas/longleaf/home/slyon/DIANN/ProteoBench/Search4/Search4_report.stats.tsv
+

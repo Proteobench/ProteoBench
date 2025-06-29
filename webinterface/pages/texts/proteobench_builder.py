@@ -39,6 +39,36 @@ def proteobench_sidebar(proteobench_logo="logos/logo_funding/main_logos_sidebar.
     """
     texts = WebpageTexts
 
+    import streamlit as st
+
+    # Sidebar title
+    # st.sidebar.markdown("## Navigation")
+    # Quant_LFQ_DDA_ion_QExactive
+    # Quant_LFQ_DDA_peptidoform
+    # Quant_LFQ_DDA_ion_Astral
+    # Quant_LFQ_DIA_ion_AIF
+    # Quant_LFQ_DIA_ion_diaPASEF
+    # Quant_LFQ_DIA_ion_Astral
+    # DIA section in the sidebar
+    with st.sidebar:
+        st.link_button("Home", "/")
+
+    # DDA section in the sidebar
+    with st.sidebar:
+        with st.expander("DDA", expanded=False):
+            st.link_button("Quant LFQ DDA ion QExactive", "/Quant_LFQ_DDA_ion_QExactive")
+            st.link_button("Quant LFQ DDA peptidoform", "/Quant_LFQ_DDA_peptidoform")
+            st.link_button("Quant LFQ DDA ion Astral", "/Quant_LFQ_DDA_ion_Astral")
+
+    with st.sidebar:
+        with st.expander("DIA", expanded=False):
+            st.link_button("Quant LFQ DIA ion diaPASEF", "/Quant_LFQ_DIA_ion_diaPASEF")
+            st.link_button("Quant LFQ DIA ion Astral", "/Quant_LFQ_DIA_ion_Astral")
+
+    with st.sidebar:
+        with st.expander("Archived", expanded=False):
+            st.link_button("Quant LFQ DIA ion AIF", "/Quant_LFQ_DIA_ion_AIF")
+
     st.sidebar.image(proteobench_logo, width=300)
 
     st.sidebar.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")

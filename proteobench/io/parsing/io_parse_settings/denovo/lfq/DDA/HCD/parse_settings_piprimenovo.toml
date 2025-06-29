@@ -1,0 +1,26 @@
+[mapper]
+"label" = "spectrum_id"
+"prediction" = "sequence"
+"score" = "score"
+
+[spectrum_id_mapper]
+"pattern" = "scan=(\\d+)"
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"+[43.006]" = "+43.006"
+"[+43.006-17.027]-" = "+43.006-17.027"
+"[+42.011]-" = "+42.011"
+"[+43.006]-" = "+43.006"
+"[-17.027]-" = "-17.027"
+"[+57.021]" = "+57.021"
+"[+15.995]" = "+15.995"
+"[+0.984]" = "+0.984"
+
+[modifications_parser]
+"parse_column" = "sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "([\\d+-.]+)"
+"modification_dict" = {"+57.021" = "UNIMOD:4", "+15.995" = "UNIMOD:35", "+0.984" = "UNIMOD:7", "+42.011" = "UNIMOD:1", "+43.006" = "UNIMOD:5", "-17.027" = "UNIMOD:385", "+43.006-17.027" = "+25.980265"}

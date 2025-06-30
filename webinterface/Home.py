@@ -2,7 +2,7 @@
 
 import streamlit as st
 from _base import StreamlitPage
-from WI_utils import (
+from UI_utils import (
     get_n_modules,
     get_n_submitted_points,
     get_n_supported_tools,

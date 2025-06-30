@@ -149,11 +149,233 @@ class ParseSettingsQuant:
         return self._species_expected_ratio
 
     def add_modification_parser(self, parser: ParseModificationSettings):
+        """
+        Add a modification parser to the settings.
+
+        Parameters
+        ----------
+        parser : object
+            The modification parser to add.
+        """
         self.modification_parser = parser
+
+    def _filter_decoys(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Filter out decoy proteins from the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame containing protein data.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with decoy proteins removed.
+        """
+        if "Reverse" in self.mapper:
+            df_filtered = df[df["Reverse"] != self.decoy_flag].copy()
+        else:
+            df_filtered = df.copy()
+        return df_filtered
+
+    def _fix_colnames(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Fix column names in the DataFrame according to the mapper.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame with original column names.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with standardized column names.
+        """
+        df.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
+        return df
+
+    def _mark_contaminants(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Mark contaminant proteins in the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame containing protein data.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with marked contaminants.
+        """
+        df["contaminant"] = df["Proteins"].str.contains(self.contaminant_flag)
+        return df
+
+    def _process_species_information(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Generate species information from the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame containing protein data.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with processed species information.
+        """
+        # Process species flags
+        for flag, species in self._species_dict.items():
+            df[species] = df["Proteins"].str.contains(flag)
+
+        # Filter multi-species
+        df["MULTI_SPEC"] = df[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
+        return df[df["MULTI_SPEC"] == False]
+
+    def _validate_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Validate and rename columns according to the mapper.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame with original column names.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with validated and renamed columns.
+        """
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected software tool."
+            )
+        df.rename(columns=self.mapper, inplace=True)
+        return df
+
+    def _create_replicate_mapping(self) -> Dict[int, List[str]]:
+        """
+        Create replicate mapping for the DataFrame.
+
+        Returns
+        -------
+        Dict[int, List[str]]
+            A dictionary mapping replicates to raw data.
+        """
+        replicate_to_raw = defaultdict(list)
+        for k, v in self.condition_mapper.items():
+            replicate_to_raw[v].append(k)
+        return replicate_to_raw
+
+    def _handle_data_format(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Handle different data formats and convert to standard format.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame in either long or short format.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame converted to standard format.
+        """
+        if "Raw file" not in self.mapper.values():
+            melt_vars = self.condition_mapper.keys()
+            df_melted = df.melt(
+                id_vars=list(set(df.columns).difference(set(melt_vars))),
+                value_vars=melt_vars,
+                var_name="Raw file",
+                value_name="Intensity",
+            )
+        else:
+            df_melted = df.copy()
+
+        df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
+        return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)
+
+    def _process_modifications(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Generate modified sequences using the modification parser.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame containing modification data.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with processed modifications.
+        """
+        if self.modification_parser is not None:
+            return self.modification_parser.convert_to_proforma(df, self.analysis_level)
+        return df
+
+    def _filter_zero_intensities(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Filter out rows with zero or negative intensities.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame containing intensity data.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with zero/negative intensities removed.
+        """
+        zero_intensity_count = len(df[df["Intensity"] <= 0])
+        if zero_intensity_count > 0:
+            print(f"WARNING: {zero_intensity_count} rows with 0 intensity were removed.")
+        return df[df["Intensity"] > 0]
+
+    def _format_by_analysis_level(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Format DataFrame according to the analysis level.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame to be formatted.
+
+        Returns
+        -------
+        pd.DataFrame
+            Formatted DataFrame according to analysis level.
+        """
+        if self.analysis_level == "ion":
+            if "proforma" in df.columns and "Charge" in df.columns:
+                df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+            return df
+        elif self.analysis_level == "peptidoform":
+            if "proforma" in df.columns:
+                df["peptidoform"] = df["proforma"]
+            return df
+        else:
+            raise ValueError(f"Analysis level '{self.analysis_level}' not supported.")
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert a software tool output into a generic format supported by the module.
+
+        Steps:
+        1. Validate and rename columns
+        2. Create replicate mapping
+        3. Filter decoys
+        4. Fix column names
+        5. Mark contaminants
+        6. Process species information
+        7. Handle data format (long vs short)
+        8. Process modifications if needed
+        9. Filter zero intensities
+        10. Format based on analysis level
 
         Parameters
         ----------
@@ -165,99 +387,36 @@ class ParseSettingsQuant:
         tuple[pd.DataFrame, Dict[int, List[str]]]
             The converted DataFrame and a dictionary mapping replicates to raw data.
         """
-        # TODO: Add functionality/steps in docstring.
-        if not all(k in df.columns for k in self.mapper.keys()):
-            raise ValueError(
-                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
-                " Please check input file and selected software tool."
-            )
-
-        df.rename(columns=self.mapper, inplace=True)
-
-        replicate_to_raw = defaultdict(list)
-        for k, v in self.condition_mapper.items():
-            replicate_to_raw[v].append(k)
-
-        if "Reverse" in self.mapper:
-            df_filtered = df[df["Reverse"] != self.decoy_flag].copy()
-        else:
-            df_filtered = df.copy()
-
-        df_filtered.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
-
-        df_filtered["contaminant"] = df_filtered["Proteins"].str.contains(self.contaminant_flag)
-        for flag, species in self._species_dict.items():
-            df_filtered[species] = df_filtered["Proteins"].str.contains(flag)
-        df_filtered["MULTI_SPEC"] = (
-            df_filtered[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
-        )
-
-        df_filtered = df_filtered[df_filtered["MULTI_SPEC"] == False]
-
-        # If there is "Raw file" then it is a long format, otherwise short format
-        if "Raw file" not in self.mapper.values():
-            melt_vars = self.condition_mapper.keys()
-            df_filtered_melted = df_filtered.melt(
-                id_vars=list(set(df_filtered.columns).difference(set(melt_vars))),
-                value_vars=melt_vars,
-                var_name="Raw file",
-                value_name="Intensity",
-            )
-        else:
-            df_filtered_melted = df_filtered.copy()
-
-        df_filtered_melted["replicate"] = df_filtered_melted["Raw file"].map(self.condition_mapper)
-        df_filtered_melted = pd.concat([df_filtered_melted, pd.get_dummies(df_filtered_melted["Raw file"])], axis=1)
-
-        if self.modification_parser is not None:
-            df_filtered_melted = self.modification_parser.convert_to_proforma(df_filtered_melted, self.analysis_level)
-
-        # Filter out rows with 0 intensity
-        print(
-            "WARNING: {} rows with 0 intensity were removed.".format(
-                len(df_filtered_melted[df_filtered_melted["Intensity"] <= 0])
-            )
-        )
-        df_filtered_melted = df_filtered_melted[df_filtered_melted["Intensity"] > 0]
-
-        if self.analysis_level == "ion":
-            if "proforma" in df_filtered_melted.columns and "Charge" in df_filtered_melted.columns:
-                df_filtered_melted["precursor ion"] = (
-                    df_filtered_melted["proforma"] + "|Z=" + df_filtered_melted["Charge"].astype(str)
-                )
-            return df_filtered_melted, replicate_to_raw
-
-        elif self.analysis_level == "peptidoform":
-            if "proforma" in df_filtered_melted.columns:
-                df_filtered_melted["peptidoform"] = df_filtered_melted["proforma"]
-            return df_filtered_melted, replicate_to_raw
-
-        else:
-            raise ValueError("Analysis level not supported.")
+        df = self._validate_and_rename_columns(df)
+        replicate_to_raw = self._create_replicate_mapping()
+        df = self._filter_decoys(df)
+        df = self._fix_colnames(df)
+        df = self._mark_contaminants(df)
+        df = self._process_species_information(df)
+        df = self._process_modifications(df)
+        df_melted = self._handle_data_format(df)
+        df_melted = self._filter_zero_intensities(df_melted)
+        return self._format_by_analysis_level(df_melted), replicate_to_raw
 
 
 class ParseModificationSettings:
     """
-    Class to handle modifications-specific parsing settings.
+    Settings for parsing modifications in protein data.
 
     Parameters
     ----------
-    parser : ParseSettings
-        The base parse settings object.
     parse_settings : Dict[str, Any]
-        The modifications-specific parse settings.
+        Dictionary containing modification-specific parsing settings.
     """
 
     def __init__(self, parse_settings: Dict[str, Any]):
         """
-        Initialize the ParseModificationSettings object.
+        Initialize ParseModificationSettings.
 
         Parameters
         ----------
-        parser : ParseSettings
-            The base parse settings object.
         parse_settings : Dict[str, Any]
-            The modifications-specific parse settings.
+            Dictionary containing modification-specific parsing settings.
         """
         self.modifications_mapper = parse_settings["modifications_parser"]["modification_dict"]
         self.modifications_isalpha = parse_settings["modifications_parser"]["isalpha"]
@@ -269,12 +428,14 @@ class ParseModificationSettings:
 
     def convert_to_proforma(self, df: pd.DataFrame, analysis_level: str) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
-        Convert the DataFrame to a standard format, adding modifications to the 'proforma' column.
+        Convert modifications to ProForma format.
 
         Parameters
         ----------
         df : pd.DataFrame
-            The input DataFrame to convert.
+            Input DataFrame containing modification data.
+        analysis_level : str
+            The level of analysis to perform.
 
         Returns
         -------
@@ -295,7 +456,7 @@ class ParseModificationSettings:
                 df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
             except KeyError as e:
                 raise KeyError(
-                    "Not all columns required for making the ion are available."
+                    "Not all columns required for making the precursor ion are available."
                     " Is the charge available in the input file?"
                 ) from e
 
@@ -308,10 +469,11 @@ class ParseModificationSettings:
 
 
 MODULE_TO_CLASS = {
-    "quant_lfq_DDA_ion": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
 }

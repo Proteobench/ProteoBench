@@ -111,7 +111,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all data points from the repo.
         default_cutoff_min_prec : int, optional
-            Minimum number of runs an ion must be identified in. Defaults to 3.
+            Minimum number of runs a precursor ion must be identified in. Defaults to 3.
 
         Returns
         -------

@@ -86,23 +86,23 @@ class PlotDataPoint:
         benchmark_metrics_df: pd.DataFrame,
         metric: str = "Median",
         software_colors: Dict[str, str] = {
-            "MaxQuant": "#377eb8",
-            "AlphaPept": "#4daf4a",
-            "ProlineStudio": "#5f0f40",
-            "MSAngel": "#e41a1c",
-            "FragPipe": "#ff7f00",
-            "i2MassChroQ": "#984ea3",
-            "Sage": "#a65628",
-            "WOMBAT": "#f781bf",
-            "DIA-NN": "#8c564b",
-            "AlphaDIA": "#4daf4a",
-            "Custom": "#7f7f7f",
-            "Spectronaut": "#bcbd22",
-            "FragPipe (DIA-NN quant)": "#ff7f00",
-            "MSAID": "#afff57",
-            "Proteome Discoverer": "#8c564b",
-            "PEAKS": "#f781bf",
-            "quantms": "#03fc39",
+            "MaxQuant": "#8bc6fd",
+            "AlphaPept": "#17212b",
+            "ProlineStudio": "#8b26ff",
+            "MSAngel": "#C0FA7D",
+            "FragPipe": "#F89008",
+            "i2MassChroQ": "#108E2E",
+            "Sage": "#E43924",
+            "WOMBAT": "#663200",
+            "DIA-NN": "#d42f2f",
+            "AlphaDIA": "#1D2732",
+            "Custom": "#000000",
+            "Spectronaut": "#007548",
+            "FragPipe (DIA-NN quant)": "#F89008",
+            "MSAID": "#bfef45",
+            "Proteome Discoverer": "#911eb4",
+            "PEAKS": "#f032e6",
+            "quantms": "#f5e830",
         },
         mapping: Dict[str, int] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
@@ -310,4 +310,87 @@ class PlotDataPoint:
             yaxis=dict(linecolor="black"),  # Set the Y axis line color to black
         )
 
+        return fig
+
+    @staticmethod
+    def plot_ma_plot(result_df: pd.DataFrame, species_ratio: Dict[str, Dict[str, str]]) -> go.Figure:
+        """
+        Plot a MA plot using Plotly.
+
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            The results DataFrame containing the MA plot data.
+        species_ratio : Dict[str, Dict[str, str]]
+            A dictionary mapping species to their respective colors and ratios.
+
+        Returns
+        -------
+        go.Figure
+            A Plotly figure object representing the MA plot.
+        """
+        color_map = {species: data["color"] for species, data in species_ratio.items()}
+
+        # take mean of log intensity mean a and log intensity mean b
+        result_df["logIntensityMean"] = (result_df["log_Intensity_mean_A"] + result_df["log_Intensity_mean_B"]) / 2
+
+        fig = px.scatter(
+            result_df,
+            x="log2_A_vs_B",
+            y="logIntensityMean",
+            color="species",
+            color_discrete_map=color_map,
+            labels={"log2_A_vs_B": "log2_FC(A:B)", "logIntensityMean": "log2_Intensity_Mean", "species": "Organism"},
+            title="log2FC vs logIntensityMean",
+            size_max=10,
+            opacity=0.6,
+        )
+
+        # Add vertical lines as shapes
+        fig.add_shape(
+            type="line",
+            x0=0,
+            x1=0,
+            y0=result_df["logIntensityMean"].min(),
+            y1=result_df["logIntensityMean"].max(),
+            line=dict(color="green", dash="dash"),
+            xref="x",
+            yref="y",
+            name="log2FC = 0",
+        )
+        fig.add_shape(
+            type="line",
+            x0=1,
+            x1=1,
+            y0=result_df["logIntensityMean"].min(),
+            y1=result_df["logIntensityMean"].max(),
+            line=dict(color="red", dash="dash"),
+            xref="x",
+            yref="y",
+            name="log2FC = 1",
+        )
+        fig.add_shape(
+            type="line",
+            x0=-2,
+            x1=-2,
+            y0=result_df["logIntensityMean"].min(),
+            y1=result_df["logIntensityMean"].max(),
+            line=dict(color="blue", dash="dash"),
+            xref="x",
+            yref="y",
+            name="log2FC = -2",
+        )
+
+        # To show vertical lines in the legend, add dummy traces
+        fig.add_trace(
+            go.Scatter(x=[None], y=[None], mode="lines", line=dict(color="green", dash="dash"), name="log2FC = 0")
+        )
+        fig.add_trace(
+            go.Scatter(x=[None], y=[None], mode="lines", line=dict(color="red", dash="dash"), name="log2FC = 1")
+        )
+        fig.add_trace(
+            go.Scatter(x=[None], y=[None], mode="lines", line=dict(color="blue", dash="dash"), name="log2FC = -2")
+        )
+
+        fig.update_traces(marker=dict(size=6))  # Marker size approx. equivalent to s=10 in seaborn
         return fig

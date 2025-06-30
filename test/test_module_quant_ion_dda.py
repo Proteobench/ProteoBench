@@ -5,8 +5,10 @@ import pytest
 
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
 from proteobench.score.quant.quantscores import QuantScores
+from proteobench.exceptions import DatapointGenerationError
+
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")
 TESTDATA_FILES = {
@@ -34,6 +36,7 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "lfq",
         "DDA",
         "ion",
+        "QExactive",
     )
 )
 TESTED_SOFTWARE_TOOLS = (
@@ -59,7 +62,7 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_valid_and_supported_search_tool_settings_exists(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion"
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion_QExactive"
         )
         assert software_tool in parse_settings_builder.INPUT_FORMATS
 
@@ -71,7 +74,7 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_settings_parser_created_successfully(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion"
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion_QExactive"
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         assert parse_settings is not None
@@ -79,7 +82,7 @@ class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_software_tool_output_converted_to_standard_format(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion"
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion_QExactive"
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
 
@@ -94,7 +97,7 @@ class TestQuantScores:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_intermediate_generated_from_software_tool_output(self, software_tool):
         parse_settings_builder = ParseSettingsBuilder(
-            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion"
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion_QExactive"
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
 
@@ -132,7 +135,7 @@ class TestDDAQuantIonModule:
         }
 
     def test_benchmarking_return_types_are_correct(self):
-        intermediate_df, all_datapoints, input_df = DDAQuantIonModule("").benchmarking(
+        intermediate_df, all_datapoints, input_df = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
         assert isinstance(intermediate_df, pd.DataFrame)
@@ -140,7 +143,7 @@ class TestDDAQuantIonModule:
         assert isinstance(input_df, pd.DataFrame)
 
     def test_results_column_in_new_data_point_contains_correct_number_of_entries(self):
-        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[self.software_tool], self.software_tool, self.user_input, None
         )
         results_entry_newest_datapoint = all_datapoints.results[len(all_datapoints.results) - 1]
@@ -151,8 +154,8 @@ class TestDDAQuantIonModule:
         input_file_location = TESTDATA_FILES[self.software_tool]
         input_format = self.software_tool
         empty_user_input = {}
-        with pytest.raises(KeyError):
-            DDAQuantIonModule("").benchmarking(input_file_location, input_format, empty_user_input, None)
+        with pytest.raises(DatapointGenerationError):
+            DDAQuantIonModuleQExactive("").benchmarking(input_file_location, input_format, empty_user_input, None)
 
     def test_new_datapoint_with_unique_hash_is_added_to_existing_ones(self, monkeypatch):
         def mock_clone_repo(*args, **kwargs):
@@ -169,10 +172,10 @@ class TestDDAQuantIonModule:
         first_software_tool = "MaxQuant"
         second_software_tool = "FragPipe"
 
-        _, previous_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, previous_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
         )
-        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
         )
 
@@ -196,10 +199,10 @@ class TestDDAQuantIonModule:
         first_software_tool = "MaxQuant"
         second_software_tool = first_software_tool
 
-        _, previous_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, previous_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[first_software_tool], first_software_tool, self.user_input, None
         )
-        _, all_datapoints, _ = DDAQuantIonModule("").benchmarking(
+        _, all_datapoints, _ = DDAQuantIonModuleQExactive("").benchmarking(
             TESTDATA_FILES[second_software_tool], second_software_tool, self.user_input, previous_datapoints
         )
 

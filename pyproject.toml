@@ -1,7 +1,8 @@
 [project]
 authors = [
   { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
-  { name = "Henry Webel", email = "henry.webel@sund.ku.dk" },
+  { name = "Henry Webel", email = "heweb@dtu.dk" },
+  { name = 'Witold Wolski', email = 'witold.wolski@fgcz.uzh.ch' }
 ] # TODO: Add others
 description = "ProteoBench compares the outputs of mass spectrometry-based proteomics data analysis pipelines"
 classifiers = [
@@ -20,7 +21,9 @@ dependencies = [
   "pandas",
   "openpyxl",
   "numpy>1.24.4",
-  "plotly",
+  "plotly==5.24.0",
+  "upsetplot",
+  "seaborn",
   "streamlit>=1.31",
   "streamlit_extras",
   "streamlit-plotly-events",
@@ -29,6 +32,7 @@ dependencies = [
   "PyGithub",
   "GitPython",
   "psm-utils",
+  "python-calamine"
 ]
 license = { file = "LICENSE" }
 name = "proteobench"
@@ -43,6 +47,8 @@ docs = [
   "sphinx-autobuild",
   "myst-parser>=0.3.0",
   "pydata-sphinx-theme",
+  "sphinx_new_tab_link",
+  "sphinx_copybutton",
 ]
 web = ["streamlit>1.27", "scipy"]
 

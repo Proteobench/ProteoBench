@@ -5,6 +5,7 @@ body:
     attributes:
       value: |
         This is the place to propose a new module idea and discuss it in the community.
+        More information on how to propose and develop a new ProteoBench module can be found here: proteobench.readthedocs.io/en/latest/general-information/3-module-proposal/
   - type: textarea
     id: goal
     attributes:
@@ -39,8 +40,8 @@ body:
   - type: textarea
     id: reviewers
     attributes:
-      label: "potential reviewers"
-      description: "Please provide the name of potential reviewers for this module proposal"
+      label: "potential external expert(s)"
+      description: "Please provide the name of potential experts who did not participate to the full design of the module proposed. They can choose to give inputs and/or can fully collaborate to the module design and/or development."
       value: |
         ...
       render: bash

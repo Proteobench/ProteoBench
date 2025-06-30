@@ -251,7 +251,7 @@ class QuantModule:
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all datapoints from the ProteoBench repo.
         default_cutoff_min_prec : int, optional
-            Minimum number of runs an ion has to be identified in. Defaults to 3.
+            Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
 
         Returns
         -------
@@ -479,7 +479,11 @@ class QuantModule:
                 # Save the user comment in the zip file
                 zf.writestr("comment.txt", comment)
 
-            logging.info(f"Zipped data saved to {zip_file_path}")
+            # save intermediate performance file unzipped as well
+            result_csv_path = os.path.join(path_write, "result_performance.csv")
+            result_csv.to_csv(result_csv_path, index=False)
+
+            logging.info(f"Data saved to {zip_file_path}")
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 

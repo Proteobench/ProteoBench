@@ -14,4 +14,4 @@
 "isalpha" = true
 "isupper" = true
 "pattern" = "([\\d+-.]+)"
-"modification_dict" = {"+57.021" = "UNIMOD:4", "+15.995" = "UNIMOD:35", "+0.984" = "UNIMOD:7", "+42.011" = "UNIMOD:1", "+43.006" = "UNIMOD:5", "-17.027" = "UNIMOD:385", "+43.006-17.027" = "+25.980265"}
+"modification_dict" = {"+57.021" = "UNIMOD:4", "+15.995" = "UNIMOD:35", "+0.984" = "UNIMOD:7", "+42.011" = "UNIMOD:1", "+43.006" = "UNIMOD:5", "-17.027" = "UNIMOD:385", "+43.006-17.027" = "Formula:H-2C1O1"}

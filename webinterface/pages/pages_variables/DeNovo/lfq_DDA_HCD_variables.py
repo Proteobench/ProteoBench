@@ -27,13 +27,13 @@ class VariablesDDADeNovo:
     fig_ptm_overview: str = "fig_ptm_overview_dda_hcd_denovo"
     fig_ptm_specific: str = "fig_ptm_specific_dda_hcd_denovo"
     fig_spectrum_feature: str = "fig_spectrum_feature_dda_hcd_denovo"
+    fig_species_overview: str = "fig_species_overview_dda_hcd_denovo"
 
-    evaluation_mode_toggle_tab3: str = "evaluation_mode_toggle_tab3_dda_hcd_denovo"
+    evaluation_mode_toggle_tab3_features: str = "evaluation_mode_toggle_tab3_features_dda_hcd_denovo"
+    evaluation_mode_toggle_tab3_species: str = "evaluation_mode_toggle_tab3_species_dda_hcd_denovo"
 
     # Tab 4
     fig_metric_submitted: str = "fig_metric_dda_hcd_denovo_submitted"
-
-
 
     result_perf: str = "result_perf_dda_hcd_denovo"
     meta_data: str = "meta_data_dda_hcd_denovo"

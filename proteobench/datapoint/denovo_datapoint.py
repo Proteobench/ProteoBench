@@ -352,54 +352,55 @@ class DenovoDatapoint:
         return mod_count, correct
 
     @staticmethod
-    def get_spectrum_metrics(df: pd.DataFrame):
-        def record_proportions_to_results_feature(
-                series: pd.Series,
-                counts: dict,
-                min_el: int=1,
-                max_el: int=30,
-                all_elements=None
-            ) -> dict:
-            data = {}
+    def record_proportions_to_results_feature(
+            series: pd.Series,
+            counts: dict,
+            min_el: int=1,
+            max_el: int=30,
+            all_elements=None
+        ) -> dict:
+        data = {}
 
-            if isinstance(all_elements, list):
-                iteration = all_elements
-            else:
-                iteration = range(min_el, max_el+1)
+        if isinstance(all_elements, list):
+            iteration = all_elements
+        else:
+            iteration = range(min_el, max_el+1)
 
-            for i in iteration:
-                try:
-                    proportions = series[i]
-                    
-                    try:
-                        exact = proportions['exact']
-                    except KeyError:
-                        exact = 0.0
-
-                    try:
-                        mass_based = 1-proportions['mismatch']
-                    except:
-                        mass_based = 1.0
-
-
-                except KeyError as e:
-                    exact = None
-                    mass_based = None
-
-                if isinstance(i, float) and np.isnan(i):
-                    continue
-
-                try:
-                    count_subset = counts[i]
-                except:
-                    count_subset = 0
+        for i in iteration:
+            try:
+                proportions = series[i]
                 
-                data[i] = {
-                    'exact': exact,
-                    'mass': mass_based,
-                    'n_spectra': count_subset
-                }
-            return data
+                try:
+                    exact = proportions['exact']
+                except KeyError:
+                    exact = 0.0
+
+                try:
+                    mass_based = 1-proportions['mismatch']
+                except:
+                    mass_based = 1.0
+
+
+            except KeyError as e:
+                exact = None
+                mass_based = None
+
+            if isinstance(i, float) and np.isnan(i):
+                continue
+
+            try:
+                count_subset = counts[i]
+            except:
+                count_subset = 0
+            
+            data[i] = {
+                'exact': exact,
+                'mass': mass_based,
+                'n_spectra': count_subset
+            }
+        return data
+
+    def get_spectrum_metrics(self, df: pd.DataFrame):
 
         results = {}
         intermediate = df.dropna()
@@ -407,13 +408,13 @@ class DenovoDatapoint:
         # Missing fragmentation sites
         series = intermediate.groupby('missing_frag_sites')['match_type'].value_counts(normalize=True)
         counts = intermediate.groupby('missing_frag_sites').count()['match_type'].to_dict()
-        results['Missing Fragmentation Sites'] = record_proportions_to_results_feature(series, counts, min_el=0, max_el=30)
+        results['Missing Fragmentation Sites'] = self.record_proportions_to_results_feature(series, counts, min_el=0, max_el=30)
                 
 
         # Peptide length
         series = intermediate.groupby('peptide_length')['match_type'].value_counts(normalize=True)
         counts = intermediate.groupby('peptide_length').count()['match_type'].to_dict()
-        results['Peptide Length'] = record_proportions_to_results_feature(series, counts, min_el=5, max_el=30)
+        results['Peptide Length'] = self.record_proportions_to_results_feature(series, counts, min_el=5, max_el=30)
 
         # Explained intensity
         intermediate_selection = intermediate[['explained_by_pct', 'match_type']].copy()
@@ -424,7 +425,7 @@ class DenovoDatapoint:
         series = intermediate_selection.groupby('intensity_binned').match_type.value_counts(normalize=True)
         counts = intermediate_selection.groupby('intensity_binned').count()['match_type'].to_dict()
         series.name = 'percentage'
-        results['% Explained Intensity'] = record_proportions_to_results_feature(series, counts, all_elements=indices)
+        results['% Explained Intensity'] = self.record_proportions_to_results_feature(series, counts, all_elements=indices)
         
         # Cosine similarity
         # results['cosine'] = {
@@ -434,6 +435,21 @@ class DenovoDatapoint:
 
         return results
 
-    @staticmethod
-    def get_species_metrics(df):
-        pass
+    def get_species_metrics(self, df: pd.DataFrame):
+
+        species = [
+            'Solanum-lycopersicum',
+            'Mus-musculus',
+            'Bacillus-subtilis',
+            'Apis-mellifera',
+            'Vigna-mungo',
+            'Methanosarcina-mazei',
+            'Candidatus-endoloripes',
+            'H.-sapiens',
+            'Saccharomyces-cerevisiae'
+        ]
+
+        series = df.groupby('collection')['match_type'].value_counts(normalize=True)
+        counts = df.groupby('collection').count()['match_type'].to_dict()
+        species_result = self.record_proportions_to_results_feature(series, counts, all_elements=species)
+        return species_result

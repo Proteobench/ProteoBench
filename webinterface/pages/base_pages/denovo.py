@@ -176,7 +176,9 @@ class DeNovoUIObjects():
             feature_names=feature_names
         )
 
-        st.markdown("# Species")
+        self._generate_species_plot(
+            df=selected_dtps
+        )
 
         st.markdown("# Spectrum overlap")
     
@@ -608,7 +610,7 @@ class DeNovoUIObjects():
         exact_mode = st.toggle(
             label='Exact evaluation mode',
             value=False,
-            key=self.variables_denovo.evaluation_mode_toggle_tab3
+            key=self.variables_denovo.evaluation_mode_toggle_tab3_features
         )
         if exact_mode:
             evaluation_type = 'exact'
@@ -634,6 +636,32 @@ class DeNovoUIObjects():
                     use_container_width=True,
                     key=self.variables_denovo.fig_spectrum_feature + feature_name
                 )
+
+    def _generate_species_plot(self, df):
+        st.markdown("# Species")
+
+        exact_mode = st.toggle(
+            label='Exact evaluation mode',
+            value=False,
+            key=self.variables_denovo.evaluation_mode_toggle_tab3_species
+        )
+        if exact_mode:
+            evaluation_type = 'exact'
+        else:
+            evaluation_type = 'mass'
+
+        fig = PlotDataPoint.plot_species_overview(
+            self=PlotDataPoint(),
+            benchmark_metrics_df=df,
+            evaluation_type=evaluation_type
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+            key=self.variables_denovo.fig_species_overview
+        )
+
 
     #####################
     ### TAB 4 METHODS ###

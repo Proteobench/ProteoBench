@@ -144,7 +144,9 @@ def _load_piprimenovo(input_path: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    return pd.read_csv(input_path, sep="\t")
+    input_data_frame = pd.read_csv(input_path, sep="\t")
+    # Sometimes, weird erroneous lines exist in the output. Filter them out
+    return input_data_frame.dropna()
 
 
 _LOAD_FUNCTIONS = {

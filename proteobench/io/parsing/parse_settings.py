@@ -10,6 +10,7 @@ from typing import Any, Dict, List
 import pandas as pd
 import toml
 from psm_utils import Peptidoform
+import numpy as np
 
 from .parse_ion import get_proforma_bracketed
 
@@ -536,7 +537,7 @@ class ParseSettingsDeNovo:
                 sequence = sequence.replace(key, value)
         return sequence
 
-    def format_scores(self, aa_scores: Any) -> List[float]:
+    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length=False) -> List[float]:
         """
         Format the amino acid scores into a list of float numbers.
 
@@ -550,6 +551,14 @@ class ParseSettingsDeNovo:
         List[float]
             The formatted list of scores.
         """
+        # Fix aa_score length as this modification is collapsed from 2 tokens to 1
+        if (
+            fix_aa_length and
+            isinstance(peptidoform.properties['n_term'], list) and
+            peptidoform.properties['n_term'][0].value == 'H-2C1O1'
+        ):
+            aa_scores = list(np.mean(aa_scores[0:2])) + aa_scores[2:]
+
         if isinstance(aa_scores, list) and all(isinstance(i, float) for i in aa_scores):
             return aa_scores
 
@@ -610,8 +619,8 @@ class ParseSettingsDeNovo:
             "N-term Acetylation (denovo)",
             "N-term Carbamylation (denovo)",
             "N-term Ammonia-loss (denovo)",
-            # TODO
             ### SPECIES
+            'collection',
         ]
         
         # PTM-features
@@ -632,10 +641,9 @@ class ParseSettingsDeNovo:
         df['peptidoform_ground_truth'] = df.peptidoform_ground_truth.apply(lambda x: Peptidoform(Peptidoform(x).modified_sequence)) # Removing precursor charge from peptidoform
         
         # Peptide length
-        df['peptide_length'] = df.peptidoform_ground_truth.apply(lambda x: len(x))
+        df['peptide_length'] = df.peptidoform_ground_truth.apply(lambda x: self.get_length_peptidoform_with_nterm(x))
 
         return df[columns_to_keep_gt]
-
 
     def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
@@ -671,8 +679,15 @@ class ParseSettingsDeNovo:
         else:
             df["proforma"] = df["sequence"]
 
+
+        def convert_to_peptidoform(proforma):
+            try:
+                return Peptidoform(proforma)
+            except:
+                return None
         if "proforma" in df.columns:
-            df["peptidoform"] = df["proforma"].apply(lambda x: Peptidoform(x))
+            df["peptidoform"] = df["proforma"].apply(lambda x: convert_to_peptidoform(x))
+            df = df.dropna(subset='peptidoform')
 
         # If AA scores are not provided, simulate them from peptide score
         if "aa_scores" not in df.columns:
@@ -681,7 +696,10 @@ class ParseSettingsDeNovo:
                 axis=1
             )
         
-        df["aa_scores"] = df["aa_scores"].apply(self.format_scores)
+        df["aa_scores"] = df.apply(
+            lambda x: self.format_scores(x['aa_scores'], x['peptidoform']),
+            axis=1
+        )
 
         columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]
         df = df[columns_to_keep]
@@ -689,10 +707,7 @@ class ParseSettingsDeNovo:
         # Load ground truth PSMs
 
         df_ground_truth = pd.read_csv(self.path_to_ground_truth)
-        df_ground_truth = pd.concat([
-            df_ground_truth,
-            pd.DataFrame(df_ground_truth['rescoring_features'].apply(eval).tolist())
-        ], axis=1)
+
         df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
         df = self.add_features(df=df)
 

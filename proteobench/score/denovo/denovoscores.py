@@ -288,7 +288,7 @@ class DenovoScores:
         for mod in mods:
             if mod is None:
                 continue
-            token_str += "[{}]".format(mod.id)
+            token_str += "[{}]".format(mod.value)
         return token_str
 
     def mass_diff(self, mz1, mz2, mode_is_da):

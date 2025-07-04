@@ -1,13 +1,19 @@
 """Proteobench Streamlit-based web server."""
 
+from pathlib import Path
+
 import streamlit as st
 from _base import StreamlitPage
 from UI_utils import (
     get_n_modules,
+    get_n_modules_proposed,
     get_n_submitted_points,
     get_n_supported_tools,
     stat_box,
 )
+
+# Path to the index.rst file
+file_path = Path(__file__).parent.parent / "docs" / "index.rst"
 
 
 class StreamlitPageHome(StreamlitPage):
@@ -20,8 +26,9 @@ class StreamlitPageHome(StreamlitPage):
         Set up the main page layout for the Streamlit application.
         """
         # Placeholders TODO: replace with actual data
+
         n_modules_all = get_n_modules()
-        n_modules_reviewed = "Coming soon"  # Since we don't have a review system and banner in place yet
+        n_modules_proposed = get_n_modules_proposed(file_path.read_text(encoding="utf-8"))
         n_tools_supported = get_n_supported_tools()
         n_of_points_submitted = get_n_submitted_points()  # This function should return the number of submitted points
         monthly_visitors = "Coming soon"  # TODO
@@ -29,47 +36,36 @@ class StreamlitPageHome(StreamlitPage):
         st.header("ProteoBench Overview")
         st.markdown(
             """
-        <style>
-        .row-container {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .row-container > div {
-            flex: 1;
-            display: flex;
-        }
-
-        .stat-card-glass {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-        }
-        .stat-card-glass h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        .stat-card-glass .metric {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        .stat-card-glass .icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        </style>
-        """,
+    <style>
+    .stat-card-glass {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 12px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+    .stat-card-glass h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .stat-card-glass .metric {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    .stat-card-glass .icon {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+    </style>
+    """,
             unsafe_allow_html=True,
         )
 
@@ -78,7 +74,7 @@ class StreamlitPageHome(StreamlitPage):
         with row1_col1:
             st.markdown(
                 stat_box(
-                    "Number of modules (total)",
+                    "Active modules",
                     n_modules_all,
                     "🧩",
                     "#37475E",
@@ -89,9 +85,9 @@ class StreamlitPageHome(StreamlitPage):
         with row1_col2:
             st.markdown(
                 stat_box(
-                    "Number of modules (expert validated)",
-                    n_modules_reviewed,
-                    "✅",
+                    "Proposed and in-development modules",
+                    n_modules_proposed,
+                    "🏗️",
                     "#37475E",
                     # TODO: link to expert validation docs
                 ),
@@ -103,7 +99,7 @@ class StreamlitPageHome(StreamlitPage):
         with row2_col1:
             st.markdown(
                 stat_box(
-                    "Number of tools supported",
+                    "Supported workflows and tools",
                     n_tools_supported,
                     "🔨",
                     "#37475E",
@@ -114,7 +110,7 @@ class StreamlitPageHome(StreamlitPage):
         with row2_col2:
             st.markdown(
                 stat_box(
-                    "Number of submitted points",
+                    "Submitted points",
                     n_of_points_submitted,
                     "⭕",
                     "#37475E",

@@ -89,7 +89,7 @@ class StreamlitPageHome(StreamlitPage):
                     n_modules_proposed,
                     "🏗️",
                     "#37475E",
-                    # TODO: link to expert validation docs
+                    "https://github.com/orgs/Proteobench/discussions",
                 ),
                 unsafe_allow_html=True,
             )

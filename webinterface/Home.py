@@ -14,6 +14,7 @@ from UI_utils import (
 
 # Path to the index.rst file
 file_path = Path(__file__).parent.parent / "docs" / "index.rst"
+fig_path = Path(__file__).parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
 
 
 class StreamlitPageHome(StreamlitPage):
@@ -76,8 +77,7 @@ class StreamlitPageHome(StreamlitPage):
                 stat_box(
                     "Active modules",
                     n_modules_all,
-                    "🧩",
-                    "#37475E",
+                    fig_path / "module.png",
                     "https://proteobench.readthedocs.io/en/stable/available-modules/",
                 ),
                 unsafe_allow_html=True,
@@ -87,8 +87,7 @@ class StreamlitPageHome(StreamlitPage):
                 stat_box(
                     "Proposed and in-development modules",
                     n_modules_proposed,
-                    "🏗️",
-                    "#37475E",
+                    fig_path / "module-construction.png",
                     "https://github.com/orgs/Proteobench/discussions",
                 ),
                 unsafe_allow_html=True,
@@ -101,8 +100,7 @@ class StreamlitPageHome(StreamlitPage):
                 stat_box(
                     "Supported workflows and tools",
                     n_tools_supported,
-                    "🔨",
-                    "#37475E",
+                    fig_path / "workflow-run.png",
                     # TODO: parameter parsing docs url
                 ),
                 unsafe_allow_html=True,
@@ -112,8 +110,7 @@ class StreamlitPageHome(StreamlitPage):
                 stat_box(
                     "Submitted points",
                     n_of_points_submitted,
-                    "⭕",
-                    "#37475E",
+                    fig_path / "scatter-plot.png",
                     "https://proteobench.cubimed.rub.de/datasets/",
                 ),
                 unsafe_allow_html=True,
@@ -123,7 +120,7 @@ class StreamlitPageHome(StreamlitPage):
         # Third row
         row3 = st.columns(1)
         with row3[0]:
-            st.markdown(stat_box("Monthly visitors", monthly_visitors, "🌐", "#37475E"), unsafe_allow_html=True)
+            st.markdown(stat_box("Monthly visitors", monthly_visitors, fig_path / "user.png"), unsafe_allow_html=True)
 
 
 if __name__ == "__main__":

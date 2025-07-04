@@ -1,3 +1,4 @@
+import base64
 import re
 from collections import Counter
 from pathlib import Path
@@ -9,7 +10,13 @@ SECRETS_FILE = Path(__file__).parent / ".streamlit" / "secrets.toml"
 GRAPHQL_URL = "https://api.github.com/graphql"
 
 
-def stat_box(title, value, icon, color="#000", url=None):
+def get_base64_image(path):
+    with open(path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
+
+
+def stat_box(title, value, icon_path, color="#000", url=None):
+    img_data = get_base64_image(icon_path)
     content = f"""
     <div style="
         background: #fff;
@@ -21,10 +28,12 @@ def stat_box(title, value, icon, color="#000", url=None):
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;  /* center horizontally */
+        align-items: center;
         transition: transform 0.2s ease;
     ">
-        <div style="font-size: 1.8rem; color: {color}; margin-bottom: 8px;">{icon}</div>
+        <div style="margin-bottom: 8px;">
+            <img src="data:image/png;base64,{img_data}" alt="icon" style="width: 36px; height: 36px;" />
+        </div>
         <div style="color: #37475E; font-weight: 600; font-size: 0.95rem; text-align: center;">{title}</div>
         <div style="font-size: 1.5rem; font-weight: 700; margin-top: 6px; color: #37475E;">{value}</div>
     </div>
@@ -166,4 +175,30 @@ if __name__ == "__main__":
     print(f"Number of supported tools: {get_n_supported_tools()}")
     file_path = Path(__file__).parent.parent / "docs" / "index.rst"
     status_counts = parse_proteobench_index(file_path.read_text(encoding="utf-8"))
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
     print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")

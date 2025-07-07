@@ -32,14 +32,14 @@ The files are currently not yet uploaded to the ProteomeXchange repository, but 
 
 For now, you can download the raw files via:
 
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw] (TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](TO DO)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](TO DO)
+- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d.zip)
+- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d.zip)
+- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d.zip)
+- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d.zip)
+- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d.zip)
+- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d.zip)
 
-Alternatively, you can download them from a private server here: [proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://filesender.belnet.be/?s=download&token=7b7d5b37-a154-446b-9db3-ac5dffae0af5))
+Alternatively, you can download them from a private server here: [https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/))
 
 **It is imperative not to rename the files once downloaded!**
 

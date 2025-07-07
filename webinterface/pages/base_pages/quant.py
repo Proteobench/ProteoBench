@@ -763,9 +763,9 @@ class QuantUIObjects:
             st.subheader("Download raw datasets")
 
             # Sort the intermediate_hash values and get the corresponding ids
-            sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"][i])
-            sorted_intermediate_hash = [downloads_df["intermediate_hash"][i] for i in sorted_indices]
-            sorted_ids = [downloads_df["id"][i] for i in sorted_indices]
+            sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"].iloc[i])
+            sorted_intermediate_hash = [downloads_df["intermediate_hash"].iloc[i] for i in sorted_indices]
+            sorted_ids = [downloads_df["id"].iloc[i] for i in sorted_indices]
 
             st.selectbox(
                 "Select dataset",

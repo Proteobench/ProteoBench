@@ -208,7 +208,7 @@ DIA-NN parameters are parsed either from the command line string found in the lo
 \*This may seem incorrect. However, when the setting "PSM FDR" is changed in the GUI, this affects the peptideFdr setting in the mqpar.xml.<br>There does not seem to be a peptide FDR setting in the GUI.
 
 ### MSAID*
-*Parsed parameter file: .csv*
+*Parsed parameter file: experiment_details.csv*
 
 | Parameter                | Parsed value |
 |--------------------------|-------------|
@@ -238,3 +238,152 @@ DIA-NN parameters are parsed either from the command line string found in the lo
 
 *ProteoBench's compatibility with MSAID output is still a work in progress.
 
+### MSAngel
+*Parsed parameter file: .json*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      MSAngel (fixed)       |
+| software_version         |      Parsed from "msAngelVersion"       |
+| search_engine            |      Parsed from "searchEnginesWithForms"       |
+| search_engine_version    |      Not parsed       |
+| ident_fdr_psm            |      Parsed from "psmExpectedFdr"       |
+| ident_fdr_peptide        |      Not parsed       |
+| ident_fdr_protein        |      Not parsed       | 
+| enable_match_between_runs|      True (fixed)      |
+| precursor_mass_tolerance |      Parsed from "TOL" and "TOLU" in the "paramMap" section if Mascot is used<br> Parsed from "precursorTolerance" and "precursorAccuracyType" in the "paramMap" section if X!Tandem is used       |
+| fragment_mass_tolerance  |      Not parsed if Mascot is used<br>Parsed from "fragmentIonMZTolerance" and "fragmentAccuraccyType"  in the "paramMap" section if X!Tandem is used       |
+| enzyme                   |      Parsed from "CLE" in the "paramMap" section if Mascot is used<br>Parsed from "enzymes" in "digestionParameters" in the "paramMap" section if X!Tandem is used       |
+| allowed_miscleavages     |      Parsed from "PFA" in the "paramMap" section if Mascot is used<br>Parsed from "nMissedCleavages" in "digestionParameters" in the "paramMap" section if X!Tandem is used       |
+| min_peptide_length       |      Not parsed       |
+| max_peptide_length       |      Not parsed      |
+| fixed_mods               |      Parsed from "MODS" in the "paramMap" section if Masscot is used<br>Parsed from "fixedModifications" in "modificationParameters" in the "paramMap" section if X!Tandem is used      |
+| variable_mods            |      Parsed from "IT_MODS" in the "paramMap" section if Masscot is used<br>Parsed from "variableModifications" in "modificationParameters" in the "paramMap" section if X!Tandem is used.<br> Special parsing of the "data" section if proteinQuickAcetyl and/or quickPyrolidone are toggled       |
+| max_mods                 |      Not parsed       |
+| min_precursor_charge     |      Not parsed       |
+| max_precursor_charge     |      Not parsed       |
+| quantification_method    |      Not parsed       |
+| protein_inference        |      Not parsed       |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
+
+### PEAKS
+*Parsed parameter file: parameters.txt*
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      PEAKS (fixed)       |
+| software_version         |      Parsed from line "PEAKS Version: X"       |
+| search_engine            |       PEAKS (fixed)      |
+| search_engine_version    |      Parsed from line "PEAKS Version: X"       |
+| ident_fdr_psm            |      Parsed from either "PSM FDR: X" or "Precusor FDR: X"       |
+| ident_fdr_peptide        |      Parsed from line "Peptide FDR: X"       |
+| ident_fdr_protein        |      Parsed from line "Protein Group FDR: X"       | 
+| enable_match_between_runs|      Parsed from line "Match Between Run: X"      |
+| precursor_mass_tolerance |      Parsed from line "Precursor Mass Error Tolerance: X"       |
+| fragment_mass_tolerance  |      Parsed from line "Fragment Mass Error Tolerance: X"       |
+| enzyme                   |      Parsed from line "Enzyme: X"       |
+| allowed_miscleavages     |      Parsed from line "Max Missed Cleavage: X"       |
+| min_peptide_length       |      Parsed from line "Peptide Length between: X" or "Peptide Length Range: X"       |
+| max_peptide_length       |      Parsed from line "Peptide Length between: X" or "Peptide Length Range: X"     |
+| fixed_mods               |      Parsed as the elements between "Fixed Modifications:" and "Variable Modifications"      |
+| variable_mods            |      Parsed as the elements between "Variable Modifications:" and "Database:"       |
+| max_mods                 |      Parsed from line "Max Variable PTM per Peptide: X"       |
+| min_precursor_charge     |      Parsed from line "Precursor Charge between: X" or "Precursors Charge between: X"       |
+| max_precursor_charge     |      Parsed from line "Precursor Charge between: X" or "Precursors Charge between: X"       |
+| quantification_method    |      Parsed from line "LFQ Method: X"       |
+| protein_inference        |      Not parsed       |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
+
+### ProlineStudio
+*Parsed parameter file: .xlsx*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      ProlineStudio (fixed)       |
+| software_version         |      If there is a "Dataset statistics and infos" sheet, it is parsed from "version", otherwise not parsed       |
+| search_engine            |      Parsed from "software_name" on "Search settings and infos" sheet       |
+| search_engine_version    |      Parsed from "software_version" on "Search settings and infos" sheet       |
+| ident_fdr_psm            |      Parsed from "psm_filter_expected_fdr" on "Import and filters" sheet       |
+| ident_fdr_peptide        |      Not parsed       |
+| ident_fdr_protein        |      Not parsed       | 
+| enable_match_between_runs|      Set to true if "cross assignment" is present in the rows of the "Quant config" sheet, else False      |
+| precursor_mass_tolerance |      Parsed from "peptide_mass_error_tolerance" on "Search settings and infos" sheet       |
+| fragment_mass_tolerance  |      Parsed from "fragment_mass_error_tolerance" on "Search settings and infos" sheet       |
+| enzyme                   |      Parsed from "enzymes" on "Search settings and infos" sheet       |
+| allowed_miscleavages     |      Parsed from "max_missed_cleavages" on "Search settings and infos" sheet       |
+| min_peptide_length       |      Parsed from "psm_filter_2" on "Import and filters" sheet       |
+| max_peptide_length       |      Not parsed      |
+| fixed_mods               |      Parsed from "fixed_ptms" on "Search settings and infos" sheet       |
+| variable_mods            |      Parsed from "variable_ptms" on "Search settings and infos" sheet      |
+| max_mods                 |      Not parsed       |
+| min_precursor_charge     |      Parsed as the minimal charge state found in "peptide_charge_states" on "Search settings and infos" sheet       |
+| max_precursor_charge     |      Parsed as the maximal charge state found in "peptide_charge_states" on "Search settings and infos" sheet       |
+| quantification_method    |      Not parsed       |
+| protein_inference        |      Not parsed       |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
+
+### QuantMS 
+TODO
+
+### Sage
+*Parsed parameter file: .json*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      Sage (fixed)      |
+| software_version         |      Parsed from "version"       |
+| search_engine            |      Sage (fixed)       |
+| search_engine_version    |      Parsed from "version"       |
+| ident_fdr_psm            |      Not parsed       |
+| ident_fdr_peptide        |      Not parsed       |
+| ident_fdr_protein        |      Not parsed       | 
+| enable_match_between_runs|      True (fixed)      |
+| precursor_mass_tolerance |      Parsed from "precursor_tol"       |
+| fragment_mass_tolerance  |      Parsed from "fragment_tol"       |
+| enzyme                   |      Parsed from "cleave_at" and "restrict" in the "database[enzyme]" section in the config       |
+| allowed_miscleavages     |      Parsed from "missed_cleavages" in the "database[enzyme]" section in the config       |
+| min_peptide_length       |      Parsed from "min_len" in the "database[enzyme]" section in the config       |
+| max_peptide_length       |      Parsed from "max_len" in the "database[enzyme]" section in the config      |
+| fixed_mods               |      Parsed from "static_mods" in the "database" section in the config      |
+| variable_mods            |      Parsed from "variable_mods" in the "database" section in the config       |
+| max_mods                 |      Parsed from "max_variable_mods" in the "database" section in the config       |
+| min_precursor_charge     |      Parsed as first value from "precursor_charge" list       |
+| max_precursor_charge     |      Parsed as last value from "precursor_charge" list       |
+| quantification_method    |      Not parsed       |
+| protein_inference        |      Not parsed        |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
+
+### Spectronaut
+*Parsed parameter file: .setup.txt*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      Spectronaut (fixed)      |
+| software_version         |     Parsed from first line        |
+| search_engine            |     Spectronaut (fixed)        |
+| search_engine_version    |     Parsed from first line        |
+| ident_fdr_psm            |     Parsed from line "Precursor Qvalue Cutoff: X"        |
+| ident_fdr_peptide        |     Not parsed        |
+| ident_fdr_protein        |     Parsed from line "Protein Qvalue Cutoff: X"        | 
+| enable_match_between_runs|     False (fixed)       |
+| precursor_mass_tolerance |     Set to "Dynamic", if the calibration method is set to "Dynamic"<br>If the calibration method is set to "Static" or "Relative", tolerances are extracted from line "MS1 Tolerance: X", with Th or ppm units, respectively       |
+| fragment_mass_tolerance  |     Set to "Dynamic", if the calibration method is set to "Dynamic"<br>If the calibration method is set to "Static" or "Relative", tolerances are extracted from line "MS2 Tolerance: X", with Th or ppm units, respectively        |
+| enzyme                   |     Parsed from line "Enzymes / Cleavage Rules: X"        |
+| allowed_miscleavages     |     Parsed from line "Missed Cleavages: X"        |
+| min_peptide_length       |     Parsed from line "Min Peptide Length: X"        |
+| max_peptide_length       |     Parsed from line "Max Peptide Length: X"       |
+| fixed_mods               |     Parsed from line "Fixed Modifications: X"       |
+| variable_mods            |     Parsed from line "Variable Modifications: X"        |
+| max_mods                 |     Parsed from line "Max Variable Modifiations: X"        |
+| min_precursor_charge     |     If Peptide Charge is set to False, not parsed<br>If not, parsed from line "Peptide Charge: X"        |
+| max_precursor_charge     |     If Peptide Charge is set to False, not parsed<br>If not, parsed from line "Peptide Charge: X"        |
+| quantification_method    |     Parsed from line "Quantity MS Level: X"        |
+| protein_inference        |     Parsed from line "Inference Algorithm: X"        |
+| predictors_library       |     Not parsed        |
+| scan_window              |     Parsed from line "Cross-Run Normalization: X"        |
+
+### Wombat
+*Parsed parameter file: .yaml*

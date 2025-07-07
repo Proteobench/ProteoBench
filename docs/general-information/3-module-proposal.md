@@ -38,7 +38,7 @@ We advise to send an email to minimum one expert that can provide feedback on th
 * Is the proposed data well suited for the aim of the module?
 * What workflow runs (tools, parameters) should be included in the comparison when we release the module?
 
-**A template for this email can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/general-information/templates_emails_module_proposal/first_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.**
+**A template for this email can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/templates_emails_module_proposal/first_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.**
 We ask in the email that expert(s) answer within two weeks. If an expert accepts to contribute, all discussions should take place publicly on GitHub (an email template to send to expert(s) after they accept to contribute is available at the bottom of this document).
 
 Switch to the label "waiting for expert input". It can be switched to "under development" after discussions with expert(s). In such case, experts should be listed as contributors of the module and mentionned in all communications about it. Discussions should take place publicly on GitHub. 
@@ -57,8 +57,8 @@ Send an email to minimum one expert that can provide feedback on the proposal su
 * How clear is the documentation?
 
 Expert(s) should have access to an online version of the module, we ask that they signify they acceptance/refusal within two weeks. 
-**A template for this email can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/general-information/templates_emails_module_proposal/second_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.** If an expert accepts to contribute, all discussions should take place publicly on GitHub (find below an email template to send to expert(s) after they accept to contribute).
+**A template for this email can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/templates_emails_module_proposal/second_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.** If an expert accepts to contribute, all discussions should take place publicly on GitHub (find below an email template to send to expert(s) after they accept to contribute).
 
 # Information to send to experts when they accept to give inputs
 
-When an expert accepts to contribute to the discussion of a new module, the coordinator should send them a detailed description on how to create a github account and comment in the discussion. **A template for this email can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/general-information/templates_emails_module_proposal/help_for_contributing_expert.txt). Do not forget to put proteobench@eubic-ms.org in CC.**
+When an expert accepts to contribute to the discussion of a new module, the coordinator should send them a detailed description on how to create a github account and comment in the discussion. **A template for this email can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/templates_emails_module_proposal/help_for_contributing_expert.txt). Do not forget to put proteobench@eubic-ms.org in CC.**

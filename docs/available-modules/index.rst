@@ -21,7 +21,7 @@ Links to active modules
 .. toctree::
    :maxdepth: 2
    :glob:
-   :caption: Links to their documentation
+   :caption: Links to the documentation of active modules
 
    active-modules/index
 
@@ -34,6 +34,6 @@ Links to archived modules
 .. toctree::
    :maxdepth: 2
    :glob:
-   :caption: Links to documentation of the archived modules
+   :caption: Links to documentation of archived modules
 
    archived-modules/index

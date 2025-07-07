@@ -325,7 +325,33 @@ DIA-NN parameters are parsed either from the command line string found in the lo
 | scan_window              |      Not parsed       |
 
 ### QuantMS 
-TODO
+*QuantMS requires three files to be uploaded: a json file, a yml file with version information and an optional sdrf file.*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      quantms (fixed)    |
+| software_version         |      Parsed as the bigbio or nf-core/quantms version from the yml file       |
+| search_engine            |      Parsed as a list of all the search engines found under the keys in the yml file that start with "SEARCHENGINE"      |
+| search_engine_version    |      Parsed as a list of the versions of all the search engines under the keys in the yml file that start with "SEARCHENGINE"       |
+| ident_fdr_psm            |      Parsed from "psm_level_fdr_cutoff" from the json file       |
+| ident_fdr_peptide        |      Not parsed       |
+| ident_fdr_protein        |      Parsed from "protein_level_fdr_cutoff" from the json file      | 
+| enable_match_between_runs|      Not parsed      |
+| precursor_mass_tolerance |      Parsed from "precursor_mass_tolerance" from the json file      |
+| fragment_mass_tolerance  |      Parsed from "fragment_mass_tolerance" from the json file      |
+| enzyme                   |      Parsed from "enzyme" from the json file       |
+| allowed_miscleavages     |      Parsed from "allowed_missed_cleavages" from the json file       |
+| min_peptide_length       |      Parsed from "min_peptide_length" from the json file       |
+| max_peptide_length       |      Parsed from "max_peptide_length" from the json file     |
+| fixed_mods               |      Parsed from "fixed_mods" from the json file      |
+| variable_mods            |      Parsed from "variable_mods" from the json file       |
+| max_mods                 |      Parsed from "max_mods" from the json file       |
+| min_precursor_charge     |      Parsed from "min_precursor_charge" from the json file       |
+| max_precursor_charge     |      Parsed from "max_precursor_charge" from the json file       |
+| quantification_method    |      Parsed from "quantification_method" from the json file       |
+| protein_inference        |      Parsed from "protein_inference_method" from the json file        |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
 
 ### Sage
 *Parsed parameter file: .json*
@@ -387,3 +413,29 @@ TODO
 
 ### Wombat
 *Parsed parameter file: .yaml*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      Wombat (fixed)       |
+| software_version         |       Parsed from "version"      |
+| search_engine            |      various (fixed)       |
+| search_engine_version    |      Not parsed       |
+| ident_fdr_psm            |      Parsed from "ident_fdr_psm"       |
+| ident_fdr_peptide        |      Parsed from "ident_fdr_peptide"       |
+| ident_fdr_protein        |       Parsed from "ident_fdr_protein"      | 
+| enable_match_between_runs|      Parsed from "enable_match_between_runs"      |
+| precursor_mass_tolerance |       Parsed from "precursor_mass_tolerance"      |
+| fragment_mass_tolerance  |      Parsed from "fragment_mass_tolerance"       |
+| enzyme                   |     Parsed from "enzyme"        |
+| allowed_miscleavages     |      Parsed from "miscleavages"       |
+| min_peptide_length       |      Parsed from "min_peptide_length"       |
+| max_peptide_length       |      Parsed from "max_peptide_length"      |
+| fixed_mods               |     Parsed from "fixed_mods"       |
+| variable_mods            |     Parsed from "variable_mods"       |
+| max_mods                 |      Parsed from "max_mods"       |
+| min_precursor_charge     |      Parsed from "min_precursor_charge"       |
+| max_precursor_charge     |      Parsed from "max_precursor_charge"       |
+| quantification_method    |      Not parsed       |
+| protein_inference        |      Not parsed       |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |

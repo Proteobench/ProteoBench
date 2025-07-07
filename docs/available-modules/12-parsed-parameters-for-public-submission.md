@@ -120,7 +120,95 @@ DIA-NN parameters are parsed either from the command line string found in the lo
 | predictors_library       |      No --cfg: either "DIA-NN" if "--predictor" is set, or "User defined" if "--lib" is set to a path     |
 | scan_window              |       Parsed from line "Scan window radius set to X"      |
 
+### FragPipe
+*Parsed parameter file: .workflow*
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      Either FragPipe or FragPipe (DIA-NN quant), depending on input        |
+| software_version         |      Parsed from header        |
+| search_engine            |      MSFragger (fixed)       |
+| search_engine_version    |      Parsed either from header or from MSFragger binary path       |
+| ident_fdr_psm            |      If not DIA-NN quant, parsed from "phi-report.filter"<br>if DIA-NN quant, parsed from "diann.q-value"       |
+| ident_fdr_peptide        |      If not DIA-NN quant, parsed from "phi-report.filter"<br>if DIA-NN quant, not parsed      |
+| ident_fdr_protein        |      If not DIA-NN quant, parsed from "phi-report.filter"<br>if DIA-NN quant, parsed from "diann.q-value"       | 
+| enable_match_between_runs|      If not DIA-NN quant, parsed from "ionquant.mbr"<br>if DIA-NN quant, parsed by checking if "--reanalyse" is present in diann.fragpipe.cmd-opts        |
+| precursor_mass_tolerance |     Parsed from msfragger.precursor_mass_lower and msfragger.precursor_mass_upper        |
+| fragment_mass_tolerance  |     Parsed from msfragger.fragment_mass_tolerance      |
+| enzyme                   |     Parsed from msfragger.search_enzyme_name_1 and msfragger.search_enzyme_name_2        |
+| allowed_miscleavages     |     Parsed from msfragger.allowed_missed_cleavage_1        |
+| min_peptide_length       |     Parsed from msfragger.digest_min_length        |
+| max_peptide_length       |     Parsed from msfragger.digest_max_length        |
+| fixed_mods               |     Parsed from msfragger.table.fix-mods        |
+| variable_mods            |     Parsed from msfragger.table.var-mods        |
+| max_mods                 |     Parsed from msfragger.max_variable_mods_per_peptide        |
+| min_precursor_charge     |     FragPipe uses charge state information from data, if present. <br>So this value is set to 1 by default, but overwritten using "msfragger.misc.fragger.precursor-charge-lo" if "msfragger.override_charge" is set to True        |
+| max_precursor_charge     |     FragPipe uses charge state information from data, if present. <br>So this value is set to None by default, but overwritten using "msfragger.misc.fragger.precursor-charge-lo" if "msfragger.override_charge" is set to True        |
+| quantification_method    |     If not DIA-NN quant, not parsed (TODO)<br>if DIA-NN quant, parsed from "diann.quantification-strategy"        |
+| protein_inference        |     Parsed from protein-prophet.cmd-opts        |
+| predictors_library       |     Not parsed        |
+| scan_window              |     Not parsed        |
 
+### i2MassChroQ
+*Parsed parameter file: Project parameters.tsv*
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      i2MassChroQ (fixed)       |
+| software_version         |      Parsed from "i2MassChroQ_VERSION"       |
+| search_engine            |      Parsed from "AnalysisSoftware_name"       |
+| search_engine_version    |      Parsed from "AnalysisSoftware_version"       |
+| ident_fdr_psm            |      Parsed from "psm_fdr"       |
+| ident_fdr_peptide        |      Parsed from "peptide_fdr"       |
+| ident_fdr_protein        |      Parsed from "protein_fdr"       | 
+| enable_match_between_runs|      Parsed from "mcq_mbr"       |
+| precursor_mass_tolerance |      Parsed from either "sage_precursor_tol" or "spectrum, parent monoisotopic mass error minus/plus",<br> depending on search engine used       |
+| fragment_mass_tolerance  |      Parsed from either "sage_fragment_tol" or "spectrum, fragment monoisotopic mass error minus/plus",<br> depending on search engine used       |
+| enzyme                   |      If Sage is used: parsed from "sage_database_enzyme_cleave_at", "sage_data_enzyme_restrict", "sage_database_enzyme_c_terminal"<br>if X!Tandem is used: parsed from "protein, cleavage site"       |
+| allowed_miscleavages     |      Parsed from either "sage_database_enzyme_missed_cleavages" or "scoring, maximum missed cleavage sites",<br> depending on search engine used       |
+| min_peptide_length       |       Not parsed if X!Tandem is used <br> parsed from "sage_database_enzyme_min_len" if Sage is used      |
+| max_peptide_length       |       Not parsed if X!Tandem is used <br> parsed from "sage_database_enzyme_max_len" if Sage is used      |
+| fixed_mods               |       Parsed from either "sage_database_static_mods or "residue, modification mass", depending on search engine used      |
+| variable_mods            |       Parsed from either "sage_database_variable_mods" or "residue, potential modification mass", depending on search engine used      |
+| max_mods                 |       Not parsed if X!Tandem is used <br> parsed from "sage_database_max_variable_mods" if Sage is used      |
+| min_precursor_charge     |       Not parsed if X!Tandem is used <br> parsed from "sage_precursor_charge" if Sage is used       |
+| max_precursor_charge     |       Parsed from either "sage_precursor_charge" or "spectrum, maximum parent charge", depending on search engine used      |
+| quantification_method    |       Not parsed      |
+| protein_inference        |       Not parsed      |
+| predictors_library       |       Not parsed      |
+| scan_window              |       Not parsed      |
+
+### MaxQuant
+*Parsed parameter file: mqpar.xml*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      MaxQuant (fixed)       |
+| software_version         |      Parsed from "maxQuantVersion"       |
+| search_engine            |      Andromeda (fixed)       |
+| search_engine_version    |      Not parsed       |
+| ident_fdr_psm            |      Parsed from "peptideFdr"*       |
+| ident_fdr_peptide        |      Not parsed       |
+| ident_fdr_protein        |      Parsed from "proteinFdr"       | 
+| enable_match_between_runs|      Parsed from "matchBetweenRuns"       |
+| precursor_mass_tolerance |      Parsed from "mainSearchTol"       |
+| fragment_mass_tolerance  |      Parsed from "MatchTolerance"       |
+| enzyme                   |      Parsed from "\<enzymes>\<string\>"       |
+| allowed_miscleavages     |      Parsed from "maxMissedCleavages"       |
+| min_peptide_length       |      Parsed from "minPepLen" (version < 2.6) or "minPeptideLength" (version >= 2.6)       |
+| max_peptide_length       |      Not parsed if not DIA, otherwise parsed from "maxPeptideLengthForUnspecificSearch"      |
+| fixed_mods               |      Parsed from "fixedModifications"       |
+| variable_mods            |      Parsed from "variableModifications"       |
+| max_mods                 |      Parsed from "maxNmods"       |
+| min_precursor_charge     |      Not parsed       |
+| max_precursor_charge     |      Parsed from "maxCharge"       |
+| quantification_method    |      Not parsed       |
+| protein_inference        |      Not parsed       |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
+
+\*This may seem incorrect. However, when the setting "PSM FDR" is changed in the GUI, this affects the peptideFdr setting in the mqpar.xml.<br>There does not seem to be a peptide FDR setting in the GUI.
+
+### MSAID
+*Parsed parameter file: .csv*
 
 | Parameter                | Parsed value |
 |--------------------------|-------------|

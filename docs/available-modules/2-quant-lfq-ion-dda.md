@@ -168,7 +168,7 @@ For public submission, you can upload the same excel export, just make sure to h
 MSAngel allows to build piplenes for bottom-up MS analysis with a choice of search engines, validation strategy and the Proline quantification. 
 More information can be found [here](https://www.profiproteomics.fr/ms-angel/)
 
-### PEAKS (work in progress)
+### PEAKS
 When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that the sample names correspond to:
 - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01
 - LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02
@@ -176,6 +176,7 @@ When starting a new project and selecting the .RAW files, there is no need to mo
 - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01
 - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02
 - LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03
+
 Make sure to set Enzyme as trypsin,  Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DDA.
 In workflow section use the PEAKS Q (de novo assisted search quantification) option. Set the different parameters in "Data refine" and "DB search". In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide FDR and Protein Group FDR are set to 1%. 
 Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
@@ -318,6 +319,14 @@ Press it to submit.
 
 **If some parameters are not in your parameter file, it is important that 
 you provide them in the "comments" section.**
+
+**DISCLAIMER**: When submitting parameter files, please be aware that your dataset may contain identifiable information through embedded file paths. These paths can reveal personal usernames, system architecture, project names, and directory structures associated with e.g.
+- The FASTA database location
+- The RAW data location
+- Installation paths for the tools being used
+
+Such metadata can inadvertently disclose sensitive or institution-specific information.
+We recommend reviewing and sanitizing any file paths prior to submission to ensure compliance with your organization's data privacy policies and to protect personal or institutional identifiers.
 
 Once submitted, you will see a weblink that will prompt you to a 
 pull request on the github repository of the module. Please write down

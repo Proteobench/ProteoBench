@@ -108,7 +108,7 @@ After upload, you will get a link to a Github pull request associated with your 
 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
-### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
+### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE)
 We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.setup.txt" file for parameter parsing when doing public upload.
 
 In the windowsGUI:
@@ -132,12 +132,20 @@ By default, MaxDIA uses a contaminants-only fasta file that is located in the so
 
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
-### [PEAKS](https://www.bioinfor.com//) (work in progress)
-When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that Sample 1 -> 3 are Condition "A" and Sample 4 -> 6 are condition "B".
+### [PEAKS](https://www.bioinfor.com//)
+When starting a new project and selecting the .RAW files, it is important to modify the sample names given by PEAKS. Just make sure the samples have the following names:
+
+LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01,
+LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02,
+LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03, 
+LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01, 
+LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02,
+LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.
+
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
-In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide FDR and Protein Group FDR are set to 1%. 
-Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Peptide CSV" from the Label Free Quantification Exports in the "Export" tab. 
+In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide and Precursor FDR are set to 1%. 
+Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
 
 #### Troubleshooting: 
 
@@ -258,6 +266,14 @@ that some important information is missing, please add it in the
 Once you confirm that the metadata is correct (and corresponds to the 
 table you uploaded before generating the plot), a button will appear.
 Press it to submit. 
+
+**DISCLAIMER**: When submitting parameter files, please be aware that your dataset may contain identifiable information through embedded file paths. These paths can reveal personal usernames, system architecture, project names, and directory structures associated with e.g.
+- The FASTA database location
+- The RAW data location
+- Installation paths for the tools being used
+
+Such metadata can inadvertently disclose sensitive or institution-specific information.
+We recommend reviewing and sanitizing any file paths prior to submission to ensure compliance with your organization's data privacy policies and to protect personal or institutional identifiers.
 
 **If some parameters are not in your parameter file, it is important that 
 you provide them in the "comments" section.**

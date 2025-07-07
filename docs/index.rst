@@ -182,7 +182,7 @@ Available ProteoBench modules
     .. grid-item-card:: Label-free quantification of precursor ions with DIA (AIF)
         :columns: 6 6 4 4
         :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF
+        :link: available-modules/archived-modules/4-quant-lfq-ion-dia-aif.md
 
         :bdg-dark:`archived`
         ^^^

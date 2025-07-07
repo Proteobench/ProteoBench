@@ -34,7 +34,7 @@ The parameters that are retrieved from the parameter files are the following:
 
 ## Tool-specific information
 ### AlphaDIA
-*Parsed parameter file: log.txt*
+*Parsed parameter file: log.txt* #TODO: add link to examples for each of the parsed files (link to GitHub test files)
 
 | Parameter                | Parsed value |
 |--------------------------|-------|
@@ -42,53 +42,54 @@ The parameters that are retrieved from the parameter files are the following:
 | software_version         |   Parsed from log file header    |
 | search_engine            |    AlphaDIA (fixed)   |
 | search_engine_version    |   Not parsed as no difference with software_version    |
-| ident_fdr_psm            |   "fdr" setting in "fdr" branch of the config    |
+| ident_fdr_psm            |   "fdr" setting in "fdr" section of the config    |
 | ident_fdr_peptide        |   Not parsed as not an option    |
-|ident_fdr_protein         |   "fdr" setting in "fdr" branch of the config    | 
+|ident_fdr_protein         |   "fdr" setting in "fdr" section of the config    | 
 | enable_match_between_runs|    Set to true if MBR step enabled, else False   |
-| precursor_mass_tolerance |   "target_ms1_tolerance" setting in "search" branch of the config    |
-| fragment_mass_tolerance  |   "target_ms2_tolerance" setting in "search" branch of the config   |
-| enzyme                   |   "enzyme" setting in "library_prediction" branch of the config   |
-| allowed_miscleavages     |   "missed_cleavages" setting in "library_prediction" branch of the config    |
-| min_peptide_length       |   Minimum value in "precursor_len" setting in "library_prediction" branch of the config    |
-| max_peptide_length       |    Maximum value in "precursor_len" setting in "library_prediction" branch of the config   |
-| fixed_mods               |    "fixed_modifications" setting in "library_prediction" branch of the config   |
-| variable_mods            |   "variable_modifications" setting in "library_prediction" branch of the config    |
-| max_mods                 |    "max_var_mod_num" setting in "library_prediction" branch of the config   |
-| min_precursor_charge     |    Minimum value in "precursor_charge" setting in "library_prediction" branch of the config   |
-| max_precursor_charge     |   Maximum value in "precursor_charge" setting in "library_prediction" branch of the config    |
+| precursor_mass_tolerance |   "target_ms1_tolerance" setting in "search" section of the config    |
+| fragment_mass_tolerance  |   "target_ms2_tolerance" setting in "search" section of the config   |
+| enzyme                   |   "enzyme" setting in "library_prediction" section of the config   |
+| allowed_miscleavages     |   "missed_cleavages" setting in "library_prediction" section of the config    |
+| min_peptide_length       |   Minimum value in "precursor_len" setting in "library_prediction" section of the config    |
+| max_peptide_length       |    Maximum value in "precursor_len" setting in "library_prediction" section of the config   |
+| fixed_mods               |    "fixed_modifications" setting in "library_prediction" section of the config   |
+| variable_mods            |   "variable_modifications" setting in "library_prediction" section of the config    |
+| max_mods                 |    "max_var_mod_num" setting in "library_prediction" section of the config   |
+| min_precursor_charge     |    Minimum value in "precursor_charge" setting in "library_prediction" section of the config   |
+| max_precursor_charge     |   Maximum value in "precursor_charge" setting in "library_prediction" section of the config    |
 | quantification_method    |    DirectLFQ (fixed)   |
-| protein_inference        |   "inference_strategy" in "fdr" branch of the config    |
+| protein_inference        |   "inference_strategy" in "fdr" section of the config    |
 | predictors_library       |   AlphaPeptDeep (fixed)    |
 | scan_window              |   Not parsed    |
 
 ### AlphaPept
-
+*Parsed parameter file: .yaml*
 | Parameter                | Parsed value |
 |--------------------------|-------------|
-| software_name            |             |
-| software_version         |             |
-| search_engine            |             |
-| search_engine_version    |             |
-| ident_fdr_psm            |             |
-| ident_fdr_peptide        |             |
-| ident_fdr_protein        |             | 
-| enable_match_between_runs|             |
-| precursor_mass_tolerance |             |
-| fragment_mass_tolerance  |             |
-| enzyme                   |             |
-| allowed_miscleavages     |             |
-| min_peptide_length       |             |
-| max_peptide_length       |             |
-| fixed_mods               |             |
-| variable_mods            |             |
-| max_mods                 |             |
-| min_precursor_charge     |             |
-| max_precursor_charge     |             |
-| quantification_method    |             |
-| protein_inference        |             |
-| predictors_library       |             |
-| scan_window              |             |
+| software_name            |       AlphaPept (fixed)      |
+| software_version         |      "version" in "summary" section of the config       |
+| search_engine            |      AlphaPept (fixed)       |
+| search_engine_version    |      "version" in "summary" section of the config       |
+| ident_fdr_psm            |       "peptide_fdr" in "search" section of the config      |
+| ident_fdr_peptide        |       Not parsed as not an option   |
+| ident_fdr_protein        |      "protein_fdr" in "search" section of the config       | 
+| enable_match_between_runs|       True if "match" is enabled in "workflow" section of the config, else False      |
+| precursor_mass_tolerance |      "prec_tol" in "search" section of the config       |
+| fragment_mass_tolerance  |      "frag_tol" in "search" section of the config       |
+| enzyme                   |      "protease" in "fasta" section of the config       |
+| allowed_miscleavages     |      "n_missed_cleavages" in "fasta" section of the config       |
+| min_peptide_length       |      "pep_length_min" in "fasta" section of  the config       |
+| max_peptide_length       |      "pep_length_max" in "fasta" section of the config       |
+| fixed_mods               |       "mods_fixed" & "mods_fixed_terminal" & "mods_fixed_terminal_prot" in "fasta" section of the config      |
+| variable_mods            |      "mods_variable" & "mods_variable_terminal" & "mods_variable_terminal_prot" in "fasta" section of the config      |
+| max_mods                 |      "n_modifications_max" in "fasta" section of the config       |
+| min_precursor_charge     |      "iso_charge_min" in "features" section of the config       |
+| max_precursor_charge     |      "iso_charge_max" in "features" section of the config       |
+| quantification_method    |      Not parsed       |
+| protein_inference        |      Not parsed       |
+| predictors_library       |      Not parsed as not applicable       |
+| scan_window              |      Not parsed       |
+
 ### DIA-NN
 
 We use the log file and extract the software version. Then, find the command line string that was used to run DIA-NN and parse it to extract settings.

@@ -4,7 +4,7 @@ We automatically retrieve the parameters used for a specific worklow run in the 
 
 ## General comments on the parameters that are retrieved by ProteoBench
 
-The parameters that are retrieve from the parameter files are the following:
+The parameters that are retrieved from the parameter files are the following:
 
 - "software_name": name of the software tool.
 - "software_version": version of the software tool used to generate the run.
@@ -26,10 +26,7 @@ The parameters that are retrieve from the parameter files are the following:
 - "quantification_method": quantification method. This applies to software tools that offer different strategies for quantification.
 - "protein_inference": 
 - "predictors_library": library used for the analysis in DIA. With the current module, we do not support experimentally generated libraries, but some software tools allow to use different in-silico-generated libraries.
-- "abundance_normalization_ions":
 - "scan_window":
-
-
 
 ## Tool-specific considerations
 

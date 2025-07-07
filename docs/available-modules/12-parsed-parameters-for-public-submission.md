@@ -207,31 +207,34 @@ DIA-NN parameters are parsed either from the command line string found in the lo
 
 \*This may seem incorrect. However, when the setting "PSM FDR" is changed in the GUI, this affects the peptideFdr setting in the mqpar.xml.<br>There does not seem to be a peptide FDR setting in the GUI.
 
-### MSAID
+### MSAID*
 *Parsed parameter file: .csv*
 
 | Parameter                | Parsed value |
 |--------------------------|-------------|
-| software_name            |             |
-| software_version         |             |
-| search_engine            |             |
-| search_engine_version    |             |
-| ident_fdr_psm            |             |
-| ident_fdr_peptide        |             |
-| ident_fdr_protein        |             | 
-| enable_match_between_runs|             |
-| precursor_mass_tolerance |             |
-| fragment_mass_tolerance  |             |
-| enzyme                   |             |
-| allowed_miscleavages     |             |
-| min_peptide_length       |             |
-| max_peptide_length       |             |
-| fixed_mods               |             |
-| variable_mods            |             |
-| max_mods                 |             |
-| min_precursor_charge     |             |
-| max_precursor_charge     |             |
-| quantification_method    |             |
-| protein_inference        |             |
-| predictors_library       |             |
-| scan_window              |             |
+| software_name            |      MSAID (default)       |
+| software_version         |      Not parsed       |
+| search_engine            |      Parsed from "Algorithm"       |
+| search_engine_version    |      Parsed from "Algorithm"       |
+| ident_fdr_psm            |      0.01 (fixed)       |
+| ident_fdr_peptide        |      0.01 (fixed)       |
+| ident_fdr_protein        |      0.01 (fixed)       | 
+| enable_match_between_runs|      True if "Quan in all file" or "MBR" is found in "quantification_method"      |
+| precursor_mass_tolerance |      Not parsed       |
+| fragment_mass_tolerance  |      Parsed from "Fragment Mass Tolerance"       |
+| enzyme                   |      Parsed from "Enzyme"       |
+| allowed_miscleavages     |      Parsed from "Max. Missed Cleavage Sites"       |
+| min_peptide_length       |      Parsed from "Min. Peptide Length"       |
+| max_peptide_length       |      Parsed from "Max. Peptide Length"       |
+| fixed_mods               |      Parsed from "Static Modifications"       |
+| variable_mods            |      Parsed from "Variable Modifications"       |
+| max_mods                 |      Parsed from "Maximum Number of Modifications"       |
+| min_precursor_charge     |      Parsed from "Min. Peptide Charge"       |
+| max_precursor_charge     |      Parsed from "Max. Peptide Charge"       |
+| quantification_method    |      Parsed from "Quantification Type"       |
+| protein_inference        |      Not parsed       |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
+
+*ProteoBench's compatibility with MSAID output is still a work in progress.
+

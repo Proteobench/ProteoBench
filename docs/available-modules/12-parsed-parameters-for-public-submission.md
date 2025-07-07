@@ -91,15 +91,36 @@ The parameters that are retrieved from the parameter files are the following:
 | scan_window              |      Not parsed       |
 
 ### DIA-NN
+*Parsed parameter file: log.txt*
+DIA-NN parameters are parsed either from the command line string found in the log file or, if the --cfg flag is used (meaning a custom configuration file was used, which we do not have access to), the parameters are parsed from the free text underneath the command line string. For robust parameter parsing, we recommend not using the --cfg flag.
 
-We use the log file and extract the software version. Then, find the command line string that was used to run DIA-NN and parse it to extract settings.
-Default values are set for parameters that are not specified in the command line:
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      DIA-NN (fixed)       |
+| software_version         |      Parsed from log file header       |
+| search_engine            |       DIA-NN (fixed)      |
+| search_engine_version    |      Parsed from log file header       |
+| ident_fdr_psm            |      No --cfg: value set for "--qvalue"<br>--cfg: parsed from line "Output will be filtered at X FDR"       |
+| ident_fdr_peptide        |      Not parsed as not an option       |
+| ident_fdr_protein        |      Not parsed as not an option       | 
+| enable_match_between_runs|      No --cfg: True if "--reanalyse" is set, else false<br>--cfg: True if "reanalyse them" (version <1.8) or "MBR enabled" (version >1.8) is mentioned       |
+| precursor_mass_tolerance |      Value set for "--mass-acc-ms1". If this parameter is not set, it means tolerance optimization<br>will be performed. In that case,as well as if --cfg is set, the value will be parsed from the first<br> occurence of the line "Recommended MS1 mass accuracy setting: X ppm"      |
+| fragment_mass_tolerance  |      Value set for "--mass-acc". If this parameter is not set, it means tolerance optimization will<br> be performed. In that case, as well as if --cfg is set, the value will be parsed from line <br>"Optimised mass accuracy: X ppm"      |
+| enzyme                   |     No --cfg: value set for "--cut"<br>--cfg: parsed from line "In silico digest will involve cuts at X but excluding cuts at X"        |
+| allowed_miscleavages     |     No --cfg: value set for "--missed-cleavages"<br>--cfg: parsed from line "Maximum number of missed cleavages set to X"        |
+| min_peptide_length       |     No --cfg: value set for "--min-pep-len"<br>--cfg: parsed from the line "Min peptide length set to X"        |
+| max_peptide_length       |     No --cfg: value set for "--max-pep-len"<br>--cfg: parsed from the line "Max peptide length set to X"        |
+| fixed_mods               |     No --cfg: value set for "--mod"<br>--cfg: parsed from the lines "X enabled as a fixed modification" and "Modification X with mass<br> delta X at X will be considered as fixed        |
+| variable_mods            |     No --cfg: value set for "--var-mod"<br>--cfg: parsed form line "Modification X with mass delta X at X will be considered as variable"        |
+| max_mods                 |      No --cfg: value set for "var-mods"<br>--cfg: parsed from line "Maximum number of variable modifications set to X"       |
+| min_precursor_charge     |      No --cfg: value set for "min-pr-charge"<br>--cfg: parsed from line "Min precursor charge set to X"      |
+| max_precursor_charge     |      No --cfg: value set for "max-pr-charge"<br>--cfg: parsed from line "Max precursor charge set to X"      |
+| quantification_method    |     No --cfg: either "Legacy" (if --direct-quant set), "QuantUMS high-accuracy if --high-acc set<br>or "QuantUMS high-precision (default)<br>--cfg: parsed from line "X quantification mode"       |
+| protein_inference        |      No --cfg: value set for "--pg-level" or "no-prot-inf", with the mapping {"0": "Isoforms", "1": "Protein_names", "2": "Genes"}<br>--cfg: parsed from line "Implicit protein grouping: X"       |
+| predictors_library       |      No --cfg: either "DIA-NN" if "--predictor" is set, or "User defined" if "--lib" is set to a path     |
+| scan_window              |       Parsed from line "Scan window radius set to X"      |
 
-- "enable_match_between_runs": False
-- "quantification_method": "QuantUMS high-precision"
-- "protein_inference": "Genes"
 
-If the --cfg flag is used (meaning a configuration file was used), the parameters are parsed from the free text underneath the cmd line.
 
 | Parameter                | Parsed value |
 |--------------------------|-------------|

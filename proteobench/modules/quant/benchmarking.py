@@ -2,11 +2,12 @@
 Benchmarking functionality for quantification modules.
 """
 
-from typing import Optional, Tuple, Dict, List, Callable, Type
-import pandas as pd
-from pandas import DataFrame
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial, wraps
+from typing import Callable, Dict, List, Optional, Tuple, Type
+
+import pandas as pd
+from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.exceptions import (
@@ -142,9 +143,12 @@ def run_benchmarking(
 
     # Convert to standard format
     standard_format, replicate_to_raw = _convert_format(parse_settings, input_df)
+    standard_format.to_csv("/mnt/d/Task1SearchTask/standard_format.csv", index=False)
+    print(replicate_to_raw)
 
     # Create quantification scores
     quant_score = _create_quant_scores(precursor_column_name, parse_settings)
+    print(quant_score)
 
     # Generate intermediate structure
     intermediate_metric_structure = _generate_intermediate(quant_score, standard_format, replicate_to_raw)
@@ -206,8 +210,8 @@ def run_benchmarking_with_timing(
         A tuple containing the intermediate data structure, all data points, the input DataFrame,
         and a dictionary of timing information.
     """
-    from contextlib import contextmanager
     import time
+    from contextlib import contextmanager
 
     timings: Dict[str, float] = {}
 

@@ -104,6 +104,7 @@ class PlotDataPoint:
             "Spectronaut": "#007548",
             "FragPipe (DIA-NN quant)": "#F89008",
             "MSAID": "#bfef45",
+            "MetaMorpheus": "#637C7A",
             "Proteome Discoverer": "#911eb4",
             "PEAKS": "#f032e6",
             "quantms": "#f5e830",

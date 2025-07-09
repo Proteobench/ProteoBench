@@ -7,6 +7,7 @@
 "PEAKS" = "parse_settings_peaks.toml"
 "ProlineStudio" = "parse_settings_proline.toml"
 "quantms" = "parse_settings_msstats.toml"
+"MetaMorpheus" = "parse_settings_metamorpheus.toml"
 "Sage" = "parse_settings_sage.toml"
 "WOMBAT" = "parse_settings_wombat.toml"
 "Custom" = "parse_settings_custom.toml"

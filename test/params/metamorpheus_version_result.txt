@@ -1,0 +1,216 @@
+MetaMorpheus: version 1.1.1
+Time to run task: 00:24:42.2158777
+
+--------------------------------------------------
+
+All target PSMs with q-value <= 0.01: 566491
+All target peptides with q-value <= 0.01: 51699
+All target protein groups with q-value <= 0.01 (1% FDR): 6820
+
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - Target PSMs with q-value <= 0.01: 88048
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - Target peptides with q-value <= 0.01: 36500
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - Target protein groups within 1 % FDR: 5381
+
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - Target PSMs with q-value <= 0.01: 93319
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - Target peptides with q-value <= 0.01: 37004
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - Target protein groups within 1 % FDR: 5569
+
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - Target PSMs with q-value <= 0.01: 99170
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - Target peptides with q-value <= 0.01: 38941
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - Target protein groups within 1 % FDR: 5823
+
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - Target PSMs with q-value <= 0.01: 91761
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - Target peptides with q-value <= 0.01: 37352
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - Target protein groups within 1 % FDR: 5543
+
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - Target PSMs with q-value <= 0.01: 93761
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - Target peptides with q-value <= 0.01: 36456
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - Target protein groups within 1 % FDR: 5488
+
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - Target PSMs with q-value <= 0.01: 100465
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - Target peptides with q-value <= 0.01: 39110
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - Target protein groups within 1 % FDR: 5665
+
+
+
+--------------------------------------------------
+
+Engine Results:
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:00:58.6527075
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:01:11.2375688
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:01:09.3881692
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:01:05.1028368
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:01:08.7863024
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:01:06.6787281
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:03:31.5525307
+PSMs within 1% FDR: 573058
+Delta Score Used for FDR Analysis: False
+
+************************************************************
+*       Metrics for Determination of PEP Using Binary Classification      
+*-----------------------------------------------------------
+*       Accuracy:  0.9864796752835339
+*       Area Under Curve:  0.9978210273940555
+*       Area under Precision recall Curve:  0.9944849785682738
+*       F1Score:  0.9703655800935491
+*       LogLoss:  0.05933045703067658
+*       LogLossReduction:  0.9235982152824831
+*       PositivePrecision:  0.9747688512806845
+*       PositiveRecall:  0.9660040572720546
+*       NegativePrecision:  0.9899212169587926
+*       NegativeRecall:  0.9925664112609411
+*       Count of Ambiguous Peptides Removed:  0
+*       Q-Value Cutoff for Training Targets:  0.005
+*       Targets Used for Training:  48949
+*       Decoys Used for Training:  164655
+************************************************************
+
+
+
+Engine type: ModificationAnalysisEngine
+Time to run engine: 00:00:01.0670508
+Localized mods seen below q-value 0.01:
+	Carbamidomethyl on C	10561
+	Oxidation on M	3175
+	Carbamidomethyl on U	1
+(Approx) Additional localized but protein ambiguous mods seen below q-value 0.01:
+
+(Approx) Additional unlocalized mods seen below q-value 0.01:
+
+(Approx) Additional unlocalized modification formulas seen below q-value 0.01:
+
+
+All mods in database limited to peptides observed in the results:
+
+
+
+Engine type: ProteinParsimonyEngine
+Time to run engine: 00:00:34.8736420
+
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:09.2075109
+Number of proteins within 1% FDR: 6888
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.3300854
+PSMs within 1% FDR: 89091
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.6216195
+PSMs within 1% FDR: 92924
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.3622842
+PSMs within 1% FDR: 100198
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.5090688
+PSMs within 1% FDR: 101567
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.5447588
+PSMs within 1% FDR: 94942
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.3313949
+PSMs within 1% FDR: 94467
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:00.7807400
+peptides within 1% FDR: 36977
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:00.8842029
+peptides within 1% FDR: 37717
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:00.8755609
+peptides within 1% FDR: 39357
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:00.9701162
+peptides within 1% FDR: 39428
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:00.9904085
+peptides within 1% FDR: 36922
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:00.8729745
+peptides within 1% FDR: 37451
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.7194776
+Number of proteins within 1% FDR: 5434
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:03.6471405
+Number of proteins within 1% FDR: 5598
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.5796438
+Number of proteins within 1% FDR: 5881
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:09.8691098
+Number of proteins within 1% FDR: 5721
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.4626682
+Number of proteins within 1% FDR: 5542
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.4007934
+Number of proteins within 1% FDR: 5624
+

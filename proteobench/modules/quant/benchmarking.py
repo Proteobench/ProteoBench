@@ -143,12 +143,9 @@ def run_benchmarking(
 
     # Convert to standard format
     standard_format, replicate_to_raw = _convert_format(parse_settings, input_df)
-    standard_format.to_csv("/mnt/d/Task1SearchTask/standard_format.csv", index=False)
-    print(replicate_to_raw)
 
     # Create quantification scores
     quant_score = _create_quant_scores(precursor_column_name, parse_settings)
-    print(quant_score)
 
     # Generate intermediate structure
     intermediate_metric_structure = _generate_intermediate(quant_score, standard_format, replicate_to_raw)

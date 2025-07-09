@@ -607,7 +607,6 @@ def _load_metamorpheus(input_csv: str) -> pd.DataFrame:
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
-    print(mapper)
     input_data_frame["Proteins"] = input_data_frame["Protein Group"].map(
         lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
     )

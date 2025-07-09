@@ -31,7 +31,7 @@ def load_files(file1: Union[str, IO], file2: Union[str, IO]) -> Tuple[Union[str,
         nonlocal versions_line, settings
 
         # Case 1: Path
-        if isinstance(file, (str, PosixPath)):
+        if isinstance(file, (str, PosixPath, Path)):
             # Try TOML
             try:
                 with open(file, "rb") as f:
@@ -137,11 +137,7 @@ def format_tolerances(tolerance: str) -> str:
 def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
     params = ProteoBenchParameters()
 
-    print(type(file_path_1), type(file_path_2))
-
     versions_line, settings = load_files(file_path_1, file_path_2)
-    print(f"Versions line: {versions_line}")
-    print(f"Settings: {settings}")
 
     params.software_name = "MetaMorpheus"
     params.search_engine = "MetaMorpheus"

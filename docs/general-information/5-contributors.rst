@@ -128,6 +128,12 @@ People who contributed to ProteoBench, in alphabetical order:
     *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
 
 .. line-block::
+    **Kevin Velghe**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+
+.. line-block::
     **Veit Schwämmle**
     *Department of Biochemistry and Molecular Biology, University of Southern Denmark, Odense, Denmark*
 
@@ -162,3 +168,4 @@ People who contributed to ProteoBench, in alphabetical order:
     *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *VIB-Proteomics Core facility*
     *Core for Life (C4L)*
+

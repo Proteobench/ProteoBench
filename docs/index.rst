@@ -188,7 +188,7 @@ Available ProteoBench modules
         ^^^
         Benchmark the quantification accuracy of label-free data independent acquisition workflows (All-Ion Fragmentation - AIF)
         using a multi-species sample analysed with an Orbitrap.
-        *A discussion on oxydation-related issues with the data used for this module can be found here:* https://github.com/orgs/Proteobench/discussions/641.
+        *A discussion on oxidation-related issues with the data used for this module can be found here:* https://github.com/orgs/Proteobench/discussions/641.
 
 
 .. button-ref:: available-modules/index

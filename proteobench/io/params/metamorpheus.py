@@ -162,6 +162,9 @@ def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
     params.protein_inference = "Parsimony" if settings["SearchParameters"]["DoParsimony"] == True else None
     params.abundance_normalization_ions = True if settings["SearchParameters"]["Normalize"] == True else False
     params.ident_fdr_psm = "{}".format(settings["CommonParameters"]["QValueThreshold"])
+    params.ident_fdr_peptide = None
+    params.ident_fdr_protein = None
+    params.search_engine_version = None
     return params
 
 

@@ -608,7 +608,7 @@ def _load_metamorpheus(input_csv: str) -> pd.DataFrame:
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
     input_data_frame["Proteins"] = input_data_frame["Protein Group"].map(
-        lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
+        lambda x: ";".join([mapper.get(protein, protein) for protein in x.split(";")])
     )
     # TODO: discuss how to handle multiple mapped precursors
     input_data_frame = input_data_frame[input_data_frame["Full Sequences Mapped"] == 1]

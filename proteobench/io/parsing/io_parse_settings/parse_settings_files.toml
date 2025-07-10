@@ -67,6 +67,7 @@
 "FragPipe" = "parse_settings_fragpipe.toml"
 "i2MassChroQ" = "parse_settings_i2massChroQ.toml"
 "MaxQuant" = "parse_settings_maxquant.toml"
+"MetaMorpheus" = "parse_settings_metamorpheus.toml"
 "MSAngel" = "parse_settings_msangel.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 "ProlineStudio" = "parse_settings_proline.toml"

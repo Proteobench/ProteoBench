@@ -208,7 +208,7 @@ parameter json `params_<timestamp>.json` produced by the `pipeline-info` step.
 To upload MetaMorpheus output compatible with ProteoBench, you need to:
 1. Run a Search Task on the input data **(do not change the file names)**, using the FASTA provided by the module.
 2. Quantification needs to be performed in LFQ mode (using FlashLFQ). You can do this by enabling "LFQ" in the Quantification section of the Search Task configuration (this should be enabled by default) in the GUI, or by setting "DoQuantification = true" in the .toml in CLI
-3. Upload the AllQuantifiedPeaks.tsv file to ProteoBench to calculate the precursor ratios.
+3. Upload the AllQuantifiedPeaks.tsv file (found in the Task-specific folder) to ProteoBench to calculate the precursor ratios.
 4. For public submission, you need to upload **two** parameter files:
 a. The Task`<your-search-task-name>`config.toml* file that will be generated in the "Task Settings" folder. Make sure you select the config of the relevant Search Task.<br>**Important**: This is not the same .toml file used to run MetaMorpheus in CLI.
 b.the allResults.txt file that is outputted in the main output folder you specified for the search. This file is needed to parse the MetaMorpheus version.

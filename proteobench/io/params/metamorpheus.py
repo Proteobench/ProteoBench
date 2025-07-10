@@ -151,8 +151,12 @@ def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
     params.min_peptide_length = settings["CommonParameters"]["DigestionParams"]["MinPeptideLength"]
     params.max_peptide_length = settings["CommonParameters"]["DigestionParams"]["MaxPeptideLength"]
     params.max_mods = settings["CommonParameters"]["DigestionParams"]["MaxModsForPeptide"]
-    params.min_precursor_charge = None
-    params.max_precursor_charge = None
+    params.min_precursor_charge = settings["CommonParameters"]["PrecursorDeconvolutionParameters"][
+        "MinAssumedChargeState"
+    ]
+    params.max_precursor_charge = settings["CommonParameters"]["PrecursorDeconvolutionParameters"][
+        "MaxAssumedChargeState"
+    ]
     params.enable_match_between_runs = bool(settings["SearchParameters"]["MatchBetweenRuns"])
     params.quantification_method = "FlashLFQ"
     params.protein_inference = "Parsimony" if settings["SearchParameters"]["DoParsimony"] == True else None

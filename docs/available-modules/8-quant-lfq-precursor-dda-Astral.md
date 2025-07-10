@@ -32,7 +32,7 @@ For now, you can download the raw files via a private server:
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw)
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw)
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/datasets/raw_files/DDA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA/)
+Alternatively, you can download them from the ProteoBench server here: [https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/)
 
 **It is imperative not to rename the files once downloaded!**
 

@@ -2,7 +2,7 @@
 
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-independent acquisition (DIA) on a timsTOF (Bruker).
-It is similar to the DIA quantification module "ion-level" described [here](#4-quant-lfq-ion-dia-aif).
+It is similar to the DIA quantification module "precursor ion-level" described [here](#7-quant-lfq-precursor-dia-Astral_2Th).
 
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely dia-PASEF, on a timsTOF SCP (Bruker Corporation).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
@@ -66,8 +66,8 @@ The module is flexible in terms of what workflow the participants can run. Howev
 |PSM FDR|0.01|
 |Spectral Library|Predicted spectral library from FASTA|
 |Precursor charge state|1-5|
-|Precursor m/z range|380-980|
-|Fragment ion m/z range|150-2000|
+|Precursor m/z range|400-1000|
+|Fragment ion m/z range|100-1700|
 |Endopeptidase|Trypsin/P|
 |Fixed modifications|Carbamidomethylation (C)|
 |Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
@@ -100,7 +100,7 @@ After upload, you will get a link to a Github pull request associated with your 
 ## Important Tool-specific settings
 
 ### [DIA-NN](https://github.com/vdemichev/DiaNN)
-1. Import Raw files
+1. Import .d files
 2. Add FASTA but do not select "Contaminants" since these are already included in the FASTA file
 3. Turn on FASTA digest for library-free search / library generation (automatically activates deep-learning based spectra, RTs, and IMs prediction).
 4. Do not set verbosity/Log Level higher than 1, otherwise parameter parsing will not work correctly.
@@ -115,15 +115,30 @@ After upload, you will get a link to a Github pull request associated with your 
 
 ### [FragPipe - DIA-NN](https://github.com/Nesvilab/FragPipe)
 1. Load the DIA_SpecLib_Quant workflow
-2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
+2. Following import of .d files, assign experiments "by File Name" right above the list of raw files.
 3. **Make sure contaminants are not added when you add decoys to the database**. 
 4. Upload “*report.tsv” in order for Proteobench to calculate the ion ratios. For public submission, please provide the parameter file “fragpipe.workflow”  that correspond to your search.
 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
-### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
-We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.s
-etup" file for parameter parsing when doing public upload.
+### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE)
+We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.setup.txt" file for parameter parsing when doing public upload.
+
+In the windowsGUI:
+
+1. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
+2. In the "Analysis" tab, select "Set up a DirectDIA Analysis from file"
+3. Select the folder containting the raw files in order to load them
+4. Once loaded, you optionally can change the name of the project ("Condition" by default)
+5. In the next tab, click on "Import..." to import the proteobench fasta. Next, check the box corresponding to the proteobench fasta on the left panel, and click on "Next".
+6. Choose your settings in the next tab
+7. In the next tab, fill "A" and "B" in the "Condition" column:
+   "A" for "ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494","ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500", "ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506";
+   "B" for "ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496","ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502","ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508" 
+9. Do not tick any GO terms or Library exensions in the next tabs
+10. Finish the settings on the next tab in order to start the search
+11. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
+12. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
 
 ### [MaxDIA](https://www.maxquant.org/) (work in progress)
 By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
@@ -131,25 +146,19 @@ By default, MaxDIA uses a contaminants-only fasta file that is located in the so
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
 ### [PEAKS](https://www.bioinfor.com//)
-When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS, so they match the exact .RAW file names. 
-More specifically, 
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
+When starting a new project and selecting the .d files for analysis, you will need to modify the sample names given by PEAKS. More specifically, 
 
-Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
+LFQ_ttSCP_diaPASEF_Condition_A_Sample_Alpha_01, 
+LFQ_ttSCP_diaPASEF_Condition_A_Sample_Alpha_02,
+LFQ_ttSCP_diaPASEF_Condition_A_Sample_Alpha_03,
+LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_01,
+LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_02,
+LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_03
+
+Make sure to set Enzyme as trypsin, Instrument as timsTOF, Fragment as CID and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
-In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Precursor or Peptide FDR and Protein Group FDR are set to 1%. 
+In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Precursor and Peptide FDR are set to 1%. 
 Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
-
-#### Troubleshooting: 
-
-Since the Thermo DIA data .raw files were acquired using a staggered window approach it is highly recommended to convert and demultiplex the .RAW files first into .mzML using MSConvert.
-Detailed instructions for this process can be found [here](https://fragpipe.nesvilab.org/docs/tutorial_convert.html#convert-thermo-dia-raw-files-with-overlappingstaggered-windows).
-
 
 ### Custom format
 
@@ -159,12 +168,12 @@ If you do not use a tool that is compatible with ProteoBench, you can upload a t
 - Proteins: column containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
 - Charge: Charge state of measured peptide ions
 - Modified sequence: column containing the sequences and the localised modifications in the [ProForma standard](https://www.psidev.info/proforma) format. 
-- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01: Quantitative column sample 1
-- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02: Quantitative column sample 2
-- LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03: Quantitative column sample 3
-- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01: Quantitative column sample 4
-- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02: Quantitative column sample 5
-- LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+- ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494: Quantitative column sample 1
+- ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500: Quantitative column sample 2
+- ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506: Quantitative column sample 3
+- ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496: Quantitative column sample 4
+- ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502: Quantitative column sample 5
+- ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508: Quantitative column sample 6
 
 the table must not contain non-validated ions. If you have any issue, contact us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
 
@@ -264,6 +273,14 @@ that some important information is missing, please add it in the
 Once you confirm that the metadata is correct (and corresponds to the 
 table you uploaded before generating the plot), a button will appear.
 Press it to submit. 
+
+**DISCLAIMER**: When submitting parameter files, please be aware that your dataset may contain identifiable information through embedded file paths. These paths can reveal personal usernames, system architecture, project names, and directory structures associated with e.g.
+- The FASTA database location
+- The RAW data location
+- Installation paths for the tools being used
+
+Such metadata can inadvertently disclose sensitive or institution-specific information.
+We recommend reviewing and sanitizing any file paths prior to submission to ensure compliance with your organization's data privacy policies and to protect personal or institutional identifiers.
 
 **If some parameters are not in your parameter file, it is important that 
 you provide them in the "comments" section.**

@@ -1057,7 +1057,9 @@ class QuantUIObjects:
 
         try:
             params = self.ionmodule.load_params_file(
-                self.user_input[self.variables_quant.meta_data], self.user_input["input_format"]
+                self.user_input[self.variables_quant.meta_data],
+                self.user_input["input_format"],
+                json=self.variables_quant.additional_params_json,
             )
             st.session_state[self.variables_quant.params_json_dict] = (
                 params.__dict__ if hasattr(params, "__dict__") else params

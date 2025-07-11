@@ -18,6 +18,12 @@ variable_mods,"UniMod:35,UniMod:1"
 max_mods,3
 min_precursor_charge,2
 max_precursor_charge,4
+min_precursor_mz,380
+max_precursor_mz,980
+min_fragment_mz,200
+max_fragment_mz,1800
 quantification_method,Legacy (direct)
 protein_inference,Genes
 abundance_normalization_ions,
+predictors_library,"{'RT': 'User defined speclib', 'IM': 'User defined speclib', 'MS2_int': 'User defined speclib'}"
+scan_window,5

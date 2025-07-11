@@ -18,6 +18,12 @@ variable_mods,Oxidation (M)
 max_mods,1
 min_precursor_charge,None
 max_precursor_charge,None
+min_precursor_mz,400
+max_precursor_mz,1000
+min_fragment_mz,50
+max_fragment_mz,2000
 quantification_method,QuantUMS high-precision
 protein_inference,Genes
 abundance_normalization_ions,
+predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
+scan_window,10

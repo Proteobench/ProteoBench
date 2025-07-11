@@ -21,3 +21,7 @@ max_precursor_charge,7
 quantification_method,
 protein_inference,
 abundance_normalization_ions,
+max_precursor_mz,
+min_precursor_mz,
+max_fragment_mz,
+min_fragment_mz,

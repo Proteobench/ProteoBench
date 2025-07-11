@@ -2,7 +2,7 @@
 software_name,MaxQuant
 software_version,2.6.4.0
 search_engine,Andromeda
-search_engine_version,2.6.4.0
+search_engine_version,
 ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,0.01

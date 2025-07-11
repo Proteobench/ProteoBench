@@ -5,7 +5,7 @@ search_engine,DIA-NN
 search_engine_version,1.9.2
 ident_fdr_psm,0.01
 ident_fdr_peptide,None
-ident_fdr_protein,0.01
+ident_fdr_protein,
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-2.35337 ppm, 2.35337 ppm]"
 fragment_mass_tolerance,"[-8.67093 ppm, 8.67093 ppm]"

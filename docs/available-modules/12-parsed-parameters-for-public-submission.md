@@ -1,8 +1,12 @@
 # Parameters parsed for public submission
 
-We automatically retrieve the parameters used for a specific worklow run in the parameter file submitted next to the result. The parsing depends on the tool and are described below. If you have any suggestions or concerns related to how we parse these parameters, please let us know by creating a [GitHub issue](https://github.com/Proteobench/ProteoBench/issues).
+We automatically retrieve the parameters used for a specific worklow run in the parameter file submitted next to the 
+result. The parsing depends on the tool and are described below. If you have any suggestions or concerns related to 
+how we parse these parameters, please let us know by creating a 
+[GitHub issue](https://github.com/Proteobench/ProteoBench/issues).
 
-A single-table overview of the parsing methodology of supported tools can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/parsing_overview.tsv).
+A single-table overview of the parsing methodology of supported tools can be found 
+[here](https://github.com/Proteobench/ProteoBench/tree/main/docs/parsing_overview.tsv).
 
 ## General comments on the parameters that are retrieved by ProteoBench
 

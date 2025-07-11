@@ -33,6 +33,9 @@ from proteobench.io.params.i2masschroq import (
     extract_params as extract_params_i2masschroq,
 )
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.metamorpheus import (
+    extract_params as extract_params_metamorpheus,
+)
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.msangel import extract_params as extract_params_msangel
 from proteobench.io.params.peaks import read_peaks_settings as extract_params_peaks
@@ -84,6 +87,7 @@ class QuantModule:
         # TODO needs to be replace with parameter extraction function
         "Proteome Discoverer": extract_params_spectronaut,
         "quantms": extract_params_quantms,
+        "MetaMorpheus": extract_params_metamorpheus,
     }
 
     def __init__(

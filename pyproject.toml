@@ -33,7 +33,8 @@ dependencies = [
   "PyGithub",
   "GitPython",
   "psm-utils",
-  "python-calamine"
+  "python-calamine",
+  "pmultiqc>=0.0.29",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"

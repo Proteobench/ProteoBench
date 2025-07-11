@@ -2,6 +2,7 @@
 Streamlit UI for the DDA quantification - precursor ions module.
 """
 import logging
+import subprocess
 from pathlib import Path
 from typing import Any, Dict, Type
 
@@ -113,12 +114,27 @@ class StreamlitUI:
             # self.quant_uiobjects.display_multqc_plot()
             
             # write_report can write to stdout (or a ioBuffer?)
-            file_path = Path("multiqc_reports/multiqc_report.html").resolve()
-            
-            with open(file_path, 'r', encoding='utf-8') as f:
-                html_content = f.read()
+            if self.quant_uiobjects.variables_quant.result_perf in st.session_state.keys():
+                tmp = st.session_state[self.quant_uiobjects.variables_quant.result_perf]
+                tmp_path = Path('tmp_pmultiqc')
+                tmp_path.mkdir(parents=True, exist_ok=True)
+                tmp.to_csv(tmp_path / 'result_performance.csv', index=False)
+                subprocess.run(
+                    ["multiqc", "--parse_proteobench", "./tmp_pmultiqc", "-o", "./report"],
+                    check=True,
+                )
 
-            components.html(html_content, height=800, scrolling=True)
+                st.write("Intermedate data saved to: ", tmp_path)
+
+                file_path = Path("report/multiqc_report.html").resolve()
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+
+                components.html(html_content, height=800, scrolling=True)
+            else:
+                st.warning("No intermediate data available for pMultiQC report."
+                           " Please first submit data.")
+
 
         # Tab 3: Results (New Submissions)
         with tab_results_new:

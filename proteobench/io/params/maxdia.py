@@ -40,9 +40,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         series.loc[series["level_0"] == "maxPeptideLengthForUnspecificSearch", 0].values[0]
     )
 
-    # Set search engine version from software version
-    parameters.search_engine_version = parameters.__dict__["software_version"]
-
     return parameters
 
 

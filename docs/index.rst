@@ -131,7 +131,7 @@ Available ProteoBench modules
 
         :bdg-info:`in development`
         ^^^
-        Single-species benchmark using spacial proteomics
+        Single-species benchmark using spatial proteomics
 
     .. grid-item-card:: single-cell label free DIA quantification
         :columns: 6 6 4 4

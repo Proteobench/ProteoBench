@@ -20,7 +20,19 @@ class StreamlitPage(ABC):
         self.state = st.session_state
 
         pbb.proteobench_page_config(page_layout="centered")
-        pbb.proteobench_sidebar()
+        # Hide the default page navigation
+        st.markdown(
+            """
+            <style>
+            [data-testid="stSidebarNav"] {
+                display: none;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        pbb.proteobench_sidebar(current_page="/")
 
         self._preface()
         self._main_page()

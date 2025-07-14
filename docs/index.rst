@@ -70,11 +70,9 @@ Available ProteoBench modules
 ==============================
 
 .. For card colors, use:
-.. proposed: info
 .. in development: primary
 .. active: success
-.. archived: warning
-.. withdrawn: danger
+.. archived: dark
 
 .. grid::
 
@@ -125,17 +123,6 @@ Available ProteoBench modules
         :bdg-success:`active`
         ^^^
         additional DIA ion-level module with Astral DIA data
-
-    .. grid-item-card:: Label-free quantification of precursor ions with DIA (AIF)
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF
-
-        :bdg-success:`active`
-        ^^^
-        Benchmark the quantification accuracy of label-free data independent acquisition workflows (All-Ion Fragmentation - AIF)
-        using a multi-species sample analysed with an Orbitrap.
-        *A discussion on oxydation-related issues with the data used for this module can be found here:* https://github.com/orgs/Proteobench/discussions/641.
 
     .. grid-item-card:: benchmark with Dynamic Organellar Mapping
         :columns: 6 6 4 4
@@ -191,6 +178,18 @@ Available ProteoBench modules
         ^^^
         Benchmark the identification sensitivity and specificity of data dependent acquisition
         workflows using an entrapment strategy
+
+    .. grid-item-card:: Label-free quantification of precursor ions with DIA (AIF)
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: available-modules/archived-modules/4-quant-lfq-ion-dia-aif.md
+
+        :bdg-dark:`archived`
+        ^^^
+        Benchmark the quantification accuracy of label-free data independent acquisition workflows (All-Ion Fragmentation - AIF)
+        using a multi-species sample analysed with an Orbitrap.
+        *A discussion on oxidation-related issues with the data used for this module can be found here:* https://github.com/orgs/Proteobench/discussions/641.
+
 
 .. button-ref:: available-modules/index
     :ref-type: doc

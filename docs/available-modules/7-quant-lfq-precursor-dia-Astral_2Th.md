@@ -106,6 +106,8 @@ After upload, you will get a link to a Github pull request associated with your 
 4. Turn on "Precursor Level LFQ"
 4. Because ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", it needs to be preprocessed. For this, please refer to the Jupyter Notebook "ProteoBench_input_conversion.ipynb" [HERE](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/ProteoBench_input_conversion.ipynb). Using this notebook will provide you with the correct input file that can be used in ProteoBench. The parameter file is "log.txt".
 
+Note: V1.10.4 is required to obtain the most optimal performance (improved check for MS1 cycle)
+
 ### [FragPipe - DIA-NN](https://github.com/Nesvilab/FragPipe)
 1. Load the DIA_SpecLib_Quant workflow
 2. Following import of raw files, assign experiments "by File Name" right above the list of raw files.
@@ -130,7 +132,7 @@ In FragPipe output files, the protein identifiers matching a given ion are in tw
 We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.setup.txt" file for parameter parsing when doing public upload.
 
 ### [MaxDIA](https://www.maxquant.org/) (work in progress)
-By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
+By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_REP1", "A_REP2", "A_REP3", "B_REP1", "B_REP2", "B_REP3". 
 
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
@@ -147,12 +149,6 @@ Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
 In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Precursor or Peptide FDR and Protein Group FDR are set to 1%. 
 Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
-
-#### Troubleshooting: 
-
-Since the Thermo DIA data .raw files were acquired using a staggered window approach it is highly recommended to convert and demultiplex the .RAW files first into .mzML using MSConvert.
-Detailed instructions for this process can be found [here](https://fragpipe.nesvilab.org/docs/tutorial_convert.html#convert-thermo-dia-raw-files-with-overlappingstaggered-windows).
-
 
 ### Custom format
 
@@ -230,7 +226,7 @@ After uploading an output file, a table is generated that contains the following
 - standard deviations calculated for the intensity values in condition A and B
 - coefficient of variation (CV) for condition A and B
 - differences of the mean log2-transformed values between condition A and B
-- MS signal from the input table ("abundance_DIA_Condition_A_Sample_Alpha_01" to "abundance_DIA_Condition_B_Sample_Alpha_03")
+- MS signal from the input table ("abundance_LFQ_Astral_DIA_15min_50ng_Condition_A_REP1" to "abundance_LFQ_Astral_DIA_15min_50ng_Condition_B_REP3")
 - Count = number of runs with non-missing values
 - species the sequence matches to
 - unique = TRUE if the sequence is species-specific
@@ -267,6 +263,14 @@ that some important information is missing, please add it in the
 Once you confirm that the metadata is correct (and corresponds to the 
 table you uploaded before generating the plot), a button will appear.
 Press it to submit. 
+
+**DISCLAIMER**: When submitting parameter files, please be aware that your dataset may contain identifiable information through embedded file paths. These paths can reveal personal usernames, system architecture, project names, and directory structures associated with e.g.
+- The FASTA database location
+- The RAW data location
+- Installation paths for the tools being used
+
+Such metadata can inadvertently disclose sensitive or institution-specific information.
+We recommend reviewing and sanitizing any file paths prior to submission to ensure compliance with your organization's data privacy policies and to protect personal or institutional identifiers.
 
 **If some parameters are not in your parameter file, it is important that 
 you provide them in the "comments" section.**

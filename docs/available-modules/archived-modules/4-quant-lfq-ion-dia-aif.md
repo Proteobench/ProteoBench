@@ -1,10 +1,20 @@
-# DIA quantification - precursor ion level - diaPASEF (**We are working on the documentation: come back soon.**)
+# DIA quantification - precursor ions - AIF data
 
 
-This module compares the sensitivity and quantification accuracy for data acquired with data-independent acquisition (DIA) on a timsTOF (Bruker).
-It is similar to the DIA quantification module "ion-level" described [here](#4-quant-lfq-ion-dia-aif).
+> **THIS MODULE IS NOW ARCHIVED**
+> 
+> This module is archived because we noticed the presence of oxidations that prevent the accurate mesure of quantification accuracy.
+> The original GitHub discussion highlighting the issue can be found [here](https://github.com/orgs/Proteobench/discussions/641)
+> 
+> We noticed that the presence of oxidised peptides creates human ratio that are close to the expected value for E. coli (see figure below).
+> 
+> ![log2-transformed ratio (A/B) for the oxidized peptides and their counterpart are not close to the expected ratio](../../_static/img/Module_documentation/Archived_modules/AIF_Module_density_FC_20250707.svg)
+>
+> This figure was made with only the precursors matched to a single species and no contaminant in the DIA AIF precursor data:
+> All the raw files associated to this experiment (including samples Beta and Gamma) were searched with Spectronaut v19.5.241126.62635 using a directDIA+ workflow and Trypsin/P cleavage with carbamidomethyl (C) as variable modification, and acetyl (Protein N-term) and oxidation (M) as variable modifications (maximum variable modifications = 5). We performed run-wise median centering after log2 transformation to align run signals, then calculated the mean value per sample and mean value per condition and the difference between A and B for each precursor. The three panels present: precursors with min. one oxidation (right); precursors with the same stripped sequence as the ones seen with min. one oxidation (middle); and all other precursors matching the same species (left). 
 
-This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely dia-PASEF, on a timsTOF SCP (Bruker Corporation).
+
+This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely All-Ion Fragmentation (AIF), on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
 **This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
@@ -18,28 +28,19 @@ Other modules will be more suited to explore further post-pocessing steps.
 
 ## Data set
 
-A dia-PASEF dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)] was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
-Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
+A subset of the Q Exactive HF-X Orbitrap (Thermo Fisher) data independent acquisition (DIA) data described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset (in the manuscript referred to as All-Ion Fragmentation (AIF)). Here, only the first biological replicate series (named “alpha”) was used, encompassing three technical replicates of two different conditions (referred to as “A” and “B”). The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
+Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
-Data acquisition parameters were as following: 
-The resulting peptides were analysed in triplicate (25ng) by nanoLC-MS/MS using an UltiMate 3000 RS nanoLC system (Thermo Fisher Scientific) coupled to a timsTOF SCP mass spectrometer (Bruker). Peptides were separated on a C18 Aurora column (25cm x 75µm ID, IonOpticks) using a gradient ramping from 2% to 20% of B in 30 min, then to 37% of B in 3min and to 85% of B in 2min (solvent A: 0.1% formic acid in H2O; solvent B: 0.1% FA in acetonitrile), with a flow rate of 150nL/min. MS acquisition was performed in diaPASEF mode on the precursor mass range [400-1000] m/z and ion mobility 1/K0 [0.64-1.37]. The acquisition scheme was composed of 8 consecutive TIMS ramps using an accumulation time of 100ms, with 3 MS/MS acquisition windows of 25 Th for each of them. The resulting cycle time was 0.96 seconds. The collision energy was ramped linearly as a function of the ion mobility from 59 eV at 1/K0=1.6Vs cm−2 to 20 eV at 1/K0=0.6Vs cm−2.
+The files can be downloaded from the proteomeXchange repository [PXD028735](https://www.ebi.ac.uk/pride/archive/projects/PXD028735), make sure that you download the following raw files:
 
-These files are available alongside all the associated metadata27 on the ProteomeXchange28 repository PRIDE29 with the following identifier: PXD062685.
+- [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw)
+- [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw)
+- [LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw)
+- [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw)
+- [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
+- [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
 
-
-
-The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
-
-For now, you can download the raw files via:
-
-- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d.zip)
-- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d.zip)
-- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d.zip)
-- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d.zip)
-- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d.zip)
-- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d.zip)
-
-Alternatively, you can download them from a private server here: [https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/))
+Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -65,9 +66,9 @@ The module is flexible in terms of what workflow the participants can run. Howev
 |Maximum number of missed cleavages|1|
 |PSM FDR|0.01|
 |Spectral Library|Predicted spectral library from FASTA|
-|Precursor charge state|1-5|
-|Precursor m/z range|380-980|
-|Fragment ion m/z range|150-2000|
+|Precursor charge state|1-4|
+|Precursor m/z range|400-1000|
+|Fragment ion m/z range|50-2000|
 |Endopeptidase|Trypsin/P|
 |Fixed modifications|Carbamidomethylation (C)|
 |Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
@@ -88,11 +89,11 @@ Table 2 provides an overview of the required input files for public submission. 
 |Tool|Input file|Parameter File|
 |---------|-----|-|
 |AlphaDIA|precursors.tsv|log.txt|
-|DIA-NN|*_report.tsv or *_report.parquet|*report.log.txt|
+|DIA-NN|*_report.tsv|*report.log.txt|
 |FragPipe|*_report.tsv|fragpipe.workflow|
 |MaxDIA|evidence.txt|mqpar.xml|
 |Spectronaut|*.tsv|*.txt|
-|PEAKS|lfq.dia.features.csv|parameters.txt|
+|PEAKS|lfq.dia.peptides.csv|parameters.txt|
 
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
@@ -121,9 +122,24 @@ After upload, you will get a link to a Github pull request associated with your 
 
 In FragPipe output files, the protein identifiers matching a given ion are in two separate columns: "Proteins" and "Mapped Proteins". So we concatenate these two fields to have the protein groups.
 
-### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE) (work in progress)
-We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.s
-etup" file for parameter parsing when doing public upload.
+### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE)
+We accept Spectronaut BGS Factory Reports (normal format): the ".._Report.tsv" file is used for calculating the metrics, and the "..._Report.setup.txt" file for parameter parsing when doing public upload.
+
+In the windowsGUI:
+
+1. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
+2. In the "Analysis" tab, select "Set up a DirectDIA Analysis from file"
+3. Select the folder containting the raw files in order to load them
+4. Once loaded, you optionally can change the name of the project ("Condition" by default)
+5. In the next tab, click on "Import..." to import the proteobench fasta. Next, check the box corresponding to the proteobench fasta on the left panel, and click on "Next".
+6. Choose your settings in the next tab
+7. In the next tab, fill "A" and "B" in the "Condition" column:
+   "A" for "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02", "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03";
+   "B" for "LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" 
+9. Do not tick any GO terms or Library exensions in the next tabs
+10. Finish the settings on the next tab in order to start the search
+11. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
+12. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
 
 ### [MaxDIA](https://www.maxquant.org/) (work in progress)
 By default, MaxDIA uses a contaminants-only fasta file that is located in the software folder (“contaminant.txt”). However, the fasta file provided for this module already contains a set of curated contaminant sequences. Therefore, in the MaxQuant settings (Global parameters > Sequences), **UNTICK the “Include contaminants” box**. Furthermore, please make sure the FASTA parsing is set as `Identifier rule = >([^\t]*)`; `Description rule = >(.*)`). When uploading the raw files, press the "No Fractions" button to set up the experiment names as follows: "A_Sample_Alpha_01", "A_Sample_Alpha_02", "A_Sample_Alpha_03", "B_Sample_Alpha_01", "B_Sample_Alpha_02", "B_Sample_Alpha_03". 
@@ -131,18 +147,18 @@ By default, MaxDIA uses a contaminants-only fasta file that is located in the so
 For this module, use the "evidence.txt" output in the "txt" folder of MaxQuant search outputs. For public submission, please upload the "mqpar.xml" file associated with your search.
 
 ### [PEAKS](https://www.bioinfor.com//)
-When starting a new project and selecting the .RAW files for analysis, you will need to modify the sample names given by PEAKS, so they match the exact .RAW file names. 
-More specifically, 
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP1
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
-LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
+When starting a new project and selecting the .RAW files, it is important to modify the sample names given by PEAKS. Just make sure the samples have the following names:
 
-Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
+LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01,
+LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02,
+LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03, 
+LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01, 
+LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02,
+LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.
+
+Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
-In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Precursor or Peptide FDR and Protein Group FDR are set to 1%. 
+In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide and Precursor FDR are set to 1%. 
 Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
 
 #### Troubleshooting: 
@@ -264,6 +280,14 @@ that some important information is missing, please add it in the
 Once you confirm that the metadata is correct (and corresponds to the 
 table you uploaded before generating the plot), a button will appear.
 Press it to submit. 
+
+**DISCLAIMER**: When submitting parameter files, please be aware that your dataset may contain identifiable information through embedded file paths. These paths can reveal personal usernames, system architecture, project names, and directory structures associated with e.g.
+- The FASTA database location
+- The RAW data location
+- Installation paths for the tools being used
+
+Such metadata can inadvertently disclose sensitive or institution-specific information.
+We recommend reviewing and sanitizing any file paths prior to submission to ensure compliance with your organization's data privacy policies and to protect personal or institutional identifiers.
 
 **If some parameters are not in your parameter file, it is important that 
 you provide them in the "comments" section.**

@@ -1,6 +1,6 @@
-# DDA quantification - precursor ions
+# DDA quantification - precursor ions - Astral
 
-This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on a Q Exactive HF-X Orbitrap (Thermo Fisher).
+This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on an Orbitrap Astral (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
 **This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
@@ -15,19 +15,24 @@ Other modules will be more suited to explore further post-pocessing steps.
 
 ## Data set
 
-A subset of the Q Exactive HF-X Orbitrap (Thermo Fisher) data dependent acquisition (DDA) data described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. Here, only the first biological replicate series (named “alpha”) was used, encompassing three technical replicates of two different conditions (referred to as “A” and “B”). The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
-Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
+A not yet released Astral (Thermo Fisher) data dependent acquisition (DDA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)] was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. 
+Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
-The files can be downloaded from the proteomeXchange repository [PXD028735](https://www.ebi.ac.uk/pride/archive/projects/PXD028735), make sure that you download the following raw files:
+Data acquisition parameters were as following:
+Peptides were loaded directly onto the analytical column and were separated by reversed-phase chromatography using a 50 cm μPAC™ column (Thermo Scientific, cat # COL-NANO050NEOB), featuring a structured pillar array bed with a 180 µm bed width. The chromatographic gradient was initiated with 96% buffer A and 4% buffer B at a flow rate of 750 nL/min durig 1 minute. The flow rate was then reduced to 250 nL/min, and the percentage of buffer B was further increased to 40% over 15 minutes. Buffer A: 0.1% formic acid in water. Buffer B: 0.1% formic acid in 80% acetonitrile.
+The mass spectrometer was operated in positive ionization mode with data-dependent acquisition, with a full MS scans over a mass range of m/z 380-980 with detection in the Orbitrap at a resolution of 180,000 and a fixed cycle time of 0.5 s. Precursor ion selection width was kept at 2-Th and a normalized collision energy of 30% was used for higher-energy collisional dissociation (HCD) fragmentation. MS2 scan range was set from 145 to 1450 m/z with detection in the Astral and maximum fill time of 2.5 ms. Dynamic exclusion was enabled and set to 10 s.
 
-- [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw)
-- [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw)
-- [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw)
-- [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw)
-- [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw)
-- [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
+The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
+For now, you can download the raw files via a private server:
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/datasets/raw_files/DDA/](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA/)
+- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw)
+
+Alternatively, you can download them from the ProteoBench server here: [https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -44,7 +49,7 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion) if you want to submit your results or when you want to explore the DDA quantification module.
+Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral) if you want to submit your results or when you want to explore the DDA quantification module.
 
 ### Input data for private visualisation of your benchmark run(s)
 
@@ -59,7 +64,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 |Fixed modifications|Carbamidomethylation (C)|
 |Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
 |Precursor mass tolerance|10 ppm|
-|Fragment mass tolerance|0.02 Da|
+|Fragment mass tolerance|20 ppm|
 |Minimum peptide length|7 residues|
 
 ### Submit your run for public usage
@@ -156,7 +161,7 @@ Make sure that the peaklists are named with the same prefix as raw files. To do 
 
 ![ProlineStudio Naming](../../img/module_docs/quant_lfq_ion_DDA/ProlineStudio_naming.png)
 
-The columns with the quantification values that ProteoBench will retrieve in the outputs will have the following format "abundance_LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mgf". 
+The columns with the quantification values that ProteoBench will retrieve in the outputs will have the following format "abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mgf". 
 For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two fields are combined to determine what species a peptide sequence matches to.
 The `Quantified peptide ions` tab reports the precursor ion quantities (retrieved from XICs). Shared peptides ions between multiple ProteinSets are duplicated. This redundancy is removed by combining the protein identification from all rows of a given precursor ion before metric calculation.
 In the outputs of ProlineStudio, we consider that decoys are already removed.
@@ -169,13 +174,7 @@ MSAngel allows to build piplenes for bottom-up MS analysis with a choice of sear
 More information can be found [here](https://www.profiproteomics.fr/ms-angel/)
 
 ### PEAKS (work in progress)
-When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that the sample names correspond to:
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03
+When starting a new project and selecting the .RAW files, there is no need to modify the sample names given by PEAKS. Just make sure that Sample 1 -> 3 are Condition "A" and Sample 4 -> 6 are condition "B".
 Make sure to set Enzyme as trypsin,  Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DDA.
 In workflow section use the PEAKS Q (de novo assisted search quantification) option. Set the different parameters in "Data refine" and "DB search". In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide FDR and Protein Group FDR are set to 1%. 
 Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
@@ -211,12 +210,12 @@ If you do not use a tool that is compatible with ProteoBench, you can upload a t
 - Proteins: column containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
 - Charge: Charge state of measured peptide precursor ions
 - Modified sequence: column containing the sequences and the localised modifications in the [ProForma standard](https://www.psidev.info/proforma) format. 
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01: Quantitative column sample 1
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02: Quantitative column sample 2
-- LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03: Quantitative column sample 3
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01: Quantitative column sample 4
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02: Quantitative column sample 5
-- LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03: Quantitative column sample 6
+- LFQ_Astral_DDA_15min_50ng_Condition_A_REP1: Quantitative column sample 1
+- LFQ_Astral_DDA_15min_50ng_Condition_A_REP2: Quantitative column sample 2
+- LFQ_Astral_DDA_15min_50ng_Condition_A_REP3: Quantitative column sample 3
+- LFQ_Astral_DDA_15min_50ng_Condition_B_REP1: Quantitative column sample 4
+- LFQ_Astral_DDA_15min_50ng_Condition_B_REP2: Quantitative column sample 5
+- LFQ_Astral_DDA_15min_50ng_Condition_B_REP3: Quantitative column sample 6
 
 the table must not contain non-validated precursor ions. If you have any issue, contact us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).
 

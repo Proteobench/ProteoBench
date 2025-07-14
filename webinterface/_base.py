@@ -32,7 +32,7 @@ class StreamlitPage(ABC):
             unsafe_allow_html=True,
         )
 
-        pbb.proteobench_sidebar()
+        pbb.proteobench_sidebar(current_page="/")
 
         self._preface()
         self._main_page()

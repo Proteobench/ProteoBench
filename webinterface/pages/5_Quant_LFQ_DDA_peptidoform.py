@@ -48,7 +48,10 @@ class StreamlitUI:
         )
 
         self.quant_uiobjects = QuantUIObjects(
-            self.variables_dda_quant, self.peptidoform_module, self.parsesettingsbuilder
+            self.variables_dda_quant,
+            self.peptidoform_module,
+            self.parsesettingsbuilder,
+            page_name="Quant LFQ DDA peptidoform",
         )
 
         self._main_page()

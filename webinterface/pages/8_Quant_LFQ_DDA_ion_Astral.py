@@ -2,6 +2,8 @@
 Streamlit UI for the DDA quantification - precursor ions Astral module.
 """
 
+PAGE_NAME = "2_Quant_LFQ_DDA_ion_QExactive"
+
 import logging
 import uuid
 from typing import Any, Dict, Type
@@ -46,7 +48,9 @@ class StreamlitUI:
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dda_quant.parse_settings_dir
         )
 
-        self.quant_uiobjects = QuantUIObjects(self.variables_dda_quant, self.ionmodule, self.parsesettingsbuilder)
+        self.quant_uiobjects = QuantUIObjects(
+            self.variables_dda_quant, self.ionmodule, self.parsesettingsbuilder, page_name="Quant LFQ DDA ion Astral"
+        )
 
         self._main_page()
 

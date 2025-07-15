@@ -73,7 +73,7 @@ class VariablesDDAQuant:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/3-quant-lfq-peptidoform-dda/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/3-quant-lfq-peptidoform-dda/"
     title: str = "DDA peptidoform quantification"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_peptidoform.json"

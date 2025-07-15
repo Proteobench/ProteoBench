@@ -5,6 +5,14 @@ result. The parsing depends on the tool and are described below. If you have any
 how we parse these parameters, please let us know by creating a 
 [GitHub issue](https://github.com/Proteobench/ProteoBench/issues).
 
+> **DISCLAIMER**: When submitting parameter files, please be aware that your dataset may contain identifiable information through embedded file paths. These paths can reveal personal usernames, system architecture, project names, and directory structures associated with e.g.
+> - The FASTA database location
+> - The RAW data location
+> - Installation paths for the tools being used
+> 
+> Such metadata can inadvertently disclose sensitive or institution-specific information.
+> We recommend reviewing and sanitizing any file paths prior to submission to ensure compliance with your organization's data privacy policies and to protect personal or institutional identifiers.
+
 A single-table overview of the parsing methodology of supported tools can be found 
 [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/parsing_overview.tsv).
 

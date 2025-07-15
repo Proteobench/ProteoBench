@@ -68,7 +68,7 @@ class VariablesDIAQuantSC:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/singlecell"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/6-quant-lfq-ion-dia-singlecell/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/6-quant-lfq-ion-dia-singlecell/"
 
     title: str = "DIA Precursor quantification - singlecell"
 

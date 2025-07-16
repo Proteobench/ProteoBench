@@ -65,6 +65,13 @@ class QuantScores:
         relevant_columns_df = filtered_df[["Raw file", self.precursor_column_name, "Intensity"]].copy()
         replicate_to_raw_df = QuantScores.convert_replicate_to_raw(replicate_to_raw)
 
+        all_present = all(
+            item in list(filtered_df.columns) for sublist in replicate_to_raw.values() for item in sublist
+        )
+
+        if not all_present:
+            raise Exception("Not all runs are present in the quantification file")
+
         # add column "Condition" to filtered_df_p1 using inner join on "Raw file"
         relevant_columns_df = pd.merge(relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner")
         quant_df = QuantScores.compute_condition_stats(
@@ -143,7 +150,6 @@ class QuantScores:
         quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(nr_observed=("Raw file", "size"))
 
         # pivot filtered_df_p1 to wide where index peptide ion, columns Raw file and values Intensity
-
         intensities_wide = quant_raw_df_int.pivot(index=precursor, columns="Raw file", values="Intensity").reset_index()
 
         quant_raw_df = (

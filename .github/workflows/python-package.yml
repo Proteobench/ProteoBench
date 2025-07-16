@@ -46,3 +46,12 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+      - name: ensure paramater documentation is up-to-date
+        run: |
+          cd docs
+          python parse_tables.py
+          if git diff -- parsing_overview.tsv | grep .; then
+            echo "Error: Parameters overview not updated, run in docs folder: python parse_tables.py"
+            exit 1
+          fi
+

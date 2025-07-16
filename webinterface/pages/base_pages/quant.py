@@ -83,7 +83,11 @@ class QuantUIObjects:
     """
 
     def __init__(
-        self, variables_quant: VariablesDDAQuant, ionmodule: IonModule, parsesettingsbuilder: ParseSettingsBuilder
+        self,
+        variables_quant: VariablesDDAQuant,
+        ionmodule: IonModule,
+        parsesettingsbuilder: ParseSettingsBuilder,
+        page_name: str = "/",
     ) -> None:
         """
         Initialize the Streamlit UI objects for the quantification modules.
@@ -100,11 +104,24 @@ class QuantUIObjects:
         self.variables_quant: VariablesDDAQuant = variables_quant
         self.ionmodule: IonModule = ionmodule
         self.parsesettingsbuilder: ParseSettingsBuilder = parsesettingsbuilder
+        self.page_name = page_name
         self.user_input: Dict[str, Any] = dict()
 
         # Create page config and sidebar
         pbb.proteobench_page_config()
-        pbb.proteobench_sidebar()
+
+        st.markdown(
+            """
+            <style>
+            [data-testid="stSidebarNav"] {
+                display: none;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        pbb.proteobench_sidebar(current_page=self.page_name)
 
         self.first_point_plotted = False
         st.session_state[self.variables_quant.submit] = False
@@ -763,9 +780,9 @@ class QuantUIObjects:
             st.subheader("Download raw datasets")
 
             # Sort the intermediate_hash values and get the corresponding ids
-            sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"][i])
-            sorted_intermediate_hash = [downloads_df["intermediate_hash"][i] for i in sorted_indices]
-            sorted_ids = [downloads_df["id"][i] for i in sorted_indices]
+            sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"].iloc[i])
+            sorted_intermediate_hash = [downloads_df["intermediate_hash"].iloc[i] for i in sorted_indices]
+            sorted_ids = [downloads_df["id"].iloc[i] for i in sorted_indices]
 
             st.selectbox(
                 "Select dataset",

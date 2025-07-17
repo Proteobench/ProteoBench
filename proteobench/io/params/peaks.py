@@ -173,7 +173,7 @@ def extract_params(
 
     lines = [line.strip() for line in lines]
 
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters()
 
     params.software_name = "PEAKS"
     params.software_version = extract_value(lines, "PEAKS Version:")
@@ -214,19 +214,6 @@ def extract_params(
         )
     params.min_precursor_charge = int(precursor_charge_between[0])
     params.max_precursor_charge = int(precursor_charge_between[1])
-
-    try:
-        precursor_mz_between = extract_value(lines, "Precursor M/Z between:").split(",")
-        params.min_precursor_mz = int(precursor_mz_between[0])
-        params.max_precursor_mz = int(precursor_mz_between[1])
-        fragment_mz_between = extract_value(lines, "Fragment M/Z between:").split(",")
-        params.min_fragment_mz = int(fragment_mz_between[0])
-        params.max_fragment_mz = int(fragment_mz_between[1])
-    except AttributeError:  # DDA
-        params.min_precursor_mz = None
-        params.max_precursor_mz = None
-        params.min_fragment_mz = None
-        params.max_fragment_mz = None
     params.scan_window = None
 
     params.quantification_method = extract_value(

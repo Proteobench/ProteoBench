@@ -239,7 +239,7 @@ if __name__ == "__main__":
 
     for file in fnames:
         # Extract parameters from the settings file
-        parameters = read_peaks_settings(file)
+        parameters = extract_params(file)
 
         # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)

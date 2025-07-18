@@ -394,6 +394,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "enable_match_between_runs": False,
         "quantification_method": "QuantUMS high-precision",
         "protein_inference": "Genes",  # Default value, if not specified in the command line
+        "min_precursor_charge": 1,
+        "max_precursor_charge": 4,
+        "min_peptide_length": 7,
+        "max_peptide_length": 30,
     }
 
     try:

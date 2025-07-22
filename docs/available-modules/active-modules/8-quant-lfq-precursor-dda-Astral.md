@@ -159,7 +159,7 @@ Some older versions of MaxQuant do not provide the option to change fasta header
 
 Make sure that the peaklists are named with the same prefix as raw files. To do so in ProlineStudio, use peaklist names as sample names (manually or with automatic renaming option).
 
-![ProlineStudio Naming](../../img/module_docs/quant_lfq_ion_DDA/ProlineStudio_naming.png)
+![ProlineStudio Naming](../../../img/module_docs/quant_lfq_ion_DDA/ProlineStudio_naming.png)
 
 The columns with the quantification values that ProteoBench will retrieve in the outputs will have the following format "abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mgf". 
 For this module, use the excel exports. Make sure that the `Quantified peptide ions` tab contains the columns `samesets_accessions` and `subsets_accessions`. The accessions in these two fields are combined to determine what species a peptide sequence matches to.

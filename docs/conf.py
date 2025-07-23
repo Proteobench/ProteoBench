@@ -30,6 +30,24 @@ extensions = [
     "sphinx_copybutton",
 ]
 
+# https://myst-parser.readthedocs.io/en/latest/syntax/optional.html#syntax-colon-fence
+myst_enable_extensions = [
+    # "amsmath",
+    # "attrs_inline",
+    "colon_fence",
+    # "deflist",
+    # "dollarmath",
+    # "fieldlist",
+    # "html_admonition",
+    # "html_image",
+    # "linkify",
+    # "replacements",
+    # "smartquotes",
+    # "strikethrough",
+    # "substitution",
+    # "tasklist",
+]
+
 source_suffix = [".rst"]
 master_doc = "index"
 exclude_patterns = ["_build", "_autosummary", "reference", "Thumbs.db", ".DS_Store"]

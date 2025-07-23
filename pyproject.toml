@@ -21,17 +21,19 @@ dependencies = [
   "pandas",
   "openpyxl",
   "numpy>1.24.4",
-  "plotly==5.24.0",
+  "plotly>=6.0.0",
   "upsetplot",
   "seaborn",
   "streamlit>=1.31",
   "streamlit_extras",
   "streamlit-plotly-events",
+  "scipy",
   "matplotlib",
   "toml",
   "PyGithub",
   "GitPython",
   "psm-utils",
+  "python-calamine"
 ]
 license = { file = "LICENSE" }
 name = "proteobench"

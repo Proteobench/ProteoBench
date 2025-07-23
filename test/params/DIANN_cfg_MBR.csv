@@ -1,0 +1,23 @@
+,0
+software_name,DIA-NN
+software_version,1.9.2
+search_engine,DIA-NN
+search_engine_version,1.9.2
+ident_fdr_psm,0.01
+ident_fdr_peptide,None
+ident_fdr_protein,
+enable_match_between_runs,True
+precursor_mass_tolerance,"[-2.35337 ppm, 2.35337 ppm]"
+fragment_mass_tolerance,"[-8.67093 ppm, 8.67093 ppm]"
+enzyme,"K*,R*,!"
+allowed_miscleavages,1
+min_peptide_length,7
+max_peptide_length,30
+fixed_mods,UniMod:4
+variable_mods,"UniMod:35,UniMod:1"
+max_mods,3
+min_precursor_charge,2
+max_precursor_charge,4
+quantification_method,High accuracy
+protein_inference,Genes
+abundance_normalization_ions,

@@ -4,7 +4,6 @@ Streamlit UI for the DDA quantification - precursor ions module.
 import logging
 import subprocess
 from pathlib import Path
-import uuid
 from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb

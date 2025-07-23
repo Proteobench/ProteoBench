@@ -574,8 +574,15 @@ def _load_spectronaut(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+
     if input_data_frame["FG.Quantity"].dtype == object:
-        input_csv.seek(0)
+        try:
+            input_csv.seek(0)
+        except AttributeError:
+            # if input_csv is a PathPosix object, it does not have a seek method
+            # This can occur when the io util functions are used.
+            # Should probably be fixed some way in the future
+            pass
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t", decimal=",")
     input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")

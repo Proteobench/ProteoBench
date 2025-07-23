@@ -70,7 +70,7 @@ class VariablesDDAQuant:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/QExactive"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/2-quant-lfq-ion-dda/"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Precursor quantification (QExactive)"

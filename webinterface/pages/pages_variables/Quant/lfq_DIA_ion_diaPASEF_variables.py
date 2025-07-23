@@ -70,7 +70,7 @@ class VariablesDIAQuantdiaPASEF:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/5-quant-lfq-ion-dia-diapasef/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-diapasef/"
 
     title: str = "DIA Precursor quantification - diaPASEF"
 

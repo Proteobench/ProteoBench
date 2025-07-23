@@ -30,7 +30,7 @@ class StreamlitUI:
         """
         Initialize the Streamlit UI for the DDA quantification - precursor ions module.
         """
-        self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
+        self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()  # could be a session state variable
         self.texts: Type[WebpageTexts] = WebpageTexts
 
         self.user_input: Dict[str, Any] = dict()

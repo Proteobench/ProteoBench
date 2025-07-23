@@ -9,7 +9,6 @@ import tempfile
 import uuid
 import zipfile
 from datetime import datetime
-from pprint import pformat
 from typing import Any, Dict, Optional
 
 import pages.texts.proteobench_builder as pbb
@@ -372,11 +371,17 @@ class QuantUIObjects:
     def initialize_main_slider(self) -> None:
         """
         Initialize the slider for the main data.
+        
+        We use a slider uuid and associate a defalut value with it.
+        - self.variables_quant.slider_id_uuid
+        - self.variables_quant.default_val_slider
         """
-        if self.variables_quant.slider_id_uuid not in st.session_state.keys():
-            st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
-        if st.session_state[self.variables_quant.slider_id_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_uuid]] = (
+        key = self.variables_quant.slider_id_uuid
+        if key not in st.session_state.keys():
+            st.session_state[key] = uuid.uuid4()
+        _id_of_key = st.session_state[key]
+        if _id_of_key not in st.session_state.keys():
+            st.session_state[_id_of_key] = (
                 self.variables_quant.default_val_slider
             )
 
@@ -726,16 +731,20 @@ class QuantUIObjects:
         """
         Create a slider input.
         """
-        if self.variables_quant.slider_id_uuid not in st.session_state:
-            st.session_state[self.variables_quant.slider_id_uuid] = uuid.uuid4()
-        slider_key = st.session_state[self.variables_quant.slider_id_uuid]
+        # key for slider_uuid in session state
+        slider_uuid = self.variables_quant.slider_id_uuid
+        if slider_uuid not in st.session_state:
+            st.session_state[slider_uuid] = uuid.uuid4()
+        slider_key = st.session_state[slider_uuid]
 
-        st.markdown(open(self.variables_quant.description_slider_md, "r").read())
+        fpath = self.variables_quant.description_slider_md
+        st.markdown(open(fpath, "r").read())
 
+        default_value = st.session_state.get(slider_key, self.variables_quant.default_val_slider)
         st.select_slider(
             label="Minimal precursor quantifications (# samples)",
             options=[1, 2, 3, 4, 5, 6],
-            value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
+            value=default_value,
             key=slider_key,
         )
 

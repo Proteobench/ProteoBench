@@ -86,6 +86,7 @@ Table 2 provides an overview of the required input files for public submission. 
 |quantms|<project-name>.sdrf_openms_design_msstats_in.csv|nf_core_quantms_software_mqc_versions.yml, params_<timestamp>.json|
 |Sage|lfq.tsv|results.json|
 |PEAKS|lfq_features.csv|parameters.txt|
+|Quantms|<name>.sdrf_openms_design_msstats_in.csv|params_<timestamp>.json,versons.yml|
 
 ### AlphaPept (legacy tool\*)
 
@@ -223,6 +224,9 @@ add_decoys: true
 The parameters needed for public submission can be parsed based on the `versions.yml` and 
 parameter json `params_<timestamp>.json` produced by the `pipeline-info` step, which can
 be found under `results/pipeline_info`.
+  
+> Quantms 1.4 and higher have `params_<timestamp>.json` dumped. If you run an older version in
+> Seqera, you can obtain the paramaters jsons from a run there.
 
 :::{note}
 The `results` folder is set through the `outdir` parameter of the `bigbio/quantms` workflow.

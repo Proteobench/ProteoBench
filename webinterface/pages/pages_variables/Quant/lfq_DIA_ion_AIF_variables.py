@@ -22,6 +22,7 @@ class VariablesDIAQuant:
     fig_logfc: str = "fig_logfc_dia_quant"
     fig_metric: str = "fig_metric_dia_quant"
     fig_cv: str = "fig_CV_violinplot_dia_quant"
+    fig_ma_plot: str = "fig_ma_plot_dia_quant"
     result_perf: str = "result_perf_dia_quant"
     meta_data: str = "meta_data_dia_quant"
     input_df: str = "input_df_dia_quant"
@@ -60,12 +61,15 @@ class VariablesDIAQuant:
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
+    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dia_quant"
+    dataset_selector_id_uuid: str = "dataset_selector_id_dia_quant"
+
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/AIF"
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/"
 
-    title: str = "DIA Ion quantification - AIF"
+    title: str = "DIA Precursor quantification - AIF"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_aif_quant_"

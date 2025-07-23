@@ -10,8 +10,18 @@ Developer guide
     development-setup
     local-usage
     modifying-module
+    reviewing-new-point-pr
     changelog
 
+.. toctree:: 
+    :caption: Architecture and new modules
+    :maxdepth: 2
+    :hidden:
+
+    repo_layout
+    adding-module
+    
+    modules/index
 
 .. toctree::
    :caption: Python API
@@ -19,7 +29,8 @@ Developer guide
    :maxdepth: 3
    :hidden:
 
-   api/*/index
+   api/proteobench/proteobench
+   api/webinterface/webinterface
 
 
 Organization
@@ -29,9 +40,9 @@ The ProteoBench project is divided into two main parts:
 
 Modules for Data Processing and Reporting
 -----------------------------------------
-These :doc:`developer-guide/api/proteobench/modules/index` process the data and generate reports.
+These :ref:`proteobench` process the data and generate reports.
 
 Web Interface for Result Visualization
 --------------------------------------
-The :doc:`developer-guide/api/webinterface/index` displays the results and allows
+The :ref:`webinterface` displays the results and allows
 comparison with publicly available data.

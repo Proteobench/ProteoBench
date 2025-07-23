@@ -26,6 +26,39 @@ Parameter = namedtuple("Parameter", ["name", "value", "comment"])
 VERSION_NO_PATTERN = r"MSFragger-(.+)\.jar"
 
 
+def parse_phi_report_filters(phi_report_cmd: str) -> tuple[float, float, float]:
+    """
+    Parse the filters from the phi-report command string.
+
+    Parameters
+    ----------
+    phi_report_cmd : str
+        The command string from the phi-report filter.
+
+    Returns
+    -------
+    tuple of (float, float, float)
+        A tuple containing the PSM, peptide, and protein FDR values.
+    """
+    # Define default FDR values
+    default_fdr = 0.01
+
+    # Define regex patterns for FDR values
+    fdr_patterns = {
+        "psm": r"--psm\s+(\d+\.\d+)",
+        "peptide": r"--pep\s+(\d+\.\d+)",
+        "protein": r"--prot\s+(\d+\.\d+)",
+    }
+
+    # Extract FDR values using regex
+    fdr_values = {
+        key: float(match.group(1)) if (match := re.search(pattern, phi_report_cmd)) else default_fdr
+        for key, pattern in fdr_patterns.items()
+    }
+
+    return fdr_values["psm"], fdr_values["peptide"], fdr_values["protein"]
+
+
 def parse_params(l_of_str: List[str], sep: str = " = ") -> List[Parameter]:
     """
     Parse the FragPipe parameter file and return a list of Parameter objects.
@@ -89,6 +122,7 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
     l_of_str = file.read().decode("utf-8").splitlines()
     header = l_of_str[0][1:].strip()  # Skip leading '#' in the header
     msfragger_version = None
+    fragpipe_version = None
     for ss in l_of_str[1:]:
         if ss.startswith("# MSFragger version"):
             msfragger_version = ss.split(" ")[-1].strip()
@@ -104,7 +138,9 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
             match = re.search(VERSION_NO_PATTERN, filename)
             if match:
                 msfragger_version = match.group(1)
-    return header, msfragger_version, parse_params(l_of_str, sep=sep)
+        if ss.startswith("# FragPipe version"):
+            fragpipe_version = ss.split(" ")[-1].strip()
+    return header, msfragger_version, fragpipe_version, parse_params(l_of_str, sep=sep)
 
 
 def extract_params(file: BytesIO) -> ProteoBenchParameters:
@@ -121,20 +157,19 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
-    header, msfragger_version, fragpipe_params = read_fragpipe_workflow(file)
+    header, msfragger_version, fragpipe_version, fragpipe_params = read_fragpipe_workflow(file)
     fragpipe_params = pd.DataFrame.from_records(fragpipe_params, columns=Parameter._fields).set_index(
         Parameter._fields[0]
     )["value"]
 
     # Extract version from header
-    match = re.search(VERSION_NO_PATTERN, header)
-    if match:
-        header = match.group()
+    if not fragpipe_version:
+        fragpipe_version = re.match(r"FragPipe \((\d+\.\d+.*)\)", header).group(1)
 
     # Initialize ProteoBenchParameters
     params = ProteoBenchParameters()
     params.software_name = "FragPipe"
-    params.software_version = header
+    params.software_version = fragpipe_version
     params.search_engine = "MSFragger"
     params.search_engine_version = msfragger_version
 
@@ -170,18 +205,17 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         fragment_mass_units = "ppm"
     params.fragment_mass_tolerance = f'[-{fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}, {fragpipe_params.loc["msfragger.fragment_mass_tolerance"]} {fragment_mass_units}]'
 
-    # Quantification settings
-    if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
-        params.ident_fdr_protein = fragpipe_params.loc["ionquant.proteinfdr"]
-        params.ident_fdr_peptide = fragpipe_params.loc["ionquant.peptidefdr"]
-        params.ident_fdr_psm = fragpipe_params.loc["ionquant.ionfdr"]
-        params.abundance_normalization_ions = fragpipe_params.loc["ionquant.normalization"]
-
-    elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
+    if fragpipe_params.loc["diann.run-dia-nn"] == "true":
         params.ident_fdr_protein = fragpipe_params.loc["diann.q-value"]
         params.ident_fdr_peptide = None
         params.ident_fdr_psm = fragpipe_params.loc["diann.q-value"]
         params.abundance_normalization_ions = None
+
+    else:
+        phi_report_cmd = fragpipe_params.loc["phi-report.filter"]
+        params.ident_fdr_psm, params.ident_fdr_peptide, params.ident_fdr_protein = parse_phi_report_filters(
+            phi_report_cmd
+        )
 
     # Precursor charge settings
     if fragpipe_params.loc["msfragger.override_charge"] == "true":
@@ -201,10 +235,10 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
             3: "Robust LC (high accuracy)",
             4: "Robust LC (high precision)",
         }
-        if "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]:
-            params.enable_match_between_runs = True
-        else:
-            params.enable_match_between_runs = False
+        params.enable_match_between_runs = (
+            "diann.fragpipe.cmd-opts" in fragpipe_params.index
+            and "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]
+        ) or ("diann.cmd-opts" in fragpipe_params.index and "--reanalyse" in fragpipe_params.loc["diann.cmd-opts"])
         params.quantification_method = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
 
     # Protein inference settings
@@ -220,18 +254,22 @@ if __name__ == "__main__":
     # Process FragPipe workflow file and extract parameters
     files = [
         "../../../test/params/fragpipe.workflow",
+        "../../../test/params/fragpipe_older.workflow",
         "../../../test/params/fragpipe_win_paths.workflow",
         "../../../test/params/fragpipe_v22.workflow",
+        "../../../test/params/fragpipe_fdr_test.workflow",
+        "../../../test/params/fragpipe-version.workflow",
     ]
 
     for file_path in files:
         file = pathlib.Path(file_path)
         with open(file, "rb") as f:
-            _, _, data = read_fragpipe_workflow(f)
+            _, _, _, data = read_fragpipe_workflow(f)
         df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
         df.to_csv(file.with_suffix(".csv"))
         with open(file, "rb") as f:
             params = extract_params(f)
         series = pd.Series(params.__dict__)
         print(series)
+        print("\n")
         series.to_csv(file.parent / f"{file.stem}_extracted_params.csv")

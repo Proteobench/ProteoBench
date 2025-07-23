@@ -1,0 +1,83 @@
+Project:
+* Name: PEAKSv13_DDA_Orbitrap_QEHFX
+* Description: 
+* Project Version: 13 20250520
+* Created at: 2025-05-27 09:28:41
++ PEAKSv13_QExactive_1%FDRPSM
+  Description: 
+  PEAKS Version: 13 20250520
+  Created at: 2025-05-27 10:22:54
+
+  Data Refinement Parameters:
+    Skip Preprocessing: false
+    Mass Correction: true
+    Chimera Association: true
+
+  De Novo Parameters:
+    Precursor Mass Error Tolerance: 10.00ppm
+    Fragment Mass Error Tolerance: 0.02Da
+    Enzyme: Trypsin
+    Max Variable PTM per Peptide: 1
+    Fixed Modifications: 
+    - Carbamidomethylation (+57.02)
+    Variable Modifications: 
+    - Acetylation (Protein N-term) (+42.01)
+    - Oxidation (M) (+15.99)
+
+  Database Search Parameters:
+    Precursor Mass Error Tolerance: 10.00ppm
+    Fragment Mass Error Tolerance: 0.02Da
+    Enzyme: Trypsin
+    Max Missed Cleavage: 2
+    Digest Mode: Specific
+    Peptide Length between: 7, 45
+    Max Variable PTM per Peptide: 1
+    Fixed Modifications: 
+    - Carbamidomethylation (+57.02)
+    Variable Modifications: 
+    - Acetylation (Protein N-term) (+42.01)
+    - Oxidation (M) (+15.99)
+    Database: 
+    - Proteobench
+      - Taxonomy: all species
+      - Searched Entries: 31889
+    Deep Learning Boost: Yes
+    Report Filter: 
+      PSM FDR: 1.0%
+      Proteins -10LgP >= 15.0
+      Proteins Unique Peptides >= 1
+      De Novo Only ALC >= 50.0%
+      De Novo Only Tag Sharing: Disabled
+      De Novo Only Fully Matched: No
+      Confident Amino Acid Threshold: 2.00%
+
+  LFQ Parameters:
+    Quantification Type: Label Free Quantification
+    LFQ Method: Identification Directed Quantification
+    Mass Error Tolerance: 10.00ppm
+    Retention Time Shift Tolerance: Auto detected
+    Feature Intensity >= 0.0
+    Retention Time Range: [0.0 - Max]
+    Base Sample: LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01
+    Peptide Feature Filter:
+      Avg Area >= 0.0
+      Quality >= 0.0
+      Charge between: [1 - 5]
+      Peptide ID Count >= 0 per group
+      Detected in at least 0 samples per group
+      Use in Group Coefficient of Variation Filter: No
+    Protein:
+      Significance Method: ANOVA
+      Modified Form Exclusion: Yes
+      Remove Outlier: Yes
+      Use Top 3 Peptide
+      Significance >= 0.0
+      Fold Change between: [1.0 - 64.0]
+      Has at least 1 Used Peptide
+    Samples: 6 Samples in 2 Groups
+      Group 1: 
+        LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01;LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02;LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03;
+      Group 2: 
+        LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01;LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02;LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03;
+    Normalization Method: No Normalization
+

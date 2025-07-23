@@ -149,8 +149,23 @@ class StreamlitUI:
                 file_path = Path("report/multiqc_report.html").resolve()
                 with open(file_path, 'r', encoding='utf-8') as f:
                     html_content = f.read()
-
-                components.html(html_content, height=800, scrolling=True)
+                    
+                @st.fragment()
+                def show_download_button():
+                    """
+                    Display a download button for the pMultiQC report.
+                    """
+                    st.markdown(
+                        "Download the pMultiQC report generated from the intermediate data."
+                    )
+                    # components.html(html_content, height=800, scrolling=True)
+                    st.download_button(
+                        label="Download pMultiQC Report",
+                        file_name="pMultiQC_report.html",
+                        data=html_content,
+                    )
+                
+                show_download_button()
             else:
                 st.warning("No intermediate data available for pMultiQC report."
                            " Please first submit data.")

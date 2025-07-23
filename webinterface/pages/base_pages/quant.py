@@ -30,6 +30,7 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
+from . import tab1_results
 
 
 def compare_dictionaries(old_dict, new_dict):
@@ -368,40 +369,6 @@ class QuantUIObjects:
             disabled=not editable,
         )
 
-    def initialize_main_slider(self) -> None:
-        """
-        Initialize the slider for the main data.
-        
-        We use a slider uuid and associate a defalut value with it.
-        - self.variables_quant.slider_id_uuid
-        - self.variables_quant.default_val_slider
-        """
-        key = self.variables_quant.slider_id_uuid
-        if key not in st.session_state.keys():
-            st.session_state[key] = uuid.uuid4()
-        _id_of_key = st.session_state[key]
-        if _id_of_key not in st.session_state.keys():
-            st.session_state[_id_of_key] = (
-                self.variables_quant.default_val_slider
-            )
-
-    def generate_main_selectbox(self) -> None:
-        """
-        Create the selectbox for the Streamlit UI.
-        """
-        if self.variables_quant.selectbox_id_uuid not in st.session_state.keys():
-            st.session_state[self.variables_quant.selectbox_id_uuid] = uuid.uuid4()
-
-        try:
-            # TODO: Other labels based on different modules, e.g. mass tolerances are less relevant for DIA
-            st.selectbox(
-                "Select label to plot",
-                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance", "enable_match_between_runs"],
-                key=st.session_state[self.variables_quant.selectbox_id_uuid],
-            )
-        except Exception as e:
-            st.error(f"Unable to create the selectbox: {e}", icon="🚨")
-
     def generate_submitted_selectbox(self) -> None:
         """
         Create the selectbox for the Streamlit UI.
@@ -726,27 +693,6 @@ class QuantUIObjects:
             df["Highlight"] = df["Highlight"].astype(bool).fillna(False)
         # only needed for last elif, but to be sure apply always:
         st.session_state[self.variables_quant.all_datapoints_submitted] = df
-
-    def generate_main_slider(self) -> None:
-        """
-        Create a slider input.
-        """
-        # key for slider_uuid in session state
-        slider_uuid = self.variables_quant.slider_id_uuid
-        if slider_uuid not in st.session_state:
-            st.session_state[slider_uuid] = uuid.uuid4()
-        slider_key = st.session_state[slider_uuid]
-
-        fpath = self.variables_quant.description_slider_md
-        st.markdown(open(fpath, "r").read())
-
-        default_value = st.session_state.get(slider_key, self.variables_quant.default_val_slider)
-        st.select_slider(
-            label="Minimal precursor quantifications (# samples)",
-            options=[1, 2, 3, 4, 5, 6],
-            value=default_value,
-            key=slider_key,
-        )
 
     def generate_submitted_slider(self) -> None:
         """
@@ -1201,7 +1147,7 @@ class QuantUIObjects:
             self.generate_confirmation_checkbox()
         else:
             params = None
-            
+
         pr_url = None
         if st.session_state[self.variables_quant.check_submission] and params is not None:
             get_form_values = self.get_form_values()
@@ -1356,12 +1302,20 @@ class QuantUIObjects:
 
         return fig_logfc
 
+    @st.fragment
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
-        self.initialize_main_slider()
-        self.generate_main_slider()
-        self.generate_main_selectbox()
+        tab1_results.initialize_main_slider(
+            slider_id_uuid=self.variables_quant.slider_id_uuid,
+            default_val_slider=self.variables_quant.default_val_slider,
+        )
+        tab1_results.generate_main_slider(
+            slider_id_uuid=self.variables_quant.slider_id_uuid,
+            description_slider_md=self.variables_quant.description_slider_md,
+            default_val_slider=self.variables_quant.default_val_slider,
+        )
+        tab1_results.generate_main_selectbox(selectbox_id_uuid=self.variables_quant.selectbox_id_uuid)
         self.display_existing_results()
 
     def display_all_data_results_submitted(self) -> None:
@@ -1371,4 +1325,3 @@ class QuantUIObjects:
         self.generate_submitted_slider()
         self.generate_submitted_selectbox()
         self.display_submitted_results()
-

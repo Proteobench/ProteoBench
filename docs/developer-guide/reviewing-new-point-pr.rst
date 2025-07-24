@@ -10,11 +10,13 @@ Reviewing the submission of new data point
 
 4. Check in 'Files Changed' tab whether the parameter values look reasonable. If you notice any possible error in parameter parsing or in metric calculation, contact the dev team.
 
-5. If everything looks good and the PR is ready to be accepted, then:
+5. Check if the submitted data is present on the server by clicking the link in the PR. For example, points submitted from local installs should not be accepted because the data will not be present on the server.
+
+6. If everything looks good and the PR is ready to be accepted, then:
   * Press 'Merge pull request'. 
   * Confirm the merge. 
   * Go to the 'Code' page
   * Sync the fork
   * Click 'Contribute' and open a pull request.
 
-6. Go to the Proteobench github repository corresponding to the module results and accept (merge) the pull request.
+7. Go to the Proteobench github repository corresponding to the module results and accept (merge) the pull request.

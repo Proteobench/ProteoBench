@@ -2,6 +2,7 @@
 Peaks parameter parsing.
 """
 
+import os
 import re
 from pathlib import Path
 from typing import List, Optional
@@ -145,7 +146,7 @@ def get_items_between(lines: list, start: str, end: str, only_last: bool = False
     return items
 
 
-def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
+def extract_params(file_path: str) -> ProteoBenchParameters:
     """
     Read a PEAKS settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 
@@ -211,7 +212,6 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
         )
     params.min_precursor_charge = int(precursor_charge_between[0])
     params.max_precursor_charge = int(precursor_charge_between[1])
-
     params.scan_window = None
 
     params.quantification_method = extract_value(
@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
     for file in fnames:
         # Extract parameters from the settings file
-        parameters = read_peaks_settings(file)
+        parameters = extract_params(file)
 
         # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)

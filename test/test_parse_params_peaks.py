@@ -17,7 +17,7 @@ fnames = [TESTDATA_DIR / f for f in fnames]
 @pytest.mark.parametrize("file", fnames)
 def test_read_peaks_settings(file):
     expected = pd.read_csv(file.with_suffix(".csv"), index_col=0).squeeze("columns")
-    actual = peaks_params.read_peaks_settings(file)
+    actual = peaks_params.extract_params(file)
     print(actual.software_name)
     actual = pd.Series(actual.__dict__)
     actual = pd.read_csv(io.StringIO(actual.to_csv()), index_col=0).squeeze("columns")

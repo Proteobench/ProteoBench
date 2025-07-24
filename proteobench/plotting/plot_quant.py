@@ -17,7 +17,9 @@ class PlotDataPoint:
     """
 
     @staticmethod
-    def plot_fold_change_histogram(result_df: pd.DataFrame, species_ratio: Dict[str, Dict[str, str]]) -> go.Figure:
+    def plot_fold_change_histogram(
+        result_df: pd.DataFrame, species_ratio: Dict[str, Dict[str, str]], hide_annot: bool = False
+    ) -> go.Figure:
         """
         Plot smooth shaded density distributions of log2 fold changes using Plotly, color-coded by species.
 
@@ -76,7 +78,7 @@ class PlotDataPoint:
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-",
+            text="-Beta-" if not hide_annot else "",
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )
@@ -112,6 +114,7 @@ class PlotDataPoint:
         legend_name_map: Dict[str, str] = {
             "AlphaPept": "AlphaPept (legacy tool)",
         },
+        hide_annot: bool = False,
     ) -> go.Figure:
         """
         Plot mean metrics in a scatter plot with Plotly, highlighting specific data points.
@@ -280,7 +283,7 @@ class PlotDataPoint:
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-",
+            text="-Beta-" if not hide_annot else "",
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )

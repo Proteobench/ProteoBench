@@ -10,7 +10,9 @@ import toml
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
+    DDAQuantIonModuleQExactive,
+)
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
@@ -49,10 +51,10 @@ def get_merged_json(
 
     # Extract ZIP contents to a local folder
     with zipfile.ZipFile(zip_bytes) as zip_ref:
-        zip_ref.extractall("Results_quant_ion_DDA")
+        zip_ref.extractall(repo_url.split("/")[-5])
 
     # Prepare base directory
-    base_path = "Results_quant_ion_DDA/Results_quant_ion_DDA-main"
+    base_path = f"{repo_url.split('/')[-5]}/{repo_url.split('/')[-5]}-main"
 
     # Initialize combined JSON container
     combined_json = []
@@ -98,6 +100,12 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", ou
 
     # Download and extract zip files from matching folders
     for folder in matching_folders:
+        extract_dir = f"{output_directory}/{folder}"
+        if os.path.exists(extract_dir) and os.listdir(extract_dir):
+            print(f"Folder already exists and is not empty, skipping download: {extract_dir}")
+            hash_vis_dir[folder] = extract_dir
+            continue
+
         folder_url = f"{base_url}{folder}/"
         print(f"Processing folder: {folder_url}")
 
@@ -137,8 +145,6 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", ou
                     progress.update(len(data))
 
             # Extract the zip file
-            extract_dir = f"{output_directory}/{folder}"
-
             os.makedirs(extract_dir, exist_ok=True)
             with zipfile.ZipFile(zip_filename, "r") as zip_ref:
                 zip_ref.extractall(extract_dir)

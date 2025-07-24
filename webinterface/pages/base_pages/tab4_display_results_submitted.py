@@ -115,6 +115,10 @@ def display_submitted_results(variables_quant, ionmodule) -> None:
     )
 
 
+########################################################################################
+# helper functions
+
+
 def initialize_submitted_data_points(
     all_datapoints_submitted: str,
     obtain_all_data_points: Callable,

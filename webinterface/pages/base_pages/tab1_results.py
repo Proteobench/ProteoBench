@@ -8,6 +8,7 @@ import streamlit as st
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 from . import setup
+from .filter import filter_data_using_slider
 
 
 def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> None:
@@ -63,26 +64,6 @@ def generate_main_selectbox(selectbox_id_uuid) -> None:
         )
     except Exception as e:
         st.error(f"Unable to create the selectbox: {e}", icon="🚨")
-
-
-def _filter_data_main_slider(
-    slider_id_uuid: str,
-    all_datapoints: pd.DataFrame,
-    filter_data_point: Callable,
-) -> pd.DataFrame:
-    """
-    Filter the data points based on the slider value.
-
-    Returns
-    -------
-    pandas.DataFrame
-        The filtered data points.
-    """
-    if slider_id_uuid in st.session_state.keys():
-        return filter_data_point(
-            st.session_state[all_datapoints],
-            st.session_state[st.session_state[slider_id_uuid]],
-        )
 
 
 def display_download_section(variables_quant, reset_uuid=False) -> None:
@@ -151,7 +132,7 @@ def display_existing_results(variables_quant, ionmodule) -> None:
         all_datapoints=variables_quant.all_datapoints,
         obtain_all_data_points=ionmodule.obtain_all_data_points,
     )
-    data_points_filtered = _filter_data_main_slider(
+    data_points_filtered = filter_data_using_slider(
         slider_id_uuid=variables_quant.slider_id_uuid,
         all_datapoints=variables_quant.all_datapoints,
         filter_data_point=ionmodule.filter_data_point,

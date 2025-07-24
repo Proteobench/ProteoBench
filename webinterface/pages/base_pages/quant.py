@@ -24,7 +24,12 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
 )
 from proteobench.plotting.plot_quant import PlotDataPoint
 
-from . import tab1_results, tab2_form_upload_data, tab3_indepth_plots
+from . import (
+    tab1_results,
+    tab2_form_upload_data,
+    tab3_indepth_plots,
+    tab4_display_results_submitted,
+)
 from .inputs import generate_input_widget
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -152,83 +157,6 @@ class QuantUIObjects:
         if submit_button:
             self.process_submission_form()
 
-    def generate_submitted_selectbox(self) -> None:
-        """
-        Create the selectbox for the Streamlit UI.
-        """
-        if self.variables_quant.selectbox_id_submitted_uuid not in st.session_state.keys():
-            st.session_state[self.variables_quant.selectbox_id_submitted_uuid] = uuid.uuid4()
-
-        try:
-            st.selectbox(
-                "Select label to plot",
-                ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
-                key=st.session_state[self.variables_quant.selectbox_id_submitted_uuid],
-            )
-        except Exception as e:
-            st.error(f"Unable to create the selectbox: {e}", icon="🚨")
-
-    def initialize_submitted_slider(self) -> None:
-        """
-        Initialize the slider for the submitted data.
-        """
-        if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
-            st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
-        if st.session_state[self.variables_quant.slider_id_submitted_uuid] not in st.session_state.keys():
-            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]] = (
-                self.variables_quant.default_val_slider
-            )
-
-    def display_submitted_results(self) -> None:
-        """
-        Display the results section of the page for submitted data.
-        """
-        # handled_submission = self.process_submission_form()
-        # if handled_submission == False:
-        #    return
-
-        self.initialize_submitted_data_points()
-        data_points_filtered = self.filter_data_submitted_slider()
-
-        metric = st.radio(
-            "Select metric to plot",
-            options=["Median", "Mean"],
-            help="Toggle between median and mean absolute difference metrics.",
-            key="placeholder2",  # TODO: add to variables
-        )
-
-        if len(data_points_filtered) == 0:
-            st.error("No datapoints available for plotting", icon="🚨")
-            return
-
-        try:
-            fig_metric = PlotDataPoint.plot_metric(
-                data_points_filtered,
-                metric=metric,
-                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_submitted_uuid]],
-            )
-
-            try:
-                st.plotly_chart(fig_metric, use_container_width=True)
-            except Exception as e:
-                st.error("No (new) datapoints available for plotting", icon="🚨")
-                return
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-        st.session_state[self.variables_quant.table_id_uuid] = uuid.uuid4()
-        st.data_editor(
-            st.session_state[self.variables_quant.all_datapoints_submitted],
-            key=st.session_state[self.variables_quant.table_id_uuid],
-            on_change=self.handle_submitted_table_edits,
-        )
-
-        st.title("Public submission")
-        st.markdown(
-            "If you want to make this point — and the associated data —"
-            "publicly available, please go to “Public Submission"
-        )
-
     def submit_to_repository(self, params) -> Optional[str]:
         """
         Handle the submission process of the benchmark results to the ProteoBench repository.
@@ -329,34 +257,6 @@ class QuantUIObjects:
                 all_datapoints=st.session_state[self.variables_quant.all_datapoints]
             )
 
-    def initialize_submitted_data_points(self) -> None:
-        """
-        Initialize the all_datapoints variable in the session state.
-        """
-        if self.variables_quant.all_datapoints_submitted not in st.session_state.keys():
-            st.session_state[self.variables_quant.all_datapoints_submitted] = None
-            st.session_state[self.variables_quant.all_datapoints_submitted] = self.ionmodule.obtain_all_data_points(
-                all_datapoints=st.session_state[self.variables_quant.all_datapoints_submitted]
-            )
-
-    def filter_data_submitted_slider(self) -> pd.DataFrame:
-        """
-        Filter the data points based on the slider value.
-
-        Returns
-        -------
-        pd.DataFrame
-            The filtered data points.
-        """
-        if (
-            self.variables_quant.slider_id_submitted_uuid in st.session_state.keys()
-            and self.variables_quant.all_datapoints_submitted in st.session_state.keys()
-        ):
-            return self.ionmodule.filter_data_point(
-                st.session_state[self.variables_quant.all_datapoints_submitted],
-                st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]],
-            )
-
     def set_highlight_column_in_submitted_data(self) -> None:
         """
         Initialize the highlight column in the data points.
@@ -375,26 +275,9 @@ class QuantUIObjects:
         # only needed for last elif, but to be sure apply always:
         st.session_state[self.variables_quant.all_datapoints_submitted] = df
 
-    def generate_submitted_slider(self) -> None:
-        """
-        Create a slider input.
-        """
-        if self.variables_quant.slider_id_submitted_uuid not in st.session_state:
-            st.session_state[self.variables_quant.slider_id_submitted_uuid] = uuid.uuid4()
-        slider_key = st.session_state[self.variables_quant.slider_id_submitted_uuid]
-
-        st.markdown(open(self.variables_quant.description_slider_md, "r").read())
-
-        st.select_slider(
-            label="Minimal precursor quantifications (# samples)",
-            options=[1, 2, 3, 4, 5, 6],
-            value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
-            key=slider_key,
-        )
-
     def display_indepth_plots(self) -> None:
         """
-        Display the dataset selection dropdown and plot the selected dataset.
+        Display the dataset selection dropdown and plot the selected dataset (Tab 3).
         """
         # the key is a string and links to a pandas.DataFrame
         key_in_state = self.variables_quant.all_datapoints_submitted
@@ -624,36 +507,6 @@ class QuantUIObjects:
             default_cutoff_min_prec=set_slider_val,
         )
 
-    def handle_submitted_table_edits(self) -> None:
-        """Callback function for handling edits made to the data table in the UI."""
-        edits = st.session_state[st.session_state[self.variables_quant.table_id_uuid]]["edited_rows"].items()
-        for k, v in edits:
-            try:
-                st.session_state[self.variables_quant.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(
-                    v.values()
-                )[0]
-            except TypeError:
-                return
-        st.session_state[self.variables_quant.highlight_list_submitted] = list(
-            st.session_state[self.variables_quant.all_datapoints_submitted]["Highlight"]
-        )
-        st.session_state[self.variables_quant.placeholder_table] = st.session_state[
-            self.variables_quant.all_datapoints_submitted
-        ]
-
-        if len(st.session_state[self.variables_quant.all_datapoints]) == 0:
-            st.error("No datapoints available for plotting", icon="🚨")
-
-        try:
-            fig_metric = PlotDataPoint.plot_metric(
-                st.session_state[self.variables_quant.all_datapoints],
-                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
-            )
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-        st.session_state[self.variables_quant.fig_metric] = fig_metric
-
     def load_user_parameters(self) -> Any:
         """
         Read and process the parameter files provided by the user.
@@ -746,7 +599,7 @@ class QuantUIObjects:
 
     def display_public_submission_ui(self) -> None:
         """
-        Display the public submission section of the page in Tab 4.
+        Display the public submission section of the page in Tab 5.
         """
         # Initialize Unchecked submission box variable
         if self.variables_quant.check_submission not in st.session_state:
@@ -797,9 +650,15 @@ class QuantUIObjects:
         tab1_results.display_existing_results(variables_quant=self.variables_quant, ionmodule=self.ionmodule)
 
     def display_all_data_results_submitted(self) -> None:
-        """Display the results for all data in Tab 3."""
+        """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
-        self.initialize_submitted_slider()
-        self.generate_submitted_slider()
-        self.generate_submitted_selectbox()
-        self.display_submitted_results()
+        tab4_display_results_submitted.initialize_submitted_slider(
+            self.variables_quant.slider_id_submitted_uuid,
+            self.variables_quant.default_val_slider,
+        )
+        tab4_display_results_submitted.generate_submitted_slider(self.variables_quant)
+        tab4_display_results_submitted.generate_submitted_selectbox(self.variables_quant)
+        tab4_display_results_submitted.display_submitted_results(
+            variables_quant=self.variables_quant,
+            ionmodule=self.ionmodule,
+        )

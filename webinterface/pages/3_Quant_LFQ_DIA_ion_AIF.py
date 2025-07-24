@@ -16,7 +16,6 @@ from pages.texts.generic_texts import WebpageTexts
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 
-
 class StreamlitUI:
     """
     Streamlit UI for the DIA quantification - precursor ions module - AIF.

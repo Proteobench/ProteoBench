@@ -117,7 +117,11 @@ class QuantUIObjects:
             )
 
         if submit_button:
-            self.first_point_plotted = tab2_form_upload_data.process_submission_form()
+            self.first_point_plotted = tab2_form_upload_data.process_submission_form(
+                variables_quant=self.variables_quant,
+                ionmodule=self.ionmodule,
+                user_input=self.user_input,
+            )
 
     def display_indepth_plots(self) -> None:
         """

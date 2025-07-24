@@ -101,7 +101,7 @@ def _generate_text_area_widget(
         height=height,
         disabled=not editable,
     )
-    ret
+    return ret
 
 
 def _generate_text_input(

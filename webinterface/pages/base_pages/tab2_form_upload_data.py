@@ -61,13 +61,13 @@ def process_submission_form(
     variables_quant,
     ionmodule,
     user_input,
-) -> None:
+) -> bool:
     """
     Handle the form submission logic.
 
     Returns
     -------
-    bool, optional
+    bool
         Whether the submission was handled unsuccessfully.
     """
     if not user_input["input_csv"]:

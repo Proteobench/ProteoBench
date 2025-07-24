@@ -446,35 +446,6 @@ class QuantUIObjects:
             "publicly available, please go to “Public Submission"
         )
 
-    def display_existing_results(self) -> None:
-        """
-        Display the results section of the page for existing data.
-        """
-        self.initialize_main_data_points()
-        data_points_filtered = self.filter_data_main_slider()
-
-        metric = st.radio(
-            "Select metric to plot",
-            options=["Median", "Mean"],
-            help="Toggle between median and mean absolute difference metrics.",
-        )
-
-        if len(data_points_filtered) == 0:
-            st.error("No datapoints available for plotting", icon="🚨")
-
-        try:
-            fig_metric = PlotDataPoint.plot_metric(
-                data_points_filtered,
-                label=st.session_state[st.session_state[self.variables_quant.selectbox_id_uuid]],
-                metric=metric,
-            )
-            st.plotly_chart(fig_metric, use_container_width=True)
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-        st.dataframe(data_points_filtered)
-        self.display_download_section()
-
     def submit_to_repository(self, params) -> Optional[str]:
         """
         Handle the submission process of the benchmark results to the ProteoBench repository.
@@ -643,21 +614,6 @@ class QuantUIObjects:
                 all_datapoints=st.session_state[self.variables_quant.all_datapoints_submitted]
             )
 
-    def filter_data_main_slider(self) -> pd.DataFrame:
-        """
-        Filter the data points based on the slider value.
-
-        Returns
-        -------
-        pandas.DataFrame
-            The filtered data points.
-        """
-        if self.variables_quant.slider_id_uuid in st.session_state.keys():
-            return self.ionmodule.filter_data_point(
-                st.session_state[self.variables_quant.all_datapoints],
-                st.session_state[st.session_state[self.variables_quant.slider_id_uuid]],
-            )
-
     def filter_data_submitted_slider(self) -> pd.DataFrame:
         """
         Filter the data points based on the slider value.
@@ -710,60 +666,6 @@ class QuantUIObjects:
             value=st.session_state.get(slider_key, self.variables_quant.default_val_slider),
             key=slider_key,
         )
-
-    def display_download_section(self, reset_uuid=False) -> None:
-        """
-        Render the selector and area for raw data download.
-
-        Parameters
-        ----------
-        reset_uuid : bool, optional
-            Whether to reset the UUID, by default False.
-        """
-        if len(st.session_state[self.variables_quant.all_datapoints]) == 0:
-            st.error("No data available for download.", icon="🚨")
-            return
-
-        downloads_df = st.session_state[self.variables_quant.all_datapoints][["id", "intermediate_hash"]]
-        downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
-
-        if self.variables_quant.placeholder_downloads_container not in st.session_state.keys() or reset_uuid:
-            st.session_state[self.variables_quant.placeholder_downloads_container] = st.empty()
-            st.session_state[self.variables_quant.download_selector_id_uuid] = uuid.uuid4()
-
-        with st.session_state[self.variables_quant.placeholder_downloads_container].container(border=True):
-            st.subheader("Download raw datasets")
-
-            # Sort the intermediate_hash values and get the corresponding ids
-            sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"].iloc[i])
-            sorted_intermediate_hash = [downloads_df["intermediate_hash"].iloc[i] for i in sorted_indices]
-            sorted_ids = [downloads_df["id"].iloc[i] for i in sorted_indices]
-
-            st.selectbox(
-                "Select dataset",
-                sorted_intermediate_hash,
-                index=None,
-                key=st.session_state[self.variables_quant.download_selector_id_uuid],
-                format_func=lambda x: sorted_ids[sorted_intermediate_hash.index(x)],
-            )
-
-            if (
-                st.session_state[st.session_state[self.variables_quant.download_selector_id_uuid]] is not None
-                and st.secrets["storage"]["dir"] is not None
-            ):
-                dataset_path = (
-                    st.secrets["storage"]["dir"]
-                    + "/"
-                    + st.session_state[st.session_state[self.variables_quant.download_selector_id_uuid]]
-                )
-                if os.path.isdir(dataset_path):
-                    files = os.listdir(dataset_path)
-                    for file_name in files:
-                        path_to_file = dataset_path + "/" + file_name
-                        with open(path_to_file, "rb") as file:
-                            st.download_button(file_name, file, file_name=file_name)
-                else:
-                    st.write("Directory for this dataset does not exist, this should not happen.")
 
     def display_indepth_plots(self) -> None:
         """
@@ -1316,7 +1218,7 @@ class QuantUIObjects:
             default_val_slider=self.variables_quant.default_val_slider,
         )
         tab1_results.generate_main_selectbox(selectbox_id_uuid=self.variables_quant.selectbox_id_uuid)
-        self.display_existing_results()
+        tab1_results.display_existing_results(variables_quant=self.variables_quant, ionmodule=self.ionmodule)
 
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 3."""

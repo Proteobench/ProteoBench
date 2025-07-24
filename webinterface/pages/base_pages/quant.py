@@ -30,7 +30,8 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 logger: logging.Logger = logging.getLogger(__name__)
-from . import tab1_results
+from . import tab1_results, tab2_form_upload_data
+from .inputs import generate_input_widget
 
 
 def compare_dictionaries(old_dict, new_dict):
@@ -135,239 +136,25 @@ class QuantUIObjects:
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
         with st.form(key="main_form"):
-            self.generate_input_fields()
+            tab2_form_upload_data.generate_input_fields(
+                variables_quant=self.variables_quant,
+                parsesettingsbuilder=self.parsesettingsbuilder,
+                user_input=self.user_input,
+            )
             # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
-            self.generate_additional_parameters_fields()
-            st.markdown(self.variables_quant.texts.ShortMessages.run_instructions)
-            submit_button = st.form_submit_button("Parse and bench", help=self.variables_quant.texts.Help.parse_button)
+            tab2_form_upload_data.generate_additional_parameters_fields(
+                variables_quant=self.variables_quant,
+                user_input=self.user_input,
+            )
+            text = self.variables_quant.texts.ShortMessages.run_instructions
+            st.markdown(text)
+            submit_button = st.form_submit_button(
+                "Parse and bench",
+                help=self.variables_quant.texts.Help.parse_button,
+            )
 
         if submit_button:
             self.process_submission_form()
-
-    def generate_input_widget(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
-        """
-        Generate input fields in the Streamlit UI based on the specified format and content.
-
-        Parameters
-        ----------
-        input_format : str
-            The input format.
-        content : dict
-            The content of the input fields.
-        key : str
-            The key of the input fields.
-        editable : bool
-            Whether the input fields are editable.
-
-        Returns
-        -------
-        Any
-            The input fields.
-        """
-        field_type = content.get("type")
-        if field_type == "text_area":
-            return self.generate_text_area_widget(input_format, content, editable=editable)
-        elif field_type == "text_input":
-            return self._generate_text_input(input_format, content, key, editable=editable)
-        elif field_type == "number_input":
-            return self._generate_number_input(content, key, editable=editable)
-        elif field_type == "selectbox":
-            return self._generate_selectbox(input_format, content, key, editable=editable)
-        elif field_type == "checkbox":
-            return self._generate_checkbox(content=content, key=key, editable=editable)
-
-    def _generate_text_area(self, input_format: str, content: dict, key: str = "") -> Any:
-        """
-        Generate a text area input field.
-
-        Parameters
-        ----------
-        input_format : str
-            The input format.
-        content : dict
-            The content of the text area.
-        key : str
-            The key of the text area.
-
-        Returns
-        -------
-        Any
-            The text area input field.
-        """
-        placeholder = content.get("placeholder")
-        if key in st.session_state[self.variables_quant.params_file_dict].keys():
-            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
-        else:
-            value = content.get("value", {}).get(input_format)
-        height = content.get("height", 200)  # Default height if not specified
-        return st.text_area(
-            content["label"],
-            placeholder=placeholder,
-            key=self.variables_quant.prefix_params + key,
-            value=value,
-            height=height,
-            on_change=self.update_parameters_submission_form(
-                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
-            ),
-        )
-
-        # Function to update session state dictionary
-
-    def update_parameters_submission_form(self, field, value) -> None:
-        """
-        Update the session state dictionary with the specified field and value.
-
-        Parameters
-        ----------
-        field : str
-            The field to update.
-        value : Any
-            The value to update the field with.
-        """
-        try:
-            st.session_state[self.variables_quant.params_json_dict][field] = value
-        except KeyError:
-            st.session_state[self.variables_quant.params_json_dict] = {}
-            st.session_state[self.variables_quant.params_json_dict][field] = value
-
-    def _generate_text_input(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
-        """
-        Generate a text input field.
-
-        Parameters
-        ----------
-        input_format : str
-            The input format.
-        content : dict
-            The content of the text input field.
-        key : str
-            The key of the text input field.
-
-        Returns
-        -------
-        Any
-            The text input field.
-        """
-        placeholder = content.get("placeholder")
-        if key in st.session_state[self.variables_quant.params_file_dict].keys():
-            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
-        else:
-            value = content.get("value", {}).get(input_format)
-
-        return st.text_input(
-            content["label"],
-            placeholder=placeholder,
-            key=self.variables_quant.prefix_params + key,
-            value=value,
-            on_change=self.update_parameters_submission_form(
-                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
-            ),
-            disabled=not editable,
-        )
-
-    def _generate_number_input(self, content: dict, key: str = "", editable: bool = True) -> Any:
-        """
-        Generate a number input field.
-
-        Parameters
-        ----------
-        content : dict
-            The content of the number input field.
-        key : str
-            The key of the number input field.
-        editable : bool
-            Whether the number input field is editable.
-
-        Returns
-        -------
-        Any
-            The number input field.
-        """
-        if key in st.session_state[self.variables_quant.params_file_dict].keys():
-            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
-        else:
-            value = content.get("value", {}).get("min_value")
-        return st.number_input(
-            content["label"],
-            value=value,
-            key=self.variables_quant.prefix_params + key,
-            format=content["format"],
-            min_value=content["min_value"],
-            max_value=content["max_value"],
-            on_change=self.update_parameters_submission_form(
-                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
-            ),
-            disabled=not editable,
-        )
-
-    def _generate_selectbox(self, input_format: str, content: dict, key: str = "", editable: bool = True) -> Any:
-        """
-        Generate a selectbox input field.
-
-        Parameters
-        ----------
-        input_format : str
-            The input format.
-        content : dict
-            The content of the selectbox.
-        key : str
-            The key of the selectbox.
-        editable : bool
-            Whether the selectbox is editable.
-
-        Returns
-        -------
-        Any
-            The selectbox input field.
-        """
-        options = content.get("options", [])
-        if key in st.session_state[self.variables_quant.params_file_dict].keys():
-            value = st.session_state[self.variables_quant.params_file_dict].get(key)  # Get parsed value if available
-        else:
-            value = content.get("value", {}).get(input_format)
-        index = options.index(value) if value in options else 0
-
-        return st.selectbox(
-            content["label"],
-            options,
-            key=self.variables_quant.prefix_params + key,
-            index=index,
-            on_change=self.update_parameters_submission_form(
-                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
-            ),
-            disabled=not editable,
-        )
-
-    def _generate_checkbox(self, content: dict, key: str = "", editable: bool = True) -> Any:
-        """
-        Generate a checkbox input field.
-
-        Parameters
-        ----------
-        content : dict
-            The content of the checkbox.
-        key : str
-            The key of the checkbox.
-        editable : bool
-            Whether the checkbox is editable.
-
-        Returns
-        -------
-        Any
-            The checkbox input field.
-        """
-        value = content.get("value", {})
-        if key in st.session_state[self.variables_quant.params_file_dict].keys():
-            value = st.session_state[self.variables_quant.params_file_dict].get(key)
-        return st.checkbox(
-            content["label"],
-            key=self.variables_quant.prefix_params + key,
-            value=value,
-            on_change=self.update_parameters_submission_form(
-                key, st.session_state.get(self.variables_quant.prefix_params + key, 0)
-            ),
-            disabled=not editable,
-        )
 
     def generate_submitted_selectbox(self) -> None:
         """
@@ -515,39 +302,6 @@ class QuantUIObjects:
             st.error(":x: Please provide a result file", icon="🚨")
         self.generate_metadata_uploader()
 
-    def generate_input_fields(self) -> None:
-        """
-        Create the input section of the form.
-        """
-        st.subheader("Input files")
-        st.markdown(open(self.variables_quant.description_input_file_md, "r").read())
-        self.user_input["input_format"] = st.selectbox(
-            "Software tool",
-            self.parsesettingsbuilder.INPUT_FORMATS,
-            help=self.variables_quant.texts.Help.input_format,
-        )
-        self.user_input["input_csv"] = st.file_uploader(
-            "Software tool result file", help=self.variables_quant.texts.Help.input_file
-        )
-
-    # TODO: change additional_params_json for other modules, to capture relevant parameters
-    def generate_additional_parameters_fields(self) -> None:
-        """
-        Create the additional parameters section of the form and initializes the parameter fields.
-        """
-        with open(self.variables_quant.additional_params_json) as file:
-            config = json.load(file)
-        for key, value in config.items():
-            if key.lower() == "software_name":
-                editable = False
-            else:
-                editable = True
-
-            if key == "comments_for_plotting":
-                self.user_input[key] = self.generate_input_widget(self.user_input["input_format"], value, editable)
-            else:
-                self.user_input[key] = None
-
     def process_submission_form(self) -> None:
         """
         Handle the form submission logic.
@@ -567,31 +321,6 @@ class QuantUIObjects:
         st.info(
             "Form submitted successfully! Please navigate to the 'Results In-Depth' "
             "or 'Results New Data' tab for the next step."
-        )
-
-    def generate_text_area_widget(self, input_format: str, content: dict, editable: bool = True) -> Any:
-        """
-        Generate a text area input field.
-
-        Parameters
-        ----------
-        input_format : str
-            The input format.
-        content : dict
-            The content of the text area.
-        editable : bool
-            Whether the text area is editable.
-
-        Returns
-        -------
-        Any
-            The text area input field.
-        """
-        placeholder = content.get("placeholder")
-        value = content.get("value", {}).get(input_format)
-        height = content.get("height", 200)
-        return st.text_area(
-            content["label"], placeholder=placeholder, value=value, height=height, disabled=not editable
         )
 
     def initialize_main_data_points(self) -> None:
@@ -974,18 +703,18 @@ class QuantUIObjects:
 
             if idx < input_param_len:
                 with st_col1:
-                    self.user_input[key] = self.generate_input_widget(
-                        self.user_input["input_format"], value, key, editable=editable
+                    self.user_input[key] = generate_input_widget(
+                        self.variables_quant, self.user_input["input_format"], value, key, editable=editable
                     )
             elif idx < input_param_len * 2:
                 with st_col2:
-                    self.user_input[key] = self.generate_input_widget(
-                        self.user_input["input_format"], value, key, editable=editable
+                    self.user_input[key] = generate_input_widget(
+                        self.variables_quant, self.user_input["input_format"], value, key, editable=editable
                     )
             else:
                 with st_col3:
-                    self.user_input[key] = self.generate_input_widget(
-                        self.user_input["input_format"], value, key, editable=editable
+                    self.user_input[key] = generate_input_widget(
+                        self.variables_quant, self.user_input["input_format"], value, key, editable=editable
                     )
 
     def generate_sample_name(self) -> str:

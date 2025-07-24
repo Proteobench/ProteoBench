@@ -135,25 +135,6 @@ def initialize_submitted_data_points(
         )
 
 
-def filter_data_submitted_slider(self) -> pd.DataFrame:
-    """
-    Filter the data points based on the slider value.
-
-    Returns
-    -------
-    pd.DataFrame
-        The filtered data points.
-    """
-    if (
-        self.variables_quant.slider_id_submitted_uuid in st.session_state.keys()
-        and self.variables_quant.all_datapoints_submitted in st.session_state.keys()
-    ):
-        return self.ionmodule.filter_data_point(
-            st.session_state[self.variables_quant.all_datapoints_submitted],
-            st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]],
-        )
-
-
 def handle_submitted_table_edits(variables_quant) -> None:
     """Callback function for handling edits made to the data table in the UI."""
     edits = st.session_state[st.session_state[variables_quant.table_id_uuid]]["edited_rows"].items()

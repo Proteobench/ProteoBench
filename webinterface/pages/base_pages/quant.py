@@ -2,7 +2,6 @@
 
 import copy
 import logging
-import tempfile
 import uuid
 from typing import Any, Dict
 
@@ -25,7 +24,6 @@ from . import (
     tab4_display_results_submitted,
     tab5_public_submission,
 )
-from .inputs import generate_input_widget
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -119,56 +117,7 @@ class QuantUIObjects:
             )
 
         if submit_button:
-            self.process_submission_form()
-
-    def process_submission_form(self) -> None:
-        """
-        Handle the form submission logic.
-
-        Returns
-        -------
-        bool, optional
-            Whether the submission was handled unsuccessfully.
-        """
-        if not self.user_input["input_csv"]:
-            st.error(":x: Please provide a result file", icon="🚨")
-            return False
-        self.execute_proteobench()
-        self.first_point_plotted = True
-
-        # Inform the user with a link to the next tab
-        st.info(
-            "Form submitted successfully! Please navigate to the 'Results In-Depth' "
-            "or 'Results New Data' tab for the next step."
-        )
-
-    def initialize_main_data_points(self) -> None:
-        """
-        Initialize the all_datapoints variable in the session state.
-        """
-        if self.variables_quant.all_datapoints not in st.session_state.keys():
-            st.session_state[self.variables_quant.all_datapoints] = None
-            st.session_state[self.variables_quant.all_datapoints] = self.ionmodule.obtain_all_data_points(
-                all_datapoints=st.session_state[self.variables_quant.all_datapoints]
-            )
-
-    def set_highlight_column_in_submitted_data(self) -> None:
-        """
-        Initialize the highlight column in the data points.
-        """
-        df = st.session_state[self.variables_quant.all_datapoints_submitted]
-        if (
-            self.variables_quant.highlight_list_submitted not in st.session_state.keys()
-            and "Highlight" not in df.columns
-        ):
-            df.insert(0, "Highlight", [False] * len(df.index))
-        elif "Highlight" not in df.columns:
-            df.insert(0, "Highlight", st.session_state[self.variables_quant.highlight_list_submitted])
-        elif "Highlight" in df.columns:
-            # Not sure how 'Highlight' column became object dtype
-            df["Highlight"] = df["Highlight"].astype(bool).fillna(False)
-        # only needed for last elif, but to be sure apply always:
-        st.session_state[self.variables_quant.all_datapoints_submitted] = df
+            self.first_point_plotted = tab2_form_upload_data.process_submission_form()
 
     def display_indepth_plots(self) -> None:
         """
@@ -214,54 +163,6 @@ class QuantUIObjects:
             recalculate=True,
             public_id=public_id,
             public_hash=selected_hash,
-        )
-
-    def execute_proteobench(self) -> None:
-        """
-        Execute the ProteoBench benchmarking process.
-        """
-        if self.variables_quant.all_datapoints_submitted not in st.session_state:
-            self.initialize_main_data_points()
-
-        result_performance, all_datapoints, input_df = self.run_benchmarking_process()
-        st.session_state[self.variables_quant.all_datapoints_submitted] = all_datapoints
-
-        self.set_highlight_column_in_submitted_data()
-
-        st.session_state[self.variables_quant.result_perf] = result_performance
-
-        st.session_state[self.variables_quant.input_df] = input_df
-
-    def run_benchmarking_process(self):
-        """
-        Execute the benchmarking process and returns the results.
-
-        Returns
-        -------
-        Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
-            The benchmarking results, all data points, and the input data frame.
-        """
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(self.user_input["input_csv"].getbuffer())
-
-        # reload buffer: https://stackoverflow.com/a/64478151/9684872
-        self.user_input["input_csv"].seek(0)
-        if st.session_state[self.variables_quant.slider_id_submitted_uuid] in st.session_state.keys():
-            set_slider_val = st.session_state[st.session_state[self.variables_quant.slider_id_submitted_uuid]]
-        else:
-            set_slider_val = self.variables_quant.default_val_slider
-
-        if self.variables_quant.all_datapoints_submitted in st.session_state.keys():
-            all_datapoints = st.session_state[self.variables_quant.all_datapoints_submitted]
-        else:
-            all_datapoints = st.session_state[self.variables_quant.all_datapoints]
-
-        return self.ionmodule.benchmarking(
-            self.user_input["input_csv"],
-            self.user_input["input_format"],
-            self.user_input,
-            all_datapoints,
-            default_cutoff_min_prec=set_slider_val,
         )
 
     def display_public_submission_ui(self) -> None:

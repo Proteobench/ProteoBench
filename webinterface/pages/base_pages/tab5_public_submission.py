@@ -390,11 +390,12 @@ def save_intermediate_submission_data(variables_quant, ionmodule, user_input) ->
             user_input[variables_quant.meta_data][0].name,
         )[1]
         logger.info("Save intermediate raw")
+        df_result_performance_submission = st.session_state[variables_quant.result_performance_submission]
         ionmodule.write_intermediate_raw(
-            dir=st.secrets["storage"]["dir"],
+            directory=st.secrets["storage"]["dir"],
             ident=_id,
             input_file_obj=user_input["input_csv"],
-            result_performance=st.session_state[variables_quant.result_performance_submission],
+            result_performance=df_result_performance_submission,
             param_loc=user_input[variables_quant.meta_data],
             comment=st.session_state[variables_quant.meta_data_text],
             extension_input_file=extension_input_file,

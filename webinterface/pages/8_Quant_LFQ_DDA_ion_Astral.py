@@ -2,14 +2,10 @@
 Streamlit UI for the DDA quantification - precursor ions Astral module.
 """
 
-PAGE_NAME = "2_Quant_LFQ_DDA_ion_QExactive"
-
 import logging
-import uuid
 from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
-import pandas as pd
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DDA_ion_Astral_variables import (
@@ -19,6 +15,8 @@ from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
+
+PAGE_NAME = "2_Quant_LFQ_DDA_ion_QExactive"
 
 
 class StreamlitUI:

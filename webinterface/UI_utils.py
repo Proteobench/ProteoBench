@@ -2,7 +2,7 @@ import base64
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import requests
 
@@ -83,7 +83,7 @@ def get_n_submitted_points(url: str = "https://proteobench.cubimed.rub.de/datase
 
         return len(submitted_dirs)
 
-    except requests.RequestException as e:
+    except requests.RequestException:
         return "Error communicating with the server"
 
 

@@ -1,8 +1,6 @@
 import os
 import uuid
-from typing import Callable
 
-import pandas as pd
 import streamlit as st
 
 from proteobench.plotting.plot_quant import PlotDataPoint

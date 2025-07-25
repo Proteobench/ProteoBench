@@ -67,7 +67,6 @@ class QuantUIObjects:
         self.parsesettingsbuilder: ParseSettingsBuilder = parsesettingsbuilder
         self.user_input: Dict[str, Any] = {}
         self.page_name = page_name
-        self.user_input: Dict[str, Any] = {}
         self.submission_ready = False
         self.params_file_dict_copy: Dict[str, Any] = {}
 

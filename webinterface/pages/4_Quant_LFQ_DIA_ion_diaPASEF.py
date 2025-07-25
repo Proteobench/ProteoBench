@@ -3,11 +3,9 @@ Streamlit UI for the DIA quantification - precursor ions module - diaPASEF.
 """
 
 import logging
-import uuid
 from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
-import pandas as pd
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DIA_ion_diaPASEF_variables import (

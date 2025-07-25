@@ -3,7 +3,6 @@
 import logging
 
 import streamlit as st
-from typing_extensions import get_origin
 
 
 class StreamlitLogger:

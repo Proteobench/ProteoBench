@@ -11,6 +11,9 @@ import plotly.graph_objects as go
 from plotly.figure_factory import create_distplot
 
 
+# ! only has static methods, so scoping in the module should be enough
+# import plotldatapoint
+# plotdatapoint.function
 class PlotDataPoint:
     """
     Class for plotting data points.

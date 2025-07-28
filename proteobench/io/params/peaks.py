@@ -146,7 +146,7 @@ def get_items_between(lines: list, start: str, end: str, only_last: bool = False
     return items
 
 
-def read_peaks_settings(
+def extract_params(
     file_path: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
@@ -252,7 +252,7 @@ if __name__ == "__main__":
 
     for file in fnames:
         # Extract parameters from the settings file
-        parameters = read_peaks_settings(file)
+        parameters = extract_params(file)
 
         # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)

@@ -117,6 +117,7 @@ def execute_proteobench(variables_quant, ionmodule, user_input) -> None:
     st.session_state[variables_quant.input_df] = input_df
 
 
+# function with same name exists in tab1_results.py, but is different
 def initialize_main_data_points(variables_quant, ionmodule) -> None:
     """
     Initialize the all_datapoints variable in the session state.

@@ -1,11 +1,11 @@
 import os
 import uuid
+from typing import Callable
 
 import streamlit as st
 
 from proteobench.plotting.plot_quant import PlotDataPoint
 
-from . import setup
 from .filter import filter_data_using_slider
 
 
@@ -126,7 +126,7 @@ def display_existing_results(variables_quant, ionmodule) -> None:
     """
     Display the results section of the page for existing data.
     """
-    setup.initialize_main_data_points(
+    initialize_main_data_points(
         all_datapoints=variables_quant.all_datapoints,
         obtain_all_data_points=ionmodule.obtain_all_data_points,
     )
@@ -157,3 +157,12 @@ def display_existing_results(variables_quant, ionmodule) -> None:
 
     st.dataframe(data_points_filtered)
     display_download_section(variables_quant=variables_quant)
+
+
+def initialize_main_data_points(all_datapoints: str, obtain_all_data_points: Callable) -> None:
+    """
+    Initialize the all_datapoints variable in the session state.
+    """
+    if all_datapoints not in st.session_state.keys():
+        st.session_state[all_datapoints] = None
+        st.session_state[all_datapoints] = obtain_all_data_points(all_datapoints=st.session_state[all_datapoints])

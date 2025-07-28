@@ -93,8 +93,3 @@ if __name__ == "__main__":
 
         # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".tsv"), sep="\t")
-        series.to_csv(file.with_suffix(".tsv"), sep="\t")
-        series.to_csv(file.with_suffix(".tsv"), sep="\t")
-        series.to_csv(file.with_suffix(".tsv"), sep="\t")
-        series.to_csv(file.with_suffix(".tsv"), sep="\t")
-        series.to_csv(file.with_suffix(".tsv"), sep="\t")

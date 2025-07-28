@@ -331,8 +331,3 @@ if __name__ == "__main__":
 
         with open(fname, "w") as f:
             json.dump(params.__dict__, f, indent=4)
-            json.dump(params.__dict__, f, indent=4)
-            json.dump(params.__dict__, f, indent=4)
-            json.dump(params.__dict__, f, indent=4)
-            json.dump(params.__dict__, f, indent=4)
-            json.dump(params.__dict__, f, indent=4)

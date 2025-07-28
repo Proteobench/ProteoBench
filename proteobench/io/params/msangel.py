@@ -159,7 +159,8 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
 
 
 def extract_params(
-    fname: Union[str, pathlib.Path], json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    fname: Union[str, pathlib.Path],
+    json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"),
 ) -> ProteoBenchParameters:
     """
     Parse MSAangel quantification tool JSON parameter file and extract relevant parameters.
@@ -174,7 +175,7 @@ def extract_params(
     ProteoBenchParameters
         The extracted parameters as a `ProteoBenchParameters` object.
     """
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
 
     try:
         # If the input is a file-like object (e.g., StringIO), decode it

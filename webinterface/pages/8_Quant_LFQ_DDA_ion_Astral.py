@@ -16,8 +16,6 @@ from pages.texts.generic_texts import WebpageTexts
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
 
-PAGE_NAME = "2_Quant_LFQ_DDA_ion_QExactive"
-
 
 class StreamlitUI:
     """

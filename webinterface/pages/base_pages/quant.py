@@ -57,7 +57,7 @@ def compare_dictionaries(old_dict, new_dict):
     for key in all_keys:
         old_value = old_dict.get(key, "[MISSING]")
         new_value = new_dict.get(key, "[MISSING]")
-        if str(old_value) != str(new_value) and not (old_value == None and new_value == "[MISSING]"):
+        if str(old_value) != str(new_value) and not (old_value is None and new_value == "[MISSING]"):
             changes.append(f"- **{key}**: `{old_value}` → `{new_value}`")
 
     if changes:
@@ -67,8 +67,7 @@ def compare_dictionaries(old_dict, new_dict):
 
 
 class QuantUIObjects:
-    """
-    Main class for the Streamlit interface of ProteoBench quantification.
+    """Main class for the Streamlit interface of ProteoBench quantification.
     This class handles the creation of the Streamlit UI elements, including the main page layout,
     input forms, results display, and data submission elements.
 
@@ -104,8 +103,9 @@ class QuantUIObjects:
         self.variables_quant: VariablesDDAQuant = variables_quant
         self.ionmodule: IonModule = ionmodule
         self.parsesettingsbuilder: ParseSettingsBuilder = parsesettingsbuilder
+        self.user_input: Dict[str, Any] = {}
         self.page_name = page_name
-        self.user_input: Dict[str, Any] = dict()
+        self.user_input: Dict[str, Any] = {}
 
         # Create page config and sidebar
         pbb.proteobench_page_config()
@@ -128,14 +128,12 @@ class QuantUIObjects:
         self.stop_duplicating = False
 
         if self.variables_quant.params_file_dict not in st.session_state.keys():
-            st.session_state[self.variables_quant.params_file_dict] = dict()
+            st.session_state[self.variables_quant.params_file_dict] = {}
         if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables_quant.slider_id_submitted_uuid] = str()
 
     def display_submission_form(self) -> None:
-        """
-        Create the main submission form for the Streamlit UI in Tab 2.
-        """
+        """Create the main submission form for the Streamlit UI in Tab 2."""
         with st.form(key="main_form"):
             self.generate_input_fields()
             # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
@@ -472,7 +470,8 @@ class QuantUIObjects:
 
         st.title("Public submission")
         st.markdown(
-            "If you want to make this point — and the associated data — publicly available, please go to “Public Submission"
+            "If you want to make this point — and the associated data —"
+            "publicly available, please go to “Public Submission"
         )
 
     def display_existing_results(self) -> None:
@@ -623,7 +622,8 @@ class QuantUIObjects:
 
         # Inform the user with a link to the next tab
         st.info(
-            "Form submitted successfully! Please navigate to the 'Results In-Depth' or 'Results New Data' tab for the next step."
+            "Form submitted successfully! Please navigate to the 'Results In-Depth' "
+            "or 'Results New Data' tab for the next step."
         )
 
     def generate_text_area_widget(self, input_format: str, content: dict, editable: bool = True) -> Any:
@@ -793,8 +793,8 @@ class QuantUIObjects:
             )
 
             if (
-                st.session_state[st.session_state[self.variables_quant.download_selector_id_uuid]] != None
-                and st.secrets["storage"]["dir"] != None
+                st.session_state[st.session_state[self.variables_quant.download_selector_id_uuid]] is not None
+                and st.secrets["storage"]["dir"] is not None
             ):
                 dataset_path = (
                     st.secrets["storage"]["dir"]
@@ -1087,7 +1087,8 @@ class QuantUIObjects:
         except Exception as e:
             input_f = self.user_input["input_format"]
             st.error(
-                f"Unexpected error while parsing file. Make sure you provided a meta parameters file produced by {input_f}: {e}",
+                "Unexpected error while parsing file. Make sure you provided a meta "
+                f"parameters file produced by {input_f}: {e}",
                 icon="🚨",
             )
         return params
@@ -1103,7 +1104,7 @@ class QuantUIObjects:
             config = json.load(file)
 
         # Check if parsed values exist in session state
-        parsed_params = st.session_state.get(self.variables_quant.params_json_dict, {})
+        _ = st.session_state.get(self.variables_quant.params_json_dict, {})
 
         st_col1, st_col2, st_col3 = st.columns(3)
         input_param_len = int(len(config.items()) / 3)
@@ -1191,18 +1192,19 @@ class QuantUIObjects:
             self.generate_confirmation_checkbox()
         else:
             params = None
-
-        if st.session_state[self.variables_quant.check_submission] and params != None:
+            
+        pr_url = None
+        if st.session_state[self.variables_quant.check_submission] and params is not None:
             get_form_values = self.get_form_values()
             params = ProteoBenchParameters(**get_form_values)
             pr_url = self.submit_to_repository(params)
-        if self.submission_ready == False:
+        if not self.submission_ready:
             return
         if (
             st.session_state[self.variables_quant.check_submission]
-            and params != None
+            and params is not None
             and self.variables_quant.submit in st.session_state
-            and pr_url != None
+            and pr_url is not None
         ):
             self.show_submission_success_message(pr_url)
 
@@ -1361,7 +1363,3 @@ class QuantUIObjects:
         self.generate_submitted_selectbox()
         self.display_submitted_results()
 
-
-if __name__ == "__main__":
-    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
-    QuantUIObjects()

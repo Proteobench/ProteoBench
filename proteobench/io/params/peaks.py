@@ -227,6 +227,7 @@ def extract_params(
         params.max_precursor_mz = None
         params.min_fragment_mz = None
         params.max_fragment_mz = None
+
     params.scan_window = None
 
     params.quantification_method = extract_value(

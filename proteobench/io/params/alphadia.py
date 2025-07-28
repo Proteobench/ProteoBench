@@ -144,7 +144,6 @@ def _extract_values_older_version(lines: List[str], start_index: int) -> List[in
     """
     values = []
     for line in lines[start_index:]:
-
         if len(values) == 3:
             break
         cleaned_line = clean_line(line)

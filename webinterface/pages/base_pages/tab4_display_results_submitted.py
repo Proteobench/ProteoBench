@@ -1,5 +1,5 @@
 """Display similar to Tab1 in the quant benchmarking modules, all of the data
-next to the sumbitted data."""
+next to the submitted data."""
 
 import uuid
 from typing import Callable

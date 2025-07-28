@@ -411,6 +411,10 @@ def extract_params(
         "max_precursor_charge": 4,
         "min_peptide_length": 7,
         "max_peptide_length": 30,
+        "min_fragment_mz": 200,
+        "max_fragment_mz": 1800,
+        "min_precursor_mz": 300,
+        "max_precursor_mz": 1800,
     }
 
     try:

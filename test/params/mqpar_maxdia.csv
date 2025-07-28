@@ -2,7 +2,7 @@
 software_name,MaxQuant
 software_version,2.6.4.0
 search_engine,Andromeda
-search_engine_version,
+search_engine_version,2.6.4.0
 ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,0.01
@@ -18,10 +18,12 @@ variable_mods,"Oxidation (M),Acetyl (Protein N-term)"
 max_mods,1
 min_precursor_charge,
 max_precursor_charge,7
+min_precursor_mz,
+max_precursor_mz,
+min_fragment_mz,
+max_fragment_mz,
 quantification_method,
 protein_inference,
 abundance_normalization_ions,
-max_precursor_mz,
-min_precursor_mz,
-max_fragment_mz,
-min_fragment_mz,
+predictors_library,
+scan_window,

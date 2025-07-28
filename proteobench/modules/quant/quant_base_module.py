@@ -423,7 +423,7 @@ class QuantModule:
 
     def write_intermediate_raw(
         self,
-        dir: str,
+        directory: str,
         ident: str,
         input_file_obj: Any,
         result_performance: pd.DataFrame,
@@ -437,7 +437,7 @@ class QuantModule:
 
         Parameters
         ----------
-        dir : str
+        directory : str
             Directory to write to.
         ident : str
             Identifier to create a subdirectory for this submission.
@@ -451,7 +451,7 @@ class QuantModule:
             User comment for the submission.
         """
         # Create the target directory
-        path_write = os.path.join(dir, ident)
+        path_write = os.path.join(directory, ident)
         try:
             os.makedirs(path_write, exist_ok=True)
         except OSError as e:
@@ -465,7 +465,6 @@ class QuantModule:
                 # Save the input file-like object content to the zip file
                 input_file_obj.seek(0)
                 zf.writestr(f"input_file{extension_input_file}", input_file_obj.read())
-
                 # Save the result performance DataFrame as a CSV in the zip file
                 result_csv = result_performance.to_csv(index=False)
                 zf.writestr("result_performance.csv", result_csv)
@@ -478,10 +477,6 @@ class QuantModule:
 
                 # Save the user comment in the zip file
                 zf.writestr("comment.txt", comment)
-
-            # save intermediate performance file unzipped as well
-            result_csv_path = os.path.join(path_write, "result_performance.csv")
-            result_csv.to_csv(result_csv_path, index=False)
 
             logging.info(f"Data saved to {zip_file_path}")
         except Exception as e:

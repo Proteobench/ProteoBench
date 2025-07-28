@@ -3,11 +3,9 @@ Streamlit UI for the DDA quantification - precursor ions module.
 """
 
 import logging
-import uuid
 from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
-import pandas as pd
 import streamlit as st
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
@@ -30,7 +28,7 @@ class StreamlitUI:
         """
         Initialize the Streamlit UI for the DDA quantification - precursor ions module.
         """
-        self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()
+        self.variables_dda_quant: VariablesDDAQuant = VariablesDDAQuant()  # could be a session state variable
         self.texts: Type[WebpageTexts] = WebpageTexts
 
         self.user_input: Dict[str, Any] = dict()
@@ -108,7 +106,7 @@ class StreamlitUI:
                 )
             self.quant_uiobjects.display_submission_form()
 
-        # Tab 2.5: in-depth plots current data
+        # Tab 3: in-depth plots current data
         with tab_indepth_plots:
             st.title(self.variables_dda_quant.title)
 
@@ -125,7 +123,7 @@ class StreamlitUI:
 
             self.quant_uiobjects.display_indepth_plots()
 
-        # Tab 3: Results (New Submissions)
+        # Tab 4: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables_dda_quant.title)
             st.link_button(
@@ -141,7 +139,7 @@ class StreamlitUI:
 
             self.quant_uiobjects.display_all_data_results_submitted()
 
-        # Tab 4: Public Submission
+        # Tab 5: Public Submission
         with tab_public_submission:
             st.title(self.variables_dda_quant.title)
             st.link_button(

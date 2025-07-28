@@ -486,7 +486,7 @@ def extract_params(
         parameters.update(
             {
                 "ident_fdr_psm": extract_cfg_parameter(lines, fdr_regex, float),
-                "ident_fdr_protein": extract_cfg_parameter(lines, fdr_regex, float),
+                "ident_fdr_protein": None,
                 "enable_match_between_runs": bool(re.search(enable_match_between_runs_regex, "".join(lines))),
                 "enzyme": (
                     f"{extract_cfg_parameter(lines, cleavage_regex) or ''},!{extract_cfg_parameter(lines, cleavage_exc_regex) or ''}"

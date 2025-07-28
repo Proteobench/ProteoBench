@@ -30,8 +30,8 @@ def extract_params(
     # Default and flag settings
     parameters = {
         "software_name": "MSAID",
+        "software_version": None,
         "search_engine": "Chimerys",
-        "search_engine_version": "4.1.1",
         "quantification_method": "MS2 Area",
         "ident_fdr_psm": 0.01,
         "ident_fdr_peptide": 0.01,

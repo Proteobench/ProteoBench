@@ -1,5 +1,19 @@
 # DIA quantification - precursor ions - AIF data
 
+
+> **THIS MODULE IS NOW ARCHIVED**
+> 
+> This module is archived because we noticed the presence of oxidations that prevent the accurate mesure of quantification accuracy.
+> The original GitHub discussion highlighting the issue can be found [here](https://github.com/orgs/Proteobench/discussions/641)
+> 
+> We noticed that the presence of oxidised peptides creates human ratio that are close to the expected value for E. coli (see figure below).
+> 
+> ![log2-transformed ratio (A/B) for the oxidized peptides and their counterpart are not close to the expected ratio](../../_static/img/Module_documentation/Archived_modules/AIF_Module_density_FC_20250707.svg)
+>
+> This figure was made with only the precursors matched to a single species and no contaminant in the DIA AIF precursor data:
+> All the raw files associated to this experiment (including samples Beta and Gamma) were searched with Spectronaut v19.5.241126.62635 using a directDIA+ workflow and Trypsin/P cleavage with carbamidomethyl (C) as variable modification, and acetyl (Protein N-term) and oxidation (M) as variable modifications (maximum variable modifications = 5). We performed run-wise median centering after log2 transformation to align run signals, then calculated the mean value per sample and mean value per condition and the difference between A and B for each precursor. The three panels present: precursors with min. one oxidation (right); precursors with the same stripped sequence as the ones seen with min. one oxidation (middle); and all other precursors matching the same species (left). 
+
+
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely All-Ion Fragmentation (AIF), on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 

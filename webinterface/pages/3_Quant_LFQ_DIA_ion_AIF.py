@@ -44,7 +44,12 @@ class StreamlitUI:
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dia_quant.parse_settings_dir
         )
 
-        self.quant_uiobjects = QuantUIObjects(self.variables_dia_quant, self.ionmodule, self.parsesettingsbuilder)
+        self.quant_uiobjects = QuantUIObjects(
+            self.variables_dia_quant,
+            self.ionmodule,
+            self.parsesettingsbuilder,
+            page_name="Quant LFQ DIA ion AIF",
+        )
 
         self._main_page()
 

@@ -57,7 +57,7 @@ def extract_params(
 
     mods_variable = fasta["mods_variable"]
     mods_variable.extend(fasta["mods_variable_terminal"])
-    mods_variable.extend(fasta["mods_variable_terminal"])
+    mods_variable.extend(fasta["mods_variable_terminal_prot"])
     params.variable_mods = ",".join(mods_variable)
 
     params.max_mods = fasta["n_modifications_max"]

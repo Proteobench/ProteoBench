@@ -9,6 +9,7 @@ expressed with a hash sign.
 from __future__ import annotations
 
 import logging
+import os
 import pathlib
 import re
 from collections import namedtuple
@@ -143,7 +144,9 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
     return header, msfragger_version, fragpipe_version, parse_params(l_of_str, sep=sep)
 
 
-def extract_params(file: BytesIO) -> ProteoBenchParameters:
+def extract_params(
+    file: BytesIO, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse FragPipe parameter files and extract relevant parameters into a `ProteoBenchParameters` object.
 
@@ -167,7 +170,7 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
         fragpipe_version = re.match(r"FragPipe \((\d+\.\d+.*)\)", header).group(1)
 
     # Initialize ProteoBenchParameters
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json)
     params.software_name = "FragPipe"
     params.software_version = fragpipe_version
     params.search_engine = "MSFragger"
@@ -224,6 +227,20 @@ def extract_params(file: BytesIO) -> ProteoBenchParameters:
     else:
         params.min_precursor_charge = 1
         params.max_precursor_charge = None
+
+    params.min_precursor_mz = (
+        int(fragpipe_params.loc["msfragger.misc.fragger.digest-mass-lo"]) / params.max_precursor_charge
+        if params.max_precursor_charge
+        else None
+    )
+    params.max_precursor_mz = (
+        int(fragpipe_params.loc["msfragger.misc.fragger.digest-mass-hi"]) / params.min_precursor_charge
+        if params.min_precursor_charge
+        else None
+    )
+
+    params.min_fragment_mz = None
+    params.max_fragment_mz = None
 
     # Match between runs and quantification method settings
     if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":

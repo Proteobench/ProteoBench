@@ -18,6 +18,12 @@ variable_mods,"UniMod:35,UniMod:1"
 max_mods,2
 min_precursor_charge,1
 max_precursor_charge,4
+min_precursor_mz,400
+max_precursor_mz,1000
+min_fragment_mz,50
+max_fragment_mz,2000
 quantification_method,Legacy (direct)
 protein_inference,Genes
 abundance_normalization_ions,
+predictors_library,
+scan_window,6

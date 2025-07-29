@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import collections
 import logging
+import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -213,7 +214,9 @@ def build_Series_from_records(records, index_length=4):
     return pd.Series((v for (k, v) in records), index=idx)
 
 
-def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
+def extract_params(
+    fname, ms2frac="FTMS", json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Extract parameters from a MaxQuant XML file.
 
@@ -229,7 +232,7 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters.
     """
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json)
 
     record = read_file(fname)
     # select ms2 fragmentation method specified by parameter

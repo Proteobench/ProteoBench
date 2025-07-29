@@ -8,6 +8,7 @@ are taken from the SDRF file.
 
 import json
 import logging
+import os
 import pathlib
 from typing import IO, Tuple, Union
 
@@ -126,7 +127,12 @@ def load_files(file1: IO, file2: IO, file3: IO = None) -> Tuple[dict, Union[pd.D
     return versions, sdrf, pipeline_params
 
 
-def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParameters:
+def extract_params(
+    file1: IO,
+    file2: IO,
+    file3: IO = None,
+    json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"),
+) -> ProteoBenchParameters:
     """
     Extract parameters from the parsed SDRF and version file. We use both the parsed
     SDRF file and the yaml file of versions to extract the parameters. The function
@@ -152,7 +158,7 @@ def extract_params(file1: IO, file2: IO, file3: IO = None) -> ProteoBenchParamet
     """
     versions, sdrf, pipeline_params = load_files(file1, file2, file3)
 
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json)
     params.software_name = "quantms"
     try:
         params.software_version = versions["Workflow"]["bigbio/quantms"]

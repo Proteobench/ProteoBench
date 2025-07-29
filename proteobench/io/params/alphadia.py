@@ -76,7 +76,7 @@ def parse_key_value(line: str) -> Tuple[str, str]:
 
 def detect_newer_version(lines: List[str]) -> bool:
     """
-    Detect if the log file is from a newer version of AlphaDIA based on the presence of 'user defined' in the lines.
+    Detect if the log file is from a newer version (>= 1.10) of AlphaDIA based on the presence of 'user defined' in the lines.
 
     Parameters
     ----------
@@ -98,7 +98,7 @@ def detect_newer_version(lines: List[str]) -> bool:
 
 def _extract_values_newer_version(lines: List[str], start_index: int) -> List[int]:
     """
-    Extract values from lines that are indented, following the format for parameters like precursor_len in newer versions.
+    Extract values from lines that are indented, following the format for parameters like precursor_len in newer versions (>=1.10).
 
     Parameters
     ----------
@@ -126,7 +126,7 @@ def _extract_values_newer_version(lines: List[str], start_index: int) -> List[in
 
 def _extract_values_older_version(lines: List[str], start_index: int) -> List[int]:
     """
-    Extract values from lines that are indented, following the format for parameters like precursor_len in older versions.
+    Extract values from lines that are indented, following the format for parameters like precursor_len in older versions (<1.10).
 
     Parameters
     ----------

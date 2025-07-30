@@ -482,7 +482,7 @@ class QuantModule:
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 
-    def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
+    def load_params_file(self, input_file: List[str], input_format: str, json: str) -> ProteoBenchParameters:
         """
         Load parameters from a metadata file depending on its format.
 
@@ -498,6 +498,9 @@ class QuantModule:
         ProteoBenchParameters
             The parameters for the module.
         """
-        params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
+        params = self.EXTRACT_PARAMS_DICT[input_format](
+            *input_file,
+            json=json,
+        )
         params.software_name = input_format
         return params

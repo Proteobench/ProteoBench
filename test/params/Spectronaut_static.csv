@@ -18,8 +18,12 @@ variable_mods,"Acetyl (Protein N-term), Oxidation (M)"
 max_mods,5
 min_precursor_charge,
 max_precursor_charge,
+min_precursor_mz,
+max_precursor_mz,
+min_fragment_mz,
+max_fragment_mz,
 quantification_method,MS2
 protein_inference,IDPicker
 abundance_normalization_ions,True
-scan_window,Dynamic
 predictors_library,
+scan_window,Dynamic

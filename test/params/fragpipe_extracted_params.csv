@@ -21,3 +21,7 @@ max_precursor_charge,
 quantification_method,Robust LC (high accuracy)
 protein_inference,ProteinProphet: --maxppmdiff 2000000 --minprob 0.5
 abundance_normalization_ions,
+min_precursor_mz,
+max_precursor_mz,4000.0
+min_fragment_mz,
+max_fragment_mz,

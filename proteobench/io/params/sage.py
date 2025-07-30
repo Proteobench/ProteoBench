@@ -3,6 +3,7 @@ Sage parameter extraction.
 """
 
 import json
+import os
 import pathlib
 from typing import Union
 
@@ -11,7 +12,9 @@ import pandas as pd
 from proteobench.io.params import ProteoBenchParameters
 
 
-def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
+def extract_params(
+    fname: Union[str, pathlib.Path], json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse Sage quantification tool JSON parameter file and extract relevant parameters.
 

@@ -18,6 +18,12 @@ variable_mods,"UniMod:35/15.994915/M,UniMod:1/42.010565/*n"
 max_mods,1
 min_precursor_charge,1
 max_precursor_charge,4
+min_precursor_mz,400
+max_precursor_mz,1000
+min_fragment_mz,50
+max_fragment_mz,2000
 quantification_method,QuantUMS high-precision
 protein_inference,1
 abundance_normalization_ions,
+predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
+scan_window,13

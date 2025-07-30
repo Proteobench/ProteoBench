@@ -2,6 +2,7 @@
 DIA-NN parameter parsing.
 """
 
+import os
 import pathlib
 import re
 from typing import Any, List, Optional
@@ -21,6 +22,10 @@ min_pep_len_regex = r"Min peptide length set to (\d+)"
 max_pep_len_regex = r"Max peptide length set to (\d+)"
 min_z_regex = r"Min precursor charge set to (\d+)"
 max_z_regex = r"Max precursor charge set to (\d+)"
+min_mz_prec_regex = r"Min precursor m/z set to (\d+)"
+max_mz_prec_regex = r"Max precursor m/z set to (\d+)"
+min_mz_frag_regex = r"Min fragment m/z set to (\d+)"
+max_mz_frag_regex = r"Max fragment m/z set to (\d+)"
 cleavage_regex = r"In silico digest will involve cuts at (.*)"
 cleavage_exc_regex = r"But excluding cuts at (.*)"
 missed_cleavages_regex = r"Maximum number of missed cleavages set to (\d+)"
@@ -62,6 +67,10 @@ PARAM_CMD_DICT = {
     "allowed_miscleavages": "missed-cleavages",
     "min_peptide_length": "min-pep-len",
     "max_peptide_length": "max-pep-len",
+    "min_fragment_mz": "min-fr-mz",
+    "max_fragment_mz": "max-fr-mz",
+    "min_precursor_mz": "min-pr-mz",
+    "max_precursor_mz": "max-pr-mz",
     "fixed_mods": "mod",
     "variable_mods": "var-mod",
     "max_mods": "var-mods",
@@ -363,7 +372,9 @@ def extract_modifications(lines: List[str], regexes: List[str]) -> Optional[str]
     return ",".join(modifications).replace("\n", "") if modifications else None
 
 
-def extract_params(fname: str) -> ProteoBenchParameters:
+def extract_params(
+    fname: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse DIA-NN log file and extract relevant parameters.
 
@@ -386,6 +397,8 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     ProteoBenchParameters
         The parsed ProteoBenchParameters object.
     """
+    print("JSON file used for DIA-NN parameters:", json)
+    print("\n" * 5)
     cfg_used = False
     # Some default and flag settings
     parameters = {
@@ -398,6 +411,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "max_precursor_charge": 4,
         "min_peptide_length": 7,
         "max_peptide_length": 30,
+        "min_fragment_mz": 200,
+        "max_fragment_mz": 1800,
+        "min_precursor_mz": 300,
+        "max_precursor_mz": 1800,
     }
 
     try:
@@ -467,7 +484,6 @@ def extract_params(fname: str) -> ProteoBenchParameters:
             + str(parameters["precursor_mass_tolerance"])
             + " ppm]"
         )
-
     # If scan window is not customely set, extract it from the log file
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
     parameters["abundance_normalization_ions"] = None
@@ -494,13 +510,17 @@ def extract_params(fname: str) -> ProteoBenchParameters:
                 ),
                 "fixed_mods": extract_modifications(lines, PARAM_REGEX_DICT["fixed_mods"]),
                 "variable_mods": extract_modifications(lines, [PARAM_REGEX_DICT["variable_mods"]]),
+                "min_fragment_mz": extract_cfg_parameter(lines, min_mz_frag_regex, int),
+                "max_fragment_mz": extract_cfg_parameter(lines, max_mz_frag_regex, int),
+                "min_precursor_mz": extract_cfg_parameter(lines, min_mz_prec_regex, int),
+                "max_precursor_mz": extract_cfg_parameter(lines, max_mz_prec_regex, int),
             }
         )
 
         protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
         parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")
 
-    return ProteoBenchParameters(**parameters)
+    return ProteoBenchParameters(**parameters, filename=json)
 
 
 if __name__ == "__main__":

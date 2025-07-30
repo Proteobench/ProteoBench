@@ -94,6 +94,26 @@
         "label": "Maximum precursor charge allowed",
         "placeholder": "None"
     },
+    "min_precursor_mz": {
+        "type": "text_input",
+        "label": "Minimum precursor m/z",
+        "placeholder": "None"
+    },
+    "max_precursor_mz": {
+        "type": "text_input",
+        "label": "Maximum precursor m/z",
+        "placeholder": "None"
+    },
+    "min_fragment_mz": {
+        "type": "text_input",
+        "label": "Minimum fragment m/z",
+        "placeholder": "None"
+    },
+    "max_fragment_mz": {
+        "type": "text_input",
+        "label": "Maximum fragment m/z",
+        "placeholder": "None"
+    },
     "quantification_method": {
         "type": "text_input",
         "label": "Quantification method",

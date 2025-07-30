@@ -8,6 +8,7 @@ Relevant information in sheets:
 - "Quant config"
 """
 
+import os
 import re
 from pathlib import Path
 from typing import List
@@ -78,7 +79,9 @@ def find_min_pep_length(string: str) -> int:
     return int(min_length)
 
 
-def extract_params(fname: str) -> ProteoBenchParameters:
+def extract_params(
+    fname: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse Proline Studio parameter file (Excel) and extract relevant parameters.
 
@@ -92,7 +95,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json)
     excel = pd.ExcelFile(fname)
 
     # Parse the "Search settings and infos" sheet

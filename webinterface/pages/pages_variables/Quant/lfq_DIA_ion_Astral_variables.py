@@ -78,5 +78,5 @@ class VariablesDIAQuantAstral:
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_Astral_quant_"
-    params_json_dict: str = "params_json_dict_lfq_ion_dda_Astral_quant"
+    params_json_dict: str = "params_json_dict_lfq_ion_dia_Astral_quant"
     params_file_dict: str = "params_file_dict_lfq_ion_dia_Astral_quant"

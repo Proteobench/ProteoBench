@@ -2,9 +2,10 @@
 AlphaDIA parameter parsing.
 """
 
+import os
 import pathlib
 import re
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 
 import pandas as pd
 
@@ -27,6 +28,10 @@ CONFIG_KEY_MAPPER = {
     "mbr_step_enabled": "enable_match_between_runs",
     "target_ms1_tolerance": "precursor_mass_tolerance",
     "target_ms2_tolerance": "fragment_mass_tolerance",
+    "min_fragment_mz": "min_fragment_mz",
+    "max_fragment_mz": "max_fragment_mz",
+    "min_precursor_mz": "min_precursor_mz",
+    "max_precursor_mz": "max_precursor_mz",
     "enzyme": "enzyme",
     "missed_cleavages": "allowed_miscleavages",
     "min_peptide_length": "min_peptide_length",
@@ -69,7 +74,99 @@ def parse_key_value(line: str) -> Tuple[str, str]:
     return key.strip(), value.strip()
 
 
-def extract_values_from_nested_lines(lines: List[str], start_index: int) -> List[int]:
+def detect_newer_version(lines: List[str]) -> bool:
+    """
+    Detect if the log file is from a newer version (>= 1.10) of AlphaDIA based on the presence of 'user defined' in the lines.
+
+    Parameters
+    ----------
+    lines : List[str]
+        List of log lines.
+
+    Returns
+    -------
+    bool
+        True if the log file is from a newer version, False otherwise.
+    """
+    for line in lines:
+        cleaned_line = clean_line(line)
+        # If user defined and default are in the same line, it indicates a newer version
+        if "user defined, default" in cleaned_line:
+            return True
+    return False
+
+
+def _extract_values_newer_version(lines: List[str], start_index: int) -> List[int]:
+    """
+    Extract values from lines that are indented, following the format for parameters like precursor_len in newer versions (>=1.10).
+
+    Parameters
+    ----------
+    lines : List[str]
+        List of log lines.
+    start_index : int
+        Index of the line where the key (e.g., precursor_len) is found.
+
+    Returns
+    -------
+    List[int]
+        A list of integers representing the values extracted from the nested lines.
+    """
+    values = []
+    for line in lines[start_index:]:
+        cleaned_line = clean_line(line)
+        if cleaned_line:
+            number = re.search(r"\d+", cleaned_line)
+            if number:
+                values.append(int(number.group(0)))
+        if len(values) == 3:  # Assuming we want three values
+            break
+    return values[:-1]  # Exclude the last value which is often not needed
+
+
+def _extract_values_older_version(lines: List[str], start_index: int) -> List[int]:
+    """
+    Extract values from lines that are indented, following the format for parameters like precursor_len in older versions (<1.10).
+
+    Parameters
+    ----------
+    lines : List[str]
+        List of log lines.
+    start_index : int
+        Index of the line where the key (e.g., precursor_len) is found.
+    debug : bool, optional
+        If True, print debug information. Default is False.
+
+    Returns
+    -------
+    List[int]
+        A list of integers representing the values extracted from the nested lines.
+    """
+    values = []
+    for line in lines[start_index:]:
+        if len(values) == 3:
+            break
+        cleaned_line = clean_line(line)
+
+        if cleaned_line:
+            if "user defined" in cleaned_line:
+                # Remove the last value, as that is overwritten
+                if values:
+                    values.pop()
+
+                cleaned_line = USER_DEFINED_REGEX.sub("", cleaned_line)
+                number = re.search(r"\d+", cleaned_line)
+                if number:
+                    values.append(int(number.group(0)))
+            else:
+                number = re.search(r"\d+", cleaned_line)
+                if number:
+                    values.append(int(number.group(0)))
+
+    return values[:-1]
+
+
+def extract_values_from_nested_lines(lines: List[str], start_index: int, debug: bool = False) -> List[int]:
     """
     Extract values from lines that are indented, following the format for parameters like precursor_len.
 
@@ -85,31 +182,11 @@ def extract_values_from_nested_lines(lines: List[str], start_index: int) -> List
     List[int]
         A list of integers representing the values extracted from the nested lines.
     """
-    newer_version = False
-    values = []
-    for line in lines[start_index:]:
-        if len(values) == 3:
-            break
-        cleaned_line = clean_line(line)
-
-        if cleaned_line:
-            if "user defined" in cleaned_line:
-                cleaned_line = USER_DEFINED_REGEX.sub("", cleaned_line)
-                number = re.search(r"\d+", cleaned_line)
-
-                if number and values and not newer_version:
-                    values[-1] = number.group(0)
-                elif number:
-                    newer_version = True
-                    values.append(number.group(0))
-                elif number and values and newer_version:
-                    values.append(number.group(0))
-            else:
-                number = re.search(r"\d+", cleaned_line)
-                if number:
-                    values.append(number.group(0))
-
-    return values[:-1]
+    new_version = detect_newer_version(lines[start_index:])
+    if new_version:
+        return _extract_values_newer_version(lines, start_index)
+    else:
+        return _extract_values_older_version(lines, start_index)
 
 
 def read_file_lines(file_path: str) -> List[str]:
@@ -162,6 +239,20 @@ def process_precursor_charge(lines: List[str], index: int, all_parameters: Dict[
     all_parameters["max_precursor_charge"] = values[-1]
 
 
+def process_precursor_mz(lines: List[str], index: int, all_parameters: Dict[str, str]) -> None:
+    """Process precursor m/z parameters."""
+    values = extract_values_from_nested_lines(lines, index + 1)
+    all_parameters["min_precursor_mz"] = values[0]
+    all_parameters["max_precursor_mz"] = values[-1]
+
+
+def process_fragment_mz(lines: List[str], index: int, all_parameters: Dict[str, str]) -> None:
+    """Process fragment m/z parameters."""
+    values = extract_values_from_nested_lines(lines, index + 1)
+    all_parameters["min_fragment_mz"] = values[0]
+    all_parameters["max_fragment_mz"] = values[-1]
+
+
 def map_keys_to_desired_format(all_parameters: Dict[str, str]) -> None:
     """Map keys to the desired format."""
     for key in list(all_parameters.keys()):
@@ -205,7 +296,9 @@ def clean_up_parameters(all_parameters: Dict[str, str]) -> None:
             all_parameters[key] = list(set(value))
 
 
-def extract_params(file_path: str) -> Dict[str, str]:
+def extract_params(
+    file_path: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+) -> Dict[str, str]:
     """
     Extract parameters from the log file and return them as a dictionary.
 
@@ -234,6 +327,12 @@ def extract_params(file_path: str) -> Dict[str, str]:
         if "precursor_charge" in cleaned_line:
             process_precursor_charge(lines, i, all_parameters)
 
+        if "precursor_mz" in cleaned_line and not all_parameters.get("min_precursor_mz"):
+            process_precursor_mz(lines, i, all_parameters)
+
+        if "fragment_mz" in cleaned_line and not all_parameters.get("min_fragment_mz"):
+            process_fragment_mz(lines, i, all_parameters)
+
     map_keys_to_desired_format(all_parameters)
     clean_up_parameters(all_parameters)
     # Format some values
@@ -251,7 +350,7 @@ def extract_params(file_path: str) -> Dict[str, str]:
     # 'True' and 'False' to boolean
     all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"] == "True"
 
-    return ProteoBenchParameters(**all_parameters)
+    return ProteoBenchParameters(**all_parameters, filename=json)
 
 
 if __name__ == "__main__":

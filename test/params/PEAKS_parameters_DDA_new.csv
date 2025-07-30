@@ -21,5 +21,9 @@ max_precursor_charge,5
 quantification_method,Identification Directed Quantification
 protein_inference,
 abundance_normalization_ions,No Normalization
+min_precursor_mz,
+max_precursor_mz,
+min_fragment_mz,
+max_fragment_mz,
 scan_window,
 predictors_library,

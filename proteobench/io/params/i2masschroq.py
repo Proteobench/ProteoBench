@@ -102,8 +102,10 @@ def _extract_sage_params(
     ProteoBenchParameters
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
+    import logging
+    logger = logging.getLogger(__name__)
     for param in params.index:
-        print(f"Parameter: {param}, Value: {params[param]}")
+        logger.debug(f"Parameter: {param}, Value: {params[param]}")
     # Construct tolerance strings for fragment and parent mass errors
     fragment_mass_tolerance = params.loc["sage_fragment_tol"]  # e.g '-0.02 0.02 da'
 

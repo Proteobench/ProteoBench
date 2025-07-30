@@ -96,6 +96,8 @@ def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
+    for param in params.index:
+        print(f"Parameter: {param}, Value: {params[param]}")
     # Construct tolerance strings for fragment and parent mass errors
     fragment_mass_tolerance = params.loc["sage_fragment_tol"]  # e.g '-0.02 0.02 da'
 
@@ -105,9 +107,13 @@ def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
     # Max missed cleavage sites, either from scoring or refinement
     max_cleavage = int(params.loc["sage_database_enzyme_missed_cleavages"])  # e.g. "2"
 
-    _enzyme = "{},{},{}".format(
+    _enzyme = "{}{},{}".format(
         params.loc["sage_database_enzyme_cleave_at"],
-        params.loc["sage_database_enzyme_restrict"],
+        (
+            "|{}".format(params.loc["sage_database_enzyme_restrict"])
+            if "sage_database_enzyme_restrict" in params.index
+            else ""
+        ),
         params.loc["sage_database_enzyme_c_terminal"],
     )  # e.g. "KR" and "sage_database_enzyme_restrict"	"P" and 'sage_database_enzyme_c_terminal'	"true"
     # Replace the enzyme pattern with the enzyme name used in ProteoBench

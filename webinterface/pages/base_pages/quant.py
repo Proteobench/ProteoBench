@@ -210,7 +210,7 @@ class QuantUIObjects:
             get_form_values = tab5_public_submission.get_form_values(
                 variables_quant=self.variables_quant,
             )
-            params = ProteoBenchParameters(**get_form_values)
+            params = ProteoBenchParameters(**get_form_values, filename=self.variables_quant.additional_params_json)
             pr_url = tab5_public_submission.submit_to_repository(
                 variables_quant=self.variables_quant,
                 ionmodule=self.ionmodule,

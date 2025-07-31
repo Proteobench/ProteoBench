@@ -127,7 +127,7 @@ class QuantUIObjects:
         Display the dataset selection dropdown and plot the selected dataset (Tab 3).
         """
         # the key is a string and links to a pandas.DataFrame
-        key_in_state = self.variables_quant.all_datapoints_submitted
+        key_in_state = self.variables_quant.all_datapoints
         if key_in_state not in st.session_state.keys():
             st.error("No data available for plotting.", icon="🚨")
             return

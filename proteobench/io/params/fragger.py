@@ -244,7 +244,7 @@ def extract_params(
 
     # Match between runs and quantification method settings
     if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
-        params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
+        params.enable_match_between_runs = bool(int(fragpipe_params.loc["ionquant.mbr"]))
     elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
         diann_quant_dict = {
             1: "Any LC (high accuracy)",
@@ -276,6 +276,7 @@ if __name__ == "__main__":
         "../../../test/params/fragpipe_v22.workflow",
         "../../../test/params/fragpipe_fdr_test.workflow",
         "../../../test/params/fragpipe-version.workflow",
+        "../../../test/params/fragpipe_v23_noMBR.workflow",
     ]
 
     for file_path in files:

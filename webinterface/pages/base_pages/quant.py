@@ -127,7 +127,7 @@ class QuantUIObjects:
         Display the dataset selection dropdown and plot the selected dataset (Tab 3).
         """
         # the key is a string and links to a pandas.DataFrame
-        key_in_state = self.variables_quant.all_datapoints_submitted
+        key_in_state = self.variables_quant.all_datapoints
         if key_in_state not in st.session_state.keys():
             st.error("No data available for plotting.", icon="🚨")
             return
@@ -210,7 +210,7 @@ class QuantUIObjects:
             get_form_values = tab5_public_submission.get_form_values(
                 variables_quant=self.variables_quant,
             )
-            params = ProteoBenchParameters(**get_form_values)
+            params = ProteoBenchParameters(**get_form_values, filename=self.variables_quant.additional_params_json)
             pr_url = tab5_public_submission.submit_to_repository(
                 variables_quant=self.variables_quant,
                 ionmodule=self.ionmodule,

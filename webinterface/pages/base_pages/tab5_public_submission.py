@@ -46,6 +46,7 @@ def load_user_parameters(variables_quant, ionmodule, user_input) -> Any:
         params = ionmodule.load_params_file(
             user_input[variables_quant.meta_data],
             user_input["input_format"],
+            json=variables_quant.additional_params_json,
         )
         st.session_state[variables_quant.params_json_dict] = params.__dict__ if hasattr(params, "__dict__") else params
 

@@ -363,7 +363,6 @@ def _load_wombat(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    print(input_csv)
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")

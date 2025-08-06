@@ -90,16 +90,20 @@ if __name__ == "__main__":
     from pathlib import Path
     from pprint import pprint
 
-    file = Path("../../../test/params/sage_results.json")
+    files = [
+        Path("../../../test/params/sage_results.json"),
+        Path("../../../test/params/sage_parameterfile.json"),
+    ]
 
-    # Extract parameters from the file
-    print(f"Extracting parameters from {file}")
-    params = extract_params(file)
+    for file in files:
+        # Extract parameters from the file
+        print(f"Extracting parameters from {file}")
+        params = extract_params(file)
 
-    # Convert the extracted parameters to a dictionary and then to a pandas Series
-    data_dict = params.__dict__
-    pprint(params.__dict__)
-    series = pd.Series(data_dict)
+        # Convert the extracted parameters to a dictionary and then to a pandas Series
+        data_dict = params.__dict__
+        pprint(params.__dict__)
+        series = pd.Series(data_dict)
 
-    # Write the Series to a CSV file
-    series.to_csv(file.with_suffix(".csv"))
+        # Write the Series to a CSV file
+        series.to_csv(file.with_suffix(".csv"))

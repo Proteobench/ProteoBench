@@ -297,7 +297,7 @@ def clean_up_parameters(all_parameters: Dict[str, str]) -> None:
 
 
 def extract_params(
-    file_path: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+    file_path: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
 ) -> Dict[str, str]:
     """
     Extract parameters from the log file and return them as a dictionary.

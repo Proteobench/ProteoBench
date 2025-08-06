@@ -16,7 +16,7 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(
-    fname: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse MaxDIA parameters using MaxQuant's parser and extract additional parameters.
@@ -32,7 +32,7 @@ def extract_params(
         The extracted parameters as a `ProteoBenchParameters` object.
     """
     # Use MaxQuant's extract_params to parse the base parameters
-    parameters = extract_params_mq(fname, json=json)
+    parameters = extract_params_mq(fname, json_file=json_file)
 
     # Read the MaxDIA parameter file and build a pandas Series from the records
     series = build_Series_from_records(read_file(fname)).reset_index()

@@ -350,7 +350,7 @@ def extract_params(
     # 'True' and 'False' to boolean
     all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"] == "True"
 
-    return ProteoBenchParameters(**all_parameters, filename=json)
+    return ProteoBenchParameters(**all_parameters, filename=json_file)
 
 
 if __name__ == "__main__":

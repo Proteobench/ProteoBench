@@ -297,7 +297,7 @@ def clean_up_parameters(all_parameters: Dict[str, str]) -> None:
 
 
 def extract_params(
-    file_path: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+    file_path: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
 ) -> Dict[str, str]:
     """
     Extract parameters from the log file and return them as a dictionary.
@@ -350,7 +350,7 @@ def extract_params(
     # 'True' and 'False' to boolean
     all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"] == "True"
 
-    return ProteoBenchParameters(**all_parameters, filename=json)
+    return ProteoBenchParameters(**all_parameters, filename=json_file)
 
 
 if __name__ == "__main__":

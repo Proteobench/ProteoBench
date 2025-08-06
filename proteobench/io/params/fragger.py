@@ -145,7 +145,7 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
 
 
 def extract_params(
-    file: BytesIO, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    file: BytesIO, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse FragPipe parameter files and extract relevant parameters into a `ProteoBenchParameters` object.
@@ -170,7 +170,7 @@ def extract_params(
         fragpipe_version = re.match(r"FragPipe \((\d+\.\d+.*)\)", header).group(1)
 
     # Initialize ProteoBenchParameters
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
     params.software_name = "FragPipe"
     params.software_version = fragpipe_version
     params.search_engine = "MSFragger"

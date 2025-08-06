@@ -373,7 +373,7 @@ def extract_modifications(lines: List[str], regexes: List[str]) -> Optional[str]
 
 
 def extract_params(
-    fname: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse DIA-NN log file and extract relevant parameters.
@@ -397,7 +397,7 @@ def extract_params(
     ProteoBenchParameters
         The parsed ProteoBenchParameters object.
     """
-    print("JSON file used for DIA-NN parameters:", json)
+    print("JSON file used for DIA-NN parameters:", json_file)
     print("\n" * 5)
     cfg_used = False
     # Some default and flag settings
@@ -520,7 +520,7 @@ def extract_params(
         protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
         parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")
 
-    return ProteoBenchParameters(**parameters, filename=json)
+    return ProteoBenchParameters(**parameters, filename=json_file)
 
 
 if __name__ == "__main__":

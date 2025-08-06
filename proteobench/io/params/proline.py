@@ -80,7 +80,7 @@ def find_min_pep_length(string: str) -> int:
 
 
 def extract_params(
-    fname: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse Proline Studio parameter file (Excel) and extract relevant parameters.
@@ -95,7 +95,7 @@ def extract_params(
     ProteoBenchParameters
         The extracted parameters encapsulated in a `ProteoBenchParameters` object.
     """
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
     excel = pd.ExcelFile(fname)
 
     # Parse the "Search settings and infos" sheet

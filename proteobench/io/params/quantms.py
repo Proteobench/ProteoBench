@@ -131,7 +131,7 @@ def extract_params(
     file1: IO,
     file2: IO,
     file3: IO = None,
-    json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"),
+    json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"),
 ) -> ProteoBenchParameters:
     """
     Extract parameters from the parsed SDRF and version file. We use both the parsed
@@ -158,7 +158,7 @@ def extract_params(
     """
     versions, sdrf, pipeline_params = load_files(file1, file2, file3)
 
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
     params.software_name = "quantms"
     try:
         params.software_version = versions["Workflow"]["bigbio/quantms"]

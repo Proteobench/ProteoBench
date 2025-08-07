@@ -46,6 +46,20 @@ class VariablesDDAQuant:
     download_selector_id_uuid: str = "download_selector_id_dda_quant_peptidoform"
     table_id_uuid: str = "table_id_dda_quant_peptidoform"
 
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "precursor_mass_tolerance",
+            "fragment_mass_tolerance",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+        ]
+    )
+
     placeholder_table: str = "placeholder_table_dda_quant_peptidoform"
     placeholder_slider: str = "placeholder_slider_dda_quant_peptidoform"
 
@@ -73,7 +87,9 @@ class VariablesDDAQuant:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/3-quant-lfq-peptidoform-dda/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/3-quant-lfq-peptidoform-dda/"
+    )
     title: str = "DDA peptidoform quantification"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_peptidoform.json"

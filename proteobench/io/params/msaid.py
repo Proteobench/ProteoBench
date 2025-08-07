@@ -12,7 +12,7 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(
-    fname: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse the MSAID parameter file and extract relevant parameters.
@@ -72,7 +72,7 @@ def extract_params(
     else:
         parameters["enable_match_between_runs"] = False
 
-    return ProteoBenchParameters(**parameters, filename=json)
+    return ProteoBenchParameters(**parameters, filename=json_file)
 
 
 if __name__ == "__main__":

@@ -46,6 +46,20 @@ class VariablesDDAQuant:
     download_selector_id_uuid: str = "download_selector_id"
     table_id_uuid: str = "table_id"
 
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "precursor_mass_tolerance",
+            "fragment_mass_tolerance",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+        ]
+    )
+
     placeholder_table: str = "placeholder_table"
     placeholder_slider: str = "placeholder_slider"
 

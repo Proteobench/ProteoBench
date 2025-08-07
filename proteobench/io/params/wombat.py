@@ -11,7 +11,7 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(
-    fname: pathlib.Path, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    fname: pathlib.Path, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Extracts parameters from a WOMBAT-P YAML configuration file.
@@ -31,7 +31,7 @@ def extract_params(
 
     # Extracting the summary data
     summary = record["params"]
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
 
     # Set software details
     params.software_name = "Wombat"

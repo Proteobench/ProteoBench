@@ -244,7 +244,9 @@ class QuantUIObjects:
             description_slider_md=self.variables_quant.description_slider_md,
             default_val_slider=self.variables_quant.default_val_slider,
         )
-        tab1_results.generate_main_selectbox(selectbox_id_uuid=self.variables_quant.selectbox_id_uuid)
+        tab1_results.generate_main_selectbox(
+            self.variables_quant, selectbox_id_uuid=self.variables_quant.selectbox_id_uuid
+        )
         tab1_results.display_existing_results(variables_quant=self.variables_quant, ionmodule=self.ionmodule)
 
     def display_all_data_results_submitted(self) -> None:

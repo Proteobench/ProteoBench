@@ -156,6 +156,7 @@ def display_existing_results(variables_quant, ionmodule) -> None:
     grid_options = configure_aggrid(df_display)
 
     render_aggrid(df_display, grid_options)
+    offer_download(df_display)
     display_download_section(variables_quant=variables_quant)
 
 
@@ -392,6 +393,22 @@ def render_aggrid(df: pd.DataFrame, grid_options):
         height=600,
         allow_unsafe_jscode=True,
     )
+
+
+def offer_download(df: pd.DataFrame, filename: str = "quantification_results.csv") -> None:
+    """
+    Adds a download button to export the displayed DataFrame as a CSV file.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to be downloaded.
+
+    filename : str, optional
+        The name of the file to download, by default "quantification_results.csv".
+    """
+    csv_data = df.to_csv(index=False).encode("utf-8")
+    st.download_button(label="📥 Download table as CSV", data=csv_data, file_name=filename, mime="text/csv")
 
 
 def get_style_js(bg_color: str) -> JsCode:

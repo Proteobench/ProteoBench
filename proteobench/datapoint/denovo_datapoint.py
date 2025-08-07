@@ -275,16 +275,16 @@ class DenovoDatapoint:
             "Q-Deamidation": "Q[UNIMOD:7]",
             "N-Deamidation": "N[UNIMOD:7]",
             "N-term Acetylation": "[UNIMOD:1]-",
-            "N-term Carbamylation": "[UNIMOD:385]-",
-            "N-term Ammonia-loss": "[UNIMOD:5]-",
+            "N-term Carbamylation": "[UNIMOD:5]-",
+            "N-term Ammonia-loss": "[UNIMOD:385]-",
         }
         mod_labels_dn = {
             "M-Oxidation (denovo)": "M[UNIMOD:35]",
             "Q-Deamidation (denovo)": "Q[UNIMOD:7]",
             "N-Deamidation (denovo)": "N[UNIMOD:7]",
             "N-term Acetylation (denovo)": "[UNIMOD:1]-",
-            "N-term Carbamylation (denovo)": "[UNIMOD:385]-",
-            "N-term Ammonia-loss (denovo)": "[UNIMOD:5]-",
+            "N-term Carbamylation (denovo)": "[UNIMOD:5]-",
+            "N-term Ammonia-loss (denovo)": "[UNIMOD:385]-",
         }
 
         # Init the mod_counts

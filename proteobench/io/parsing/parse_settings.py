@@ -628,15 +628,15 @@ class ParseSettingsDeNovo:
         df['Q-Deamidation'] = df.peptidoform_ground_truth.apply(lambda x: "Q[UNIMOD:7]" in x)
         df['N-Deamidation'] = df.peptidoform_ground_truth.apply(lambda x: "N[UNIMOD:7]" in x)
         df['N-term Acetylation'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:1]-" in x)
-        df['N-term Carbamylation'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:385]-" in x)
-        df['N-term Ammonia-loss'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:5]-" in x)
+        df['N-term Carbamylation'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:5]-" in x)
+        df['N-term Ammonia-loss'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:385]-" in x)
 
         df['M-Oxidation (denovo)'] = df.peptidoform.apply(lambda x: "M[UNIMOD:35]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
         df['Q-Deamidation (denovo)'] = df.peptidoform.apply(lambda x: "Q[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
         df['N-Deamidation (denovo)'] = df.peptidoform.apply(lambda x: "N[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
         df['N-term Acetylation (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:1]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
-        df['N-term Carbamylation (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:385]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
-        df['N-term Ammonia-loss (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:5]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df['N-term Carbamylation (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:5]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df['N-term Ammonia-loss (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:385]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
 
         df['peptidoform_ground_truth'] = df.peptidoform_ground_truth.apply(lambda x: Peptidoform(Peptidoform(x).modified_sequence)) # Removing precursor charge from peptidoform
         

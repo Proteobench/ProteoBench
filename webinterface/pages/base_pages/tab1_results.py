@@ -56,7 +56,7 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     )
 
 
-def generate_main_selectbox(selectbox_id_uuid) -> None:
+def generate_main_selectbox(variables_quant, selectbox_id_uuid) -> None:
     """
     Create the selectbox for the Streamlit UI.
     """
@@ -67,7 +67,7 @@ def generate_main_selectbox(selectbox_id_uuid) -> None:
         # TODO: Other labels based on different modules, e.g. mass tolerances are less relevant for DIA
         st.selectbox(
             "Select label to plot",
-            ["None", "precursor_mass_tolerance", "fragment_mass_tolerance", "enable_match_between_runs"],
+            variables_quant.metric_plot_labels,
             key=st.session_state[selectbox_id_uuid],
         )
     except Exception as e:

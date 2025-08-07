@@ -56,6 +56,19 @@ class VariablesDIAQuant:
     description_results_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/result_description.md"
     description_submission_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/submit_description.md"
 
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+            "quantification_method",
+        ]
+    )
+
     all_datapoints_submitted: str = "all_datapoints_submitted_dia_quant"
     placeholder_table_submitted: str = "placeholder_table_submitted_dia_quant"
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant"
@@ -67,7 +80,9 @@ class VariablesDIAQuant:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/AIF"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/archived-modules/4-quant-lfq-ion-dia-aif/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/archived-modules/4-quant-lfq-ion-dia-aif/"
+    )
 
     title: str = "DIA Precursor quantification - AIF"
 

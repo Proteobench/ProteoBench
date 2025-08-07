@@ -49,6 +49,19 @@ class VariablesDIAQuantSC:
     download_selector_id_uuid: str = "download_selector_id_dia_quant_singlecell"
     table_id_uuid: str = "table_id_dia_quant_singlecell"
 
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+            "quantification_method",
+        ]
+    )
+
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/input_file_description.md"
@@ -68,7 +81,9 @@ class VariablesDIAQuantSC:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/singlecell"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/6-quant-lfq-ion-dia-singlecell/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/6-quant-lfq-ion-dia-singlecell/"
+    )
 
     title: str = "DIA Precursor quantification - singlecell"
 

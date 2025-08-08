@@ -10,7 +10,7 @@ from proteobench.score.quant.quantscores import QuantScores
 from proteobench.exceptions import DatapointGenerationError
 
 
-TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dda_quant")
+TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/quant/quant_lfq_ion_DDA_QExactive")
 TESTDATA_FILES = {
     # "WOMBAT": os.path.join(TESTDATA_DIR, "WOMBAT_stand_pep_quant_mergedproline.csv"),
     "MaxQuant": os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),

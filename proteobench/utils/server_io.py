@@ -39,6 +39,49 @@ MODULE_CLASSES = {
     "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
 }
 
+DATASETS_BASE_URL = "https://proteobench.cubimed.rub.de/datasets/"
+
+
+def dataset_folder_exists(intermediate_hash: str, base_url: str = DATASETS_BASE_URL) -> bool:
+    """
+    Check if a dataset folder already exists on the public server for a given intermediate hash.
+    First tries a direct HEAD to the folder URL, then falls back to parsing the index page.
+
+    Args:
+        intermediate_hash: The hash to check for
+        base_url: Base URL of the datasets server
+
+    Returns:
+        True if the dataset folder exists, False otherwise
+    """
+    if not intermediate_hash:
+        return False
+
+    folder_url = f"{base_url.rstrip('/')}/{intermediate_hash.strip('/')}/"
+    try:
+        resp = requests.head(folder_url, allow_redirects=True, timeout=5)
+        if resp.status_code == 200:
+            return True
+        # Some servers may redirect. If it ends in the folder, treat as exists.
+        if resp.status_code in (301, 302, 303, 307, 308) and resp.headers.get("Location", "").rstrip("/").endswith(
+            f"/{intermediate_hash.strip('/')}"
+        ):
+            return True
+    except Exception:
+        pass
+
+    # Fallback: parse directory listing
+    try:
+        resp = requests.get(base_url, timeout=10)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+        folder_links = {
+            a.get("href", "").strip("/").split("/")[0] for a in soup.find_all("a") if a.get("href", "").endswith("/")
+        }
+        return intermediate_hash.strip("/") in folder_links
+    except Exception:
+        return False
+
 
 def get_merged_json(
     repo_url="https://github.com/Proteobench/Results_quant_ion_DDA/archive/refs/heads/main.zip",

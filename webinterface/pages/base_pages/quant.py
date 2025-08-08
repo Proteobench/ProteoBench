@@ -11,11 +11,13 @@ from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
     VariablesDDAQuant,
 )
 
+from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
     DDAQuantIonModuleQExactive as IonModule,
 )
+from proteobench.utils.server_io import dataset_folder_exists
 
 from . import (
     tab1_results,
@@ -172,9 +174,42 @@ class QuantUIObjects:
         """
         Display the public submission section of the page in Tab 5.
         """
+
+        # Early duplicate guard using any available hash in session or user_input
+        def _resolve_intermediate_hash():
+            candidates = []
+            try:
+                # Commonly stored places
+                candidates.append(st.session_state.get(getattr(self.variables_quant, "intermediate_hash", ""), None))
+                candidates.append(st.session_state.get(getattr(self.variables_quant, "public_hash", ""), None))
+            except Exception:
+                pass
+            # Direct keys
+            for k in ("intermediate_hash", "public_hash", "dataset_hash"):
+                candidates.append(st.session_state.get(k))
+            # From user_input if present
+            if isinstance(self.user_input, dict):
+                for k in ("intermediate_hash", "public_hash", "dataset_hash"):
+                    candidates.append(self.user_input.get(k))
+            # First non-empty
+            return next((str(x) for x in candidates if x), None)
+
+        try:
+            resolved_hash = _resolve_intermediate_hash()
+            if resolved_hash and dataset_folder_exists(resolved_hash):
+                st.error(
+                    f":no_entry: This dataset was already submitted. A folder for hash '{resolved_hash}' exists on the server. Submission disabled.",
+                    icon="🚫",
+                )
+                return
+        except Exception:
+            # Fail-soft; backend will still enforce protection
+            pass
+
         # Initialize Unchecked submission box variable
         if self.variables_quant.check_submission not in st.session_state:
             st.session_state[self.variables_quant.check_submission] = False
+
         if self.variables_quant.first_new_plot:
             self.submission_ready = tab5_public_submission.generate_submission_ui_elements(
                 variables_quant=self.variables_quant,
@@ -211,13 +246,17 @@ class QuantUIObjects:
                 variables_quant=self.variables_quant,
             )
             params = ProteoBenchParameters(**get_form_values, filename=self.variables_quant.additional_params_json)
-            pr_url = tab5_public_submission.submit_to_repository(
-                variables_quant=self.variables_quant,
-                ionmodule=self.ionmodule,
-                user_input=self.user_input,
-                params_from_file=self.params_file_dict_copy,
-                params=params,
-            )
+            try:
+                pr_url = tab5_public_submission.submit_to_repository(
+                    variables_quant=self.variables_quant,
+                    ionmodule=self.ionmodule,
+                    user_input=self.user_input,
+                    params_from_file=self.params_file_dict_copy,
+                    params=params,
+                )
+            except DatasetAlreadyExistsOnServerError as e:
+                st.error(str(e), icon="🚫")
+                return
         if not self.submission_ready:
             return
         if (

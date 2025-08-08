@@ -54,7 +54,16 @@ def extract_params(
             params.enyzme = "Trypsin/P"
 
     params.allowed_miscleavages = data["database"]["enzyme"]["missed_cleavages"]
-    params.semi_enzymatic = data["database"]["enzyme"]["semi_enzymatic"]
+
+    if data["database"]["enzyme"]["semi_enzymatic"] is None:
+        params.semi_enzymatic = False
+    elif data["database"]["enzyme"]["semi_enzymatic"] is True:
+        params.semi_enzymatic = True
+    elif data["database"]["enzyme"]["semi_enzymatic"] is False:
+        params.semi_enzymatic = False
+    else:
+        raise ValueError(f"Unknown value for semi_enzymatic: {data['database']['enzyme']['semi_enzymatic']}")
+
     params.fixed_mods = data["database"]["static_mods"]
     params.variable_mods = data["database"]["variable_mods"]
 

@@ -8,7 +8,6 @@ import pandas as pd
 import requests
 import toml
 from bs4 import BeautifulSoup
-from tqdm import tqdm
 
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
     DDAQuantIonModuleQExactive,
@@ -173,19 +172,9 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", ou
             block_size = 1024  # 1 KB
 
             # Save the zip file
-            with (
-                open(zip_filename, "wb") as f,
-                tqdm(
-                    desc=f"Downloading {zip_filename}",
-                    total=total_size,
-                    unit="B",
-                    unit_scale=True,
-                    unit_divisor=1024,
-                ) as progress,
-            ):
+            with open(zip_filename, "wb") as f:
                 for data in zip_response.iter_content(block_size):
                     f.write(data)
-                    progress.update(len(data))
 
             # Extract the zip file
             os.makedirs(extract_dir, exist_ok=True)

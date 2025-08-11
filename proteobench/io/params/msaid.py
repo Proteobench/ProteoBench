@@ -52,6 +52,7 @@ def extract_params(
         "[-" + params_dict["Fragment Mass Tolerance"] + ", " + params_dict["Fragment Mass Tolerance"] + "]"
     )
     parameters["enzyme"] = params_dict["Enzyme"]
+    parameters["semi_enzymatic"] = params_dict["Enzyme Specificity"] != "full"
     parameters["allowed_miscleavages"] = int(params_dict["Max. Missed Cleavage Sites"])
     parameters["min_peptide_length"] = int(params_dict["Min. Peptide Length"])
     parameters["max_peptide_length"] = int(params_dict["Max. Peptide Length"])

@@ -49,6 +49,13 @@ def _extract_xtandem_params(
 
     _enzyme = str(params.loc["protein, cleavage site"])
 
+    if params.loc["protein, cleavage semi"] == "yes":
+        _semi_enzymatic = True
+    elif params.loc["protein, cleavage semi"] == "no":
+        _semi_enzymatic = False
+    else:
+        raise ValueError(f"Unknown value for protein, cleavage semi: {params.loc['protein, cleavage semi']}")
+
     fixed_mods_list = list(params.loc[params.index.str.contains("residue, modification mass")].dropna())
     var_mods_list = list(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())
 
@@ -73,6 +80,7 @@ def _extract_xtandem_params(
         precursor_mass_tolerance="[-" + _tol_prec_lower + ", " + _tol_prec_upper + "]",
         fragment_mass_tolerance="[-" + _tol_frag + ", " + _tol_frag + "]",
         enzyme=_enzyme,
+        semi_enzymatic=_semi_enzymatic,
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # xtandem: "spectrum, minimum fragment mz"
         max_peptide_length=None,
@@ -146,6 +154,7 @@ def _extract_sage_params(
         precursor_mass_tolerance=precursor_mass_tolerance,
         fragment_mass_tolerance=fragment_mass_tolerance,
         enzyme=_enzyme,
+        semi_enzymatic=False,  # i2masschroq does not propagate this parameter
         allowed_miscleavages=max_cleavage,
         min_peptide_length=int(params.loc["sage_database_enzyme_min_len"]),  # 5
         max_peptide_length=int(params.loc["sage_database_enzyme_max_len"]),  # 50
@@ -154,6 +163,7 @@ def _extract_sage_params(
         max_mods=int(params.loc["sage_database_max_variable_mods"]),  # 2
         min_precursor_charge=int(min_precursor_charge),
         max_precursor_charge=int(max_precursor_charge),
+        json_file=json_file,
     )
     params.fill_none()
     return params

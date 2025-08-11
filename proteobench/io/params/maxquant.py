@@ -259,6 +259,19 @@ def extract_params(
     fragment_mass_tolerance = f"[-{fragment_mass_tolerance}, {fragment_mass_tolerance}]"
     params.fragment_mass_tolerance = fragment_mass_tolerance
     params.enzyme = record.loc[("parameterGroups", "parameterGroup", "enzymes", "string")].squeeze()
+    semi_enzymatic = int(record.loc[("parameterGroups", "parameterGroup", "enzymeMode")].squeeze())
+
+    # enzyme mode 0: Fully specific
+    # enzyme mode 1: Semi specific free N terminus
+    # enzyme mode 2: Semi specific free C terminus
+    # enzyme mode 3: Semi specific
+    # enzyme mode 4: Unspecific
+    # enzyme mode 5: No digestion
+    if semi_enzymatic == 0:
+        params.semi_enzymatic = False
+    else:
+        params.semi_enzymatic = True
+
     params.allowed_miscleavages = int(
         record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "maxMissedCleavages", :]].squeeze()
     )

@@ -22,3 +22,4 @@ max_precursor_charge,12
 quantification_method,FlashLFQ
 protein_inference,Parsimony
 abundance_normalization_ions,False
+semi_specific,False

@@ -27,4 +27,4 @@ protein_inference,IDPicker
 abundance_normalization_ions,True
 predictors_library,
 scan_window,Dynamic
-semi_specific,True
+semi_specific,False

@@ -10,6 +10,7 @@ enable_match_between_runs,True
 precursor_mass_tolerance,"[-10.0 PPM, +10.0 PPM]"
 fragment_mass_tolerance,"[-0.02 DA, +0.02 DA]"
 enzyme,Trypsin
+semi_enzymatic,False
 allowed_miscleavages,2
 min_peptide_length,
 max_peptide_length,

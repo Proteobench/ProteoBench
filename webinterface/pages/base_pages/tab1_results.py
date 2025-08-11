@@ -135,6 +135,22 @@ def display_download_section(variables_quant, reset_uuid=False) -> None:
 
 
 def display_existing_results(variables_quant, ionmodule) -> None:
+    """
+    Display the existing results table, metric plot, and download options for quantification datasets.
+
+    This function initializes and filters the data, displays a metric selector and plot,
+    prepares and renders the results table using AgGrid, and offers download options for the displayed data.
+    It also includes a comparison feature: users can flag data points for comparison in the table,
+    and these flags are persisted in the session state to survive reruns. The function calls
+    `compare_datapoints` to handle the comparison logic.
+
+    Parameters
+    ----------
+    variables_quant : object
+        An object containing quantification dataset variables and session state keys.
+    ionmodule : object
+        The ion module used for data initialization and filtering.
+    """
     initialize_and_filter_data(variables_quant, ionmodule)
     data_points_filtered = variables_quant.filtered_data
 

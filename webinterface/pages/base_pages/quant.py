@@ -174,28 +174,8 @@ class QuantUIObjects:
         """
         Display the public submission section of the page in Tab 5.
         """
-
-        # Early duplicate guard using any available hash in session or user_input
-        def _resolve_intermediate_hash():
-            candidates = []
-            try:
-                # Commonly stored places
-                candidates.append(st.session_state.get(getattr(self.variables_quant, "intermediate_hash", ""), None))
-                candidates.append(st.session_state.get(getattr(self.variables_quant, "public_hash", ""), None))
-            except Exception:
-                pass
-            # Direct keys
-            for k in ("intermediate_hash", "public_hash", "dataset_hash"):
-                candidates.append(st.session_state.get(k))
-            # From user_input if present
-            if isinstance(self.user_input, dict):
-                for k in ("intermediate_hash", "public_hash", "dataset_hash"):
-                    candidates.append(self.user_input.get(k))
-            # First non-empty
-            return next((str(x) for x in candidates if x), None)
-
         try:
-            resolved_hash = _resolve_intermediate_hash()
+            resolved_hash = st.session_state[self.variables_quant.all_datapoints].iloc[-1]["intermediate_hash"]
             if resolved_hash and dataset_folder_exists(resolved_hash):
                 st.error(
                     f":no_entry: This dataset was already submitted. A folder for hash '{resolved_hash}' exists on the server. Submission disabled.",
@@ -224,7 +204,7 @@ class QuantUIObjects:
             )
             st.session_state[self.variables_quant.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
-            print(self.params_file_dict_copy)
+
             tab5_public_submission.generate_additional_parameters_fields_submission(
                 variables_quant=self.variables_quant,
                 user_input=self.user_input,

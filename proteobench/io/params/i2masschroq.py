@@ -154,7 +154,7 @@ def _extract_sage_params(
         precursor_mass_tolerance=precursor_mass_tolerance,
         fragment_mass_tolerance=fragment_mass_tolerance,
         enzyme=_enzyme,
-        semi_enzymatic=None,  # i2masschroq does not propagate this parameter
+        semi_enzymatic=False,  # i2masschroq does not propagate this parameter
         allowed_miscleavages=max_cleavage,
         min_peptide_length=int(params.loc["sage_database_enzyme_min_len"]),  # 5
         max_peptide_length=int(params.loc["sage_database_enzyme_max_len"]),  # 50

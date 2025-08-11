@@ -24,7 +24,7 @@ def proteobench_page_config(page_layout="wide"):
             layout=page_layout,
             initial_sidebar_state="expanded",
         )
-    except:
+    except Exception:
         return "Set already"
 
 
@@ -45,8 +45,6 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
     proteobench_logo : str, optional
         Path to the ProteoBench logo image file.
     """
-    import streamlit as st
-    from pages.texts.generic_texts import WebpageTexts
 
     texts = WebpageTexts
 

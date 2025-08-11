@@ -50,6 +50,19 @@ class VariablesDIAQuantAstral:
     download_selector_id_uuid: str = "download_selector_id_dia_quant_Astral"
     table_id_uuid: str = "table_id_dia_quant_Astral"
 
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+            "quantification_method",
+        ]
+    )
+
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/Astral/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/Astral/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/Astral/input_file_description.md"
@@ -78,5 +91,5 @@ class VariablesDIAQuantAstral:
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_Astral_quant_"
-    params_json_dict: str = "params_json_dict_lfq_ion_dda_Astral_quant"
+    params_json_dict: str = "params_json_dict_lfq_ion_dia_Astral_quant"
     params_file_dict: str = "params_file_dict_lfq_ion_dia_Astral_quant"

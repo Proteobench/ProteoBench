@@ -67,6 +67,10 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | allowed_miscleavages     |   **missed_cleavages** setting in **library_prediction** section of the config    |
 | min_peptide_length       |   Minimum value in **precursor_len** setting in **library_prediction** section of the config    |
 | max_peptide_length       |    Maximum value in **precursor_len** setting in **library_prediction** section of the config   |
+| min_precursor_mz          |    Minimum value in **precursor_mz** setting in **library_prediction** section of the config   |
+| max_precursor_mz          |    Maximum value in **precursor_mz** setting in **library_prediction** section of the config   |
+| min_fragment_mz          |    Minimum value in **fragment_mz** setting in **library_prediction** section of the config   |
+| max_fragment_mz          |    Maximum value in **fragment_mz** setting in **library_prediction** section of the config   |
 | fixed_mods               |    **fixed_modifications** setting in **library_prediction** section of the config   |
 | variable_mods            |   **variable_modifications** setting in **library_prediction** section of the config    |
 | max_mods                 |    **max_var_mod_num** setting in **library_prediction** section of the config   |
@@ -125,13 +129,17 @@ DIA-NN parameters are parsed either from the command line string found in the lo
 | fragment_mass_tolerance  |      Value set for **--mass-acc**. If this parameter is not set, it means tolerance optimization will<br> be performed. In that case, as well as if --cfg is set, the value will be parsed from line <br>**Optimised mass accuracy: X ppm**      |
 | enzyme                   |     No --cfg: value set for **--cut**<br>--cfg: parsed from line **In silico digest will involve cuts at X but excluding cuts at X**        |
 | allowed_miscleavages     |     No --cfg: value set for **--missed-cleavages**<br>--cfg: parsed from line **Maximum number of missed cleavages set to X**        |
-| min_peptide_length       |     No --cfg: value set for **--min-pep-len**<br>--cfg: parsed from the line **Min peptide length set to X**        |
-| max_peptide_length       |     No --cfg: value set for **--max-pep-len**<br>--cfg: parsed from the line **Max peptide length set to X**        |
+| min_peptide_length       |     No --cfg: value set for **--min-pep-len** (if not provided, default = 7)<br>--cfg: parsed from the line **Min peptide length set to X**        |
+| max_peptide_length       |     No --cfg: value set for **--max-pep-len** (if not provided, default = 30)<br>--cfg: parsed from the line **Max peptide length set to X**        |
 | fixed_mods               |     No --cfg: value set for **--mod**<br>--cfg: parsed from the lines **X enabled as a fixed modification** and **Modification X with mass<br> delta X at X will be considered as fixed        |
 | variable_mods            |     No --cfg: value set for **--var-mod**<br>--cfg: parsed form line **Modification X with mass delta X at X will be considered as variable**        |
 | max_mods                 |      No --cfg: value set for **var-mods**<br>--cfg: parsed from line **Maximum number of variable modifications set to X**       |
-| min_precursor_charge     |      No --cfg: value set for **min-pr-charge**<br>--cfg: parsed from line **Min precursor charge set to X**      |
-| max_precursor_charge     |      No --cfg: value set for **max-pr-charge**<br>--cfg: parsed from line **Max precursor charge set to X**      |
+| min_precursor_charge     |      No --cfg: value set for **min-pr-charge** (if not provided, default = 1) <br>--cfg: parsed from line **Min precursor charge set to X**      |
+| max_precursor_charge     |      No --cfg: value set for **max-pr-charge** (if not provided, default = 4) <br>--cfg: parsed from line **Max precursor charge set to X**      |
+| min_precursor_mz          |  No --cfg: value set for **min-pr-mz** (if not provided, default = 300) <br>--cfg: parsed from line **Min precursor m/z set to X**      |
+| max_precursor_mz          |  No --cfg: value set for **max-pr-mz** (if not provided, default = 1800) <br>--cfg: parsed from line **Max precursor m/z set to X**     |
+| min_fragment_mz          |   No --cfg: value set for **min-fr-mz** (if not provided, default = 200) <br>--cfg: parsed from line **Min fragment m/z set to X**    |
+| max_fragment_mz          |   No --cfg: value set for **max-fr-mz** (if not provided, default = 1800) <br>--cfg: parsed from line **Min fragment m/z set to X**    |
 | quantification_method    |     No --cfg: either **Legacy** (if --direct-quant set), **QuantUMS high-accuracy if --high-acc set<br>or **QuantUMS high-precision (default)<br>--cfg: parsed from line **X quantification mode**       |
 | protein_inference        |      No --cfg: value set for **--pg-level** or **no-prot-inf**, with the mapping {**0**: **Isoforms**, **1**: **Protein_names**, **2**: **Genes**}<br>--cfg: parsed from line **Implicit protein grouping: X**       |
 | predictors_library       |      No --cfg: either **DIA-NN** if **--predictor** is set, or **User defined** if **--lib** is set to a path     |
@@ -162,6 +170,10 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | min_precursor_charge     |     FragPipe uses charge state information from data, if present. <br>So this value is set to 1 by default, but overwritten using **msfragger.misc.fragger.precursor-charge-lo** if **msfragger.override_charge** is set to True        |
 | max_precursor_charge     |     FragPipe uses charge state information from data, if present. <br>So this value is set to None by default, but overwritten using **msfragger.misc.fragger.precursor-charge-lo** if **msfragger.override_charge** is set to True        |
 | quantification_method    |     If not DIA-NN quant, not parsed (TODO)<br>if DIA-NN quant, parsed from **diann.quantification-strategy**        |
+| min_precursor_mz          |  Calculated by dividing the minimum peptide mass set for digestion (**msfragger.misc.fragger.digest-mass-lo**) by the maximum precursor charge |
+| max_precursor_mz          |  Calculated by dividing the maximum peptide mass set for digestion (**msfragger.misc.fragger.digest-mass-hi**) by the minimum precursor charge     |
+| min_fragment_mz          |   Not parsed    |
+| max_fragment_mz          |   Not parsed    |
 | protein_inference        |     Parsed from protein-prophet.cmd-opts        |
 | predictors_library       |     Not parsed        |
 | scan_window              |     Not parsed        |
@@ -220,6 +232,10 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | max_mods                 |      Parsed from **maxNmods**       |
 | min_precursor_charge     |      Not parsed       |
 | max_precursor_charge     |      Parsed from **maxCharge**       |
+| min_precursor_mz          |  Not parsed |
+| max_precursor_mz          |  Calculated by dividing the maximum peptide mass set (**maxPeptideMass**) by the minimum precursor charge     |
+| min_fragment_mz          |   Not parsed    |
+| max_fragment_mz          |   Not parsed    |
 | quantification_method    |      Not parsed       |
 | protein_inference        |      Not parsed       |
 | predictors_library       |      Not parsed       |
@@ -252,6 +268,10 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | max_mods                 |      Parsed from **Maximum Number of Modifications**       |
 | min_precursor_charge     |      Parsed from **Min. Peptide Charge**       |
 | max_precursor_charge     |      Parsed from **Max. Peptide Charge**       |
+| min_precursor_mz          |  Not parsed |
+| max_precursor_mz          |  Not parsed     |
+| min_fragment_mz          |   Not parsed    |
+| max_fragment_mz          |   Not parsed    |
 | quantification_method    |      Parsed from **Quantification Type**       |
 | protein_inference        |      Not parsed       |
 | predictors_library       |      Not parsed       |
@@ -314,6 +334,10 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | max_mods                 |      Parsed from line **Max Variable PTM per Peptide: X**       |
 | min_precursor_charge     |      Parsed from line **Precursor Charge between: X** or **Precursors Charge between: X**       |
 | max_precursor_charge     |      Parsed from line **Precursor Charge between: X** or **Precursors Charge between: X**       |
+| min_precursor_mz          |  Parsed from line **Precursor M/Z between:** (DIA) |
+| max_precursor_mz          |  Parsed from line **Precursor M/Z between:** (DIA)     |
+| min_fragment_mz          |   Parsed from line **Fragment M/Z between:** (DIA)    |
+| max_fragment_mz          |   Parsed from line **Fragment M/Z between:** (DIA)    |
 | quantification_method    |      Parsed from line **LFQ Method: X**       |
 | protein_inference        |      Not parsed       |
 | predictors_library       |      Not parsed       |
@@ -436,6 +460,10 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | max_mods                 |     Parsed from line **Max Variable Modifiations: X**        |
 | min_precursor_charge     |     If Peptide Charge is set to False, not parsed<br>If not, parsed from line **Peptide Charge: X**        |
 | max_precursor_charge     |     If Peptide Charge is set to False, not parsed<br>If not, parsed from line **Peptide Charge: X**        |
+| min_precursor_mz          |  Not parsed |
+| max_precursor_mz          |  Not parsed     |
+| min_fragment_mz          |   Not parsed    |
+| max_fragment_mz          |   Not parsed    |
 | quantification_method    |     Parsed from line **Quantity MS Level: X**        |
 | protein_inference        |     Parsed from line **Inference Algorithm: X**        |
 | predictors_library       |     Not parsed        |

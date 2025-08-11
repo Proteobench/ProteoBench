@@ -574,8 +574,15 @@ def _load_spectronaut(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+
     if input_data_frame["FG.Quantity"].dtype == object:
-        input_csv.seek(0)
+        try:
+            input_csv.seek(0)
+        except AttributeError:
+            # if input_csv is a PathPosix object, it does not have a seek method
+            # This can occur when the io util functions are used.
+            # Should probably be fixed some way in the future
+            pass
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t", decimal=",")
     input_data_frame["FG.LabeledSequence"] = input_data_frame["FG.LabeledSequence"].str.strip("_")
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
@@ -586,6 +593,32 @@ def _load_spectronaut(input_csv: str) -> pd.DataFrame:
         lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
     )
     input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
+    return input_data_frame
+
+
+def _load_metamorpheus(input_csv: str) -> pd.DataFrame:
+    """
+    Load a MetaMorpheus output file (FlashLFQ: AllQuantifiedPeaks.tsv).
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the MetaMorpheus output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    input_data_frame["Proteins"] = input_data_frame["Protein Group"].map(
+        lambda x: ";".join([mapper.get(protein, protein) for protein in x.split(";")])
+    )
+    # TODO: discuss how to handle multiple mapped precursors
+    input_data_frame = input_data_frame[input_data_frame["Full Sequences Mapped"] == 1]
     return input_data_frame
 
 
@@ -666,4 +699,5 @@ _LOAD_FUNCTIONS = {
     "MSAID": _load_msaid,
     "PEAKS": _load_peaks,
     "quantms": _load_quantms,
+    "MetaMorpheus": _load_metamorpheus,
 }

@@ -46,6 +46,20 @@ class VariablesDDAQuantAstral:
     download_selector_id_uuid: str = "download_selector_id_dda_quant_Astral"
     table_id_uuid: str = "table_id_dda_quant_Astral"
 
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "precursor_mass_tolerance",
+            "fragment_mass_tolerance",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+        ]
+    )
+
     placeholder_table: str = "placeholder_table_dda_quant_Astral"
     placeholder_slider: str = "placeholder_slider_dda_quant_Astral"
 
@@ -70,7 +84,9 @@ class VariablesDDAQuantAstral:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-precursor-dda-Astral/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-precursor-dda-Astral/"
+    )
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Ion quantification (Astral)"

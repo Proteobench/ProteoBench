@@ -2,6 +2,7 @@
 MaxDIA parameter file parser for ProteoBench.
 """
 
+import os
 import pathlib
 import re
 from typing import Any
@@ -14,7 +15,9 @@ from maxquant import read_file
 from proteobench.io.params import ProteoBenchParameters
 
 
-def extract_params(fname: str) -> ProteoBenchParameters:
+def extract_params(
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse MaxDIA parameters using MaxQuant's parser and extract additional parameters.
 
@@ -29,7 +32,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         The extracted parameters as a `ProteoBenchParameters` object.
     """
     # Use MaxQuant's extract_params to parse the base parameters
-    parameters = extract_params_mq(fname)
+    parameters = extract_params_mq(fname, json_file=json_file)
 
     # Read the MaxDIA parameter file and build a pandas Series from the records
     series = build_Series_from_records(read_file(fname)).reset_index()
@@ -39,6 +42,18 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters.max_peptide_length = int(
         series.loc[series["level_0"] == "maxPeptideLengthForUnspecificSearch", 0].values[0]
     )
+
+    parameters.max_precursor_mz = (
+        int(series.loc[series["level_0"] == "maxPeptideMass", 0].values[0]) / parameters.min_precursor_charge
+        if parameters.min_precursor_charge
+        else None
+    )
+    parameters.min_precursor_mz = None
+    parameters.max_fragment_mz = None
+    parameters.min_fragment_mz = None
+
+    # Set search engine version from software version
+    parameters.search_engine_version = parameters.__dict__["software_version"]
 
     return parameters
 

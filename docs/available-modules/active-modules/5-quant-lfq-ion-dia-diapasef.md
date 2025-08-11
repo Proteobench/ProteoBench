@@ -1,4 +1,4 @@
-# DIA quantification - precursor ion level - diaPASEF (**We are working on the documentation: come back soon.**)
+# DIA quantification - precursor ion level - diaPASEF
 
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-independent acquisition (DIA) on a timsTOF (Bruker).

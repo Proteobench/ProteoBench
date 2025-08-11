@@ -146,7 +146,9 @@ def get_items_between(lines: list, start: str, end: str, only_last: bool = False
     return items
 
 
-def extract_params(file_path: str) -> ProteoBenchParameters:
+def extract_params(
+    file_path: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Read a PEAKS settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 
@@ -171,7 +173,7 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
 
     lines = [line.strip() for line in lines]
 
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json_file)
 
     params.software_name = "PEAKS"
     params.software_version = extract_value(lines, "PEAKS Version:")
@@ -212,6 +214,20 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
         )
     params.min_precursor_charge = int(precursor_charge_between[0])
     params.max_precursor_charge = int(precursor_charge_between[1])
+
+    try:
+        precursor_mz_between = extract_value(lines, "Precursor M/Z between:").split(",")
+        params.min_precursor_mz = int(precursor_mz_between[0])
+        params.max_precursor_mz = int(precursor_mz_between[1])
+        fragment_mz_between = extract_value(lines, "Fragment M/Z between:").split(",")
+        params.min_fragment_mz = int(fragment_mz_between[0])
+        params.max_fragment_mz = int(fragment_mz_between[1])
+    except AttributeError:  # DDA
+        params.min_precursor_mz = None
+        params.max_precursor_mz = None
+        params.min_fragment_mz = None
+        params.max_fragment_mz = None
+
     params.scan_window = None
 
     params.quantification_method = extract_value(

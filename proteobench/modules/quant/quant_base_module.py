@@ -33,6 +33,9 @@ from proteobench.io.params.i2masschroq import (
     extract_params as extract_params_i2masschroq,
 )
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.metamorpheus import (
+    extract_params as extract_params_metamorpheus,
+)
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.msangel import extract_params as extract_params_msangel
 from proteobench.io.params.peaks import extract_params as extract_params_peaks
@@ -84,6 +87,7 @@ class QuantModule:
         # TODO needs to be replace with parameter extraction function
         "Proteome Discoverer": extract_params_spectronaut,
         "quantms": extract_params_quantms,
+        "MetaMorpheus": extract_params_metamorpheus,
     }
 
     def __init__(
@@ -423,7 +427,7 @@ class QuantModule:
 
     def write_intermediate_raw(
         self,
-        dir: str,
+        directory: str,
         ident: str,
         input_file_obj: Any,
         result_performance: pd.DataFrame,
@@ -437,7 +441,7 @@ class QuantModule:
 
         Parameters
         ----------
-        dir : str
+        directory : str
             Directory to write to.
         ident : str
             Identifier to create a subdirectory for this submission.
@@ -451,7 +455,7 @@ class QuantModule:
             User comment for the submission.
         """
         # Create the target directory
-        path_write = os.path.join(dir, ident)
+        path_write = os.path.join(directory, ident)
         try:
             os.makedirs(path_write, exist_ok=True)
         except OSError as e:
@@ -465,7 +469,6 @@ class QuantModule:
                 # Save the input file-like object content to the zip file
                 input_file_obj.seek(0)
                 zf.writestr(f"input_file{extension_input_file}", input_file_obj.read())
-
                 # Save the result performance DataFrame as a CSV in the zip file
                 result_csv = result_performance.to_csv(index=False)
                 zf.writestr("result_performance.csv", result_csv)
@@ -479,15 +482,11 @@ class QuantModule:
                 # Save the user comment in the zip file
                 zf.writestr("comment.txt", comment)
 
-            # save intermediate performance file unzipped as well
-            result_csv_path = os.path.join(path_write, "result_performance.csv")
-            result_csv.to_csv(result_csv_path, index=False)
-
             logging.info(f"Data saved to {zip_file_path}")
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 
-    def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
+    def load_params_file(self, input_file: List[str], input_format: str, json_file: str) -> ProteoBenchParameters:
         """
         Load parameters from a metadata file depending on its format.
 
@@ -497,12 +496,17 @@ class QuantModule:
             Path to the metadata file.
         input_format : str
             Format of the metadata file.
+        json_file : str
+            Path to the JSON file containing additional module specific parameters.
 
         Returns
         -------
         ProteoBenchParameters
             The parameters for the module.
         """
-        params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
+        params = self.EXTRACT_PARAMS_DICT[input_format](
+            *input_file,
+            json_file=json_file,
+        )
         params.software_name = input_format
         return params

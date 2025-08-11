@@ -2,6 +2,7 @@
 MSAID parameter parsing.
 """
 
+import os
 import pathlib
 from typing import Dict
 
@@ -10,7 +11,9 @@ import pandas as pd
 from proteobench.io.params import ProteoBenchParameters
 
 
-def extract_params(fname: str) -> ProteoBenchParameters:
+def extract_params(
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse the MSAID parameter file and extract relevant parameters.
 
@@ -58,6 +61,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters["min_precursor_charge"] = int(params_dict["Min. Peptide Charge"])
     parameters["max_precursor_charge"] = int(params_dict["Max. Peptide Charge"])
     parameters["quantification_method"] = params_dict["Quantification Type"]
+    parameters["max_precursor_mz"] = None
+    parameters["min_precursor_mz"] = None
+    parameters["max_fragment_mz"] = None
+    parameters["min_fragment_mz"] = None
 
     # Set flag for enabling match between runs based on quantification method
     if "Quan in all file" in parameters["quantification_method"] or "MBR" in parameters["quantification_method"]:
@@ -65,7 +72,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     else:
         parameters["enable_match_between_runs"] = False
 
-    return ProteoBenchParameters(**parameters)
+    return ProteoBenchParameters(**parameters, filename=json_file)
 
 
 if __name__ == "__main__":

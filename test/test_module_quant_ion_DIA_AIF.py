@@ -9,7 +9,7 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.score.quant.quantscores import QuantScores
 
-TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/dia_quant")
+TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/quant/quant_lfq_ion_DIA_AIF")
 TESTDATA_FILES = {
     "DIA-NN": os.path.join(TESTDATA_DIR, "DIANN_1.9_beta_sample_report.tsv"),
     "AlphaDIA": os.path.join(TESTDATA_DIR, "AlphaDIA_1.10_sample.tsv"),

@@ -2,6 +2,7 @@
 Spectronaut parameter parsing.
 """
 
+import os
 import re
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -176,7 +177,11 @@ def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
     return next((clean_text(re.split(search_term, line)[1]) for line in lines if re.search(search_term, line)), None)
 
 
-def read_spectronaut_settings(file_path: str, system="Thermo Orbitrap") -> ProteoBenchParameters:
+def read_spectronaut_settings(
+    file_path: str,
+    system="Thermo Orbitrap",
+    json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json"),
+) -> ProteoBenchParameters:
     """
     Read a Spectronaut settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 
@@ -213,7 +218,7 @@ def read_spectronaut_settings(file_path: str, system="Thermo Orbitrap") -> Prote
             f"Unknown system: {system}. Supported systems are: {', '.join(VENDOR_SYSTEM_MAP.keys())}. Did you upload the correct settings file?"
         )
 
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json_file)
     params.software_name = "Spectronaut"
     params.software_version = lines[0].split()[1]
     params.search_engine = "Spectronaut"
@@ -245,6 +250,11 @@ def read_spectronaut_settings(file_path: str, system="Thermo Orbitrap") -> Prote
         params.max_precursor_charge = None
     else:
         params.max_precursor_charge = int(_max_precursor_charge)
+
+    params.min_fragment_mz = None  # Spectronaut does not provide this information
+    params.max_fragment_mz = None  # Spectronaut does not provide this information
+    params.max_precursor_mz = None  # Spectronaut does not provide this information
+    params.min_precursor_mz = None  # Spectronaut does not provide this information
 
     params.scan_window = extract_value(lines, "XIC IM Extraction Window:")
     params.quantification_method = extract_value(

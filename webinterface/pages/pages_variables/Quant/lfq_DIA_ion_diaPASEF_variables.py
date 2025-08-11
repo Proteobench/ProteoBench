@@ -50,6 +50,19 @@ class VariablesDIAQuantdiaPASEF:
     download_selector_id_uuid: str = "download_selector_id_dia_quant_diaPASEF"
     table_id_uuid: str = "table_id_dia_quant_diaPASEF"
 
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+            "quantification_method",
+        ]
+    )
+
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/diaPASEF/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/diaPASEF/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/diaPASEF/input_file_description.md"
@@ -70,7 +83,9 @@ class VariablesDIAQuantdiaPASEF:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-diapasef/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-diapasef/"
+    )
 
     title: str = "DIA Precursor quantification - diaPASEF"
 

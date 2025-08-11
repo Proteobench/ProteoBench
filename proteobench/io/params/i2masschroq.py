@@ -2,6 +2,7 @@
 I2MassChroQ parameter file parser.
 """
 
+import os
 import pathlib
 
 import pandas as pd
@@ -9,7 +10,9 @@ import pandas as pd
 from proteobench.io.params import ProteoBenchParameters
 
 
-def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
+def _extract_xtandem_params(
+    params: pd.Series, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse i2MassChroQ parameters when with X!Tandem is used.
 
@@ -57,6 +60,7 @@ def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
 
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
+        filename=json_file,
         software_name="i2MassChroQ",
         software_version=params.loc["i2MassChroQ_VERSION"],
         search_engine=params.loc["AnalysisSoftware_name"],
@@ -82,7 +86,9 @@ def _extract_xtandem_params(params: pd.Series) -> ProteoBenchParameters:
     return params
 
 
-def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
+def _extract_sage_params(
+    params: pd.Series, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse i2MassChroQ parameters when Sage is used.
 
@@ -105,9 +111,13 @@ def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
     # Max missed cleavage sites, either from scoring or refinement
     max_cleavage = int(params.loc["sage_database_enzyme_missed_cleavages"])  # e.g. "2"
 
-    _enzyme = "{},{},{}".format(
+    _enzyme = "{}{},{}".format(
         params.loc["sage_database_enzyme_cleave_at"],
-        params.loc["sage_database_enzyme_restrict"],
+        (
+            "|{}".format(params.loc["sage_database_enzyme_restrict"])
+            if "sage_database_enzyme_restrict" in params.index
+            else ""
+        ),
         params.loc["sage_database_enzyme_c_terminal"],
     )  # e.g. "KR" and "sage_database_enzyme_restrict"	"P" and 'sage_database_enzyme_c_terminal'	"true"
     # Replace the enzyme pattern with the enzyme name used in ProteoBench
@@ -123,6 +133,7 @@ def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
 
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
+        filename=json_file,
         software_name="i2MassChroQ",
         software_version=params.loc["i2MassChroQ_VERSION"],
         search_engine=params.loc["AnalysisSoftware_name"],
@@ -148,7 +159,9 @@ def _extract_sage_params(params: pd.Series) -> ProteoBenchParameters:
     return params
 
 
-def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
+def extract_params(
+    fname: pathlib.Path, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Extract parameters from an i2MassChroQ parameter file and return a `ProteoBenchParameters` object.
 
@@ -166,9 +179,9 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
     params = pd.read_csv(fname, sep="\t", header=None, index_col=0).squeeze()
 
     if params.loc["AnalysisSoftware_name"] in ["X!Tandem", "X! Tandem"]:
-        return _extract_xtandem_params(params)
+        return _extract_xtandem_params(params, json_file=json_file)
     elif params.loc["AnalysisSoftware_name"] == "Sage":
-        return _extract_sage_params(params)
+        return _extract_sage_params(params, json_file=json_file)
     else:
         raise ValueError(f"Unsupported search engine: {params.loc['AnalysisSoftware_name']}")
 

@@ -266,7 +266,7 @@ if __name__ == "__main__":
             assert _versions == versions
             assert _sdrf.equals(sdrf)
             assert _pipeline_params == pipeline_params
-            display(params.__dict__)
+            # display(params.__dict__)  # Removed debug output
 
     # Convert the extracted parameters to a dictioPnary and then to a pandas Series
     # data_dict = params.__dict__

@@ -7,7 +7,7 @@ import pandas as pd
 import re
 
 from proteobench.plotting.plot_quant import PlotDataPoint
-from st_aggrid import GridOptionsBuilder, AgGrid, JsCode
+from st_aggrid import GridOptionsBuilder, AgGrid, JsCode, GridUpdateMode, DataReturnMode
 
 from .filter import filter_data_using_slider
 
@@ -17,6 +17,8 @@ COLOR_PARAMETER = "#FFFFFF"
 COLOR_RESULT = "#F0F2F6"
 COLOR_TECHNICAL = "#FFFFFF"
 COLOR_ADDITIONAL = "#F0F2F6"
+
+COMPARE_STATE_KEY = "compare_flags"
 
 
 def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> None:
@@ -134,17 +136,20 @@ def display_download_section(variables_quant, reset_uuid=False) -> None:
 
 def display_existing_results(variables_quant, ionmodule) -> None:
     """
-    Orchestrates the full display of quantification results in Streamlit,
-    including plotting and interactive tabular output with styling.
+    Display the existing results table, metric plot, and download options for quantification datasets.
+
+    This function initializes and filters the data, displays a metric selector and plot,
+    prepares and renders the results table using AgGrid, and offers download options for the displayed data.
+    It also includes a comparison feature: users can flag data points for comparison in the table,
+    and these flags are persisted in the session state to survive reruns. The function calls
+    `compare_datapoints` to handle the comparison logic.
 
     Parameters
     ----------
     variables_quant : object
-        Object containing quantification variables including data points,
-        slider/selectbox UUIDs, and configuration flags.
-
+        An object containing quantification dataset variables and session state keys.
     ionmodule : object
-        Module responsible for filtering and transforming ion data.
+        The ion module used for data initialization and filtering.
     """
     initialize_and_filter_data(variables_quant, ionmodule)
     data_points_filtered = variables_quant.filtered_data
@@ -155,9 +160,17 @@ def display_existing_results(variables_quant, ionmodule) -> None:
     df_display = prepare_display_dataframe(data_points_filtered, highlight_point_id)
     grid_options = configure_aggrid(df_display)
 
-    render_aggrid(df_display, grid_options)
+    grid_response = render_aggrid(df_display, grid_options)
+
+    # NEW: persist compare flags so edits survive reruns
+    if grid_response and "data" in grid_response and grid_response["data"] is not None:
+        cur = pd.DataFrame(grid_response["data"])
+        if {"id", "compare"}.issubset(cur.columns):
+            st.session_state[COMPARE_STATE_KEY] = dict(zip(cur["id"].astype(str), cur["compare"].astype(bool)))
+
     offer_download(df_display)
     display_download_section(variables_quant=variables_quant)
+    compare_datapoints(df_display=df_display, grid_response=grid_response)
 
 
 # === Modular Functions ===
@@ -259,7 +272,13 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
     df = df.copy()
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
 
-    identifier_cols = ["selected", "id"]
+    if COMPARE_STATE_KEY in st.session_state:
+        flags = st.session_state[COMPARE_STATE_KEY]
+        df["compare"] = df["id"].astype(str).map(flags).fillna(False).astype(bool)
+    else:
+        df["compare"] = False
+
+    identifier_cols = ["selected", "compare", "id"]
     parameter_cols = [
         "software_name",
         "software_version",
@@ -297,6 +316,9 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
         "scatter_size",
     ]
 
+    # add a compare column for selection
+    df["compare"] = None
+
     # Define display column order
     cols = identifier_cols + parameter_cols + result_cols + technical_cols
     cols = [col for col in cols if col in df.columns]
@@ -331,7 +353,7 @@ def configure_aggrid(df: pd.DataFrame):
         AgGrid gridOptions dictionary.
     """
     gb = GridOptionsBuilder.from_dataframe(df)
-    identifier_cols = ["selected", "id"]
+    identifier_cols = ["selected", "compare", "id"]
     parameter_cols = [
         "software_name",
         "software_version",
@@ -381,18 +403,103 @@ def configure_aggrid(df: pd.DataFrame):
         else:
             gb.configure_column(col, cellStyle=get_style_js(COLOR_ADDITIONAL))
 
-    return gb.build()
+    if "compare" in df.columns:
+        gb.configure_column(
+            "compare",
+            headerName="Compare",
+            editable=False,  # important: not an editor anymore
+            cellRenderer=JsCode("function(p){ return p.value ? '✅' : '☐'; }"),
+            cellStyle=get_style_js_clickable(COLOR_IDENTIFIER),  # optional pointer cursor
+            width=110,
+            pinned="left",
+        )
+
+    grid_options = gb.build()
+    grid_options["suppressClickEdit"] = True  # prevent entering edit mode on click
+
+    # Single-click toggle logic
+    grid_options["onCellClicked"] = JsCode(
+        """
+        function(params){
+          if (params.colDef && params.colDef.field === 'compare') {
+            var cur = params.node.data['compare'] === true;
+            params.node.setDataValue('compare', !cur);
+          }
+        }
+    """
+    )
+
+    return grid_options
 
 
 def render_aggrid(df: pd.DataFrame, grid_options):
-    AgGrid(
+    grid_response = AgGrid(
         df,
         gridOptions=grid_options,
         theme="alpine",
         fit_columns_on_grid_load=False,
         height=600,
         allow_unsafe_jscode=True,
+        update_mode=GridUpdateMode.MODEL_CHANGED,
+        data_return_mode=DataReturnMode.AS_INPUT,
     )
+    return grid_response
+
+
+def _uniq(seq):
+    # order-preserving de-duplication
+    return list(dict.fromkeys(seq))
+
+
+def compare_datapoints(df_display: pd.DataFrame, grid_response) -> None:
+    st.subheader("Compare selected datapoints")
+
+    if not grid_response or "data" not in grid_response or grid_response["data"] is None:
+        st.info("Tick the 'Compare' checkbox in one or more rows to compare.")
+        return
+
+    cur = pd.DataFrame(grid_response["data"])
+    if {"id", "compare"}.issubset(cur.columns):
+        sel_df = cur[cur["compare"] == True].copy()
+    else:
+        st.info("Tick the 'Compare' checkbox in one or more rows to compare.")
+        return
+
+    if sel_df.empty:
+        st.info("Tick the 'Compare' checkbox in one or more rows to compare.")
+        return
+
+    if "id" in sel_df.columns:
+        sel_df = sel_df.sort_values("id", kind="stable")
+
+    only_diffs = st.checkbox("Show only differing columns", value=True)
+
+    ignore_cols = {"selected", "compare"}
+    comp_cols = [c for c in sel_df.columns if c not in ignore_cols]
+
+    filled = sel_df[comp_cols].fillna("<NA>")
+    differing_cols = [c for c in comp_cols if filled[c].nunique(dropna=False) > 1]
+
+    if only_diffs:
+        # explicitly show id first if present, then differing columns excluding id
+        base_cols = ["id"] if "id" in sel_df.columns else []
+        cols_to_show = base_cols + [c for c in differing_cols if c != "id"]
+        if not differing_cols:
+            st.success("No differences found among the checked rows.")
+            cols_to_show = ["id"] if "id" in sel_df.columns else sel_df.columns.tolist()
+    else:
+        cols_to_show = sel_df.columns.tolist()
+
+    # final guard against any accidental duplicates
+    cols_to_show = _uniq(cols_to_show)
+
+    comp_table = sel_df[cols_to_show]
+
+    # numeric formatting
+    numeric_cols = comp_table.select_dtypes(include=["float64", "int64"]).columns
+    comp_table.loc[:, numeric_cols] = comp_table[numeric_cols].round(3)
+
+    st.dataframe(comp_table, use_container_width=True)
 
 
 def offer_download(df: pd.DataFrame, filename: str = "quantification_results.csv") -> None:
@@ -435,6 +542,21 @@ def get_style_js(bg_color: str) -> JsCode:
         }}
     }}
     """
+    )
+
+
+def get_style_js_clickable(bg_color: str) -> JsCode:
+    return JsCode(
+        f"""
+        function(params) {{
+            return {{
+                'backgroundColor': '{bg_color}',
+                'color': 'black',
+                'fontWeight': 'normal',
+                'cursor': 'pointer'
+            }};
+        }}
+        """
     )
 
 

@@ -233,6 +233,7 @@ def read_spectronaut_settings(
     params.enable_match_between_runs = False  # https://x.com/OliverMBernhar1/status/1656220095553601537
     params.precursor_mass_tolerance, params.fragment_mass_tolerance = extract_mass_tolerance(lines, system=system)
     params.enzyme = extract_value(lines, "Enzymes / Cleavage Rules:")
+    params.semi_specific = extract_value(lines, "Digest Type:") != "Specific"
     params.allowed_miscleavages = int(extract_value(lines, "Missed Cleavages:"))
     params.max_peptide_length = int(extract_value(lines, "Max Peptide Length:"))
     params.min_peptide_length = int(extract_value(lines, "Min Peptide Length:"))

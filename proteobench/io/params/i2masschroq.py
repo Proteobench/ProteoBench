@@ -11,7 +11,7 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def _extract_xtandem_params(
-    params: pd.Series, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    params: pd.Series, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse i2MassChroQ parameters when with X!Tandem is used.
@@ -49,6 +49,13 @@ def _extract_xtandem_params(
 
     _enzyme = str(params.loc["protein, cleavage site"])
 
+    if params.loc["protein, cleavage semi"] == "yes":
+        _semi_enzymatic = True
+    elif params.loc["protein, cleavage semi"] == "no":
+        _semi_enzymatic = False
+    else:
+        raise ValueError(f"Unknown value for protein, cleavage semi: {params.loc['protein, cleavage semi']}")
+
     fixed_mods_list = list(params.loc[params.index.str.contains("residue, modification mass")].dropna())
     var_mods_list = list(params.loc[params.index.str.contains("residue, potential modification mass")].dropna())
 
@@ -60,7 +67,7 @@ def _extract_xtandem_params(
 
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
-        filename=json,
+        filename=json_file,
         software_name="i2MassChroQ",
         software_version=params.loc["i2MassChroQ_VERSION"],
         search_engine=params.loc["AnalysisSoftware_name"],
@@ -73,6 +80,7 @@ def _extract_xtandem_params(
         precursor_mass_tolerance="[-" + _tol_prec_lower + ", " + _tol_prec_upper + "]",
         fragment_mass_tolerance="[-" + _tol_frag + ", " + _tol_frag + "]",
         enzyme=_enzyme,
+        semi_enzymatic=_semi_enzymatic,
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # xtandem: "spectrum, minimum fragment mz"
         max_peptide_length=None,
@@ -87,7 +95,7 @@ def _extract_xtandem_params(
 
 
 def _extract_sage_params(
-    params: pd.Series, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    params: pd.Series, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse i2MassChroQ parameters when Sage is used.
@@ -133,7 +141,7 @@ def _extract_sage_params(
 
     # Create and return a ProteoBenchParameters object with the extracted values
     params = ProteoBenchParameters(
-        filename=json,
+        filename=json_file,
         software_name="i2MassChroQ",
         software_version=params.loc["i2MassChroQ_VERSION"],
         search_engine=params.loc["AnalysisSoftware_name"],
@@ -146,6 +154,7 @@ def _extract_sage_params(
         precursor_mass_tolerance=precursor_mass_tolerance,
         fragment_mass_tolerance=fragment_mass_tolerance,
         enzyme=_enzyme,
+        semi_enzymatic=False,  # i2masschroq does not propagate this parameter
         allowed_miscleavages=max_cleavage,
         min_peptide_length=int(params.loc["sage_database_enzyme_min_len"]),  # 5
         max_peptide_length=int(params.loc["sage_database_enzyme_max_len"]),  # 50
@@ -154,13 +163,14 @@ def _extract_sage_params(
         max_mods=int(params.loc["sage_database_max_variable_mods"]),  # 2
         min_precursor_charge=int(min_precursor_charge),
         max_precursor_charge=int(max_precursor_charge),
+        json_file=json_file,
     )
     params.fill_none()
     return params
 
 
 def extract_params(
-    fname: pathlib.Path, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    fname: pathlib.Path, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Extract parameters from an i2MassChroQ parameter file and return a `ProteoBenchParameters` object.
@@ -179,9 +189,9 @@ def extract_params(
     params = pd.read_csv(fname, sep="\t", header=None, index_col=0).squeeze()
 
     if params.loc["AnalysisSoftware_name"] in ["X!Tandem", "X! Tandem"]:
-        return _extract_xtandem_params(params, json=json)
+        return _extract_xtandem_params(params, json_file=json_file)
     elif params.loc["AnalysisSoftware_name"] == "Sage":
-        return _extract_sage_params(params, json=json)
+        return _extract_sage_params(params, json_file=json_file)
     else:
         raise ValueError(f"Unsupported search engine: {params.loc['AnalysisSoftware_name']}")
 

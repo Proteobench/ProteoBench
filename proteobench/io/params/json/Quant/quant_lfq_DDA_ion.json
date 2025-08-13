@@ -54,6 +54,11 @@
         "label": "Proteolytic Enzyme",
         "placeholder": "None"
     },
+    "semi_enzymatic": {
+        "type": "checkbox",
+        "label": "Semi-enzymatic digestion",
+        "value": false
+    },
     "allowed_miscleavages": {
         "type": "text_input",
         "label": "Maximum allowed number of missed cleavage",

@@ -13,7 +13,8 @@ from proteobench.io.params import ProteoBenchParameters
 
 
 def extract_params(
-    fname: Union[str, pathlib.Path], json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    fname: Union[str, pathlib.Path],
+    json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"),
 ) -> ProteoBenchParameters:
     """
     Parse Sage quantification tool JSON parameter file and extract relevant parameters.
@@ -28,7 +29,7 @@ def extract_params(
     ProteoBenchParameters
         The extracted parameters as a `ProteoBenchParameters` object.
     """
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(json_file=json_file)
 
     try:
         # If the input is a file-like object (e.g., StringIO), decode it
@@ -53,6 +54,16 @@ def extract_params(
             params.enyzme = "Trypsin/P"
 
     params.allowed_miscleavages = data["database"]["enzyme"]["missed_cleavages"]
+
+    if data["database"]["enzyme"]["semi_enzymatic"] is None:
+        params.semi_enzymatic = False
+    elif data["database"]["enzyme"]["semi_enzymatic"] is True:
+        params.semi_enzymatic = True
+    elif data["database"]["enzyme"]["semi_enzymatic"] is False:
+        params.semi_enzymatic = False
+    else:
+        raise ValueError(f"Unknown value for semi_enzymatic: {data['database']['enzyme']['semi_enzymatic']}")
+
     params.fixed_mods = data["database"]["static_mods"]
     params.variable_mods = data["database"]["variable_mods"]
 
@@ -89,15 +100,20 @@ if __name__ == "__main__":
     from pathlib import Path
     from pprint import pprint
 
-    file = Path("../../../test/params/sage_results.json")
+    files = [
+        Path("../../../test/params/sage_results.json"),
+        Path("../../../test/params/sage_parameterfile.json"),
+    ]
 
-    # Extract parameters from the file
-    params = extract_params(file)
+    for file in files:
+        # Extract parameters from the file
+        print(f"Extracting parameters from {file}")
+        params = extract_params(file)
 
-    # Convert the extracted parameters to a dictionary and then to a pandas Series
-    data_dict = params.__dict__
-    pprint(params.__dict__)
-    series = pd.Series(data_dict)
+        # Convert the extracted parameters to a dictionary and then to a pandas Series
+        data_dict = params.__dict__
+        pprint(params.__dict__)
+        series = pd.Series(data_dict)
 
-    # Write the Series to a CSV file
-    series.to_csv(file.with_suffix(".csv"))
+        # Write the Series to a CSV file
+        series.to_csv(file.with_suffix(".csv"))

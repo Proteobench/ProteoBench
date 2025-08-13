@@ -25,6 +25,7 @@ dependencies = [
   "upsetplot",
   "seaborn",
   "streamlit>=1.31",
+  "streamlit-aggrid>=1.1.7",
   "streamlit_extras",
   "streamlit-plotly-events",
   "scipy",

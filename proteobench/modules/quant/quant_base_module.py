@@ -33,6 +33,9 @@ from proteobench.io.params.i2masschroq import (
     extract_params as extract_params_i2masschroq,
 )
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.metamorpheus import (
+    extract_params as extract_params_metamorpheus,
+)
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.msangel import extract_params as extract_params_msangel
 from proteobench.io.params.peaks import extract_params as extract_params_peaks
@@ -84,6 +87,7 @@ class QuantModule:
         # TODO needs to be replace with parameter extraction function
         "Proteome Discoverer": extract_params_spectronaut,
         "quantms": extract_params_quantms,
+        "MetaMorpheus": extract_params_metamorpheus,
     }
 
     def __init__(
@@ -482,7 +486,7 @@ class QuantModule:
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 
-    def load_params_file(self, input_file: List[str], input_format: str, json: str) -> ProteoBenchParameters:
+    def load_params_file(self, input_file: List[str], input_format: str, json_file: str) -> ProteoBenchParameters:
         """
         Load parameters from a metadata file depending on its format.
 
@@ -492,6 +496,8 @@ class QuantModule:
             Path to the metadata file.
         input_format : str
             Format of the metadata file.
+        json_file : str
+            Path to the JSON file containing additional module specific parameters.
 
         Returns
         -------
@@ -500,7 +506,7 @@ class QuantModule:
         """
         params = self.EXTRACT_PARAMS_DICT[input_format](
             *input_file,
-            json=json,
+            json_file=json_file,
         )
         params.software_name = input_format
         return params

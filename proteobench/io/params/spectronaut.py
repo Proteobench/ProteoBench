@@ -180,7 +180,7 @@ def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
 def read_spectronaut_settings(
     file_path: str,
     system="Thermo Orbitrap",
-    json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json"),
+    json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json"),
 ) -> ProteoBenchParameters:
     """
     Read a Spectronaut settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
@@ -218,7 +218,7 @@ def read_spectronaut_settings(
             f"Unknown system: {system}. Supported systems are: {', '.join(VENDOR_SYSTEM_MAP.keys())}. Did you upload the correct settings file?"
         )
 
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
     params.software_name = "Spectronaut"
     params.software_version = lines[0].split()[1]
     params.search_engine = "Spectronaut"
@@ -233,6 +233,7 @@ def read_spectronaut_settings(
     params.enable_match_between_runs = False  # https://x.com/OliverMBernhar1/status/1656220095553601537
     params.precursor_mass_tolerance, params.fragment_mass_tolerance = extract_mass_tolerance(lines, system=system)
     params.enzyme = extract_value(lines, "Enzymes / Cleavage Rules:")
+    params.semi_specific = extract_value(lines, "Digest Type:") != "Specific"
     params.allowed_miscleavages = int(extract_value(lines, "Missed Cleavages:"))
     params.max_peptide_length = int(extract_value(lines, "Max Peptide Length:"))
     params.min_peptide_length = int(extract_value(lines, "Min Peptide Length:"))

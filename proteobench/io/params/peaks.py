@@ -147,7 +147,7 @@ def get_items_between(lines: list, start: str, end: str, only_last: bool = False
 
 
 def extract_params(
-    file_path: str, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    file_path: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Read a PEAKS settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
@@ -173,7 +173,7 @@ def extract_params(
 
     lines = [line.strip() for line in lines]
 
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
 
     params.software_name = "PEAKS"
     params.software_version = extract_value(lines, "PEAKS Version:")
@@ -194,6 +194,7 @@ def extract_params(
     params.precursor_mass_tolerance = extract_mass_tolerance(lines, "Precursor Mass Error Tolerance:")
     params.fragment_mass_tolerance = extract_mass_tolerance(lines, "Fragment Mass Error Tolerance:")
     params.enzyme = extract_value(lines, "Enzyme:")
+    params.semi_enzymatic = extract_value(lines, "Digest Mode:") != "Specific"
     params.allowed_miscleavages = int(extract_value(lines, "Max Missed Cleavage:"))
     try:
         peptide_length_range = extract_value(lines, "Peptide Length between:").split(",")

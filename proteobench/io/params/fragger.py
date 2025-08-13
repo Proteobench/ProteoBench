@@ -145,7 +145,7 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
 
 
 def extract_params(
-    file: BytesIO, json=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+    file: BytesIO, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
     """
     Parse FragPipe parameter files and extract relevant parameters into a `ProteoBenchParameters` object.
@@ -170,7 +170,7 @@ def extract_params(
         fragpipe_version = re.match(r"FragPipe \((\d+\.\d+.*)\)", header).group(1)
 
     # Initialize ProteoBenchParameters
-    params = ProteoBenchParameters(filename=json)
+    params = ProteoBenchParameters(filename=json_file)
     params.software_name = "FragPipe"
     params.software_version = fragpipe_version
     params.search_engine = "MSFragger"
@@ -186,6 +186,12 @@ def extract_params(
         enzyme = "Trypsin"  # trypsin: do not cut before P
     params.enzyme = enzyme
     params.allowed_miscleavages = int(fragpipe_params.loc["msfragger.allowed_missed_cleavage_1"])
+
+    if fragpipe_params.loc["msfragger.num_enzyme_termini"] == "2":
+        # 2 is ENZYMATIC, 1 is SEMI, 3 is SEMI_N_TERM, 0 is NONSPECIFIC
+        params.semi_enzymatic = False
+    else:
+        params.semi_enzymatic = True
 
     # Modifications
     params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods"]
@@ -244,7 +250,7 @@ def extract_params(
 
     # Match between runs and quantification method settings
     if fragpipe_params.loc["quantitation.run-label-free-quant"] == "true":
-        params.enable_match_between_runs = bool(fragpipe_params.loc["ionquant.mbr"])
+        params.enable_match_between_runs = bool(int(fragpipe_params.loc["ionquant.mbr"]))
     elif fragpipe_params.loc["diann.run-dia-nn"] == "true":
         diann_quant_dict = {
             1: "Any LC (high accuracy)",
@@ -276,6 +282,7 @@ if __name__ == "__main__":
         "../../../test/params/fragpipe_v22.workflow",
         "../../../test/params/fragpipe_fdr_test.workflow",
         "../../../test/params/fragpipe-version.workflow",
+        "../../../test/params/fragpipe_v23_noMBR.workflow",
     ]
 
     for file_path in files:

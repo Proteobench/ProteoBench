@@ -155,6 +155,21 @@ The field "Proteins" in **the "evidence.txt" table should report proteins in the
 In the recent versions of MaxQuant, the default settings work perfectly (`Identifier rule = >([^ ]*)`; `Description rule = >(.*)`).
 Some older versions of MaxQuant do not provide the option to change fasta header parsing. These are not compatible with ProteoBench.
 
+### MetaMorpheus (work in progress)
+To upload MetaMorpheus output compatible with ProteoBench, you need to:
+1. Run a Search Task on the input data **(do not change the file names)**, using the FASTA provided by the module.
+2. Quantification needs to be performed in LFQ mode (using FlashLFQ). You can do this by enabling "LFQ" in the Quantification section of the Search Task configuration (this should be enabled by default) in the GUI, or by setting "DoQuantification = true" in the .toml in CLI
+3. Upload the AllQuantifiedPeaks.tsv file (found in the Task-specific folder) to ProteoBench to calculate the precursor ratios.
+4. For public submission, you need to upload **two** parameter files:
+a. The Task`<your-search-task-name>`config.toml* file that will be generated in the "Task Settings" folder. Make sure you select the config of the relevant Search Task.<br>**Important**: This is not the same .toml file used to run MetaMorpheus in CLI.
+b.the allResults.txt file that is outputted in the main output folder you specified for the search. This file is needed to parse the MetaMorpheus version.
+
+The order in which you upload these files should not matter.
+When you upload these two parameter files to ProteoBench, you might notice an error message after you upload the first (multi-file uploads are still a work in progress); simply continue adding the second file and this error message will disappear and the parsed parameters will be shown.
+
+*By default, this file will be called **Task1SearchTaskconfig.toml**, but this can differ depending on, 1. The name you gave to the task, 2. whether you configured any previous tasks.
+
+
 ### Proline Studio 
 
 Make sure that the peaklists are named with the same prefix as raw files. To do so in ProlineStudio, use peaklist names as sample names (manually or with automatic renaming option).

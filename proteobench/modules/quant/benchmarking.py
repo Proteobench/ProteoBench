@@ -2,11 +2,12 @@
 Benchmarking functionality for quantification modules.
 """
 
-from typing import Optional, Tuple, Dict, List, Callable, Type
-import pandas as pd
-from pandas import DataFrame
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial, wraps
+from typing import Callable, Dict, List, Optional, Tuple, Type
+
+import pandas as pd
+from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import QuantDatapoint
 from proteobench.exceptions import (
@@ -206,8 +207,8 @@ def run_benchmarking_with_timing(
         A tuple containing the intermediate data structure, all data points, the input DataFrame,
         and a dictionary of timing information.
     """
-    from contextlib import contextmanager
     import time
+    from contextlib import contextmanager
 
     timings: Dict[str, float] = {}
 

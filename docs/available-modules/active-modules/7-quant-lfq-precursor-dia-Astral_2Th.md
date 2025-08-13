@@ -25,18 +25,20 @@ The mass spectrometer was operated in positive ionization mode with data-indepen
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-For now, you can download the raw files via a private server:
+For now, you can download the raw files from the ProteoBench server here:
 
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw)
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw)
-- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw)
-- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP3.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw)
+- [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw)
+
+All files can be found here [proteobench.cubimed.rub.de/raws/DIA-astral/](https://proteobench.cubimed.rub.de/raws/DIA-astral/)
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip" download>ProteoBenchFASTA_MixedSpecies_HYE.zip</a>.
+Download the zipped FASTA file here: [ProteoBenchFASTA_MixedSpecies_HYE.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip).
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))

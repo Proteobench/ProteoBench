@@ -20,23 +20,25 @@ Please refer to the original publication for the full description of sample prep
 
 Data acquisition parameters were as following:
 Peptides were loaded directly onto the analytical column and were separated by reversed-phase chromatography using a 50 cm μPAC™ column (Thermo Scientific, cat # COL-NANO050NEOB), featuring a structured pillar array bed with a 180 µm bed width. The chromatographic gradient was initiated with 96% buffer A and 4% buffer B at a flow rate of 750 nL/min durig 1 minute. The flow rate was then reduced to 250 nL/min, and the percentage of buffer B was further increased to 40% over 15 minutes. Buffer A: 0.1% formic acid in water. Buffer B: 0.1% formic acid in 80% acetonitrile.
+
 The mass spectrometer was operated in positive ionization mode with data-dependent acquisition, with a full MS scans over a mass range of m/z 380-980 with detection in the Orbitrap at a resolution of 180,000 and a fixed cycle time of 0.5 s. Precursor ion selection width was kept at 2-Th and a normalized collision energy of 30% was used for higher-energy collisional dissociation (HCD) fragmentation. MS2 scan range was set from 145 to 1450 m/z with detection in the Astral and maximum fill time of 2.5 ms. Dynamic exclusion was enabled and set to 10 s.
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
-For now, you can download the raw files via a private server:
 
-- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw)
-- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw)
-- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.raw)
-- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw)
-- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw)
-- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw)
+For now, you can download the raw files from the ProteoBench server here:
 
-Alternatively, you can download them from the ProteoBench server here: [https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/](https://proteobench.cubimed.rub.de/datasets/raw_files/DDA-astral/)
+- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw)
+- [LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw)
+
+All files can be found here [proteobench.cubimed.rub.de/raws/DDA-astral/](https://proteobench.cubimed.rub.de/raws/DDA-astral/)
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: [ProteoBenchFASTA_MixedSpecies_HYE.zip](https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip).
+Download the zipped FASTA file here: [ProteoBenchFASTA_MixedSpecies_HYE.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip).
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))

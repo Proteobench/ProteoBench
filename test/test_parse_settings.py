@@ -181,7 +181,7 @@ class TestParseSettingsQuant:
         result = parse_settings_long._format_by_analysis_level(df)
         # Should add precursor ion column for ion level
         assert "precursor ion" in result.columns
-        assert all("|Z=" in ion for ion in result["precursor ion"])
+        assert all("/" in ion for ion in result["precursor ion"])
 
     def test_convert_to_standard_format_integration(self, parse_settings_long, parse_settings_short):
         # Test with long format

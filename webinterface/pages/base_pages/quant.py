@@ -175,7 +175,9 @@ class QuantUIObjects:
         Display the public submission section of the page in Tab 5.
         """
         try:
-            resolved_hash = st.session_state[self.variables_quant.all_datapoints].iloc[-1]["intermediate_hash"]
+            resolved_hash = st.session_state[self.variables_quant.all_datapoints][
+                st.session_state[self.variables_quant.all_datapoints][st.session_state["old_new"] == "new"]
+            ]["intermediate_hash"].values[0]
             if resolved_hash and dataset_folder_exists(resolved_hash):
                 st.error(
                     f":no_entry: This dataset was already submitted. A folder for hash '{resolved_hash}' exists on the server. Submission disabled.",

@@ -143,6 +143,7 @@ def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
     params.search_engine = "MetaMorpheus"
     params.software_version = versions_line.split()[2]
     params.enzyme = settings["CommonParameters"]["DigestionParams"]["Protease"]
+    params.semi_specific = settings["CommonParameters"]["DigestionParams"]["FragmentationTerminus"] != "Both"
     params.allowed_miscleavages = settings["CommonParameters"]["DigestionParams"]["MaxMissedCleavages"]
     params.fixed_mods = parse_modifications(settings["CommonParameters"]["ListOfModsFixed"])
     params.variable_mods = parse_modifications(settings["CommonParameters"]["ListOfModsVariable"])

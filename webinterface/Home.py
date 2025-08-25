@@ -78,7 +78,7 @@ class StreamlitPageHome(StreamlitPage):
                     "Active modules",
                     n_modules_all,
                     fig_path / "module.png",
-                    "https://proteobench.readthedocs.io/en/stable/available-modules/",
+                    url="https://proteobench.readthedocs.io/en/stable/available-modules/",
                 ),
                 unsafe_allow_html=True,
             )
@@ -88,7 +88,7 @@ class StreamlitPageHome(StreamlitPage):
                     "Proposed and in-development modules",
                     n_modules_proposed,
                     fig_path / "module-construction.png",
-                    "https://github.com/orgs/Proteobench/discussions",
+                    url="https://github.com/orgs/Proteobench/discussions",
                 ),
                 unsafe_allow_html=True,
             )
@@ -101,7 +101,7 @@ class StreamlitPageHome(StreamlitPage):
                     "Supported workflows and tools",
                     n_tools_supported,
                     fig_path / "workflow-run.png",
-                    # TODO: parameter parsing docs url
+                    url="https://proteobench.readthedocs.io/en/stable/available-modules/12-parsed-parameters-for-public-submission/",
                 ),
                 unsafe_allow_html=True,
             )
@@ -111,7 +111,7 @@ class StreamlitPageHome(StreamlitPage):
                     "Submitted points",
                     n_of_points_submitted,
                     fig_path / "scatter-plot.png",
-                    "https://proteobench.cubimed.rub.de/datasets/",
+                    url="https://proteobench.cubimed.rub.de/datasets/",
                 ),
                 unsafe_allow_html=True,
             )

@@ -15,7 +15,7 @@ def get_base64_image(path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
-def stat_box(title, value, icon_path, color="#000", url=None):
+def stat_box(title, value, icon_path, url=None):
     img_data = get_base64_image(icon_path)
     content = f"""
     <div style="

@@ -9,6 +9,7 @@ from UI_utils import (
     get_n_modules_proposed,
     get_n_submitted_points,
     get_n_supported_tools,
+    get_monthly_visitors,
     stat_box,
 )
 
@@ -32,7 +33,20 @@ class StreamlitPageHome(StreamlitPage):
         n_modules_proposed = get_n_modules_proposed(file_path.read_text(encoding="utf-8"))
         n_tools_supported = get_n_supported_tools()
         n_of_points_submitted = get_n_submitted_points()  # This function should return the number of submitted points
-        monthly_visitors = "Coming soon"  # TODO
+
+        if (
+            "tracking" in st.secrets
+            and "matomo_endpoint" in st.secrets["tracking"]
+            and "matomo_idsite" in st.secrets["tracking"]
+            and "matomo_token" in st.secrets["tracking"]
+        ):
+            monthly_visitors = get_monthly_visitors(
+                st.secrets["tracking"]["matomo_endpoint"],
+                st.secrets["tracking"]["matomo_token"],
+                st.secrets["tracking"]["matomo_idsite"],
+            )
+        else:
+            monthly_visitors = "not configured"
 
         st.header("ProteoBench Overview")
         st.markdown(

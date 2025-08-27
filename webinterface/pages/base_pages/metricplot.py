@@ -15,8 +15,6 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key) -> str 
     data : pd.DataFrame
         The filtered dataset to plot.
 
-    variables_quant : object
-        Contains session state and selectbox identifier.
 
     metric : str
         Metric to plot ("Median" or "Mean").

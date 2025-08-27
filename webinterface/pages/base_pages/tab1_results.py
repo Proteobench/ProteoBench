@@ -166,7 +166,7 @@ def display_existing_results(variables_quant, ionmodule) -> None:
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
-    render_aggrid(df_display, grid_options, key)
+    render_aggrid(df_display, grid_options, key=_id_of_key)
     offer_download(df_display)
     display_download_section(variables_quant=variables_quant)
 

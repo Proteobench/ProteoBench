@@ -45,6 +45,11 @@ class VariablesDDAQuantAstral:
     slider_id_uuid: str = "slider_id_dda_quant_Astral"
     download_selector_id_uuid: str = "download_selector_id_dda_quant_Astral"
     table_id_uuid: str = "table_id_dda_quant_Astral"
+    table_new_results_uuid: str = "table_new_results_uuid_dda_quant_Astral"
+    result_plot_uuid: str = "result_figure_uuid_dda_quant_Astral"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dda_quant_Astral"
+    metric_selector_uuid: str = "metric_selector_uuid_dda_quant_Astral"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dda_quant_Astral"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [

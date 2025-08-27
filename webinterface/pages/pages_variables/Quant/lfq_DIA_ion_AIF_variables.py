@@ -48,6 +48,12 @@ class VariablesDIAQuant:
     slider_id_uuid: str = "slider_id_dia_quant"
     download_selector_id_uuid: str = "download_selector_id_dia_quant"
     table_id_uuid: str = "table_id_dia_quant"
+    table_new_results_uuid: str = "table_new_results_uuid_dia_quant"
+    result_plot_uuid: str = "result_figure_uuid_dia_quant"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant"
+    metric_selector_uuid: str = "metric_selector_uuid_dia_quant"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant"
+
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/input_file_description.md"

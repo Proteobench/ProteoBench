@@ -40,7 +40,23 @@ def _get_style_js(bg_color: str) -> JsCode:
 
 
 def render_aggrid(df: pd.DataFrame, grid_options, key):
+    """
+    Renders a DataFrame using AgGrid with specified grid options and a unique key.
 
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to display in the grid.
+    grid_options : dict
+        Configuration options for AgGrid.
+    key : Any
+        Unique identifier for the grid instance (AgGrid does not work with UUID keys).
+
+    Returns
+    -------
+    None
+        This function renders the grid in the Streamlit interface and does not return a value.
+    """
     AgGrid(
         df,
         gridOptions=grid_options,

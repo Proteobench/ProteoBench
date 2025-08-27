@@ -9,6 +9,8 @@ import streamlit as st
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 from .filter import filter_data_using_slider
+from .resulttable import configure_aggrid, render_aggrid, prepare_display_dataframe
+from .metricplot import render_metric_plot
 
 
 def initialize_submitted_slider(slider_id_submitted_uuid, default_val_slider) -> None:
@@ -51,7 +53,7 @@ def generate_submitted_selectbox(variables_quant) -> None:
     try:
         st.selectbox(
             "Select label to plot",
-            ["None", "precursor_mass_tolerance", "fragment_mass_tolerance"],
+            variables_quant.metric_plot_labels,
             key=st.session_state[variables_quant.selectbox_id_submitted_uuid],
         )
     except Exception as e:
@@ -73,44 +75,42 @@ def display_submitted_results(variables_quant, ionmodule) -> None:
         filter_data_point=ionmodule.filter_data_point,
     )
 
-    metric = st.radio(
-        "Select metric to plot",
-        options=["Median", "Mean"],
-        help="Toggle between median and mean absolute difference metrics.",
-        key="placeholder2",  # TODO: add to variables
-    )
+    metric = display_metric_selector(variables_quant)
 
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")
         return
 
-    try:
-        fig_metric = PlotDataPoint.plot_metric(
-            data_points_filtered,
-            metric=metric,
-            label=st.session_state[st.session_state[variables_quant.selectbox_id_submitted_uuid]],
-        )
+    # prepare plot key explicitly for tab 4
+    key = variables_quant.result_submitted_plot_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
 
-        try:
-            st.plotly_chart(fig_metric, use_container_width=True)
-        except Exception:
-            st.error("No (new) datapoints available for plotting", icon="🚨")
-            return
-    except Exception as e:
-        st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-    st.session_state[variables_quant.table_id_uuid] = uuid.uuid4()
-    st.data_editor(
-        st.session_state[variables_quant.all_datapoints_submitted],
-        key=st.session_state[variables_quant.table_id_uuid],
-        on_change=handle_submitted_table_edits,
-        args=(variables_quant,),
+    highlight_point_id = render_metric_plot(
+        data_points_filtered,
+        metric,
+        label=st.session_state[st.session_state[variables_quant.selectbox_id_submitted_uuid]],
+        key=_id_of_key,
     )
+
+    df_display = prepare_display_dataframe(
+        st.session_state[variables_quant.all_datapoints_submitted], highlight_point_id
+    )
+    grid_options = configure_aggrid(df_display)
+
+    # prepare df key explicitly for tab 4
+    key = variables_quant.table_new_results_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    render_aggrid(df_display, grid_options, key=str(_id_of_key))
 
     st.title("Public submission")
     st.markdown(
         "If you want to make this point — and the associated data —"
-        "publicly available, please go to “Public Submission"
+        "publicly available, please go to the tab 'Public Submission'"
     )
 
 
@@ -164,3 +164,17 @@ def handle_submitted_table_edits(variables_quant) -> None:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
     st.session_state[variables_quant.fig_metric] = fig_metric
+
+
+def display_metric_selector(variables_quant) -> str:
+    key = variables_quant.metric_selector_submitted_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.radio(
+        "Select metric to plot",
+        options=["Median", "Mean"],
+        help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )

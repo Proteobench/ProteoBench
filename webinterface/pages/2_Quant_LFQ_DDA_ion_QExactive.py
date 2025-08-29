@@ -1,6 +1,7 @@
 """
 Streamlit UI for the DDA quantification - precursor ions module.
 """
+
 import logging
 import subprocess
 from pathlib import Path
@@ -126,50 +127,17 @@ class StreamlitUI:
                 )
 
             self.quant_uiobjects.display_indepth_plots()
-            
-        # Tab 2: pMultiQC plot based on intermediate data
-        
+
+        # Tab 3_1: pMultiQC plot based on intermediate data
+
         with tab_multqc_plot:
-            st.title('pMultiQC Report for selected dataset.')
+            st.title("pMultiQC Report for selected dataset.")
             # self.quant_uiobjects.display_multqc_plot()
-            
-            # write_report can write to stdout (or a ioBuffer?)
-            if self.quant_uiobjects.variables_quant.result_perf in st.session_state.keys():
-                tmp = st.session_state[self.quant_uiobjects.variables_quant.result_perf]
-                tmp_path = Path('tmp_pmultiqc')
-                tmp_path.mkdir(parents=True, exist_ok=True)
-                tmp.to_csv(tmp_path / 'result_performance.csv', index=False)
-                subprocess.run(
-                    ["multiqc", "--parse_proteobench", "./tmp_pmultiqc", "-o", "./report"],
-                    check=True,
-                )
 
-                st.write("Intermedate data saved to: ", tmp_path)
 
-                file_path = Path("report/multiqc_report.html").resolve()
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    html_content = f.read()
-                    
-                @st.fragment()
-                def show_download_button():
-                    """
-                    Display a download button for the pMultiQC report.
-                    """
-                    st.markdown(
-                        "Download the pMultiQC report generated from the intermediate data."
-                    )
-                    # components.html(html_content, height=800, scrolling=True)
-                    st.download_button(
-                        label="Download pMultiQC Report",
-                        file_name="pMultiQC_report.html",
-                        data=html_content,
-                    )
+
+            self.quant_uiobjects.display_pmultiqc_report()
                 
-                show_download_button()
-            else:
-                st.warning("No intermediate data available for pMultiQC report."
-                           " Please first submit data.")
-
 
         # Tab 4: Results (New Submissions)
         with tab_results_new:

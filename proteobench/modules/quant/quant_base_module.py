@@ -448,7 +448,7 @@ class QuantModule:
         input_file_obj : Any
             File-like object representing the raw input file.
         result_performance : pd.DataFrame
-            The result performance DataFrame.
+            The result performance DataFrame (intermediate data).
         param_loc : List[Any]
             List of paths to parameter files that need to be copied.
         comment : str

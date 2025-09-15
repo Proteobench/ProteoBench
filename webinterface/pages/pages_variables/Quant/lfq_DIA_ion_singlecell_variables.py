@@ -87,7 +87,7 @@ class VariablesDIAQuantSC:
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/6-quant-lfq-ion-dia-singlecell/"
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-singlecell/"
     )
 
     title: str = "DIA Precursor quantification - singlecell"

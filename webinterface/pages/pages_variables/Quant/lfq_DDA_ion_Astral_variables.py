@@ -90,7 +90,7 @@ class VariablesDDAQuantAstral:
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-precursor-dda-Astral/"
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/"
     )
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"

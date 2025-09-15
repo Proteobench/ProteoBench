@@ -1,4 +1,4 @@
-# DIA quantification - precursor ions - Astral 2Th
+# DIA quantification - precursor ion level - Astral 2Th
 
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Narrow-window 2 Th, on an Orbitrap Astral (Thermo Fisher Scientific).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.

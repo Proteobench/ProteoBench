@@ -58,6 +58,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
     dia_pages = {
         "Quant LFQ DIA ion diaPASEF": "/Quant_LFQ_DIA_ion_diaPASEF",
         "Quant LFQ DIA ion Astral": "/Quant_LFQ_DIA_ion_Astral",
+        "Quant LFQ DIA ion singlecell": "/Quant_LFQ_DIA_ion_singlecell",
     }
     archived_pages = {
         "Quant LFQ DIA ion AIF": "/Quant_LFQ_DIA_ion_AIF",

@@ -40,7 +40,8 @@ class VariablesDIAQuantSC:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
-    beta_warning: bool = True
+    alpha_warning: bool = True
+    beta_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git_singlecell"
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_singlecell"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_singlecell"
@@ -90,7 +91,7 @@ class VariablesDIAQuantSC:
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-singlecell/"
     )
 
-    title: str = "DIA Precursor quantification - singlecell"
+    title: str = "DIA Precursor quantification - Single Cell"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_singlecell_quant_"

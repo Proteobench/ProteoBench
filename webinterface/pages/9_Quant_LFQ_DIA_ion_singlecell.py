@@ -80,6 +80,12 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="⚠️",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -95,6 +101,10 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution."
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -110,6 +120,10 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution."
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -125,6 +139,10 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution."
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -140,6 +158,10 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution."
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."

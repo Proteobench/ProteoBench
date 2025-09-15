@@ -32,3 +32,20 @@ present in the samples **and contaminant proteins**
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145)).
 
 For search specific instructions, metric definitions, troubleshooting, and result descriptions, see [the DIA Astral bulk module](#8-quant-lfq-ion-dia-Astral_2Th).
+
+### Custom format
+
+If you do not use a tool that is compatible with ProteoBench, you can upload a tab-delimited table format containing the following columns:
+
+- Sequence: peptide sequence without the modification(s)
+- Proteins: column containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST").
+- Charge: Charge state of measured peptide ions
+- Modified sequence: column containing the sequences and the localised modifications in the [ProForma standard](https://www.psidev.info/proforma) format. 
+20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1: Quantitative column sample 1
+20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2: Quantitative column sample 2
+20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3: Quantitative column sample 3
+20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1: Quantitative column sample 4
+20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2: Quantitative column sample 5 
+20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3: Quantitative column sample 6
+
+The table must not contain non-validated ions. If you have any issue, contact us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).

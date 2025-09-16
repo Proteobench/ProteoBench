@@ -21,12 +21,12 @@ The files can be downloaded from the proteomeXchange repository [PXD049412](http
 - [	20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2025/01/PXD049412/20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2.raw)
 - [	20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2025/01/PXD049412/20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3.raw)
 
-Alternatively, you can download them from the ProteoBench server here: [To be uploaded](https://proteobench.cubimed.rub.de/raws/DDA/)
+Alternatively, you can download them from the ProteoBench server [here](https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/).
 
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: [To be uploaded: ProteoBenchFASTA_MixedSpecies_HY.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HY.zip).
+Download the zipped FASTA file here: [ProteoBenchFASTA_MixedSpecies_HY.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HY.zip).
 The fasta file provided for this module contains the two species
 present in the samples **and contaminant proteins**
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145)).

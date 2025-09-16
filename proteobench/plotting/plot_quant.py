@@ -355,51 +355,12 @@ class PlotDataPoint:
             opacity=0.6,
         )
 
-        # Add vertical lines as shapes
-        fig.add_shape(
-            type="line",
-            x0=0,
-            x1=0,
-            y0=result_df["logIntensityMean"].min(),
-            y1=result_df["logIntensityMean"].max(),
-            line=dict(color="green", dash="dash"),
-            xref="x",
-            yref="y",
-            name="log2FC = 0",
-        )
-        fig.add_shape(
-            type="line",
-            x0=1,
-            x1=1,
-            y0=result_df["logIntensityMean"].min(),
-            y1=result_df["logIntensityMean"].max(),
-            line=dict(color="red", dash="dash"),
-            xref="x",
-            yref="y",
-            name="log2FC = 1",
-        )
-        fig.add_shape(
-            type="line",
-            x0=-2,
-            x1=-2,
-            y0=result_df["logIntensityMean"].min(),
-            y1=result_df["logIntensityMean"].max(),
-            line=dict(color="blue", dash="dash"),
-            xref="x",
-            yref="y",
-            name="log2FC = -2",
-        )
-
-        # To show vertical lines in the legend, add dummy traces
-        fig.add_trace(
-            go.Scatter(x=[None], y=[None], mode="lines", line=dict(color="green", dash="dash"), name="log2FC = 0")
-        )
-        fig.add_trace(
-            go.Scatter(x=[None], y=[None], mode="lines", line=dict(color="red", dash="dash"), name="log2FC = 1")
-        )
-        fig.add_trace(
-            go.Scatter(x=[None], y=[None], mode="lines", line=dict(color="blue", dash="dash"), name="log2FC = -2")
-        )
+        # Add vertical lines for expected ratios
+        ratio_map = {species: np.log2(data["A_vs_B"]) for species, data in species_ratio.items()}
+        for species, ratio in ratio_map.items():
+            fig.add_vline(
+                x=ratio, line_dash="dash", line_color=species_ratio[species]["color"], annotation_text=species
+            )
 
         fig.update_traces(marker=dict(size=6))  # Marker size approx. equivalent to s=10 in seaborn
         return fig

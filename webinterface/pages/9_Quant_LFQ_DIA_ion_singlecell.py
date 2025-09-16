@@ -80,6 +80,12 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -95,13 +101,18 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
             self.quant_uiobjects.display_submission_form()
 
-        # Tab 2.5: in-depth plots current data
+        # Tab 3: in-depth plots current data
         with tab_indepth_plots:
             st.title(self.variables_dia_quant.title)
             st.link_button(
@@ -110,13 +121,18 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
-            self.quant_uiobjects.generate_current_data_plots(True)
+            self.quant_uiobjects.display_indepth_plots()
 
-        # Tab 3: Results (New Submissions)
+        # Tab 4: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables_dia_quant.title)
             st.link_button(
@@ -125,13 +141,18 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
                 )
             self.quant_uiobjects.display_all_data_results_submitted()
 
-        # Tab 4: Public Submission
+        # Tab 5: Public Submission
         with tab_public_submission:
             st.title(self.variables_dia_quant.title)
             st.link_button(
@@ -140,6 +161,11 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."

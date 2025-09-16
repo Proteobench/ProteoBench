@@ -8,7 +8,7 @@ For bulk sample analyses, see [the DIA Astral module](#8-quant-lfq-ion-dia-Astra
 **This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
 
 ## Data set
-A subset of the Astral (Thermo Fisher) data independent acquisition (DIA) data described by [Bubis et al., 2024](https://www.biorxiv.org/content/10.1101/2024.02.01.578358v2.abstract) was used as a benchmark dataset. Here, only the series containing x:y (condition 'A') and y:a (condition 'B') ratios were used, encompassing three technical (?) replicates each.
+A subset of the Astral (Thermo Fisher) data independent acquisition (DIA) data described by [Bubis et al., 2024](https://www.biorxiv.org/content/10.1101/2024.02.01.578358v2.abstract) was used as a benchmark dataset. Here, only the series containing 240:10 (condition 'A') and 200:50 (condition 'B') ratios were used, encompassing three replicates each.
 The samples are a mixture of commercial peptide digest standards of the following species: HeLa (H) (Thermo Scientific, Pierce™ HeLa Protein Digest Standard, 88328) and yeast (Y) (Promega, MS Compatible Yeast Protein Extract, Digest, Saccharomyces cerevisiae, 100ug, V7461), combined in 0.1% TFA.
 Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Bubis et al., 2024](https://www.biorxiv.org/content/10.1101/2024.02.01.578358v2.abstract)). 
 

@@ -134,10 +134,7 @@ class StreamlitUI:
             st.title("pMultiQC Report for selected dataset.")
             # self.quant_uiobjects.display_multqc_plot()
 
-
-
             self.quant_uiobjects.display_pmultiqc_report()
-                
 
         # Tab 4: Results (New Submissions)
         with tab_results_new:

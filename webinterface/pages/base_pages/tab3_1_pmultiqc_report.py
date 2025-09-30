@@ -5,7 +5,6 @@ from tempfile import TemporaryDirectory
 import streamlit as st
 
 
-@st.fragment
 def show_download_button(html_content: str, disabled: bool) -> None:
     """
     Display a download button for the pMultiQC report.
@@ -21,7 +20,6 @@ def show_download_button(html_content: str, disabled: bool) -> None:
     )
 
 
-@st.fragment
 def create_pmultiqc_report_section(variables_quant) -> str:
     """
     Create a section in the Streamlit app to display the pMultiQC report.
@@ -33,7 +31,6 @@ def create_pmultiqc_report_section(variables_quant) -> str:
             tmp_dir = Path(tmp_dir)
             tmp_data = (tmp_dir / "data").resolve()
             tmp_data.mkdir(parents=True, exist_ok=True)
-            st.write(tmp_data)
             df_intermediate_results.to_csv(tmp_data / "result_performance.csv", index=False)
             file_out = tmp_dir
             ret_code = subprocess.run(
@@ -49,8 +46,6 @@ def create_pmultiqc_report_section(variables_quant) -> str:
                 check=False,
             )
             html_path = Path(file_out) / "multiqc_report.html"
-            st.write(ret_code.returncode)
-            st.write(html_path.exists())
             if html_path.exists() and ret_code.returncode == 0:
                 with open(html_path, "r", encoding="utf-8") as f:
                     html_content = f.read()

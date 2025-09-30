@@ -41,7 +41,7 @@ name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = ["black~=23.0", "jupyterlab", "notebook", "tqdm", "wget", "nox", "pytest"]
+dev = ["black~=23.0", "jupyterlab", "ipywidgets", "notebook", "tqdm", "wget", "nox", "pytest"]
 docs = [
   "sphinx",
   "sphinx-design",

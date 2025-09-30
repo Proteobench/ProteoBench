@@ -179,16 +179,13 @@ class QuantUIObjects:
         Build pmultiqc based on intermediate data and save self-contained html file.
         """
         if self.variables_quant.result_perf in st.session_state.keys():
-            tab3_1_pmultiqc_report.create_pmultiqc_report_section(self.variables_quant)
-
-            file_path = Path("report/multiqc_report.html").resolve()
+            html_content = tab3_1_pmultiqc_report.create_pmultiqc_report_section(self.variables_quant)
             download_disactivate = True
-            html_content = ""
-            if file_path.exists():
+            if html_content:
                 download_disactivate = False
-                with open(file_path, "r", encoding="utf-8") as f:
-                    html_content = f.read()
-                logger.info("pMultiQC report generated at: %s", file_path)
+                logger.info(
+                    "pMultiQC report generated.",
+                )
             tab3_1_pmultiqc_report.show_download_button(html_content, disabled=download_disactivate)
         else:
             st.warning("No intermediate data available for pMultiQC report. Please first submit data.")

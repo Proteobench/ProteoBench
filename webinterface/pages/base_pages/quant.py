@@ -173,38 +173,26 @@ class QuantUIObjects:
             public_hash=selected_hash,
         )
 
+    @st.fragment
     def display_pmultiqc_report(self):
         """Display the pMultiQC report download option of the page in Tab 3.1.
 
         Build pmultiqc based on intermediate data and save self-contained html file.
         """
         if self.variables_quant.result_perf in st.session_state.keys():
-            tmp = st.session_state[self.variables_quant.result_perf]
-            tmp_path = Path("tmp_pmultiqc")
-            tmp_path.mkdir(parents=True, exist_ok=True)
-            tmp.to_csv(tmp_path / "result_performance.csv", index=False)
-            ret_code = subprocess.run(
-                [
-                    "multiqc",
-                    "--parse_proteobench",
-                    "./tmp_pmultiqc",
-                    "-o",
-                    "./report",
-                    "-f",
-                    "--clean-up",
-                ],
-                check=False,
-            )
-            logger.info("pMultiQC command exited with return code: %d", ret_code.returncode)
-            if ret_code.returncode == 0:
-                logger.info("Intermediate for pMultiQC data saved to: %s", tmp_path)
-                file_path = Path("report/multiqc_report.html").resolve()
-                with open(file_path, "r", encoding="utf-8") as f:
-                    html_content = f.read()
-                logger.info("pMultiQC report generated at: %s", file_path)
-                tab3_1_pmultiqc_report.show_download_button(html_content)
+            html_content = st.session_state.get("tab31_pmultiqc_html_content", "")
+            if not html_content:
+                html_content = tab3_1_pmultiqc_report.create_pmultiqc_report_section(self.variables_quant)
+                st.session_state["tab31_pmultiqc_html_content"] = html_content
+                logger.info(
+                    "pMultiQC report generated.",
+                )
             else:
-                st.error("pMultiQC report generation failed.", icon="🚨")
+                logger.info('using cached pMultiQC report from session_state["tab31_pmultiqc_html_content"].')
+            download_disactivate = True
+            if html_content:
+                download_disactivate = False
+            tab3_1_pmultiqc_report.show_download_button(html_content, disabled=download_disactivate)
         else:
             st.warning("No intermediate data available for pMultiQC report. Please first submit data.")
 

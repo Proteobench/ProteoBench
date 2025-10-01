@@ -3,13 +3,10 @@ Streamlit UI for the DDA quantification - precursor ions module.
 """
 
 import logging
-import subprocess
-from pathlib import Path
 from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
-import streamlit.components.v1 as components
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
     VariablesDDAQuant,
@@ -134,10 +131,7 @@ class StreamlitUI:
             st.title("pMultiQC Report for selected dataset.")
             # self.quant_uiobjects.display_multqc_plot()
 
-
-
             self.quant_uiobjects.display_pmultiqc_report()
-                
 
         # Tab 4: Results (New Submissions)
         with tab_results_new:

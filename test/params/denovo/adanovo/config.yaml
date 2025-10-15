@@ -1,0 +1,78 @@
+#############
+random_seed: 454
+train_from_scratch: True
+model_save_folder_path: "saved_model/"
+
+max_epochs: 30
+warmup_iters: 100_000
+max_iters: 600_000
+
+train_batch_size: 32
+predict_batch_size: 1024
+
+#############
+residues:
+  "G": 57.021464                # 1
+  "A": 71.037114                # 2
+  "S": 87.032028                # 3
+  "P": 97.052764                # 4
+  "V": 99.068414                # 5
+  "T": 101.047670               # 6
+  "C(+57.02)": 160.030649       # 7
+  "L": 113.084064               # 8
+  "I": 113.084064               # 9
+  "N": 114.042927               # 10
+  "D": 115.026943               # 11
+  "Q": 128.058578               # 12
+  "K": 128.094963               # 13
+  "E": 129.042593               # 14
+  "M": 131.040485               # 15
+  "H": 137.058912               # 16
+  "F": 147.068414               # 17
+  "R": 156.101111               # 18
+  "Y": 163.063329               # 19
+  "W": 186.079313               # 20
+  "M(+15.99)": 147.035400       # 21
+  "N(+.98)": 115.026943         # 22
+  "Q(+.98)": 129.042594         # 23
+  "+42.011": 42.010565          # 24
+  "+43.006": 43.005814          # 25
+  "-17.027": -17.026549         # 26
+  "+43.006-17.027": 25.980265   # 27
+
+ptm_types: ["M(+15.99)", "N(+.98)", "Q(+.98)"]
+
+#############
+n_peaks: 150
+min_mz: 50.0
+max_mz: 2500.0
+min_intensity: 0.01
+remove_precursor_tol: 2.0 
+max_charge: 10
+precursor_mass_tol: 50  
+isotope_error_range: [0, 1]
+min_peptide_len: 6
+dim_model: 512
+n_head: 8
+dim_feedforward: 1024
+n_layers: 9
+dropout: 0.0
+dim_intensity:
+custom_encoder:
+max_length: 100
+
+
+n_log: 1
+tb_summarywriter:
+
+learning_rate: 5e-4
+weight_decay: 1e-5
+
+n_beams: 5
+top_match: 1
+logger:
+num_sanity_val_steps: 0
+save_model: True
+save_weights_only: True
+every_n_train_steps: 50_000
+no_gpu: False

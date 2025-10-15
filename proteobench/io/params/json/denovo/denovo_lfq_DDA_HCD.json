@@ -1,0 +1,92 @@
+{
+    "software_name": {
+        "type": "text_input",
+        "label": "Software name",
+        "placeholder": "None"
+    },
+    "software_version": {
+        "type": "text_input",
+        "label": "Software tool version",
+        "placeholder": "1.0"
+    },
+    "checkpoint": {
+        "type": "text_input",
+        "label": "Model checkpoint identifier",
+        "placeholder": "None"
+    },
+    "n_beams": {
+        "type": "text_input",
+        "label": "Number of beams",
+        "placeholder": "None"
+    },
+    "n_peaks": {
+        "type": "text_input",
+        "label": "Number of peaks considered in the spectrum",
+        "placeholder": "None"
+    },
+    "precursor_mass_tolerance": {
+        "type": "text_input",
+        "label": "Precursor mass tolerance (including unit ppm, PPM or Da)",
+        "placeholder": "None"
+    },
+    "min_peptide_length": {
+        "type": "text_input",
+        "label": "Minimum peptide length",
+        "placeholder": "None"
+    },
+    "max_peptide_length": {
+        "type": "text_input",
+        "label": "Maximum peptide length",
+        "placeholder": "None"
+    },
+    "min_mz": {
+        "type": "text_input",
+        "label": "Minimum m/z value",
+        "placeholder": "None"
+    },
+    "max_mz": {
+        "type": "text_input",
+        "label": "Maximum m/z value",
+        "placeholder": "None"
+    },
+    "min_intensity": {
+        "type": "text_input",
+        "label": "Minimum intensity value",
+        "placeholder": "None"
+    },
+    "max_intensity": {
+        "type": "text_input",
+        "label": "Maximum intensity value",
+        "placeholder": "None"
+    },
+    "tokens": {
+        "type": "text_input",
+        "label": "Specify the possible predicted tokens (amino acids and modifications)",
+        "placeholder": "None"
+    },
+    "min_precursor_charge": {
+        "type": "text_input",
+        "label": "Minimum precursor charge allowed",
+        "placeholder": "None"
+    },
+    "max_precursor_charge": {
+        "type": "text_input",
+        "label": "Maximum precursor charge allowed",
+        "placeholder": "None"
+    },
+    "remove_precursor_tol": {
+        "type": "text_input",
+        "label": "Remove precursor peaks",
+        "placeholder": "None"
+    },
+    "isotope_error_range": {
+        "type": "text_input",
+        "label": "Allowed isotope error range",
+        "placeholder": "None"
+    },
+    "decoding_strategy": {
+        "type": "text_input",
+        "label": "Decoding strategy",
+        "placeholder": "None"
+    }
+}

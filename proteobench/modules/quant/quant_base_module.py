@@ -240,6 +240,7 @@ class QuantModule:
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -256,6 +257,8 @@ class QuantModule:
             DataFrame containing all datapoints from the ProteoBench repo.
         default_cutoff_min_prec : int, optional
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
 
         Returns
         -------
@@ -263,7 +266,7 @@ class QuantModule:
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
         # Parse user config
-        input_df = load_input_file(input_file, input_format)
+        input_df = load_input_file(input_file, input_format, input_file_secondary)
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)

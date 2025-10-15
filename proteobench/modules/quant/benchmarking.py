@@ -52,9 +52,9 @@ def handle_benchmarking_error(error_type: Type[Exception], error_message: str):
 
 
 @handle_benchmarking_error(ParseError, "Error parsing input file")
-def _load_input(input_file: str, input_format: str) -> DataFrame:
+def _load_input(input_file: str, input_format: str, input_file_secondary: str = None) -> DataFrame:
     """Load and parse the input file."""
-    return load_input_file(input_file, input_format)
+    return load_input_file(input_file, input_format, input_file_secondary)
 
 
 @handle_benchmarking_error(ParseSettingsError, "Error parsing settings")
@@ -105,6 +105,7 @@ def run_benchmarking(
     precursor_column_name: str,
     default_cutoff_min_prec: int = 3,
     add_datapoint_func=None,
+    input_file_secondary: str = None,
 ) -> Tuple[DataFrame, DataFrame, DataFrame]:
     """
     Run the benchmarking workflow.
@@ -129,6 +130,8 @@ def run_benchmarking(
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
         Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
+    input_file_secondary : str, optional
+        Path to a secondary input file (used for some formats like AlphaDIA).
 
     Returns
     -------
@@ -136,7 +139,7 @@ def run_benchmarking(
         A tuple containing the intermediate data structure, all data points, and the input DataFrame.
     """
     # Load and parse input file
-    input_df = _load_input(input_file, input_format)
+    input_df = _load_input(input_file, input_format, input_file_secondary)
 
     # Load and parse settings
     parse_settings = _load_settings(parse_settings_dir, module_id, input_format)
@@ -176,6 +179,7 @@ def run_benchmarking_with_timing(
     precursor_column_name: str,
     default_cutoff_min_prec: int = 3,
     add_datapoint_func=None,
+    input_file_secondary: str = None,
 ) -> Tuple[DataFrame, DataFrame, DataFrame, Dict[str, float]]:
     """
     Run the benchmarking workflow with timing information.
@@ -200,6 +204,8 @@ def run_benchmarking_with_timing(
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
         Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
+    input_file_secondary : str, optional
+        Path to a secondary input file (used for some formats like AlphaDIA).
 
     Returns
     -------
@@ -219,7 +225,7 @@ def run_benchmarking_with_timing(
         timings[label] = time.perf_counter() - t0
 
     with time_block("load_input_file"):
-        input_df = load_input_file(input_file, input_format)
+        input_df = load_input_file(input_file, input_format, input_file_secondary)
 
     with time_block("parse_settings"):
         parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(

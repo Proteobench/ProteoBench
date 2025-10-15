@@ -10,7 +10,7 @@ import warnings
 import pandas as pd
 
 
-def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
+def load_input_file(input_csv: str, input_format: str, input_csv_secondary: str = None) -> pd.DataFrame:
     """
     Load a dataframe from a CSV file depending on its format.
 
@@ -20,6 +20,8 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         The path to the CSV file.
     input_format : str
         The format of the input file (e.g., "MaxQuant", "AlphaPept", etc.).
+    input_csv_secondary : str, optional
+        The path to a secondary CSV file (used for some formats like AlphaDIA).
 
     Returns
     -------
@@ -38,6 +40,10 @@ def load_input_file(input_csv: str, input_format: str) -> pd.DataFrame:
         load_function = _LOAD_FUNCTIONS[input_format]
     except KeyError as e:
         raise ValueError(f"Invalid input format: {input_format}") from e
+
+    # For AlphaDIA, pass the secondary file if provided
+    if input_format == "AlphaDIA" and input_csv_secondary:
+        return load_function(input_csv, input_csv_secondary)
 
     return load_function(input_csv)
 
@@ -509,31 +515,143 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
     return input_data_frame
 
 
-def _load_alphadia(input_csv: str) -> pd.DataFrame:
+def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFrame:
     """
-    Load a AlphaDIA output file.
+    Load AlphaDIA output files.
 
     Parameters
     ----------
     input_csv : str
-        The path to the AlphaDIA output file.
+        The path to one of the AlphaDIA output files.
+    input_csv_secondary : str, optional
+        The path to the second AlphaDIA output file.
+        If provided, the system will automatically detect which file is the precursor.matrix.tsv
+        and which is the precursors.tsv (long format), then merge them.
 
     Returns
     -------
     pd.DataFrame
         The loaded dataframe.
     """
-    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    # Read the first file with explicit header handling
+    file1 = pd.read_csv(input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, nrows=5, header=0)
+    print("File 1 columns:", file1.columns.tolist())
+    print("File 1 shape:", file1.shape)
+    if len(file1) > 0:
+        print("File 1 first row sample:", {k: v for k, v in zip(file1.columns[:5], file1.iloc[0][:5])})
+
+    # Reset file pointer to beginning (only if it's a file object, not a path string)
+    if hasattr(input_csv, "seek"):
+        input_csv.seek(0)
+
+    # If secondary file is provided, detect which is which and merge
+    if input_csv_secondary:
+        # Read the second file (just header to detect) with explicit header handling
+        file2 = pd.read_csv(
+            input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, nrows=5, header=0
+        )
+        print("File 2 columns:", file2.columns.tolist())
+        print("File 2 shape:", file2.shape)
+        if len(file2) > 0:
+            print("File 2 first row sample:", {k: v for k, v in zip(file2.columns[:5], file2.iloc[0][:5])})
+
+        # Reset file pointer to beginning (only if it's a file object, not a path string)
+        if hasattr(input_csv_secondary, "seek"):
+            input_csv_secondary.seek(0)
+
+        # Required columns for the merge
+        required_merge_columns = [
+            "genes",
+            "decoy",
+            "mods",
+            "mod_sites",
+            "sequence",
+            "charge",
+            "mod_seq_charge_hash",
+        ]
+
+        # Detect which file is the matrix (wide format) and which is long format
+        # The precursors.tsv (long format) should have all the required merge columns
+        # The precursor.matrix.tsv (wide format) typically has fewer metadata columns
+        file1_cols = set(file1.columns)
+        file2_cols = set(file2.columns)
+
+        # Check which file has the required columns for merge
+        file1_has_required = all(col in file1_cols for col in required_merge_columns)
+        file2_has_required = all(col in file2_cols for col in required_merge_columns)
+        print(f"File 1 has required columns: {file1_has_required}")
+        print(f"File 2 has required columns: {file2_has_required}")
+
+        # Determine which file is the long format
+        # Priority: file with required columns + more long format indicators
+        if file1_has_required and not file2_has_required:
+            # file1 is long format (precursors.tsv), file2 is matrix
+            precursors_long = pd.read_csv(
+                input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+            )
+            precursor_matrix = pd.read_csv(
+                input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+            )
+        elif file2_has_required:
+            # file2 is long format (precursors.tsv), file1 is matrix
+            precursor_matrix = pd.read_csv(
+                input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+            )
+            precursors_long = pd.read_csv(
+                input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+            )
+        else:
+            # Neither file has the required columns
+            raise ValueError(
+                f"Cannot identify the correct AlphaDIA files. Neither file contains all required columns: "
+                f"{', '.join(required_merge_columns)}. "
+                f"File 1 columns: {', '.join(sorted(file1_cols)[:10])}... "
+                f"File 2 columns: {', '.join(sorted(file2_cols)[:10])}... "
+                f"Please ensure you are uploading both precursor.matrix.tsv and precursors.tsv files from AlphaDIA output."
+            )
+
+        # Select only the columns that exist in precursors_long
+        available_merge_columns = [col for col in required_merge_columns if col in precursors_long.columns]
+
+        print(f"Available merge columns in long format file: {available_merge_columns}")
+        print(f"All columns in long format file: {list(precursors_long.columns)[:20]}")
+        print(f"All columns in matrix file: {list(precursor_matrix.columns)[:20]}")
+
+        if not available_merge_columns or "mod_seq_charge_hash" not in available_merge_columns:
+            raise ValueError(
+                f"Cannot merge AlphaDIA files. The long format file is missing required columns. "
+                f"Required: {', '.join(required_merge_columns)}. "
+                f"Available in long format: {', '.join(available_merge_columns)}. "
+                f"All columns in long format: {', '.join(list(precursors_long.columns)[:20])}. "
+                f"Please ensure you are uploading the correct precursors.tsv file."
+            )
+
+        # Merge the matrix with precursor info
+        input_data_frame = pd.merge(
+            precursor_matrix, precursors_long[available_merge_columns], on="mod_seq_charge_hash", how="left"
+        )
+        # Remove duplicates that might result from the merge
+        input_data_frame.drop_duplicates(inplace=True)
+    else:
+        # Use the single file directly if no secondary file provided
+        input_data_frame = pd.read_csv(
+            input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+        )
+
+    # Map gene names to descriptions
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
     input_data_frame["genes"] = input_data_frame["genes"].map(
         lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
     )
+
+    # Generate proforma notation
     input_data_frame["proforma"] = input_data_frame.apply(
         lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
         axis=1,
     )
+    input_data_frame.to_csv("/mnt/c/Users/robbe/Work/ProteoBench/debug_tmp/alphadia_parsed.csv")
     return input_data_frame
 
 

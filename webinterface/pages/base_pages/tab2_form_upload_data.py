@@ -30,6 +30,18 @@ def generate_input_fields(
         help=variables_quant.texts.Help.input_file,
     )
 
+    # For AlphaDIA, require a second file upload
+    if user_input["input_format"] == "AlphaDIA":
+        st.info(
+            "ℹ️ AlphaDIA requires two files: precursor.matrix.tsv and precursors.tsv. You can upload them in any order."
+        )
+        user_input["input_csv_secondary"] = st.file_uploader(
+            "AlphaDIA second result file",
+            help="Upload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv). The system will automatically detect which is which.",
+        )
+    else:
+        user_input["input_csv_secondary"] = None
+
 
 # TODO: change additional_params_json for other modules, to capture relevant parameters
 def generate_additional_parameters_fields(
@@ -73,6 +85,15 @@ def process_submission_form(
     if not user_input["input_csv"]:
         st.error(":x: Please provide a result file", icon="🚨")
         return False
+
+    # For AlphaDIA, validate that both files are provided
+    if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
+        st.warning(
+            ":x: Please provide both AlphaDIA files (precursor.matrix.tsv and precursors.tsv). You can upload them in any order.",
+            icon="⚠️",
+        )
+        return False
+
     execute_proteobench(
         variables_quant=variables_quant,
         ionmodule=ionmodule,
@@ -141,6 +162,14 @@ def run_benchmarking_process(variables_quant, ionmodule, user_input):
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         tmp_file.write(user_input["input_csv"].getbuffer())
 
+    # For AlphaDIA, also create temporary file for secondary input
+    tmp_file_secondary = None
+    if user_input.get("input_csv_secondary"):
+        tmp_file_secondary = tempfile.NamedTemporaryFile(delete=False)
+        tmp_file_secondary.write(user_input["input_csv_secondary"].getbuffer())
+        tmp_file_secondary.flush()
+        user_input["input_csv_secondary"].seek(0)
+
     # reload buffer: https://stackoverflow.com/a/64478151/9684872
     user_input["input_csv"].seek(0)
     if st.session_state[variables_quant.slider_id_submitted_uuid] in st.session_state.keys():
@@ -159,6 +188,7 @@ def run_benchmarking_process(variables_quant, ionmodule, user_input):
         user_input,
         all_datapoints,
         default_cutoff_min_prec=set_slider_val,
+        input_file_secondary=tmp_file_secondary.name if tmp_file_secondary else None,
     )
 
 

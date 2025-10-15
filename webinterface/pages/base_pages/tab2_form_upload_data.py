@@ -33,11 +33,14 @@ def generate_input_fields(
     # For AlphaDIA, require a second file upload
     if user_input["input_format"] == "AlphaDIA":
         st.info(
-            "ℹ️ AlphaDIA requires two files: precursor.matrix.tsv and precursors.tsv. You can upload them in any order."
+            "ℹ️**Two-file upload (recommended):** Upload both **precursor.matrix.tsv** and **precursors.tsv** files below for automatic merging. "
+            "You can upload them in any order - the system will automatically detect which is which.\n\n"
+            "**Single-file upload (legacy):** Alternatively, upload a single pre-merged file in the main uploader above."
         )
         user_input["input_csv_secondary"] = st.file_uploader(
-            "AlphaDIA second result file",
-            help="Upload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv). The system will automatically detect which is which.",
+            "Upload second AlphaDIA file (optional)",
+            type=["tsv", "csv"],
+            help="Upload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv) for automatic merging. Leave empty if uploading a pre-merged file.",
         )
     else:
         user_input["input_csv_secondary"] = None
@@ -86,13 +89,13 @@ def process_submission_form(
         st.error(":x: Please provide a result file", icon="🚨")
         return False
 
-    # For AlphaDIA, validate that both files are provided
+    # For AlphaDIA, inform about the two-file option but allow single merged file
     if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
-        st.warning(
-            ":x: Please provide both AlphaDIA files (precursor.matrix.tsv and precursors.tsv). You can upload them in any order.",
-            icon="⚠️",
+        st.info(
+            "You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
+            "or upload a single pre-merged file. Currently uploading a single file.",
+            icon="ℹ️",
         )
-        return False
 
     execute_proteobench(
         variables_quant=variables_quant,

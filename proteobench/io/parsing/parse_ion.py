@@ -651,7 +651,6 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
         lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
         axis=1,
     )
-    input_data_frame.to_csv("/mnt/c/Users/robbe/Work/ProteoBench/debug_tmp/alphadia_parsed.csv")
     return input_data_frame
 
 

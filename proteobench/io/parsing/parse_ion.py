@@ -535,10 +535,6 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
     """
     # Read the first file with explicit header handling
     file1 = pd.read_csv(input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, nrows=5, header=0)
-    print("File 1 columns:", file1.columns.tolist())
-    print("File 1 shape:", file1.shape)
-    if len(file1) > 0:
-        print("File 1 first row sample:", {k: v for k, v in zip(file1.columns[:5], file1.iloc[0][:5])})
 
     # Reset file pointer to beginning (only if it's a file object, not a path string)
     if hasattr(input_csv, "seek"):

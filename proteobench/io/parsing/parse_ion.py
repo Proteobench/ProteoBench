@@ -605,10 +605,6 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
         # Select only the columns that exist in precursors_long
         available_merge_columns = [col for col in required_merge_columns if col in precursors_long.columns]
 
-        print(f"Available merge columns in long format file: {available_merge_columns}")
-        print(f"All columns in long format file: {list(precursors_long.columns)[:20]}")
-        print(f"All columns in matrix file: {list(precursor_matrix.columns)[:20]}")
-
         if not available_merge_columns or "mod_seq_charge_hash" not in available_merge_columns:
             raise ValueError(
                 f"Cannot merge AlphaDIA files. The long format file is missing required columns. "

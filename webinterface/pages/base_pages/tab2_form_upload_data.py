@@ -91,9 +91,11 @@ def process_submission_form(
 
     # For AlphaDIA, inform about the two-file option but allow single merged file
     if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
+        # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
         st.info(
             "You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
-            "or upload a single pre-merged file. Currently uploading a single file.",
+            "or upload a single pre-merged file. Currently uploading a single file. If you intended to upload both files, "
+            "please use the secondary file uploader below and disregard the error message that follows.",
             icon="ℹ️",
         )
 

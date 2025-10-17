@@ -369,7 +369,6 @@ def extract_params(
     )
 
     # 'True' and 'False' to boolean
-    # The clean_up_parameters function already cleaned the string, so we just need to check for "True"
     if isinstance(all_parameters.get("enable_match_between_runs"), str):
         all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"].strip() == "True"
     else:

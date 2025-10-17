@@ -95,7 +95,7 @@ def process_submission_form(
         st.info(
             "You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
             "or upload a single pre-merged file. Currently uploading a single file. If you intended to upload both files, "
-            "please use the secondary file uploader below and disregard the error message that follows.",
+            "please use the secondary file uploader below and disregard the error message that may follow.",
             icon="ℹ️",
         )
 

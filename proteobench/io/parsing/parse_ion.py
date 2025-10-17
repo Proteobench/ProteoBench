@@ -515,6 +515,104 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
     return input_data_frame
 
 
+def _merge_alphadia_files(
+    input_csv: str, input_csv_secondary: str, file1_sample: pd.DataFrame, file2_sample: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Merge two AlphaDIA files (precursor.matrix.tsv and precursors.tsv).
+
+    This function automatically detects which file is the matrix (wide format) and which is
+    the long format based on the presence of required metadata columns.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the first AlphaDIA output file.
+    input_csv_secondary : str
+        The path to the second AlphaDIA output file.
+    file1_sample : pd.DataFrame
+        A sample (first few rows) of the first file for column detection.
+    file2_sample : pd.DataFrame
+        A sample (first few rows) of the second file for column detection.
+
+    Returns
+    -------
+    pd.DataFrame
+        The merged dataframe with precursor information.
+
+    Raises
+    ------
+    ValueError
+        If the files cannot be identified or merged correctly.
+    """
+    # Required columns for the merge
+    required_merge_columns = [
+        "genes",
+        "decoy",
+        "mods",
+        "mod_sites",
+        "sequence",
+        "charge",
+        "mod_seq_charge_hash",
+    ]
+
+    # Detect which file is the matrix (wide format) and which is long format
+    file1_cols = set(file1_sample.columns)
+    file2_cols = set(file2_sample.columns)
+
+    # Check which file has the required columns for merge
+    file1_has_required = all(col in file1_cols for col in required_merge_columns)
+    file2_has_required = all(col in file2_cols for col in required_merge_columns)
+
+    # Determine which file is the long format
+    if file1_has_required and not file2_has_required:
+        # file1 is long format (precursors.tsv), file2 is matrix
+        precursors_long = pd.read_csv(
+            input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+        )
+        precursor_matrix = pd.read_csv(
+            input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+        )
+    elif file2_has_required:
+        # file2 is long format (precursors.tsv), file1 is matrix
+        precursor_matrix = pd.read_csv(
+            input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+        )
+        precursors_long = pd.read_csv(
+            input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
+        )
+    else:
+        # Neither file has the required columns
+        raise ValueError(
+            f"Cannot identify the correct AlphaDIA files. Neither file contains all required columns: "
+            f"{', '.join(required_merge_columns)}. "
+            f"File 1 columns: {', '.join(sorted(file1_cols)[:10])}... "
+            f"File 2 columns: {', '.join(sorted(file2_cols)[:10])}... "
+            f"Please ensure you are uploading both precursor.matrix.tsv and precursors.tsv files from AlphaDIA output."
+        )
+
+    # Select only the columns that exist in precursors_long
+    available_merge_columns = [col for col in required_merge_columns if col in precursors_long.columns]
+
+    if not available_merge_columns or "mod_seq_charge_hash" not in available_merge_columns:
+        raise ValueError(
+            f"Cannot merge AlphaDIA files. The long format file is missing required columns. "
+            f"Required: {', '.join(required_merge_columns)}. "
+            f"Available in long format: {', '.join(available_merge_columns)}. "
+            f"All columns in long format: {', '.join(list(precursors_long.columns)[:20])}. "
+            f"Please ensure you are uploading the correct precursors.tsv file."
+        )
+
+    # Merge the matrix with precursor info
+    merged_df = pd.merge(
+        precursor_matrix, precursors_long[available_merge_columns], on="mod_seq_charge_hash", how="left"
+    )
+    # Remove duplicates that might result from the merge
+    merged_df.drop_duplicates(inplace=True)
+
+    return merged_df
+
+
 def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFrame:
     """
     Load AlphaDIA output files.
@@ -533,93 +631,24 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
     pd.DataFrame
         The loaded dataframe.
     """
-    # Read the first file with explicit header handling
-    file1 = pd.read_csv(input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, nrows=5, header=0)
-
-    # Reset file pointer to beginning (only if it's a file object, not a path string)
-    if hasattr(input_csv, "seek"):
-        input_csv.seek(0)
-
     # If secondary file is provided, detect which is which and merge
     if input_csv_secondary:
-        # Read the second file (just header to detect) with explicit header handling
-        file2 = pd.read_csv(
+        # Read samples from both files to detect their structure
+        file1_sample = pd.read_csv(
+            input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, nrows=5, header=0
+        )
+        file2_sample = pd.read_csv(
             input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, nrows=5, header=0
         )
 
-        # Reset file pointer to beginning (only if it's a file object, not a path string)
+        # Reset file pointers to beginning (only if they're file objects, not path strings)
+        if hasattr(input_csv, "seek"):
+            input_csv.seek(0)
         if hasattr(input_csv_secondary, "seek"):
             input_csv_secondary.seek(0)
 
-        # Required columns for the merge
-        required_merge_columns = [
-            "genes",
-            "decoy",
-            "mods",
-            "mod_sites",
-            "sequence",
-            "charge",
-            "mod_seq_charge_hash",
-        ]
-
-        # Detect which file is the matrix (wide format) and which is long format
-        # The precursors.tsv (long format) should have all the required merge columns
-        # The precursor.matrix.tsv (wide format) typically has fewer metadata columns
-        file1_cols = set(file1.columns)
-        file2_cols = set(file2.columns)
-
-        # Check which file has the required columns for merge
-        file1_has_required = all(col in file1_cols for col in required_merge_columns)
-        file2_has_required = all(col in file2_cols for col in required_merge_columns)
-        print(f"File 1 has required columns: {file1_has_required}")
-        print(f"File 2 has required columns: {file2_has_required}")
-
-        # Determine which file is the long format
-        # Priority: file with required columns + more long format indicators
-        if file1_has_required and not file2_has_required:
-            # file1 is long format (precursors.tsv), file2 is matrix
-            precursors_long = pd.read_csv(
-                input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
-            )
-            precursor_matrix = pd.read_csv(
-                input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
-            )
-        elif file2_has_required:
-            # file2 is long format (precursors.tsv), file1 is matrix
-            precursor_matrix = pd.read_csv(
-                input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
-            )
-            precursors_long = pd.read_csv(
-                input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
-            )
-        else:
-            # Neither file has the required columns
-            raise ValueError(
-                f"Cannot identify the correct AlphaDIA files. Neither file contains all required columns: "
-                f"{', '.join(required_merge_columns)}. "
-                f"File 1 columns: {', '.join(sorted(file1_cols)[:10])}... "
-                f"File 2 columns: {', '.join(sorted(file2_cols)[:10])}... "
-                f"Please ensure you are uploading both precursor.matrix.tsv and precursors.tsv files from AlphaDIA output."
-            )
-
-        # Select only the columns that exist in precursors_long
-        available_merge_columns = [col for col in required_merge_columns if col in precursors_long.columns]
-
-        if not available_merge_columns or "mod_seq_charge_hash" not in available_merge_columns:
-            raise ValueError(
-                f"Cannot merge AlphaDIA files. The long format file is missing required columns. "
-                f"Required: {', '.join(required_merge_columns)}. "
-                f"Available in long format: {', '.join(available_merge_columns)}. "
-                f"All columns in long format: {', '.join(list(precursors_long.columns)[:20])}. "
-                f"Please ensure you are uploading the correct precursors.tsv file."
-            )
-
-        # Merge the matrix with precursor info
-        input_data_frame = pd.merge(
-            precursor_matrix, precursors_long[available_merge_columns], on="mod_seq_charge_hash", how="left"
-        )
-        # Remove duplicates that might result from the merge
-        input_data_frame.drop_duplicates(inplace=True)
+        # Merge the two files using the helper function
+        input_data_frame = _merge_alphadia_files(input_csv, input_csv_secondary, file1_sample, file2_sample)
     else:
         # Use the single file directly if no secondary file provided
         input_data_frame = pd.read_csv(

@@ -8,7 +8,7 @@ ident_fdr_peptide,None
 ident_fdr_protein,0.01
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-5ppm, 5ppm]"
-fragment_mass_tolerance,"[-10, 10.0ppm, 10, 10.0ppm]"
+fragment_mass_tolerance,"[-10ppm, 10ppm]"
 enzyme,trypsin/p 
 allowed_miscleavages,1
 min_peptide_length,6

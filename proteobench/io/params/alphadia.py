@@ -358,7 +358,11 @@ def extract_params(
     )
 
     # 'True' and 'False' to boolean
-    all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"] == "True"
+    # The clean_up_parameters function already cleaned the string, so we just need to check for "True"
+    if isinstance(all_parameters.get("enable_match_between_runs"), str):
+        all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"].strip() == "True"
+    else:
+        all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
 
     return ProteoBenchParameters(**all_parameters, filename=json_file)
 
@@ -370,6 +374,7 @@ if __name__ == "__main__":
         "../../../test/params/log_alphadia_1.8.txt",
         "../../../test/params/log_alphadia_1.10.txt",
         "../../../test/params/log_alphadia_1.12.txt",
+        "../../../test/params/log_alphadia_1.12MBR.txt",
     ]:
         file = pathlib.Path(fname)
         pb_params = extract_params(file)

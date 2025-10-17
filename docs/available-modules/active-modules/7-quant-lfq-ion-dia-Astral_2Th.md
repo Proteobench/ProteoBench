@@ -55,19 +55,19 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
 
-|Parameter|Value|
-|---------|-----|
-|Maximum number of missed cleavages|1|
-|PSM/Precursor FDR|0.01|
-|Spectral Library|Predicted spectral library from FASTA|
-|Precursor charge state|1-5|
-|Precursor m/z range|380-980|
-|Fragment ion m/z range|150-2000|
-|Endopeptidase|Trypsin/P|
-|Fixed modifications|Carbamidomethylation (C)|
-|Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
-|Maximum number of variable modifications|1|
-|Minimum peptide length|6 residues|
+| Parameter                                | Value                                  |
+| ---------------------------------------- | -------------------------------------- |
+| Maximum number of missed cleavages       | 1                                      |
+| PSM/Precursor FDR                        | 0.01                                   |
+| Spectral Library                         | Predicted spectral library from FASTA  |
+| Precursor charge state                   | 1-5                                    |
+| Precursor m/z range                      | 380-980                                |
+| Fragment ion m/z range                   | 150-2000                               |
+| Endopeptidase                            | Trypsin/P                              |
+| Fixed modifications                      | Carbamidomethylation (C)               |
+| Variable modifications                   | Oxidation (M), Acetyl (Protein N-term) |
+| Maximum number of variable modifications | 1                                      |
+| Minimum peptide length                   | 6 residues                             |
 
 
 ### Submit your run for public usage
@@ -80,14 +80,14 @@ To submit your run for public usage, you need to upload the parameter file assoc
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
 **Table 2. Overview of input files required for metric caluclation and public submission**
-|Tool|Input file|Parameter File|
-|---------|-----|-|
-|AlphaDIA|precursors.tsv|log.txt|
-|DIA-NN|*_report.tsv or *_report.parquet|*report.log.txt|
-|FragPipe|*_report.tsv|fragpipe.workflow|
-|MaxDIA|evidence.txt|mqpar.xml|
-|Spectronaut|*.tsv|*.txt|
-|PEAKS|lfq.dia.features.csv|parameters.txt|
+| Tool        | Input file                            | Parameter File    |
+| ----------- | ------------------------------------- | ----------------- |
+| AlphaDIA    | precursors.tsv & precursor.matrix.tsv | log.txt           |
+| DIA-NN      | *_report.tsv or *_report.parquet      | *report.log.txt   |
+| FragPipe    | *_report.tsv                          | fragpipe.workflow |
+| MaxDIA      | evidence.txt                          | mqpar.xml         |
+| Spectronaut | *.tsv                                 | *.txt             |
+| PEAKS       | lfq.dia.features.csv                  | parameters.txt    |
 
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `DIANN_20250505_083341`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
@@ -106,9 +106,9 @@ After upload, you will get a link to a Github pull request associated with your 
 2. In "Method settings" you need to define your search parameters 
 3. Turn on "Predict Library" 
 4. Turn on "Precursor Level LFQ"
-4. Because ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", it needs to be preprocessed. For this, please refer to the Jupyter Notebook "ProteoBench_input_conversion.ipynb" [HERE](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/ProteoBench_input_conversion.ipynb). Using this notebook will provide you with the correct input file that can be used in ProteoBench. The parameter file is "log.txt".
+5.  Because ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", both files need to be submitted to ProteoBench. This is possible through the web interface, where both files can be submitted in any order. Alternatively (legacy), one can preprocess the two output files using a [Jupyter Notebook provided on theProteoBench repository](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/submission/ProteoBench_input_conversion.ipynb)
 
-Note: V1.10.4 is required to obtain the most optimal performance (improved check for MS1 cycle)
+Note: >=V1.10.4 is required to obtain the most desired performance (improved check for MS1 cycle)
 
 ### [FragPipe - DIA-NN](https://github.com/Nesvilab/FragPipe)
 1. Load the DIA_SpecLib_Quant workflow

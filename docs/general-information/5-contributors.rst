@@ -173,3 +173,16 @@ People who contributed to ProteoBench, in alphabetical order:
     *VIB-Proteomics Core facility*
     *Core for Life (C4L)*
 
+.. line-block::
+    **Cristina Chiva**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Eduard Sabidó**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+

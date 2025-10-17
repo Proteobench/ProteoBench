@@ -30,6 +30,21 @@ def generate_input_fields(
         help=variables_quant.texts.Help.input_file,
     )
 
+    # For AlphaDIA, require a second file upload
+    if user_input["input_format"] == "AlphaDIA":
+        st.info(
+            "ℹ️**Two-file upload (recommended):** Upload both **precursor.matrix.tsv** and **precursors.tsv** files below for automatic merging. "
+            "You can upload them in any order - the system will automatically detect which is which.\n\n"
+            "**Single-file upload (legacy):** Alternatively, upload a single pre-merged file in the main uploader above."
+        )
+        user_input["input_csv_secondary"] = st.file_uploader(
+            "Upload second AlphaDIA file (optional)",
+            type=["tsv", "csv"],
+            help="Upload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv) for automatic merging. Leave empty if uploading a pre-merged file.",
+        )
+    else:
+        user_input["input_csv_secondary"] = None
+
 
 # TODO: change additional_params_json for other modules, to capture relevant parameters
 def generate_additional_parameters_fields(
@@ -73,6 +88,17 @@ def process_submission_form(
     if not user_input["input_csv"]:
         st.error(":x: Please provide a result file", icon="🚨")
         return False
+
+    # For AlphaDIA, inform about the two-file option but allow single merged file
+    if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
+        # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
+        st.info(
+            "You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
+            "or upload a single pre-merged file. Currently uploading a single file. If you intended to upload both files, "
+            "please use the secondary file uploader below and disregard the error message that may follow.",
+            icon="ℹ️",
+        )
+
     execute_proteobench(
         variables_quant=variables_quant,
         ionmodule=ionmodule,
@@ -141,6 +167,14 @@ def run_benchmarking_process(variables_quant, ionmodule, user_input):
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         tmp_file.write(user_input["input_csv"].getbuffer())
 
+    # For AlphaDIA, also create temporary file for secondary input
+    tmp_file_secondary = None
+    if user_input.get("input_csv_secondary"):
+        tmp_file_secondary = tempfile.NamedTemporaryFile(delete=False)
+        tmp_file_secondary.write(user_input["input_csv_secondary"].getbuffer())
+        tmp_file_secondary.flush()
+        user_input["input_csv_secondary"].seek(0)
+
     # reload buffer: https://stackoverflow.com/a/64478151/9684872
     user_input["input_csv"].seek(0)
     if st.session_state[variables_quant.slider_id_submitted_uuid] in st.session_state.keys():
@@ -159,6 +193,7 @@ def run_benchmarking_process(variables_quant, ionmodule, user_input):
         user_input,
         all_datapoints,
         default_cutoff_min_prec=set_slider_val,
+        input_file_secondary=tmp_file_secondary.name if tmp_file_secondary else None,
     )
 
 

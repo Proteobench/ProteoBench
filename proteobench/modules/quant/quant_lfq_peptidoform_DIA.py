@@ -96,6 +96,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module for benchmarking workflow results.
@@ -112,6 +113,8 @@ class DIAQuantPeptidoformModule(QuantModule):
             DataFrame containing all data points from the repo.
         default_cutoff_min_prec : int, optional
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
 
         Returns
         -------
@@ -120,7 +123,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         """
         # Parse workflow output file
         try:
-            input_df = load_input_file(input_file, input_format)
+            input_df = load_input_file(input_file, input_format, input_file_secondary)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"

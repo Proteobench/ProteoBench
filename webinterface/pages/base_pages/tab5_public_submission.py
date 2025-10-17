@@ -401,4 +401,5 @@ def save_intermediate_submission_data(variables_quant, ionmodule, user_input) ->
             comment=st.session_state[variables_quant.meta_data_text],
             extension_input_file=extension_input_file,
             extension_input_parameter_file=extension_input_parameter_file,
+            input_file_secondary_obj=user_input.get("input_csv_secondary"),
         )

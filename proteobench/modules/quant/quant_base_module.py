@@ -240,6 +240,7 @@ class QuantModule:
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -256,6 +257,8 @@ class QuantModule:
             DataFrame containing all datapoints from the ProteoBench repo.
         default_cutoff_min_prec : int, optional
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
 
         Returns
         -------
@@ -263,7 +266,7 @@ class QuantModule:
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
         # Parse user config
-        input_df = load_input_file(input_file, input_format)
+        input_df = load_input_file(input_file, input_format, input_file_secondary)
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
@@ -435,6 +438,7 @@ class QuantModule:
         comment: str,
         extension_input_file: str = ".txt",
         extension_input_parameter_file: str = ".txt",
+        input_file_secondary_obj: Any = None,
     ) -> None:
         """
         Write intermediate and raw data to a directory in zipped form.
@@ -453,6 +457,8 @@ class QuantModule:
             List of paths to parameter files that need to be copied.
         comment : str
             User comment for the submission.
+        input_file_secondary_obj : Any, optional
+            File-like object representing a secondary input file (e.g., for AlphaDIA).
         """
         # Create the target directory
         path_write = os.path.join(directory, ident)
@@ -469,6 +475,12 @@ class QuantModule:
                 # Save the input file-like object content to the zip file
                 input_file_obj.seek(0)
                 zf.writestr(f"input_file{extension_input_file}", input_file_obj.read())
+
+                # Save the secondary input file if provided
+                if input_file_secondary_obj is not None:
+                    input_file_secondary_obj.seek(0)
+                    zf.writestr(f"input_file_secondary{extension_input_file}", input_file_secondary_obj.read())
+
                 # Save the result performance DataFrame as a CSV in the zip file
                 result_csv = result_performance.to_csv(index=False)
                 zf.writestr("result_performance.csv", result_csv)

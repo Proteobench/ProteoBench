@@ -327,10 +327,20 @@ def extract_params(
         if "precursor_charge" in cleaned_line:
             process_precursor_charge(lines, i, all_parameters)
 
-        if "precursor_mz" in cleaned_line and not all_parameters.get("min_precursor_mz"):
+        # Match precursor_mz but not precursor_mz_tolerance
+        if (
+            "precursor_mz" in cleaned_line
+            and "tolerance" not in cleaned_line
+            and not all_parameters.get("min_precursor_mz")
+        ):
             process_precursor_mz(lines, i, all_parameters)
 
-        if "fragment_mz" in cleaned_line and not all_parameters.get("min_fragment_mz"):
+        # Match fragment_mz but not fragment_mz_tolerance
+        if (
+            "fragment_mz" in cleaned_line
+            and "tolerance" not in cleaned_line
+            and not all_parameters.get("min_fragment_mz")
+        ):
             process_fragment_mz(lines, i, all_parameters)
 
     map_keys_to_desired_format(all_parameters)
@@ -359,6 +369,7 @@ if __name__ == "__main__":
         "../../../test/params/log_alphadia_2.txt",
         "../../../test/params/log_alphadia_1.8.txt",
         "../../../test/params/log_alphadia_1.10.txt",
+        "../../../test/params/log_alphadia_1.12.txt",
     ]:
         file = pathlib.Path(fname)
         pb_params = extract_params(file)

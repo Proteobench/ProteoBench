@@ -1,6 +1,5 @@
-from st_aggrid import GridOptionsBuilder, AgGrid, JsCode
 import pandas as pd
-
+from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
 # this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
 
@@ -160,58 +159,63 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
         return df
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
 
-    identifier_cols = ["selected", "id"]
-    parameter_cols = [
-        "software_name",
-        "software_version",
-        "search_engine",
-        "search_engine_version",
-        "ident_fdr_psm",
-        "ident_fdr_protein",
-        "ident_fdr_peptide",
-        "enable_match_between_runs",
-        "precursor_mass_tolerance",
-        "fragment_mass_tolerance",
-        "enzyme",
-        "allowed_miscleavages",
-        "min_peptide_length",
-        "max_peptide_length",
-        "fixed_mods",
-        "variable_mods",
-        "max_mods",
-        "min_precursor_charge",
-        "max_precursor_charge",
-        "quantification_method",
-        "protein_inference",
-        "abundance_normalization_ions",
-        "submission_comments",
-    ]
-    result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
-    technical_cols = [
-        "proteobench_version",
-        "intermediate_hash",
-        "hover_text",
-        "color",
-        "old_new",
-        "is_temporary",
-        "comments",
-        "scatter_size",
-    ]
+        identifier_cols = ["selected", "id"]
+        parameter_cols = [
+            "software_name",
+            "software_version",
+            "search_engine",
+            "search_engine_version",
+            "ident_fdr_psm",
+            "ident_fdr_protein",
+            "ident_fdr_peptide",
+            "enable_match_between_runs",
+            "precursor_mass_tolerance",
+            "fragment_mass_tolerance",
+            "enzyme",
+            "allowed_miscleavages",
+            "min_peptide_length",
+            "max_peptide_length",
+            "fixed_mods",
+            "variable_mods",
+            "max_mods",
+            "min_precursor_charge",
+            "max_precursor_charge",
+            "quantification_method",
+            "protein_inference",
+            "abundance_normalization_ions",
+            "submission_comments",
+        ]
+        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
+        technical_cols = [
+            "proteobench_version",
+            "intermediate_hash",
+            "hover_text",
+            "color",
+            "old_new",
+            "is_temporary",
+            "comments",
+            "scatter_size",
+        ]
 
-    # Define display column order
-    cols = identifier_cols + parameter_cols + result_cols + technical_cols
-    cols = [col for col in cols if col in df.columns]
-    additional_cols = [col for col in df.columns if col not in cols]
-    # remove boring columns
-    cols = [
-        col for col in cols if col not in ["comments", "scatter_size", "old_new", "is_temporary", "color", "hover_text"]
-    ]
-    df = df[cols + additional_cols]
+        # Define display column order
+        cols = identifier_cols + parameter_cols + result_cols + technical_cols
+        cols = [col for col in cols if col in df.columns]
+        additional_cols = [col for col in df.columns if col not in cols]
+        # remove boring columns
+        cols = [
+            col
+            for col in cols
+            if col not in ["comments", "scatter_size", "old_new", "is_temporary", "color", "hover_text"]
+        ]
+        df = df[cols + additional_cols]
 
-    # Clean up values
-    df["results"] = df["results"].apply(str)
-    numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
-    df[numeric_cols] = df[numeric_cols].round(3)
-    df.sort_values(by="id", inplace=True)
+        # Clean up values
+        df["results"] = df["results"].apply(str)
+        numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
+        df[numeric_cols] = df[numeric_cols].round(3)
+        df.sort_values(by="id", inplace=True)
+    except KeyError as e:
+        # No data to display
+        print(f"KeyError during DataFrame preparation: {e}")
 
     return df

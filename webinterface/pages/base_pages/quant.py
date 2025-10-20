@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pages.texts.proteobench_builder as pbb
+import pandas as pd
 import streamlit as st
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
     VariablesDDAQuant,
@@ -137,11 +138,12 @@ class QuantUIObjects:
             st.error("No data available for plotting.", icon="🚨")
             return
         df = st.session_state[key_in_state]
-        if df.empty:
-            st.error("No data available for plotting.", icon="🚨")
-            return
-        downloads_df = df[["id", "intermediate_hash"]]
-        downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
+        downloads_df = pd.DataFrame()
+        if not df.empty:
+            # st.error("No data available for plotting.", icon="🚨")
+            # return
+            downloads_df = df[["id", "intermediate_hash"]]
+            downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
         key_in_state = self.variables.placeholder_dataset_selection_container
         if key_in_state not in st.session_state.keys():
@@ -151,9 +153,12 @@ class QuantUIObjects:
 
         st.subheader("Select dataset to plot")
 
-        dataset_options = [("Uploaded dataset", None)] + list(
-            zip(downloads_df["id"], downloads_df["intermediate_hash"])
-        )
+        if not downloads_df.empty:
+            dataset_options = [("Uploaded dataset", None)] + list(
+                zip(downloads_df["id"], downloads_df["intermediate_hash"])
+            )
+        else:
+            dataset_options = [("Uploaded dataset", None)]
 
         dataset_selection = st.selectbox(
             "Select dataset",

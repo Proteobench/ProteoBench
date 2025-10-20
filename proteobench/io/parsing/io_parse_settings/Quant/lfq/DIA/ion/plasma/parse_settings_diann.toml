@@ -1,0 +1,47 @@
+[mapper]
+"Modified.Sequence" = "Sequence"
+"Run" = "Raw file"
+"Protein.Names" = "Proteins"
+"Precursor.Charge" = "Charge"
+"Precursor.Quantity" = "Intensity"
+
+[condition_mapper]
+"A9_G_DIA_nLC_tTOF_R1" = "A"
+"A9_G_DIA_nLC_tTOF_R2" = "A"
+"A9_G_DIA_nLC_tTOF_R3" = "A"
+"A9_G_DIA_nLC_tTOF_R4" = "A"
+"A9_G_DIA_nLC_tTOF_R5" = "A"
+"B9_G_DIA_nLC_tTOF_R1" = "B"
+"B9_G_DIA_nLC_tTOF_R2" = "B"
+"B9_G_DIA_nLC_tTOF_R3" = "B"
+"B9_G_DIA_nLC_tTOF_R4" = "B"
+"B9_G_DIA_nLC_tTOF_R5" = "B"
+
+[run_mapper]
+"A9_G_DIA_nLC_tTOF_R1" = "Condition_A_Sample_1"
+"A9_G_DIA_nLC_tTOF_R2" = "Condition_A_Sample_2"
+"A9_G_DIA_nLC_tTOF_R3" = "Condition_A_Sample_3"
+"A9_G_DIA_nLC_tTOF_R4" = "Condition_A_Sample_4"
+"A9_G_DIA_nLC_tTOF_R5" = "Condition_A_Sample_5"
+"B9_G_DIA_nLC_tTOF_R1" = "Condition_B_Sample_1"
+"B9_G_DIA_nLC_tTOF_R2" = "Condition_B_Sample_2"
+"B9_G_DIA_nLC_tTOF_R3" = "Condition_B_Sample_3"
+"B9_G_DIA_nLC_tTOF_R4" = "Condition_B_Sample_4"
+"B9_G_DIA_nLC_tTOF_R5" = "Condition_B_Sample_6"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_HUMAN" = "HUMAN"
+"_ECOLI" = "ECOLI"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\(([^()]*)\\)"
+"modification_dict" = {"(unimod:35)" = "Oxidation", "(unimod:1)" = "Acetyl", "(unimod:4)" = "Carbamidomethyl"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

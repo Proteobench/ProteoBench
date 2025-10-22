@@ -24,6 +24,7 @@ class VariablesDIAQuantAstral:
     fig_metric: str = "fig_metric_dia_quant_Astral"
     fig_cv: str = "fig_CV_violinplot_dia_quant_Astral"
     fig_ma_plot: str = "fig_ma_plot_dia_quant_Astral"
+    fig_prefix: str = "fig_dia_quant_Astral_"
     result_perf: str = "result_perf_dia_quant_Astral"
     meta_data: str = "meta_data_dia_quant_Astral"
     input_df: str = "input_df_dia_quant_Astral"

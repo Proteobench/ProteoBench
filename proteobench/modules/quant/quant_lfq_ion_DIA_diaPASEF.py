@@ -182,3 +182,14 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    def get_plot_generator(self):
+        """
+        Get the plot generator for this module.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance.
+        """
+        return super().get_plot_generator()

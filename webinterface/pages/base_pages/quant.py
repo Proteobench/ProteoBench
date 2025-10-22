@@ -40,7 +40,7 @@ class QuantUIObjects:
 
     Parameters
     ----------
-    variables_quant : VariablesDDAQuant
+    variables : VariablesDDAQuant
         The variables for the quantification module.
     ionmodule : IonModule
         The quantification module.
@@ -50,7 +50,7 @@ class QuantUIObjects:
 
     def __init__(
         self,
-        variables_quant: VariablesDDAQuant,
+        variables: VariablesDDAQuant,
         ionmodule: IonModule,
         parsesettingsbuilder: ParseSettingsBuilder,
         page_name: str = "/",
@@ -60,14 +60,14 @@ class QuantUIObjects:
 
         Parameters
         ----------
-        variables_quant : VariablesDDAQuant
+        variables : VariablesDDAQuant
             The variables for the quantification module.
         ionmodule : IonModule
             The quantification module.
         parsesettingsbuilder : ParseSettingsBuilder
             The parse settings builder.
         """
-        self.variables_quant: VariablesDDAQuant = variables_quant
+        self.variables: VariablesDDAQuant = variables
         self.ionmodule: IonModule = ionmodule
         self.parsesettingsbuilder: ParseSettingsBuilder = parsesettingsbuilder
         self.user_input: Dict[str, Any] = {}
@@ -92,37 +92,37 @@ class QuantUIObjects:
         pbb.proteobench_sidebar(current_page=self.page_name)
 
         self.first_point_plotted = False
-        st.session_state[self.variables_quant.submit] = False
+        st.session_state[self.variables.submit] = False
         self.stop_duplicating = False
 
-        if self.variables_quant.params_file_dict not in st.session_state.keys():
-            st.session_state[self.variables_quant.params_file_dict] = {}
-        if self.variables_quant.slider_id_submitted_uuid not in st.session_state.keys():
-            st.session_state[self.variables_quant.slider_id_submitted_uuid] = str()
+        if self.variables.params_file_dict not in st.session_state.keys():
+            st.session_state[self.variables.params_file_dict] = {}
+        if self.variables.slider_id_submitted_uuid not in st.session_state.keys():
+            st.session_state[self.variables.slider_id_submitted_uuid] = str()
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
         with st.form(key="main_form"):
             tab2_form_upload_data.generate_input_fields(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 parsesettingsbuilder=self.parsesettingsbuilder,
                 user_input=self.user_input,
             )
             # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
             tab2_form_upload_data.generate_additional_parameters_fields(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 user_input=self.user_input,
             )
-            text = self.variables_quant.texts.ShortMessages.run_instructions
+            text = self.variables.texts.ShortMessages.run_instructions
             st.markdown(text)
             submit_button = st.form_submit_button(
                 "Parse and bench",
-                help=self.variables_quant.texts.Help.parse_button,
+                help=self.variables.texts.Help.parse_button,
             )
 
         if submit_button:
             self.first_point_plotted = tab2_form_upload_data.process_submission_form(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
             )
@@ -132,7 +132,7 @@ class QuantUIObjects:
         Display the dataset selection dropdown and plot the selected dataset (Tab 3).
         """
         # the key is a string and links to a pandas.DataFrame
-        key_in_state = self.variables_quant.all_datapoints
+        key_in_state = self.variables.all_datapoints
         if key_in_state not in st.session_state.keys():
             st.error("No data available for plotting.", icon="🚨")
             return
@@ -143,10 +143,10 @@ class QuantUIObjects:
         downloads_df = df[["id", "intermediate_hash"]]
         downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
-        key_in_state = self.variables_quant.placeholder_dataset_selection_container
+        key_in_state = self.variables.placeholder_dataset_selection_container
         if key_in_state not in st.session_state.keys():
             st.session_state[key_in_state] = st.empty()
-            key_in_state = self.variables_quant.dataset_selector_id_uuid
+            key_in_state = self.variables.dataset_selector_id_uuid
             st.session_state[key_in_state] = uuid.uuid4()
 
         st.subheader("Select dataset to plot")
@@ -159,13 +159,14 @@ class QuantUIObjects:
             "Select dataset",
             dataset_options,
             index=0,
-            key=st.session_state[self.variables_quant.dataset_selector_id_uuid],
+            key=st.session_state[self.variables.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
         )
 
         public_id, selected_hash = dataset_selection
         tab3_indepth_plots.generate_indepth_plots(
-            variables_quant=self.variables_quant,
+            module=self.ionmodule,
+            variables=self.variables,
             parsesettingsbuilder=self.parsesettingsbuilder,
             user_input=self.user_input,
             recalculate=True,
@@ -179,10 +180,10 @@ class QuantUIObjects:
 
         Build pmultiqc based on intermediate data and save self-contained html file.
         """
-        if self.variables_quant.result_perf in st.session_state.keys():
+        if self.variables.result_perf in st.session_state.keys():
             html_content = st.session_state.get("tab31_pmultiqc_html_content", "")
             if not html_content:
-                html_content = tab3_1_pmultiqc_report.create_pmultiqc_report_section(self.variables_quant)
+                html_content = tab3_1_pmultiqc_report.create_pmultiqc_report_section(self.variables)
                 st.session_state["tab31_pmultiqc_html_content"] = html_content
                 logger.info(
                     "pMultiQC report generated.",
@@ -201,8 +202,8 @@ class QuantUIObjects:
         Display the public submission section of the page in Tab 5.
         """
         try:
-            resolved_hash = st.session_state[self.variables_quant.all_datapoints][
-                st.session_state[self.variables_quant.all_datapoints][st.session_state["old_new"] == "new"]
+            resolved_hash = st.session_state[self.variables.all_datapoints][
+                st.session_state[self.variables.all_datapoints][st.session_state["old_new"] == "new"]
             ]["intermediate_hash"].values[0]
             if resolved_hash and dataset_folder_exists(resolved_hash):
                 st.error(
@@ -215,48 +216,48 @@ class QuantUIObjects:
             pass
 
         # Initialize Unchecked submission box variable
-        if self.variables_quant.check_submission not in st.session_state:
-            st.session_state[self.variables_quant.check_submission] = False
+        if self.variables.check_submission not in st.session_state:
+            st.session_state[self.variables.check_submission] = False
 
-        if self.variables_quant.first_new_plot:
+        if self.variables.first_new_plot:
             self.submission_ready = tab5_public_submission.generate_submission_ui_elements(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 user_input=self.user_input,
             )
 
-        if self.user_input[self.variables_quant.meta_data]:
+        if self.user_input[self.variables.meta_data]:
             params = tab5_public_submission.load_user_parameters(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
             )
-            st.session_state[self.variables_quant.params_file_dict] = params.__dict__
+            st.session_state[self.variables.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
 
             tab5_public_submission.generate_additional_parameters_fields_submission(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 user_input=self.user_input,
             )
             tab5_public_submission.generate_comments_section(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 user_input=self.user_input,
             )
             # ? stop_duplicating is not used?
             self.stop_duplicating = tab5_public_submission.generate_confirmation_checkbox(
-                check_submission=self.variables_quant.check_submission
+                check_submission=self.variables.check_submission
             )
         else:
             params = None
 
         pr_url = None
-        if st.session_state[self.variables_quant.check_submission] and params is not None:
+        if st.session_state[self.variables.check_submission] and params is not None:
             get_form_values = tab5_public_submission.get_form_values(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
             )
-            params = ProteoBenchParameters(**get_form_values, filename=self.variables_quant.additional_params_json)
+            params = ProteoBenchParameters(**get_form_values, filename=self.variables.additional_params_json)
             try:
                 pr_url = tab5_public_submission.submit_to_repository(
-                    variables_quant=self.variables_quant,
+                    variables=self.variables,
                     ionmodule=self.ionmodule,
                     user_input=self.user_input,
                     params_from_file=self.params_file_dict_copy,
@@ -268,13 +269,13 @@ class QuantUIObjects:
         if not self.submission_ready:
             return
         if (
-            st.session_state[self.variables_quant.check_submission]
+            st.session_state[self.variables.check_submission]
             and params is not None
-            and self.variables_quant.submit in st.session_state
+            and self.variables.submit in st.session_state
             and pr_url is not None
         ):
             tab5_public_submission.show_submission_success_message(
-                variables_quant=self.variables_quant,
+                variables=self.variables,
                 pr_url=pr_url,
             )
 
@@ -283,29 +284,27 @@ class QuantUIObjects:
         """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
         tab1_results.initialize_main_slider(
-            slider_id_uuid=self.variables_quant.slider_id_uuid,
-            default_val_slider=self.variables_quant.default_val_slider,
+            slider_id_uuid=self.variables.slider_id_uuid,
+            default_val_slider=self.variables.default_val_slider,
         )
         tab1_results.generate_main_slider(
-            slider_id_uuid=self.variables_quant.slider_id_uuid,
-            description_slider_md=self.variables_quant.description_slider_md,
-            default_val_slider=self.variables_quant.default_val_slider,
+            slider_id_uuid=self.variables.slider_id_uuid,
+            description_slider_md=self.variables.description_slider_md,
+            default_val_slider=self.variables.default_val_slider,
         )
-        tab1_results.generate_main_selectbox(
-            self.variables_quant, selectbox_id_uuid=self.variables_quant.selectbox_id_uuid
-        )
-        tab1_results.display_existing_results(variables_quant=self.variables_quant, ionmodule=self.ionmodule)
+        tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+        tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
 
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
         tab4_display_results_submitted.initialize_submitted_slider(
-            self.variables_quant.slider_id_submitted_uuid,
-            self.variables_quant.default_val_slider,
+            self.variables.slider_id_submitted_uuid,
+            self.variables.default_val_slider,
         )
-        tab4_display_results_submitted.generate_submitted_slider(self.variables_quant)
-        tab4_display_results_submitted.generate_submitted_selectbox(self.variables_quant)
+        tab4_display_results_submitted.generate_submitted_slider(self.variables)
+        tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
         tab4_display_results_submitted.display_submitted_results(
-            variables_quant=self.variables_quant,
+            variables=self.variables,
             ionmodule=self.ionmodule,
         )

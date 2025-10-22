@@ -129,3 +129,6 @@ class DDAQuantIonModuleQExactive(QuantModule):
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
         )
+
+    def get_plot_generator(self):
+        return super().get_plot_generator()

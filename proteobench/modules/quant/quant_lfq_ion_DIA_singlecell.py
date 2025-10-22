@@ -182,3 +182,6 @@ class DIAQuantIonModulediaSC(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    def get_plot_generator(self):
+        return super().get_plot_generator()

@@ -177,3 +177,6 @@ class DDAQuantPeptidoformModule(QuantModule):
             raise DatapointAppendError(f"Error adding current data point: {e}")
 
         return intermediate_metric_structure, all_datapoints, input_df
+
+    def get_plot_generator(self):
+        return super().get_plot_generator()

@@ -48,6 +48,8 @@ from proteobench.io.params.spectronaut import (
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
 from proteobench.score.quant.quantscores import QuantScores
 
 
@@ -522,3 +524,14 @@ class QuantModule:
         )
         params.software_name = input_format
         return params
+
+    def get_plot_generator(self) -> PlotGeneratorBase:
+        """
+        Get the plot generator for LFQ Ion plots.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance.
+        """
+        return LFQHYEPlotGenerator()

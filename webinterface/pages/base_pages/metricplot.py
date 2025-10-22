@@ -1,12 +1,12 @@
-import streamlit as st
-import pandas as pd
-from proteobench.plotting.plot_quant import PlotDataPoint
 import re
+
+import pandas as pd
+import streamlit as st
 
 # functions to plot the metric plot
 
 
-def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key) -> str | None:
+def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key, plot_generator) -> str | None:
     """
     Displays the metric plot and returns the ProteoBench ID of the selected point (if any).
 
@@ -14,7 +14,6 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key) -> str 
     ----------
     data : pd.DataFrame
         The filtered dataset to plot.
-
 
     metric : str
         Metric to plot ("Median" or "Mean").
@@ -24,6 +23,9 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key) -> str 
 
     key : str
         Unique key for the plot in the Streamlit session state.
+
+    plot_generator : PlotGeneratorBase
+        The plot generator instance for the module.
 
     Returns
     -------
@@ -37,10 +39,10 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key) -> str 
 
     highlight_point_id = None
     try:
-        fig_metric = PlotDataPoint.plot_metric(
+        fig_metric = plot_generator.plot_main_metric(
             data,
-            label=label,
             metric=metric,
+            label=label,
         )
         event_dict = st.plotly_chart(
             fig_metric,
@@ -63,4 +65,9 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key) -> str 
     except Exception as e:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
+    return highlight_point_id
+    return highlight_point_id
+    return highlight_point_id
+    return highlight_point_id
+    return highlight_point_id
     return highlight_point_id

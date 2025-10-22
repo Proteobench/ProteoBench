@@ -13,25 +13,25 @@ from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from .inputs import generate_input_widget
 
 
-def generate_submission_ui_elements(variables_quant, user_input) -> bool:
+def generate_submission_ui_elements(variables, user_input) -> bool:
     """
     Create the UI elements necessary for data submission,
     including metadata uploader and comments section.
     """
     submission_ready = False
     try:
-        copy_dataframes_for_submission(variables_quant)
+        copy_dataframes_for_submission(variables)
         submission_ready = True
     except Exception:
         st.error(":x: Please provide a result file", icon="🚨")
-    generate_metadata_uploader(variables_quant, user_input)
+    generate_metadata_uploader(variables, user_input)
     return submission_ready
 
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-def load_user_parameters(variables_quant, ionmodule, user_input) -> Any:
+def load_user_parameters(variables, ionmodule, user_input) -> Any:
     """
     Read and process the parameter files provided by the user.
 
@@ -44,11 +44,11 @@ def load_user_parameters(variables_quant, ionmodule, user_input) -> Any:
 
     try:
         params = ionmodule.load_params_file(
-            user_input[variables_quant.meta_data],
+            user_input[variables.meta_data],
             user_input["input_format"],
-            json_file=variables_quant.additional_params_json,
+            json_file=variables.additional_params_json,
         )
-        st.session_state[variables_quant.params_json_dict] = params.__dict__ if hasattr(params, "__dict__") else params
+        st.session_state[variables.params_json_dict] = params.__dict__ if hasattr(params, "__dict__") else params
 
     except KeyError:
         st.error(
@@ -66,20 +66,20 @@ def load_user_parameters(variables_quant, ionmodule, user_input) -> Any:
 
 
 def generate_additional_parameters_fields_submission(
-    variables_quant,
+    variables,
     user_input,
 ) -> None:
     """
     Create the additional parameters section of the form and initializes the parameter fields.
     """
-    st.markdown(variables_quant.texts.ShortMessages.initial_parameters)
+    st.markdown(variables.texts.ShortMessages.initial_parameters)
 
     # Load JSON config
-    with open(variables_quant.additional_params_json, encoding="utf-8") as file:
+    with open(variables.additional_params_json, encoding="utf-8") as file:
         config = json.load(file)
 
     # Check if parsed values exist in session state
-    _ = st.session_state.get(variables_quant.params_json_dict, {})
+    _ = st.session_state.get(variables.params_json_dict, {})
 
     st_col1, st_col2, st_col3 = st.columns(3)
     input_param_len = int(len(config.items()) / 3)
@@ -93,30 +93,30 @@ def generate_additional_parameters_fields_submission(
         if idx < input_param_len:
             with st_col1:
                 user_input[key] = generate_input_widget(
-                    variables_quant, user_input["input_format"], value, key, editable=editable
+                    variables, user_input["input_format"], value, key, editable=editable
                 )
         elif idx < input_param_len * 2:
             with st_col2:
                 user_input[key] = generate_input_widget(
-                    variables_quant, user_input["input_format"], value, key, editable=editable
+                    variables, user_input["input_format"], value, key, editable=editable
                 )
         else:
             with st_col3:
                 user_input[key] = generate_input_widget(
-                    variables_quant, user_input["input_format"], value, key, editable=editable
+                    variables, user_input["input_format"], value, key, editable=editable
                 )
 
 
-def generate_comments_section(variables_quant, user_input) -> None:
+def generate_comments_section(variables, user_input) -> None:
     """
     Create the text area for submission comments.
     """
     user_input["comments_for_submission"] = st.text_area(
         "Comments for submission",
-        placeholder=variables_quant.texts.ShortMessages.parameters_additional,
+        placeholder=variables.texts.ShortMessages.parameters_additional,
         height=200,
     )
-    st.session_state[variables_quant.meta_data_text] = user_input["comments_for_submission"]
+    st.session_state[variables.meta_data_text] = user_input["comments_for_submission"]
 
 
 def generate_confirmation_checkbox(check_submission: str) -> None:
@@ -129,7 +129,7 @@ def generate_confirmation_checkbox(check_submission: str) -> None:
     return True
 
 
-def get_form_values(variables_quant) -> dict[str, Any]:
+def get_form_values(variables) -> dict[str, Any]:
     """
     Retrieve all user inputs from Streamlit session state and returns them as a dictionary.
 
@@ -141,19 +141,19 @@ def get_form_values(variables_quant) -> dict[str, Any]:
     form_values = {}
 
     # Load JSON config (same file used to create fields)
-    with open(variables_quant.additional_params_json, "r", encoding="utf-8") as file:
+    with open(variables.additional_params_json, "r", encoding="utf-8") as file:
         config = json.load(file)
 
     # Extract values from session state
     for key in config.keys():
-        form_key = variables_quant.prefix_params + key  # Ensure correct session key
+        form_key = variables.prefix_params + key  # Ensure correct session key
         form_values[key] = st.session_state.get(form_key, None)  # Retrieve value, default to None if missing
 
     return form_values
 
 
 def submit_to_repository(
-    variables_quant,
+    variables,
     ionmodule,
     user_input,
     params_from_file,
@@ -172,9 +172,9 @@ def submit_to_repository(
     str, optional
         The URL of the pull request if the submission was successful.
     """
-    st.session_state[variables_quant.submit] = True
+    st.session_state[variables.submit] = True
     button_pressed = generate_submission_button(
-        button_submission_uuid=variables_quant.button_submission_uuid
+        button_submission_uuid=variables.button_submission_uuid
     )  # None or 'button_pressed'
 
     if not button_pressed:  # if button_pressed is None
@@ -182,19 +182,19 @@ def submit_to_repository(
 
     # MaxQuant fixed modification handling
     if user_input["input_format"] == "MaxQuant":
-        st.session_state[variables_quant.result_perf] = add_maxquant_fixed_modifications(
-            params, st.session_state[variables_quant.result_perf]
+        st.session_state[variables.result_perf] = add_maxquant_fixed_modifications(
+            params, st.session_state[variables.result_perf]
         )
         # Overwrite the dataframes for submission
         # ? done a second time?
         copy_dataframes_for_submission(
-            variables_quant=variables_quant,
+            variables=variables,
         )
 
-    clear_highlight_column(all_datapoints_submission=variables_quant.all_datapoints_submission)
+    clear_highlight_column(all_datapoints_submission=variables.all_datapoints_submission)
 
     pr_url = create_pull_request(
-        variables_quant=variables_quant,
+        variables=variables,
         ionmodule=ionmodule,
         user_input=user_input,
         params_from_file=params_from_file,
@@ -203,7 +203,7 @@ def submit_to_repository(
 
     if pr_url:
         save_intermediate_submission_data(
-            variables_quant=variables_quant,
+            variables=variables,
             ionmodule=ionmodule,
             user_input=user_input,
         )
@@ -211,7 +211,7 @@ def submit_to_repository(
     return pr_url
 
 
-def show_submission_success_message(variables_quant, pr_url) -> None:
+def show_submission_success_message(variables, pr_url) -> None:
     """
     Handle the UI updates and notifications after a successful submission.
 
@@ -220,15 +220,15 @@ def show_submission_success_message(variables_quant, pr_url) -> None:
     pr_url : str
         The URL of the pull request.
     """
-    if st.session_state[variables_quant.submit]:
+    if st.session_state[variables.submit]:
         st.subheader("SUCCESS")
-        st.markdown(variables_quant.texts.ShortMessages.submission_processing_warning)
+        st.markdown(variables.texts.ShortMessages.submission_processing_warning)
         try:
             st.write(f"Follow your submission approval here: [{pr_url}]({pr_url})")
         except UnboundLocalError:
             pass
 
-        st.session_state[variables_quant.submit] = False
+        st.session_state[variables.submit] = False
         rain(emoji="🎈", font_size=54, falling_speed=5, animation_length=1)
 
 
@@ -238,29 +238,27 @@ def show_submission_success_message(variables_quant, pr_url) -> None:
 # generate_submission_ui_elements
 
 
-def copy_dataframes_for_submission(variables_quant) -> None:
+def copy_dataframes_for_submission(variables) -> None:
     """
     Create copies of the dataframes before submission.
     """
-    if st.session_state[variables_quant.all_datapoints_submitted] is not None:
-        st.session_state[variables_quant.all_datapoints_submission] = st.session_state[
-            variables_quant.all_datapoints_submitted
+    if st.session_state[variables.all_datapoints_submitted] is not None:
+        st.session_state[variables.all_datapoints_submission] = st.session_state[
+            variables.all_datapoints_submitted
         ].copy()
-    if st.session_state[variables_quant.input_df] is not None:
-        st.session_state[variables_quant.input_df_submission] = st.session_state[variables_quant.input_df].copy()
-    if st.session_state[variables_quant.result_perf] is not None:
-        st.session_state[variables_quant.result_performance_submission] = st.session_state[
-            variables_quant.result_perf
-        ].copy()
+    if st.session_state[variables.input_df] is not None:
+        st.session_state[variables.input_df_submission] = st.session_state[variables.input_df].copy()
+    if st.session_state[variables.result_perf] is not None:
+        st.session_state[variables.result_performance_submission] = st.session_state[variables.result_perf].copy()
 
 
-def generate_metadata_uploader(variables_quant, user_input) -> None:
+def generate_metadata_uploader(variables, user_input) -> None:
     """
     Create the file uploader for meta data.
     """
-    user_input[variables_quant.meta_data] = st.file_uploader(
+    user_input[variables.meta_data] = st.file_uploader(
         "Meta data for searches",
-        help=variables_quant.texts.Help.meta_data_file,
+        help=variables.texts.Help.meta_data_file,
         accept_multiple_files=True,
     )
 
@@ -333,7 +331,7 @@ def compare_dictionaries(old_dict, new_dict):
 
 
 def create_pull_request(
-    variables_quant,
+    variables,
     ionmodule,
     user_input,
     params_from_file: dict[str, Any],
@@ -358,9 +356,9 @@ def create_pull_request(
 
     try:
         pr_url = ionmodule.clone_pr(
-            st.session_state[variables_quant.all_datapoints_submission],
+            st.session_state[variables.all_datapoints_submission],
             params,
-            remote_git=variables_quant.github_link_pr,
+            remote_git=variables.github_link_pr,
             submission_comments=user_comments + "\n" + changed_params_str,
         )
     except Exception as e:
@@ -368,18 +366,18 @@ def create_pull_request(
         pr_url = None
 
     if not pr_url:
-        del st.session_state[variables_quant.submit]
+        del st.session_state[variables.submit]
 
     return pr_url
 
 
-def save_intermediate_submission_data(variables_quant, ionmodule, user_input) -> None:
+def save_intermediate_submission_data(variables, ionmodule, user_input) -> None:
     """
     Store intermediate and input data to the storage directory if available.
     """
     _id = str(
-        st.session_state[variables_quant.all_datapoints_submission][
-            st.session_state[variables_quant.all_datapoints_submission]["old_new"] == "new"
+        st.session_state[variables.all_datapoints_submission][
+            st.session_state[variables.all_datapoints_submission]["old_new"] == "new"
         ].iloc[-1, :]["intermediate_hash"]
     )
 
@@ -388,17 +386,17 @@ def save_intermediate_submission_data(variables_quant, ionmodule, user_input) ->
     if "storage" in st.secrets.keys():
         extension_input_file = os.path.splitext(user_input["input_csv"].name)[1]
         extension_input_parameter_file = os.path.splitext(
-            user_input[variables_quant.meta_data][0].name,
+            user_input[variables.meta_data][0].name,
         )[1]
         logger.info("Save intermediate raw")
-        df_result_performance_submission = st.session_state[variables_quant.result_performance_submission]
+        df_result_performance_submission = st.session_state[variables.result_performance_submission]
         ionmodule.write_intermediate_raw(
             directory=st.secrets["storage"]["dir"],
             ident=_id,
             input_file_obj=user_input["input_csv"],
             result_performance=df_result_performance_submission,
-            param_loc=user_input[variables_quant.meta_data],
-            comment=st.session_state[variables_quant.meta_data_text],
+            param_loc=user_input[variables.meta_data],
+            comment=st.session_state[variables.meta_data_text],
             extension_input_file=extension_input_file,
             extension_input_parameter_file=extension_input_parameter_file,
             input_file_secondary_obj=user_input.get("input_csv_secondary"),

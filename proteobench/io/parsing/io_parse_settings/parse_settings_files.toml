@@ -50,6 +50,7 @@
 "MSAID" = "parse_settings_msaid.toml"
 "Custom" = "parse_settings_custom.toml"
 "Sage" = "parse_settings_sage.toml"
+"PEAKS" = "parse_settings_peaks.toml"
 
 [quant_lfq_DIA_ion_Astral]
 "DIA-NN" = "parse_settings_diann.toml"

@@ -3,7 +3,7 @@
 "Run" = "Raw file"
 "Protein.Names" = "Proteins"
 "Precursor.Charge" = "Charge"
-"Precursor.Quantity" = "Intensity"
+"Precursor.Normalised" = "Intensity"
 
 [condition_mapper]
 "ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494" = "A"

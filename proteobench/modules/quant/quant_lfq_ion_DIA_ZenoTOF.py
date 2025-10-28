@@ -52,8 +52,8 @@ class DIAQuantIonModuleZenoTOF(QuantModule):
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_ZenoTOF",
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_ZenoTOF",
+        proteobot_repo_name: str = "Proteobot/Results_quant_lfq_DIA_ion_ZenoTOF",
+        proteobench_repo_name: str = "Proteobench/Results_quant_lfq_DIA_ion_ZenoTOF",
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for Astral.

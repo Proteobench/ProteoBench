@@ -155,6 +155,9 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
         A formatted and sorted DataFrame ready for rendering.
     """
     df = df.copy()
+
+    if len(df) == 0:
+        return df
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
 
     identifier_cols = ["selected", "id"]

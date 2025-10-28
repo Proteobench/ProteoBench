@@ -10,7 +10,7 @@ We think that this module is more suited to evaluate the impact of (non exhausti
 - peak picking
 - low-level ion signal normalisation
 
-Other modules will be more suited to explore further post-pocessing steps.
+Other modules will be more suited to explore further post-pocessing steps. 
 
 ## Data set
 

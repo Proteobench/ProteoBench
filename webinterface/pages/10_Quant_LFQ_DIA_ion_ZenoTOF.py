@@ -1,5 +1,5 @@
 """
-Streamlit UI for the DIA quantification - precursor ions module - Astral.
+Streamlit UI for the DIA quantification - precursor ions module - ZenoTOF.
 """
 
 import logging
@@ -14,17 +14,17 @@ from pages.pages_variables.Quant.lfq_DIA_ion_ZenoTOF_variables import (
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
+from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
 
 
 class StreamlitUI:
     """
-    Streamlit UI for the DIA quantification - precursor ions module - Astral.
+    Streamlit UI for the DIA quantification - precursor ions module - ZenoTOF.
     """
 
     def __init__(self):
         """
-        Initialize the Streamlit UI for the DIA quantification - precursor ions module - Astral.
+        Initialize the Streamlit UI for the DIA quantification - precursor ions module - ZenoTOF.
         """
         self.variables_dia_quant: VariablesDIAQuantZenoTOF = VariablesDIAQuantZenoTOF()
         self.texts: Type[WebpageTexts] = WebpageTexts
@@ -38,7 +38,7 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: DIAQuantIonModuleAstral = DIAQuantIonModuleAstral(token=token)
+        self.ionmodule: DIAQuantIonModuleZenoTOF = DIAQuantIonModuleZenoTOF(token=token)
         self.parsesettingsbuilder = ParseSettingsBuilder(
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dia_quant.parse_settings_dir
         )
@@ -82,6 +82,11 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -97,6 +102,11 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -112,6 +122,11 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -128,6 +143,11 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -143,6 +163,11 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
+            if self.variables_dia_quant.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    icon="🚨",
+                )
             if self.variables_dia_quant.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."

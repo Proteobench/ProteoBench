@@ -75,3 +75,14 @@
 "Sage" = "parse_settings_sage.toml"
 "WOMBAT" = "parse_settings_wombat.toml"
 "Custom" = "parse_settings_custom.toml"
+
+[quant_lfq_DIA_ion_ZenoTOF]
+"DIA-NN" = "parse_settings_diann.toml"
+"MaxQuant" = "parse_settings_maxdia.toml"
+"FragPipe (DIA-NN quant)" = "parse_settings_diann.toml"
+"FragPipe" = "parse_settings_fragpipe_DIA.toml"
+"Spectronaut" = "parse_settings_spectronaut.toml"
+"AlphaDIA" = "parse_settings_alphadia.toml"
+"MSAID" = "parse_settings_msaid.toml"
+"Custom" = "parse_settings_custom.toml"
+"PEAKS" = "parse_settings_peaks.toml"

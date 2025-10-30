@@ -29,7 +29,7 @@ Links to active modules
 Links to archived modules
 =========================
 
-- `Label-free quantification of precursor ions with DIA (AIF) <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`_: A discussion on oxidation-related issues with the data used for this module can be found `here <https://github.com/orgs/Proteobench/discussions/641>`_, and the documentation `here <docs/available-modules/archived-modules/4-quant-lfq-ion-dia-aif.md>`_.
+- `Label-free quantification of precursor ions with DIA (AIF) <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`_: A discussion on oxidation-related issues with the data used for this module can be found `here <https://github.com/orgs/Proteobench/discussions/641>`_, and the documentation `here <archived-modules/4-quant-lfq-ion-dia-aif.md>`_.
 
 .. toctree::
    :maxdepth: 2

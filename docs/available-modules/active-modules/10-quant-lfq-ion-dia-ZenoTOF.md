@@ -1,4 +1,4 @@
-# DIA quantification - precursor ion level - ZenoTOF 8600 - Zeno SWATH
+# DIA quantification - precursor ion level - SCIEX ZenoTOF 8600 system - Zeno SWATH DIA
 
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Zeno SWATH 85 variable windows, on a ZenoTOF 8600 (SCIEX).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
@@ -14,16 +14,15 @@ Other modules will be more suited to explore further post-pocessing steps.
 
 ## Data set
 
-A not yet released ZenoTOF 8600 (SCIEX) data independent acquisition (DIA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli.
+A not yet released ZenoTOF 8600 system (SCIEX) data independent acquisition (DIA) dataset using the same sample composition (for "A" and "B") as described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli.
 Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)).
 
 Data acquisition parameters were as following:
 Peptide separations were done using an IonOpticks Aurora® XS Ultimate column (25 cm x 75 µm, 1.7 µm particle size)(IonOpticks, Victoria, Australia) at a flow rate of 0.250 µL/min, column temperature of 40 °C, using a 15-min gradient: i) after an initial hold at 3% B for 18 min, a gradient from 3% to 35% mobile phase B in 15 min, respectively, was applied ii) ramp to 65% mobile phase B in 2 min, followed by ramping to 80% in 1 min. The washing step at 80% mobile phase B lasted 4 min and was followed by an equilibration step at 1% mobile phase B (starting conditions) for 15 min.
 An OptiFlow Pro Nano ion source was used with a NanoCal probe (<1 µL electrode), with source parameters as following: GS1: 10 psi, Nano cel temperature: 250 °C and Nano spray voltage: 2500V.
 
-
-The 15-min Zeno SWATH DIA experiments used 85 variable windows spanning the TOF MS mass range 400-900 Da and MS/MS mass range 140-1750 Da, with Zeno trap pulsing turned on, with MS/MS accumulation times of 16 ms. Before each Zeno SWATH MS cycle an additional MS1 survey scan from 400-1500 Da was recorded for 50 ms.
-The files have been uploaded to the ProteomeXchange repository, but we are still waiting for the PXD accession number.
+The 15-min Zeno SWATH DIA experiments used 85 variable windows spanning the TOF MS mass range 400-900 Da and MS/MS mass range 140-1750 Da, with Zeno trap pulsing turned on, with MS/MS accumulation times of 16 ms. Before each Zeno SWATH MS DIA cycle an additional MS1 survey scan from 400-1500 Da was recorded for 50 ms.
+The files have been uploaded to the ProteomeXchange repository, with PXD accession number (PXD070049). Since the corresponding manuscript is still under review, the data can be accessed as following: Log in to the PRIDE website using the following details: Project accession: PXD070049 - Token: hcXc5dENPPrf. Alternatively, reviewer can access the dataset by logging in to the PRIDE website using the following account details: Username: reviewer_pxd070049@ebi.ac.uk - Password: LF0Bpyt0gt1g
 
 **It is imperative not to rename the files once downloaded!**
 

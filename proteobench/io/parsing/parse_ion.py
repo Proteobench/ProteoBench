@@ -656,16 +656,20 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
         input_data_frame = _merge_alphadia_files(input_csv, input_csv_secondary, file1_sample, file2_sample)
     else:
         # Use the single file directly if no secondary file provided
-        try:
-            input_data_frame = pd.read_csv(
-                input_csv,
-                low_memory=False,
-                sep="\t",
-                dtype={"mod_seq_charge_hash": str, "precursor.mod_seq_charge_hash": str},
-                header=0,
-            )
-        except UnicodeDecodeError:  # Parquet input, possible from AlphaDIA v2
+        # Check file extension first for parquet
+        if isinstance(input_csv, str) and input_csv.lower().endswith('.parquet'):
             input_data_frame = pd.read_parquet(input_csv)
+        else:
+            try:
+                input_data_frame = pd.read_csv(
+                    input_csv,
+                    low_memory=False,
+                    sep="\t",
+                    dtype={"mod_seq_charge_hash": str, "precursor.mod_seq_charge_hash": str},
+                    header=0,
+                )
+            except UnicodeDecodeError:  # Parquet input, possible from AlphaDIA v2
+                input_data_frame = pd.read_parquet(input_csv)
 
     # Map gene names to descriptions
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")

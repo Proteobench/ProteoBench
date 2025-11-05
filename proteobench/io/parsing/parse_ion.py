@@ -671,7 +671,7 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
-    if not "pg.genes" in input_data_frame.columns:  # AlphaDIA v1
+    if "pg.genes" not in input_data_frame.columns:  # AlphaDIA v1
         v1 = True
         gene_column = "genes"
     else:

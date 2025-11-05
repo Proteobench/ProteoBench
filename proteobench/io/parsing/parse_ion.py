@@ -682,6 +682,7 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
     )
 
     if not v1:
+        # AlphaDIA v2: Rename columns first
         input_data_frame.rename(
             columns={
                 "precursor.sequence": "sequence",
@@ -689,13 +690,29 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
                 "precursor.mod_sites": "mod_sites",
                 "precursor.charge": "charge",
                 "precursor.intensity": "Intensity",
-                "raw.name": "Raw file",
             },
             inplace=True,
         )
         input_data_frame = input_data_frame.dropna(subset=["Intensity"])
 
-    # Generate proforma notation
+        # If data is in long format (has raw.name column), convert to wide format
+        if "raw.name" in input_data_frame.columns:
+
+            # Define columns to keep as identifiers (not pivot)
+            id_columns = ["sequence", "mods", "mod_sites", "charge", "genes"]
+
+            # Pivot from long to wide format
+            input_data_frame = input_data_frame.pivot_table(
+                index=id_columns,
+                columns="raw.name",
+                values="Intensity",
+                aggfunc="first",  # Use first value if duplicates exist
+            ).reset_index()
+
+            # Flatten column names after pivot
+            input_data_frame.columns.name = None
+
+    # For v1 or v2 TSV (already in wide format), generate proforma notation
     input_data_frame["proforma"] = input_data_frame.apply(
         lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
         axis=1,

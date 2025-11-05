@@ -657,7 +657,7 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
     else:
         # Use the single file directly if no secondary file provided
         # Check file extension first for parquet
-        if isinstance(input_csv, str) and input_csv.lower().endswith('.parquet'):
+        if isinstance(input_csv, str) and input_csv.lower().endswith(".parquet"):
             input_data_frame = pd.read_parquet(input_csv)
         else:
             try:

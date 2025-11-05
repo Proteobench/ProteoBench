@@ -697,7 +697,6 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
 
         # If data is in long format (has raw.name column), convert to wide format
         if "raw.name" in input_data_frame.columns:
-
             # Define columns to keep as identifiers (not pivot)
             id_columns = ["sequence", "mods", "mod_sites", "charge", "genes"]
 

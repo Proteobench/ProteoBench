@@ -68,14 +68,14 @@ To submit your run for public usage, you need to upload the parameter file assoc
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
 **Table 2. Overview of input files required for metric caluclation and public submission**
-| Tool        | Input file                            | Parameter File    |
-| ----------- | ------------------------------------- | ----------------- |
-| AlphaDIA    | precursors.tsv & precursor.matrix.tsv | log.txt           |
-| DIA-NN      | *_report.tsv or *_report.parquet      | *report.log.txt   |
-| FragPipe    | *_report.tsv                          | fragpipe.workflow |
-| MaxDIA      | evidence.txt                          | mqpar.xml         |
-| Spectronaut | *.tsv                                 | *.txt             |
-| PEAKS       | lfq.dia.features.csv                  | parameters.txt    |
+| Tool        | Input file                                                                  | Parameter File    |
+| ----------- | --------------------------------------------------------------------------- | ----------------- |
+| AlphaDIA    | precursors.tsv & precursor.matrix.tsv (v1) or precursors.tsv/.parquet (v2+) | log.txt           |
+| DIA-NN      | *_report.tsv or *_report.parquet                                            | *report.log.txt   |
+| FragPipe    | *_report.tsv                                                                | fragpipe.workflow |
+| MaxDIA      | evidence.txt                                                                | mqpar.xml         |
+| Spectronaut | *.tsv                                                                       | *.txt             |
+| PEAKS       | lfq.dia.features.csv                                                        | parameters.txt    |
 
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `DIANN_20250505_083341`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure.
@@ -94,7 +94,7 @@ After upload, you will get a link to a Github pull request associated with your 
 2. In "Method settings" you need to define your search parameters
 3. Turn on "Predict Library"
 4. Turn on "Precursor Level LFQ"
-5.  Because ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", both files need to be submitted to ProteoBench. This is possible through the web interface, where both files can be submitted in any order. Alternatively (legacy), one can preprocess the two output files using a [Jupyter Notebook provided on theProteoBench repository](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/submission/ProteoBench_input_conversion.ipynb)
+5. Which AlphaDIA output files are needed for submission depends on which AlphaDIA version the output comes from. For AlphaDIA v1.X output, ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", both files need to be submitted to ProteoBench. This is possible through the web interface, where both files can be submitted in any order. Alternatively (legacy), one can preprocess the two output files using a [Jupyter Notebook provided on theProteoBench repository](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/submission/ProteoBench_input_conversion.ipynb). In this case, only the merged output file needs to be submitted to ProteoBench. For later versions, only the precursors.parquet/.tsv file needs to be submitted.
 
 Note: >=V1.10.4 is required to obtain the most desired performance (improved check for MS1 cycle)
 

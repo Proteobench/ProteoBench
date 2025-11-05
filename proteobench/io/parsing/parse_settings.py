@@ -285,7 +285,9 @@ class ParseSettingsQuant:
         pd.DataFrame
             DataFrame converted to standard format.
         """
-        if "Raw file" not in self.mapper.values():
+        if (
+            "Raw file" not in self.mapper.values() and "Raw file" not in df.columns
+        ):  # Would there ever be a case where wide format has "Raw file" column?
             melt_vars = self.condition_mapper.keys()
             df_melted = df.melt(
                 id_vars=list(set(df.columns).difference(set(melt_vars))),

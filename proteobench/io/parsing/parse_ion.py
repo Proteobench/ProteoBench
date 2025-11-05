@@ -120,7 +120,11 @@ def aggregate_modification_sites_column(
     str
         The modified sequence string with modification sites.
     """
+    # In V1, mods sites column of unmodified peptides is NaN, in V2 it is empty string
     if isinstance(input_string_modifications, float) and math.isnan(input_string_modifications):
+        return input_string_seq
+
+    if not input_string_modifications:
         return input_string_seq
 
     mods_list = input_string_modifications.split(";")
@@ -631,6 +635,7 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
     pd.DataFrame
         The loaded dataframe.
     """
+    v1 = False
     # If secondary file is provided, detect which is which and merge
     if input_csv_secondary:
         # Read samples from both files to detect their structure
@@ -651,23 +656,51 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
         input_data_frame = _merge_alphadia_files(input_csv, input_csv_secondary, file1_sample, file2_sample)
     else:
         # Use the single file directly if no secondary file provided
-        input_data_frame = pd.read_csv(
-            input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
-        )
+        try:
+            input_data_frame = pd.read_csv(
+                input_csv,
+                low_memory=False,
+                sep="\t",
+                dtype={"mod_seq_charge_hash": str, "precursor.mod_seq_charge_hash": str},
+                header=0,
+            )
+        except UnicodeDecodeError:  # Parquet input, possibly from AlphaDIA v2
+            input_data_frame = pd.read_parquet(input_csv)
 
     # Map gene names to descriptions
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
-    input_data_frame["genes"] = input_data_frame["genes"].map(
+    if not "pg.genes" in input_data_frame.columns:  # AlphaDIA v1
+        v1 = True
+        gene_column = "genes"
+    else:
+        gene_column = "pg.genes"
+
+    input_data_frame["genes"] = input_data_frame[gene_column].map(
         lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
     )
+
+    if not v1:
+        input_data_frame.rename(
+            columns={
+                "precursor.sequence": "sequence",
+                "precursor.mods": "mods",
+                "precursor.mod_sites": "mod_sites",
+                "precursor.charge": "charge",
+                "precursor.intensity": "Intensity",
+                "raw.name": "Raw file",
+            },
+            inplace=True,
+        )
+        input_data_frame = input_data_frame.dropna(subset=["Intensity"])
 
     # Generate proforma notation
     input_data_frame["proforma"] = input_data_frame.apply(
         lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
         axis=1,
     )
+
     return input_data_frame
 
 

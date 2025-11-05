@@ -664,7 +664,7 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
                 dtype={"mod_seq_charge_hash": str, "precursor.mod_seq_charge_hash": str},
                 header=0,
             )
-        except UnicodeDecodeError:  # Parquet input, possibly from AlphaDIA v2
+        except UnicodeDecodeError:  # Parquet input, possible from AlphaDIA v2
             input_data_frame = pd.read_parquet(input_csv)
 
     # Map gene names to descriptions

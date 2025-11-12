@@ -82,16 +82,16 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dia_quant.alpha_warning:
-                st.warning(
-                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
-                    icon="🚨",
-                )
             if self.variables_dia_quant.archived_warning:
                 st.info(
                     self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
             else:
+                if self.variables_dia_quant.alpha_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_alpha,
+                        icon="🚨",
+                )
                 if self.variables_dia_quant.beta_warning:
                     st.warning(
                         self.variables_dia_quant.texts.ShortMessages.warning_beta
@@ -107,16 +107,16 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dia_quant.alpha_warning:
-                st.warning(
-                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
-                    icon="🚨",
-                )
             if self.variables_dia_quant.archived_warning:
                 st.info(
                     self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
             else:
+                if self.variables_dia_quant.alpha_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_alpha,
+                        icon="🚨",
+                )
                 if self.variables_dia_quant.beta_warning:
                     st.warning(
                         self.variables_dia_quant.texts.ShortMessages.warning_beta
@@ -132,16 +132,16 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dia_quant.alpha_warning:
-                st.warning(
-                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
-                    icon="🚨",
-                )
             if self.variables_dia_quant.archived_warning:
                 st.info(
                     self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
             else:
+                if self.variables_dia_quant.alpha_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_alpha,
+                        icon="🚨",
+                )
                 if self.variables_dia_quant.beta_warning:
                     st.warning(
                         self.variables_dia_quant.texts.ShortMessages.warning_beta
@@ -157,16 +157,16 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dia_quant.alpha_warning:
-                st.warning(
-                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
-                    icon="🚨",
-                )
             if self.variables_dia_quant.archived_warning:
                 st.info(
                     self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
             else:
+                if self.variables_dia_quant.alpha_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_alpha,
+                        icon="🚨",
+                )
                 if self.variables_dia_quant.beta_warning:
                     st.warning(
                         self.variables_dia_quant.texts.ShortMessages.warning_beta
@@ -182,16 +182,16 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dia_quant.alpha_warning:
-                st.warning(
-                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
-                    icon="🚨",
-                )
             if self.variables_dia_quant.archived_warning:
                 st.info(
                     self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
             else:
+                if self.variables_dia_quant.alpha_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_alpha,
+                        icon="🚨",
+                )
                 if self.variables_dia_quant.beta_warning:
                     st.warning(
                         self.variables_dia_quant.texts.ShortMessages.warning_beta

@@ -27,9 +27,13 @@ After two positive code reviews by ProteoBench maintainers, the PR can be merged
 3. All code should follow Black styling
 4. The latest commit of the PR should pass the continuous integration tests
 
+## Alpha
+
+When the PR is merged, the new module enters an alpha stage, where its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in "Alpha". This means that the module is available but remains to be fully discussed with experts (more information on module proposal process can be found [here](./3-module-proposal.md)). 
+
 ## Beta
 
-When the PR is merged, the new module enters a beta stage, where its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in “Beta”. After a minimal period of one month and approval by the initial proposers and external reviewers, the beta label can be removed.
+The new module enters a beta stage when it has been discussed and approved by the community.  Its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in “Beta”. After a minimal period of one month and approval by the initial proposers and external reviewers, the beta label can be removed.
 
 ## Live
 

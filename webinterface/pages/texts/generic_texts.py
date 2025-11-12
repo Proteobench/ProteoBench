@@ -55,6 +55,10 @@ class WebpageTexts:
             for more details.
             """
         
+        warning_alpha =  """This module is in ALPHA phase. It has not yet passed peer review 
+            and should be used with caution.
+            """
+        
         warning_beta =  """This module is in BETA phase. The figure presented below and 
             the metrics calculation may change in the near future.
             """

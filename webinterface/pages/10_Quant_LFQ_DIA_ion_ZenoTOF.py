@@ -84,7 +84,7 @@ class StreamlitUI:
             )
             if self.variables_dia_quant.alpha_warning:
                 st.warning(
-                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
                     icon="🚨",
                 )
             if self.variables_dia_quant.archived_warning:
@@ -109,7 +109,7 @@ class StreamlitUI:
             )
             if self.variables_dia_quant.alpha_warning:
                 st.warning(
-                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
                     icon="🚨",
                 )
             if self.variables_dia_quant.archived_warning:
@@ -134,7 +134,7 @@ class StreamlitUI:
             )
             if self.variables_dia_quant.alpha_warning:
                 st.warning(
-                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
                     icon="🚨",
                 )
             if self.variables_dia_quant.archived_warning:
@@ -159,7 +159,7 @@ class StreamlitUI:
             )
             if self.variables_dia_quant.alpha_warning:
                 st.warning(
-                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
                     icon="🚨",
                 )
             if self.variables_dia_quant.archived_warning:
@@ -184,7 +184,7 @@ class StreamlitUI:
             )
             if self.variables_dia_quant.alpha_warning:
                 st.warning(
-                    "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
+                    self.variables_dia_quant.texts.ShortMessages.warning_alpha,
                     icon="🚨",
                 )
             if self.variables_dia_quant.archived_warning:

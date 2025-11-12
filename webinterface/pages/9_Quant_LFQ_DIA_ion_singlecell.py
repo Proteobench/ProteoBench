@@ -86,10 +86,15 @@ class StreamlitUI:
                     "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
                     icon="🚨",
                 )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+            if self.variables_dia_quant.archived_warning:
+                st.info(
+                    self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
+            else:
+                if self.variables_dia_quant.beta_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_beta
+                    )
             self.quant_uiobjects.display_all_data_results_main()
 
         # Tab 2: Submission Details
@@ -106,10 +111,15 @@ class StreamlitUI:
                     "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
                     icon="🚨",
                 )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+            if self.variables_dia_quant.archived_warning:
+                st.info(
+                    self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
+            else:
+                if self.variables_dia_quant.beta_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_beta
+                    )
             self.quant_uiobjects.display_submission_form()
 
         # Tab 3: in-depth plots current data
@@ -126,10 +136,15 @@ class StreamlitUI:
                     "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
                     icon="🚨",
                 )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+            if self.variables_dia_quant.archived_warning:
+                st.info(
+                    self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
+            else:
+                if self.variables_dia_quant.beta_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_beta
+                    )
             self.quant_uiobjects.display_indepth_plots()
 
         # Tab 4: Results (New Submissions)
@@ -146,10 +161,15 @@ class StreamlitUI:
                     "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
                     icon="🚨",
                 )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+            if self.variables_dia_quant.archived_warning:
+                st.info(
+                    self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
+            else:
+                if self.variables_dia_quant.beta_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_beta
+                    )
             self.quant_uiobjects.display_all_data_results_submitted()
 
         # Tab 5: Public Submission
@@ -166,10 +186,15 @@ class StreamlitUI:
                     "This module is in ALPHA phase. It has not yet passed peer review and should be used with caution.",
                     icon="🚨",
                 )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+            if self.variables_dia_quant.archived_warning:
+                st.info(
+                    self.variables_dia_quant.texts.ShortMessages.warning_archived
                 )
+            else:
+                if self.variables_dia_quant.beta_warning:
+                    st.warning(
+                        self.variables_dia_quant.texts.ShortMessages.warning_beta
+                    )
             self.quant_uiobjects.display_public_submission_ui()
 
 

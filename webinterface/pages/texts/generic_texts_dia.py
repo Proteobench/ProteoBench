@@ -48,6 +48,16 @@ class WebpageTexts:
         parameters_additional = """Anything else you want to let us know? Please specifically
             add changes in your search parameters here, that are not obvious from the parameter file.
             """
+        
+        warning_archived =  """This module is in ARCHIVED phase. The figure presented below 
+            and the metrics calculation will no longer be updated. See module documentation 
+            for more details.
+            """
+        
+        warning_beta =  """This module is in BETA phase. The figure presented below and 
+            the metrics calculation may change in the near future.
+            """
+
 
     class Help:
         """

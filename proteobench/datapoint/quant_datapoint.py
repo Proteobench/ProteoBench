@@ -17,7 +17,9 @@ import pandas as pd
 import proteobench
 
 
-def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: str = "median") -> float | None:
+def filter_df_numquant_epsilon(
+    row: Dict[str, Any], min_quant: int = 3, metric: str = "median", mode: str = "global"
+) -> float | None:
     """
     Extract the 'median_abs_epsilon' value from a row (assumed to be a dictionary).
 
@@ -41,7 +43,7 @@ def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: 
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("{}_abs_epsilon".format(metric))
+        return row[min_quant].get("{}_abs_epsilon_{}".format(metric, mode))
 
     return None
 
@@ -118,8 +120,10 @@ class QuantDatapoint:
     is_temporary: bool = True
     intermediate_hash: str = ""
     results: dict = None
-    median_abs_epsilon: float = 0
-    mean_abs_epsilon: float = 0
+    median_abs_epsilon_global: float = 0
+    mean_abs_epsilon_global: float = 0
+    median_abs_epsilon_eq_species: float = 0
+    mean_abs_epsilon_eq_species: float = 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
@@ -198,8 +202,18 @@ class QuantDatapoint:
             ChainMap(*[QuantDatapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
         )
         result_datapoint.results = results
-        result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
-        result_datapoint.mean_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["mean_abs_epsilon"]
+        result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_global"
+        ]
+        result_datapoint.mean_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_global"
+        ]
+        result_datapoint.median_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_eq_species"
+        ]
+        result_datapoint.mean_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_eq_species"
+        ]
         result_datapoint.nr_prec = result_datapoint.results[default_cutoff_min_prec]["nr_prec"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
@@ -215,8 +229,8 @@ class QuantDatapoint:
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         nr_prec = len(df_slice)
 
-        # 2) Compute abs-epsilon only once
-        eps = df_slice["epsilon"].abs()
+        # 2) Compute abs-epsilon only once, globally
+        eps_global = df_slice["epsilon"].abs()
 
         # 3) Batch the CV quantiles in one go
         #    This returns a DataFrame with index [0.50, 0.75, 0.90, 0.95]
@@ -226,61 +240,25 @@ class QuantDatapoint:
 
         return {
             min_nr_observed: {
-                "median_abs_epsilon": eps.median(),
-                "mean_abs_epsilon": eps.mean(),
-                "variance_epsilon": df_slice["epsilon"].var(),
+                "median_abs_epsilon_global": eps_global.median(),
+                "mean_abs_epsilon_global": eps_global.mean(),
+                "variance_epsilon_global": df_slice["epsilon"].var(),
+                "median_abs_epsilon_eq_species": pd.Series(
+                    [
+                        df_slice[df_slice["species"] == species]["epsilon"].abs().median()
+                        for species in df_slice["species"].unique()
+                    ]
+                ).mean(),
+                "mean_abs_epsilon_eq_species": pd.Series(
+                    [
+                        df_slice[df_slice["species"] == species]["epsilon"].abs().mean()
+                        for species in df_slice["species"].unique()
+                    ]
+                ).mean(),
                 "nr_prec": nr_prec,
                 "CV_median": cv_avg.loc[0.50],
                 "CV_q75": cv_avg.loc[0.75],
                 "CV_q90": cv_avg.loc[0.90],
                 "CV_q95": cv_avg.loc[0.95],
-            }
-        }
-
-    @staticmethod
-    def get_metrics_old(df: pd.DataFrame, min_nr_observed: int = 1) -> Dict[int, Dict[str, float]]:
-        """
-        Compute various statistical metrics from the provided DataFrame for the benchmark.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            The DataFrame containing the benchmark results.
-        min_nr_observed : int, optional
-            The minimum number of observed values for a valid computation. Defaults to 1.
-
-        Returns
-        -------
-        dict
-            A dictionary containing computed metrics such as 'median_abs_epsilon', 'variance_epsilon', etc.
-        """
-        # Filter DataFrame by the minimum number of observations
-        df_slice = df[df["nr_observed"] >= min_nr_observed]
-        nr_prec = len(df_slice)
-
-        # Calculate the median absolute epsilon (insensitive to outliers)
-        median_abs_epsilon = df_slice["epsilon"].abs().median()
-        # Calculate the mean absolute epsilon (sensitive to outliers)
-        mean_abs_epsilon = df_slice["epsilon"].abs().mean()
-
-        # Calculate the variance of epsilon (sensitive to outliers)
-        variance_epsilon = df_slice["epsilon"].var()
-
-        # Compute the median of the coefficient of variation (CV) for both 'CV_A' and 'CV_B'
-        cv_median = (df_slice["CV_A"].median() + df_slice["CV_B"].median()) / 2
-        cv_q75 = (df_slice["CV_A"].quantile(0.75) + df_slice["CV_B"].quantile(0.75)) / 2
-        cv_q90 = (df_slice["CV_A"].quantile(0.9) + df_slice["CV_B"].quantile(0.9)) / 2
-        cv_q95 = (df_slice["CV_A"].quantile(0.95) + df_slice["CV_B"].quantile(0.95)) / 2
-
-        return {
-            min_nr_observed: {
-                "median_abs_epsilon": median_abs_epsilon,
-                "mean_abs_epsilon": mean_abs_epsilon,
-                "variance_epsilon": variance_epsilon,
-                "nr_prec": nr_prec,
-                "CV_median": cv_median,
-                "CV_q90": cv_q90,
-                "CV_q75": cv_q75,
-                "CV_q95": cv_q95,
             }
         }

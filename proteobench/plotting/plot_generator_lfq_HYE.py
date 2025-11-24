@@ -93,10 +93,40 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             "ma_plot": "MA plot calculated from the performance data",
         }
 
+    def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
+        """
+        Get the appropriate metric column names based on metric type and calculation mode.
+
+        Parameters
+        ----------
+        metric : str
+            The metric type: "Median" or "Mean"
+        mode : str
+            The calculation mode: "Global" or "Equal weighted species"
+
+        Returns
+        -------
+        Tuple[str, str, str]
+            Tuple of (metric_lower, mode_suffix, plot_title) for constructing column names
+            and plot title.
+        """
+        metric_lower = metric.lower()
+        mode_suffix = "global" if mode == "Global" else "eq_species"
+
+        mode_description = "global" if mode == "Global" else "equal weighted species"
+
+        plot_title = (
+            f"{metric} absolute difference between measured and expected log2-transformed fold change "
+            f"(calculated {mode_description})"
+        )
+
+        return metric_lower, mode_suffix, plot_title
+
     def plot_main_metric(
         self,
         result_df: pd.DataFrame,
         metric: str = "Median",
+        mode: str = "Equal weighted species",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
             "AlphaPept": "#17212b",
@@ -133,6 +163,9 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             DataFrame containing the results to plot.
         metric : str
             Metric to plot, either "Median" or "Mean".
+        mode : str
+            Metric calculation mode: "Global" (all precursors) or "Equal weighted species"
+            (calculated separately per species then averaged).
         software_colors : Dict[str, str]
             Mapping of software names to colors.
         mapping : Dict[str, str]
@@ -152,9 +185,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with the main performance metric plot.
         """
+        # Get metric column names and plot title based on metric type and mode
+        metric_lower, mode_suffix, layout_xaxis_title = self._get_metric_column_name(metric, mode)
+        metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
 
-        all_median_abs_epsilon = [v2["median_abs_epsilon"] for v in result_df["results"] for v2 in v.values()]
-        all_mean_abs_epsilon = [v2["mean_abs_epsilon"] for v in result_df["results"] for v2 in v.values()]
+        # Extract all values for the selected metric mode
+        all_metric_values = [v2[metric_col_name] for v in result_df["results"] for v2 in v.values()]
         all_nr_prec = [v2["nr_prec"] for v in result_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
@@ -213,20 +249,10 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         result_df["hover_text"] = hover_texts
         result_df["scatter_size"] = scatter_size
 
-        if metric == "Median":
-            layout_xaxis_range = [
-                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
-                max(all_median_abs_epsilon) + max(all_median_abs_epsilon) * 0.05,
-            ]
-            layout_xaxis_title = (
-                "Median absolute difference between measured and expected log2-transformed fold change."
-            )
-        elif metric == "Mean":
-            layout_xaxis_range = [
-                min(all_mean_abs_epsilon) - min(all_mean_abs_epsilon) * 0.05,
-                max(all_mean_abs_epsilon) + max(all_mean_abs_epsilon) * 0.05,
-            ]
-            layout_xaxis_title = "Mean absolute difference between measured and expected log2-transformed fold change."
+        layout_xaxis_range = [
+            min(all_metric_values) - min(all_metric_values) * 0.05,
+            max(all_metric_values) + max(all_metric_values) * 0.05,
+        ]
 
         fig = go.Figure(
             layout_yaxis_range=[
@@ -249,7 +275,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
             fig.add_trace(
                 go.Scatter(
-                    x=tmp_df["{}_abs_epsilon".format(metric.lower())],
+                    x=tmp_df[metric_col_name],
                     y=tmp_df["nr_prec"],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],

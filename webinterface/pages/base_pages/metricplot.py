@@ -6,7 +6,7 @@ import streamlit as st
 # functions to plot the metric plot
 
 
-def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key, plot_generator) -> str | None:
+def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, key, plot_generator) -> str | None:
     """
     Displays the metric plot and returns the ProteoBench ID of the selected point (if any).
 
@@ -42,6 +42,7 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key, plot_ge
         fig_metric = plot_generator.plot_main_metric(
             data,
             metric=metric,
+            mode=mode,
             label=label,
         )
         event_dict = st.plotly_chart(
@@ -65,9 +66,4 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key, plot_ge
     except Exception as e:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
-    return highlight_point_id
-    return highlight_point_id
-    return highlight_point_id
-    return highlight_point_id
-    return highlight_point_id
     return highlight_point_id

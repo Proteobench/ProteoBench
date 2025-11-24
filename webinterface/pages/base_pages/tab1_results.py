@@ -139,6 +139,7 @@ def display_existing_results(variables, ionmodule) -> None:
     data_points_filtered = variables.filtered_data
 
     metric = display_metric_selector(variables)
+    mode = display_metric_calc_approach_selector(variables)
 
     # prepare plot key explicitly for tab 1
     key = variables.result_plot_uuid
@@ -150,6 +151,7 @@ def display_existing_results(variables, ionmodule) -> None:
     highlight_point_id = render_metric_plot(
         data_points_filtered,
         metric,
+        mode,
         label=st.session_state[st.session_state[variables.selectbox_id_uuid]],
         key=_id_of_key,
         plot_generator=plot_generator,
@@ -194,6 +196,20 @@ def display_metric_selector(variables) -> str:
         "Select metric to plot",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_metric_calc_approach_selector(variables) -> str:
+    key = variables.metric_calc_approach_selector_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.radio(
+        "Select metric calculation approach",
+        options=["Equal weighted species", "Global"],
+        help="Toggle between equal weighted species-specific and global absolute difference metrics.",
         key=_id_of_key,
     )
 

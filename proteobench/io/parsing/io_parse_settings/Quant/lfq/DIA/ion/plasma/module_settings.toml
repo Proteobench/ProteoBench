@@ -1,10 +1,10 @@
 [species_expected_ratio]
 [species_expected_ratio.YEAST]
-"A_vs_B" = 3.0
+"A_vs_B" = 0.3333333333333333333333333333333333333
 "color" = "red"
 
 [species_expected_ratio.ECOLI]
-"A_vs_B" = 0.5
+"A_vs_B" = 2.0
 "color" = "blue"
 
 [species_expected_ratio.HUMAN]

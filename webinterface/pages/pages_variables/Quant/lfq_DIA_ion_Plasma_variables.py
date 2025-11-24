@@ -24,6 +24,7 @@ class VariablesDIAQuantPlasma:
     fig_metric: str = "fig_metric_dia_quant_Plasma"
     fig_cv: str = "fig_CV_violinplot_dia_quant_Plasma"
     fig_ma_plot: str = "fig_ma_plot_dia_quant_Plasma"
+    fig_prefix: str = "fig_dia_quant_Plasma_"
     result_perf: str = "result_perf_dia_quant_Plasma"
     meta_data: str = "meta_data_dia_quant_Plasma"
     input_df: str = "input_df_dia_quant_Plasma"
@@ -54,7 +55,8 @@ class VariablesDIAQuantPlasma:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_Plasma"
     metric_selector_uuid: str = "metric_selector_uuid_dia_quant_Plasma"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_Plasma"
-
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant_Plasma"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_Plasma"
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [
             "None",

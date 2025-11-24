@@ -124,7 +124,7 @@ Available ProteoBench modules
         ^^^
         additional DIA ion-level module with Astral DIA data
 
-    .. grid-item-card:: Label-free quantification of precursor ions with ZenoTOF 8600 - Zeno SWATH data
+    .. grid-item-card:: Label-free quantification of precursor ions with ZenoTOF 8600 - ZenoSWATH data
         :columns: 6 6 4 4
         :padding: 1
         :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF

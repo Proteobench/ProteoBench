@@ -363,15 +363,6 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     annotation_text=f"Expected {species}",
                 )
 
-            fig.add_annotation(
-                x=0.5,
-                y=0.5,
-                xref="paper",
-                yref="paper",
-                font=dict(size=50, color="rgba(0,0,0,0.1)"),
-                showarrow=False,
-            )
-
         else:
             # Create empty figure if no data
             fig = go.Figure()

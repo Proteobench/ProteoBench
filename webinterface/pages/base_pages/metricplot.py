@@ -58,7 +58,7 @@ def render_metric_plot(data: pd.DataFrame, metric: str, label: str, key, plot_ge
         )
         if selected_point:
             hover = selected_point.get("hovertext", "")
-            match = re.search(r"ProteoBench ID: ([^\s<]+)", hover)
+            match = re.search(r"ProteoBench ID: ([^<]+)", hover)
             if match:
                 highlight_point_id = match.group(1)
 

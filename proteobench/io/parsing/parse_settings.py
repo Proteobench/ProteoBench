@@ -285,6 +285,7 @@ class ParseSettingsQuant:
         pd.DataFrame
             DataFrame converted to standard format.
         """
+        # If "Raw file" is in mapper values, data is already in long format - skip melting
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
             df_melted = df.melt(
@@ -476,4 +477,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
 }

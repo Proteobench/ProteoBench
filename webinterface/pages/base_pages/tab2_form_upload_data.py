@@ -33,14 +33,16 @@ def generate_input_fields(
     # For AlphaDIA, require a second file upload
     if user_input["input_format"] == "AlphaDIA":
         st.info(
-            "ℹ️**Two-file upload (recommended):** Upload both **precursor.matrix.tsv** and **precursors.tsv** files below for automatic merging. "
+            "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
+            "**If not, you have the following options:**\n\n"
+            "**Two-file upload (recommended):** Upload both **precursor.matrix.tsv** and **precursors.tsv** files below for automatic merging. "
             "You can upload them in any order - the system will automatically detect which is which.\n\n"
             "**Single-file upload (legacy):** Alternatively, upload a single pre-merged file in the main uploader above."
         )
         user_input["input_csv_secondary"] = st.file_uploader(
             "Upload second AlphaDIA file (optional)",
             type=["tsv", "csv"],
-            help="Upload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv) for automatic merging. Leave empty if uploading a pre-merged file.",
+            help="ℹ️ Only for AlphaDIA v1:\nUpload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv) for automatic merging. Leave empty if uploading a pre-merged file.",
         )
     else:
         user_input["input_csv_secondary"] = None
@@ -93,7 +95,7 @@ def process_submission_form(
     if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
         # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
         st.info(
-            "You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
+            "Only for AlphaDIA v1: You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
             "or upload a single pre-merged file. Currently uploading a single file. If you intended to upload both files, "
             "please use the secondary file uploader below and disregard the error message that may follow.",
             icon="ℹ️",

@@ -15,4 +15,5 @@ MODULE_SETTINGS_DIRS = {
     "quant_lfq_DDA_peptidoform": (QUANT_LFQ_SETTINGS_DIR / "DDA" / "peptidoform").as_posix(),
     "quant_lfq_DIA_ion_Astral": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "Astral").as_posix(),
     "quant_lfq_DDA_ion_Astral": (QUANT_LFQ_SETTINGS_DIR / "DDA" / "ion" / "Astral").as_posix(),
+    "quant_lfq_DIA_ion_ZenoTOF": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "ZenoTOF").as_posix(),
 }

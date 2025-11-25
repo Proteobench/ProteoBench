@@ -95,6 +95,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
         input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module for benchmarking workflow results.
@@ -165,7 +166,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         # Generate current data point
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

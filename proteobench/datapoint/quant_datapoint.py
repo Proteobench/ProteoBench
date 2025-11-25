@@ -371,7 +371,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
                 "nr_quantified_spike_ins", 0
             )
             result_dict["dynamic_range_human_plasma"] = plasma_metrics[default_cutoff_min_prec].get(
-                "dynamic_range_human_plasma", 0.0
+                "dynamic_range_human_plasma_mean", 0.0
             )
             result_dict["median_abs_epsilon_human_plasma"] = plasma_metrics[default_cutoff_min_prec].get(
                 "median_abs_epsilon_human_plasma", 0.0

@@ -53,6 +53,12 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Generate CV violin plot
         plots["cv"] = self._plot_cv_violinplot(performance_data)
 
+        plots["ma_plot"] = self._plot_ma_plot(performance_data, species_expected_ratio)
+
+        plots["dynamic_range_plot"] = self._plot_dynamic_range(performance_data)
+
+        plots["missing_values_plot"] = self._plot_missing_values(performance_data)
+
         return plots
 
     def get_in_depth_plot_layout(self) -> list:
@@ -66,11 +72,26 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         """
         return [
             {
+                "plots": ["dynamic_range_plot", "missing_values_plot"],
+                "columns": 2,
+                "titles": {
+                    "dynamic_range_plot": "Dynamic Range Distribution in Condition A and B.",
+                    "missing_values_plot": "Missing Values Distribution in Condition A and B.",
+                },
+            },
+            {
                 "plots": ["logfc", "cv"],
                 "columns": 2,
                 "titles": {
                     "logfc": "Log2 Fold Change distributions by species (Human plasma, Yeast, E. coli).",
                     "cv": "Coefficient of variation distribution in Condition A and B.",
+                },
+            },
+            {
+                "plots": ["ma_plot"],
+                "columns": 1,
+                "titles": {
+                    "ma_plot": "MA Plot",
                 },
             },
         ]
@@ -87,6 +108,10 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         return {
             "logfc": "log2 fold changes calculated from the intermediate data",
             "cv": "CVs calculated from the intermediate data",
+            "ma_plot": "MA plot (M vs A plot) showing log2 fold changes against mean abundance",
+            # TODO: improve
+            "dynamic_range_plot": "Dynamic range of human precursor intensities in Condition A and B",
+            "missing_values_plot": "Distribution of missing values (%) in the dataset",
         }
 
     def _plot_fold_change_histogram(
@@ -240,6 +265,186 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             fig = go.Figure()
             fig.add_annotation(
                 text="No CV data available",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+            )
+
+        return fig
+
+    def _plot_ma_plot(
+        self, performance_data: pd.DataFrame, species_expected_ratio: Dict[str, Dict[str, Union[float, str]]]
+    ) -> go.Figure:
+        """
+        Generate MA plot (M vs A plot) but with A on the y-axis and M on the x-axis.
+
+        Parameters
+        ----------
+        performance_data : pd.DataFrame
+            Performance data containing log2_A_vs_B and mean abundance columns
+        species_expected_ratio : Dict[str, Dict[str, Union[float, str]]]
+            Expected ratios for each species and their colors
+
+        Returns
+        -------
+        go.Figure
+            Plotly figure with MA plot (M on x, A on y)
+        """
+        fig = go.Figure()
+
+        # Define colors for species
+        color_map = {species: data["color"] for species, data in species_expected_ratio.items()}
+
+        performance_data["logIntensityMean"] = (
+            performance_data["log_Intensity_mean_A"] + performance_data["log_Intensity_mean_B"]
+        ) / 2
+
+        fig = px.scatter(
+            performance_data,
+            x="log2_A_vs_B",
+            y="logIntensityMean",
+            color="species",
+            color_discrete_map=color_map,
+            labels={"log2_A_vs_B": "M (Log2 Fold Change(A:B))", "logIntensityMean": "A (Mean Abundance)"},
+            title="MA Plot",
+            size_max=10,
+            opacity=0.2,
+        )
+
+        # Add vertical lines for expected M values (since M is on x-axis) across the A range
+        if fig.data:
+            ratio_map = {species: np.log2(data["A_vs_B"]) for species, data in species_expected_ratio.items()}
+            for species, ratio in ratio_map.items():
+                fig.add_vline(
+                    x=ratio,
+                    line_dash="dash",
+                    line_color=species_expected_ratio[species].get("color", "#000000"),
+                    annotation_text=f"Expected {species}",
+                )
+
+            fig.update_traces(marker=dict(size=6))
+        else:
+            fig.add_annotation(
+                text="No data available for MA plot",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+            )
+        return fig
+
+    def _plot_dynamic_range(self, performance_data: pd.DataFrame) -> go.Figure:
+        """
+        Generate dynamic range plot for both conditions A and B.
+
+        Parameters
+        ----------
+        performance_data : pd.DataFrame
+            Performance data containing dynamic range information
+
+        Returns
+        -------
+        go.Figure
+            Plotly figure with dynamic range plots for both conditions
+        """
+        fig = go.Figure()
+
+        # Process data for both conditions
+        conditions_data = []
+
+        # Check for Condition A data
+        if "Intensity_mean_A" in performance_data.columns:
+            human_slice_a = performance_data[performance_data["species"] == "HUMAN"].copy()
+            if len(human_slice_a) > 0 and human_slice_a["Intensity_mean_A"].max() > 0:
+                human_slice_a["normalized_intensity"] = (
+                    human_slice_a["Intensity_mean_A"] / human_slice_a["Intensity_mean_A"].max() * 100
+                )
+                human_slice_a = human_slice_a.sort_values(by="normalized_intensity", ascending=False)
+                human_slice_a["rank"] = range(1, len(human_slice_a) + 1)
+                human_slice_a["condition"] = "A"
+                conditions_data.append(human_slice_a[["rank", "normalized_intensity", "condition"]])
+
+        # Check for Condition B data
+        if "Intensity_mean_B" in performance_data.columns:
+            human_slice_b = performance_data[performance_data["species"] == "HUMAN"].copy()
+            if len(human_slice_b) > 0 and human_slice_b["Intensity_mean_B"].max() > 0:
+                human_slice_b["normalized_intensity"] = (
+                    human_slice_b["Intensity_mean_B"] / human_slice_b["Intensity_mean_B"].max() * 100
+                )
+                human_slice_b = human_slice_b.sort_values(by="normalized_intensity", ascending=False)
+                human_slice_b["rank"] = range(1, len(human_slice_b) + 1)
+                human_slice_b["condition"] = "B"
+                conditions_data.append(human_slice_b[["rank", "normalized_intensity", "condition"]])
+
+        if conditions_data:
+            if len(conditions_data) > 1:
+                # Both conditions available - combine and plot with condition separation
+                plot_df = pd.concat(conditions_data, ignore_index=True)
+                fig = px.scatter(
+                    plot_df,
+                    x="rank",
+                    y="normalized_intensity",
+                    color="condition",
+                    labels={"rank": "Rank", "normalized_intensity": "Normalized Intensity (%)"},
+                    title="Dynamic Range Plot (Human precursors in plasma)",
+                    color_discrete_map={"A": "#1f77b4", "B": "#ff7f0e"},
+                )
+                fig.update_yaxes(type="log", dtick="1")
+            else:
+                # Only one condition available
+                plot_df = conditions_data[0]
+                fig = px.scatter(
+                    plot_df,
+                    x="rank",
+                    y="normalized_intensity",
+                    labels={"rank": "Rank", "normalized_intensity": "Normalized Intensity (%)"},
+                    title="Dynamic Range Plot (Human precursors)",
+                )
+                fig.update_yaxes(type="log")
+        else:
+            # No data available
+            fig = go.Figure()
+            fig.add_annotation(
+                text="No human plasma data available for dynamic range plot",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+            )
+
+        return fig
+
+    def _plot_missing_values(self, performance_data: pd.DataFrame) -> go.Figure:
+        """
+        Generate missing values plot.
+
+        Parameters
+        ----------
+        performance_data : pd.DataFrame
+            Performance data containing missing values information
+
+        Returns
+        -------
+        go.Figure
+            Plotly figure with missing values plot
+        """
+        fig = go.Figure()
+
+        if "missing_values_percent" in performance_data.columns:
+            fig = px.histogram(
+                performance_data,
+                x="missing_values_percent",
+                nbins=50,
+                labels={"missing_values_percent": "Missing Values (%)"},
+                title="Missing Values Distribution",
+            )
+        else:
+            fig.add_annotation(
+                text="No missing values data available",
                 xref="paper",
                 yref="paper",
                 x=0.5,
@@ -413,7 +618,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
                 x_val = metrics.get("median_abs_log2_fc_error_spike_ins", 0.0)
                 y_val = metrics.get("nr_quantified_spike_ins", 0)
-                size_val = metrics.get("dynamic_range_human_plasma_mean", 0.0) or metrics.get("dynamic_range_human_plasma", 0.0)
+                size_val = metrics.get("dynamic_range_human_plasma_mean", 0.0)
                 opacity_val = metrics.get("median_abs_epsilon_human_plasma", 0.0)
 
                 x_values.append(x_val)
@@ -489,7 +694,11 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         )
 
         # Add annotation explaining visual dimensions
-        annotation_text = "Dot size = dynamic range of plasma | " "Opacity = plasma accuracy (darker = better)"
+        # TODO: improve
+        annotation_text = (
+            "Dot size = dynamic range of quantified human precursors in plasma | "
+            "Opacity = plasma quantification accuracy (darker = better)"
+        )
         fig.add_annotation(
             text=annotation_text if not hide_annot else "",
             xref="paper",

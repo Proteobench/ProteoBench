@@ -19,7 +19,7 @@ import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
-    QuantDatapoint,
+    QuantDatapointHYE,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
@@ -50,7 +50,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscores import QuantScoresHYE
 
 
 class QuantModule:
@@ -220,11 +220,20 @@ class QuantModule:
         if len(all_datapoints) == 0:
             return all_datapoints
 
-        all_datapoints["median_abs_epsilon"] = [
+        all_datapoints["median_abs_epsilon_global"] = [
             filter_df_numquant_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
 
-        all_datapoints["mean_abs_epsilon"] = [
+        all_datapoints["mean_abs_epsilon_global"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["median_abs_epsilon_eq_species"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["mean_abs_epsilon_eq_species"] = [
             filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean")
             for v in all_datapoints["results"]
         ]
@@ -275,12 +284,12 @@ class QuantModule:
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data
-        quant_score = QuantScores(
+        quant_score = QuantScoresHYE(
             self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
-        current_datapoint = QuantDatapoint.generate_datapoint(
+        current_datapoint = QuantDatapointHYE.generate_datapoint(
             intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 

@@ -1,10 +1,14 @@
 import datetime
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint, filter_df_numquant_epsilon, filter_df_numquant_nr_prec
+from proteobench.datapoint.quant_datapoint import (
+    QuantDatapointHYE,
+    filter_df_numquant_epsilon,
+    filter_df_numquant_nr_prec,
+)
 
 DATAPOINT_USER_INPUT_TYPE = {
     "DDA_MaxQuant": {
@@ -50,7 +54,7 @@ class TestQuantDatapoint:
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
-        QuantDatapoint(
+        QuantDatapointHYE(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],
@@ -82,7 +86,7 @@ class TestQuantDatapoint:
     def test_get_metrics(self, sample_dataframe):
         """Test the get_metrics method."""
         # Test with min_nr_observed = 1
-        result = QuantDatapoint.get_metrics(sample_dataframe, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(sample_dataframe, min_nr_observed=1)
         assert 1 in result
         metrics = result[1]
 
@@ -101,7 +105,7 @@ class TestQuantDatapoint:
             assert metric in metrics
 
         # Test with min_nr_observed = 3
-        result = QuantDatapoint.get_metrics(sample_dataframe, min_nr_observed=3)
+        result = QuantDatapointHYE.get_metrics(sample_dataframe, min_nr_observed=3)
         assert 3 in result
         assert result[3]["nr_prec"] == 3  # Only 3 rows have nr_observed >= 3
 
@@ -109,13 +113,13 @@ class TestQuantDatapoint:
         """Test the get_metrics method with edge cases."""
         # Test with empty DataFrame
         empty_df = pd.DataFrame(columns=["nr_observed", "epsilon", "CV_A", "CV_B"])
-        result = QuantDatapoint.get_metrics(empty_df)
+        result = QuantDatapointHYE.get_metrics(empty_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 0
 
         # Test with single row
         single_row_df = pd.DataFrame({"nr_observed": [1], "epsilon": [0.1], "CV_A": [0.1], "CV_B": [0.1]})
-        result = QuantDatapoint.get_metrics(single_row_df)
+        result = QuantDatapointHYE.get_metrics(single_row_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
         assert result[1]["median_abs_epsilon"] == 0.1
@@ -143,6 +147,26 @@ class TestQuantDatapoint:
         # Test with missing metric
         row_missing_metric = {"3": {"mean_abs_epsilon": 0.3}}
         assert filter_df_numquant_epsilon(row_missing_metric, metric="median") is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
 
         # Test with None values
         row_with_none = {"3": None}

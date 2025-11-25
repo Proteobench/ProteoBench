@@ -15,6 +15,7 @@ from typing import Any, Dict
 import pandas as pd
 
 import proteobench
+from proteobench.datapoint.datapoint_base import DatapointBase
 
 
 def filter_df_numquant_epsilon(
@@ -72,9 +73,12 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
 
 
 @dataclass
-class QuantDatapoint:
+class QuantDatapointHYE(DatapointBase):
     """
-    A data structure used to store the results of a benchmark run.
+    A data structure used to store the results of a quantification benchmark run.
+
+    This class extends DatapointBase to implement quantification-specific metrics and metadata
+    storage for LFQ benchmarking runs.
 
     Attributes:
         id (str): Unique identifier for the benchmark run.
@@ -95,8 +99,10 @@ class QuantDatapoint:
         is_temporary (bool): Whether the data is temporary.
         intermediate_hash (str): Hash of the intermediate result.
         results (dict): A dictionary of metrics for the benchmark run.
-        median_abs_epsilon (float): Median absolute epsilon value for the benchmark.
-        mean_abs_epsilon (float): Mean absolute epsilon value for the benchmark.
+        median_abs_epsilon_global (float): Median absolute epsilon value (global calculation).
+        mean_abs_epsilon_global (float): Mean absolute epsilon value (global calculation).
+        median_abs_epsilon_eq_species (float): Median absolute epsilon value (equal weighted species).
+        mean_abs_epsilon_eq_species (float): Mean absolute epsilon value (equal weighted species).
         nr_prec (int): Number of precursors identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
@@ -175,7 +181,7 @@ class QuantDatapoint:
         except AttributeError:
             user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
 
-        result_datapoint = QuantDatapoint(
+        result_datapoint = QuantDatapointHYE(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],
@@ -199,7 +205,7 @@ class QuantDatapoint:
         result_datapoint.generate_id()
 
         results = dict(
-            ChainMap(*[QuantDatapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
+            ChainMap(*[QuantDatapointHYE.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
         )
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][

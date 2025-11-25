@@ -169,7 +169,11 @@ class DIAQuantIonModulePlasma(QuantModule):
         # Generate current data point
         try:
             current_datapoint = QuantDatapointPYE.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
+                intermediate_data_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_prec=default_cutoff_min_prec,
+                max_nr_observed=max_nr_observed,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

@@ -295,7 +295,11 @@ class QuantModule:
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
+            intermediate_metric_structure,
+            input_format,
+            user_input,
+            default_cutoff_min_prec=default_cutoff_min_prec,
+            max_nr_observed=max_nr_observed,
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)

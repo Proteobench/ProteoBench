@@ -288,6 +288,7 @@ class QuantUIObjects:
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
+        
         tab1_results.initialize_main_slider(
             slider_id_uuid=self.variables.slider_id_uuid,
             default_val_slider=self.variables.default_val_slider,
@@ -296,6 +297,7 @@ class QuantUIObjects:
             slider_id_uuid=self.variables.slider_id_uuid,
             description_slider_md=self.variables.description_slider_md,
             default_val_slider=self.variables.default_val_slider,
+            max_nr_observed=self.variables.max_nr_observed,
         )
         tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
         tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
@@ -303,11 +305,15 @@ class QuantUIObjects:
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
+        
         tab4_display_results_submitted.initialize_submitted_slider(
             self.variables.slider_id_submitted_uuid,
             self.variables.default_val_slider,
         )
-        tab4_display_results_submitted.generate_submitted_slider(self.variables)
+        tab4_display_results_submitted.generate_submitted_slider(
+            self.variables,
+            max_nr_observed=self.variables.max_nr_observed,
+        )
         tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
         tab4_display_results_submitted.display_submitted_results(
             variables=self.variables,

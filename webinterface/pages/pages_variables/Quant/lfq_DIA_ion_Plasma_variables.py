@@ -41,7 +41,8 @@ class VariablesDIAQuantPlasma:
     placeholder_downloads_container: str = "placeholder_downloads_container_dia_quant_Plasma"
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
-    default_val_slider: int = 3
+    default_val_slider: int = 6
+    max_nr_observed: int = 12
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_Plasma.git"
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_Plasma"

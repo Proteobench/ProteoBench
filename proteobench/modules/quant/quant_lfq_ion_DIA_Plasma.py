@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapointPYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -23,7 +23,8 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.plotting.plot_generator_lfq_PYE import LFQPYEPlotGenerator
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class DIAQuantIonModulePlasma(QuantModule):
@@ -95,6 +96,7 @@ class DIAQuantIonModulePlasma(QuantModule):
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
         input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module for benchmarking workflow results.
@@ -113,6 +115,8 @@ class DIAQuantIonModulePlasma(QuantModule):
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
+        max_nr_observed : int, optional
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 12 for plasma).
 
         Returns
         -------
@@ -150,7 +154,7 @@ class DIAQuantIonModulePlasma(QuantModule):
 
         # Calculate quantification scores
         try:
-            quant_score = QuantScores(
+            quant_score = QuantScoresHYE(
                 self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
@@ -164,8 +168,8 @@ class DIAQuantIonModulePlasma(QuantModule):
 
         # Generate current data point
         try:
-            current_datapoint = QuantDatapoint.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            current_datapoint = QuantDatapointPYE.generate_datapoint(
+                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
@@ -182,3 +186,14 @@ class DIAQuantIonModulePlasma(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    def get_plot_generator(self):
+        """Return the plot generator for the module.
+
+        Returns
+        -------
+        PlotGenerator
+            The plot generator for the module.
+        """
+
+        return LFQPYEPlotGenerator()

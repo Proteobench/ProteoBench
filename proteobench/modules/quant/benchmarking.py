@@ -21,7 +21,7 @@ from proteobench.exceptions import (
 )
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.score.quantscores import QuantScoresHYE
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 def handle_benchmarking_error(error_type: Type[Exception], error_message: str):

@@ -51,6 +51,10 @@ class VariablesDDAQuant:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dda_quant_peptidoform"
     metric_selector_uuid: str = "metric_selector_uuid_dda_quant_peptidoform"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dda_quant_peptidoform"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dda_quant_peptidoform"
+    metric_calc_approach_selector_submitted_uuid: str = (
+        "metric_calc_approach_selector_submitted_uuid_dda_quant_peptidoform"
+    )
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [
@@ -76,6 +80,7 @@ class VariablesDDAQuant:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    max_nr_observed: int = 6
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_peptidoform_DDA.git"
 

@@ -174,7 +174,6 @@ class QuantUIObjects:
             variables=self.variables,
             parsesettingsbuilder=self.parsesettingsbuilder,
             user_input=self.user_input,
-            recalculate=True,
             public_id=public_id,
             public_hash=selected_hash,
         )

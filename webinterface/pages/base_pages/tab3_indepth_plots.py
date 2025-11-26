@@ -19,7 +19,6 @@ def generate_indepth_plots(
     variables,
     parsesettingsbuilder,
     user_input,
-    recalculate: bool,
     public_id: Optional[str],
     public_hash: Optional[str],
 ) -> go.Figure:
@@ -28,8 +27,6 @@ def generate_indepth_plots(
 
     Parameters
     ----------
-    recalculate : bool
-        Whether to recalculate the plots.
     public_id : Optional[str], optional
         The dataset to plot, either "Uploaded dataset" or name of public run.
     public_hash : Optional[str], optional
@@ -83,22 +80,14 @@ def generate_indepth_plots(
         performance_data["nr_observed"] >= st.session_state[st.session_state[variables.slider_id_uuid]]
     ]
 
-    if recalculate:
-        parse_settings = parsesettingsbuilder.build_parser(user_input["input_format"])
-        plots = plot_generator.generate_in_depth_plots(
-            performance_data,
-            parse_settings,
-        )
+    parse_settings = parsesettingsbuilder.build_parser(user_input["input_format"])
+    plots = plot_generator.generate_in_depth_plots(
+        performance_data,
+        parse_settings,
+    )
 
-        for plot_name, fig in plots.items():
-            st.session_state[f"{variables.fig_prefix}_{plot_name}"] = fig
-
-    else:
-        plots = {}
-        for plot_name in plot_generator.get_in_depht_plot_descriptions().keys():
-            key = f"{variables.fig_prefix}_{plot_name}"
-            if key in st.session_state:
-                plots[plot_name] = st.session_state[key]
+    for plot_name, fig in plots.items():
+        st.session_state[f"{variables.fig_prefix}_{plot_name}"] = fig
 
     if variables.first_new_plot:
         layout_config = plot_generator.get_in_depth_plot_layout()

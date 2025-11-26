@@ -7,7 +7,7 @@ from __future__ import annotations
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     IntermediateFormatGenerationError,
@@ -20,7 +20,7 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.benchmarking import run_benchmarking
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscores import QuantScoresHYE
 
 
 class DDAQuantIonModuleQExactive(QuantModule):
@@ -129,3 +129,6 @@ class DDAQuantIonModuleQExactive(QuantModule):
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
         )
+
+    def get_plot_generator(self):
+        return super().get_plot_generator()

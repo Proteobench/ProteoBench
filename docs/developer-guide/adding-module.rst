@@ -17,10 +17,10 @@ The following terms capture the crucial components:
    benchmarks of a new data type.
 
    *Intermediate data structure* (:class:`DataFrame`): Data structure needed for the
-   calculation of the ``datapoint``, e.g. :class:`QuantDatapoint`. It contains
+   calculation of the ``datapoint``, e.g. :class:`QuantDatapointHYE`. It contains
    the transformed and annotated data of an uploaded data file.
 
-   *Datapoint*: Metadata and benchmarking metrics for a given data set. A ``datapoint``, e.g. :class:`QuantDatapoint`,
+   *Datapoint*: Metadata and benchmarking metrics for a given data set. A ``datapoint``, e.g. :class:`QuantDatapointHYE`,
    is the data needed for the benchmarking and should also be represented by a json object.
 
 Naming convention
@@ -44,46 +44,67 @@ that allow for a more modular and portable implementation.
 Backend
 ------- 
 
-We make an example of an ``quant`` module implementation, where you should use or extend
-certain classes and do the following steps:
+The backend is organized into four main components that you can extend or customize:
 
-1. :class:`~proteobench.modules.quant.quant_base_module.QuantModule` contains the main functions reading 
-   the and processing the uploaded data set, generating the *intermediate* metric structure
-   and creating the ``datapoint``, as well as adding it to our collection of ``datapoints``.
-   You can subclass it and implement the ``benchmarking`` method and the ``is_implemented``
-   method, initializing it with custom parameters in the ``__init__`` method.
-2. Functions in :file:`proteobench/io/parsing/parse_ion.py` provide the functions used to parse
-   precursor (`open on GitHub <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_)
-3. :file:`proteobench/io/parsing/io_parse_settings/parse_settings_files.toml`
-   `(link) <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/parse_settings_files.toml>`_
-   links the settings to parse the uploaded data files into the **intermediate** metric
-   structure used by
-   :file:`proteobench/io/parsing/parse_ion.py` per module. The settings file
-   parameters should be defined in the toml file in a folder for a module
-   :file:`proteobench/io/parse/io_parse_settings/Quant/lfq/DDA/ion/`,
-   for example
-   `parse_settings_alphadia <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral/parse_settings_alphadia.toml>`_.
-   New data analysis software has to be added to 
-   :func:`~proteobench.io.parsing.parse_ion.load_input_file`
-   and the settings are parsed by
-   :class:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant`,
-   which most important method is
-   :meth:`~proteobench.io.parsing.parse_settings.ParseSettingsQuant.convert_to_standard_format`.
-4. :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint` is the
-   data structure (as a dataclass) of :class:`DataPoint` for quant modules.
-   It contains data set properties from the acquisition and processing
-   (e.g. used peptide fdr).
-5. :class:`~proteobench.plotting.plot_quant.PlotDataPoint` is the class with methods to visualize
-   the benchmarking metrics from the ``DataPoints``.
-6. Functionality for calculating score can be found in
-   :class:`~proteobench/score/quant/quantscores.QuantScores`, which also generates the 
-   ``intermediate`` output.
-7. Functions in :file:`proteobench/io/params` provide the functions used to parse
-   parameter setting files for data analysis tools
-   (`open on GitHub <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_)
-8. The possibility to adapt the parsed results before submission is customized based on
-   a module specific json file in
-   `proteobench/io/params/json/Quant <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/params/json/Quant>`_
+**1. Module implementation** - Define how your benchmarking is performed
+   - For quantification: Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule`
+   - Implement the ``benchmarking`` method with your specific logic
+   - Initialize with custom parameters in the ``__init__`` method
+
+**2. Data parsing** - Convert software output to standard format
+   - Functions in :file:`proteobench/io/parsing/parse_ion.py` parse precursor ion data
+   - :file:`proteobench/io/parsing/parse_settings.py` handles format conversion
+   - Settings defined in TOML files in :file:`proteobench/io/parsing/io_parse_settings/`
+   - For new software tools, extend :func:`~proteobench.io.parsing.parse_ion.load_input_file`
+
+**3. Score calculation** - Compute benchmarking metrics
+   - Base class: :class:`~proteobench.score.score_base.ScoreBase` (ABC)
+   - For quantification: Use or extend :class:`~proteobench.score.quantscores.QuantScores`
+   - Generates the ``intermediate`` data structure
+   - For new module types: Create a new class inheriting from ``ScoreBase``
+
+**4. Result representation** - Store benchmark results as datapoints
+   - Base class: :class:`~proteobench.datapoint.datapoint_base.DatapointBase` (ABC)
+   - For quantification: Use or extend :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint`
+   - Stores metadata and metrics for each benchmark run
+   - For new module types: Create a new class inheriting from ``DatapointBase``
+
+**5. Visualization** - Create plots for web interface
+   - Base class: :class:`~proteobench.plotting.plot_generator_base.PlotGeneratorBase` (ABC)
+   - For LFQ modules: Use or extend :class:`~proteobench.plotting.plot_generator_lfq_HYE.LFQHYEPlotGenerator`
+   - Generates module-specific visualizations
+   - For new module types: Create a new class inheriting from ``PlotGeneratorBase``
+
+**6. Parameter parsing** - Parse tool-specific settings
+   - Functions in :file:`proteobench/io/params` parse parameter setting files
+   - Customize per software tool in :file:`proteobench/io/params/json/`
+
+Architecture example
+....................
+
+Here's how these components work together for a quantification module:
+
+.. code-block:: python
+
+    # Module orchestrates the workflow
+    module = QuantModule()
+    
+    # 1. Parse input file
+    input_data = parse_ion.load_input_file(file_path, "MaxQuant")
+    
+    # 2. Calculate scores (generates intermediate data)
+    score_calculator = QuantScores(...)
+    intermediate = score_calculator.generate_intermediate(input_data, replicate_to_raw)
+    
+    # 3. Create datapoint from intermediate results
+    datapoint = QuantDatapoint.generate_datapoint(intermediate, "MaxQuant", user_input)
+    
+    # 4. Generate plots for visualization
+    plot_generator = LFQHYEPlotGenerator()
+    plots = plot_generator.generate_in_depth_plots(performance_data, parse_settings)
+    
+    # 5. Store and display results
+    # ... persist datapoint and plots to results repository
 
 Web interface
 -------------

@@ -23,6 +23,7 @@ class VariablesDDAQuant:
     fig_metric: str = "fig_metric"
     fig_cv: str = "fig_CV_violinplot"
     fig_ma_plot: str = "fig_ma_plot"
+    fig_prefix: str = "fig_dda_quant_QExactive_"
     result_perf: str = "result_perf"
     meta_data: str = "meta_data"
     input_df: str = "input_df"

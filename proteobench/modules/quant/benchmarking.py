@@ -9,7 +9,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Type
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -21,7 +21,7 @@ from proteobench.exceptions import (
 )
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscores import QuantScoresHYE
 
 
 def handle_benchmarking_error(error_type: Type[Exception], error_message: str):
@@ -72,7 +72,7 @@ def _convert_format(parse_settings, input_df: DataFrame):
 @handle_benchmarking_error(QuantificationError, "Error generating quantification scores")
 def _create_quant_scores(precursor_column_name: str, parse_settings):
     """Create quantification scores."""
-    return QuantScores(precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict())
+    return QuantScoresHYE(precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict())
 
 
 @handle_benchmarking_error(IntermediateFormatGenerationError, "Error generating intermediate data structure")
@@ -84,7 +84,7 @@ def _generate_intermediate(quant_score, standard_format, replicate_to_raw):
 @handle_benchmarking_error(DatapointGenerationError, "Error generating datapoint")
 def _generate_datapoint(intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec):
     """Generate datapoint."""
-    return QuantDatapoint.generate_datapoint(
+    return QuantDatapointHYE.generate_datapoint(
         intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
     )
 
@@ -236,7 +236,7 @@ def run_benchmarking_with_timing(
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
     with time_block("instantiate_quant_scores"):
-        quant_score = QuantScores(
+        quant_score = QuantScoresHYE(
             precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
 
@@ -244,7 +244,7 @@ def run_benchmarking_with_timing(
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
     with time_block("generate_datapoint"):
-        current_datapoint = QuantDatapoint.generate_datapoint(
+        current_datapoint = QuantDatapointHYE.generate_datapoint(
             intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 

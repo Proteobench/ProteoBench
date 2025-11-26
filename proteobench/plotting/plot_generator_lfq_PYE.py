@@ -9,7 +9,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.figure_factory import create_distplot
-from scipy.optimize import curve_fit
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
@@ -77,7 +76,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 "columns": 2,
                 "titles": {
                     "dynamic_range_plot": "Dynamic Range in Condition A and B.",
-                    "missing_values_plot": "Missing Values Distribution in Condition A and B.",
+                    "missing_values_plot": "Missing Values Distribution across runs.",
                 },
             },
             {
@@ -112,7 +111,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             "ma_plot": "MA plot (M vs A plot) showing log2 fold changes against mean abundance",
             # TODO: improve
             "dynamic_range_plot": "Dynamic range of human precursor intensities in Condition A and B",
-            "missing_values_plot": "Distribution of missing values (%) in the dataset",
+            "missing_values_plot": "Distribution of missing values (%) of quantified human precursors",
         }
 
     def _plot_fold_change_histogram(
@@ -467,11 +466,6 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
         return fig
 
-    @staticmethod
-    def _sigmoid(x, L, x0, k, b):
-        """Sigmoidal function (logistic curve)"""
-        return L / (1 + np.exp(-k * (x - x0))) + b
-
     def _plot_missing_values(self, performance_data: pd.DataFrame, max_observations=12) -> go.Figure:
         """
         Generate missing values plot with a sigmoidal trend line.
@@ -499,8 +493,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             human_slice,
             x="rank",
             y="missingness",
-            labels={"rank": "Rank", "missingness": "Missing Values (%)"},
-            title="Missing Values Plot with Sigmoidal Trend",
+            labels={"rank": "Intensity Rank", "missingness": "Missing Values (%)"},
         )
 
         return fig

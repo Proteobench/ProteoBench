@@ -223,7 +223,6 @@ class QuantDatapointHYE(DatapointBase):
                 ]
             )
         )
-        print(results)
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
             "median_abs_epsilon_global"

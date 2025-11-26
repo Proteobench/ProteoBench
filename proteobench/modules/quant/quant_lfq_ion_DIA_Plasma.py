@@ -163,6 +163,7 @@ class DIAQuantIonModulePlasma(QuantModule):
         # Generate intermediate data structure
         try:
             intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+            print(intermediate_data_structure["nr_observed"].value_counts())
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 

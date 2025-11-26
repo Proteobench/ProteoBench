@@ -9,6 +9,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.figure_factory import create_distplot
+from scipy.optimize import curve_fit
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
@@ -75,7 +76,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 "plots": ["dynamic_range_plot", "missing_values_plot"],
                 "columns": 2,
                 "titles": {
-                    "dynamic_range_plot": "Dynamic Range Distribution in Condition A and B.",
+                    "dynamic_range_plot": "Dynamic Range in Condition A and B.",
                     "missing_values_plot": "Missing Values Distribution in Condition A and B.",
                 },
             },
@@ -132,9 +133,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with fold change distributions
         """
-        species_list = (
-            list(species_expected_ratio.keys()) if species_expected_ratio else ["human_plasma", "yeast", "ecoli"]
-        )
+        species_list = list(species_expected_ratio.keys())
 
         # Filter to rows where at least one species is present
         species_cols = [s for s in species_list if s in performance_data.columns]
@@ -338,7 +337,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
     def _plot_dynamic_range(self, performance_data: pd.DataFrame) -> go.Figure:
         """
-        Generate dynamic range plot for both conditions A and B.
+        Generate dynamic range plot for both conditions A and B, with a smoothed
+        epsilon trend on a secondary y-axis.
 
         Parameters
         ----------
@@ -355,7 +355,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Process data for both conditions
         conditions_data = []
 
-        # Check for Condition A data
+        # Condition A
         if "Intensity_mean_A" in performance_data.columns:
             human_slice_a = performance_data[performance_data["species"] == "HUMAN"].copy()
             if len(human_slice_a) > 0 and human_slice_a["Intensity_mean_A"].max() > 0:
@@ -365,9 +365,10 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 human_slice_a = human_slice_a.sort_values(by="normalized_intensity", ascending=False)
                 human_slice_a["rank"] = range(1, len(human_slice_a) + 1)
                 human_slice_a["condition"] = "A"
-                conditions_data.append(human_slice_a[["rank", "normalized_intensity", "condition"]])
+                # keep epsilon so we can compute the trend
+                conditions_data.append(human_slice_a[["rank", "normalized_intensity", "condition", "epsilon"]])
 
-        # Check for Condition B data
+        # Condition B
         if "Intensity_mean_B" in performance_data.columns:
             human_slice_b = performance_data[performance_data["species"] == "HUMAN"].copy()
             if len(human_slice_b) > 0 and human_slice_b["Intensity_mean_B"].max() > 0:
@@ -377,25 +378,36 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 human_slice_b = human_slice_b.sort_values(by="normalized_intensity", ascending=False)
                 human_slice_b["rank"] = range(1, len(human_slice_b) + 1)
                 human_slice_b["condition"] = "B"
-                conditions_data.append(human_slice_b[["rank", "normalized_intensity", "condition"]])
+                # epsilon of B should be same as A
+                conditions_data.append(human_slice_b[["rank", "normalized_intensity", "condition", "epsilon"]])
 
         if conditions_data:
+            eps_df = conditions_data[0][["rank", "epsilon"]].copy()
+            eps_df["absolute_eps"] = eps_df["epsilon"].abs()
+            eps_df = eps_df.sort_values("rank")
+
+            # window ~1% of points, minimum 5
+            window = max(5, len(eps_df) // 10 if len(eps_df) >= 100 else 5)
+            eps_df["epsilon_trend"] = eps_df["absolute_eps"].rolling(window=window, center=True, min_periods=1).median()
+
             if len(conditions_data) > 1:
                 # Both conditions available - combine and plot with condition separation
                 plot_df = pd.concat(conditions_data, ignore_index=True)
+
                 fig = px.scatter(
                     plot_df,
                     x="rank",
                     y="normalized_intensity",
                     color="condition",
                     labels={"rank": "Rank", "normalized_intensity": "Normalized Intensity (%)"},
-                    title="Dynamic Range Plot (Human precursors in plasma)",
                     color_discrete_map={"A": "#1f77b4", "B": "#ff7f0e"},
                 )
                 fig.update_yaxes(type="log", dtick="1")
+
             else:
                 # Only one condition available
                 plot_df = conditions_data[0]
+
                 fig = px.scatter(
                     plot_df,
                     x="rank",
@@ -404,6 +416,43 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                     title="Dynamic Range Plot (Human precursors)",
                 )
                 fig.update_yaxes(type="log")
+
+            # Add smoothed epsilon trend (without markers, just a line)
+            fig.add_trace(
+                go.Scatter(
+                    x=eps_df["rank"],
+                    y=eps_df["epsilon_trend"],
+                    mode="markers",
+                    name="Absolute epsilon (trend)",
+                    yaxis="y2",
+                    line=dict(dash="dash", color="green"),
+                    showlegend=False,
+                )
+            )
+
+            # Update layout to prevent overlap between the secondary y-axis and the legend
+            max_epsilon = eps_df["epsilon_trend"].max()
+            if pd.isna(max_epsilon) or max_epsilon == 0:
+                max_epsilon = 1.0
+
+            fig.update_layout(
+                yaxis2=dict(
+                    title="Absolute epsilon (rolling median)",
+                    overlaying="y",
+                    side="right",
+                    range=[0, max_epsilon * 1.1],
+                ),
+                hovermode="closest",
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="center",
+                    x=0.5,
+                    title=dict(text="Condition", side="top"),
+                ),
+            )
+
         else:
             # No data available
             fig = go.Figure()
@@ -418,9 +467,14 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
         return fig
 
-    def _plot_missing_values(self, performance_data: pd.DataFrame) -> go.Figure:
+    @staticmethod
+    def _sigmoid(x, L, x0, k, b):
+        """Sigmoidal function (logistic curve)"""
+        return L / (1 + np.exp(-k * (x - x0))) + b
+
+    def _plot_missing_values(self, performance_data: pd.DataFrame, max_observations=12) -> go.Figure:
         """
-        Generate missing values plot.
+        Generate missing values plot with a sigmoidal trend line.
 
         Parameters
         ----------
@@ -430,27 +484,24 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Returns
         -------
         go.Figure
-            Plotly figure with missing values plot
+            Plotly figure with missing values plot and sigmoidal trend line
         """
         fig = go.Figure()
 
-        if "missing_values_percent" in performance_data.columns:
-            fig = px.histogram(
-                performance_data,
-                x="missing_values_percent",
-                nbins=50,
-                labels={"missing_values_percent": "Missing Values (%)"},
-                title="Missing Values Distribution",
-            )
-        else:
-            fig.add_annotation(
-                text="No missing values data available",
-                xref="paper",
-                yref="paper",
-                x=0.5,
-                y=0.5,
-                showarrow=False,
-            )
+        # Filter and prepare data
+        human_slice = performance_data[performance_data["species"] == "HUMAN"].copy()
+        human_slice = human_slice.sort_values(by="logIntensityMean", ascending=False)  # Across conditions
+        human_slice["rank"] = range(1, len(human_slice) + 1)
+        human_slice["missingness"] = (1 - human_slice["nr_observed"] / max_observations) * 100
+
+        # Plot missingness vs rank (scatter plot)
+        fig = px.scatter(
+            human_slice,
+            x="rank",
+            y="missingness",
+            labels={"rank": "Rank", "missingness": "Missing Values (%)"},
+            title="Missing Values Plot with Sigmoidal Trend",
+        )
 
         return fig
 

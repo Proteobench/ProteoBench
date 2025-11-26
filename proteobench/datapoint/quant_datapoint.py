@@ -223,6 +223,7 @@ class QuantDatapointHYE(DatapointBase):
                 ]
             )
         )
+        print(results)
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
             "median_abs_epsilon_global"
@@ -410,6 +411,18 @@ class QuantDatapointPYE(QuantDatapointHYE):
             # Filter data for this min_nr_observed threshold
             df_slice = intermediate[intermediate["nr_observed"] >= min_nr_obs]
 
+            # If no precursors meet this threshold, return zero metrics for this level
+            if len(df_slice) == 0:
+                plasma_metrics[min_nr_obs] = {
+                    "median_abs_log2_fc_error_spike_ins": 0.0,
+                    "nr_quantified_spike_ins": 0,
+                    "dynamic_range_human_plasma_A": 0.0,
+                    "dynamic_range_human_plasma_B": 0.0,
+                    "dynamic_range_human_plasma_mean": 0.0,
+                    "median_abs_epsilon_human_plasma": 0.0,
+                }
+                continue
+
             # Compute median absolute log2 fold-change error for spike-ins (yeast and E. coli)
             spike_ins_df = df_slice[df_slice["species"].isin(["YEAST", "ECOLI"])]
             median_abs_log2_fc_error_spike_ins = (
@@ -436,7 +449,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
             if dynamic_ranges:
                 dynamic_range_human_plasma_mean = np.mean(list(dynamic_ranges.values()))
             else:
-                dynamic_range_human_plasma = 0.0
+                dynamic_range_human_plasma_mean = 0.0
 
             # Compute median absolute epsilon for human plasma
             median_abs_epsilon_human_plasma = (

@@ -75,11 +75,6 @@ def generate_indepth_plots(
                 with z.open("result_performance.csv") as f:
                     performance_data = pd.read_csv(f)
 
-    # Filter the data based on the slider condition (as before)
-    performance_data = performance_data[
-        performance_data["nr_observed"] >= st.session_state[st.session_state[variables.slider_id_uuid]]
-    ]
-
     parse_settings = parsesettingsbuilder.build_parser(user_input["input_format"])
     plots = plot_generator.generate_in_depth_plots(
         performance_data,

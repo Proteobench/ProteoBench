@@ -19,7 +19,6 @@ def generate_indepth_plots(
     variables_quant,
     parsesettingsbuilder,
     user_input,
-    recalculate: bool,
     public_id: Optional[str],
     public_hash: Optional[str],
 ) -> go.Figure:
@@ -28,8 +27,6 @@ def generate_indepth_plots(
 
     Parameters
     ----------
-    recalculate : bool
-        Whether to recalculate the plots.
     public_id : Optional[str], optional
         The dataset to plot, either "Uploaded dataset" or name of public run.
     public_hash : Optional[str], optional
@@ -75,29 +72,17 @@ def generate_indepth_plots(
                 with z.open("result_performance.csv") as f:
                     performance_data = pd.read_csv(f)
 
-    # Filter the data based on the slider condition (as before)
-    performance_data = performance_data[
-        performance_data["nr_observed"] >= st.session_state[st.session_state[variables_quant.slider_id_uuid]]
-    ]
+    parse_settings = parsesettingsbuilder.build_parser(user_input["input_format"])
 
-    if recalculate:
-        parse_settings = parsesettingsbuilder.build_parser(user_input["input_format"])
-
-        fig_logfc = PlotDataPoint.plot_fold_change_histogram(
-            performance_data,
-            parse_settings.species_expected_ratio(),
-        )
-        fig_CV = PlotDataPoint.plot_CV_violinplot(performance_data)
-        fig_MA = PlotDataPoint.plot_ma_plot(
-            performance_data,
-            parse_settings.species_expected_ratio(),
-        )
-        st.session_state[variables_quant.fig_cv] = fig_CV
-        st.session_state[variables_quant.fig_logfc] = fig_logfc
-    else:
-        fig_logfc = st.session_state[variables_quant.fig_logfc]
-        fig_CV = st.session_state[variables_quant.fig_cv]
-        fig_MA = st.session_state[variables_quant.fig_ma_plot]
+    fig_logfc = PlotDataPoint.plot_fold_change_histogram(
+        performance_data,
+        parse_settings.species_expected_ratio(),
+    )
+    fig_CV = PlotDataPoint.plot_CV_violinplot(performance_data)
+    fig_MA = PlotDataPoint.plot_ma_plot(
+        performance_data,
+        parse_settings.species_expected_ratio(),
+    )
 
     if variables_quant.first_new_plot:
         col1, col2 = st.columns(2)

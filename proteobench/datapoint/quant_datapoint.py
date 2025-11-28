@@ -44,7 +44,16 @@ def filter_df_numquant_epsilon(
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("{}_abs_epsilon_{}".format(metric, mode))
+        # Try with mode suffix first (new format)
+        metric_key_with_mode = "{}_abs_epsilon_{}".format(metric, mode)
+        result = row[min_quant].get(metric_key_with_mode)
+
+        # Fallback to legacy format without mode suffix (for old datapoints)
+        if result is None:
+            metric_key_legacy = "{}_abs_epsilon".format(metric)
+            result = row[min_quant].get(metric_key_legacy)
+
+        return result
 
     return None
 

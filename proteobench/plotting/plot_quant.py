@@ -161,13 +161,17 @@ class PlotDataPoint:
             benchmark_metrics_df = _filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
 
         # Extract all values for the selected metric mode
-        try:
-            all_metric_values = [v2[metric_col_name] for v in benchmark_metrics_df["results"] for v2 in v.values()]
-        except KeyError:
-            all_metric_values = [
-                v2[legacy_metric_col_name] for v in benchmark_metrics_df["results"] for v2 in v.values()
-            ]
-            use_legacy = True
+        # Handle mixed old/new datapoints by trying new key first, then falling back to legacy
+        all_metric_values = []
+        for v in benchmark_metrics_df["results"]:
+            for v2 in v.values():
+                # Try new metric name first, fall back to legacy
+                value = v2.get(metric_col_name)
+                if value is None:
+                    value = v2.get(legacy_metric_col_name)
+                if value is not None:
+                    all_metric_values.append(value)
+
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
@@ -258,9 +262,22 @@ class PlotDataPoint:
             ]
             # to do: remove this line as soon as parameters are homogeneous, see #380
             # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
+
+            # Handle mixed old/new datapoints by using fallback column selection
+            # Try new metric column first, fall back to legacy if values are null
+            if metric_col_name in tmp_df.columns and tmp_df[metric_col_name].notna().any():
+                # Use new column, but fill null values with legacy column if available
+                if legacy_metric_col_name in tmp_df.columns:
+                    x_values = tmp_df[metric_col_name].fillna(tmp_df[legacy_metric_col_name])
+                else:
+                    x_values = tmp_df[metric_col_name]
+            else:
+                # Fall back to legacy column
+                x_values = tmp_df[legacy_metric_col_name]
+
             fig.add_trace(
                 go.Scatter(
-                    x=tmp_df[metric_col_name] if not use_legacy else tmp_df[legacy_metric_col_name],
+                    x=x_values,
                     y=tmp_df["nr_prec"],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],

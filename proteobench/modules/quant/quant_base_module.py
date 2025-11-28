@@ -218,6 +218,7 @@ class QuantModule:
         if len(all_datapoints) == 0:
             return all_datapoints
 
+        # Add new metric columns with mode suffixes
         all_datapoints["median_abs_epsilon_global"] = [
             filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
             for v in all_datapoints["results"]
@@ -235,6 +236,18 @@ class QuantModule:
 
         all_datapoints["mean_abs_epsilon_eq_species"] = [
             filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="eq_species")
+            for v in all_datapoints["results"]
+        ]
+
+        # Also maintain legacy column names for backwards compatibility with old datapoints
+        # These will be used as fallback when new metrics don't exist
+        all_datapoints["median_abs_epsilon"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["mean_abs_epsilon"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="global")
             for v in all_datapoints["results"]
         ]
 

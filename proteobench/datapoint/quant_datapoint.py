@@ -250,28 +250,19 @@ class QuantDatapoint:
         #    Then average across the two columns for each quantile
         cv_avg = cv_q.mean(axis=1)
 
-        # 4) Compute equal-weighted species metrics if species column exists
-        if "species" in df_slice.columns and len(df_slice["species"].unique()) > 0:
-            median_abs_epsilon_eq_species = pd.Series(
-                df_slice[df_slice["species"] == species]["epsilon"].abs().median()
-                for species in df_slice["species"].unique()
-            ).mean()
-            mean_abs_epsilon_eq_species = pd.Series(
-                df_slice[df_slice["species"] == species]["epsilon"].abs().mean()
-                for species in df_slice["species"].unique()
-            ).mean()
-        else:
-            # Fallback to global metrics if species column doesn't exist
-            median_abs_epsilon_eq_species = eps_global.median()
-            mean_abs_epsilon_eq_species = eps_global.mean()
-
         return {
             min_nr_observed: {
                 "median_abs_epsilon_global": eps_global.median(),
                 "mean_abs_epsilon_global": eps_global.mean(),
                 "variance_epsilon_global": df_slice["epsilon"].var(),
-                "median_abs_epsilon_eq_species": median_abs_epsilon_eq_species,
-                "mean_abs_epsilon_eq_species": mean_abs_epsilon_eq_species,
+                "median_abs_epsilon_eq_species": pd.Series(
+                    df_slice[df_slice["species"] == species]["epsilon"].abs().median()
+                    for species in df_slice["species"].unique()
+                ).mean(),
+                "mean_abs_epsilon_eq_species": pd.Series(
+                    df_slice[df_slice["species"] == species]["epsilon"].abs().mean()
+                    for species in df_slice["species"].unique()
+                ).mean(),
                 "nr_prec": nr_prec,
                 "CV_median": cv_avg.loc[0.50],
                 "CV_q75": cv_avg.loc[0.75],

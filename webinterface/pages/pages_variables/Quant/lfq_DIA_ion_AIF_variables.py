@@ -41,6 +41,7 @@ class VariablesDIAQuant:
     first_new_plot: bool = True
     default_val_slider: int = 3
     beta_warning: bool = True
+    archived_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git"
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant"
     selectbox_id_uuid: str = "selectbox_id_dia_quant"

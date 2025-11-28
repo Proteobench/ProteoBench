@@ -9,8 +9,8 @@ import streamlit as st
 from proteobench.plotting.plot_quant import PlotDataPoint
 
 from .filter import filter_data_using_slider
-from .resulttable import configure_aggrid, render_aggrid, prepare_display_dataframe
 from .metricplot import render_metric_plot
+from .resulttable import configure_aggrid, prepare_display_dataframe, render_aggrid
 
 
 def initialize_submitted_slider(slider_id_submitted_uuid, default_val_slider) -> None:
@@ -76,6 +76,7 @@ def display_submitted_results(variables_quant, ionmodule) -> None:
     )
 
     metric = display_metric_selector(variables_quant)
+    mode = display_metric_calc_approach_selector(variables_quant)
 
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")
@@ -90,6 +91,7 @@ def display_submitted_results(variables_quant, ionmodule) -> None:
     highlight_point_id = render_metric_plot(
         data_points_filtered,
         metric,
+        mode,
         label=st.session_state[st.session_state[variables_quant.selectbox_id_submitted_uuid]],
         key=_id_of_key,
     )
@@ -134,38 +136,6 @@ def initialize_submitted_data_points(
         )
 
 
-def handle_submitted_table_edits(variables_quant) -> None:
-    """Callback function for handling edits made to the data table in the UI."""
-    edits = st.session_state[st.session_state[variables_quant.table_id_uuid]]["edited_rows"].items()
-    for k, v in edits:
-        try:
-            # ToDo: check if this can be done more clearly
-            # ? gets row k from the all_datapoints_submitted DataFrame
-            # ? and ... modifies the first column specified in the keys of dictionary v
-            # df = st.session_state[variables_quant.all_datapoints_submitted]
-            # df[list(v.keys())[0]].iloc[k] = list(v.values())[0]
-            st.session_state[variables_quant.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(v.values())[0]
-        except TypeError:
-            return
-    st.session_state[variables_quant.highlight_list_submitted] = list(
-        st.session_state[variables_quant.all_datapoints_submitted]["Highlight"]
-    )
-    st.session_state[variables_quant.placeholder_table] = st.session_state[variables_quant.all_datapoints_submitted]
-
-    if len(st.session_state[variables_quant.all_datapoints]) == 0:
-        st.error("No datapoints available for plotting", icon="🚨")
-
-    try:
-        fig_metric = PlotDataPoint.plot_metric(
-            st.session_state[variables_quant.all_datapoints],
-            label=st.session_state[st.session_state[variables_quant.selectbox_id_uuid]],
-        )
-    except Exception as e:
-        st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-    st.session_state[variables_quant.fig_metric] = fig_metric
-
-
 def display_metric_selector(variables_quant) -> str:
     key = variables_quant.metric_selector_submitted_uuid
     if key not in st.session_state.keys():
@@ -176,5 +146,19 @@ def display_metric_selector(variables_quant) -> str:
         "Select metric to plot",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_metric_calc_approach_selector(variables) -> str:
+    key = variables.metric_calc_approach_selector_submitted_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.radio(
+        "Select metric calculation approach",
+        options=["Equal weighted species", "Global"],
+        help="Toggle between equal weighted species-specific and global absolute difference metrics.",
         key=_id_of_key,
     )

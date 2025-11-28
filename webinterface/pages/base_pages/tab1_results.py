@@ -2,14 +2,12 @@ import os
 import uuid
 from typing import Callable
 
-import streamlit as st
 import pandas as pd
-
-from .resulttable import configure_aggrid, render_aggrid, prepare_display_dataframe
-from .metricplot import render_metric_plot
-
+import streamlit as st
 
 from .filter import filter_data_using_slider
+from .metricplot import render_metric_plot
+from .resulttable import configure_aggrid, prepare_display_dataframe, render_aggrid
 
 
 def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> None:
@@ -143,6 +141,7 @@ def display_existing_results(variables_quant, ionmodule) -> None:
     data_points_filtered = variables_quant.filtered_data
 
     metric = display_metric_selector(variables_quant)
+    mode = display_metric_calc_approach_selector(variables_quant)
 
     # prepare plot key explicitly for tab 1
     key = variables_quant.result_plot_uuid
@@ -153,6 +152,7 @@ def display_existing_results(variables_quant, ionmodule) -> None:
     highlight_point_id = render_metric_plot(
         data_points_filtered,
         metric,
+        mode,
         label=st.session_state[st.session_state[variables_quant.selectbox_id_uuid]],
         key=_id_of_key,
     )
@@ -196,6 +196,20 @@ def display_metric_selector(variables_quant) -> str:
         "Select metric to plot",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_metric_calc_approach_selector(variables_quant) -> str:
+    key = variables_quant.metric_calc_approach_selector_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.radio(
+        "Select metric calclulation approach",
+        options=["Global", "Equal weighted species"],
+        help="Toggle between equal weighted species-specific and global absolute difference metrics.",
         key=_id_of_key,
     )
 

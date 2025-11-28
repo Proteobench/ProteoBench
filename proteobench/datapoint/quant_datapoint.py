@@ -17,7 +17,9 @@ import pandas as pd
 import proteobench
 
 
-def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: str = "median") -> float | None:
+def filter_df_numquant_epsilon(
+    row: Dict[str, Any], min_quant: int = 3, metric: str = "median", mode: str = "global"
+) -> float | None:
     """
     Extract the 'median_abs_epsilon' value from a row (assumed to be a dictionary).
 
@@ -29,7 +31,8 @@ def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: 
         The key for the desired value. Defaults to 3.
     metric : str
         The metric to be calculated. Should be either median or mean, defaults to median.
-
+    mode : str, optional
+        The mode of metric calculation, defaults to "global".
     Returns
     -------
     float or None
@@ -41,7 +44,7 @@ def filter_df_numquant_epsilon(row: Dict[str, Any], min_quant: int = 3, metric: 
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("{}_abs_epsilon".format(metric))
+        return row[min_quant].get("{}_abs_epsilon_{}".format(metric, mode))
 
     return None
 
@@ -93,8 +96,10 @@ class QuantDatapoint:
         is_temporary (bool): Whether the data is temporary.
         intermediate_hash (str): Hash of the intermediate result.
         results (dict): A dictionary of metrics for the benchmark run.
-        median_abs_epsilon (float): Median absolute epsilon value for the benchmark.
-        mean_abs_epsilon (float): Mean absolute epsilon value for the benchmark.
+        median_abs_epsilon_global (float): Median absolute epsilon value for the benchmark.
+        mean_abs_epsilon_global (float): Mean absolute epsilon value for the benchmark.
+        median_abs_epsilon_eq_species (float): Median absolute epsilon value for equivalently weighted species.
+        mean_abs_epsilon_eq_species (float): Mean absolute epsilon value for equivalently weighted species.
         nr_prec (int): Number of precursors identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
@@ -118,8 +123,10 @@ class QuantDatapoint:
     is_temporary: bool = True
     intermediate_hash: str = ""
     results: dict = None
-    median_abs_epsilon: float = 0
-    mean_abs_epsilon: float = 0
+    median_abs_epsilon_global: float = 0
+    mean_abs_epsilon_global: float = 0
+    median_abs_epsilon_eq_species: float = 0
+    mean_abs_epsilon_eq_species: float = 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
@@ -198,8 +205,18 @@ class QuantDatapoint:
             ChainMap(*[QuantDatapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
         )
         result_datapoint.results = results
-        result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]
-        result_datapoint.mean_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["mean_abs_epsilon"]
+        result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_global"
+        ]
+        result_datapoint.mean_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_global"
+        ]
+        result_datapoint.median_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_eq_species"
+        ]
+        result_datapoint.mean_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_eq_species"
+        ]
         result_datapoint.nr_prec = result_datapoint.results[default_cutoff_min_prec]["nr_prec"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
@@ -216,7 +233,7 @@ class QuantDatapoint:
         nr_prec = len(df_slice)
 
         # 2) Compute abs-epsilon only once
-        eps = df_slice["epsilon"].abs()
+        eps_global = df_slice["epsilon"].abs()
 
         # 3) Batch the CV quantiles in one go
         #    This returns a DataFrame with index [0.50, 0.75, 0.90, 0.95]
@@ -226,9 +243,17 @@ class QuantDatapoint:
 
         return {
             min_nr_observed: {
-                "median_abs_epsilon": eps.median(),
-                "mean_abs_epsilon": eps.mean(),
-                "variance_epsilon": df_slice["epsilon"].var(),
+                "median_abs_epsilon_global": eps_global.median(),
+                "mean_abs_epsilon_global": eps_global.mean(),
+                "variance_epsilon_global": df_slice["epsilon"].var(),
+                "median_abs_epsilon_eq_species": pd.Series(
+                    df_slice[df_slice["species"] == species]["epsilon"].abs().median()
+                    for species in df_slice["species"].unique()
+                ).mean(),
+                "mean_abs_epsilon_eq_species": pd.Series(
+                    df_slice[df_slice["species"] == species]["epsilon"].abs().mean()
+                    for species in df_slice["species"].unique()
+                ).mean(),
                 "nr_prec": nr_prec,
                 "CV_median": cv_avg.loc[0.50],
                 "CV_q75": cv_avg.loc[0.75],

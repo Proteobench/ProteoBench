@@ -2,7 +2,7 @@
 Module for plotting quantitative proteomics data.
 """
 
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
@@ -92,6 +92,7 @@ class PlotDataPoint:
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
         metric: str = "Median",
+        mode: str = "Equal weighted species",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
             "AlphaPept": "#17212b",
@@ -129,6 +130,8 @@ class PlotDataPoint:
             The DataFrame containing benchmark metrics data.
         metric : str, optional
             The metric to plot, either "Median" or "Mean", by default "Median".
+        mode : str, optional
+            The mode for filtering, either "global" or "equal weighted species", by default "Equal weighted species".
         software_colors : Dict[str, str], optional
             A dictionary mapping software names to their colors, by default predefined colors.
         mapping : Dict[str, int], optional
@@ -146,10 +149,25 @@ class PlotDataPoint:
         go.Figure
             A Plotly figure object representing the scatter plot.
         """
-        all_median_abs_epsilon = [
-            v2["median_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()
-        ]
-        all_mean_abs_epsilon = [v2["mean_abs_epsilon"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
+        # Get metric column names and plot title based on metric and mode
+        metric_lower, mode_suffix, plot_title = _get_metric_column_name(metric, mode)
+        metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
+        legacy_metric_col_name = f"{metric_lower}_abs_epsilon"
+        use_legacy = False
+
+        # Filter datapoints based on mode
+        # If user selects "Equal weighted species" mode, only show datapoints that have the new metrics
+        if mode == "Equal weighted species":
+            benchmark_metrics_df = _filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
+
+        # Extract all values for the selected metric mode
+        try:
+            all_metric_values = [v2[metric_col_name] for v in benchmark_metrics_df["results"] for v2 in v.values()]
+        except KeyError:
+            all_metric_values = [
+                v2[legacy_metric_col_name] for v in benchmark_metrics_df["results"] for v2 in v.values()
+            ]
+            use_legacy = True
         all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
@@ -212,20 +230,10 @@ class PlotDataPoint:
         benchmark_metrics_df["hover_text"] = hover_texts
         benchmark_metrics_df["scatter_size"] = scatter_size
 
-        if metric == "Median":
-            layout_xaxis_range = [
-                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
-                max(all_median_abs_epsilon) + max(all_median_abs_epsilon) * 0.05,
-            ]
-            layout_xaxis_title = (
-                "Median absolute difference between measured and expected log2-transformed fold change."
-            )
-        elif metric == "Mean":
-            layout_xaxis_range = [
-                min(all_mean_abs_epsilon) - min(all_mean_abs_epsilon) * 0.05,
-                max(all_mean_abs_epsilon) + max(all_mean_abs_epsilon) * 0.05,
-            ]
-            layout_xaxis_title = "Mean absolute difference between measured and expected log2-transformed fold change."
+        layout_xaxis_range = [
+            min(all_metric_values) - min(all_metric_values) * 0.05,
+            max(all_metric_values) + max(all_metric_values) * 0.05,
+        ]
 
         fig = go.Figure(
             layout_yaxis_range=[
@@ -252,7 +260,7 @@ class PlotDataPoint:
             # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
             fig.add_trace(
                 go.Scatter(
-                    x=tmp_df["{}_abs_epsilon".format(metric.lower())],
+                    x=tmp_df[metric_col_name] if not use_legacy else tmp_df[legacy_metric_col_name],
                     y=tmp_df["nr_prec"],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],
@@ -267,7 +275,7 @@ class PlotDataPoint:
             width=700,
             height=700,
             xaxis=dict(
-                title=layout_xaxis_title,
+                title=plot_title,
                 gridcolor="white",
                 gridwidth=2,
                 linecolor="black",
@@ -364,3 +372,64 @@ class PlotDataPoint:
 
         fig.update_traces(marker=dict(size=6))  # Marker size approx. equivalent to s=10 in seaborn
         return fig
+
+
+def _filter_datapoints_with_metric(benchmark_metrics_df: pd.DataFrame, metric_col_name: str) -> pd.DataFrame:
+    """
+    Filter datapoints to only include those that have the specified metric calculated.
+
+    This is used when the user selects "Equal weighted species" mode to ensure only
+    datapoints with the new metric calculation are displayed (avoiding visual confusion
+    with legacy metric calculations).
+
+    Parameters
+    ----------
+    benchmark_metrics_df : pd.DataFrame
+        The DataFrame containing benchmark metrics data.
+    metric_col_name : str
+        The name of the metric column to check (e.g., "median_abs_epsilon_eq_species").
+
+    Returns
+    -------
+    pd.DataFrame
+        Filtered DataFrame containing only datapoints that have the specified metric.
+    """
+
+    def has_metric(results_dict):
+        """Check if any threshold level in results has the specified metric."""
+        try:
+            for threshold_dict in results_dict.values():
+                if metric_col_name in threshold_dict:
+                    return True
+        except (TypeError, AttributeError):
+            pass
+        return False
+
+    # Filter to only datapoints that have the metric
+    return benchmark_metrics_df[benchmark_metrics_df["results"].apply(has_metric)].copy()
+
+
+def _get_metric_column_name(metric: str, mode: str) -> Tuple[str, str, str]:
+    """
+    Get the appropriate metric column names based on the specified metric and mode.
+
+    Parameters
+    ----------
+    metric : str
+        The metric to plot, either "Median" or "Mean".
+    mode : str
+        The mode for filtering, either "global" or "eq_species".
+
+    Returns
+    -------
+    Tuple[str, str, str]
+        A tuple containing the metric_lower, mode_suffix, and plot_title
+    """
+
+    metric_lower = metric.lower()
+    mode_suffix = "global" if mode.lower() == "global" else "eq_species"
+    mode_description = "globally" if mode.lower() == "global" else "using equally weighted species averages"
+
+    plot_title = f"{metric} absolute difference between measured and expected log2-transformed fold change (calculated {mode_description})"
+
+    return metric_lower, mode_suffix, plot_title

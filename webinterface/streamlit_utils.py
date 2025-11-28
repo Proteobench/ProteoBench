@@ -152,3 +152,102 @@ def save_dataframe(df):
         The CSV representation of the dataframe encoded in UTF-8.
     """
     return df.to_csv().encode("utf-8")
+
+
+def display_error(
+    friendly_message: str,
+    exception: Exception = None,
+    suggestions: list = None,
+    technical_details: str = None,
+):
+    """
+    Display user-friendly error with expandable technical details.
+
+    Parameters
+    ----------
+    friendly_message : str
+        A user-friendly error message to display prominently.
+    exception : Exception, optional
+        The exception object to show with Streamlit's nice traceback formatting.
+    suggestions : list, optional
+        List of suggestions to help the user resolve the error.
+    technical_details : str, optional
+        Technical error details as string (used if exception is not provided).
+    """
+    st.error(f":x: {friendly_message}", icon="🚨")
+
+    if suggestions:
+        suggestions_text = "\n".join(f"- {s}" for s in suggestions)
+        st.info(f"**Suggestions:**\n{suggestions_text}")
+
+    if exception is not None:
+        with st.expander("Technical details"):
+            st.exception(exception)
+    elif technical_details:
+        with st.expander("Technical details"):
+            st.code(technical_details)
+
+
+def get_error_suggestions(exception: Exception, context: dict) -> tuple:
+    """
+    Analyze exception and return user-friendly message with suggestions.
+
+    Parameters
+    ----------
+    exception : Exception
+        The exception that was raised.
+    context : dict
+        Context about the operation, including 'input_format' for the selected software tool.
+
+    Returns
+    -------
+    tuple
+        A tuple of (friendly_message, suggestions_list).
+    """
+    error_str = str(exception)
+    error_type = type(exception).__name__
+    suggestions = []
+
+    # Missing raw files / wrong dataset - this is a specific, identifiable error
+    if "Not all runs are present" in error_str:
+        friendly = "The uploaded file doesn't contain all expected sample names"
+        suggestions.append("Ensure you processed the correct benchmark dataset for this module")
+        suggestions.append("Check the module documentation for the expected raw file names")
+        suggestions.append("Verify you are using the correct module for your instrument type")
+
+    # Invalid input format
+    elif "Invalid input format" in error_str:
+        friendly = "The selected software tool is not supported"
+        suggestions.append("Check the list of supported software tools for this module")
+
+    # File format / parsing errors - broad category for many issues
+    elif any(
+        pattern in error_str
+        for pattern in [
+            "Error tokenizing data",
+            "Expected 1 fields",
+            "ParserError",
+            "could not convert",
+            "Unable to parse",
+        ]
+    ) or error_type in ["ParserError", "ValueError", "TypeError"]:
+        friendly = "The file format doesn't match the selected software tool"
+        suggestions.append("Check that you selected the correct software tool for your file")
+        suggestions.append("Verify the file is a complete, unmodified output from the software")
+        suggestions.append("Refer to the module documentation for supported file formats")
+
+    # Missing required columns
+    elif "KeyError" in error_str or "not in index" in error_str.lower() or error_type == "KeyError":
+        friendly = "The file is missing required columns"
+        suggestions.append("Verify the file is a complete output from the selected software tool")
+        suggestions.append("Check that the file was not modified after export")
+        suggestions.append("Ensure you selected the correct software tool")
+
+    # Generic fallback - assume file format issue as most common cause
+    else:
+        friendly = "The file format doesn't match the selected software tool"
+        suggestions.append("Check that you selected the correct software tool for your file")
+        suggestions.append("Verify the file is a complete, unmodified output from the software")
+        suggestions.append("Refer to the module documentation for supported file formats")
+
+    return friendly, suggestions

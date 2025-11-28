@@ -1,10 +1,14 @@
 import datetime
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint, filter_df_numquant_epsilon, filter_df_numquant_nr_prec
+from proteobench.datapoint.quant_datapoint import (
+    QuantDatapoint,
+    filter_df_numquant_epsilon,
+    filter_df_numquant_nr_prec,
+)
 
 DATAPOINT_USER_INPUT_TYPE = {
     "DDA_MaxQuant": {
@@ -86,11 +90,13 @@ class TestQuantDatapoint:
         assert 1 in result
         metrics = result[1]
 
-        # Check all expected metrics are present
+        # Check all expected metrics are present (with new naming convention)
         expected_metrics = [
-            "median_abs_epsilon",
-            "mean_abs_epsilon",
-            "variance_epsilon",
+            "median_abs_epsilon_global",
+            "mean_abs_epsilon_global",
+            "median_abs_epsilon_eq_species",
+            "mean_abs_epsilon_eq_species",
+            "variance_epsilon_global",
             "nr_prec",
             "CV_median",
             "CV_q75",
@@ -118,7 +124,7 @@ class TestQuantDatapoint:
         result = QuantDatapoint.get_metrics(single_row_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
-        assert result[1]["median_abs_epsilon"] == 0.1
+        assert result[1]["median_abs_epsilon_global"] == 0.1
 
     def test_filter_df_numquant_epsilon(self):
         """Test the filter_df_numquant_epsilon function."""
@@ -143,6 +149,18 @@ class TestQuantDatapoint:
         # Test with missing metric
         row_missing_metric = {"3": {"mean_abs_epsilon": 0.3}}
         assert filter_df_numquant_epsilon(row_missing_metric, metric="median") is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
+
+        # Test with None values
+        row_with_none = {"3": None}
+        assert filter_df_numquant_epsilon(row_with_none) is None
 
         # Test with None values
         row_with_none = {"3": None}

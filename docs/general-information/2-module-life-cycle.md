@@ -33,7 +33,7 @@ When the PR is merged, the new module enters an alpha stage, where its code base
 
 ## Beta
 
-The new module enters a beta stage when it has been discussed and approved by the community.  Its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in “Beta”. After a minimal period of one month and approval by the initial proposers and external reviewers, the beta label can be removed.
+The new module enters a beta stage when it has been discussed and approved by the community. Its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in “Beta”. After a minimal period of one month and approval by the initial proposers and external reviewers, the beta label can be removed.
 
 ## Live
 

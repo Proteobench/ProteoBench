@@ -12,7 +12,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict
 
+import numpy as np
 import pandas as pd
+from sklearn.metrics import roc_auc_score
 
 import proteobench
 
@@ -79,6 +81,85 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
         return row[min_quant].get("nr_prec")
     return None
+
+
+def compute_roc_auc(df: pd.DataFrame, unchanged_species: str = None) -> float:
+    """
+    Compute ROC-AUC for distinguishing unchanged from changed species.
+
+    Uses absolute log2 fold change as the score to separate species that should
+    show no change (e.g., HUMAN with 1:1 ratio) from species that should show
+    change (e.g., YEAST, ECOLI with different ratios).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'species' and 'log2_A_vs_B' columns.
+        Optionally 'log2_expectedRatio' for auto-detecting unchanged species.
+    unchanged_species : str, optional
+        Species name for the unchanged/control group. If None, auto-detects
+        from data as the species with smallest absolute expected log2 ratio.
+
+    Returns
+    -------
+    float
+        ROC-AUC score, or np.nan if computation is not possible
+        (e.g., only one class present or all scores are NaN).
+    """
+    if "species" not in df.columns or "log2_A_vs_B" not in df.columns:
+        return np.nan
+
+    if len(df) == 0:
+        return np.nan
+
+    # Auto-detect unchanged species if not provided
+    if unchanged_species is None:
+        unchanged_species = _detect_unchanged_species(df)
+        if unchanged_species is None:
+            return np.nan
+
+    y_true = (df["species"] != unchanged_species).astype(int)
+    y_score = df["log2_A_vs_B"].abs()
+
+    # Need both classes and valid scores
+    if len(y_true.unique()) < 2 or y_score.isna().all():
+        return np.nan
+
+    # Handle NaN scores by dropping them
+    valid_mask = ~y_score.isna()
+    if valid_mask.sum() < 2:
+        return np.nan
+
+    return roc_auc_score(y_true[valid_mask], y_score[valid_mask])
+
+
+def _detect_unchanged_species(df: pd.DataFrame) -> str | None:
+    """
+    Detect the unchanged species from the data.
+
+    The unchanged species is the one with the smallest absolute expected log2 ratio
+    (i.e., ratio closest to 1:1).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'species' and 'log2_expectedRatio' columns.
+
+    Returns
+    -------
+    str or None
+        Species name for the unchanged group, or None if detection fails.
+    """
+    if "log2_expectedRatio" not in df.columns or "species" not in df.columns:
+        return None
+
+    if len(df) == 0:
+        return None
+
+    # Get unique species-ratio pairs and find the one closest to 1:1
+    species_ratios = df[["species", "log2_expectedRatio"]].drop_duplicates()
+    idx = species_ratios["log2_expectedRatio"].abs().idxmin()
+    return species_ratios.loc[idx, "species"]
 
 
 @dataclass
@@ -268,6 +349,7 @@ class QuantDatapoint:
                 "CV_q75": cv_avg.loc[0.75],
                 "CV_q90": cv_avg.loc[0.90],
                 "CV_q95": cv_avg.loc[0.95],
+                "roc_auc": compute_roc_auc(df_slice),
             }
         }
 

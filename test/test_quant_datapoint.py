@@ -6,6 +6,8 @@ import pytest
 
 from proteobench.datapoint.quant_datapoint import (
     QuantDatapoint,
+    _detect_unchanged_species,
+    compute_roc_auc,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
@@ -80,6 +82,9 @@ class TestQuantDatapoint:
             "epsilon": [0.1, -0.2, 0.3, -0.4, 0.5],
             "CV_A": [0.1, 0.2, 0.3, 0.4, 0.5],
             "CV_B": [0.15, 0.25, 0.35, 0.45, 0.55],
+            "species": ["HUMAN", "YEAST", "HUMAN", "YEAST", "HUMAN"],
+            "log2_A_vs_B": [0.1, 1.0, -0.1, 0.9, 0.05],  # HUMAN ~0, YEAST ~1
+            "log2_expectedRatio": [0.0, 1.0, 0.0, 1.0, 0.0],  # HUMAN=1:1, YEAST=2:1
         }
         return pd.DataFrame(data)
 
@@ -102,6 +107,7 @@ class TestQuantDatapoint:
             "CV_q75",
             "CV_q90",
             "CV_q95",
+            "roc_auc",
         ]
         for metric in expected_metrics:
             assert metric in metrics
@@ -114,13 +120,16 @@ class TestQuantDatapoint:
     def test_get_metrics_edge_cases(self):
         """Test the get_metrics method with edge cases."""
         # Test with empty DataFrame
-        empty_df = pd.DataFrame(columns=["nr_observed", "epsilon", "CV_A", "CV_B"])
+        empty_df = pd.DataFrame(columns=["nr_observed", "epsilon", "CV_A", "CV_B", "species", "log2_A_vs_B", "log2_expectedRatio"])
         result = QuantDatapoint.get_metrics(empty_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 0
 
         # Test with single row
-        single_row_df = pd.DataFrame({"nr_observed": [1], "epsilon": [0.1], "CV_A": [0.1], "CV_B": [0.1]})
+        single_row_df = pd.DataFrame({
+            "nr_observed": [1], "epsilon": [0.1], "CV_A": [0.1], "CV_B": [0.1],
+            "species": ["HUMAN"], "log2_A_vs_B": [0.1], "log2_expectedRatio": [0.0]
+        })
         result = QuantDatapoint.get_metrics(single_row_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
@@ -154,14 +163,94 @@ class TestQuantDatapoint:
         row_with_none = {"3": None}
         assert filter_df_numquant_epsilon(row_with_none) is None
 
-        # Test with None values
-        row_with_none = {"3": None}
-        assert filter_df_numquant_epsilon(row_with_none) is None
+    def test_compute_roc_auc(self):
+        """Test the compute_roc_auc function."""
+        # Test with well-separated species (HUMAN ~0, YEAST ~1, ECOLI ~-2)
+        data = {
+            "log2_A_vs_B": [0.1, -0.1, 1.1, 0.9, -1.8, -2.2],
+            "species": ["HUMAN", "HUMAN", "YEAST", "YEAST", "ECOLI", "ECOLI"],
+            "log2_expectedRatio": [0.0, 0.0, 1.0, 1.0, -2.0, -2.0],  # HUMAN=1:1, YEAST=2:1, ECOLI=0.25:1
+        }
+        df = pd.DataFrame(data)
+        # Test with explicit unchanged_species
+        auc = compute_roc_auc(df, unchanged_species="HUMAN")
+        assert auc > 0.8  # Should separate well since HUMAN has low |log2| and others have high
 
-        # Test with None values
-        row_with_none = {"3": None}
-        assert filter_df_numquant_epsilon(row_with_none) is None
+        # Test auto-detection of unchanged species
+        auc_auto = compute_roc_auc(df)  # Should auto-detect HUMAN as unchanged
+        assert auc_auto > 0.8
+        assert auc == auc_auto  # Same result
 
-        # Test with None values
-        row_with_none = {"3": None}
-        assert filter_df_numquant_epsilon(row_with_none) is None
+    def test_compute_roc_auc_edge_cases(self):
+        """Test compute_roc_auc with edge cases."""
+        # Test with missing columns
+        df_no_species = pd.DataFrame({"log2_A_vs_B": [0.1, 0.2]})
+        assert np.isnan(compute_roc_auc(df_no_species))
+
+        df_no_log2 = pd.DataFrame({"species": ["HUMAN", "YEAST"]})
+        assert np.isnan(compute_roc_auc(df_no_log2))
+
+        # Test with empty DataFrame
+        empty_df = pd.DataFrame(columns=["log2_A_vs_B", "species"])
+        assert np.isnan(compute_roc_auc(empty_df))
+
+        # Test with single class (only HUMAN)
+        single_class_df = pd.DataFrame({
+            "log2_A_vs_B": [0.1, 0.2, 0.3],
+            "species": ["HUMAN", "HUMAN", "HUMAN"],
+        })
+        assert np.isnan(compute_roc_auc(single_class_df))
+
+    def test_compute_roc_auc_two_species(self):
+        """Test compute_roc_auc with two species (like singlecell module)."""
+        # Simulate 2-species scenario (singlecell: HUMAN=1.2, YEAST=0.2)
+        data = {
+            "log2_A_vs_B": [0.1, -0.05, 0.15, -1.5, -1.8, -1.2],
+            "species": ["HUMAN", "HUMAN", "HUMAN", "YEAST", "YEAST", "YEAST"],
+            "log2_expectedRatio": [0.263, 0.263, 0.263, -2.322, -2.322, -2.322],  # log2(1.2), log2(0.2)
+        }
+        df = pd.DataFrame(data)
+        # HUMAN has smaller |log2_expectedRatio|, so it's the "unchanged" species
+        auc = compute_roc_auc(df)  # Auto-detect HUMAN as unchanged
+        assert auc > 0.9  # Should separate very well
+
+    def test_compute_roc_auc_bounds(self):
+        """Test that ROC-AUC is always between 0 and 1."""
+        # Test with random data - ROC-AUC should always be in [0, 1]
+        np.random.seed(42)
+        for _ in range(10):
+            n = 100
+            data = {
+                "log2_A_vs_B": np.random.normal(0, 1, n),
+                "species": np.random.choice(["HUMAN", "YEAST", "ECOLI"], n),
+            }
+            df = pd.DataFrame(data)
+            auc = compute_roc_auc(df, unchanged_species="HUMAN")
+            if not np.isnan(auc):
+                assert 0.0 <= auc <= 1.0, f"ROC-AUC {auc} out of bounds [0, 1]"
+
+    def test_detect_unchanged_species(self):
+        """Test the _detect_unchanged_species function."""
+        # Standard 3-species: HUMAN=1:1, YEAST=2:1, ECOLI=0.25:1
+        data = {
+            "species": ["HUMAN", "YEAST", "ECOLI"],
+            "log2_expectedRatio": [0.0, 1.0, -2.0],
+        }
+        df = pd.DataFrame(data)
+        assert _detect_unchanged_species(df) == "HUMAN"
+
+        # Singlecell 2-species: HUMAN=1.2, YEAST=0.2
+        data_sc = {
+            "species": ["HUMAN", "YEAST"],
+            "log2_expectedRatio": [0.263, -2.322],  # log2(1.2), log2(0.2)
+        }
+        df_sc = pd.DataFrame(data_sc)
+        assert _detect_unchanged_species(df_sc) == "HUMAN"
+
+        # Edge case: missing columns
+        df_no_cols = pd.DataFrame({"species": ["HUMAN"]})
+        assert _detect_unchanged_species(df_no_cols) is None
+
+        # Edge case: empty DataFrame
+        df_empty = pd.DataFrame(columns=["species", "log2_expectedRatio"])
+        assert _detect_unchanged_species(df_empty) is None

@@ -151,23 +151,30 @@ class PlotDataPoint:
         """
         # Get metric column names and plot title based on metric and mode
         metric_lower, mode_suffix, plot_title = _get_metric_column_name(metric, mode)
-        metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
-        legacy_metric_col_name = f"{metric_lower}_abs_epsilon"
-        use_legacy = False
 
-        # Filter datapoints based on mode
-        # If user selects "Equal weighted species" mode, only show datapoints that have the new metrics
-        if mode == "Equal weighted species":
+        # ROC-AUC is a special case - uses direct column name without mode suffix
+        if metric == "ROC-AUC":
+            metric_col_name = "roc_auc"
+            legacy_metric_col_name = None  # No legacy format for ROC-AUC
+            # Filter to only datapoints that have ROC-AUC calculated
             benchmark_metrics_df = _filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
+        else:
+            metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
+            legacy_metric_col_name = f"{metric_lower}_abs_epsilon"
+
+            # Filter datapoints based on mode
+            # If user selects "Equal weighted species" mode, only show datapoints that have the new metrics
+            if mode == "Equal weighted species":
+                benchmark_metrics_df = _filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
 
         # Extract all values for the selected metric mode
         # Handle mixed old/new datapoints by trying new key first, then falling back to legacy
         all_metric_values = []
         for v in benchmark_metrics_df["results"]:
             for v2 in v.values():
-                # Try new metric name first, fall back to legacy
+                # Try new metric name first, fall back to legacy (if available)
                 value = v2.get(metric_col_name)
-                if value is None:
+                if value is None and legacy_metric_col_name is not None:
                     value = v2.get(legacy_metric_col_name)
                 if value is not None:
                     all_metric_values.append(value)
@@ -267,13 +274,16 @@ class PlotDataPoint:
             # Try new metric column first, fall back to legacy if values are null
             if metric_col_name in tmp_df.columns and tmp_df[metric_col_name].notna().any():
                 # Use new column, but fill null values with legacy column if available
-                if legacy_metric_col_name in tmp_df.columns:
+                if legacy_metric_col_name is not None and legacy_metric_col_name in tmp_df.columns:
                     x_values = tmp_df[metric_col_name].fillna(tmp_df[legacy_metric_col_name])
                 else:
                     x_values = tmp_df[metric_col_name]
-            else:
+            elif legacy_metric_col_name is not None:
                 # Fall back to legacy column
                 x_values = tmp_df[legacy_metric_col_name]
+            else:
+                # No fallback available (e.g., ROC-AUC)
+                x_values = tmp_df[metric_col_name]
 
             fig.add_trace(
                 go.Scatter(
@@ -433,15 +443,18 @@ def _get_metric_column_name(metric: str, mode: str) -> Tuple[str, str, str]:
     Parameters
     ----------
     metric : str
-        The metric to plot, either "Median" or "Mean".
+        The metric to plot: "Median", "Mean", or "ROC-AUC".
     mode : str
-        The mode for filtering, either "global" or "eq_species".
+        The mode for filtering, either "global" or "eq_species". Ignored for ROC-AUC.
 
     Returns
     -------
     Tuple[str, str, str]
         A tuple containing the metric_lower, mode_suffix, and plot_title
     """
+    # ROC-AUC is a special case - no mode suffix, single column name
+    if metric == "ROC-AUC":
+        return "roc_auc", None, "ROC-AUC score for distinguishing changed from unchanged species"
 
     metric_lower = metric.lower()
     mode_suffix = "global" if mode.lower() == "global" else "eq_species"

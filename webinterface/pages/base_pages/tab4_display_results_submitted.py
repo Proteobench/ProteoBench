@@ -76,7 +76,11 @@ def display_submitted_results(variables_quant, ionmodule) -> None:
     )
 
     metric = display_metric_selector(variables_quant)
-    mode = display_metric_calc_approach_selector(variables_quant)
+    # ROC-AUC has no mode variants (it's already species-aware by design)
+    if metric == "ROC-AUC":
+        mode = None
+    else:
+        mode = display_metric_calc_approach_selector(variables_quant)
 
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")
@@ -142,6 +146,7 @@ def display_metric_selector(variables_quant) -> str:
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
+    # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
         "Select metric to plot",
         options=["Median", "Mean"],

@@ -80,6 +80,7 @@ class TestQuantDatapoint:
             "epsilon": [0.1, -0.2, 0.3, -0.4, 0.5],
             "CV_A": [0.1, 0.2, 0.3, 0.4, 0.5],
             "CV_B": [0.15, 0.25, 0.35, 0.45, 0.55],
+            "species": ["HUMAN", "YEAST", "HUMAN", "YEAST", "HUMAN"],
         }
         return pd.DataFrame(data)
 
@@ -114,13 +115,13 @@ class TestQuantDatapoint:
     def test_get_metrics_edge_cases(self):
         """Test the get_metrics method with edge cases."""
         # Test with empty DataFrame
-        empty_df = pd.DataFrame(columns=["nr_observed", "epsilon", "CV_A", "CV_B"])
+        empty_df = pd.DataFrame(columns=["nr_observed", "epsilon", "CV_A", "CV_B", "species"])
         result = QuantDatapoint.get_metrics(empty_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 0
 
         # Test with single row
-        single_row_df = pd.DataFrame({"nr_observed": [1], "epsilon": [0.1], "CV_A": [0.1], "CV_B": [0.1]})
+        single_row_df = pd.DataFrame({"nr_observed": [1], "epsilon": [0.1], "CV_A": [0.1], "CV_B": [0.1], "species": ["HUMAN"]})
         result = QuantDatapoint.get_metrics(single_row_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
@@ -149,18 +150,6 @@ class TestQuantDatapoint:
         # Test with missing metric
         row_missing_metric = {"3": {"mean_abs_epsilon": 0.3}}
         assert filter_df_numquant_epsilon(row_missing_metric, metric="median") is None
-
-        # Test with None values
-        row_with_none = {"3": None}
-        assert filter_df_numquant_epsilon(row_with_none) is None
-
-        # Test with None values
-        row_with_none = {"3": None}
-        assert filter_df_numquant_epsilon(row_with_none) is None
-
-        # Test with None values
-        row_with_none = {"3": None}
-        assert filter_df_numquant_epsilon(row_with_none) is None
 
         # Test with None values
         row_with_none = {"3": None}

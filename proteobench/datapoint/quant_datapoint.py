@@ -255,8 +255,12 @@ class QuantDatapoint:
                 "median_abs_epsilon_global": eps_global.median(),
                 "mean_abs_epsilon_global": eps_global.mean(),
                 "variance_epsilon_global": df_slice["epsilon"].var(),
-                "median_abs_epsilon_eq_species": df_slice.groupby("species")["epsilon"].apply(lambda x: x.abs().median()).mean(),
-                "mean_abs_epsilon_eq_species": df_slice.groupby("species")["epsilon"].apply(lambda x: x.abs().mean()).mean(),
+                "median_abs_epsilon_eq_species": df_slice.groupby("species")["epsilon"]
+                .apply(lambda x: x.abs().median())
+                .mean(),
+                "mean_abs_epsilon_eq_species": df_slice.groupby("species")["epsilon"]
+                .apply(lambda x: x.abs().mean())
+                .mean(),
                 "nr_prec": nr_prec,
                 "CV_median": cv_avg.loc[0.50],
                 "CV_q75": cv_avg.loc[0.75],

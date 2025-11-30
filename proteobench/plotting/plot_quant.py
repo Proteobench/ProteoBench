@@ -131,7 +131,7 @@ class PlotDataPoint:
         metric : str, optional
             The metric to plot, either "Median" or "Mean", by default "Median".
         mode : str, optional
-            The mode for filtering, either "global" or "equal weighted species", by default "Equal weighted species".
+            The mode for filtering, either "Global" or "Equal weighted species" (case-insensitive), by default "Equal weighted species".
         software_colors : Dict[str, str], optional
             A dictionary mapping software names to their colors, by default predefined colors.
         mapping : Dict[str, int], optional

@@ -434,7 +434,7 @@ def _get_metric_column_name(metric: str, mode: str) -> Tuple[str, str, str]:
     metric : str
         The metric to plot, either "Median" or "Mean".
     mode : str
-        The mode for filtering, either "global" or "eq_species".
+        The mode for filtering, either "Global" or "Equal weighted species" (case-insensitive).
 
     Returns
     -------

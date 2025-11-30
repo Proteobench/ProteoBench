@@ -153,7 +153,6 @@ class PlotDataPoint:
         metric_lower, mode_suffix, plot_title = _get_metric_column_name(metric, mode)
         metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
         legacy_metric_col_name = f"{metric_lower}_abs_epsilon"
-        use_legacy = False
 
         # Filter datapoints based on mode
         # If user selects "Equal weighted species" mode, only show datapoints that have the new metrics

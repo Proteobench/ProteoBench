@@ -3,7 +3,10 @@ import tempfile
 
 import streamlit as st
 
+from proteobench.exceptions import ProteoBenchError
+
 from . import inputs
+from streamlit_utils import display_error, get_error_suggestions
 
 
 def generate_input_fields(
@@ -101,48 +104,61 @@ def process_submission_form(
             icon="ℹ️",
         )
 
-    execute_proteobench(
+    success = execute_proteobench(
         variables_quant=variables_quant,
         ionmodule=ionmodule,
         user_input=user_input,
     )
 
-    # Inform the user with a link to the next tab
-    st.info(
-        "Form submitted successfully! Please navigate to the 'Results In-Depth' "
-        "or 'Results New Data' tab for the next step."
-    )
-    return True
+    if success:
+        # Inform the user with a link to the next tab
+        st.info(
+            "Form submitted successfully! Please navigate to the 'Results In-Depth' "
+            "or 'Results New Data' tab for the next step."
+        )
+    return success
 
 
 ########################################################################################
 # function used in process_submission_form
 
 
-def execute_proteobench(variables_quant, ionmodule, user_input) -> None:
+def execute_proteobench(variables_quant, ionmodule, user_input) -> bool:
     """
     Execute the ProteoBench benchmarking process.
+
+    Returns
+    -------
+    bool
+        True if benchmarking succeeded, False if an error occurred.
     """
-    if variables_quant.all_datapoints_submitted not in st.session_state:
-        initialize_main_data_points(
+    try:
+        if variables_quant.all_datapoints_submitted not in st.session_state:
+            initialize_main_data_points(
+                variables_quant=variables_quant,
+                ionmodule=ionmodule,
+            )
+
+        result_performance, all_datapoints, input_df = run_benchmarking_process(
             variables_quant=variables_quant,
             ionmodule=ionmodule,
+            user_input=user_input,
+        )
+        st.session_state[variables_quant.all_datapoints_submitted] = all_datapoints
+
+        set_highlight_column_in_submitted_data(
+            variables_quant=variables_quant,
         )
 
-    result_performance, all_datapoints, input_df = run_benchmarking_process(
-        variables_quant=variables_quant,
-        ionmodule=ionmodule,
-        user_input=user_input,
-    )
-    st.session_state[variables_quant.all_datapoints_submitted] = all_datapoints
+        st.session_state[variables_quant.result_perf] = result_performance
 
-    set_highlight_column_in_submitted_data(
-        variables_quant=variables_quant,
-    )
+        st.session_state[variables_quant.input_df] = input_df
+        return True
 
-    st.session_state[variables_quant.result_perf] = result_performance
-
-    st.session_state[variables_quant.input_df] = input_df
+    except (ProteoBenchError, Exception) as e:
+        friendly_msg, suggestions = get_error_suggestions(e, user_input)
+        display_error(friendly_msg, exception=e, suggestions=suggestions)
+        return False
 
 
 # function with same name exists in tab1_results.py, but is different

@@ -120,16 +120,25 @@ class TestQuantDatapoint:
     def test_get_metrics_edge_cases(self):
         """Test the get_metrics method with edge cases."""
         # Test with empty DataFrame
-        empty_df = pd.DataFrame(columns=["nr_observed", "epsilon", "CV_A", "CV_B", "species", "log2_A_vs_B", "log2_expectedRatio"])
+        empty_df = pd.DataFrame(
+            columns=["nr_observed", "epsilon", "CV_A", "CV_B", "species", "log2_A_vs_B", "log2_expectedRatio"]
+        )
         result = QuantDatapoint.get_metrics(empty_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 0
 
         # Test with single row
-        single_row_df = pd.DataFrame({
-            "nr_observed": [1], "epsilon": [0.1], "CV_A": [0.1], "CV_B": [0.1],
-            "species": ["HUMAN"], "log2_A_vs_B": [0.1], "log2_expectedRatio": [0.0]
-        })
+        single_row_df = pd.DataFrame(
+            {
+                "nr_observed": [1],
+                "epsilon": [0.1],
+                "CV_A": [0.1],
+                "CV_B": [0.1],
+                "species": ["HUMAN"],
+                "log2_A_vs_B": [0.1],
+                "log2_expectedRatio": [0.0],
+            }
+        )
         result = QuantDatapoint.get_metrics(single_row_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
@@ -195,10 +204,12 @@ class TestQuantDatapoint:
         assert np.isnan(compute_roc_auc(empty_df))
 
         # Test with single class (only HUMAN)
-        single_class_df = pd.DataFrame({
-            "log2_A_vs_B": [0.1, 0.2, 0.3],
-            "species": ["HUMAN", "HUMAN", "HUMAN"],
-        })
+        single_class_df = pd.DataFrame(
+            {
+                "log2_A_vs_B": [0.1, 0.2, 0.3],
+                "species": ["HUMAN", "HUMAN", "HUMAN"],
+            }
+        )
         assert np.isnan(compute_roc_auc(single_class_df))
 
     def test_compute_roc_auc_two_species(self):

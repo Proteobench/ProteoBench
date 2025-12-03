@@ -162,6 +162,92 @@ def _detect_unchanged_species(df: pd.DataFrame) -> str | None:
     return species_ratios.loc[idx, "species"]
 
 
+def compute_roc_auc_directional(df: pd.DataFrame) -> float:
+    """
+    Compute directional ROC-AUC for distinguishing changed from unchanged species.
+
+    Unlike the abs-based ROC-AUC, this method accounts for the expected direction
+    of fold change for each species:
+    - For species with positive expected log2 ratio (e.g., YEAST): Uses raw log2_FC
+    - For species with negative expected log2 ratio (e.g., ECOLI): Uses -log2_FC
+
+    This approach is more robust to systematic bias where the unchanged species
+    may not be centered at zero.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'species', 'log2_A_vs_B', and 'log2_expectedRatio' columns.
+
+    Returns
+    -------
+    float
+        Average ROC-AUC score across all changed species, or np.nan if computation
+        is not possible.
+    """
+    required_cols = ["species", "log2_A_vs_B", "log2_expectedRatio"]
+    if not all(col in df.columns for col in required_cols):
+        return np.nan
+
+    if len(df) == 0:
+        return np.nan
+
+    # Detect unchanged species (closest to 1:1 ratio)
+    unchanged_species = _detect_unchanged_species(df)
+    if unchanged_species is None:
+        return np.nan
+
+    # Get unique species and their expected ratios
+    species_ratios = df[["species", "log2_expectedRatio"]].drop_duplicates()
+    changed_species = species_ratios[species_ratios["species"] != unchanged_species]
+
+    if len(changed_species) == 0:
+        return np.nan
+
+    roc_aucs = []
+
+    for _, row in changed_species.iterrows():
+        species_name = row["species"]
+        expected_ratio = row["log2_expectedRatio"]
+
+        # Filter to unchanged and this changed species
+        df_binary = df[df["species"].isin([unchanged_species, species_name])].copy()
+
+        if len(df_binary) == 0:
+            continue
+
+        # Labels: 1 for changed species, 0 for unchanged
+        y_true = (df_binary["species"] == species_name).astype(int)
+
+        # Score: Use direction based on expected ratio
+        # If expected ratio > 0, changed species should have higher log2_FC
+        # If expected ratio < 0, changed species should have lower log2_FC (so negate)
+        if expected_ratio >= 0:
+            y_score = df_binary["log2_A_vs_B"]
+        else:
+            y_score = -df_binary["log2_A_vs_B"]
+
+        # Need both classes and valid scores
+        if len(y_true.unique()) < 2 or y_score.isna().all():
+            continue
+
+        # Handle NaN scores
+        valid_mask = ~y_score.isna()
+        if valid_mask.sum() < 2:
+            continue
+
+        try:
+            auc = roc_auc_score(y_true[valid_mask], y_score[valid_mask])
+            roc_aucs.append(auc)
+        except ValueError:
+            continue
+
+    if len(roc_aucs) == 0:
+        return np.nan
+
+    return np.mean(roc_aucs)
+
+
 @dataclass
 class QuantDatapoint:
     """
@@ -322,6 +408,10 @@ class QuantDatapoint:
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         nr_prec = len(df_slice)
 
+        # 1b) Compute per-species precursor counts dynamically
+        species_counts = df_slice["species"].value_counts().to_dict()
+        nr_prec_per_species = {f"nr_prec_{species}": count for species, count in species_counts.items()}
+
         # 2) Compute abs-epsilon only once
         eps_global = df_slice["epsilon"].abs()
 
@@ -345,11 +435,13 @@ class QuantDatapoint:
                     for species in df_slice["species"].unique()
                 ).mean(),
                 "nr_prec": nr_prec,
+                **nr_prec_per_species,
                 "CV_median": cv_avg.loc[0.50],
                 "CV_q75": cv_avg.loc[0.75],
                 "CV_q90": cv_avg.loc[0.90],
                 "CV_q95": cv_avg.loc[0.95],
                 "roc_auc": compute_roc_auc(df_slice),
+                "roc_auc_directional": compute_roc_auc_directional(df_slice),
             }
         }
 

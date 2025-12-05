@@ -276,6 +276,10 @@ class QuantDatapoint:
         mean_abs_epsilon_global (float): Mean absolute epsilon value for the benchmark.
         median_abs_epsilon_eq_species (float): Median absolute epsilon value for equivalently weighted species.
         mean_abs_epsilon_eq_species (float): Mean absolute epsilon value for equivalently weighted species.
+        median_abs_epsilon_precision_global (float): Median absolute precision epsilon (deviation from empirical center).
+        mean_abs_epsilon_precision_global (float): Mean absolute precision epsilon (deviation from empirical center).
+        median_abs_epsilon_precision_eq_species (float): Median absolute precision epsilon for equivalently weighted species.
+        mean_abs_epsilon_precision_eq_species (float): Mean absolute precision epsilon for equivalently weighted species.
         nr_prec (int): Number of precursors identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
@@ -303,6 +307,10 @@ class QuantDatapoint:
     mean_abs_epsilon_global: float = 0
     median_abs_epsilon_eq_species: float = 0
     mean_abs_epsilon_eq_species: float = 0
+    median_abs_epsilon_precision_global: float = 0
+    mean_abs_epsilon_precision_global: float = 0
+    median_abs_epsilon_precision_eq_species: float = 0
+    mean_abs_epsilon_precision_eq_species: float = 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
@@ -393,6 +401,18 @@ class QuantDatapoint:
         result_datapoint.mean_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
             "mean_abs_epsilon_eq_species"
         ]
+        result_datapoint.median_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_precision_global"
+        ]
+        result_datapoint.mean_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_precision_global"
+        ]
+        result_datapoint.median_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_precision_eq_species"
+        ]
+        result_datapoint.mean_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_precision_eq_species"
+        ]
         result_datapoint.nr_prec = result_datapoint.results[default_cutoff_min_prec]["nr_prec"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
@@ -430,6 +450,15 @@ class QuantDatapoint:
                 .apply(lambda x: x.abs().median())
                 .mean(),
                 "mean_abs_epsilon_eq_species": df_slice.groupby("species")["epsilon"]
+                .apply(lambda x: x.abs().mean())
+                .mean(),
+                # Precision metrics: deviation from empirical center (measures consistency)
+                "median_abs_epsilon_precision_global": df_slice["epsilon_precision_median"].abs().median(),
+                "mean_abs_epsilon_precision_global": df_slice["epsilon_precision_mean"].abs().mean(),
+                "median_abs_epsilon_precision_eq_species": df_slice.groupby("species")["epsilon_precision_median"]
+                .apply(lambda x: x.abs().median())
+                .mean(),
+                "mean_abs_epsilon_precision_eq_species": df_slice.groupby("species")["epsilon_precision_mean"]
                 .apply(lambda x: x.abs().mean())
                 .mean(),
                 "nr_prec": nr_prec,

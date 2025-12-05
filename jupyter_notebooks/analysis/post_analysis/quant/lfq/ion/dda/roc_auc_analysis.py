@@ -17,14 +17,14 @@ __generated_with = "0.18.1"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import marimo as mo
 
     return (mo,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -36,9 +36,13 @@ def _(mo):
     - **ROC-AUC**: Measures separation of changed vs unchanged species using `abs(log2_FC)`
     - **Directional ROC-AUC**: Uses direction-aware scoring (YEAST positive, ECOLI negative)
 
-    **Epsilon Metrics** (deviation from expected ratio):
+    **Epsilon Metrics** (deviation from expected ratio - measures **accuracy**):
     - **Median/Mean Abs Epsilon (Global)**: Overall accuracy across all species
     - **Median/Mean Abs Epsilon (Equal Species)**: Weighted equally per species
+
+    **Epsilon Precision Metrics** (deviation from empirical center - measures **consistency**):
+    - **Median/Mean Abs Epsilon Precision (Global)**: How tightly grouped measurements are
+    - **Median/Mean Abs Epsilon Precision (Equal Species)**: Per-species consistency, weighted equally
 
     **CV Metrics** (coefficient of variation):
     - **CV Median/Q75/Q90/Q95**: Reproducibility at different quantiles
@@ -47,7 +51,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     import pandas as pd
     import os
@@ -60,10 +64,62 @@ def _():
 
     # Get the directory where this notebook lives
     NOTEBOOK_DIR = Path(__file__).parent
-    return NOTEBOOK_DIR, defaultdict, os, pd, px
+
+    # Color palette for software tools
+    SOFTWARE_COLORS = [
+        "#e41a1c",
+        "#377eb8",
+        "#4daf4a",
+        "#984ea3",
+        "#ff7f00",
+        "#ffff33",
+        "#a65628",
+        "#f781bf",
+        "#999999",
+        "#66c2a5",
+    ]
+
+    return NOTEBOOK_DIR, SOFTWARE_COLORS, defaultdict, os, pd, px
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(px, SOFTWARE_COLORS):
+    def create_boxplot(df, y_col, y_label, title):
+        """Create a box plot for a metric by software tool."""
+        fig = px.box(
+            df.reset_index(),
+            x="software_name",
+            y=y_col,
+            color="software_name",
+            points="all",
+            hover_name="dataset_id",
+            labels={y_col: y_label, "software_name": "Software"},
+            title=title,
+            color_discrete_sequence=SOFTWARE_COLORS,
+        )
+        fig.update_traces(marker=dict(size=8))
+        fig.update_layout(showlegend=False)
+        return fig
+
+    def create_scatter(df, x_col, x_label, title):
+        """Create a scatter plot: metric vs n_precursors."""
+        fig = px.scatter(
+            df.reset_index(),
+            x=x_col,
+            y="n_precursors",
+            color="software_name",
+            hover_name="dataset_id",
+            labels={"n_precursors": "Number of Precursors", x_col: x_label, "software_name": "Software"},
+            title=title,
+            color_discrete_sequence=SOFTWARE_COLORS,
+        )
+        fig.update_traces(marker=dict(size=10))
+        return fig
+
+    return create_boxplot, create_scatter
+
+
+@app.cell(hide_code=True)
 def _():
     from proteobench.utils.server_io import get_merged_json, get_raw_data
     from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
@@ -77,7 +133,7 @@ def _():
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -89,7 +145,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(get_merged_json, mo):
     df_all = get_merged_json(
         repo_url="https://github.com/Proteobench/Results_quant_ion_DDA/archive/refs/heads/main.zip"
@@ -98,7 +154,7 @@ def _(get_merged_json, mo):
     return (df_all,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -110,7 +166,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(NOTEBOOK_DIR, df_all, get_raw_data, os):
     OUTPUT_DIR = NOTEBOOK_DIR.resolve() / "temp_results"
 
@@ -149,7 +205,7 @@ def _(NOTEBOOK_DIR, df_all, get_raw_data, os):
     return df_available, hash_vis_dirs
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -161,7 +217,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(df_available, mo):
     available_software = sorted(df_available["software_name"].unique().tolist())
 
@@ -177,30 +233,7 @@ def _(df_available, mo):
     return (software_selector,)
 
 
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    Set the minimum number of samples a precursor must be quantified in.
-    """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    min_precursor_slider = mo.ui.slider(
-        start=1,
-        stop=6,
-        step=1,
-        value=3,
-        label="Minimum precursor quantifications (# samples)",
-    )
-    min_precursor_slider
-    return (min_precursor_slider,)
-
-
-@app.cell
+@app.cell(hide_code=True)
 def _(df_available, mo, software_selector):
     selected_software = software_selector.value
     df_selected = df_available[df_available["software_name"].isin(selected_software)]
@@ -208,7 +241,7 @@ def _(df_available, mo, software_selector):
     return (df_selected,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -220,21 +253,20 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     DDAQuantIonModuleQExactive,
     QuantDatapoint,
     defaultdict,
     df_selected,
     hash_vis_dirs,
-    min_precursor_slider,
     mo,
     os,
     pd,
 ):
     metrics_results = {}
     errors = []
-    min_prec = min_precursor_slider.value
+    min_prec = 3  # Minimum precursor quantifications required
 
     with mo.status.spinner(title="Computing benchmark metrics..."):
         for _, row in df_selected.iterrows():
@@ -284,12 +316,17 @@ def _(
                     # ROC-AUC metrics
                     "roc_auc": m["roc_auc"],
                     "roc_auc_directional": m["roc_auc_directional"],
-                    # Epsilon metrics
+                    # Epsilon metrics (accuracy - deviation from expected ratio)
                     "median_abs_epsilon_global": m["median_abs_epsilon_global"],
                     "mean_abs_epsilon_global": m["mean_abs_epsilon_global"],
                     "variance_epsilon_global": m["variance_epsilon_global"],
                     "median_abs_epsilon_eq_species": m["median_abs_epsilon_eq_species"],
                     "mean_abs_epsilon_eq_species": m["mean_abs_epsilon_eq_species"],
+                    # Epsilon precision metrics (consistency - deviation from empirical center)
+                    "median_abs_epsilon_precision_global": m["median_abs_epsilon_precision_global"],
+                    "mean_abs_epsilon_precision_global": m["mean_abs_epsilon_precision_global"],
+                    "median_abs_epsilon_precision_eq_species": m["median_abs_epsilon_precision_eq_species"],
+                    "mean_abs_epsilon_precision_eq_species": m["mean_abs_epsilon_precision_eq_species"],
                     # CV metrics
                     "CV_median": m["CV_median"],
                     "CV_q75": m["CV_q75"],
@@ -321,267 +358,283 @@ def _(
     return (metrics_df,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-    ## 5. ROC-AUC Box Plots
+    ## 5. Global Metrics: Accuracy vs Precision
 
-    Distribution of ROC-AUC scores (abs-based and directional) by software tool.
+    Comparing accuracy (deviation from expected ratio) vs precision (deviation from empirical center) using global weighting.
     """
     )
     return
 
 
-@app.cell
-def _(mo, px, metrics_df):
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
     if len(metrics_df) == 0:
-        box_plot_output = mo.md("**No data to display. Select software tools above.**")
+        box_eps_global = mo.md("**No data to display.**")
     else:
-        fig_box = px.box(
-            metrics_df.reset_index(),
-            x="software_name",
-            y="roc_auc",
-            color="software_name",
-            points="all",
-            hover_name="dataset_id",
-            labels={
-                "roc_auc": "ROC-AUC Score (Abs-based)",
-                "software_name": "Software",
-            },
-            title="ROC-AUC Scores by Software Tool (Abs-based)",
-            color_discrete_sequence=[
-                "#e41a1c",
-                "#377eb8",
-                "#4daf4a",
-                "#984ea3",
-                "#ff7f00",
-                "#ffff33",
-                "#a65628",
-                "#f781bf",
-                "#999999",
-                "#66c2a5",
-            ],
+        box_eps_global = create_boxplot(
+            metrics_df,
+            "median_abs_epsilon_global",
+            "Median Abs Epsilon (Global)",
+            "Accuracy: Median Abs Epsilon (Global)",
         )
-        fig_box.update_traces(marker=dict(size=8))
-        fig_box.update_layout(showlegend=False)
-        box_plot_output = fig_box
-    box_plot_output
+    box_eps_global
     return
 
 
-@app.cell
-def _(mo, px, metrics_df):
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
     if len(metrics_df) == 0:
-        box_plot_dir_output = mo.md("**No data to display.**")
+        box_prec_global = mo.md("**No data to display.**")
     else:
-        fig_box_dir = px.box(
-            metrics_df.reset_index(),
-            x="software_name",
-            y="roc_auc_directional",
-            color="software_name",
-            points="all",
-            hover_name="dataset_id",
-            labels={
-                "roc_auc_directional": "Directional ROC-AUC Score",
-                "software_name": "Software",
-            },
-            title="Directional ROC-AUC Scores by Software Tool",
-            color_discrete_sequence=[
-                "#e41a1c",
-                "#377eb8",
-                "#4daf4a",
-                "#984ea3",
-                "#ff7f00",
-                "#ffff33",
-                "#a65628",
-                "#f781bf",
-                "#999999",
-                "#66c2a5",
-            ],
+        box_prec_global = create_boxplot(
+            metrics_df,
+            "median_abs_epsilon_precision_global",
+            "Median Abs Epsilon Precision (Global)",
+            "Precision: Median Abs Epsilon (Global)",
         )
-        fig_box_dir.update_traces(marker=dict(size=8))
-        fig_box_dir.update_layout(showlegend=False)
-        box_plot_dir_output = fig_box_dir
-    box_plot_dir_output
+    box_prec_global
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
+    if len(metrics_df) == 0:
+        box_mean_eps_global = mo.md("**No data to display.**")
+    else:
+        box_mean_eps_global = create_boxplot(
+            metrics_df,
+            "mean_abs_epsilon_global",
+            "Mean Abs Epsilon (Global)",
+            "Accuracy: Mean Abs Epsilon (Global)",
+        )
+    box_mean_eps_global
+    return
+
+
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
+    if len(metrics_df) == 0:
+        box_mean_prec_global = mo.md("**No data to display.**")
+    else:
+        box_mean_prec_global = create_boxplot(
+            metrics_df,
+            "mean_abs_epsilon_precision_global",
+            "Mean Abs Epsilon Precision (Global)",
+            "Precision: Mean Abs Epsilon (Global)",
+        )
+    box_mean_prec_global
+    return
+
+
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_eps_global = mo.md("**No data to display.**")
+    else:
+        scatter_eps_global = create_scatter(
+            metrics_df,
+            "median_abs_epsilon_global",
+            "Median Abs Epsilon (Global)",
+            "Accuracy: Median (Global) vs Precursors",
+        )
+    scatter_eps_global
+    return
+
+
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_prec_global = mo.md("**No data to display.**")
+    else:
+        scatter_prec_global = create_scatter(
+            metrics_df,
+            "median_abs_epsilon_precision_global",
+            "Median Abs Epsilon Precision (Global)",
+            "Precision: Median (Global) vs Precursors",
+        )
+    scatter_prec_global
+    return
+
+
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_mean_eps_global = mo.md("**No data to display.**")
+    else:
+        scatter_mean_eps_global = create_scatter(
+            metrics_df,
+            "mean_abs_epsilon_global",
+            "Mean Abs Epsilon (Global)",
+            "Accuracy: Mean (Global) vs Precursors",
+        )
+    scatter_mean_eps_global
+    return
+
+
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_mean_prec_global = mo.md("**No data to display.**")
+    else:
+        scatter_mean_prec_global = create_scatter(
+            metrics_df,
+            "mean_abs_epsilon_precision_global",
+            "Mean Abs Epsilon Precision (Global)",
+            "Precision: Mean (Global) vs Precursors",
+        )
+    scatter_mean_prec_global
+    return
+
+
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-    ## 6. Scatter Plots: Total Precursors
+    ## 6. Equal Species Metrics: Accuracy vs Precision
 
-    Relationship between metrics and total number of quantified precursors.
+    Comparing accuracy vs precision using equal species weighting (each species contributes equally).
     """
     )
     return
 
 
-@app.cell
-def _(mo, px, metrics_df):
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
     if len(metrics_df) == 0:
-        scatter_epsilon_total = mo.md("**No data to display.**")
+        box_eps_eq = mo.md("**No data to display.**")
     else:
-        fig_eps_total = px.scatter(
-            metrics_df.reset_index(),
-            x="median_abs_epsilon_global",
-            y="n_precursors",
-            color="software_name",
-            hover_name="dataset_id",
-            labels={
-                "n_precursors": "Number of Precursors (Total)",
-                "median_abs_epsilon_global": "Median Abs Epsilon",
-                "software_name": "Software",
-            },
-            title="Median Abs Epsilon vs Total Precursors",
-            color_discrete_sequence=[
-                "#e41a1c",
-                "#377eb8",
-                "#4daf4a",
-                "#984ea3",
-                "#ff7f00",
-                "#ffff33",
-                "#a65628",
-                "#f781bf",
-                "#999999",
-                "#66c2a5",
-            ],
+        box_eps_eq = create_boxplot(
+            metrics_df,
+            "median_abs_epsilon_eq_species",
+            "Median Abs Epsilon (Equal Species)",
+            "Accuracy: Median Abs Epsilon (Equal Species)",
         )
-        fig_eps_total.update_traces(marker=dict(size=10))
-        scatter_epsilon_total = fig_eps_total
-    scatter_epsilon_total
+    box_eps_eq
     return
 
 
-@app.cell
-def _(mo, px, metrics_df):
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
     if len(metrics_df) == 0:
-        scatter_roc_total = mo.md("**No data to display.**")
+        box_prec_eq = mo.md("**No data to display.**")
     else:
-        fig_roc_total = px.scatter(
-            metrics_df.reset_index(),
-            x="roc_auc_directional",
-            y="n_precursors",
-            color="software_name",
-            hover_name="dataset_id",
-            labels={
-                "n_precursors": "Number of Precursors (Total)",
-                "roc_auc_directional": "Directional ROC-AUC",
-                "software_name": "Software",
-            },
-            title="Directional ROC-AUC vs Total Precursors",
-            color_discrete_sequence=[
-                "#e41a1c",
-                "#377eb8",
-                "#4daf4a",
-                "#984ea3",
-                "#ff7f00",
-                "#ffff33",
-                "#a65628",
-                "#f781bf",
-                "#999999",
-                "#66c2a5",
-            ],
+        box_prec_eq = create_boxplot(
+            metrics_df,
+            "median_abs_epsilon_precision_eq_species",
+            "Median Abs Epsilon Precision (Equal Species)",
+            "Precision: Median Abs Epsilon (Equal Species)",
         )
-        fig_roc_total.update_traces(marker=dict(size=10))
-        scatter_roc_total = fig_roc_total
-    scatter_roc_total
+    box_prec_eq
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_eps_eq = mo.md("**No data to display.**")
+    else:
+        scatter_eps_eq = create_scatter(
+            metrics_df,
+            "median_abs_epsilon_eq_species",
+            "Median Abs Epsilon (Equal Species)",
+            "Accuracy (Equal Species) vs Precursors",
+        )
+    scatter_eps_eq
+    return
+
+
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_prec_eq = mo.md("**No data to display.**")
+    else:
+        scatter_prec_eq = create_scatter(
+            metrics_df,
+            "median_abs_epsilon_precision_eq_species",
+            "Median Abs Epsilon Precision (Equal Species)",
+            "Precision (Equal Species) vs Precursors",
+        )
+    scatter_prec_eq
+    return
+
+
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
-    ## 7. Scatter Plots: Non-Human Precursors (YEAST + ECOLI)
+    ## 7. ROC-AUC Metrics: Species Separation
 
-    Relationship between metrics and the number of non-human (changed species) precursors.
+    Comparing ROC-AUC (abs-based) vs Directional ROC-AUC for species separation.
     """
     )
     return
 
 
-@app.cell
-def _(mo, px, metrics_df):
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
     if len(metrics_df) == 0:
-        scatter_epsilon_nonhuman = mo.md("**No data to display.**")
+        box_roc = mo.md("**No data to display.**")
     else:
-        df_eps_nh = metrics_df.reset_index().copy()
-        df_eps_nh["n_precursors_nonhuman"] = df_eps_nh["n_precursors_YEAST"] + df_eps_nh["n_precursors_ECOLI"]
-
-        fig_eps_nh = px.scatter(
-            df_eps_nh,
-            x="median_abs_epsilon_global",
-            y="n_precursors_nonhuman",
-            color="software_name",
-            hover_name="dataset_id",
-            labels={
-                "n_precursors_nonhuman": "Number of Non-Human Precursors (YEAST + ECOLI)",
-                "median_abs_epsilon_global": "Median Abs Epsilon",
-                "software_name": "Software",
-            },
-            title="Median Abs Epsilon vs Non-Human Precursors",
-            color_discrete_sequence=[
-                "#e41a1c",
-                "#377eb8",
-                "#4daf4a",
-                "#984ea3",
-                "#ff7f00",
-                "#ffff33",
-                "#a65628",
-                "#f781bf",
-                "#999999",
-                "#66c2a5",
-            ],
+        box_roc = create_boxplot(
+            metrics_df,
+            "roc_auc",
+            "ROC-AUC (Abs-based)",
+            "ROC-AUC (Abs-based)",
         )
-        fig_eps_nh.update_traces(marker=dict(size=10))
-        scatter_epsilon_nonhuman = fig_eps_nh
-    scatter_epsilon_nonhuman
+    box_roc
     return
 
 
-@app.cell
-def _(mo, px, metrics_df):
+@app.cell(hide_code=True)
+def _(create_boxplot, metrics_df, mo):
     if len(metrics_df) == 0:
-        scatter_roc_nonhuman = mo.md("**No data to display.**")
+        box_roc_dir = mo.md("**No data to display.**")
     else:
-        df_roc_nh = metrics_df.reset_index().copy()
-        df_roc_nh["n_precursors_nonhuman"] = df_roc_nh["n_precursors_YEAST"] + df_roc_nh["n_precursors_ECOLI"]
-
-        fig_roc_nh = px.scatter(
-            df_roc_nh,
-            x="roc_auc_directional",
-            y="n_precursors_nonhuman",
-            color="software_name",
-            hover_name="dataset_id",
-            labels={
-                "n_precursors_nonhuman": "Number of Non-Human Precursors (YEAST + ECOLI)",
-                "roc_auc_directional": "Directional ROC-AUC",
-                "software_name": "Software",
-            },
-            title="Directional ROC-AUC vs Non-Human Precursors",
-            color_discrete_sequence=[
-                "#e41a1c",
-                "#377eb8",
-                "#4daf4a",
-                "#984ea3",
-                "#ff7f00",
-                "#ffff33",
-                "#a65628",
-                "#f781bf",
-                "#999999",
-                "#66c2a5",
-            ],
+        box_roc_dir = create_boxplot(
+            metrics_df,
+            "roc_auc_directional",
+            "Directional ROC-AUC",
+            "Directional ROC-AUC",
         )
-        fig_roc_nh.update_traces(marker=dict(size=10))
-        scatter_roc_nonhuman = fig_roc_nh
-    scatter_roc_nonhuman
+    box_roc_dir
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_roc = mo.md("**No data to display.**")
+    else:
+        scatter_roc = create_scatter(
+            metrics_df,
+            "roc_auc",
+            "ROC-AUC (Abs-based)",
+            "ROC-AUC (Abs-based) vs Precursors",
+        )
+    scatter_roc
+    return
+
+
+@app.cell(hide_code=True)
+def _(create_scatter, metrics_df, mo):
+    if len(metrics_df) == 0:
+        scatter_roc_dir = mo.md("**No data to display.**")
+    else:
+        scatter_roc_dir = create_scatter(
+            metrics_df,
+            "roc_auc_directional",
+            "Directional ROC-AUC",
+            "Directional ROC-AUC vs Precursors",
+        )
+    scatter_roc_dir
+    return
+
+
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -593,7 +646,7 @@ def _(mo):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo, metrics_df):
     if len(metrics_df) > 0:
         csv_data = metrics_df.to_csv(index=True)

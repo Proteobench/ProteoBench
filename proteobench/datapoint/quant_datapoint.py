@@ -419,56 +419,133 @@ class QuantDatapoint:
 
         return results_series
 
+    def get_epsilon_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
+        """
+        Compute epsilon-based accuracy metrics using specified aggregation.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with epsilon column (deviation from expected ratio)
+        min_nr_observed : int
+            Filter threshold for minimum observations
+        agg : str
+            Aggregation method: "median" or "mean"
+
+        Returns
+        -------
+        dict
+            Accuracy metrics: global, equal-species average, and per-species values
+        """
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        agg_func = (lambda x: x.abs().median()) if agg == "median" else (lambda x: x.abs().mean())
+        per_species_acc = df_slice.groupby("species")["epsilon"].apply(agg_func)
+
+        return {
+            f"{agg}_abs_epsilon_global": agg_func(df_slice["epsilon"]),
+            f"{agg}_abs_epsilon_eq_species": per_species_acc.mean(),
+            **{f"{agg}_abs_epsilon_{sp}": v for sp, v in per_species_acc.items()},
+        }
+
+    def get_precision_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
+        """
+        Compute precision metrics directly from log2FC (log2_A_vs_B) column.
+
+        Precision measures deviation from the empirical center (reproducibility),
+        computed independently from expected ratios.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with log2_A_vs_B and species columns
+        min_nr_observed : int
+            Filter threshold for minimum observations
+        agg : str
+            Aggregation method: "median" or "mean"
+
+        Returns
+        -------
+        dict
+            Precision metrics including:
+            - {agg}_log2_empirical_{species}: Center of log2FC distribution per species
+            - {agg}_abs_epsilon_precision_global: Global aggregated precision
+            - {agg}_abs_epsilon_precision_eq_species: Equal-weighted species average
+            - {agg}_abs_epsilon_precision_{species}: Per-species precision values
+        """
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+
+        # Compute empirical center per species
+        center_func = (lambda x: x.median()) if agg == "median" else (lambda x: x.mean())
+        per_species_center = df_slice.groupby("species")["log2_A_vs_B"].transform(center_func)
+
+        # Precision = deviation from empirical center
+        epsilon_precision = df_slice["log2_A_vs_B"] - per_species_center
+
+        # Aggregate precision per species
+        agg_func = (lambda x: x.abs().median()) if agg == "median" else (lambda x: x.abs().mean())
+
+        # Create temp df for groupby
+        prec_df = df_slice[["species"]].copy()
+        prec_df["epsilon_precision"] = epsilon_precision
+        per_species_prec = prec_df.groupby("species")["epsilon_precision"].apply(agg_func)
+
+        # Get the empirical centers per species
+        empirical_centers = df_slice.groupby("species")["log2_A_vs_B"].apply(center_func)
+
+        return {
+            **{f"{agg}_log2_empirical_{sp}": v for sp, v in empirical_centers.items()},
+            f"{agg}_abs_epsilon_precision_global": agg_func(epsilon_precision),
+            f"{agg}_abs_epsilon_precision_eq_species": per_species_prec.mean(),
+            **{f"{agg}_abs_epsilon_precision_{sp}": v for sp, v in per_species_prec.items()},
+        }
+
+    def get_cv_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, float]:
+        """Compute CV quantiles."""
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        cv_q = df_slice[["CV_A", "CV_B"]].quantile([0.5, 0.75, 0.9, 0.95])
+        cv_avg = cv_q.mean(axis=1)
+        return {
+            "CV_median": cv_avg.loc[0.50],
+            "CV_q75": cv_avg.loc[0.75],
+            "CV_q90": cv_avg.loc[0.90],
+            "CV_q95": cv_avg.loc[0.95],
+        }
+
+    def get_roc_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, float]:
+        """Compute ROC-AUC metrics."""
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        return {
+            "roc_auc": compute_roc_auc(df_slice),
+            "roc_auc_directional": compute_roc_auc_directional(df_slice),
+        }
+
+    def get_count_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, int]:
+        """Compute precursor counts (total and per-species)."""
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        species_counts = df_slice["species"].value_counts().to_dict()
+        return {
+            "nr_prec": len(df_slice),
+            **{f"nr_prec_{sp}": count for sp, count in species_counts.items()},
+        }
+
     def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> dict[int, dict[str, float]]:
         """
-        Compute various statistical metrics from the provided DataFrame for the benchmark,
-        but optimized to do fewer passes over the data.
+        Compute all benchmark metrics (backward compatible wrapper).
+
+        Merges: epsilon (accuracy) + precision + cv + roc + counts
         """
-        # 1) Filter once
         df_slice = df[df["nr_observed"] >= min_nr_observed]
-        nr_prec = len(df_slice)
-
-        # 1b) Compute per-species precursor counts dynamically
-        species_counts = df_slice["species"].value_counts().to_dict()
-        nr_prec_per_species = {f"nr_prec_{species}": count for species, count in species_counts.items()}
-
-        # 2) Compute abs-epsilon only once
-        eps_global = df_slice["epsilon"].abs()
-
-        # 3) Batch the CV quantiles in one go
-        #    This returns a DataFrame with index [0.50, 0.75, 0.90, 0.95]
-        cv_q = df_slice[["CV_A", "CV_B"]].quantile([0.5, 0.75, 0.9, 0.95])
-        #    Then average across the two columns for each quantile
-        cv_avg = cv_q.mean(axis=1)
 
         return {
             min_nr_observed: {
-                "median_abs_epsilon_global": eps_global.median(),
-                "mean_abs_epsilon_global": eps_global.mean(),
+                **QuantDatapoint.get_epsilon_metrics(df, min_nr_observed, "median"),
+                **QuantDatapoint.get_epsilon_metrics(df, min_nr_observed, "mean"),
+                **QuantDatapoint.get_precision_metrics(df, min_nr_observed, "median"),
+                **QuantDatapoint.get_precision_metrics(df, min_nr_observed, "mean"),
+                **QuantDatapoint.get_cv_metrics(df, min_nr_observed),
+                **QuantDatapoint.get_roc_metrics(df, min_nr_observed),
+                **QuantDatapoint.get_count_metrics(df, min_nr_observed),
                 "variance_epsilon_global": df_slice["epsilon"].var(),
-                "median_abs_epsilon_eq_species": df_slice.groupby("species")["epsilon"]
-                .apply(lambda x: x.abs().median())
-                .mean(),
-                "mean_abs_epsilon_eq_species": df_slice.groupby("species")["epsilon"]
-                .apply(lambda x: x.abs().mean())
-                .mean(),
-                # Precision metrics: deviation from empirical center (measures consistency)
-                "median_abs_epsilon_precision_global": df_slice["epsilon_precision_median"].abs().median(),
-                "mean_abs_epsilon_precision_global": df_slice["epsilon_precision_mean"].abs().mean(),
-                "median_abs_epsilon_precision_eq_species": df_slice.groupby("species")["epsilon_precision_median"]
-                .apply(lambda x: x.abs().median())
-                .mean(),
-                "mean_abs_epsilon_precision_eq_species": df_slice.groupby("species")["epsilon_precision_mean"]
-                .apply(lambda x: x.abs().mean())
-                .mean(),
-                "nr_prec": nr_prec,
-                **nr_prec_per_species,
-                "CV_median": cv_avg.loc[0.50],
-                "CV_q75": cv_avg.loc[0.75],
-                "CV_q90": cv_avg.loc[0.90],
-                "CV_q95": cv_avg.loc[0.95],
-                "roc_auc": compute_roc_auc(df_slice),
-                "roc_auc_directional": compute_roc_auc_directional(df_slice),
             }
         }
 

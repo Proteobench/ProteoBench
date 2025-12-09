@@ -9,7 +9,7 @@
 #   make clean                      - Remove generated HTML files
 
 # Marimo notebooks (.py)
-MARIMO_NOTEBOOKS := roc_auc_analysis.py
+MARIMO_NOTEBOOKS := roc_auc_analysis.py scores_dissected.py
 MARIMO_HTML := $(MARIMO_NOTEBOOKS:.py=.html)
 
 # Jupyter notebooks (.ipynb)
@@ -27,6 +27,7 @@ help:
 	@echo "  make marimo                       - Export all marimo notebooks to HTML"
 	@echo "  make jupyter                      - Export all Jupyter notebooks to HTML"
 	@echo "  make roc_auc_analysis.html        - Export specific marimo notebook"
+	@echo "  make scores_dissected.html        - Export specific marimo notebook"
 	@echo "  make indepth_module_analysis.html - Export specific Jupyter notebook"
 	@echo "  make clean                        - Remove generated HTML files"
 	@echo "  make help                         - Show this help message"

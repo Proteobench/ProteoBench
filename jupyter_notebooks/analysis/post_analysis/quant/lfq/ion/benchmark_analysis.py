@@ -174,23 +174,37 @@ def _():
     # Get the directory where this notebook lives
     NOTEBOOK_DIR = Path(__file__).parent
 
-    # Color palette for software tools
-    SOFTWARE_COLORS = [
-        "#e41a1c",
-        "#377eb8",
-        "#4daf4a",
-        "#984ea3",
-        "#ff7f00",
-        "#ffff33",
-        "#a65628",
-        "#f781bf",
-        "#999999",
-        "#66c2a5",
+    # Color mapping for software tools - consistent with proteobench/plotting/plot_quant.py
+    SOFTWARE_COLOR_MAP = {
+        "MaxQuant": "#8bc6fd",
+        "AlphaPept": "#17212b",
+        "ProlineStudio": "#8b26ff",
+        "MSAngel": "#C0FA7D",
+        "FragPipe": "#F89008",
+        "i2MassChroQ": "#108E2E",
+        "Sage": "#E43924",
+        "WOMBAT": "#663200",
+        "DIA-NN": "#d42f2f",
+        "AlphaDIA": "#1D2732",
+        "Custom": "#000000",
+        "Spectronaut": "#007548",
+        "FragPipe (DIA-NN quant)": "#F89008",
+        "MSAID": "#bfef45",
+        "MetaMorpheus": "#637C7A",
+        "Proteome Discoverer": "#911eb4",
+        "PEAKS": "#f032e6",
+        "quantms": "#f5e830",
+    }
+    # Fallback color palette for unknown software
+    FALLBACK_COLORS = [
+        "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00",
+        "#ffff33", "#a65628", "#f781bf", "#999999", "#66c2a5",
     ]
 
     return (
+        FALLBACK_COLORS,
         NOTEBOOK_DIR,
-        SOFTWARE_COLORS,
+        SOFTWARE_COLOR_MAP,
         defaultdict,
         importlib,
         io,
@@ -205,9 +219,24 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(SOFTWARE_COLORS, px):
+def _(FALLBACK_COLORS, SOFTWARE_COLOR_MAP, px):
+    def _get_color_map(df):
+        """Build color map for software tools in the dataframe."""
+        software_names = df["software_name"].unique()
+        color_map = {}
+        fallback_idx = 0
+        for name in sorted(software_names):  # Sort for consistency
+            if name in SOFTWARE_COLOR_MAP:
+                color_map[name] = SOFTWARE_COLOR_MAP[name]
+            else:
+                color_map[name] = FALLBACK_COLORS[fallback_idx % len(FALLBACK_COLORS)]
+                fallback_idx += 1
+        return color_map
+
     def create_boxplot(df, y_col, y_label, title):
         """Create a box plot for a metric by software tool."""
+        color_map = _get_color_map(df)
+        sorted_software = sorted(df["software_name"].unique())
         fig = px.box(
             df.reset_index(),
             x="software_name",
@@ -218,7 +247,8 @@ def _(SOFTWARE_COLORS, px):
             hover_data=["software_version", "enzyme", "enable_match_between_runs", "ident_fdr_psm"],
             labels={y_col: y_label, "software_name": "Software"},
             title=title,
-            color_discrete_sequence=SOFTWARE_COLORS,
+            color_discrete_map=color_map,
+            category_orders={"software_name": sorted_software},
         )
         fig.update_traces(marker=dict(size=8))
         fig.update_layout(showlegend=False)
@@ -226,6 +256,7 @@ def _(SOFTWARE_COLORS, px):
 
     def create_scatter(df, x_col, x_label, title):
         """Create a scatter plot: metric vs n_precursors."""
+        color_map = _get_color_map(df)
         fig = px.scatter(
             df.reset_index(),
             x=x_col,
@@ -235,7 +266,7 @@ def _(SOFTWARE_COLORS, px):
             hover_data=["software_version", "enzyme", "enable_match_between_runs", "ident_fdr_psm"],
             labels={"n_precursors": "Number of Precursors", x_col: x_label, "software_name": "Software"},
             title=title,
-            color_discrete_sequence=SOFTWARE_COLORS,
+            color_discrete_map=color_map,
         )
         fig.update_traces(marker=dict(size=10))
         return fig

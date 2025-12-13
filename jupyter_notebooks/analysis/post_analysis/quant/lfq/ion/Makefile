@@ -8,6 +8,7 @@
 #   make index          - Generate index.html only
 #   make clean          - Remove generated HTML files
 #   make zip            - Create timestamped zip archive of HTML files
+#   make deploy         - Deploy latest zip to server
 #   make refresh        - Re-download from GitHub and rebuild all
 #   make refresh-MODULE - Re-download and rebuild specific module
 
@@ -42,11 +43,17 @@ MARIMO = marimo
 
 # Export marimo notebook to HTML, fail and remove output if errors occur
 # Usage: $(call marimo_export,input.py,output.html,module_arg)
+# --no-include-code hides code cells, showing only markdown and outputs
 define marimo_export
-	$(MARIMO) export html --no-sandbox $(1) -o $(2) $(3) 2>&1 | tee /dev/stderr | (! grep -q "MarimoExceptionRaisedError") || (rm -f $(2) && false)
+	$(MARIMO) export html --no-sandbox --no-include-code $(1) -o $(2) $(3) 2>&1 | tee /dev/stderr | (! grep -q "MarimoExceptionRaisedError") || (rm -f $(2) && false)
 endef
 
-.PHONY: all help clean dda dia index refresh clean-json zip $(MODULES)
+# Deployment settings
+DEPLOY_USER = wolski
+DEPLOY_HOST = fgcz-r-035.uzh.ch
+DEPLOY_PATH = /srv/www/htdocs/public/proteobench
+
+.PHONY: all help clean dda dia index refresh clean-json zip deploy $(MODULES)
 
 help:
 	@echo "Benchmark Analysis Notebooks"
@@ -58,6 +65,7 @@ help:
 	@echo "  make index            - Generate index.html only"
 	@echo "  make clean            - Remove generated HTML files"
 	@echo "  make zip              - Create timestamped zip archive of HTML files"
+	@echo "  make deploy           - Deploy latest zip to $(DEPLOY_HOST):$(DEPLOY_PATH)"
 	@echo "  make refresh          - Re-download from GitHub and rebuild all"
 	@echo "  make refresh-MODULE   - Re-download and rebuild specific module"
 	@echo ""
@@ -137,3 +145,15 @@ refresh: clean-json clean all
 
 clean-json:
 	rm -rf temp_results/*/Results_*-main/
+
+# Deploy to server - create zip, scp it, and extract
+deploy: zip
+	@ZIPFILE=$$(ls -t proteobench_reports_*.zip 2>/dev/null | head -1) && \
+	if [ -z "$$ZIPFILE" ]; then \
+		echo "Error: No proteobench_reports_*.zip found. Run 'make zip' first."; \
+		exit 1; \
+	fi && \
+	echo "Deploying $$ZIPFILE to $(DEPLOY_USER)@$(DEPLOY_HOST):$(DEPLOY_PATH)" && \
+	scp "$$ZIPFILE" $(DEPLOY_USER)@$(DEPLOY_HOST):$(DEPLOY_PATH)/ && \
+	ssh $(DEPLOY_USER)@$(DEPLOY_HOST) "cd $(DEPLOY_PATH) && unzip -o $$ZIPFILE" && \
+	echo "Deployment complete!"

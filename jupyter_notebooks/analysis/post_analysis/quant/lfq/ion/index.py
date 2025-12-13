@@ -72,12 +72,13 @@ def _(requests):
             "repo": "Results_quant_ion_DIA_singlecell",
             "description": "Ion-level benchmarks for single-cell proteomics",
         },
-        "dia_peptidoform": {
-            "name": "DIAQuantPeptidoformModule",
-            "html": "DIAQuantPeptidoformModule.html",
-            "repo": "Results_quant_peptidoform_DIA",
-            "description": "Peptidoform-level benchmarks for DIA",
-        },
+        # dia_peptidoform excluded - repo is empty (no data yet)
+        # "dia_peptidoform": {
+        #     "name": "DIAQuantPeptidoformModule",
+        #     "html": "DIAQuantPeptidoformModule.html",
+        #     "repo": "Results_quant_peptidoform_DIA",
+        #     "description": "Peptidoform-level benchmarks for DIA",
+        # },
     }
 
     def get_dataset_count(repo_name: str) -> int | None:
@@ -130,8 +131,8 @@ def _(MODULES, dataset_counts, mo):
         format_module_link("dia_singlecell"),
     ])
 
-    # Build DIA peptidoform links
-    dia_peptidoform_links = format_module_link("dia_peptidoform")
+    # DIA peptidoform excluded - repo is empty (no data yet)
+    dia_peptidoform_links = "*Coming soon - no data available yet*"
 
     mo.md(
         f"""
@@ -163,15 +164,39 @@ def _(MODULES, dataset_counts, mo):
 
     ---
 
-    ## About These Reports
+    ## Metrics Overview
+
+    Each benchmark report analyzes the following metrics:
+
+    ### Epsilon Metrics (deviation from expected ratio - measures **accuracy**)
+    - **Median/Mean Abs Epsilon**: How close measurements are to theoretical ratios (lower = better)
+    - Available with *global weighting* (each precursor equal) or *equal species weighting* (each species equal)
+
+    ### Epsilon Precision Metrics (deviation from empirical center - measures **consistency**)
+    - **Median/Mean Abs Epsilon Precision**: How tightly grouped measurements are around observed center
+    - Same weighting options as epsilon metrics
+
+    ### ROC-AUC Metrics (measures **species separation**)
+    - **Directional ROC-AUC**: Ability to distinguish changed vs unchanged species (higher = better)
+
+    ### CV Metrics (coefficient of variation - measures **reproducibility**)
+    - **CV Median/Q75/Q90/Q95**: Reproducibility at different quantiles (lower = better)
+
+    ### Bias Metrics (measures **systematic deviation**)
+    - **Bias**: log2(empirical) - log2(expected) ratio, averaged across species
+    - Values near 0 indicate no systematic bias; positive/negative values indicate over/under-estimation
+
+    ---
+
+    ## Report Contents
 
     Each benchmark report includes:
 
-    - **Epsilon Metrics (Accuracy)**: Deviation from expected ratio - measures how close measurements are to theoretical values
-    - **Epsilon Precision Metrics (Consistency)**: Deviation from empirical center - measures how tightly grouped measurements are
-    - **ROC-AUC Metrics**: Measures separation of changed vs unchanged species
-    - **CV Metrics**: Coefficient of variation at different quantiles (median, Q75, Q90, Q95)
-    - **Per-Species Analysis**: Accuracy vs precision breakdown, bias distribution, and reduction analysis by species
+    - **Score Heatmaps**: Overview of all metrics at a glance (5 grouped heatmaps)
+    - **Distribution Plots**: Box plots showing metric distributions across software tools
+    - **Scatter Plots**: Metric values vs number of precursors identified
+    - **Per-Species Analysis**: Accuracy vs precision breakdown, bias distribution by species
+    - **Export**: Download computed metrics as CSV
 
     ---
 

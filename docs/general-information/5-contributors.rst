@@ -30,6 +30,12 @@ People who contributed to ProteoBench, in alphabetical order:
     *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
+    **Cristina Chiva**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+.. line-block::
     **Robbe Devreese**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
@@ -102,6 +108,12 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **Christian Panse**
+    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
+    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+    *Core for Life (C4L)*
+
+.. line-block::
     **Marina Pominova**
     *Department of Computer Science, University of Antwerp, Antwerp, Belgium*
 
@@ -123,7 +135,7 @@ People who contributed to ProteoBench, in alphabetical order:
     *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
 
 .. line-block::
-    **Sam van Puyenbroeck**
+    **Sam Van Puyenbroeck**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
@@ -136,10 +148,27 @@ People who contributed to ProteoBench, in alphabetical order:
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
+.. line-block::
+    **Eduard Sabidó**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Martin Schneider**
+    *German Cancer Research Center (DKFZ), Foundation under Public Law, Im Neuenheimer Feld 580, 69120 Heidelberg, Germany*
+    *Core for Life (C4L)*
 
 .. line-block::
     **Veit Schwämmle**
     *Department of Biochemistry and Molecular Biology, University of Southern Denmark, Odense, Denmark*
+
+.. line-block::
+    **An Staes**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
 
 .. line-block::
     **Maximilian T. Strauss**
@@ -154,35 +183,3 @@ People who contributed to ProteoBench, in alphabetical order:
     *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
     *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
     *Core for Life (C4L)*
-
-.. line-block::
-    **Christian Panse**
-    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
-    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
-    *Core for Life (C4L)*
-
-.. line-block::
-    **Martin Schneider**
-    *German Cancer Research Center (DKFZ), Foundation under Public Law, Im Neuenheimer Feld 580, 69120 Heidelberg, Germany*
-    *Core for Life (C4L)*
-
-.. line-block::
-    **An Staes**
-    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
-    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *VIB-Proteomics Core facility*
-    *Core for Life (C4L)*
-
-.. line-block::
-    **Cristina Chiva**
-    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
-    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
-    *Core for Life (C4L)*
-
-.. line-block::
-    **Eduard Sabidó**
-    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
-    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
-    *Core for Life (C4L)*
-
-

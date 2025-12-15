@@ -30,6 +30,15 @@ People who contributed to ProteoBench, in alphabetical order:
     *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
+    **Tine Claeys**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Maarten Dhaenens**
+    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent, Belgium*
+
+.. line-block::
     **Cristina Chiva**
     *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
     *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
@@ -106,6 +115,14 @@ People who contributed to ProteoBench, in alphabetical order:
     **Alireza Nameni**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Magnus Palmblad**
+    *Center for Proteomics and Metabolomics, Leiden University Medical Center, Leiden, The Netherlands*
+
+.. line-block::
+    **Yasset Perez-Riverol**
+    *European Molecular Biology Laboratory, European Bioinformatics Institute, Wellcome Genome Campus, Cambridge, UK*
 
 .. line-block::
     **Christian Panse**

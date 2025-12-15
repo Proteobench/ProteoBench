@@ -910,11 +910,11 @@ def _(SOFTWARE_COLOR_MAP, FALLBACK_COLORS, metrics_df, mo, np):
                 customdata=software_customdata,
                 hovertemplate=(
                     "<b>%{y}</b><br>"
-                    "Software: %{customdata[0][0]}<br>"
-                    "Version: %{customdata[0][1]}<br>"
-                    "Enzyme: %{customdata[0][2]}<br>"
-                    "MBR: %{customdata[0][3]}<br>"
-                    "FDR: %{customdata[0][4]}"
+                    "Software: %{customdata[0]}<br>"
+                    "Version: %{customdata[1]}<br>"
+                    "Enzyme: %{customdata[2]}<br>"
+                    "MBR: %{customdata[3]}<br>"
+                    "FDR: %{customdata[4]}"
                     "<extra></extra>"
                 ),
             ),

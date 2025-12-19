@@ -21,7 +21,7 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
         Metric to plot ("Median" or "Mean").
 
     mode : str
-        Mode to plot ("Equal weighted species" or "Global").
+        Mode to plot ("Species-weighted" or "Global").
 
     label : str
         The label for the data points.
@@ -37,8 +37,8 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
 
     highlight_point_id = None
 
-    # Check if user selected "Equal weighted species" mode but no datapoints have these metrics
-    if mode == "Equal weighted species":
+    # Check if user selected "Species-weighted" mode but no datapoints have these metrics
+    if mode == "Species-weighted":
         from proteobench.plotting.plot_quant import (
             _filter_datapoints_with_metric,
             _get_metric_column_name,
@@ -53,13 +53,13 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
 
         if len(filtered_data) == 0:
             st.warning(
-                "No submitted datapoints have equal weighted species metrics yet. "
+                "No submitted datapoints have species-weighted metrics yet. "
                 "This metric calculation approach is only available for newly submitted results. "
                 "Please use the 'Global' mode to view existing results.",
                 icon="⚠️",
             )
             st.info(
-                "New datapoints submitted after the equal weighted species feature was implemented "
+                "New datapoints submitted after the species-weighted feature was implemented "
                 "will automatically have these metrics calculated and will appear here. We are currently working towards resubmitting existing datapoints with these metrics as well.",
             )
             return None

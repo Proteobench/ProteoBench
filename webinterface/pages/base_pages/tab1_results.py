@@ -213,8 +213,8 @@ def display_metric_calc_approach_selector(variables_quant) -> str:
 
     return st.radio(
         "Select metric calculation approach",
-        options=["Global", "Equal weighted species"],
-        help="Toggle between equal weighted species-specific and global absolute difference metrics.",
+        options=["Global", "Species-weighted"],
+        help="Toggle between species-weighted and global absolute difference metrics.",
         key=_id_of_key,
     )
 

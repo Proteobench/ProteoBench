@@ -92,7 +92,7 @@ class PlotDataPoint:
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
         metric: str = "Median",
-        mode: str = "Equal weighted species",
+        mode: str = "Species-weighted",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
             "AlphaPept": "#17212b",
@@ -131,7 +131,7 @@ class PlotDataPoint:
         metric : str, optional
             The metric to plot, either "Median" or "Mean", by default "Median".
         mode : str, optional
-            The mode for filtering, either "Global" or "Equal weighted species" (case-insensitive), by default "Equal weighted species".
+            The mode for filtering, either "Global" or "Species-weighted" (case-insensitive), by default "Species-weighted".
         software_colors : Dict[str, str], optional
             A dictionary mapping software names to their colors, by default predefined colors.
         mapping : Dict[str, int], optional
@@ -163,8 +163,8 @@ class PlotDataPoint:
             legacy_metric_col_name = f"{metric_lower}_abs_epsilon"
 
             # Filter datapoints based on mode
-            # If user selects "Equal weighted species" mode, only show datapoints that have the new metrics
-            if mode == "Equal weighted species":
+            # If user selects "Species-weighted" mode, only show datapoints that have the new metrics
+            if mode == "Species-weighted":
                 benchmark_metrics_df = _filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
 
         # Extract all values for the selected metric mode
@@ -405,7 +405,7 @@ def _filter_datapoints_with_metric(benchmark_metrics_df: pd.DataFrame, metric_co
     """
     Filter datapoints to only include those that have the specified metric calculated.
 
-    This is used when the user selects "Equal weighted species" mode to ensure only
+    This is used when the user selects "Species-weighted" mode to ensure only
     datapoints with the new metric calculation are displayed (avoiding visual confusion
     with legacy metric calculations).
 

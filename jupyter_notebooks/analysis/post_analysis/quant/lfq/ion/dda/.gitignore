@@ -7,3 +7,9 @@ performance_newplot.png
 render_indepth.sh
 temp_results/
 *.html
+
+__marimo__/
+astral_df.json
+figures_manuscript/
+analysis_debug/
+*.fasta

@@ -214,7 +214,7 @@ def display_metric_calc_approach_selector(variables_quant) -> str:
     return st.radio(
         "Select metric calculation approach",
         options=["Global", "Species-weighted"],
-        help="Toggle between species-weighted and global absolute difference metrics.",
+        help="Toggle between species-weighted and global absolute difference metrics. Global considers all metrics equally, while species-weighted account for species abundance variations, i.e. the mean/median metric is calculated per species first before averaging across species.",
         key=_id_of_key,
     )
 

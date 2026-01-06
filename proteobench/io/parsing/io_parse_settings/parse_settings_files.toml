@@ -91,3 +91,4 @@
 [quant_lfq_DIA_ion_plasma]
 "DIA-NN" = "parse_settings_diann.toml"
 "Spectronaut" = "parse_settings_spectronaut.toml"
+"FragPipe (DIA-NN quant)" = "parse_settings_diann.toml"

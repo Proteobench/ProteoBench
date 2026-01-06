@@ -218,4 +218,21 @@ class QuantScores:
             )
 
         withspecies_unique["epsilon"] = withspecies_unique["log2_A_vs_B"] - withspecies_unique["log2_expectedRatio"]
+
+        # Compute per-species empirical centers for precision metrics
+        withspecies_unique["log2_empirical_median"] = withspecies_unique.groupby("species")["log2_A_vs_B"].transform(
+            "median"
+        )
+        withspecies_unique["log2_empirical_mean"] = withspecies_unique.groupby("species")["log2_A_vs_B"].transform(
+            "mean"
+        )
+
+        # Epsilon precision: deviation from empirical center (measures consistency, not accuracy)
+        withspecies_unique["epsilon_precision_median"] = (
+            withspecies_unique["log2_A_vs_B"] - withspecies_unique["log2_empirical_median"]
+        )
+        withspecies_unique["epsilon_precision_mean"] = (
+            withspecies_unique["log2_A_vs_B"] - withspecies_unique["log2_empirical_mean"]
+        )
+
         return withspecies_unique

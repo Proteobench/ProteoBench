@@ -74,6 +74,7 @@ The backend is organized into four main components that you can extend or custom
    - For LFQ modules: Use or extend :class:`~proteobench.plotting.plot_generator_lfq_HYE.LFQHYEPlotGenerator`
    - Generates module-specific visualizations
    - For new module types: Create a new class inheriting from ``PlotGeneratorBase``
+   - See :ref:`plot-configuration` for detailed information
 
 **6. Parameter parsing** - Parse tool-specific settings
    - Functions in :file:`proteobench/io/params` parse parameter setting files
@@ -105,6 +106,236 @@ Here's how these components work together for a quantification module:
     
     # 5. Store and display results
     # ... persist datapoint and plots to results repository
+
+.. _plot-configuration:
+
+Plot Configuration
+..................
+
+ProteoBench uses a modular plotting architecture where each module/module group defines its own plot generation
+logic by subclassing :class:`~proteobench.plotting.plot_generator_base.PlotGeneratorBase`. This 
+section explains how to configure plots for your module.
+
+**Required Methods**
+
+When creating a new plot generator, you must implement four abstract methods:
+
+1. **generate_in_depth_plots()** - Creates the actual plot figures
+
+   .. code-block:: python
+
+       def generate_in_depth_plots(
+           self, 
+           performance_data: pd.DataFrame, 
+           parse_settings: any, 
+           **kwargs
+       ) -> Dict[str, go.Figure]:
+           """
+           Generate module-specific plots.
+           
+           Returns
+           -------
+           Dict[str, go.Figure]
+               Dictionary mapping plot names (keys) to plotly figures (values).
+               Example: {"logfc": fig1, "cv": fig2, "ma_plot": fig3}
+           """
+           plots = {}
+           
+           # Example: fold change histogram
+           plots["logfc"] = self._plot_fold_change_histogram(
+               performance_data, 
+               parse_settings.species_expected_ratio()
+           )
+           
+           # Example: CV violin plot
+           plots["cv"] = self._plot_cv_violinplot(performance_data)
+           
+           return plots
+
+2. **get_in_depth_plot_layout()** - Defines how in-depth plots are displayed in the web interface
+
+   .. code-block:: python
+
+       def get_in_depth_plot_layout(self) -> list:
+           """
+           Define layout configuration for displaying plots.
+           
+           Returns
+           -------
+           list
+               List of dictionaries, each defining a row of plots with:
+               - "plots": list of plot names (keys from generate_in_depth_plots)
+               - "columns": number of columns (1 or 2)
+               - "titles": dict mapping plot names to display titles
+           """
+           return [
+               {
+                   "plots": ["logfc", "cv"],  # Two plots side-by-side
+                   "columns": 2,
+                   "titles": {
+                       "logfc": "Log2 Fold Change distributions by species",
+                       "cv": "Coefficient of variation distribution",
+                   },
+               },
+               {
+                   "plots": ["ma_plot"],  # Single plot, full width
+                   "columns": 1,
+                   "titles": {"ma_plot": "MA plot"},
+               },
+           ]
+
+3. **get_in_depth_plot_descriptions()** - Provides help text for each plot
+
+   .. code-block:: python
+
+       def get_in_depth_plot_descriptions(self) -> Dict[str, str]:
+           """
+           Get descriptions shown to users for each plot.
+           
+           Returns
+           -------
+           Dict[str, str]
+               Dictionary mapping plot names to descriptions
+           """
+           return {
+               "logfc": "Log2 fold changes calculated from the performance data",
+               "cv": "Coefficients of variation in Condition A and B",
+               "ma_plot": "MA plot showing mean vs fold change",
+           }
+
+4. **plot_main_metric()** - Creates the main benchmarking plot (Tab 1)
+
+   .. code-block:: python
+
+       def plot_main_metric(
+           self,
+           result_df: pd.DataFrame,
+           metric: str = "Median",
+           hide_annot: bool = False,
+           **kwargs
+       ) -> go.Figure:
+           """
+           Generate the main performance metric plot.
+           
+           This plot appears on Tab 1 and shows all datapoints across time
+           or other primary axis.
+           
+           Parameters
+           ----------
+           result_df : pd.DataFrame
+               DataFrame with columns like 'results', 'software_name', etc.
+           metric : str
+               Which metric to display (e.g., "Median", "Mean")
+           hide_annot : bool
+               Whether to hide annotations
+           **kwargs
+               Additional module-specific parameters
+               
+           Returns
+           -------
+           go.Figure
+               Plotly figure for the main metric
+           """
+           # Extract metric values from results
+           all_metrics = [
+               v2["median_abs_epsilon"] 
+               for v in result_df["results"] 
+               for v2 in v.values()
+           ]
+           
+           # Create scatter plot
+           fig = go.Figure()
+           fig.add_trace(go.Scatter(
+               x=result_df.index,
+               y=all_metrics,
+               mode='markers',
+               # ... additional configuration
+           ))
+           
+           return fig
+
+**Example: Creating a Custom Plot Generator**
+
+Here's a complete example for a hypothetical peptide identification module:
+
+.. code-block:: python
+
+    from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+    import plotly.graph_objects as go
+    
+    class PeptideIDPlotGenerator(PlotGeneratorBase):
+        """Plot generator for peptide identification modules."""
+        
+        def generate_in_depth_plots(self, performance_data, **kwargs):
+            plots = {}
+            plots["score_dist"] = self._plot_score_distribution(performance_data)
+            plots["fdr_curve"] = self._plot_fdr_curve(performance_data)
+            return plots
+        
+        def get_in_depth_plot_layout(self):
+            return [
+                {
+                    "plots": ["score_dist", "fdr_curve"],
+                    "columns": 2,
+                    "titles": {
+                        "score_dist": "Score Distribution",
+                        "fdr_curve": "FDR vs Number of IDs",
+                    },
+                }
+            ]
+        
+        def get_in_depth_plot_descriptions(self):
+            return {
+                "score_dist": "Distribution of identification scores",
+                "fdr_curve": "Trade-off between FDR and identification count",
+            }
+        
+        def plot_main_metric(self, result_df, **kwargs):
+            # Implementation of main metric plot
+            fig = go.Figure()
+            # ... create plot
+            return fig
+        
+        def _plot_score_distribution(self, data):
+            """Helper method to create score distribution plot."""
+            fig = go.Figure()
+            # ... implementation
+            return fig
+        
+        def _plot_fdr_curve(self, data):
+            """Helper method to create FDR curve plot."""
+            fig = go.Figure()
+            # ... implementation
+            return fig
+
+**Integrating Plots with Your Module**
+
+After creating your plot generator, integrate it with your module class:
+
+.. code-block:: python
+
+    from proteobench.modules.quant.quant_base_module import QuantModule
+    from proteobench.plotting.my_custom_plots import MyPlotGenerator
+    
+    class MyCustomModule(QuantModule):
+        def __init__(self, token):
+            super().__init__(token)
+            self.plot_generator = MyPlotGenerator()  # Initialize plot generator
+        
+        def benchmarking(self, input_file, input_format, user_input, all_datapoints):
+            # ... benchmarking logic ...
+            
+            # Generate plots using the plot generator
+            plots = self.plot_generator.generate_in_depth_plots(
+                performance_data=intermediate,
+                parse_settings=parse_settings
+            )
+            
+            # Main metric plot
+            main_fig = self.plot_generator.plot_main_metric(all_datapoints)
+            
+            return intermediate, all_datapoints, input_df
+
 
 Web interface
 -------------
@@ -216,9 +447,17 @@ a new type of module:
    for storing the intermediate data structure.
 5. Check, modify or add the score classes to compute the scoring metrics in
    `proteobench/score <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/score>`_
-6. Check, modify or add plotting classes to
-   `proteobench/plotting <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/plotting>`_
-   to create the figures for the web interface.
+6. **Create a plot generator** by subclassing
+   :class:`~proteobench.plotting.plot_generator_base.PlotGeneratorBase` in
+   `proteobench/plotting <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/plotting>`_.
+   Implement the four required methods:
+   
+   - :meth:`generate_in_depth_plots` - Create plot figures
+   - :meth:`get_in_depth_plot_layout` - Define plot display layout
+   - :meth:`get_in_depth_plot_descriptions` - Provide plot descriptions
+   - :meth:`plot_main_metric` - Create the main benchmarking plot
+   
+   See :ref:`plot-configuration` for detailed examples.
 7. Check, modify or add parameter parsing for new tools in
    `proteobench/io/params <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/params>`_
 8. Add a new page defining the module webinterface to

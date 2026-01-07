@@ -97,8 +97,3 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
 
     return highlight_point_id
-    return highlight_point_id
-    return highlight_point_id
-    return highlight_point_id
-    return highlight_point_id
-    return highlight_point_id

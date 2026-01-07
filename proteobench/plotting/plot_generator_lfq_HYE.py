@@ -494,7 +494,6 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with MA plot (M on x, A on y)
         """
-        fig = go.Figure()
 
         # Define colors for species
         color_map = {species: data["color"] for species, data in species_expected_ratio.items()}

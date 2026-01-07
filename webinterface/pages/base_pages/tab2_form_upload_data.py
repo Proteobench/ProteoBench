@@ -104,7 +104,7 @@ def process_submission_form(
             icon="ℹ️",
         )
 
-    execute_proteobench(
+    success = execute_proteobench(
         variables=variables,
         ionmodule=ionmodule,
         user_input=user_input,
@@ -123,7 +123,7 @@ def process_submission_form(
 # function used in process_submission_form
 
 
-def execute_proteobench(variables, ionmodule, user_input) -> None:
+def execute_proteobench(variables, ionmodule, user_input) -> bool:
     """
     Execute the ProteoBench benchmarking process.
 

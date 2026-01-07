@@ -250,7 +250,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         if all_metric_values:
             layout_xaxis_range = [
                 min(all_metric_values) - min(all_metric_values) * 0.05,
-                max(all_metric_values) + min(all_metric_values) * 0.05,
+                max(all_metric_values) + max(all_metric_values) * 0.05,
             ]
         else:
             layout_xaxis_range = [0, 1]

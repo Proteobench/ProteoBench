@@ -175,7 +175,7 @@ class TestQuantDatapoint:
                 "epsilon_precision_mean": [0.0],  # Single value = 0 deviation from mean
             }
         )
-        result = QuantDatapoint.get_metrics(single_row_df)
+        result = QuantDatapointHYE.get_metrics(single_row_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
         assert result[1]["median_abs_epsilon_global"] == 0.1
@@ -341,7 +341,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # Precision should be smaller than accuracy due to bias
@@ -380,7 +380,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # With no bias, precision and accuracy should be approximately equal
@@ -408,7 +408,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # All precision values are 0.05 (abs), so median/mean should be 0.05
@@ -451,7 +451,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # eq_species should be larger than global because YEAST has high spread

@@ -26,7 +26,7 @@ def initialize_submitted_slider(slider_id_submitted_uuid, default_val_slider) ->
 def generate_submitted_slider(variables, max_nr_observed: int = None) -> None:
     """
     Create a slider input.
-    
+
     Parameters
     ----------
     variables : object
@@ -43,7 +43,7 @@ def generate_submitted_slider(variables, max_nr_observed: int = None) -> None:
     # Use provided max_nr_observed or default to 6
     if max_nr_observed is None:
         max_nr_observed = 6
-    
+
     # Generate slider options from 1 to max_nr_observed
     slider_options = list(range(1, int(max_nr_observed) + 1))
 
@@ -88,7 +88,11 @@ def display_submitted_results(variables, ionmodule) -> None:
     )
 
     metric = display_metric_selector(variables)
-    mode = display_metric_calc_approach_selector(variables)
+    # ROC-AUC has no mode variants (it's already species-aware by design)
+    if metric == "ROC-AUC":
+        mode = None
+    else:
+        mode = display_metric_calc_approach_selector(variables)
 
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")
@@ -155,6 +159,7 @@ def display_metric_selector(variables) -> str:
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
+    # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
         "Select metric to plot",
         options=["Median", "Mean"],
@@ -171,7 +176,7 @@ def display_metric_calc_approach_selector(variables) -> str:
 
     return st.radio(
         "Select metric calculation approach",
-        options=["Equal weighted species", "Global"],
-        help="Toggle between equal weighted species-specific and global absolute difference metrics.",
+        options=["Global", "Species-weighted"],
+        help="Toggle between Species-weighted and global absolute difference metrics.",
         key=_id_of_key,
     )

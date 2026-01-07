@@ -26,10 +26,12 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> No
         st.session_state[_id_of_key] = default_val_slider
 
 
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = None) -> None:
+def generate_main_slider(
+    slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = None
+) -> None:
     """
     Create a slider input.
-    
+
     Parameters
     ----------
     slider_id_uuid : str
@@ -52,10 +54,10 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     # Use provided max_nr_observed or default to 6
     if max_nr_observed is None:
         max_nr_observed = 6
-    
+
     # Generate slider options from 1 to max_nr_observed
     slider_options = list(range(1, int(max_nr_observed) + 1))
-    
+
     default_value = st.session_state.get(slider_key, default_val_slider)
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
@@ -157,7 +159,11 @@ def display_existing_results(variables, ionmodule) -> None:
     data_points_filtered = variables.filtered_data
 
     metric = display_metric_selector(variables)
-    mode = display_metric_calc_approach_selector(variables)
+    # ROC-AUC has no mode variants (it's already species-aware by design)
+    if metric == "ROC-AUC":
+        mode = None
+    else:
+        mode = display_metric_calc_approach_selector(variables)
 
     # prepare plot key explicitly for tab 1
     key = variables.result_plot_uuid
@@ -211,6 +217,7 @@ def display_metric_selector(variables) -> str:
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
+    # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
         "Select metric to plot",
         options=["Median", "Mean"],
@@ -219,16 +226,16 @@ def display_metric_selector(variables) -> str:
     )
 
 
-def display_metric_calc_approach_selector(variables) -> str:
-    key = variables.metric_calc_approach_selector_uuid
+def display_metric_calc_approach_selector(variables_quant) -> str:
+    key = variables_quant.metric_calc_approach_selector_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
     return st.radio(
         "Select metric calculation approach",
-        options=["Equal weighted species", "Global"],
-        help="Toggle between equal weighted species-specific and global absolute difference metrics.",
+        options=["Global", "Species-weighted"],
+        help="Toggle between species-weighted and global absolute difference metrics. Global considers all metrics equally, while species-weighted account for species abundance variations, i.e. the mean/median metric is calculated per species first before averaging across species.",
         key=_id_of_key,
     )
 

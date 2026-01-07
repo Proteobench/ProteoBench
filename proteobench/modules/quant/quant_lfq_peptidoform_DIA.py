@@ -124,7 +124,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         """
         # Parse workflow output file
         try:
-            input_df = load_input_file(input_file, input_format, input_file_secondary)
+            input_df = load_input_file(input_file, input_format)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"

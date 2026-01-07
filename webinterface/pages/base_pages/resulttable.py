@@ -160,7 +160,6 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
 
     try:
-
         identifier_cols = ["selected", "id"]
         parameter_cols = [
             "software_name",
@@ -218,7 +217,6 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
         df.sort_values(by="id", inplace=True)
 
     except KeyError as e:
-        # No data to display
         print(f"KeyError during DataFrame preparation: {e}")
 
     return df

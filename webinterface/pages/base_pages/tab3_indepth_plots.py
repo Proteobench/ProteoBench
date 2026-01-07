@@ -146,8 +146,3 @@ def generate_sample_name(user_input: str) -> str:
     )
 
     return sample_name
-    return sample_name
-    return sample_name
-    return sample_name
-    return sample_name
-    return sample_name

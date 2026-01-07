@@ -14,6 +14,7 @@ from typing import Any, Dict
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import roc_auc_score
 
 import proteobench
 from proteobench.datapoint.datapoint_base import DatapointBase
@@ -33,7 +34,8 @@ def filter_df_numquant_epsilon(
         The key for the desired value. Defaults to 3.
     metric : str
         The metric to be calculated. Should be either median or mean, defaults to median.
-
+    mode : str, optional
+        The mode of metric calculation, defaults to "global".
     Returns
     -------
     float or None
@@ -45,7 +47,16 @@ def filter_df_numquant_epsilon(
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("{}_abs_epsilon_{}".format(metric, mode))
+        # Try with mode suffix first (new format)
+        metric_key_with_mode = "{}_abs_epsilon_{}".format(metric, mode)
+        result = row[min_quant].get(metric_key_with_mode)
+
+        # Fallback to legacy format without mode suffix (for old datapoints)
+        if result is None:
+            metric_key_legacy = "{}_abs_epsilon".format(metric)
+            result = row[min_quant].get(metric_key_legacy)
+
+        return result
 
     return None
 
@@ -71,6 +82,171 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
         return row[min_quant].get("nr_prec")
     return None
+
+
+def compute_roc_auc(df: pd.DataFrame, unchanged_species: str = None) -> float:
+    """
+    Compute ROC-AUC for distinguishing unchanged from changed species.
+
+    Uses absolute log2 fold change as the score to separate species that should
+    show no change (e.g., HUMAN with 1:1 ratio) from species that should show
+    change (e.g., YEAST, ECOLI with different ratios).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'species' and 'log2_A_vs_B' columns.
+        Optionally 'log2_expectedRatio' for auto-detecting unchanged species.
+    unchanged_species : str, optional
+        Species name for the unchanged/control group. If None, auto-detects
+        from data as the species with smallest absolute expected log2 ratio.
+
+    Returns
+    -------
+    float
+        ROC-AUC score, or np.nan if computation is not possible
+        (e.g., only one class present or all scores are NaN).
+    """
+    if "species" not in df.columns or "log2_A_vs_B" not in df.columns:
+        return np.nan
+
+    if len(df) == 0:
+        return np.nan
+
+    # Auto-detect unchanged species if not provided
+    if unchanged_species is None:
+        unchanged_species = _detect_unchanged_species(df)
+        if unchanged_species is None:
+            return np.nan
+
+    y_true = (df["species"] != unchanged_species).astype(int)
+    y_score = df["log2_A_vs_B"].abs()
+
+    # Need both classes and valid scores
+    if len(y_true.unique()) < 2 or y_score.isna().all():
+        return np.nan
+
+    # Handle NaN scores by dropping them
+    valid_mask = ~y_score.isna()
+    if valid_mask.sum() < 2:
+        return np.nan
+
+    return roc_auc_score(y_true[valid_mask], y_score[valid_mask])
+
+
+def _detect_unchanged_species(df: pd.DataFrame) -> str | None:
+    """
+    Detect the unchanged species from the data.
+
+    The unchanged species is the one with the smallest absolute expected log2 ratio
+    (i.e., ratio closest to 1:1).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'species' and 'log2_expectedRatio' columns.
+
+    Returns
+    -------
+    str or None
+        Species name for the unchanged group, or None if detection fails.
+    """
+    if "log2_expectedRatio" not in df.columns or "species" not in df.columns:
+        return None
+
+    if len(df) == 0:
+        return None
+
+    # Get unique species-ratio pairs and find the one closest to 1:1
+    species_ratios = df[["species", "log2_expectedRatio"]].drop_duplicates()
+    idx = species_ratios["log2_expectedRatio"].abs().idxmin()
+    return species_ratios.loc[idx, "species"]
+
+
+def compute_roc_auc_directional(df: pd.DataFrame) -> float:
+    """
+    Compute directional ROC-AUC for distinguishing changed from unchanged species.
+
+    Unlike the abs-based ROC-AUC, this method accounts for the expected direction
+    of fold change for each species:
+    - For species with positive expected log2 ratio (e.g., YEAST): Uses raw log2_FC
+    - For species with negative expected log2 ratio (e.g., ECOLI): Uses -log2_FC
+
+    This approach is more robust to systematic bias where the unchanged species
+    may not be centered at zero.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'species', 'log2_A_vs_B', and 'log2_expectedRatio' columns.
+
+    Returns
+    -------
+    float
+        Average ROC-AUC score across all changed species, or np.nan if computation
+        is not possible.
+    """
+    required_cols = ["species", "log2_A_vs_B", "log2_expectedRatio"]
+    if not all(col in df.columns for col in required_cols):
+        return np.nan
+
+    if len(df) == 0:
+        return np.nan
+
+    # Detect unchanged species (closest to 1:1 ratio)
+    unchanged_species = _detect_unchanged_species(df)
+    if unchanged_species is None:
+        return np.nan
+
+    # Get unique species and their expected ratios
+    species_ratios = df[["species", "log2_expectedRatio"]].drop_duplicates()
+    changed_species = species_ratios[species_ratios["species"] != unchanged_species]
+
+    if len(changed_species) == 0:
+        return np.nan
+
+    roc_aucs = []
+
+    for _, row in changed_species.iterrows():
+        species_name = row["species"]
+        expected_ratio = row["log2_expectedRatio"]
+
+        # Filter to unchanged and this changed species
+        df_binary = df[df["species"].isin([unchanged_species, species_name])].copy()
+
+        if len(df_binary) == 0:
+            continue
+
+        # Labels: 1 for changed species, 0 for unchanged
+        y_true = (df_binary["species"] == species_name).astype(int)
+
+        # Score: Use direction based on expected ratio
+        # If expected ratio > 0, changed species should have higher log2_FC
+        # If expected ratio < 0, changed species should have lower log2_FC (so negate)
+        if expected_ratio >= 0:
+            y_score = df_binary["log2_A_vs_B"]
+        else:
+            y_score = -df_binary["log2_A_vs_B"]
+
+        # Need both classes and valid scores
+        if len(y_true.unique()) < 2 or y_score.isna().all():
+            continue
+
+        # Handle NaN scores
+        valid_mask = ~y_score.isna()
+        if valid_mask.sum() < 2:
+            continue
+
+        try:
+            auc = roc_auc_score(y_true[valid_mask], y_score[valid_mask])
+            roc_aucs.append(auc)
+        except ValueError:
+            continue
+
+    if len(roc_aucs) == 0:
+        return np.nan
+
+    return np.mean(roc_aucs)
 
 
 @dataclass
@@ -100,10 +276,14 @@ class QuantDatapointHYE(DatapointBase):
         is_temporary (bool): Whether the data is temporary.
         intermediate_hash (str): Hash of the intermediate result.
         results (dict): A dictionary of metrics for the benchmark run.
-        median_abs_epsilon_global (float): Median absolute epsilon value (global calculation).
-        mean_abs_epsilon_global (float): Mean absolute epsilon value (global calculation).
-        median_abs_epsilon_eq_species (float): Median absolute epsilon value (equal weighted species).
-        mean_abs_epsilon_eq_species (float): Mean absolute epsilon value (equal weighted species).
+        median_abs_epsilon_global (float): Median absolute epsilon value for the benchmark.
+        mean_abs_epsilon_global (float): Mean absolute epsilon value for the benchmark.
+        median_abs_epsilon_eq_species (float): Median absolute epsilon value for equivalently weighted species.
+        mean_abs_epsilon_eq_species (float): Mean absolute epsilon value for equivalently weighted species.
+        median_abs_epsilon_precision_global (float): Median absolute precision epsilon (deviation from empirical center).
+        mean_abs_epsilon_precision_global (float): Mean absolute precision epsilon (deviation from empirical center).
+        median_abs_epsilon_precision_eq_species (float): Median absolute precision epsilon for equivalently weighted species.
+        mean_abs_epsilon_precision_eq_species (float): Mean absolute precision epsilon for equivalently weighted species.
         nr_prec (int): Number of precursors identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
@@ -131,6 +311,10 @@ class QuantDatapointHYE(DatapointBase):
     mean_abs_epsilon_global: float = 0
     median_abs_epsilon_eq_species: float = 0
     mean_abs_epsilon_eq_species: float = 0
+    median_abs_epsilon_precision_global: float = 0
+    mean_abs_epsilon_precision_global: float = 0
+    median_abs_epsilon_precision_eq_species: float = 0
+    mean_abs_epsilon_precision_eq_species: float = 0
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
@@ -236,30 +420,111 @@ class QuantDatapointHYE(DatapointBase):
         result_datapoint.mean_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
             "mean_abs_epsilon_eq_species"
         ]
+        result_datapoint.median_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_precision_global"
+        ]
+        result_datapoint.mean_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_precision_global"
+        ]
+        result_datapoint.median_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "median_abs_epsilon_precision_eq_species"
+        ]
+        result_datapoint.mean_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_prec][
+            "mean_abs_epsilon_precision_eq_species"
+        ]
         result_datapoint.nr_prec = result_datapoint.results[default_cutoff_min_prec]["nr_prec"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 
         return results_series
 
-    def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> dict[int, dict[str, float]]:
+    def get_epsilon_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
         """
-        Compute various statistical metrics from the provided DataFrame for the benchmark,
-        but optimized to do fewer passes over the data.
-        """
-        # 1) Filter once
-        df_slice = df[df["nr_observed"] >= min_nr_observed]
-        nr_prec = len(df_slice)
+        Compute epsilon-based accuracy metrics using specified aggregation.
 
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with epsilon column (deviation from expected ratio)
+        min_nr_observed : int
+            Filter threshold for minimum observations
+        agg : str
+            Aggregation method: "median" or "mean"
+
+        Returns
+        -------
+        dict
+            Accuracy metrics: global, equal-species average, and per-species values
+        """
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        agg_func = (lambda x: x.abs().median()) if agg == "median" else (lambda x: x.abs().mean())
+        per_species_acc = df_slice.groupby("species")["epsilon"].apply(agg_func)
+
+        return {
+            f"{agg}_abs_epsilon_global": agg_func(df_slice["epsilon"]),
+            f"{agg}_abs_epsilon_eq_species": per_species_acc.mean(),
+            **{f"{agg}_abs_epsilon_{sp}": v for sp, v in per_species_acc.items()},
+        }
+
+    def get_precision_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
+        """
+        Compute precision metrics directly from log2FC (log2_A_vs_B) column.
+
+        Precision measures deviation from the empirical center (reproducibility),
+        computed independently from expected ratios.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with log2_A_vs_B and species columns
+        min_nr_observed : int
+            Filter threshold for minimum observations
+        agg : str
+            Aggregation method: "median" or "mean"
+
+        Returns
+        -------
+        dict
+            Precision metrics including:
+            - {agg}_log2_empirical_{species}: Center of log2FC distribution per species
+            - {agg}_abs_epsilon_precision_global: Global aggregated precision
+            - {agg}_abs_epsilon_precision_eq_species: Equal-weighted species average
+            - {agg}_abs_epsilon_precision_{species}: Per-species precision values
+        """
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+
+        # Compute empirical center per species
+        center_func = (lambda x: x.median()) if agg == "median" else (lambda x: x.mean())
+        per_species_center = df_slice.groupby("species")["log2_A_vs_B"].transform(center_func)
+
+        # Precision = deviation from empirical center
+        epsilon_precision = df_slice["log2_A_vs_B"] - per_species_center
+
+        # Aggregate precision per species
+        agg_func = (lambda x: x.abs().median()) if agg == "median" else (lambda x: x.abs().mean())
+
+        # Create temp df for groupby
+        prec_df = df_slice[["species"]].copy()
+        prec_df["epsilon_precision"] = epsilon_precision
+        per_species_prec = prec_df.groupby("species")["epsilon_precision"].apply(agg_func)
         # 2) Compute abs-epsilon only once, globally
         eps_global = df_slice["epsilon"].abs()
 
-        # 3) Batch the CV quantiles in one go
-        #    This returns a DataFrame with index [0.50, 0.75, 0.90, 0.95]
-        cv_q = df_slice[["CV_A", "CV_B"]].quantile([0.5, 0.75, 0.9, 0.95])
-        #    Then average across the two columns for each quantile
-        cv_avg = cv_q.mean(axis=1)
+        # Get the empirical centers per species
+        empirical_centers = df_slice.groupby("species")["log2_A_vs_B"].apply(center_func)
 
+        return {
+            **{f"{agg}_log2_empirical_{sp}": v for sp, v in empirical_centers.items()},
+            f"{agg}_abs_epsilon_precision_global": agg_func(epsilon_precision),
+            f"{agg}_abs_epsilon_precision_eq_species": per_species_prec.mean(),
+            **{f"{agg}_abs_epsilon_precision_{sp}": v for sp, v in per_species_prec.items()},
+        }
+
+    def get_cv_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, float]:
+        """Compute CV quantiles."""
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        cv_q = df_slice[["CV_A", "CV_B"]].quantile([0.5, 0.75, 0.9, 0.95])
+        cv_avg = cv_q.mean(axis=1)
         return {
             min_nr_observed: {
                 "median_abs_epsilon_global": eps_global.median(),

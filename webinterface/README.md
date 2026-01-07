@@ -41,18 +41,18 @@ good first step to more easily understand the session state.
 # parsed parameter file for module, e.g. "params_file_dict_lfq_ion_dda_quant_astral"
 st.session_state[self.variables_quant.params_file_dict] = {}
 st.session_state[self.variables_quant.params_file_dict] = params.__dict__
-# UI element string identifiers, e.g. slider ID 
-st.session_state[self.variables_quant.slider_id_submitted_uuid] = 'uuid'
-st.session_state[self.variables_quant.slider_id_uuid] = 'uuid'
-st.session_state[self.variables_quant.selectbox_id_submitted_uuid] = 'uuid'
-st.session_state[self.variables_quant.table_id_uuid] = 'uuid'
+# UI element string identifiers, e.g. slider ID
+st.session_state[self.variables_quant.slider_id_submitted_uuid] = "uuid"
+st.session_state[self.variables_quant.slider_id_uuid] = "uuid"
+st.session_state[self.variables_quant.selectbox_id_submitted_uuid] = "uuid"
+st.session_state[self.variables_quant.table_id_uuid] = "uuid"
 # data
 st.session_state[self.variables_quant.all_datapoints]
 st.session_state[self.variables_quant.all_datapoints_submitted]
 
-st.session_state[self.variables_quant.input_df] # string key
-st.session_state[self.variables_quant.input_df_submission] # string key
-st.session_state[self.variables_quant.all_datapoints_submission].columns # DataFrame
+st.session_state[self.variables_quant.input_df]  # string key
+st.session_state[self.variables_quant.input_df_submission]  # string key
+st.session_state[self.variables_quant.all_datapoints_submission].columns  # DataFrame
 
 st.session_state[self.variables_quant.result_perf]
 ```

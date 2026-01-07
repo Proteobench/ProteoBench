@@ -15,7 +15,7 @@ class TestPlotDataPoint:
         all_datapoints = gpr.read_results_json_repo()
         all_datapoints["old_new"] = "old"
         plot_generator = LFQHYEPlotGenerator()
-        fig = plot_generator.plot_main_metric(all_datapoints, label="None")
+        fig = plot_generator.plot_main_metric(all_datapoints, label="")
         assert fig is not None
 
     def test_plot_fold_change_histogram_returns_a_figure(self):

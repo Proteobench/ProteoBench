@@ -247,15 +247,21 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df["hover_text"] = hover_texts
         benchmark_metrics_df["scatter_size"] = scatter_size
 
-        layout_xaxis_range = [
-            min(all_metric_values) - min(all_metric_values) * 0.05,
-            max(all_metric_values) + min(all_metric_values) * 0.05,
-        ]
+        if all_metric_values:
+            layout_xaxis_range = [
+                min(all_metric_values) - min(all_metric_values) * 0.05,
+                max(all_metric_values) + min(all_metric_values) * 0.05,
+            ]
+        else:
+            layout_xaxis_range = [0, 1]
 
-        layout_yaxis_range = [
-            min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
-            max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
-        ]
+        if all_nr_prec:
+            layout_yaxis_range = [
+                min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
+                max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
+            ]
+        else:
+            layout_yaxis_range = [0, 1000]
 
         fig = go.Figure(
             layout_yaxis_range=layout_yaxis_range,

@@ -11,7 +11,7 @@ from proteobench.datapoint.quant_datapoint import (
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscores import QuantScoresHYE
 
 DATAPOINT_USER_INPUT_TYPE = {
     "DDA_MaxQuant": {
@@ -477,7 +477,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         assert "epsilon_precision_median" in result.columns
         assert "epsilon_precision_mean" in result.columns
@@ -501,7 +501,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         # Check per-species empirical centers
         human_rows = result[result["species"] == "HUMAN"]
@@ -535,7 +535,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         # Epsilon (accuracy): deviation from expected (0)
         # Values: 0.4-0=0.4, 0.5-0=0.5, 0.6-0=0.6
@@ -575,7 +575,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         # Each species should have precision values centered around 0
         for species in ["HUMAN", "YEAST", "ECOLI"]:

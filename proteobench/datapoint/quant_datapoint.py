@@ -542,13 +542,13 @@ class QuantDatapointHYE(DatapointBase):
 
         return {
             min_nr_observed: {
-                **QuantDatapoint.get_epsilon_metrics(df, min_nr_observed, "median"),
-                **QuantDatapoint.get_epsilon_metrics(df, min_nr_observed, "mean"),
-                **QuantDatapoint.get_precision_metrics(df, min_nr_observed, "median"),
-                **QuantDatapoint.get_precision_metrics(df, min_nr_observed, "mean"),
-                **QuantDatapoint.get_cv_metrics(df, min_nr_observed),
-                **QuantDatapoint.get_roc_metrics(df, min_nr_observed),
-                **QuantDatapoint.get_count_metrics(df, min_nr_observed),
+                **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "median"),
+                **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "mean"),
+                **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "median"),
+                **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "mean"),
+                **QuantDatapointHYE.get_cv_metrics(df, min_nr_observed),
+                **QuantDatapointHYE.get_roc_metrics(df, min_nr_observed),
+                **QuantDatapointHYE.get_count_metrics(df, min_nr_observed),
                 "variance_epsilon_global": df_slice["epsilon"].var(),
             }
         }

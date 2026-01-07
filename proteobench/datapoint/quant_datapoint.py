@@ -438,6 +438,7 @@ class QuantDatapointHYE(DatapointBase):
 
         return results_series
 
+    @staticmethod
     def get_epsilon_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
         """
         Compute epsilon-based accuracy metrics using specified aggregation.
@@ -466,6 +467,7 @@ class QuantDatapointHYE(DatapointBase):
             **{f"{agg}_abs_epsilon_{sp}": v for sp, v in per_species_acc.items()},
         }
 
+    @staticmethod
     def get_precision_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
         """
         Compute precision metrics directly from log2FC (log2_A_vs_B) column.
@@ -507,8 +509,6 @@ class QuantDatapointHYE(DatapointBase):
         prec_df = df_slice[["species"]].copy()
         prec_df["epsilon_precision"] = epsilon_precision
         per_species_prec = prec_df.groupby("species")["epsilon_precision"].apply(agg_func)
-        # 2) Compute abs-epsilon only once, globally
-        eps_global = df_slice["epsilon"].abs()
 
         # Get the empirical centers per species
         empirical_centers = df_slice.groupby("species")["log2_A_vs_B"].apply(center_func)
@@ -520,35 +520,51 @@ class QuantDatapointHYE(DatapointBase):
             **{f"{agg}_abs_epsilon_precision_{sp}": v for sp, v in per_species_prec.items()},
         }
 
+    @staticmethod
     def get_cv_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, float]:
         """Compute CV quantiles."""
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         cv_q = df_slice[["CV_A", "CV_B"]].quantile([0.5, 0.75, 0.9, 0.95])
         cv_avg = cv_q.mean(axis=1)
         return {
-            min_nr_observed: {
-                "median_abs_epsilon_global": eps_global.median(),
-                "mean_abs_epsilon_global": eps_global.mean(),
-                "variance_epsilon_global": df_slice["epsilon"].var(),
-                "median_abs_epsilon_eq_species": pd.Series(
-                    [
-                        df_slice[df_slice["species"] == species]["epsilon"].abs().median()
-                        for species in df_slice["species"].unique()
-                    ]
-                ).mean(),
-                "mean_abs_epsilon_eq_species": pd.Series(
-                    [
-                        df_slice[df_slice["species"] == species]["epsilon"].abs().mean()
-                        for species in df_slice["species"].unique()
-                    ]
-                ).mean(),
-                "nr_prec": nr_prec,
-                "CV_median": cv_avg.loc[0.50],
-                "CV_q75": cv_avg.loc[0.75],
-                "CV_q90": cv_avg.loc[0.90],
-                "CV_q95": cv_avg.loc[0.95],
-            }
+            "CV_median": cv_avg.loc[0.50],
+            "CV_q75": cv_avg.loc[0.75],
+            "CV_q90": cv_avg.loc[0.90],
+            "CV_q95": cv_avg.loc[0.95],
         }
+
+    @staticmethod
+    def get_metrics(df: pd.DataFrame, min_nr_observed: int = 3) -> Dict[int, Dict[str, float]]:
+        """
+        Compute statistical metrics from the provided DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame containing the intermediate results.
+        min_nr_observed : int
+            Minimum number of observations threshold.
+
+        Returns
+        -------
+        Dict[int, Dict[str, float]]
+            Dictionary mapping quantification cutoffs to their computed metrics.
+        """
+        df_slice = df[df["nr_observed"] >= min_nr_observed]
+        nr_prec = len(df_slice)
+
+        # Combine all metrics
+        metrics = {
+            **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "median"),
+            **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "mean"),
+            **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "median"),
+            **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "mean"),
+            **QuantDatapointHYE.get_cv_metrics(df, min_nr_observed),
+            "variance_epsilon_global": df_slice["epsilon"].var() if len(df_slice) > 0 else 0.0,
+            "nr_prec": nr_prec,
+        }
+
+        return {min_nr_observed: metrics}
 
 
 class QuantDatapointPYE(QuantDatapointHYE):
@@ -678,20 +694,46 @@ class QuantDatapointPYE(QuantDatapointHYE):
             # If no precursors meet this threshold, return zero metrics for this level
             if len(df_slice) == 0:
                 plasma_metrics[min_nr_obs] = {
+                    # Global metrics (legacy key names for backward compatibility)
                     "median_abs_log2_fc_error_spike_ins": 0.0,
+                    "mean_abs_log2_fc_error_spike_ins": 0.0,
+                    # Species-weighted metrics
+                    "median_abs_log2_fc_error_spike_ins_global": 0.0,
+                    "mean_abs_log2_fc_error_spike_ins_global": 0.0,
+                    "median_abs_log2_fc_error_spike_ins_eq_species": 0.0,
+                    "mean_abs_log2_fc_error_spike_ins_eq_species": 0.0,
+                    # Common metrics
                     "nr_quantified_spike_ins": 0,
                     "dynamic_range_human_plasma_A": 0.0,
                     "dynamic_range_human_plasma_B": 0.0,
                     "dynamic_range_human_plasma_mean": 0.0,
                     "median_abs_epsilon_human_plasma": 0.0,
+                    "mean_abs_epsilon_human_plasma": 0.0,
                 }
                 continue
 
-            # Compute median absolute log2 fold-change error for spike-ins (yeast and E. coli)
+            # Compute spike-in metrics (yeast and E. coli combined)
             spike_ins_df = df_slice[df_slice["species"].isin(["YEAST", "ECOLI"])]
-            median_abs_log2_fc_error_spike_ins = (
+
+            # Global: Simple aggregation across all spike-ins
+            median_abs_log2_fc_error_spike_ins_global = (
                 spike_ins_df["epsilon"].abs().median() if len(spike_ins_df) > 0 else 0.0
             )
+            mean_abs_log2_fc_error_spike_ins_global = (
+                spike_ins_df["epsilon"].abs().mean() if len(spike_ins_df) > 0 else 0.0
+            )
+
+            # Species-weighted: Calculate per species, then average
+            median_per_species = []
+            mean_per_species = []
+            for species in ["YEAST", "ECOLI"]:
+                species_df = df_slice[df_slice["species"] == species]
+                if len(species_df) > 0:
+                    median_per_species.append(species_df["epsilon"].abs().median())
+                    mean_per_species.append(species_df["epsilon"].abs().mean())
+
+            median_abs_log2_fc_error_spike_ins_eq_species = np.mean(median_per_species) if median_per_species else 0.0
+            mean_abs_log2_fc_error_spike_ins_eq_species = np.mean(mean_per_species) if mean_per_species else 0.0
 
             # Compute number of quantified spike-in precursors
             nr_quantified_spike_ins = len(spike_ins_df)
@@ -715,18 +757,28 @@ class QuantDatapointPYE(QuantDatapointHYE):
             else:
                 dynamic_range_human_plasma_mean = 0.0
 
-            # Compute median absolute epsilon for human plasma
+            # Compute human plasma metrics (global only - no species weighting needed for single species)
             median_abs_epsilon_human_plasma = (
                 human_plasma_df["epsilon"].abs().median() if len(human_plasma_df) > 0 else 0.0
             )
+            mean_abs_epsilon_human_plasma = human_plasma_df["epsilon"].abs().mean() if len(human_plasma_df) > 0 else 0.0
 
             plasma_metrics[min_nr_obs] = {
-                "median_abs_log2_fc_error_spike_ins": median_abs_log2_fc_error_spike_ins,
+                # Global metrics (legacy key names for backward compatibility)
+                "median_abs_log2_fc_error_spike_ins": median_abs_log2_fc_error_spike_ins_global,
+                "mean_abs_log2_fc_error_spike_ins": mean_abs_log2_fc_error_spike_ins_global,
+                # Species-weighted metrics
+                "median_abs_log2_fc_error_spike_ins_global": median_abs_log2_fc_error_spike_ins_global,
+                "mean_abs_log2_fc_error_spike_ins_global": mean_abs_log2_fc_error_spike_ins_global,
+                "median_abs_log2_fc_error_spike_ins_eq_species": median_abs_log2_fc_error_spike_ins_eq_species,
+                "mean_abs_log2_fc_error_spike_ins_eq_species": mean_abs_log2_fc_error_spike_ins_eq_species,
+                # Common metrics
                 "nr_quantified_spike_ins": nr_quantified_spike_ins,
                 "dynamic_range_human_plasma_A": dynamic_ranges.get("A", 0.0),
                 "dynamic_range_human_plasma_B": dynamic_ranges.get("B", 0.0),
                 "dynamic_range_human_plasma_mean": dynamic_range_human_plasma_mean if dynamic_ranges else 0.0,
                 "median_abs_epsilon_human_plasma": median_abs_epsilon_human_plasma,
+                "mean_abs_epsilon_human_plasma": mean_abs_epsilon_human_plasma,
             }
 
         return plasma_metrics

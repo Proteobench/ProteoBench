@@ -501,6 +501,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
     def plot_main_metric(
         self,
         result_df: pd.DataFrame,
+        metric: str = "Median",
+        mode: str = "Global",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
             "AlphaPept": "#17212b",
@@ -539,6 +541,11 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         ----------
         result_df : pd.DataFrame
             DataFrame containing the results to plot, must have 'results' column with metrics.
+        metric : str, optional
+            Metric to use for calculations: "Median" or "Mean". Defaults to "Median".
+        mode : str, optional
+            Mode for metric calculation: "Global" or "Species-weighted". Currently both modes
+            use the same metrics for plasma. Defaults to "Global".
         software_colors : Dict[str, str]
             Mapping of software names to colors.
         mapping : Dict[str, str]
@@ -567,6 +574,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         cutoff_level = min_nr_observed if min_nr_observed is not None else default_cutoff_min_prec
         return self._plot_plasma_scatterplot(
             result_df,
+            metric=metric,
+            mode=mode,
             software_colors=software_colors,
             mapping=mapping,
             highlight_color=highlight_color,
@@ -580,6 +589,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
     def _plot_plasma_scatterplot(
         self,
         result_df: pd.DataFrame,
+        metric: str = "Median",
+        mode: str = "Global",
         # TODO: move software_colors to constants
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
@@ -613,15 +624,20 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Generate the main plasma benchmarking scatterplot.
 
         The plot uses four visual dimensions to represent the benchmarking results:
-        - X-axis: Median absolute log2 fold-change error for yeast and E. coli spike-ins
+        - X-axis: Absolute log2 fold-change error for yeast and E. coli spike-ins (median or mean based on metric)
         - Y-axis: Number of quantified yeast and E. coli spike-in precursors
         - Dot size: Dynamic range of human plasma precursors (quantification breadth)
-        - Dot opacity: Quantification accuracy for human plasma (alpha based on error)
+        - Dot opacity: Quantification accuracy for human plasma (alpha based on error, median or mean)
 
         Parameters
         ----------
         result_df : pd.DataFrame
             DataFrame containing the results to plot.
+        metric : str, optional
+            Metric to use: "Median" or "Mean". Defaults to "Median".
+        mode : str, optional
+            Mode for metric calculation: "Global" or "Species-weighted". Currently both modes
+            use the same metrics for plasma. Defaults to "Global".
         software_colors : Dict[str, str]
             Mapping of software names to colors.
         mapping : Dict[str, str]
@@ -646,11 +662,23 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         """
         fig = go.Figure()
 
+        # Determine which metric keys to use based on selected metric and mode
+        metric_lower = metric.lower()
+        mode_suffix = "global" if mode == "Global" else "eq_species"
+
+        # Construct metric keys with mode suffix
+        x_metric_key = f"{metric_lower}_abs_log2_fc_error_spike_ins_{mode_suffix}"
+        # Fallback to legacy key (without suffix) for backwards compatibility with old datapoints
+        x_metric_key_legacy = f"{metric_lower}_abs_log2_fc_error_spike_ins"
+
+        # Human plasma metrics don't have mode variants (single species)
+        opacity_metric_key = f"{metric_lower}_abs_epsilon_human_plasma"
+
         # Extract plasma-specific metrics from results dictionary
-        x_values = []  # median_abs_log2_fc_error_spike_ins
+        x_values = []  # abs_log2_fc_error_spike_ins (median or mean, global or species-weighted)
         y_values = []  # nr_quantified_spike_ins
         sizes = []  # dynamic_range_human_plasma
-        opacities = []  # median_abs_epsilon_human_plasma
+        opacities = []  # abs_epsilon_human_plasma (median or mean)
         colors_list = []
         hover_texts = []
 
@@ -660,10 +688,14 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             if default_cutoff_min_prec in results_dict:
                 metrics = results_dict[default_cutoff_min_prec]
 
-                x_val = metrics.get("median_abs_log2_fc_error_spike_ins", 0.0)
+                # Try new mode-specific key first, fall back to legacy key
+                x_val = metrics.get(x_metric_key)
+                if x_val is None:
+                    x_val = metrics.get(x_metric_key_legacy, 0.0)
+
                 y_val = metrics.get("nr_quantified_spike_ins", 0)
                 size_val = metrics.get("dynamic_range_human_plasma_mean", 0.0)
-                opacity_val = metrics.get("median_abs_epsilon_human_plasma", 0.0)
+                opacity_val = metrics.get(opacity_metric_key, 0.0)
 
                 x_values.append(x_val)
                 y_values.append(y_val)
@@ -689,12 +721,13 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 colors_list.append(color)
 
                 # Build hover text
+                mode_label = "global" if mode == "Global" else "species-weighted"
                 hover_text = (
                     f"<b>{software} {row['software_version']}</b><br>"
-                    f"Spike-in error (median log2 FC): {x_val:.3f}<br>"
+                    f"Spike-in error ({metric_lower}, {mode_label}): {x_val:.3f}<br>"
                     f"Quantified spike-ins: {y_val}<br>"
                     f"Plasma dynamic range: {size_val:.2f}<br>"
-                    f"Plasma accuracy error: {opacity_val:.3f}<br>"
+                    f"Plasma accuracy error ({metric_lower}): {opacity_val:.3f}<br>"
                     f"ID: {row['id']}"
                 )
                 hover_texts.append(hover_text)
@@ -718,11 +751,12 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         )
 
         # Update layout
+        mode_description = "global" if mode == "Global" else "species-weighted"
         fig.update_layout(
             width=800,
             height=700,
             xaxis=dict(
-                title="Median absolute log2 fold-change error (spike-ins)",
+                title=f"{metric} absolute log2 fold-change error (spike-ins, {mode_description})",
                 gridcolor="lightgray",
                 gridwidth=1,
                 linecolor="black",
@@ -766,3 +800,68 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         fig.update_layout(clickmode="event+select")
 
         return fig
+
+    def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
+        """
+        Get the appropriate metric column names based on the specified metric and mode.
+
+        Note: For plasma (PYE) modules, this is primarily for compatibility with the UI
+        which offers metric and mode selectors. The plasma plot uses different metrics
+        (spike-in errors, quantification depth, dynamic range) rather than the
+        epsilon-based metrics used in HYE modules.
+
+        Parameters
+        ----------
+        metric : str
+            The metric to plot: "Median" or "Mean".
+        mode : str
+            The mode for filtering: "Global" or "Species-weighted".
+
+        Returns
+        -------
+        Tuple[str, str, str]
+            A tuple containing (metric_lower, mode_suffix, plot_title).
+        """
+        metric_lower = metric.lower()
+        mode_suffix = "global" if mode == "Global" else "eq_species"
+        mode_description = "globally" if mode == "Global" else "using equally weighted species averages"
+
+        plot_title = (
+            f"{metric} absolute difference between measured and expected log2-transformed fold change "
+            f"(calculated {mode_description})"
+        )
+
+        return metric_lower, mode_suffix, plot_title
+
+    def _filter_datapoints_with_metric(self, benchmark_metrics_df: pd.DataFrame, metric_col_name: str) -> pd.DataFrame:
+        """
+        Filter datapoints to only include those that have the specified metric calculated.
+
+        For plasma modules, this ensures consistency with HYE module behavior when
+        filtering for species-weighted metrics.
+
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            DataFrame containing benchmark metrics for datapoints.
+        metric_col_name : str
+            The name of the metric column to filter on.
+
+        Returns
+        -------
+        pd.DataFrame
+            Filtered DataFrame containing only datapoints with the specified metric.
+        """
+
+        def has_metric(results_dict):
+            """Check if the results dictionary contains the specified metric."""
+            try:
+                for threshold_dict in results_dict.values():
+                    if metric_col_name in threshold_dict:
+                        return True
+            except (TypeError, AttributeError):
+                pass
+            return False
+
+        # Filter to only datapoints that have the specified metric calculated
+        return benchmark_metrics_df[benchmark_metrics_df["results"].apply(has_metric)].copy()

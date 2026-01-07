@@ -24,7 +24,7 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.plotting.plot_generator_lfq_PYE import LFQPYEPlotGenerator
-from proteobench.score.quantscoresHYE import QuantScoresHYE
+from proteobench.score.quantscoresPYE import QuantScoresPYE
 
 
 class DIAQuantIonModulePlasma(QuantModule):
@@ -154,7 +154,7 @@ class DIAQuantIonModulePlasma(QuantModule):
 
         # Calculate quantification scores
         try:
-            quant_score = QuantScoresHYE(
+            quant_score = QuantScoresPYE(
                 self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:

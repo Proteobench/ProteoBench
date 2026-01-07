@@ -139,6 +139,11 @@ def display_existing_results(variables, ionmodule) -> None:
     data_points_filtered = variables.filtered_data
 
     metric = display_metric_selector(variables)
+    # ROC-AUC has no mode variants (it's already species-aware by design)
+    if metric == "ROC-AUC":
+        mode = None
+    else:
+        mode = display_metric_calc_approach_selector(variables)
 
     # prepare plot key explicitly for tab 1
     key = variables.result_plot_uuid
@@ -150,6 +155,7 @@ def display_existing_results(variables, ionmodule) -> None:
     highlight_point_id = render_metric_plot(
         data_points_filtered,
         metric,
+        mode,
         label=st.session_state[st.session_state[variables.selectbox_id_uuid]],
         key=_id_of_key,
         plot_generator=plot_generator,
@@ -190,10 +196,25 @@ def display_metric_selector(variables) -> str:
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
+    # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
         "Select metric to plot",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_metric_calc_approach_selector(variables_quant) -> str:
+    key = variables_quant.metric_calc_approach_selector_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.radio(
+        "Select metric calculation approach",
+        options=["Global", "Species-weighted"],
+        help="Toggle between species-weighted and global absolute difference metrics. Global considers all metrics equally, while species-weighted account for species abundance variations, i.e. the mean/median metric is calculated per species first before averaging across species.",
         key=_id_of_key,
     )
 

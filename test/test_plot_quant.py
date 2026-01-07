@@ -14,7 +14,7 @@ class TestPlotDataPoint:
         gpr.clone_repo_anonymous()
         all_datapoints = gpr.read_results_json_repo()
         all_datapoints["old_new"] = "old"
-        fig = PlotDataPoint().plot_metric(all_datapoints)
+        fig = PlotDataPoint().plot_metric(all_datapoints, mode="global")
         assert fig is not None
 
     def test_plot_fold_change_histogram_returns_a_figure(self):

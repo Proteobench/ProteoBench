@@ -74,6 +74,11 @@ def display_submitted_results(variables, ionmodule) -> None:
     )
 
     metric = display_metric_selector(variables)
+    # ROC-AUC has no mode variants (it's already species-aware by design)
+    if metric == "ROC-AUC":
+        mode = None
+    else:
+        mode = display_metric_calc_approach_selector(variables)
 
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")
@@ -132,47 +137,30 @@ def initialize_submitted_data_points(
         )
 
 
-def handle_submitted_table_edits(variables, ionmodule) -> None:
-    """Callback function for handling edits made to the data table in the UI."""
-    edits = st.session_state[st.session_state[variables.table_id_uuid]]["edited_rows"].items()
-    for k, v in edits:
-        try:
-            # ToDo: check if this can be done more clearly
-            # ? gets row k from the all_datapoints_submitted DataFrame
-            # ? and ... modifies the first column specified in the keys of dictionary v
-            # df = st.session_state[variables.all_datapoints_submitted]
-            # df[list(v.keys())[0]].iloc[k] = list(v.values())[0]
-            st.session_state[variables.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(v.values())[0]
-        except TypeError:
-            return
-    st.session_state[variables.highlight_list_submitted] = list(
-        st.session_state[variables.all_datapoints_submitted]["Highlight"]
-    )
-    st.session_state[variables.placeholder_table] = st.session_state[variables.all_datapoints_submitted]
-
-    if len(st.session_state[variables.all_datapoints]) == 0:
-        st.error("No datapoints available for plotting", icon="🚨")
-
-    try:
-        plot_generator = ionmodule.get_plot_generator()
-        fig_metric = plot_generator.plot_main_metric(
-            st.session_state[variables.all_datapoints],
-        )
-    except Exception as e:
-        st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-    st.session_state[variables.fig_metric] = fig_metric
-
-
 def display_metric_selector(variables) -> str:
     key = variables.metric_selector_submitted_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
+    # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
         "Select metric to plot",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_metric_calc_approach_selector(variables) -> str:
+    key = variables.metric_calc_approach_selector_submitted_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.radio(
+        "Select metric calculation approach",
+        options=["Global", "Species-weighted"],
+        help="Toggle between Species-weighted and global absolute difference metrics.",
         key=_id_of_key,
     )

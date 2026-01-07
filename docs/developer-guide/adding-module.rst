@@ -59,15 +59,16 @@ The backend is organized into four main components that you can extend or custom
 
 **3. Score calculation** - Compute benchmarking metrics
    - Base class: :class:`~proteobench.score.score_base.ScoreBase` (ABC)
-   - For quantification: Use or extend :class:`~proteobench.score.quantscores.QuantScores`
    - Generates the ``intermediate`` data structure
    - For new module types: Create a new class inheriting from ``ScoreBase``
+   - See :ref:`score-configuration` for detailed information
 
 **4. Result representation** - Store benchmark results as datapoints
    - Base class: :class:`~proteobench.datapoint.datapoint_base.DatapointBase` (ABC)
    - For quantification: Use or extend :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint`
    - Stores metadata and metrics for each benchmark run
    - For new module types: Create a new class inheriting from ``DatapointBase``
+   - See :ref:`datapoint-configuration` for detailed information
 
 **5. Visualization** - Create plots for web interface
    - Base class: :class:`~proteobench.plotting.plot_generator_base.PlotGeneratorBase` (ABC)
@@ -336,6 +337,339 @@ After creating your plot generator, integrate it with your module class:
             
             return intermediate, all_datapoints, input_df
 
+.. _score-configuration:
+
+Score Configuration
+...................
+
+ProteoBench uses a modular score calculation architecture where each module defines how to compute
+benchmarking metrics by subclassing :class:`~proteobench.score.score_base.ScoreBase`. This section
+explains how to configure score calculators for your module.
+
+**Required Methods**
+
+When creating a new score calculator, you must implement the abstract method from ``ScoreBase``:
+
+1. **generate_intermediate()** - Computes metrics and creates the intermediate data structure
+
+   .. code-block:: python
+
+       def generate_intermediate(
+           self,
+           filtered_df: pd.DataFrame,
+           replicate_to_raw: dict,
+       ) -> pd.DataFrame:
+           """
+           Generate intermediate data structure with computed scores.
+           
+           This method processes the parsed input data and computes all
+           benchmarking metrics needed for the module.
+           
+           Parameters
+           ----------
+           filtered_df : pd.DataFrame
+               Parsed and filtered input data from the software tool
+           replicate_to_raw : dict
+               Mapping of replicate names to raw file names
+               Example: {"A": ["run1.raw", "run2.raw"], "B": ["run3.raw", "run4.raw"]}
+               
+           Returns
+           -------
+           pd.DataFrame
+               Intermediate dataframe containing:
+               - Original input data columns
+               - Computed metrics (fold changes, statistics, etc.)
+               - Additional annotations needed for benchmarking
+           """
+           # 1. Select relevant columns from input
+           relevant_data = filtered_df[["Raw file", "Precursor", "Intensity"]].copy()
+           
+           # 2. Add condition/replicate information
+           replicate_df = self._convert_replicate_mapping(replicate_to_raw)
+           relevant_data = pd.merge(relevant_data, replicate_df, on="Raw file")
+           
+           # 3. Compute condition statistics (mean, CV, etc.)
+           stats_df = self._compute_condition_stats(relevant_data)
+           
+           # 4. Add species annotations
+           species_df = filtered_df[["Precursor", "HUMAN", "YEAST", "ECOLI"]].drop_duplicates()
+           stats_df = pd.merge(stats_df, species_df, on="Precursor")
+           
+           # 5. Compute performance metrics (epsilon, fold changes, etc.)
+           result = self._compute_metrics(stats_df, self.expected_ratios)
+           
+           return result
+
+**Example: Creating a Custom Score Calculator**
+
+Here's a complete example for a hypothetical peptide identification module:
+
+.. code-block:: python
+
+    from proteobench.score.score_base import ScoreBase
+    import pandas as pd
+    import numpy as np
+    
+    class PeptideIDScores(ScoreBase):
+        """Score calculator for peptide identification modules."""
+        
+        def __init__(self, fdr_threshold: float = 0.01):
+            """
+            Initialize the score calculator.
+            
+            Parameters
+            ----------
+            fdr_threshold : float
+                FDR threshold for filtering identifications
+            """
+            self.fdr_threshold = fdr_threshold
+        
+        def generate_intermediate(
+            self,
+            filtered_df: pd.DataFrame,
+            replicate_to_raw: dict,
+        ) -> pd.DataFrame:
+            """
+            Generate intermediate data for peptide ID benchmarking.
+            
+            Computes metrics like:
+            - Number of identifications at different FDR levels
+            - Score distributions
+            - Decoy hit rates
+            """
+            # 1. Filter by FDR
+            filtered_df = filtered_df[filtered_df["q_value"] <= self.fdr_threshold]
+            
+            # 2. Add replicate information
+            raw_to_replicate = self._invert_mapping(replicate_to_raw)
+            filtered_df["replicate"] = filtered_df["Raw file"].map(raw_to_replicate)
+            
+            # 3. Compute identification statistics per replicate
+            stats = filtered_df.groupby("replicate").agg({
+                "Peptide": "nunique",  # Unique peptides
+                "Protein": "nunique",  # Unique proteins
+                "Score": ["mean", "std"],  # Score statistics
+            }).reset_index()
+            
+            # 4. Compute overlap between replicates
+            stats["overlap_score"] = self._compute_overlap(filtered_df)
+            
+            # 5. Add decoy information
+            stats["decoy_rate"] = self._compute_decoy_rate(filtered_df)
+            
+            return stats
+        
+        def _invert_mapping(self, replicate_to_raw: dict) -> dict:
+            """Convert replicate->raw mapping to raw->replicate."""
+            return {
+                raw: replicate 
+                for replicate, raws in replicate_to_raw.items() 
+                for raw in raws
+            }
+        
+        def _compute_overlap(self, df: pd.DataFrame) -> float:
+            """Compute peptide overlap between replicates."""
+            replicates = df["replicate"].unique()
+            if len(replicates) < 2:
+                return 1.0
+            
+            peptide_sets = [
+                set(df[df["replicate"] == rep]["Peptide"])
+                for rep in replicates
+            ]
+            
+            # Jaccard similarity
+            intersection = set.intersection(*peptide_sets)
+            union = set.union(*peptide_sets)
+            return len(intersection) / len(union) if union else 0.0
+        
+        def _compute_decoy_rate(self, df: pd.DataFrame) -> float:
+            """Compute rate of decoy hits."""
+            total = len(df)
+            decoys = len(df[df["Protein"].str.contains("DECOY")])
+            return decoys / total if total > 0 else 0.0
+
+.. _datapoint-configuration:
+
+Datapoint Configuration
+.......................
+
+ProteoBench uses datapoints to store metadata and benchmarking results for each submission. Each module
+defines its datapoint structure by subclassing :class:`~proteobench.datapoint.datapoint_base.DatapointBase`.
+This section explains how to configure datapoints for your module.
+
+**Required Components**
+
+When creating a new datapoint class, you must:
+
+1. **Define datapoint attributes** using ``@dataclass`` decorator
+
+   .. code-block:: python
+
+       from dataclasses import dataclass
+       from proteobench.datapoint.datapoint_base import DatapointBase
+       
+       @dataclass
+       class QuantDatapointHYE(DatapointBase):
+           """
+           Datapoint for LFQ quantification benchmarking.
+           
+           Stores both metadata (search parameters, software versions) and
+           results (benchmarking metrics at different filtering levels).
+           """
+           # Metadata fields
+           id: str
+           software_name: str
+           software_version: str
+           search_engine: str
+           ident_fdr_psm: float
+           enable_match_between_runs: bool
+           enzyme: str
+           # ... other metadata ...
+           
+           # Results
+           results: dict  # Contains metrics at different filters
+
+2. **Implement generate_id()** - Create a unique identifier
+
+   .. code-block:: python
+
+       def generate_id(self) -> None:
+           """
+           Generate a unique hash ID for this benchmark run.
+           
+           The ID should be deterministic based on the input data and settings,
+           allowing detection of duplicate submissions.
+           """
+           # Combine relevant fields into a string
+           id_string = (
+               f"{self.software_name}_{self.software_version}_"
+               f"{self.search_engine}_{self.ident_fdr_psm}_"
+               f"{self.enable_match_between_runs}_{self.enzyme}"
+               # ... include all distinguishing parameters ...
+           )
+           
+           # Create hash
+           import hashlib
+           self.id = hashlib.sha256(id_string.encode()).hexdigest()[:10]
+
+3. **Implement generate_datapoint()** - Create datapoint from intermediate data
+
+   .. code-block:: python
+
+       @staticmethod
+       def generate_datapoint(
+           intermediate: pd.DataFrame,
+           input_format: str,
+           user_input: dict,
+           **kwargs
+       ) -> pd.Series:
+           """
+           Generate a datapoint from intermediate data and user input.
+           
+           Parameters
+           ----------
+           intermediate : pd.DataFrame
+               Intermediate DataFrame with computed metrics
+           input_format : str
+               Software tool name (e.g., "MaxQuant", "FragPipe")
+           user_input : dict
+               Dictionary containing metadata from submission form
+               
+           Returns
+           -------
+           pd.Series
+               Series containing the datapoint data, ready to be added to results
+           """
+           # 1. Compute metrics at different filtering levels
+           results = {}
+           for min_obs in [2, 3, 4, 5]:
+               filtered = intermediate[intermediate["nr_observed"] >= min_obs]
+               
+               results[min_obs] = {
+                   "median_abs_epsilon": filtered["abs_epsilon"].median(),
+                   "mean_abs_epsilon": filtered["abs_epsilon"].mean(),
+                   "nr_prec": len(filtered),
+               }
+           
+           # 2. Create datapoint object
+           import dataclasses
+           datapoint = QuantDatapointHYE(
+               id="",  # Will be set by generate_id()
+               software_name=input_format,
+               software_version=user_input.get("software_version", "unknown"),
+               search_engine=user_input.get("search_engine", input_format),
+               ident_fdr_psm=user_input.get("ident_fdr_psm", 0.01),
+               enable_match_between_runs=user_input.get("enable_match_between_runs", False),
+               enzyme=user_input.get("enzyme", "Trypsin"),
+               results=results,
+           )
+           
+           # 3. Generate unique ID
+           datapoint.generate_id()
+           
+           # 4. Convert to pandas Series for storage
+           return pd.Series(dataclasses.asdict(datapoint))
+
+**Example: Creating a Custom Datapoint**
+
+Here's a complete example for a hypothetical peptide identification module:
+
+.. code-block:: python
+
+    from dataclasses import dataclass
+    from proteobench.datapoint.datapoint_base import DatapointBase
+    import hashlib
+    import dataclasses
+    import pandas as pd
+    
+    @dataclass
+    class PeptideIDDatapoint(DatapointBase):
+        """Datapoint for peptide identification benchmarking."""
+        
+        # Metadata
+        id: str
+        software_name: str
+        software_version: str
+        database: str
+        fdr_threshold: float
+        
+        # Results
+        num_peptides: int
+        num_proteins: int
+        replicate_overlap: float
+        
+        def generate_id(self) -> None:
+            """Generate unique ID based on metadata."""
+            id_string = (
+                f"{self.software_name}_{self.software_version}_"
+                f"{self.database}_{self.fdr_threshold}"
+            )
+            self.id = hashlib.sha256(id_string.encode()).hexdigest()[:10]
+        
+        @staticmethod
+        def generate_datapoint(
+            intermediate: pd.DataFrame,
+            input_format: str,
+            user_input: dict,
+            **kwargs
+        ) -> pd.Series:
+            """Generate datapoint from intermediate results."""
+            metrics = intermediate.iloc[0]  # Assuming aggregated data
+            
+            datapoint = PeptideIDDatapoint(
+                id="",
+                software_name=input_format,
+                software_version=user_input.get("software_version", "unknown"),
+                database=user_input.get("database", "unknown"),
+                fdr_threshold=user_input.get("fdr_threshold", 0.01),
+                num_peptides=int(metrics["num_peptides"]),
+                num_proteins=int(metrics["num_proteins"]),
+                replicate_overlap=float(metrics["overlap_score"]),
+            )
+            
+            datapoint.generate_id()
+            return pd.Series(dataclasses.asdict(datapoint))
 
 Web interface
 -------------
@@ -442,11 +776,23 @@ a new type of module:
 3. Check, modify or add a parsing procedures in
    `proteobench/io/parsing <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_
    e.g. :file:`parse_ion.py` or :file:`parse_peptidoform.py`.
-4. Check, modify or add datapoint classes to
-   `proteobench/datapoint <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/datapoint>`_
-   for storing the intermediate data structure.
-5. Check, modify or add the score classes to compute the scoring metrics in
-   `proteobench/score <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/score>`_
+4. **Create a datapoint class** by subclassing
+   :class:`~proteobench.datapoint.datapoint_base.DatapointBase` in
+   `proteobench/datapoint <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/datapoint>`_.
+   Define attributes for metadata and results, then implement:
+   
+   - :meth:`generate_id` - Create unique identifier for the benchmark run
+   - :meth:`generate_datapoint` - Generate datapoint from intermediate data
+   
+   See :ref:`datapoint-configuration` for detailed examples.
+5. **Create a score calculator** by subclassing
+   :class:`~proteobench.score.score_base.ScoreBase` in
+   `proteobench/score <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/score>`_.
+   Implement the required method:
+   
+   - :meth:`generate_intermediate` - Compute metrics and create intermediate data structure
+   
+   See :ref:`score-configuration` for detailed examples.
 6. **Create a plot generator** by subclassing
    :class:`~proteobench.plotting.plot_generator_base.PlotGeneratorBase` in
    `proteobench/plotting <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/plotting>`_.

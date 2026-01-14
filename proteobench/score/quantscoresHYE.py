@@ -65,7 +65,7 @@ class QuantScoresHYE(ScoreBase):
             DataFrame containing the intermediate data structure.
         """
 
-        # select columns which are relavant for the statistics
+        # select columns which are relevant for the statistics
         # TODO, this should be handled different, probably in the parse settings
         relevant_columns_df = filtered_df[["Raw file", self.precursor_column_name, "Intensity"]].copy()
         replicate_to_raw_df = QuantScoresHYE.convert_replicate_to_raw(replicate_to_raw)

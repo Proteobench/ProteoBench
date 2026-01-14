@@ -13,7 +13,6 @@ import streamlit_utils
 from plotly import graph_objects as go
 
 
-# TODO: make more generic. This is currently specific to LFQ DIA ion quant (original) only.
 def generate_indepth_plots(
     module,
     variables,

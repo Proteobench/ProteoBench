@@ -55,7 +55,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
         plots["ma_plot"] = self._plot_ma_plot(performance_data, species_expected_ratio)
 
-        plots["dynamic_range_plot"] = self._plot_dynamic_range(performance_data)
+        plots["dynamic_range_plot"] = self._plot_dynamic_range(performance_data, species_expected_ratio)
 
         plots["missing_values_plot"] = self._plot_missing_values(performance_data)
 
@@ -334,7 +334,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             )
         return fig
 
-    def _plot_dynamic_range(self, performance_data: pd.DataFrame) -> go.Figure:
+    def _plot_dynamic_range(self, performance_data: pd.DataFrame, species_expected_ratio: any) -> go.Figure:
         """
         Generate dynamic range plot for both conditions A and B, with a smoothed
         epsilon trend on a secondary y-axis.
@@ -354,109 +354,165 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Process data for both conditions
         conditions_data = []
 
-        # Condition A
-        if "Intensity_mean_A" in performance_data.columns:
-            human_slice_a = performance_data[performance_data["species"] == "HUMAN"].copy()
-            if len(human_slice_a) > 0 and human_slice_a["Intensity_mean_A"].max() > 0:
-                human_slice_a["normalized_intensity"] = (
-                    human_slice_a["Intensity_mean_A"] / human_slice_a["Intensity_mean_A"].max() * 100
-                )
-                human_slice_a = human_slice_a.sort_values(by="normalized_intensity", ascending=False)
-                human_slice_a["rank"] = range(1, len(human_slice_a) + 1)
-                human_slice_a["condition"] = "A"
-                # keep epsilon so we can compute the trend
-                conditions_data.append(human_slice_a[["rank", "normalized_intensity", "condition", "epsilon"]])
+        if len(performance_data) > 0:
 
-        # Condition B
-        if "Intensity_mean_B" in performance_data.columns:
-            human_slice_b = performance_data[performance_data["species"] == "HUMAN"].copy()
-            if len(human_slice_b) > 0 and human_slice_b["Intensity_mean_B"].max() > 0:
-                human_slice_b["normalized_intensity"] = (
-                    human_slice_b["Intensity_mean_B"] / human_slice_b["Intensity_mean_B"].max() * 100
+            # Calculate mean intensity across both conditions
+            performance_data_copy = performance_data.copy()
+            performance_data_copy["mean_intensity"] = performance_data_copy[
+                ["Intensity_mean_A", "Intensity_mean_B"]
+            ].mean(axis=1, skipna=True)
+
+            if performance_data_copy["mean_intensity"].max() > 0:
+                performance_data_copy["normalized_intensity"] = (
+                    performance_data_copy["mean_intensity"] / performance_data_copy["mean_intensity"].max() * 100
                 )
-                human_slice_b = human_slice_b.sort_values(by="normalized_intensity", ascending=False)
-                human_slice_b["rank"] = range(1, len(human_slice_b) + 1)
-                human_slice_b["condition"] = "B"
-                # epsilon of B should be same as A
-                conditions_data.append(human_slice_b[["rank", "normalized_intensity", "condition", "epsilon"]])
+                performance_data_copy = performance_data_copy.sort_values(by="normalized_intensity", ascending=False)
+                performance_data_copy["rank"] = range(1, len(performance_data_copy) + 1)
+
+                conditions_data.append(performance_data_copy[["rank", "normalized_intensity", "epsilon", "species"]])
 
         if conditions_data:
-            eps_df = conditions_data[0][["rank", "epsilon"]].copy()
-            eps_df["absolute_eps"] = eps_df["epsilon"].abs()
-            eps_df = eps_df.sort_values("rank")
+            plot_df = conditions_data[0]
 
-            # window ~1% of points, minimum 5
-            window = max(5, len(eps_df) // 10 if len(eps_df) >= 100 else 5)
-            eps_df["epsilon_trend"] = eps_df["absolute_eps"].rolling(window=window, center=True, min_periods=1).median()
-
-            if len(conditions_data) > 1:
-                # Both conditions available - combine and plot with condition separation
-                plot_df = pd.concat(conditions_data, ignore_index=True)
-
-                fig = px.scatter(
-                    plot_df,
-                    x="rank",
-                    y="normalized_intensity",
-                    color="condition",
-                    labels={"rank": "Rank", "normalized_intensity": "Normalized Intensity (%)"},
-                    color_discrete_map={"A": "#1f77b4", "B": "#ff7f0e"},
-                )
-                fig.update_yaxes(type="log", dtick="1")
-
+            # Get colors from species_expected_ratio if available
+            if species_expected_ratio:
+                color_map = {species: data.get("color", "#000000") for species, data in species_expected_ratio.items()}
             else:
-                # Only one condition available
-                plot_df = conditions_data[0]
+                # Fallback colors if not provided
+                color_map = {}
 
-                fig = px.scatter(
-                    plot_df,
-                    x="rank",
-                    y="normalized_intensity",
-                    labels={"rank": "Rank", "normalized_intensity": "Normalized Intensity (%)"},
-                    title="Dynamic Range Plot (Human precursors)",
-                )
-                fig.update_yaxes(type="log")
+            # Create figure with dropdown for species selection
+            fig = go.Figure()
 
-            # Add smoothed epsilon trend (without markers, just a line)
-            fig.add_trace(
-                go.Scatter(
-                    x=eps_df["rank"],
-                    y=eps_df["epsilon_trend"],
-                    mode="markers",
-                    name="Absolute epsilon (trend)",
-                    yaxis="y2",
-                    line=dict(dash="dash", color="green"),
-                    showlegend=False,
+            species_order = ["HUMAN", "YEAST", "ECOLI"]  # Human first as default
+
+            # Create traces for each species (all hidden initially except first)
+            for idx, species in enumerate(species_order):
+                species_df = plot_df[plot_df["species"] == species].copy()
+                if len(species_df) > 0:
+                    # Add scatter trace for this species
+                    fig.add_trace(
+                        go.Scattergl(
+                            x=species_df["rank"],
+                            y=species_df["normalized_intensity"],
+                            mode="markers",
+                            marker=dict(
+                                color=color_map.get(species, "#000000"),
+                                size=6,
+                                opacity=0.3,
+                                line=dict(width=0.5, color="white"),
+                            ),
+                            name=f"{species} precursors",
+                            visible=(idx == 0),  # Only first (HUMAN) visible by default
+                            hovertemplate=f"<b>{species}</b><br>Rank: %{{x}}<br>Intensity: %{{y:.2f}}%<extra></extra>",
+                        )
+                    )
+
+                    # Calculate epsilon trend for this species
+                    eps_df = species_df[["rank", "epsilon"]].copy()
+                    eps_df["absolute_eps"] = eps_df["epsilon"].abs()
+                    eps_df = eps_df.sort_values("rank")
+
+                    # window ~1% of points, minimum 5
+                    window = max(5, len(eps_df) // 10 if len(eps_df) >= 100 else 5)
+                    eps_df["epsilon_trend"] = (
+                        eps_df["absolute_eps"].rolling(window=window, center=True, min_periods=1).median()
+                    )
+
+                    # Add epsilon trend line for this species
+                    fig.add_trace(
+                        go.Scatter(
+                            x=eps_df["rank"],
+                            y=eps_df["epsilon_trend"],
+                            mode="lines",
+                            name=f"{species} epsilon trend",
+                            yaxis="y2",
+                            line=dict(dash="dash", color=color_map.get(species, "#000000"), width=2),
+                            visible=(idx == 0),  # Only first (HUMAN) visible by default
+                            hovertemplate=f"<b>{species} epsilon trend</b><br>Rank: %{{x}}<br>Epsilon: %{{y:.3f}}<extra></extra>",
+                        )
+                    )
+
+            # Create dropdown buttons for species selection
+            buttons = []
+            for idx, species in enumerate(species_order):
+                # Create visibility array: each species has 2 traces (scatter + epsilon line)
+                visibility = [False] * (len(species_order) * 2)
+                visibility[idx * 2] = True  # Show scatter for this species
+                visibility[idx * 2 + 1] = True  # Show epsilon line for this species
+
+                buttons.append(
+                    dict(
+                        label=species,
+                        method="update",
+                        args=[{"visible": visibility}],
+                    )
                 )
+
+            fig.update_xaxes(
+                title="Intensity Rank (1 = highest intensity)",
+                gridcolor="lightgray",
+                showgrid=True,
+            )
+            fig.update_yaxes(
+                title="Normalized Intensity (%)",
+                type="log",
+                dtick="1",
+                gridcolor="lightgray",
+                showgrid=True,
             )
 
-            # Update layout to prevent overlap between the secondary y-axis and the legend
-            max_epsilon = eps_df["epsilon_trend"].max()
-            if pd.isna(max_epsilon) or max_epsilon == 0:
-                max_epsilon = 1.0
+            # Update layout with dropdown menu
+            epsilon_q85 = plot_df["epsilon"].quantile(0.85)
+            if pd.isna(epsilon_q85) or epsilon_q85 == 0:
+                epsilon_q85 = 1.0
 
             fig.update_layout(
-                yaxis2=dict(
-                    title="Absolute epsilon (rolling median)",
-                    overlaying="y",
-                    side="right",
-                    range=[0, max_epsilon * 1.1],
-                ),
-                hovermode="closest",
+                updatemenus=[
+                    dict(
+                        buttons=buttons,
+                        direction="down",
+                        pad={"r": 10, "t": 10},
+                        showactive=True,
+                        x=0.15,
+                        xanchor="left",
+                        y=1.15,
+                        yanchor="top",
+                    )
+                ],
+                annotations=[
+                    dict(
+                        text="Species:",
+                        showarrow=False,
+                        x=0.02,
+                        xref="paper",
+                        y=1.13,
+                        yref="paper",
+                        align="left",
+                    )
+                ],
                 legend=dict(
                     orientation="h",
                     yanchor="bottom",
                     y=1.02,
-                    xanchor="center",
-                    x=0.5,
-                    title=dict(text="Condition", side="top"),
+                    xanchor="right",
+                    x=1.0,
                 ),
+                yaxis2=dict(
+                    title="Absolute epsilon (rolling median)",
+                    overlaying="y",
+                    side="right",
+                    range=[0, epsilon_q85],
+                ),
+                margin=dict(l=60, r=80, t=80, b=60),  # Reduce top margin to fill space
+                hovermode="closest",
             )
 
         else:
             # No data available
             fig = go.Figure()
             fig.add_annotation(
-                text="No human plasma data available for dynamic range plot",
+                text="No data available for dynamic range plot",
                 xref="paper",
                 yref="paper",
                 x=0.5,
@@ -468,32 +524,100 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
     def _plot_missing_values(self, performance_data: pd.DataFrame, max_observations=12) -> go.Figure:
         """
-        Generate missing values plot with a sigmoidal trend line.
+        Generate missing values plot with smoothed trend line and color gradient.
+
+        This plot shows how missingness increases with lower abundance precursors.
+        High-abundance precursors (low rank) typically have low missingness,
+        while low-abundance precursors (high rank) have higher missingness.
 
         Parameters
         ----------
         performance_data : pd.DataFrame
             Performance data containing missing values information
+        max_observations : int
+            Maximum number of observations possible (default 12)
 
         Returns
         -------
         go.Figure
-            Plotly figure with missing values plot and sigmoidal trend line
+            Plotly figure with missing values plot, trend line, and reference lines
         """
         fig = go.Figure()
 
         # Filter and prepare data
         human_slice = performance_data[performance_data["species"] == "HUMAN"].copy()
+
+        if len(human_slice) == 0:
+            fig.add_annotation(
+                text="No human plasma data available for missing values plot",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+            )
+            return fig
+
         human_slice = human_slice.sort_values(by="logIntensityMean", ascending=False)  # Across conditions
         human_slice["rank"] = range(1, len(human_slice) + 1)
         human_slice["missingness"] = (1 - human_slice["nr_observed"] / max_observations) * 100
 
-        # Plot missingness vs rank (scatter plot)
-        fig = px.scatter(
-            human_slice,
-            x="rank",
-            y="missingness",
-            labels={"rank": "Intensity Rank", "missingness": "Missing Values (%)"},
+        # Calculate smoothed trend line (rolling median)
+        window = max(5, len(human_slice) // 20)  # ~5% of points, minimum 5
+        human_slice["missingness_trend"] = (
+            human_slice["missingness"].rolling(window=window, center=True, min_periods=1).median()
+        )
+
+        # Create scatter plot with color gradient based on missingness
+        fig.add_trace(
+            go.Scatter(
+                x=human_slice["rank"],
+                y=human_slice["missingness"],
+                mode="markers",
+                marker=dict(
+                    size=4,
+                    color=human_slice["missingness"],
+                    colorscale="Reds",
+                    showscale=True,
+                    colorbar=dict(title="Missing<br>Values (%)", thickness=15, len=0.7),
+                    cmin=0,
+                    cmax=100,
+                    opacity=0.6,
+                ),
+                name="Precursors",
+                hovertemplate="Rank: %{x}<br>Missing: %{y:.1f}%<extra></extra>",
+            )
+        )
+
+        # Add smoothed trend line
+        fig.add_trace(
+            go.Scatter(
+                x=human_slice["rank"],
+                y=human_slice["missingness_trend"],
+                mode="lines",
+                line=dict(color="darkred", width=3),
+                name="Trend (rolling median)",
+                hovertemplate="Rank: %{x}<br>Trend: %{y:.1f}%<extra></extra>",
+            )
+        )
+
+        # Update layout
+        fig.update_layout(
+            xaxis=dict(
+                title="Intensity Rank (1 = highest intensity)",
+                gridcolor="lightgray",
+                showgrid=True,
+            ),
+            yaxis=dict(
+                title="Missing Values (%)",
+                gridcolor="lightgray",
+                showgrid=True,
+                range=[-5, 105],  # Give some padding
+            ),
+            hovermode="closest",
+            showlegend=True,
+            legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.8)"),
+            margin=dict(l=60, r=20, t=20, b=60),  # Reduce margins to fill space
         )
 
         return fig

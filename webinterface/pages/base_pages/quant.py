@@ -102,10 +102,14 @@ class QuantUIObjects:
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
+        # Display software selector and AlphaDIA info outside the form so it updates immediately
+        tab2_form_upload_data.show_software_selector_and_alphadia_info(
+            variables=self.variables,
+            parsesettingsbuilder=self.parsesettingsbuilder,
+            user_input=self.user_input,
+        )
         with st.form(key="main_form"):
             tab2_form_upload_data.generate_input_fields(
-                variables=self.variables,
-                parsesettingsbuilder=self.parsesettingsbuilder,
                 user_input=self.user_input,
             )
             # TODO: Investigate the necessity of generating additional parameters fields in the first tab.

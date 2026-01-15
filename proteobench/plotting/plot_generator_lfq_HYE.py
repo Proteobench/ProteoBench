@@ -95,8 +95,9 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
     def plot_main_metric(
         self,
-        result_df: pd.DataFrame,
+        benchmark_metrics_df: pd.DataFrame,
         metric: str = "Median",
+        mode: str = "Species-weighted",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
             "AlphaPept": "#17212b",
@@ -129,10 +130,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
         Parameters
         ----------
-        result_df : pd.DataFrame
+        benchmark_metrics_df : pd.DataFrame
             DataFrame containing the results to plot.
-        metric : str
+        metric : str, optional
             Metric to plot, either "Median" or "Mean".
+        mode : str, optional
+            Mode of calculation, either, "Species-weighted" or "Global". Case-insensitive.
         software_colors : Dict[str, str]
             Mapping of software names to colors.
         mapping : Dict[str, str]
@@ -152,22 +155,49 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with the main performance metric plot.
         """
+        # Get metric column names and plot_title based on selected metric and mode
+        metric_lower, mode_suffix, plot_title = self._get_metric_column_name(metric, mode)
 
-        all_median_abs_epsilon = [v2["median_abs_epsilon"] for v in result_df["results"] for v2 in v.values()]
-        all_mean_abs_epsilon = [v2["mean_abs_epsilon"] for v in result_df["results"] for v2 in v.values()]
-        all_nr_prec = [v2["nr_prec"] for v in result_df["results"] for v2 in v.values()]
+        # ROC-AUC is a special case - uses direct column name without mode suffix
+        if metric == "ROC-AUC":
+            metric_col_name = "roc_auc"
+            legacy_metric_col_name = None  # No legacy column for ROC-AUC
+            # Filter to only datapoints that have ROC-AUC calculated
+            benchmark_metrics_df = self._filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
+        else:
+            metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
+            legacy_metric_col_name = f"{metric_lower}_abs_epsilon"
+
+            # Filter based on mode
+            # If user selects "Species-weighted" mode, only show datapoints that have the new metrics
+            if mode == "Species-weighted":
+                benchmark_metrics_df = self._filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
+
+        # Extract all values for the selected metric mode
+        # Handle mixed old/new datapoints by trying the new key first, then falling back to legacy
+        all_metric_values = []
+        for v in benchmark_metrics_df["results"]:
+            for v2 in v.values():
+                # Try new metric name first, fall back to legacy if not present
+                value = v2.get(metric_col_name)
+                if value is None and legacy_metric_col_name is not None:
+                    value = v2.get(legacy_metric_col_name)
+                if value is not None:
+                    all_metric_values.append(value)
+
+        all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
         hover_texts = []
-        for idx, _ in result_df.iterrows():
+        for idx, _ in benchmark_metrics_df.iterrows():
             datapoint_text = ""
-            if result_df.is_temporary[idx] == True:
+            if benchmark_metrics_df.is_temporary[idx] == True:
                 datapoint_text = (
-                    f"ProteoBench ID: {result_df.id[idx]}<br>"
-                    + f"Software tool: {result_df.software_name[idx]} {result_df.software_version[idx]}<br>"
+                    f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
+                    + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
-                if "comments" in result_df.columns:
-                    comment = result_df.comments[idx]
+                if "comments" in benchmark_metrics_df.columns:
+                    comment = benchmark_metrics_df.comments[idx]
                     if isinstance(comment, str):
                         datapoint_text = (
                             datapoint_text
@@ -176,20 +206,20 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             else:
                 # TODO: Determine parameters based on module
                 datapoint_text = (
-                    f"ProteoBench ID: {result_df.id[idx]}<br>"
-                    + f"Software tool: {result_df.software_name[idx]} {result_df.software_version[idx]}<br>"
-                    + f"Search engine: {result_df.search_engine[idx]} {result_df.search_engine_version[idx]}<br>"
-                    + f"FDR psm: {result_df.ident_fdr_psm[idx]}<br>"
-                    + f"MBR: {result_df.enable_match_between_runs[idx]}<br>"
-                    + f"Precursor Tolerance: {result_df.precursor_mass_tolerance[idx]}<br>"
-                    + f"Fragment Tolerance: {result_df.fragment_mass_tolerance[idx]}<br>"
-                    + f"Enzyme: {result_df.enzyme[idx]} <br>"
-                    + f"Missed Cleavages: {result_df.allowed_miscleavages[idx]}<br>"
-                    + f"Min peptide length: {result_df.min_peptide_length[idx]}<br>"
-                    + f"Max peptide length: {result_df.max_peptide_length[idx]}<br>"
+                    f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
+                    + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
+                    + f"Search engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.search_engine_version[idx]}<br>"
+                    + f"FDR psm: {benchmark_metrics_df.ident_fdr_psm[idx]}<br>"
+                    + f"MBR: {benchmark_metrics_df.enable_match_between_runs[idx]}<br>"
+                    + f"Precursor Tolerance: {benchmark_metrics_df.precursor_mass_tolerance[idx]}<br>"
+                    + f"Fragment Tolerance: {benchmark_metrics_df.fragment_mass_tolerance[idx]}<br>"
+                    + f"Enzyme: {benchmark_metrics_df.enzyme[idx]} <br>"
+                    + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
+                    + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
+                    + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
                 )
-                if "submission_comments" in result_df.columns:
-                    comment = result_df.submission_comments[idx]
+                if "submission_comments" in benchmark_metrics_df.columns:
+                    comment = benchmark_metrics_df.submission_comments[idx]
                     if isinstance(comment, str):
                         datapoint_text = (
                             datapoint_text
@@ -198,58 +228,78 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
             hover_texts.append(datapoint_text)
 
-        scatter_size = [mapping[item] for item in result_df["old_new"]]
-        if "Highlight" in result_df.columns:
+        scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
+        if "Highlight" in benchmark_metrics_df.columns:
             scatter_size = [
-                item * 2 if highlight else item for item, highlight in zip(scatter_size, result_df["Highlight"])
+                item * 2 if highlight else item
+                for item, highlight in zip(scatter_size, benchmark_metrics_df["Highlight"])
             ]
 
         # Color plot based on software tool
-        colors = [software_colors[software] for software in result_df["software_name"]]
-        if "Highlight" in result_df.columns:
-            colors = [highlight_color if highlight else item for item, highlight in zip(colors, result_df["Highlight"])]
-
-        result_df["color"] = colors
-        result_df["hover_text"] = hover_texts
-        result_df["scatter_size"] = scatter_size
-
-        if metric == "Median":
-            layout_xaxis_range = [
-                min(all_median_abs_epsilon) - min(all_median_abs_epsilon) * 0.05,
-                max(all_median_abs_epsilon) + max(all_median_abs_epsilon) * 0.05,
+        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        if "Highlight" in benchmark_metrics_df.columns:
+            colors = [
+                highlight_color if highlight else item
+                for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
             ]
-            layout_xaxis_title = (
-                "Median absolute difference between measured and expected log2-transformed fold change."
-            )
-        elif metric == "Mean":
-            layout_xaxis_range = [
-                min(all_mean_abs_epsilon) - min(all_mean_abs_epsilon) * 0.05,
-                max(all_mean_abs_epsilon) + max(all_mean_abs_epsilon) * 0.05,
-            ]
-            layout_xaxis_title = "Mean absolute difference between measured and expected log2-transformed fold change."
 
-        fig = go.Figure(
-            layout_yaxis_range=[
+        benchmark_metrics_df["color"] = colors
+        benchmark_metrics_df["hover_text"] = hover_texts
+        benchmark_metrics_df["scatter_size"] = scatter_size
+
+        if all_metric_values:
+            layout_xaxis_range = [
+                min(all_metric_values) - min(all_metric_values) * 0.05,
+                max(all_metric_values) + max(all_metric_values) * 0.05,
+            ]
+        else:
+            layout_xaxis_range = [0, 1]
+
+        if all_nr_prec:
+            layout_yaxis_range = [
                 min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
                 max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
-            ],
+            ]
+        else:
+            layout_yaxis_range = [0, 1000]
+
+        fig = go.Figure(
+            layout_yaxis_range=layout_yaxis_range,
             layout_xaxis_range=layout_xaxis_range,
         )
 
         # Get all unique color-software combinations (necessary for highlighting)
-        color_software_combinations = result_df[["color", "software_name"]].drop_duplicates()
-        result_df["enable_match_between_runs"] = result_df["enable_match_between_runs"].astype(str)
+        color_software_combinations = benchmark_metrics_df[["color", "software_name"]].drop_duplicates()
+        benchmark_metrics_df["enable_match_between_runs"] = benchmark_metrics_df["enable_match_between_runs"].astype(
+            str
+        )
         # plot the data points, one trace per software tool
         for _, row in color_software_combinations.iterrows():
             color = row["color"]
             software = row["software_name"]
 
-            tmp_df = result_df[(result_df["color"] == color) & (result_df["software_name"] == software)]
+            tmp_df = benchmark_metrics_df[
+                (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
+            ]
             # to do: remove this line as soon as parameters are homogeneous, see #380
             # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
+
+            if metric_col_name in tmp_df.columns and tmp_df[metric_col_name].notna().any():
+                # use new column, but fill null values with legacy if available
+                if legacy_metric_col_name is not None and legacy_metric_col_name in tmp_df.columns:
+                    x_values = tmp_df[metric_col_name].fillna(tmp_df[legacy_metric_col_name])
+                else:
+                    x_values = tmp_df[metric_col_name]
+            elif legacy_metric_col_name is not None:
+                # fall back to legacy column if new not available
+                x_values = tmp_df[legacy_metric_col_name]
+            else:
+                # No fallback available (e.g. ROC-AUC case)
+                x_values = tmp_df[metric_col_name]
+
             fig.add_trace(
                 go.Scatter(
-                    x=tmp_df["{}_abs_epsilon".format(metric.lower())],
+                    x=x_values,
                     y=tmp_df["nr_prec"],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],
@@ -264,7 +314,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             width=700,
             height=700,
             xaxis=dict(
-                title=layout_xaxis_title,
+                title=plot_title,
                 gridcolor="white",
                 gridwidth=2,
                 linecolor="black",
@@ -444,7 +494,6 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with MA plot (M on x, A on y)
         """
-        fig = go.Figure()
 
         # Define colors for species
         color_map = {species: data["color"] for species, data in species_expected_ratio.items()}
@@ -487,3 +536,65 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 showarrow=False,
             )
         return fig
+
+    def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
+        """
+        Get the appropriate metric column names based on the specified metric and mode.
+
+        Parameters
+        ----------
+        metric : str
+            The metric to plot: "Median", "Mean", or "ROC-AUC".
+        mode : str
+            The mode for filtering, either "global" or "eq_species". Ignored for ROC-AUC.
+
+        Returns
+        -------
+        Tuple[str, str, str]
+            A tuple containing the metric_lower, mode_suffix, and plot_title
+        """
+        # ROC-AUC is a special case - no mode suffix, single column name
+        if metric == "ROC-AUC":
+            return "roc_auc", None, "ROC-AUC score for distinguishing changed from unchanged species"
+
+        metric_lower = metric.lower()
+        mode_suffix = "global" if mode.lower() == "global" else "eq_species"
+        mode_description = "globally" if mode.lower() == "global" else "using equally weighted species averages"
+
+        plot_title = f"{metric} absolute difference between measured and expected log2-transformed fold change (calculated {mode_description})"
+
+        return metric_lower, mode_suffix, plot_title
+
+    def _filter_datapoints_with_metric(self, benchmark_metrics_df: pd.DataFrame, metric_col_name: str) -> pd.DataFrame:
+        """
+        Filter datapoints to only include those that have the specified metric calculated.
+
+        This is used when the user selects "Species-weighted" or "ROC-AUC" mode to ensure only datapoints
+        with the new metric calculation are displayed (avoiding visual confusion with legacy metric
+        calucations).
+
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            DataFrame containing benchmark metrics for datapoints.
+        metric_col_name : str
+            The name of the metric column to filter on.
+
+        Returns
+        -------
+        pd.DataFrame
+            Filtered DataFrame containing only datapoints with the specified metric.
+        """
+
+        def has_metric(results_dict):
+            """Check if the results dictionary contains the specified metric."""
+            try:
+                for threshold_dict in results_dict.values():
+                    if metric_col_name in threshold_dict:
+                        return True
+            except (TypeError, AttributeError):
+                pass
+            return False
+
+        # Filter to only datapoints that have the specified metric calculated
+        return benchmark_metrics_df[benchmark_metrics_df["results"].apply(has_metric)].copy()

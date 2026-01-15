@@ -65,7 +65,7 @@ The backend is organized into four main components that you can extend or custom
 
 **4. Result representation** - Store benchmark results as datapoints
    - Base class: :class:`~proteobench.datapoint.datapoint_base.DatapointBase` (ABC)
-   - For quantification: Use or extend :class:`~proteobench.datapoint.quant_datapoint.QuantDatapoint`
+   - For quantification: Use or extend :class:`~proteobench.datapoint.quant_datapoint_hye.QuantDatapointHYE`
    - Stores metadata and metrics for each benchmark run
    - For new module types: Create a new class inheriting from ``DatapointBase``
    - See :ref:`datapoint-configuration` for detailed information

@@ -94,6 +94,7 @@ def display_submitted_results(variables, ionmodule) -> None:
     highlight_point_id = render_metric_plot(
         data_points_filtered,
         metric,
+        mode=mode,
         label=st.session_state[st.session_state[variables.selectbox_id_submitted_uuid]],
         key=_id_of_key,
         plot_generator=plot_generator,

@@ -809,7 +809,7 @@ def _load_metamorpheus(input_csv: str) -> pd.DataFrame:
     return input_data_frame
 
 
-def _load_msaid(input_csv: str) -> pd.DataFrame:
+def _load_msaid(input_csv: str, input_csv_secondary: str=None) -> pd.DataFrame:
     """
     Load a MSAID output file.
 
@@ -817,13 +817,41 @@ def _load_msaid(input_csv: str) -> pd.DataFrame:
     ----------
     input_csv : str
         The path to the MSAID output file.
+    input_csv_secondary: str
+        The path to the fasta_mapping.tsv (for parsing FASTA_HEADERS column)
 
     Returns
     -------
     pd.DataFrame
         The loaded dataframe.
     """
-    return pd.read_csv(input_csv, low_memory=False, sep="\t")
+    precursor_file = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    fasta_mapping = pd.read_csv(input_csv_secondary, low_memory=False, sep="\t")
+
+    # Map the proteins to the precursors using the "PROTEIN_IDS" column in the precursor file
+    def add_fasta_headers(prec_df, fasta_mapping):
+        # Create a dictionary from the second DataFrame for fast look-up
+        protein_to_header = dict(zip(
+            fasta_mapping["PROTEIN_ID"], 
+            fasta_mapping["header"]
+        ))
+
+        # Function to find and join headers for each PROTEIN_IDS entry
+        def get_fasta_headers(protein_ids):
+            ids = protein_ids.split(";")  # Split the IDs by the separator
+            headers = [protein_to_header.get(int(protein_id.strip()), "") for protein_id in ids]
+            headers = [header.split()[0][1:] for header in headers if header]  # Remove empty headers
+            return "; ".join(headers) if headers else None
+
+        # Apply the function to the PROTEIN_IDS column and create a new FASTA_HEADERS column
+        prec_df["FASTA_HEADERS"] = prec_df["PROTEIN_IDS"].apply(get_fasta_headers)
+
+        return prec_df
+
+    prec_df_with_headers = add_fasta_headers(precursor_file, fasta_mapping)
+
+    return prec_df_with_headers
+
 
 
 def _load_peaks(input_csv: str) -> pd.DataFrame:

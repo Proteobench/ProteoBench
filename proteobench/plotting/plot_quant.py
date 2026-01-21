@@ -92,7 +92,7 @@ class PlotDataPoint:
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
         metric: str = "Median",
-        software_colors: Dict[str, str] = {
+        color_map: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
             "AlphaPept": "#17212b",
             "ProlineStudio": "#8b26ff",
@@ -112,7 +112,10 @@ class PlotDataPoint:
             "PEAKS": "#f032e6",
             "quantms": "#f5e830",
         },
+        color_column='software_name',
         mapping: Dict[str, int] = {"old": 10, "new": 20},
+        shape_column: str = None,
+        symbol_map: Dict[str, str]= None,
         highlight_color: str = "#d30067",
         label: str = "None",
         legend_name_map: Dict[str, str] = {
@@ -129,7 +132,7 @@ class PlotDataPoint:
             The DataFrame containing benchmark metrics data.
         metric : str, optional
             The metric to plot, either "Median" or "Mean", by default "Median".
-        software_colors : Dict[str, str], optional
+        color_map : Dict[str, str], optional
             A dictionary mapping software names to their colors, by default predefined colors.
         mapping : Dict[str, int], optional
             A dictionary mapping categories to scatter plot sizes, by default {"old": 10, "new": 20}.
@@ -201,7 +204,7 @@ class PlotDataPoint:
             ]
 
         # Color plot based on software tool
-        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        colors = [color_map[software] for software in benchmark_metrics_df[color_column]]
         if "Highlight" in benchmark_metrics_df.columns:
             colors = [
                 highlight_color if highlight else item
@@ -211,6 +214,32 @@ class PlotDataPoint:
         benchmark_metrics_df["color"] = colors
         benchmark_metrics_df["hover_text"] = hover_texts
         benchmark_metrics_df["scatter_size"] = scatter_size
+
+
+        # Determine marker symbols for each row
+        if shape_column is not None:
+            unique_values = benchmark_metrics_df[shape_column].unique()
+
+            # default mapping if user does not provide one
+            default_symbols = [
+                "circle", "square", "diamond", "cross", "x", 
+                "triangle-up", "triangle-down", 
+                "triangle-left", "triangle-right"
+            ]
+
+            if symbol_map is None:
+                # cycle through symbols if there are more categories than symbols
+                symbol_map = {
+                    val: default_symbols[i % len(default_symbols)]
+                    for i, val in enumerate(unique_values)
+                }
+
+            marker_symbols = [symbol_map[val] for val in benchmark_metrics_df[shape_column]]
+        else:
+            marker_symbols = ["circle"] * len(benchmark_metrics_df)
+
+        benchmark_metrics_df["marker_symbol"] = marker_symbols
+
 
         if metric == "Median":
             layout_xaxis_range = [
@@ -236,17 +265,17 @@ class PlotDataPoint:
         )
 
         # Get all unique color-software combinations (necessary for highlighting)
-        color_software_combinations = benchmark_metrics_df[["color", "software_name"]].drop_duplicates()
+        color_software_combinations = benchmark_metrics_df[["color", color_column]].drop_duplicates()
         benchmark_metrics_df["enable_match_between_runs"] = benchmark_metrics_df["enable_match_between_runs"].astype(
             str
         )
         # plot the data points, one trace per software tool
         for _, row in color_software_combinations.iterrows():
             color = row["color"]
-            software = row["software_name"]
+            software = row[color_column]
 
             tmp_df = benchmark_metrics_df[
-                (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
+                (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df[color_column] == software)
             ]
             # to do: remove this line as soon as parameters are homogeneous, see #380
             # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
@@ -257,11 +286,42 @@ class PlotDataPoint:
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],
                     text=tmp_df[label] if label != "None" else None,
-                    marker=dict(color=tmp_df["color"], showscale=False),
+                    marker=dict(
+                        color=tmp_df["color"],
+                        symbol=tmp_df['marker_symbol'],
+                        showscale=False
+                    ),
                     marker_size=tmp_df["scatter_size"],
-                    name=legend_name_map.get(tmp_df["software_name"].iloc[0], tmp_df["software_name"].iloc[0]),
+                    name=legend_name_map.get(tmp_df[color_column].iloc[0], tmp_df[color_column].iloc[0]),
                 )
             )
+
+        # --- Add separate legend entries for shapes (categorical variable) ---
+        if shape_column is not None:
+            unique_shape_values = benchmark_metrics_df[shape_column].unique()
+
+            for shape_value in unique_shape_values:
+                # Take the symbol belonging to this category
+                symbol = benchmark_metrics_df.loc[
+                    benchmark_metrics_df[shape_column] == shape_value, "marker_symbol"
+                ].iloc[0]
+
+                # Add an invisible scatter just for the legend
+                fig.add_trace(
+                    go.Scatter(
+                        x=[None],           # invisible point
+                        y=[None],
+                        mode="markers",
+                        marker=dict(
+                            symbol=symbol,
+                            color="black",  # neutral color for shapes
+                            size=12,
+                        ),
+                        showlegend=True,
+                        name=f"{shape_column}: {shape_value}",
+                        legendgroup="shapes",
+                    )
+                )
 
         fig.update_layout(
             width=700,

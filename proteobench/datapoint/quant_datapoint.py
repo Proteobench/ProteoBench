@@ -194,8 +194,9 @@ class QuantDatapoint:
 
         result_datapoint.generate_id()
 
+        # TODO: Fix the range towards the one for SCI
         results = dict(
-            ChainMap(*[QuantDatapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
+            ChainMap(*[QuantDatapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 12)])
         )
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon = result_datapoint.results[default_cutoff_min_prec]["median_abs_epsilon"]

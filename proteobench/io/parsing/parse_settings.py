@@ -478,4 +478,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
+    'quant_lfq_DIA_ion_SCI': ParseSettingsQuant,
 }

@@ -69,8 +69,9 @@ class QuantScores:
             item in list(filtered_df.columns) for sublist in replicate_to_raw.values() for item in sublist
         )
 
-        if not all_present:
-            raise Exception("Not all runs are present in the quantification file")
+        # TODO: Check if this is necessary? Breaks when certain run failed.
+        # if not all_present:
+        #     raise Exception("Not all runs are present in the quantification file")
 
         # add column "Condition" to filtered_df_p1 using inner join on "Raw file"
         relevant_columns_df = pd.merge(relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner")

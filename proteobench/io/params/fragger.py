@@ -143,7 +143,7 @@ def read_fragpipe_workflow(file: BytesIO, sep: str = "=") -> tuple[str, str | No
             fragpipe_version = ss.split(" ")[-1].strip()
     return header, msfragger_version, fragpipe_version, parse_params(l_of_str, sep=sep)
 
-
+# TODO: Change input towards str path
 def extract_params(
     file: BytesIO, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:

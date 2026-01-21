@@ -195,9 +195,11 @@ def extract_params(
     params.fragment_mass_tolerance = extract_mass_tolerance(lines, "Fragment Mass Error Tolerance:")
     params.enzyme = extract_value(lines, "Enzyme:")
     params.semi_enzymatic = extract_value(lines, "Digest Mode:") != "Specific"
-    params.allowed_miscleavages = int(extract_value(lines, "Max Missed Cleavage:"))
+
+    # Change here in PEAKS Studio 12
+    params.allowed_miscleavages = int(extract_value(lines, "Missed Cleavage:"))
     try:
-        peptide_length_range = extract_value(lines, "Peptide Length between:").split(",")
+        peptide_length_range = extract_value(lines, "Peptide Length:").split(" to ")
     except AttributeError:
         peptide_length_range = extract_value(lines, "Peptide Length Range:").split(" - ")
     params.max_peptide_length = int(peptide_length_range[1])
@@ -206,13 +208,16 @@ def extract_params(
     params.fixed_mods = " ,".join(fixed)
     varmods = get_items_between(lines, "Variable Modifications:", "Database:", only_last=True)
     params.variable_mods = " ,".join(varmods)
-    params.max_mods = int(extract_value(lines, "Max Variable PTM per Peptide:"))
+    params.max_mods = int(extract_value(lines, "Max Variable PTM Per Peptide:"))
     try:
         precursor_charge_between = extract_value(lines, "Precursor Charge between:").split(",")
     except AttributeError:
-        precursor_charge_between = (
-            extract_value(lines, "Charge between:").replace("[", "").replace("]", "").split(" - ")
+        peptide_feature = (
+            extract_value(lines, "Peptide Feature:")
         )
+        match = re.search(r"(\d+)\s*<=\s*charge\s*<=\s*(\d+)", peptide_feature)
+        precursor_charge_between = list(map(int, match.groups()))
+
     params.min_precursor_charge = int(precursor_charge_between[0])
     params.max_precursor_charge = int(precursor_charge_between[1])
 

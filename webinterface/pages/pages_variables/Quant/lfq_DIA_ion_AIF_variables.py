@@ -54,6 +54,8 @@ class VariablesDIAQuant:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant"
     metric_selector_uuid: str = "metric_selector_uuid_dia_quant"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant"
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant"
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/file_description.md"

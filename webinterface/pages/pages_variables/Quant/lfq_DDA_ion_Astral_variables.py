@@ -50,7 +50,8 @@ class VariablesDDAQuantAstral:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dda_quant_Astral"
     metric_selector_uuid: str = "metric_selector_uuid_dda_quant_Astral"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dda_quant_Astral"
-
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dda_quant_Astral"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dda_quant_Astral"
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [
             "None",

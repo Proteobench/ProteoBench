@@ -144,9 +144,24 @@ def _load_piprimenovo(input_path: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    input_data_frame = pd.read_csv(input_path, sep="\t")
-    # Sometimes, weird erroneous lines exist in the output. Filter them out
-    return input_data_frame.dropna()
+    return pd.read_csv(input_path, sep="\t", low_memory=False).dropna()
+
+
+def _load_custom(input_path: str) -> pd.DataFrame:
+    """
+    Load a de novo output file in custom (generic) format.
+
+    Parameters
+    ----------
+    input_path: str
+        The path to the output file
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe
+    """
+    return pd.read_csv(input_path, low_memory=False)
 
 
 _LOAD_FUNCTIONS = {
@@ -157,4 +172,5 @@ _LOAD_FUNCTIONS = {
     "PepNet": _load_pepnet,
     "Pi-HelixNovo": _load_pihelixnovo,
     "Pi-PrimeNovo": _load_piprimenovo,
+    "Custom": _load_custom,
 }

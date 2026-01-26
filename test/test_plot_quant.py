@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from proteobench.github.gh import GithubProteobotRepo
-from proteobench.plotting.plot_quant import PlotDataPoint
+from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
 
 
 class TestPlotDataPoint:
@@ -14,7 +14,8 @@ class TestPlotDataPoint:
         gpr.clone_repo_anonymous()
         all_datapoints = gpr.read_results_json_repo()
         all_datapoints["old_new"] = "old"
-        fig = PlotDataPoint().plot_metric(all_datapoints)
+        plot_generator = LFQHYEPlotGenerator()
+        fig = plot_generator.plot_main_metric(all_datapoints, label="")
         assert fig is not None
 
     def test_plot_fold_change_histogram_returns_a_figure(self):
@@ -46,5 +47,6 @@ class TestPlotDataPoint:
             "ECOLI": {"A_vs_B": 0.25, "color": "blue"},
             "HUMAN": {"A_vs_B": 1.0, "color": "green"},
         }
-        fig = PlotDataPoint().plot_fold_change_histogram(combineddf, species_dict)
+        plot_generator = LFQHYEPlotGenerator()
+        fig = plot_generator._plot_fold_change_histogram(combineddf, species_dict)
         assert fig is not None

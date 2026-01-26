@@ -1,6 +1,7 @@
 """
 Configuration file for the Sphinx documentation builder.
 """
+
 import os
 import sys
 from pathlib import Path
@@ -8,8 +9,8 @@ from pathlib import Path
 import proteobench
 
 # Patch in webinterface to be an importable module (needed for API documentation)
-sys.path.insert(0, str(Path('..', 'webinterface').resolve()))
-sys.path.insert(0, str(Path('..').resolve()))
+sys.path.insert(0, str(Path("..", "webinterface").resolve()))
+sys.path.insert(0, str(Path("..").resolve()))
 
 project = "ProteoBench"
 author = "EuBIC-MS"
@@ -92,9 +93,9 @@ if os.environ.get("READTHEDOCS") == "True":
                 str(PACKAGE_ROOT),
             ]
         )
-        
+
     # webinterface is not a package, so it was added to the path manually above
- 
+
     APP_ROOT = PROJECT_ROOT / "webinterface"
 
     def run_apidoc_webinterface(_):
@@ -111,7 +112,7 @@ if os.environ.get("READTHEDOCS") == "True":
                 str(APP_ROOT),
             ]
         )
-    
+
     def setup(app):
         app.connect("builder-inited", run_apidoc)
         app.connect("builder-inited", run_apidoc_webinterface)

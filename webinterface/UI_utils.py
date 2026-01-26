@@ -1,5 +1,6 @@
 import base64
 import re
+import json
 from collections import Counter
 from pathlib import Path
 from typing import Dict
@@ -15,7 +16,7 @@ def get_base64_image(path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
-def stat_box(title, value, icon_path, color="#000", url=None):
+def stat_box(title, value, icon_path, url=None):
     img_data = get_base64_image(icon_path)
     content = f"""
     <div style="
@@ -166,6 +167,48 @@ def get_n_modules_proposed(rst_text: str) -> int:
     """
     status_counts = parse_proteobench_index(rst_text)
     return status_counts.get("in discussion", 0) + status_counts.get("in development", 0)
+
+
+def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
+    """
+    Gets the monthly visitors count from the Matomo API.
+
+    Parameters
+    ----------
+    api_endpoint : str
+        The API endpoint URL of the Matomo installation
+    token : str
+        The authentication token (from Matomo)
+    id_site : int
+        The site ID (from Matomo)
+
+    Returns
+    -------
+    int
+        The number of monthly visitors (nb_visits of last 30 days)
+    """
+
+    # data to be sent to api
+    data = {
+        "module": "API",
+        "method": "Actions.getPageTitles",
+        "idSite": id_site,
+        "period": "day",
+        "date": "last30",
+        "format": "json",
+        "token_auth": token,
+    }
+
+    r = requests.post(url=api_endpoint, data=data)
+
+    json_visits = json.loads(r.text)
+    visits_count = 0
+    for _, visits in json_visits.items():
+        if len(visits) > 0:
+            for page in visits:
+                visits_count += page["nb_visits"]
+
+    return visits_count
 
 
 if __name__ == "__main__":

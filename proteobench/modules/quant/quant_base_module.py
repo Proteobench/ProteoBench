@@ -19,7 +19,7 @@ import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
-    QuantDatapoint,
+    QuantDatapointHYE,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
@@ -48,7 +48,9 @@ from proteobench.io.params.spectronaut import (
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
+from proteobench.score.quantscores import QuantScoresHYE
 
 
 class QuantModule:
@@ -218,12 +220,36 @@ class QuantModule:
         if len(all_datapoints) == 0:
             return all_datapoints
 
+        # Add new metric columns with mode suffixes
+        all_datapoints["median_abs_epsilon_global"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["mean_abs_epsilon_global"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="global")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["median_abs_epsilon_eq_species"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="eq_species")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["mean_abs_epsilon_eq_species"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="eq_species")
+            for v in all_datapoints["results"]
+        ]
+
+        # Also maintain legacy column names for backwards compatibility with old datapoints
+        # These will be used as fallback when new metrics don't exist
         all_datapoints["median_abs_epsilon"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
+            for v in all_datapoints["results"]
         ]
 
         all_datapoints["mean_abs_epsilon"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean")
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="global")
             for v in all_datapoints["results"]
         ]
 
@@ -240,6 +266,7 @@ class QuantModule:
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -256,6 +283,8 @@ class QuantModule:
             DataFrame containing all datapoints from the ProteoBench repo.
         default_cutoff_min_prec : int, optional
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
 
         Returns
         -------
@@ -263,19 +292,19 @@ class QuantModule:
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
         # Parse user config
-        input_df = load_input_file(input_file, input_format)
+        input_df = load_input_file(input_file, input_format, input_file_secondary)
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data
-        quant_score = QuantScores(
+        quant_score = QuantScoresHYE(
             self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
-        current_datapoint = QuantDatapoint.generate_datapoint(
+        current_datapoint = QuantDatapointHYE.generate_datapoint(
             intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
         )
 
@@ -435,6 +464,7 @@ class QuantModule:
         comment: str,
         extension_input_file: str = ".txt",
         extension_input_parameter_file: str = ".txt",
+        input_file_secondary_obj: Any = None,
     ) -> None:
         """
         Write intermediate and raw data to a directory in zipped form.
@@ -448,11 +478,13 @@ class QuantModule:
         input_file_obj : Any
             File-like object representing the raw input file.
         result_performance : pd.DataFrame
-            The result performance DataFrame.
+            The result performance DataFrame (intermediate data).
         param_loc : List[Any]
             List of paths to parameter files that need to be copied.
         comment : str
             User comment for the submission.
+        input_file_secondary_obj : Any, optional
+            File-like object representing a secondary input file (e.g., for AlphaDIA).
         """
         # Create the target directory
         path_write = os.path.join(directory, ident)
@@ -469,6 +501,12 @@ class QuantModule:
                 # Save the input file-like object content to the zip file
                 input_file_obj.seek(0)
                 zf.writestr(f"input_file{extension_input_file}", input_file_obj.read())
+
+                # Save the secondary input file if provided
+                if input_file_secondary_obj is not None:
+                    input_file_secondary_obj.seek(0)
+                    zf.writestr(f"input_file_secondary{extension_input_file}", input_file_secondary_obj.read())
+
                 # Save the result performance DataFrame as a CSV in the zip file
                 result_csv = result_performance.to_csv(index=False)
                 zf.writestr("result_performance.csv", result_csv)
@@ -510,3 +548,14 @@ class QuantModule:
         )
         params.software_name = input_format
         return params
+
+    def get_plot_generator(self) -> PlotGeneratorBase:
+        """
+        Get the plot generator for LFQ Ion plots.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance.
+        """
+        return LFQHYEPlotGenerator()

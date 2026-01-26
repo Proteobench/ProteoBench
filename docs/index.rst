@@ -15,6 +15,7 @@ Home
     Benchmarking modules <available-modules/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
+    Manuscript <https://doi.org/10.64898/2025.12.09.692895>
 
 .. div:: landing-title
     :style: padding: 2rem 2rem 4rem 2rem; background: rgb(49, 65, 89); clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 3rem)); -webkit-clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 3rem));
@@ -182,7 +183,7 @@ Available ProteoBench modules
     .. grid-item-card:: Label-free quantification of precursor ions with DIA (AIF)
         :columns: 6 6 4 4
         :padding: 1
-        :link: available-modules/archived-modules/4-quant-lfq-ion-dia-aif.md
+        :link: available-modules/archived-modules/4-quant-lfq-ion-dia-aif
 
         :bdg-dark:`archived`
         ^^^

@@ -16,13 +16,14 @@ class VariablesDDAQuant:
 
     all_datapoints: str = "all_datapoints"
     all_datapoints_submission: str = "all_datapoints_submission"
-    input_df_submission: str = "input_df_submission"
-    result_performance_submission: str = "result_performance_submission"
+    input_df_submission: str = "input_df_submission"  # DataFrame
+    result_performance_submission: str = "result_performance_submission"  # DataFrame
     submit: str = "submit"
     fig_logfc: str = "fig_logfc"
     fig_metric: str = "fig_metric"
     fig_cv: str = "fig_CV_violinplot"
     fig_ma_plot: str = "fig_ma_plot"
+    fig_prefix: str = "fig_dda_quant_QExactive_"
     result_perf: str = "result_perf"
     meta_data: str = "meta_data"
     input_df: str = "input_df"
@@ -45,6 +46,13 @@ class VariablesDDAQuant:
     slider_id_uuid: str = "slider_id"
     download_selector_id_uuid: str = "download_selector_id"
     table_id_uuid: str = "table_id"
+    table_new_results_uuid: str = "table_new_results_uuid"
+    result_plot_uuid: str = "result_figure_uuid"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid"
+    metric_selector_uuid: str = "metric_selector_uuid"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid"
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [

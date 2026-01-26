@@ -18,7 +18,7 @@ keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
 requires-python = ">=3.11"
 dynamic = ["version"]
 dependencies = [
-  "pandas",
+  "pandas[excel]",
   "openpyxl",
   "numpy>1.24.4",
   "plotly>=6.0.0",
@@ -34,14 +34,14 @@ dependencies = [
   "PyGithub",
   "GitPython",
   "psm-utils",
-  "python-calamine"
+  "pmultiqc>=0.0.33",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = ["black~=23.0", "jupyterlab", "notebook", "tqdm", "wget", "nox", "pytest"]
+dev = ["black~=23.0", "jupyterlab", "ipywidgets", "notebook", "tqdm", "wget", "nox", "pytest"]
 docs = [
   "sphinx",
   "sphinx-design",

@@ -13,6 +13,7 @@ fnames = [
     "log_alphadia_2.txt",
     "log_alphadia_1.8.txt",
     "log_alphadia_1.10.txt",
+    "log_alphadia_1.12.txt",
 ]
 fnames = [TESTDATA_DIR / f for f in fnames]
 

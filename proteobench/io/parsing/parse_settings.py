@@ -288,6 +288,7 @@ class ParseSettingsQuant:
         pd.DataFrame
             DataFrame converted to standard format.
         """
+        # If "Raw file" is in mapper values, data is already in long format - skip melting
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
             df_melted = df.melt(
@@ -355,7 +356,7 @@ class ParseSettingsQuant:
         """
         if self.analysis_level == "ion":
             if "proforma" in df.columns and "Charge" in df.columns:
-                df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+                df["precursor ion"] = df["proforma"] + "/" + df["Charge"].astype(str)
             return df
         elif self.analysis_level == "peptidoform":
             if "proforma" in df.columns:
@@ -456,7 +457,7 @@ class ParseModificationSettings:
 
         if analysis_level == "ion":
             try:
-                df["precursor ion"] = df["proforma"] + "|Z=" + df["Charge"].astype(str)
+                df["precursor ion"] = df["proforma"] + "/" + df["Charge"].astype(str)
             except KeyError as e:
                 raise KeyError(
                     "Not all columns required for making the precursor ion are available."
@@ -722,4 +723,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
     "denovo_lfq_DDA_HCD": ParseSettingsDeNovo,
+    "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
 }

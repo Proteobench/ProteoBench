@@ -24,6 +24,7 @@ class VariablesDIAQuantAstral:
     fig_metric: str = "fig_metric_dia_quant_Astral"
     fig_cv: str = "fig_CV_violinplot_dia_quant_Astral"
     fig_ma_plot: str = "fig_ma_plot_dia_quant_Astral"
+    fig_prefix: str = "fig_dia_quant_Astral_"
     result_perf: str = "result_perf_dia_quant_Astral"
     meta_data: str = "meta_data_dia_quant_Astral"
     input_df: str = "input_df_dia_quant_Astral"
@@ -49,6 +50,13 @@ class VariablesDIAQuantAstral:
     slider_id_uuid: str = "slider_id_dia_quant_Astral"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_Astral"
     table_id_uuid: str = "table_id_dia_quant_Astral"
+    table_new_results_uuid: str = "table_new_results_uuid_dia_quant_Astral"
+    result_plot_uuid: str = "result_figure_uuid_dia_quant_Astral"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_Astral"
+    metric_selector_uuid: str = "metric_selector_uuid_dia_quant_Astral"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_Astral"
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant_Astral"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_Astral"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [
@@ -84,7 +92,7 @@ class VariablesDIAQuantAstral:
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-precursor-dia-Astral_2Th/"
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/"
     )
 
     title: str = "DIA Precursor ion quantification - Astral 2 Th"

@@ -1,6 +1,7 @@
 """Streamlit-wide page settings and tools for ProteoBench."""
 
 import streamlit as st
+import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
 
 
@@ -57,6 +58,8 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
     dia_pages = {
         "Quant LFQ DIA ion diaPASEF": "/Quant_LFQ_DIA_ion_diaPASEF",
         "Quant LFQ DIA ion Astral": "/Quant_LFQ_DIA_ion_Astral",
+        "Quant LFQ DIA ion Single Cell": "/Quant_LFQ_DIA_ion_singlecell",
+        "Quant LFQ DIA ion ZenoTOF": "/Quant_LFQ_DIA_ion_ZenoTOF",
     }
     archived_pages = {
         "Quant LFQ DIA ion AIF": "/Quant_LFQ_DIA_ion_AIF",
@@ -104,8 +107,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
         st.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")
         st.page_link(texts.ShortMessages.legal_notice, label="legal notice")
 
-        try:
-            if "tracking" in st.secrets and "html" in st.secrets["tracking"]:
-                st.html(st.secrets["tracking"]["html"])
-        except FileNotFoundError:
-            pass
+        if "tracking" in st.secrets and "html_js" in st.secrets["tracking"]:
+            json_html = st.secrets["tracking"]["html_js"]
+            json_html = json_html.replace("<HERE_THE_URL>", st.context.url)
+            components.html(json_html, width=0, height=0)

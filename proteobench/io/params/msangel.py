@@ -211,14 +211,18 @@ if __name__ == "__main__":
     """
     from pathlib import Path
 
-    file = Path("../../../test/params/MSAngel_Xtandem-export-param.json")
+    files = [
+        Path("../../../test/params/MSAngel_Xtandem-export-param.json"),
+        Path("../../../test/params/MSAngel_fromRAWtoQUANT-Mascot-export-param.json"),
+    ]
 
-    # Extract parameters from the file
-    params = extract_params(file)
+    for file in files:
+        # Extract parameters from the file
+        params = extract_params(file)
 
-    # Convert the extracted parameters to a dictionary and then to a pandas Series
-    data_dict = params.__dict__
-    series = pd.Series(data_dict)
+        # Convert the extracted parameters to a dictionary and then to a pandas Series
+        data_dict = params.__dict__
+        series = pd.Series(data_dict)
 
-    # Write the Series to a CSV file
-    series.to_csv(file.with_suffix(".csv"))
+        # Write the Series to a CSV file
+        series.to_csv(file.with_suffix(".csv"))

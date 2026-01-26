@@ -30,20 +30,20 @@ These files are available alongside all the associated metadata27 on the Proteom
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-For now, you can download the raw files via:
+For now, you can download the raw files from the ProteoBench server here:
 
-- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d.zip)
-- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d.zip)
-- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d.zip)
-- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d.zip)
-- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d.zip)
-- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d.zip)
+- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d.zip)
+- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d.zip)
+- [ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d.zip)
+- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d.zip)
+- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d.zip)
+- [ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d.zip)
 
-Alternatively, you can download them from a private server here: [https://proteobench.cubimed.rub.de/datasets/raw_files/DIA/](https://proteobench.cubimed.rub.de/datasets/raw_files/diaPASEF/))
+All files can be found here [proteobench.cubimed.rub.de/raws/diaPASEF/](https://proteobench.cubimed.rub.de/raws/diaPASEF/)
 
 **It is imperative not to rename the files once downloaded!**
 
-Download the zipped FASTA file here: <a href="https://proteobench.cubimed.rub.de/datasets/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip" download>ProteoBenchFASTA_MixedSpecies_HYE.zip</a>.
+Download the zipped FASTA file here: [ProteoBenchFASTA_MixedSpecies_HYE.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip).
 The fasta file provided for this module contains the three species
 present in the samples **and contaminant proteins**.
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
@@ -60,19 +60,19 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
 
-|Parameter|Value|
-|---------|-----|
-|Maximum number of missed cleavages|1|
-|PSM FDR|0.01|
-|Spectral Library|Predicted spectral library from FASTA|
-|Precursor charge state|1-5|
-|Precursor m/z range|400-1000|
-|Fragment ion m/z range|100-1700|
-|Endopeptidase|Trypsin/P|
-|Fixed modifications|Carbamidomethylation (C)|
-|Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
-|Maximum number of variable modifications|1|
-|Minimum peptide length|6 residues|
+| Parameter                                | Value                                  |
+| ---------------------------------------- | -------------------------------------- |
+| Maximum number of missed cleavages       | 1                                      |
+| PSM FDR                                  | 0.01                                   |
+| Spectral Library                         | Predicted spectral library from FASTA  |
+| Precursor charge state                   | 1-5                                    |
+| Precursor m/z range                      | 400-1000                               |
+| Fragment ion m/z range                   | 100-1700                               |
+| Endopeptidase                            | Trypsin/P                              |
+| Fixed modifications                      | Carbamidomethylation (C)               |
+| Variable modifications                   | Oxidation (M), Acetyl (Protein N-term) |
+| Maximum number of variable modifications | 1                                      |
+| Minimum peptide length                   | 6 residues                             |
 
 
 ### Submit your run for public usage
@@ -85,15 +85,14 @@ To submit your run for public usage, you need to upload the parameter file assoc
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
 **Table 2. Overview of input files required for metric caluclation and public submission**
-|Tool|Input file|Parameter File|
-|---------|-----|-|
-|AlphaDIA|precursors.tsv|log.txt|
-|DIA-NN|*_report.tsv or *_report.parquet|*report.log.txt|
-|FragPipe|*_report.tsv|fragpipe.workflow|
-|MaxDIA|evidence.txt|mqpar.xml|
-|Spectronaut|*.tsv|*.txt|
-|PEAKS|lfq.dia.features.csv|parameters.txt|
-
+| Tool        | Input file                                                                  | Parameter File    |
+| ----------- | --------------------------------------------------------------------------- | ----------------- |
+| AlphaDIA    | precursors.tsv & precursor.matrix.tsv (v1) or precursors.tsv/.parquet (v2+) | log.txt           |
+| DIA-NN      | *_report.tsv or *_report.parquet                                            | *report.log.txt   |
+| FragPipe    | *_report.tsv                                                                | fragpipe.workflow |
+| MaxDIA      | evidence.txt                                                                | mqpar.xml         |
+| Spectronaut | *.tsv                                                                       | *.txt             |
+| PEAKS       | lfq.dia.features.csv                                                        | parameters.txt    |
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 
@@ -111,7 +110,8 @@ After upload, you will get a link to a Github pull request associated with your 
 2. In "Method settings" you need to define your search parameters 
 3. Turn on "Predict Library" 
 4. Turn on "Precursor Level LFQ"
-4. Because ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", it needs to be preprocessed. For this, please refer to the Jupyter Notebook "ProteoBench_input_conversion.ipynb" [HERE](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/ProteoBench_input_conversion.ipynb). Using this notebook will provide you with the correct input file that can be used in ProteoBench. The parameter file is "log.txt".
+5. Which AlphaDIA output files are needed for submission depends on which AlphaDIA version the output comes from. For AlphaDIA v1.X output, ProteoBench requires information from both "precursors.tsv" and "precursor.matrix.tsv", both files need to be submitted to ProteoBench. This is possible through the web interface, where both files can be submitted in any order. Alternatively (legacy), one can preprocess the two output files using a [Jupyter Notebook provided on the ProteoBench repository](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/submission/ProteoBench_input_conversion.ipynb). In this case, only the merged output file needs to be submitted to ProteoBench. For later versions, only the precursors.parquet/.tsv file needs to be submitted.
+  
 
 ### [FragPipe - DIA-NN](https://github.com/Nesvilab/FragPipe)
 1. Load the DIA_SpecLib_Quant workflow

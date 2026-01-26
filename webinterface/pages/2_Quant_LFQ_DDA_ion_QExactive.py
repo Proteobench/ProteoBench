@@ -64,6 +64,7 @@ class StreamlitUI:
             tab_results_all,
             tab_submission_details,
             tab_indepth_plots,
+            tab_multqc_plot,
             tab_results_new,
             tab_public_submission,
         ) = st.tabs(
@@ -71,6 +72,7 @@ class StreamlitUI:
                 "Public Benchmark Runs",
                 "Submit New Data",
                 "Results In-Depth",
+                "pMultiQC Plot",
                 "Results New Data",
                 "Public Submission",
             ]
@@ -122,6 +124,14 @@ class StreamlitUI:
                 )
 
             self.quant_uiobjects.display_indepth_plots()
+
+        # Tab 3_1: pMultiQC plot based on intermediate data
+
+        with tab_multqc_plot:
+            st.title("pMultiQC Report for selected dataset.")
+            # self.quant_uiobjects.display_multqc_plot()
+
+            self.quant_uiobjects.display_pmultiqc_report()
 
         # Tab 4: Results (New Submissions)
         with tab_results_new:

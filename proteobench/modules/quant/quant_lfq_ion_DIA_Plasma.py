@@ -1,5 +1,5 @@
 """
-DIA Quantification Module for precursor level Quantification for diaPASEF.
+DIA Quantification Module for precursor level Quantification for single cell data.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
+from proteobench.datapoint.quant_datapoint import QuantDatapointPYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -23,49 +23,50 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quantscoresHYE import QuantScoresHYE
+from proteobench.plotting.plot_generator_lfq_PYE import LFQPYEPlotGenerator
+from proteobench.score.quantscoresPYE import QuantScoresPYE
 
 
-class DIAQuantIonModulediaPASEF(QuantModule):
+class DIAQuantIonModulePlasma(QuantModule):
     """
-    DIA Quantification Module for precursor level Quantification for diaPASEF.
+    DIA Quantification Module for precursor level Quantification for low input (single-cell) data.
 
     Parameters
     ----------
     token : str
         GitHub token for the user.
     proteobot_repo_name : str, optional
-        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_diaPASEF".
+        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_plasma".
     proteobench_repo_name : str, optional
-        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_diaPASEF".
+        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_plasma".
 
     Attributes
     ----------
     module_id : str
         Module identifier for configuration.
-    precursor_column_name: str
+    precursor_name: str
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_DIA_ion_diaPASEF"
+    module_id: str = "quant_lfq_DIA_ion_plasma"
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_diaPASEF",
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_diaPASEF",
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_plasma",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_plasma",
     ):
         """
-        Initialize the DIA Quantification Module for precursor level Quantification for diaPASEF.
+        Initialize the DIA Quantification Module for precursor level Quantification for low input data.
 
         Parameters
         ----------
         token : str
             GitHub token for the user.
         proteobot_repo_name : str, optional
-            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_diaPASEF".
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_plasma".
         proteobench_repo_name : str, optional
-            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_diaPASEF".
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_plasma".
         """
         super().__init__(
             token,
@@ -74,7 +75,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
         )
-        self.precursor_column_name = "precursor ion"
+        self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
         """
@@ -114,6 +115,8 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
+        max_nr_observed : int, optional
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 12 for plasma).
 
         Returns
         -------
@@ -151,22 +154,26 @@ class DIAQuantIonModulediaPASEF(QuantModule):
 
         # Calculate quantification scores
         try:
-            quant_score = QuantScoresHYE(
-                self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            quant_score = QuantScoresPYE(
+                self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
 
         # Generate intermediate data structure
         try:
-            intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+            intermediate_data_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
         # Generate current data point
         try:
-            current_datapoint = QuantDatapointHYE.generate_datapoint(
-                intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
+            current_datapoint = QuantDatapointPYE.generate_datapoint(
+                intermediate_data_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_prec=default_cutoff_min_prec,
+                max_nr_observed=max_nr_observed,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
@@ -179,18 +186,18 @@ class DIAQuantIonModulediaPASEF(QuantModule):
 
         # Return intermediate data structure, all datapoints, and input DataFrame
         return (
-            intermediate_metric_structure,
+            intermediate_data_structure,
             all_datapoints,
             input_df,
         )
 
     def get_plot_generator(self):
-        """
-        Get the plot generator for this module.
+        """Return the plot generator for the module.
 
         Returns
         -------
-        PlotGeneratorBase
-            The plot generator instance.
+        PlotGenerator
+            The plot generator for the module.
         """
-        return super().get_plot_generator()
+
+        return LFQPYEPlotGenerator()

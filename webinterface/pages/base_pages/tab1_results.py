@@ -26,9 +26,22 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> No
         st.session_state[_id_of_key] = default_val_slider
 
 
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float) -> None:
+def generate_main_slider(
+    slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = None
+) -> None:
     """
     Create a slider input.
+
+    Parameters
+    ----------
+    slider_id_uuid : str
+        UUID for the slider.
+    description_slider_md : str
+        Path to the markdown file describing the slider.
+    default_val_slider : float
+        Default value for the slider.
+    max_nr_observed : int, optional
+        Maximum nr_observed value for the slider. If None, defaults to 6.
     """
     # key for slider_uuid in session state
     if slider_id_uuid not in st.session_state:
@@ -38,10 +51,17 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     fpath = description_slider_md
     st.markdown(open(fpath, "r").read())
 
+    # Use provided max_nr_observed or default to 6
+    if max_nr_observed is None:
+        max_nr_observed = 6
+
+    # Generate slider options from 1 to max_nr_observed
+    slider_options = list(range(1, int(max_nr_observed) + 1))
+
     default_value = st.session_state.get(slider_key, default_val_slider)
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
-        options=[1, 2, 3, 4, 5, 6],
+        options=slider_options,
         value=default_value,
         key=slider_key,
     )
@@ -159,6 +179,7 @@ def display_existing_results(variables, ionmodule) -> None:
         label=st.session_state[st.session_state[variables.selectbox_id_uuid]],
         key=_id_of_key,
         plot_generator=plot_generator,
+        slider_id_uuid=variables.slider_id_uuid,
     )
 
     df_display = prepare_display_dataframe(data_points_filtered, highlight_point_id)

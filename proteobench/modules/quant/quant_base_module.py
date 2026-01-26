@@ -50,7 +50,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
-from proteobench.score.quantscores import QuantScoresHYE
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class QuantModule:
@@ -267,6 +267,7 @@ class QuantModule:
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
         input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -285,6 +286,8 @@ class QuantModule:
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
+        max_nr_observed : int, optional
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 6).
 
         Returns
         -------
@@ -305,7 +308,11 @@ class QuantModule:
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            intermediate_metric_structure,
+            input_format,
+            user_input,
+            default_cutoff_min_prec=default_cutoff_min_prec,
+            max_nr_observed=max_nr_observed,
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)

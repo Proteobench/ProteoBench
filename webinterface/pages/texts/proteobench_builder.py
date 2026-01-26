@@ -60,6 +60,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
         "Quant LFQ DIA ion Astral": "/Quant_LFQ_DIA_ion_Astral",
         "Quant LFQ DIA ion Single Cell": "/Quant_LFQ_DIA_ion_singlecell",
         "Quant LFQ DIA ion ZenoTOF": "/Quant_LFQ_DIA_ion_ZenoTOF",
+        "Quant LFQ DIA ion Plasma": "/Quant_LFQ_DIA_ion_Plasma",
     }
     archived_pages = {
         "Quant LFQ DIA ion AIF": "/Quant_LFQ_DIA_ion_AIF",

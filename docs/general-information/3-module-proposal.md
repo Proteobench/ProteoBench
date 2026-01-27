@@ -41,11 +41,20 @@ We advise to send an email to minimum one expert that can provide feedback on th
 **A template for this email can be found [here](https://github.com/Proteobench/ProteoBench/tree/main/docs/general-information/templates_emails_module_proposal/first_request_expert_opinion.txt). Please put proteobench@eubic-ms.org in CC.**
 We ask in the email that expert(s) answer within two weeks. If an expert accepts to contribute, all discussions should take place publicly on GitHub (an email template to send to expert(s) after they accept to contribute is available at the bottom of this document).
 
-Switch to the label "waiting for expert input". It can be switched to "under development" after discussions with expert(s). In such case, experts should be listed as contributors of the module and mentionned in all communications about it. Discussions should take place publicly on GitHub. 
+## Start development
+
+When starting development, the proposal label can be switched to "under development", or can be moved from Discussions to Issues. Based on this new issue (which can be labeled as “new benchmark module”), describing the finalized Proposal, the module can be implemented and documented in the ProteoBench codebase. Finally, a pull request (PR) can be opened.
+If an expert is contacted early and contribute to the module, he/she should be listed as contributor of the module and mentionned in all communications about it. Discussions should take place publicly on GitHub. 
+
+After two positive code reviews by ProteoBench maintainers, the PR can be merged. The PR MUST meet the following requirements:
+1. Proper documentation of the benchmarking module
+2. Proper documentation of the code
+3. All code should follow Black styling
+4. The latest commit of the PR should pass the continuous integration tests
 
 ## When the module is released 
 
-**If there is no discussion started with an external expert, please contact one at this stage.**
+**If there is no discussion started with an external expert, please contact one (or several) at this stage.**
 
 Send an email to minimum one expert that can provide feedback on the proposal such as:
 

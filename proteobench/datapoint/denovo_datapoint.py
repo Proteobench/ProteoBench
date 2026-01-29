@@ -11,7 +11,7 @@ from collections import ChainMap, defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import chain
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
@@ -153,6 +153,7 @@ class DenovoDatapoint:
         intermediate: pd.DataFrame,
         input_format: str,
         user_input: dict,
+        subset_columns_hash: List[str] = ['spectrum_id', 'peptidoform, score'],
         level: str = "peptide",
         evaluation_type: str = "mass",
         # Maybe add here aa/peptide precision
@@ -175,6 +176,10 @@ class DenovoDatapoint:
         except AttributeError:
             user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
 
+        intermediate['peptide_str'] = intermediate['peptidoform'].apply(lambda x: str(x))
+        new_hash = hashlib.sha1(pd.util.hash_pandas_object(intermediate.loc[:, subset_columns_hash], index=True).values.tobytes()).hexdigest()
+        _ = intermediate.pop('peptide_str')
+        
         result_datapoint = DenovoDatapoint(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
@@ -195,13 +200,13 @@ class DenovoDatapoint:
             remove_precursor_tol=user_input["remove_precursor_tol"],
             isotope_error_range=user_input["isotope_error_range"],
             decoding_strategy=user_input["decoding_strategy"],
-            intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
+            intermediate_hash=new_hash,
             comments=user_input["comments_for_plotting"],
             proteobench_version=proteobench.__version__,
         )
 
         result_datapoint.generate_id()
-
+        
         results = {"peptide": {}, "aa": {}}
         for l in ["peptide", "aa"]:
             for e_type in ["exact", "mass"]:
@@ -221,7 +226,6 @@ class DenovoDatapoint:
         result_datapoint.recall = result_datapoint.results[level][evaluation_type]["recall"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
-
         return results_series
 
     def get_metrics(self, df: pd.DataFrame, level: str, evaluation: str):
@@ -255,7 +259,9 @@ class DenovoDatapoint:
                 "Only `aa` and `peptide` levels for accuracy calculation are supported. Should never happen."
             )
 
+        print('Checked metrics, now going into calculate_prc')
         res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
+        print('Caluclated PRC')
         return res
 
 

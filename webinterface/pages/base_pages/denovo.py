@@ -73,7 +73,6 @@ class DeNovoUIObjects():
 
         # Create page config and sidebar
         pbb.proteobench_page_config()
-        pbb.proteobench_sidebar()
 
         self.first_point_plotted = False
         st.session_state[self.variables_denovo.submit] = False

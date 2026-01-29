@@ -54,6 +54,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
         "Quant LFQ DDA ion QExactive": "/Quant_LFQ_DDA_ion_QExactive",
         "Quant LFQ DDA ion Astral": "/Quant_LFQ_DDA_ion_Astral",
         "Quant LFQ DDA peptidoform": "/Quant_LFQ_DDA_peptidoform",
+        "De novo LFQ DDA peptidoform": "/DeNovo_LFQ_DDA_HCD"
     }
     dia_pages = {
         "Quant LFQ DIA ion diaPASEF": "/Quant_LFQ_DIA_ion_diaPASEF",

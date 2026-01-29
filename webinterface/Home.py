@@ -14,8 +14,9 @@ from UI_utils import (
 )
 
 # Path to the index.rst file
-file_path = Path(__file__).parent.parent / "docs" / "index.rst"
-fig_path = Path(__file__).parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
+file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
+fig_path = Path(__file__).resolve().parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
+
 
 
 class StreamlitPageHome(StreamlitPage):

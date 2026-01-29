@@ -15,7 +15,6 @@ import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
-    QuantDatapoint,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )

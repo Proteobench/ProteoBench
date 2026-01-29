@@ -7,16 +7,26 @@ import re
 from collections import defaultdict
 from typing import Any, Dict, List
 
+import numpy as np
 import pandas as pd
 import toml
 from psm_utils import Peptidoform
-import numpy as np
 
 from .parse_ion import get_proforma_bracketed
 
 # IMPORTANT: it is defined here, but filled in after defining the classes
 # new classes need to be filled in there too!!!
 MODULE_TO_CLASS = {}
+GROUND_TRUTH_DIR_SERVER = "/mnt/data/proteobench/module_data/"
+GROUND_TRUTH_DIR_LOCAL = os.path.join(
+    os.path.dirname(__file__).resolve(),
+    "denovo",
+    "lfq",
+    "DDA",
+    "HCD",
+)
+GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
+GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
 
 class ParseSettingsBuilder:
@@ -554,9 +564,9 @@ class ParseSettingsDeNovo:
         """
         # Fix aa_score length as this modification is collapsed from 2 tokens to 1
         if (
-            fix_aa_length and
-            isinstance(peptidoform.properties['n_term'], list) and
-            peptidoform.properties['n_term'][0].value == 'H-2C1O1'
+            fix_aa_length
+            and isinstance(peptidoform.properties["n_term"], list)
+            and peptidoform.properties["n_term"][0].value == "H-2C1O1"
         ):
             aa_scores = list(np.mean(aa_scores[0:2])) + aa_scores[2:]
 
@@ -573,9 +583,9 @@ class ParseSettingsDeNovo:
         self.modification_parser = parser
 
     def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
-        if peptidoform.properties['n_term'] is None:
+        if peptidoform.properties["n_term"] is None:
             return len(peptidoform)
-        return len(peptidoform) + len(peptidoform.properties['n_term'])
+        return len(peptidoform) + len(peptidoform.properties["n_term"])
 
     def add_features(self, df: pd.DataFrame):
         columns_to_keep_gt = [
@@ -621,28 +631,42 @@ class ParseSettingsDeNovo:
             "N-term Carbamylation (denovo)",
             "N-term Ammonia-loss (denovo)",
             ### SPECIES
-            'collection',
+            "collection",
         ]
-        
+
         # PTM-features
-        df['M-Oxidation'] = df.peptidoform_ground_truth.apply(lambda x: "M[UNIMOD:35]" in x)
-        df['Q-Deamidation'] = df.peptidoform_ground_truth.apply(lambda x: "Q[UNIMOD:7]" in x)
-        df['N-Deamidation'] = df.peptidoform_ground_truth.apply(lambda x: "N[UNIMOD:7]" in x)
-        df['N-term Acetylation'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:1]-" in x)
-        df['N-term Carbamylation'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:5]-" in x)
-        df['N-term Ammonia-loss'] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:385]-" in x)
+        df["M-Oxidation"] = df.peptidoform_ground_truth.apply(lambda x: "M[UNIMOD:35]" in x)
+        df["Q-Deamidation"] = df.peptidoform_ground_truth.apply(lambda x: "Q[UNIMOD:7]" in x)
+        df["N-Deamidation"] = df.peptidoform_ground_truth.apply(lambda x: "N[UNIMOD:7]" in x)
+        df["N-term Acetylation"] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:1]-" in x)
+        df["N-term Carbamylation"] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:5]-" in x)
+        df["N-term Ammonia-loss"] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:385]-" in x)
 
-        df['M-Oxidation (denovo)'] = df.peptidoform.apply(lambda x: "M[UNIMOD:35]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
-        df['Q-Deamidation (denovo)'] = df.peptidoform.apply(lambda x: "Q[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
-        df['N-Deamidation (denovo)'] = df.peptidoform.apply(lambda x: "N[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None)
-        df['N-term Acetylation (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:1]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
-        df['N-term Carbamylation (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:5]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
-        df['N-term Ammonia-loss (denovo)'] = df.peptidoform.apply(lambda x: "[UNIMOD:385]-" in x.modified_sequence if isinstance(x, Peptidoform) else None)
+        df["M-Oxidation (denovo)"] = df.peptidoform.apply(
+            lambda x: "M[UNIMOD:35]" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["Q-Deamidation (denovo)"] = df.peptidoform.apply(
+            lambda x: "Q[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-Deamidation (denovo)"] = df.peptidoform.apply(
+            lambda x: "N[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-term Acetylation (denovo)"] = df.peptidoform.apply(
+            lambda x: "[UNIMOD:1]-" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-term Carbamylation (denovo)"] = df.peptidoform.apply(
+            lambda x: "[UNIMOD:5]-" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-term Ammonia-loss (denovo)"] = df.peptidoform.apply(
+            lambda x: "[UNIMOD:385]-" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
 
-        df['peptidoform_ground_truth'] = df.peptidoform_ground_truth.apply(lambda x: Peptidoform(Peptidoform(x).modified_sequence)) # Removing precursor charge from peptidoform
-        
+        df["peptidoform_ground_truth"] = df.peptidoform_ground_truth.apply(
+            lambda x: Peptidoform(Peptidoform(x).modified_sequence)
+        )  # Removing precursor charge from peptidoform
+
         # Peptide length
-        df['peptide_length'] = df.peptidoform_ground_truth.apply(lambda x: self.get_length_peptidoform_with_nterm(x))
+        df["peptide_length"] = df.peptidoform_ground_truth.apply(lambda x: self.get_length_peptidoform_with_nterm(x))
 
         return df[columns_to_keep_gt]
 
@@ -680,34 +704,41 @@ class ParseSettingsDeNovo:
         else:
             df["proforma"] = df["sequence"]
 
-
         def convert_to_peptidoform(proforma):
             try:
                 return Peptidoform(proforma)
             except:
                 return None
+
         if "proforma" in df.columns:
             df["peptidoform"] = df["proforma"].apply(lambda x: convert_to_peptidoform(x))
-            df = df.dropna(subset='peptidoform')
+            df = df.dropna(subset="peptidoform")
 
         # If AA scores are not provided, simulate them from peptide score
         if "aa_scores" not in df.columns:
             df["aa_scores"] = df.apply(
-                lambda row: [row["score"]] * self.get_length_peptidoform_with_nterm(row["peptidoform"]),
-                axis=1
+                lambda row: [row["score"]] * self.get_length_peptidoform_with_nterm(row["peptidoform"]), axis=1
             )
-        
-        df["aa_scores"] = df.apply(
-            lambda x: self.format_scores(x['aa_scores'], x['peptidoform']),
-            axis=1
-        )
+
+        df["aa_scores"] = df.apply(lambda x: self.format_scores(x["aa_scores"], x["peptidoform"]), axis=1)
 
         columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]
         df = df[columns_to_keep]
 
         # Load ground truth PSMs
+        # Determine the path to the ground truth file
+        if os.path.isfile(os.path.join(GROUND_TRUTH_DIR_SERVER, GROUND_TRUTH_FILENAME)):
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_SERVER, GROUND_TRUTH_FILENAME)
+        elif os.path.isfile(os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)):
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)
+        else:
+            # Download from server URL
+            from proteobench.utils.server_io import download_file
 
-        df_ground_truth = pd.read_csv(self.path_to_ground_truth)
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)
+            download_file(GROUND_TRUTH_URL, ground_truth_path)
+
+        df_ground_truth = pd.read_csv(ground_truth_path, compression="gzip")
 
         df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
         df = self.add_features(df=df)

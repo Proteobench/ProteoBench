@@ -41,6 +41,39 @@ MODULE_CLASSES = {
 DATASETS_BASE_URL = "https://proteobench.cubimed.rub.de/datasets/"
 
 
+def download_file(url: str, local_path: str, chunk_size: int = 8192) -> str:
+    """
+    Download a file from URL to local path.
+    
+    Parameters
+    ----------
+    url : str
+        URL to download from
+    local_path : str
+        Local path to save file
+    chunk_size : int
+        Size of chunks for streaming download (default: 8192)
+        
+    Returns
+    -------
+    str
+        Path to downloaded file
+    """
+    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+    
+    print(f"Downloading file from {url}...")
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    
+    with open(local_path, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            if chunk:
+                f.write(chunk)
+    
+    print(f"File downloaded to {local_path}")
+    return local_path
+
+
 def dataset_folder_exists(intermediate_hash: str, base_url: str = DATASETS_BASE_URL) -> bool:
     """
     Check if a dataset folder already exists on the public server for a given intermediate hash.

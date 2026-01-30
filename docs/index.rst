@@ -152,6 +152,15 @@ Available ProteoBench modules
         ^^^
         Benchmark the identification sensitivity and specificity of de novo sequencing workflows
 
+    .. grid-item-card:: LFQ in Human Plasma
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/659
+
+        :bdg-info:`in development`
+        ^^^
+        Benchmarking with a high dynamic range multispecies dataset
+
     .. grid-item-card:: DDA identification - phosphopeptides
         :columns: 6 6 4 4
         :padding: 1
@@ -160,15 +169,6 @@ Available ProteoBench modules
         :bdg-warning:`in discussion`
         ^^^
         Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy
-
-    .. grid-item-card:: LFQ in Human Plasma
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/659
-
-        :bdg-warning:`in discussion`
-        ^^^
-        Benchmarking with a high dynamic range multispecies dataset
 
     .. grid-item-card:: Identification with DDA
         :columns: 6 6 4 4

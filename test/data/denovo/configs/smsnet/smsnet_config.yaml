@@ -1,0 +1,76 @@
+# Data
+src: ".nmt/processed_data/evidence_16"
+tgt: "_tgt.csv"
+out_dir: "log_ablation/log_best_700k..."
+tgt_vocab_file: "/home/samva/Doctorate/DeNovo_Benchmark/configs/smsnet/vocab/vocab.txt"
+tgt_vocab_size: 27
+tgt_embed_file: ""
+dev: "data_best_compat/val_no_dup"
+test: "data_best_compat/test_no_dup"
+src_suffix: ".csv"
+train_fin: true
+
+# Networks
+num_units: 512
+num_layers: 2
+num_decoder_layers: 2
+dropout: 0.1
+unit_type: "layer_norm_lstm"
+residual: true
+num_decoder_residual_layers: 1
+time_major: true
+num_embeddings_partitions: 0
+
+# Attention mechanisms
+attention: ""
+
+# Train
+optimizer: "sgd"
+num_train_steps: 700000
+batch_size: 32
+init_op: "uniform"
+init_weight: 0.1
+max_gradient_norm: 5.0
+learning_rate: 0.01
+warmup_steps: 0
+warmup_scheme: "t2t"
+decay_scheme: "luong234"
+colocate_gradients_with_ops: true
+
+# Data constraints
+num_buckets: 2
+max_train: 0
+src_max_len: null
+tgt_max_len: null
+
+# Inference
+src_max_len_infer: false
+tgt_max_len_infer: 50
+infer_batch_size: 4
+beam_width: 5
+length_penalty_weight: 1.0
+sampling_temperature: 0.0
+num_translations_per_input: 1
+
+# Vocab
+sos: '<s>'
+eos: '</s>'
+subword_option: null
+check_special_token: null
+embed_size: 32
+
+# Misc
+forget_bias: 1.0
+num_gpus: 1
+epoch_step: 0
+steps_per_stats: 200
+steps_per_external_eval: 20000
+share_vocab: null
+metrics: ["bleu", "accuracy", "amino_acid_accuracy"]
+log_device_placement: false
+random_seed: 48
+override_loaded_hparams: false
+num_keep_ckpts: 5
+avg_ckpts: false
+num_intra_threads: null
+num_inter_threads: null

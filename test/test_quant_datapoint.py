@@ -5,13 +5,13 @@ import pandas as pd
 import pytest
 
 from proteobench.datapoint.quant_datapoint import (
-    QuantDatapoint,
+    QuantDatapointHYE,
     _detect_unchanged_species,
     compute_roc_auc,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscores import QuantScoresHYE
 
 DATAPOINT_USER_INPUT_TYPE = {
     "DDA_MaxQuant": {
@@ -57,7 +57,7 @@ class TestQuantDatapoint:
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S_%f")
 
-        QuantDatapoint(
+        QuantDatapointHYE(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],
@@ -111,7 +111,7 @@ class TestQuantDatapoint:
     def test_get_metrics(self, sample_dataframe):
         """Test the get_metrics method."""
         # Test with min_nr_observed = 1
-        result = QuantDatapoint.get_metrics(sample_dataframe, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(sample_dataframe, min_nr_observed=1)
         assert 1 in result
         metrics = result[1]
 
@@ -137,7 +137,7 @@ class TestQuantDatapoint:
             assert metric in metrics
 
         # Test with min_nr_observed = 3
-        result = QuantDatapoint.get_metrics(sample_dataframe, min_nr_observed=3)
+        result = QuantDatapointHYE.get_metrics(sample_dataframe, min_nr_observed=3)
         assert 3 in result
         assert result[3]["nr_prec"] == 3  # Only 3 rows have nr_observed >= 3
 
@@ -157,7 +157,7 @@ class TestQuantDatapoint:
                 "epsilon_precision_mean",
             ]
         )
-        result = QuantDatapoint.get_metrics(empty_df)
+        result = QuantDatapointHYE.get_metrics(empty_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 0
 
@@ -175,7 +175,7 @@ class TestQuantDatapoint:
                 "epsilon_precision_mean": [0.0],  # Single value = 0 deviation from mean
             }
         )
-        result = QuantDatapoint.get_metrics(single_row_df)
+        result = QuantDatapointHYE.get_metrics(single_row_df)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
         assert result[1]["median_abs_epsilon_global"] == 0.1
@@ -341,7 +341,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # Precision should be smaller than accuracy due to bias
@@ -380,7 +380,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # With no bias, precision and accuracy should be approximately equal
@@ -408,7 +408,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # All precision values are 0.05 (abs), so median/mean should be 0.05
@@ -451,7 +451,7 @@ class TestEpsilonPrecision:
         }
         df = pd.DataFrame(data)
 
-        result = QuantDatapoint.get_metrics(df, min_nr_observed=1)
+        result = QuantDatapointHYE.get_metrics(df, min_nr_observed=1)
         metrics = result[1]
 
         # eq_species should be larger than global because YEAST has high spread
@@ -477,7 +477,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         assert "epsilon_precision_median" in result.columns
         assert "epsilon_precision_mean" in result.columns
@@ -501,7 +501,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         # Check per-species empirical centers
         human_rows = result[result["species"] == "HUMAN"]
@@ -535,7 +535,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         # Epsilon (accuracy): deviation from expected (0)
         # Values: 0.4-0=0.4, 0.5-0=0.5, 0.6-0=0.6
@@ -575,7 +575,7 @@ class TestQuantScoresComputeEpsilon:
             }
         )
 
-        result = QuantScores.compute_epsilon(df, species_expected_ratio)
+        result = QuantScoresHYE.compute_epsilon(df, species_expected_ratio)
 
         # Each species should have precision values centered around 0
         for species in ["HUMAN", "YEAST", "ECOLI"]:

@@ -65,7 +65,7 @@ def generate_main_selectbox(variables_quant, selectbox_id_uuid) -> None:
         st.error(f"Unable to create the selectbox: {e}", icon="🚨")
 
 
-def display_download_section(variables_quant, reset_uuid=False) -> None:
+def display_download_section(variables, reset_uuid=False) -> None:
     """
     Render the selector and area for raw data download.
 
@@ -74,18 +74,18 @@ def display_download_section(variables_quant, reset_uuid=False) -> None:
     reset_uuid : bool, optional
         Whether to reset the UUID, by default False.
     """
-    if len(st.session_state[variables_quant.all_datapoints]) == 0:
+    if len(st.session_state[variables.all_datapoints]) == 0:
         st.error("No data available for download.", icon="🚨")
         return
 
-    downloads_df = st.session_state[variables_quant.all_datapoints][["id", "intermediate_hash"]]
+    downloads_df = st.session_state[variables.all_datapoints][["id", "intermediate_hash"]]
     downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
-    if variables_quant.placeholder_downloads_container not in st.session_state.keys() or reset_uuid:
-        st.session_state[variables_quant.placeholder_downloads_container] = st.empty()
-        st.session_state[variables_quant.download_selector_id_uuid] = uuid.uuid4()
+    if variables.placeholder_downloads_container not in st.session_state.keys() or reset_uuid:
+        st.session_state[variables.placeholder_downloads_container] = st.empty()
+        st.session_state[variables.download_selector_id_uuid] = uuid.uuid4()
 
-    # with st.session_state[variables_quant.placeholder_downloads_container].container(border=True):
+    # with st.session_state[variables.placeholder_downloads_container].container(border=True):
     st.subheader("Download raw datasets")
 
     # Sort the intermediate_hash values and get the corresponding ids
@@ -97,18 +97,16 @@ def display_download_section(variables_quant, reset_uuid=False) -> None:
         "Select dataset",
         sorted_intermediate_hash,
         index=None,
-        key=st.session_state[variables_quant.download_selector_id_uuid],
+        key=st.session_state[variables.download_selector_id_uuid],
         format_func=lambda x: sorted_ids[sorted_intermediate_hash.index(x)],
     )
 
     if (
-        st.session_state[st.session_state[variables_quant.download_selector_id_uuid]] is not None
+        st.session_state[st.session_state[variables.download_selector_id_uuid]] is not None
         and st.secrets["storage"]["dir"] is not None
     ):
         dataset_path = (
-            st.secrets["storage"]["dir"]
-            + "/"
-            + st.session_state[st.session_state[variables_quant.download_selector_id_uuid]]
+            st.secrets["storage"]["dir"] + "/" + st.session_state[st.session_state[variables.download_selector_id_uuid]]
         )
         if os.path.isdir(dataset_path):
             files = os.listdir(dataset_path)
@@ -123,75 +121,77 @@ def display_download_section(variables_quant, reset_uuid=False) -> None:
             )
 
 
-def display_existing_results(variables_quant, ionmodule) -> None:
+def display_existing_results(variables, ionmodule) -> None:
     """
     Orchestrates the full display of quantification results in Streamlit,
     including plotting and interactive tabular output with styling.
 
     Parameters
     ----------
-    variables_quant : object
+    variables : object
         Object containing quantification variables including data points,
         slider/selectbox UUIDs, and configuration flags.
 
     ionmodule : object
         Module responsible for filtering and transforming ion data.
     """
-    initialize_and_filter_data(variables_quant, ionmodule)
-    data_points_filtered = variables_quant.filtered_data
+    initialize_and_filter_data(variables, ionmodule)
+    data_points_filtered = variables.filtered_data
 
-    metric = display_metric_selector(variables_quant)
+    metric = display_metric_selector(variables)
     # ROC-AUC has no mode variants (it's already species-aware by design)
     if metric == "ROC-AUC":
         mode = None
     else:
-        mode = display_metric_calc_approach_selector(variables_quant)
+        mode = display_metric_calc_approach_selector(variables)
 
     # prepare plot key explicitly for tab 1
-    key = variables_quant.result_plot_uuid
+    key = variables.result_plot_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
+    plot_generator = ionmodule.get_plot_generator()
     highlight_point_id = render_metric_plot(
         data_points_filtered,
         metric,
         mode,
-        label=st.session_state[st.session_state[variables_quant.selectbox_id_uuid]],
+        label=st.session_state[st.session_state[variables.selectbox_id_uuid]],
         key=_id_of_key,
+        plot_generator=plot_generator,
     )
 
     df_display = prepare_display_dataframe(data_points_filtered, highlight_point_id)
     grid_options = configure_aggrid(df_display)
 
     # prepare df key explicitly for tab 1
-    key = variables_quant.table_id_uuid
+    key = variables.table_id_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
 
     render_aggrid(df_display, grid_options, key=_id_of_key)
     offer_download(df_display)
-    display_download_section(variables_quant=variables_quant)
+    display_download_section(variables=variables)
 
 
 # === Modular Functions ===
 
 
-def initialize_and_filter_data(variables_quant, ionmodule):
+def initialize_and_filter_data(variables, ionmodule):
     initialize_main_data_points(
-        all_datapoints=variables_quant.all_datapoints,
+        all_datapoints=variables.all_datapoints,
         obtain_all_data_points=ionmodule.obtain_all_data_points,
     )
-    variables_quant.filtered_data = filter_data_using_slider(
-        slider_id_uuid=variables_quant.slider_id_uuid,
-        all_datapoints=variables_quant.all_datapoints,
+    variables.filtered_data = filter_data_using_slider(
+        slider_id_uuid=variables.slider_id_uuid,
+        all_datapoints=variables.all_datapoints,
         filter_data_point=ionmodule.filter_data_point,
     )
 
 
-def display_metric_selector(variables_quant) -> str:
-    key = variables_quant.metric_selector_uuid
+def display_metric_selector(variables) -> str:
+    key = variables.metric_selector_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]

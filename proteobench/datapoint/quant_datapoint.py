@@ -17,6 +17,7 @@ import pandas as pd
 from sklearn.metrics import roc_auc_score
 
 import proteobench
+from proteobench.datapoint.datapoint_base import DatapointBase
 
 
 def filter_df_numquant_epsilon(
@@ -249,9 +250,12 @@ def compute_roc_auc_directional(df: pd.DataFrame) -> float:
 
 
 @dataclass
-class QuantDatapoint:
+class QuantDatapointHYE(DatapointBase):
     """
-    A data structure used to store the results of a benchmark run.
+    A data structure used to store the results of a quantification benchmark run.
+
+    This class extends DatapointBase to implement quantification-specific metrics and metadata
+    storage for LFQ benchmarking runs.
 
     Attributes:
         id (str): Unique identifier for the benchmark run.
@@ -362,7 +366,7 @@ class QuantDatapoint:
         except AttributeError:
             user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
 
-        result_datapoint = QuantDatapoint(
+        result_datapoint = QuantDatapointHYE(
             id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],
@@ -386,7 +390,7 @@ class QuantDatapoint:
         result_datapoint.generate_id()
 
         results = dict(
-            ChainMap(*[QuantDatapoint.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
+            ChainMap(*[QuantDatapointHYE.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
         )
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
@@ -538,13 +542,13 @@ class QuantDatapoint:
 
         return {
             min_nr_observed: {
-                **QuantDatapoint.get_epsilon_metrics(df, min_nr_observed, "median"),
-                **QuantDatapoint.get_epsilon_metrics(df, min_nr_observed, "mean"),
-                **QuantDatapoint.get_precision_metrics(df, min_nr_observed, "median"),
-                **QuantDatapoint.get_precision_metrics(df, min_nr_observed, "mean"),
-                **QuantDatapoint.get_cv_metrics(df, min_nr_observed),
-                **QuantDatapoint.get_roc_metrics(df, min_nr_observed),
-                **QuantDatapoint.get_count_metrics(df, min_nr_observed),
+                **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "median"),
+                **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "mean"),
+                **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "median"),
+                **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "mean"),
+                **QuantDatapointHYE.get_cv_metrics(df, min_nr_observed),
+                **QuantDatapointHYE.get_roc_metrics(df, min_nr_observed),
+                **QuantDatapointHYE.get_count_metrics(df, min_nr_observed),
                 "variance_epsilon_global": df_slice["epsilon"].var(),
             }
         }

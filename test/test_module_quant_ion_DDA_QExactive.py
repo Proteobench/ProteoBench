@@ -3,12 +3,13 @@ import os
 import pandas as pd
 import pytest
 
+from proteobench.exceptions import DatapointGenerationError
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
-from proteobench.score.quant.quantscores import QuantScores
-from proteobench.exceptions import DatapointGenerationError
-
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
+    DDAQuantIonModuleQExactive,
+)
+from proteobench.score.quantscores import QuantScoresHYE
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/quant/quant_lfq_ion_DDA_QExactive")
 TESTDATA_FILES = {
@@ -105,7 +106,7 @@ class TestQuantScores:
         prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
         # Get quantification data
-        quant_score = QuantScores(
+        quant_score = QuantScoresHYE(
             "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
         intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)

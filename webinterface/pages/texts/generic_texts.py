@@ -50,7 +50,7 @@ class WebpageTexts:
             add changes in your search parameters here, that are not obvious from the parameter file.
             """
         
-        warning_archived =  """This module is in ARCHIVED phase. The figure presented below 
+        warning_archived =  """This module is ARCHIVED. The figure presented below 
             and the metrics calculation will no longer be updated. See module documentation 
             for more details.
             """

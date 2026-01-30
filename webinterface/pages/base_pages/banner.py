@@ -14,5 +14,5 @@ def display_banner(variables):
                 variables.texts.ShortMessages.warning_alpha,
                 icon="🚨",
             )
-        if variables.beta_warning:
+        elif variables.beta_warning:
             st.warning(variables.texts.ShortMessages.warning_beta)

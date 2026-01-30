@@ -7,6 +7,7 @@ from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
+from pages.base_pages.banner import display_banner
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
     VariablesDDAQuant,
@@ -86,10 +87,7 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dda_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_all_data_results_main()
 
         # Tab 2: Submission Details
@@ -102,10 +100,7 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dda_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_submission_form()
 
         # Tab 3: in-depth plots current data
@@ -118,11 +113,7 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dda_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-
+            display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_indepth_plots()
 
         # Tab 3_1: pMultiQC plot based on intermediate data
@@ -142,11 +133,7 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dda_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-
+            display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_all_data_results_submitted()
 
         # Tab 5: Public Submission
@@ -158,10 +145,7 @@ class StreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables_dda_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_public_submission_ui()
 
 

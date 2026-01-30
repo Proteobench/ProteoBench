@@ -25,6 +25,10 @@ See the page ["How to propose/discuss a new module" section](./3-module-proposal
 
 When the PR is merged, the new module enters a "Alpha" stage, where its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in "Alpha". After approval by the initial proposer(s) and external expert(s), the alpha label can be removed.
 
+## Alpha
+
+When the PR is merged, the new module enters an alpha stage, where its code base is part of the Python package, and it is present on the web platforms. However, a prominent banner states that the module is still in "Alpha". This means that the module is available but remains to be fully discussed with experts (more information on module proposal process can be found [here](./3-module-proposal.md)). 
+
 ## Beta
 
 The module should be approved by the initial proposer(s) and external expert(s) before the banner "Alpha" can be changed to "Beta". At this stage, workflow results may still change. This can happen if we expect new tools to be included (and potential parsing mistakes), or if the module is very new. The "Beta" banner can be removed by the initial proposer(s) of the module after a minimum of six months.

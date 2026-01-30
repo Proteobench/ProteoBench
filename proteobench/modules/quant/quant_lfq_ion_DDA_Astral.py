@@ -3,12 +3,13 @@ DDA Quantification Module for Ion level Quantification.
 """
 
 from __future__ import annotations
+
 from typing import Dict, Tuple
 
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     IntermediateFormatGenerationError,
@@ -19,9 +20,9 @@ from proteobench.exceptions import (
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
-from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScores
 from proteobench.modules.quant.benchmarking import run_benchmarking_with_timing
+from proteobench.modules.quant.quant_base_module import QuantModule
+from proteobench.score.quantscores import QuantScoresHYE
 
 
 class DDAQuantIonAstralModule(QuantModule):
@@ -177,3 +178,6 @@ class DDAQuantIonAstralModule(QuantModule):
             default_cutoff_min_prec=default_cutoff_min_prec,
             add_datapoint_func=self.add_current_data_point,
         )
+
+    def get_plot_generator(self):
+        return super().get_plot_generator()

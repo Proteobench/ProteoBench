@@ -3,12 +3,10 @@ import re
 import pandas as pd
 import streamlit as st
 
-from proteobench.plotting.plot_quant import PlotDataPoint
-
 # functions to plot the metric plot
 
 
-def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, key) -> str | None:
+def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, key, plot_generator) -> str | None:
     """
     Displays the metric plot and returns the ProteoBench ID of the selected point (if any).
 
@@ -29,6 +27,9 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
     key : str
         Unique key for the plot in the Streamlit session state.
 
+    plot_generator : PlotGeneratorBase
+        The plot generator instance for the module.
+
     Returns
     -------
     str or None
@@ -39,17 +40,13 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
 
     # Check if user selected "Species-weighted" mode but no datapoints have these metrics
     if mode == "Species-weighted":
-        from proteobench.plotting.plot_quant import (
-            _filter_datapoints_with_metric,
-            _get_metric_column_name,
-        )
 
-        metric_lower, mode_suffix, _ = _get_metric_column_name(metric, mode)
+        metric_lower, mode_suffix, _ = plot_generator._get_metric_column_name(metric, mode)
         metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
 
         # Check how many datapoints have the equal-weighted metric
         original_count = len(data)
-        filtered_data = _filter_datapoints_with_metric(data, metric_col_name)
+        filtered_data = plot_generator._filter_datapoints_with_metric(data, metric_col_name)
 
         if len(filtered_data) == 0:
             st.warning(
@@ -72,11 +69,11 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
         return None
 
     try:
-        fig_metric = PlotDataPoint.plot_metric(
+        fig_metric = plot_generator.plot_main_metric(
             data,
-            label=label,
             metric=metric,
             mode=mode,
+            label=label,
         )
         event_dict = st.plotly_chart(
             fig_metric,

@@ -1,5 +1,5 @@
 """
-Module containing the QuantScores class.
+Module containing quantification score calculators.
 """
 
 from typing import Dict
@@ -7,24 +7,29 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
+from proteobench.score.score_base import ScoreBase
 
-class QuantScores:
+
+class QuantScoresHYE(ScoreBase):
     """
-    Class for computing quantification scores.
+    Class for computing quantification scores for LFQ benchmarking.
+
+    This class implements the ScoreBase interface to compute quantification-specific metrics
+    including condition statistics, fold changes, and epsilon (difference) values.
 
     Parameters
     ----------
     precursor_column_name : str
-        Name of the precursor.
+        Name of the precursor column.
     species_expected_ratio : dict
         Dictionary containing the expected ratios for each species.
     species_dict : dict
-        Dictionary containing the species names.
+        Dictionary containing the species names and their column mappings.
     """
 
     def __init__(self, precursor_column_name: str, species_expected_ratio, species_dict: Dict[str, str]):
         """
-        Initialize the QuantScores object.
+        Initialize the QuantScoresHYE object.
 
         Parameters
         ----------
@@ -63,7 +68,7 @@ class QuantScores:
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
         relevant_columns_df = filtered_df[["Raw file", self.precursor_column_name, "Intensity"]].copy()
-        replicate_to_raw_df = QuantScores.convert_replicate_to_raw(replicate_to_raw)
+        replicate_to_raw_df = QuantScoresHYE.convert_replicate_to_raw(replicate_to_raw)
 
         all_present = all(
             item in list(filtered_df.columns) for sublist in replicate_to_raw.values() for item in sublist
@@ -74,7 +79,7 @@ class QuantScores:
 
         # add column "Condition" to filtered_df_p1 using inner join on "Raw file"
         relevant_columns_df = pd.merge(relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner")
-        quant_df = QuantScores.compute_condition_stats(
+        quant_df = QuantScoresHYE.compute_condition_stats(
             relevant_columns_df,
             min_intensity=0,
             precursor=self.precursor_column_name,
@@ -86,7 +91,7 @@ class QuantScores:
         # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
         quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_column_name, how="inner")
         species_expected_ratio = self.species_expected_ratio
-        res = QuantScores.compute_epsilon(quant_df_withspecies, species_expected_ratio)
+        res = QuantScoresHYE.compute_epsilon(quant_df_withspecies, species_expected_ratio)
         return res
 
     @staticmethod

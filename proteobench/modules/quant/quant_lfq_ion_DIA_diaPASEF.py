@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -23,7 +23,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscores import QuantScoresHYE
 
 
 class DIAQuantIonModulediaPASEF(QuantModule):
@@ -150,7 +150,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
 
         # Calculate quantification scores
         try:
-            quant_score = QuantScores(
+            quant_score = QuantScoresHYE(
                 self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
@@ -164,7 +164,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
 
         # Generate current data point
         try:
-            current_datapoint = QuantDatapoint.generate_datapoint(
+            current_datapoint = QuantDatapointHYE.generate_datapoint(
                 intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
             )
         except Exception as e:
@@ -182,3 +182,14 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    def get_plot_generator(self):
+        """
+        Get the plot generator for this module.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance.
+        """
+        return super().get_plot_generator()

@@ -2,39 +2,34 @@ import json
 import tempfile
 
 import streamlit as st
+from streamlit_utils import display_error, get_error_suggestions
 
 from proteobench.exceptions import ProteoBenchError
 
 from . import inputs
-from streamlit_utils import display_error, get_error_suggestions
 
 
-def generate_input_fields(
-    variables_quant,
-    parsesettingsbuilder,
-    user_input,
-) -> None:
+def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input) -> None:
     """
-    Create the input section of the form.
+    Display software selector outside the form and show AlphaDIA-specific information.
+    This allows immediate feedback when AlphaDIA is selected.
     """
     st.subheader("Input files")
-    st.markdown(open(variables_quant.description_input_file_md, "r", encoding="utf-8").read())
-    # ! Maybe user_input needs to be returned and assigned manually
-    # ? Not the input form is made persistent?
-    # It returns None or the selected options
-    user_input["input_format"] = st.selectbox(
+    st.markdown(open(variables.description_input_file_md, "r", encoding="utf-8").read())
+
+    # Software tool selector - outside form to enable reactive updates
+    selected_format = st.selectbox(
         "Software tool",
         parsesettingsbuilder.INPUT_FORMATS,
-        help=variables_quant.texts.Help.input_format,
-    )
-    # Returns None or the selected file as UploadedFile (a file-like object)
-    user_input["input_csv"] = st.file_uploader(
-        "Software tool result file",
-        help=variables_quant.texts.Help.input_file,
+        help=variables.texts.Help.input_format,
+        key="software_tool_selector",
     )
 
-    # For AlphaDIA, require a second file upload
-    if user_input["input_format"] == "AlphaDIA":
+    # Store selection in user_input for use in form
+    user_input["input_format"] = selected_format
+
+    # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
+    if selected_format == "AlphaDIA":
         st.info(
             "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
             "**If not, you have the following options:**\n\n"
@@ -42,10 +37,27 @@ def generate_input_fields(
             "You can upload them in any order - the system will automatically detect which is which.\n\n"
             "**Single-file upload (legacy):** Alternatively, upload a single pre-merged file in the main uploader above."
         )
+
+
+def generate_input_fields(
+    user_input,
+) -> None:
+    """
+    Create the file upload section of the form.
+    Software tool selection is now handled outside the form.
+    """
+    # Returns None or the selected file as UploadedFile (a file-like object)
+    user_input["input_csv"] = st.file_uploader(
+        "Software tool result file",
+        help="Upload the result file from your selected software tool",
+    )
+
+    # For AlphaDIA, show secondary file uploader after main uploader
+    if user_input.get("input_format") == "AlphaDIA":
         user_input["input_csv_secondary"] = st.file_uploader(
             "Upload second AlphaDIA file (optional)",
             type=["tsv", "csv"],
-            help="ℹ️ Only for AlphaDIA v1:\nUpload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv) for automatic merging. Leave empty if uploading a pre-merged file.",
+            key="alphadia_secondary_file",
         )
     else:
         user_input["input_csv_secondary"] = None
@@ -53,13 +65,13 @@ def generate_input_fields(
 
 # TODO: change additional_params_json for other modules, to capture relevant parameters
 def generate_additional_parameters_fields(
-    variables_quant,
+    variables,
     user_input,
 ) -> None:
     """
     Create the additional parameters section of the form and initializes the parameter fields.
     """
-    with open(variables_quant.additional_params_json, encoding="utf-8") as file:
+    with open(variables.additional_params_json, encoding="utf-8") as file:
         config = json.load(file)
     for key, value in config.items():
         if key.lower() == "software_name":
@@ -78,7 +90,7 @@ def generate_additional_parameters_fields(
 
 
 def process_submission_form(
-    variables_quant,
+    variables,
     ionmodule,
     user_input,
 ) -> bool:
@@ -105,7 +117,7 @@ def process_submission_form(
         )
 
     success = execute_proteobench(
-        variables_quant=variables_quant,
+        variables=variables,
         ionmodule=ionmodule,
         user_input=user_input,
     )
@@ -123,7 +135,7 @@ def process_submission_form(
 # function used in process_submission_form
 
 
-def execute_proteobench(variables_quant, ionmodule, user_input) -> bool:
+def execute_proteobench(variables, ionmodule, user_input) -> bool:
     """
     Execute the ProteoBench benchmarking process.
 
@@ -133,26 +145,26 @@ def execute_proteobench(variables_quant, ionmodule, user_input) -> bool:
         True if benchmarking succeeded, False if an error occurred.
     """
     try:
-        if variables_quant.all_datapoints_submitted not in st.session_state:
+        if variables.all_datapoints_submitted not in st.session_state:
             initialize_main_data_points(
-                variables_quant=variables_quant,
+                variables=variables,
                 ionmodule=ionmodule,
             )
 
         result_performance, all_datapoints, input_df = run_benchmarking_process(
-            variables_quant=variables_quant,
+            variables=variables,
             ionmodule=ionmodule,
             user_input=user_input,
         )
-        st.session_state[variables_quant.all_datapoints_submitted] = all_datapoints
+        st.session_state[variables.all_datapoints_submitted] = all_datapoints
 
         set_highlight_column_in_submitted_data(
-            variables_quant=variables_quant,
+            variables=variables,
         )
 
-        st.session_state[variables_quant.result_perf] = result_performance
+        st.session_state[variables.result_perf] = result_performance
 
-        st.session_state[variables_quant.input_df] = input_df
+        st.session_state[variables.input_df] = input_df
         return True
 
     except (ProteoBenchError, Exception) as e:
@@ -162,18 +174,18 @@ def execute_proteobench(variables_quant, ionmodule, user_input) -> bool:
 
 
 # function with same name exists in tab1_results.py, but is different
-def initialize_main_data_points(variables_quant, ionmodule) -> None:
+def initialize_main_data_points(variables, ionmodule) -> None:
     """
     Initialize the all_datapoints variable in the session state.
     """
-    if variables_quant.all_datapoints not in st.session_state.keys():
-        st.session_state[variables_quant.all_datapoints] = None
-        st.session_state[variables_quant.all_datapoints] = ionmodule.obtain_all_data_points(
-            all_datapoints=st.session_state[variables_quant.all_datapoints]
+    if variables.all_datapoints not in st.session_state.keys():
+        st.session_state[variables.all_datapoints] = None
+        st.session_state[variables.all_datapoints] = ionmodule.obtain_all_data_points(
+            all_datapoints=st.session_state[variables.all_datapoints]
         )
 
 
-def run_benchmarking_process(variables_quant, ionmodule, user_input):
+def run_benchmarking_process(variables, ionmodule, user_input):
     """
     Execute the benchmarking process and returns the results.
 
@@ -195,15 +207,15 @@ def run_benchmarking_process(variables_quant, ionmodule, user_input):
 
     # reload buffer: https://stackoverflow.com/a/64478151/9684872
     user_input["input_csv"].seek(0)
-    if st.session_state[variables_quant.slider_id_submitted_uuid] in st.session_state.keys():
-        set_slider_val = st.session_state[st.session_state[variables_quant.slider_id_submitted_uuid]]
+    if st.session_state[variables.slider_id_submitted_uuid] in st.session_state.keys():
+        set_slider_val = st.session_state[st.session_state[variables.slider_id_submitted_uuid]]
     else:
-        set_slider_val = variables_quant.default_val_slider
+        set_slider_val = variables.default_val_slider
 
-    if variables_quant.all_datapoints_submitted in st.session_state.keys():
-        all_datapoints = st.session_state[variables_quant.all_datapoints_submitted]
+    if variables.all_datapoints_submitted in st.session_state.keys():
+        all_datapoints = st.session_state[variables.all_datapoints_submitted]
     else:
-        all_datapoints = st.session_state[variables_quant.all_datapoints]
+        all_datapoints = st.session_state[variables.all_datapoints]
 
     return ionmodule.benchmarking(
         user_input["input_csv"],
@@ -215,17 +227,17 @@ def run_benchmarking_process(variables_quant, ionmodule, user_input):
     )
 
 
-def set_highlight_column_in_submitted_data(variables_quant) -> None:
+def set_highlight_column_in_submitted_data(variables) -> None:
     """
     Initialize the highlight column in the data points.
     """
-    df = st.session_state[variables_quant.all_datapoints_submitted]
-    if variables_quant.highlight_list_submitted not in st.session_state.keys() and "Highlight" not in df.columns:
+    df = st.session_state[variables.all_datapoints_submitted]
+    if variables.highlight_list_submitted not in st.session_state.keys() and "Highlight" not in df.columns:
         df.insert(0, "Highlight", [False] * len(df.index))
     elif "Highlight" not in df.columns:
-        df.insert(0, "Highlight", st.session_state[variables_quant.highlight_list_submitted])
+        df.insert(0, "Highlight", st.session_state[variables.highlight_list_submitted])
     elif "Highlight" in df.columns:
         # Not sure how 'Highlight' column became object dtype
         df["Highlight"] = df["Highlight"].astype(bool).fillna(False)
     # only needed for last elif, but to be sure apply always:
-    st.session_state[variables_quant.all_datapoints_submitted] = df
+    st.session_state[variables.all_datapoints_submitted] = df

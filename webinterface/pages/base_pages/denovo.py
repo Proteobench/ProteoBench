@@ -33,6 +33,9 @@ from proteobench.plotting.plot_denovo import PlotDataPoint
 logger: logging.Logger = logging.getLogger(__name__)
 
 
+# TODO: Fix the Uploaded dataset naming
+# TODO: Fix the double lining in indepth plots for fragmentation and peptide length
+
 class DeNovoUIObjects():
     """
     Main class for the Streamlit interface of ProteoBench de novo identification.

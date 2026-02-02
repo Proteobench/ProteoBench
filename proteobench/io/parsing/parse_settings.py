@@ -6,6 +6,7 @@ import os
 import re
 from collections import defaultdict
 from typing import Any, Dict, List
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -19,7 +20,8 @@ from .parse_ion import get_proforma_bracketed
 MODULE_TO_CLASS = {}
 GROUND_TRUTH_DIR_SERVER = "/mnt/data/proteobench/module_data/"
 GROUND_TRUTH_DIR_LOCAL = os.path.join(
-    os.path.dirname(__file__).resolve(),
+    Path(__file__).resolve().parent,
+    'io_parse_settings',
     "denovo",
     "lfq",
     "DDA",
@@ -489,18 +491,6 @@ class ParseSettingsDeNovo:
         self.sequence_mapper = parse_settings["sequence_mapper"]
         self.modification_parser = None
         self.analysis_level = "peptidoform"
-
-        module_settings_dir = os.path.join(
-            os.path.dirname(__file__),
-            "io_parse_settings",
-            "denovo",
-            "lfq",
-            "DDA",
-            "HCD",
-        )
-        self.path_to_ground_truth = os.path.join(
-            module_settings_dir, parse_settings_module["ground_truth"]["path_to_ground_truth"]
-        )
 
     def extract_scan_id(self, spectrum_id: str) -> int:
         """

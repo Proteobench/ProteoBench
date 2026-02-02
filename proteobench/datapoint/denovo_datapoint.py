@@ -153,7 +153,7 @@ class DenovoDatapoint:
         intermediate: pd.DataFrame,
         input_format: str,
         user_input: dict,
-        subset_columns_hash: List[str] = ['spectrum_id', 'peptidoform, score'],
+        subset_columns_hash: List[str] = ['spectrum_id', 'peptide_str', 'score'],
         level: str = "peptide",
         evaluation_type: str = "mass",
         # Maybe add here aa/peptide precision

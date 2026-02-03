@@ -14,7 +14,6 @@ EPSILON = 0.0001
 
 
 def flatten_results_column(df):
-
     results = {
         "engine": [],
         "peptide_mass_precision": [],
@@ -74,7 +73,6 @@ class PlotDataPoint:
         highlight_color: str = "#d30067",
         label: str = "None",
     ) -> go.Figure:
-
         # Define layout
         results_df = flatten_results_column(benchmark_metrics_df)
         benchmark_metrics_df = pd.concat([benchmark_metrics_df, results_df], axis=1)
@@ -238,7 +236,6 @@ class PlotDataPoint:
             "PEAKS": "#f032e6",
         },
     ):
-
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
             x, y = self.get_modification_scores(row["results"]["in_depth"]["PTM"], mod_labels=mod_labels)

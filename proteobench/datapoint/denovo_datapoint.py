@@ -297,7 +297,6 @@ class DenovoDatapoint:
             mod_count = 0
             correct = 0
             for i, row in df[df[mod_label]].iterrows():
-
                 mod_count, correct = self.evaluate_ptm(
                     mod_label=mod_label,
                     mod_tag=unimod_tag,
@@ -313,7 +312,6 @@ class DenovoDatapoint:
             mod_count = 0
             correct = 0
             for i, row in df_filtered[df_filtered[mod_label]].iterrows():
-
                 mod_count, correct = self.evaluate_ptm(
                     mod_label=mod_label,
                     mod_tag=unimod_tag,
@@ -387,7 +385,6 @@ class DenovoDatapoint:
         return data
 
     def get_spectrum_metrics(self, df: pd.DataFrame):
-
         results = {}
         intermediate = df.dropna()
 
@@ -425,7 +422,6 @@ class DenovoDatapoint:
         return results
 
     def get_species_metrics(self, df: pd.DataFrame):
-
         species = [
             "Solanum-lycopersicum",
             "Mus-musculus",

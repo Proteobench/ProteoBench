@@ -69,10 +69,7 @@ class QuantUIObjects(BaseUIModule):
             The parse settings builder.
         """
         super().__init__(
-            variables=variables,
-            ionmodule=ionmodule,
-            parsesettingsbuilder=parsesettingsbuilder,
-            page_name=page_name
+            variables=variables, ionmodule=ionmodule, parsesettingsbuilder=parsesettingsbuilder, page_name=page_name
         )
         if self.variables.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables.slider_id_submitted_uuid] = str()
@@ -92,7 +89,6 @@ class QuantUIObjects(BaseUIModule):
         )
         tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
         tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
-
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
@@ -289,4 +285,3 @@ class QuantUIObjects(BaseUIModule):
                 variables=self.variables,
                 pr_url=pr_url,
             )
-

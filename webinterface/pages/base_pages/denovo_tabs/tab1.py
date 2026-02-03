@@ -1,37 +1,33 @@
 import os
 import uuid
 from typing import Callable
-from proteobench.plotting.plot_denovo import PlotDataPoint
 
 import pandas as pd
 import streamlit as st
 
-    
+from proteobench.plotting.plot_denovo import PlotDataPoint
+
+
 def initialize_radio(radio_id_uuid: str, default_value: str):
     key = radio_id_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
-    
+
     _id_of_key = st.session_state[key]
     if _id_of_key not in st.session_state.keys():
         st.session_state[_id_of_key] = default_value
 
 
 def generate_main_radio(
-        radio_id_uuid: str,
-        description: str,
-        options: list,
-        help: str,
-    ):
+    radio_id_uuid: str,
+    description: str,
+    options: list,
+    help: str,
+):
     """Wraps radio generation"""
 
-    st.radio(
-        description,
-        options=options,
-        horizontal=True,
-        key=st.session_state[radio_id_uuid],
-        help=help
-    )
+    st.radio(description, options=options, horizontal=True, key=st.session_state[radio_id_uuid], help=help)
+
 
 # Same as in quant_tabs
 def generate_main_selectbox(variables, selectbox_id_uuid) -> None:
@@ -52,12 +48,7 @@ def generate_main_selectbox(variables, selectbox_id_uuid) -> None:
         st.error(f"Unable to create the selectbox: {e}", icon="🚨")
 
 
-def display_existing_results(
-        variables,
-        ionmodule,
-        level_mapping,
-        evaluation_type_mapping
-    ):
+def display_existing_results(variables, ionmodule, level_mapping, evaluation_type_mapping):
     """
     Display the results section of the page for existing data.
     """
@@ -67,21 +58,15 @@ def display_existing_results(
         fig_metric = PlotDataPoint.plot_metric(
             benchmark_metrics_df=st.session_state[variables.all_datapoints],
             label=st.session_state[st.session_state[variables.selectbox_id_uuid]],
-            level=level_mapping[
-                st.session_state[st.session_state[variables.radio_level_id_uuid]]
-            ],
+            level=level_mapping[st.session_state[st.session_state[variables.radio_level_id_uuid]]],
             evaluation_type=evaluation_type_mapping[
                 st.session_state[st.session_state[variables.radio_evaluation_id_uuid]]
-            ]
+            ],
         )
-        st.plotly_chart(
-            fig_metric,
-            use_container_width=True,
-            key=variables.fig_metric
-        )
+        st.plotly_chart(fig_metric, use_container_width=True, key=variables.fig_metric)
     except Exception as e:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-    
+
     st.dataframe(st.session_state[variables.all_datapoints])
     _display_download_section(variables, reset_uuid=False)
 
@@ -95,6 +80,7 @@ def _initialize_main_data_points(variables, ionmodule: Callable):
         st.session_state[variables.all_datapoints] = ionmodule.obtain_all_data_points(
             all_datapoints=st.session_state[variables.all_datapoints]
         )
+
 
 def _display_download_section(variables, reset_uuid=False) -> None:
     """

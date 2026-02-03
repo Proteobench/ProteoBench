@@ -72,7 +72,7 @@ class DenovoScores:
                 "aa_matches_dn": np.full(len(gt), False),
                 "aa_exact_gt": np.full(len(gt), False),
                 "aa_exact_dn": np.full(len(gt), False),
-                "pep_match": False
+                "pep_match": False,
             }
 
         if ground_truth == de_novo:
@@ -225,7 +225,7 @@ class DenovoScores:
             exact_match = aa_str1 == aa_str2
             aa_exact_1[i1] = exact_match
             aa_exact_2[i2] = exact_match
-                
+
             # mass-based
             aa_mass1 = self.get_token_mass(peptide1[i1])
             aa_mass2 = self.get_token_mass(peptide2[i2])
@@ -278,7 +278,7 @@ class DenovoScores:
                 continue
             mass += mod.mass
         return mass
-    
+
     def get_token_str(self, token: tuple) -> str:
         """
         Convert the amino acid to string format including the modification if present.

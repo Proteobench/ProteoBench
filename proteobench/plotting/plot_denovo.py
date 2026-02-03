@@ -10,7 +10,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-EPSILON = .0001
+EPSILON = 0.0001
+
 
 def flatten_results_column(df):
 
@@ -30,23 +31,23 @@ def flatten_results_column(df):
         "aa_exact_coverage": [],
     }
     for i, row in df.iterrows():
-        results['engine'].append(row['software_name'])
+        results["engine"].append(row["software_name"])
 
-        results['peptide_mass_precision'].append(row['results']['peptide']['mass']['precision'])
-        results['peptide_mass_recall'].append(row['results']['peptide']['mass']['recall'])
-        results['peptide_mass_coverage'].append(row['results']['peptide']['mass']['coverage'])
+        results["peptide_mass_precision"].append(row["results"]["peptide"]["mass"]["precision"])
+        results["peptide_mass_recall"].append(row["results"]["peptide"]["mass"]["recall"])
+        results["peptide_mass_coverage"].append(row["results"]["peptide"]["mass"]["coverage"])
 
-        results['peptide_exact_precision'].append(row['results']['peptide']['exact']['precision'])
-        results['peptide_exact_recall'].append(row['results']['peptide']['exact']['recall'])
-        results['peptide_exact_coverage'].append(row['results']['peptide']['exact']['coverage'])
+        results["peptide_exact_precision"].append(row["results"]["peptide"]["exact"]["precision"])
+        results["peptide_exact_recall"].append(row["results"]["peptide"]["exact"]["recall"])
+        results["peptide_exact_coverage"].append(row["results"]["peptide"]["exact"]["coverage"])
 
-        results['aa_mass_precision'].append(row['results']['aa']['mass']['precision'])
-        results['aa_mass_recall'].append(row['results']['aa']['mass']['recall'])
-        results['aa_mass_coverage'].append(row['results']['aa']['mass']['coverage'])
+        results["aa_mass_precision"].append(row["results"]["aa"]["mass"]["precision"])
+        results["aa_mass_recall"].append(row["results"]["aa"]["mass"]["recall"])
+        results["aa_mass_coverage"].append(row["results"]["aa"]["mass"]["coverage"])
 
-        results['aa_exact_precision'].append(row['results']['aa']['exact']['precision'])
-        results['aa_exact_recall'].append(row['results']['aa']['exact']['recall'])
-        results['aa_exact_coverage'].append(row['results']['aa']['exact']['coverage'])
+        results["aa_exact_precision"].append(row["results"]["aa"]["exact"]["precision"])
+        results["aa_exact_recall"].append(row["results"]["aa"]["exact"]["recall"])
+        results["aa_exact_coverage"].append(row["results"]["aa"]["exact"]["coverage"])
     return pd.DataFrame(results)
 
 
@@ -73,7 +74,7 @@ class PlotDataPoint:
         highlight_color: str = "#d30067",
         label: str = "None",
     ) -> go.Figure:
-        
+
         # Define layout
         results_df = flatten_results_column(benchmark_metrics_df)
         benchmark_metrics_df = pd.concat([benchmark_metrics_df, results_df], axis=1)
@@ -146,20 +147,20 @@ class PlotDataPoint:
         benchmark_metrics_df["scatter_size"] = scatter_size
 
         layout_xaxis_range = [
-            results_min[f"{level}_{evaluation_type}_coverage"] - results_min[f"{level}_{evaluation_type}_coverage"] * .05,
-            results_max[f"{level}_{evaluation_type}_coverage"] + results_max[f"{level}_{evaluation_type}_coverage"] * .05
+            results_min[f"{level}_{evaluation_type}_coverage"]
+            - results_min[f"{level}_{evaluation_type}_coverage"] * 0.05,
+            results_max[f"{level}_{evaluation_type}_coverage"]
+            + results_max[f"{level}_{evaluation_type}_coverage"] * 0.05,
         ]
         layout_yaxis_range = [
-            results_min[f"{level}_{evaluation_type}_precision"] - results_min[f"{level}_{evaluation_type}_precision"] * .05,
-            results_max[f"{level}_{evaluation_type}_precision"] + results_max[f"{level}_{evaluation_type}_precision"] * .05
+            results_min[f"{level}_{evaluation_type}_precision"]
+            - results_min[f"{level}_{evaluation_type}_precision"] * 0.05,
+            results_max[f"{level}_{evaluation_type}_precision"]
+            + results_max[f"{level}_{evaluation_type}_precision"] * 0.05,
         ]
-        layout_xaxis_title = (
-            "Coverage"
-        )
-        layout_yaxis_title = (
-            "Precision"
-        )
-        
+        layout_xaxis_title = "Coverage"
+        layout_yaxis_title = "Precision"
+
         fig = go.Figure(
             layout_yaxis_range=layout_yaxis_range,
             layout_xaxis_range=layout_xaxis_range,
@@ -222,45 +223,36 @@ class PlotDataPoint:
         fig.update_layout(clickmode="event+select")
 
         return fig
-    
+
     def plot_ptm_overview(
-            self,
-            benchmark_metrics_df: pd.DataFrame,
-            mod_labels: List[str],
-            software_colors: Dict[str, str] = {
-                "AdaNovo": "#8b26ff",
-                "Casanovo": "#8bc6fd",
-                "DeepNovo": "#108E2E",
-                "PepNet": "#F89008",
-                "Pi-HelixNovo": "#E43924",
-                "Pi-PrimeNovo": "#663200",
-                "PEAKS": "#f032e6",
-            }
-        ):
-        
+        self,
+        benchmark_metrics_df: pd.DataFrame,
+        mod_labels: List[str],
+        software_colors: Dict[str, str] = {
+            "AdaNovo": "#8b26ff",
+            "Casanovo": "#8bc6fd",
+            "DeepNovo": "#108E2E",
+            "PepNet": "#F89008",
+            "Pi-HelixNovo": "#E43924",
+            "Pi-PrimeNovo": "#663200",
+            "PEAKS": "#f032e6",
+        },
+    ):
+
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
-            x, y = self.get_modification_scores(
-                row['results']['in_depth']['PTM'],
-                mod_labels=mod_labels
-            )
-            tool = row['software_name']
+            x, y = self.get_modification_scores(row["results"]["in_depth"]["PTM"], mod_labels=mod_labels)
+            tool = row["software_name"]
 
             fig.add_trace(
-                go.Scatter(
-                    x=x,
-                    y=y,
-                    mode='lines+markers',
-                    name=tool,
-                    marker=dict(color=software_colors[tool])
-                )
+                go.Scatter(x=x, y=y, mode="lines+markers", name=tool, marker=dict(color=software_colors[tool]))
             )
-        
+
         fig.update_layout(
             width=700,
             height=400,
             xaxis=dict(title="Modification", color="black", gridwidth=2, linecolor="black"),
-            yaxis=dict(linecolor="black")
+            yaxis=dict(linecolor="black"),
         )
         fig.update_yaxes(title="Precision", color="black", gridwidth=2)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
@@ -268,46 +260,38 @@ class PlotDataPoint:
         return fig
 
     def plot_ptm_specific(
-            self,
-            benchmark_metrics_df,
-            mod_label,
-            software_colors: Dict[str, str] = {
-                "AdaNovo": "#8b26ff",
-                "Casanovo": "#8bc6fd",
-                "DeepNovo": "#108E2E",
-                "PepNet": "#F89008",
-                "Pi-HelixNovo": "#E43924",
-                "Pi-PrimeNovo": "#663200",
-                "PEAKS": "#f032e6",
-            }
-        ):
+        self,
+        benchmark_metrics_df,
+        mod_label,
+        software_colors: Dict[str, str] = {
+            "AdaNovo": "#8b26ff",
+            "Casanovo": "#8bc6fd",
+            "DeepNovo": "#108E2E",
+            "PepNet": "#F89008",
+            "Pi-HelixNovo": "#E43924",
+            "Pi-PrimeNovo": "#663200",
+            "PEAKS": "#f032e6",
+        },
+    ):
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
-            ptm_data = row['results']['in_depth']['PTM']
+            ptm_data = row["results"]["in_depth"]["PTM"]
 
             # To make division by 0 impossible
-            
-            x = ptm_data[mod_label]['correct_gt'] / (ptm_data[mod_label]['counts_gt']+EPSILON)
-            y = ptm_data[mod_label]['correct_dn'] / (ptm_data[mod_label]['counts_dn']+EPSILON)
-            tool = row['software_name']
-            fig.add_trace(
-                go.Scatter(
-                    x=[x],
-                    y=[y],
-                    name=tool,
-                    marker=dict(color=software_colors[tool])
-                )
-            )
-        
+
+            x = ptm_data[mod_label]["correct_gt"] / (ptm_data[mod_label]["counts_gt"] + EPSILON)
+            y = ptm_data[mod_label]["correct_dn"] / (ptm_data[mod_label]["counts_dn"] + EPSILON)
+            tool = row["software_name"]
+            fig.add_trace(go.Scatter(x=[x], y=[y], name=tool, marker=dict(color=software_colors[tool])))
+
         fig.update_layout(
             width=500,
             height=500,
-            xaxis=dict(title="Precision (Ground-truth)", color='black', gridwidth=2),
-            yaxis=dict(title="Precision (denovo)", color='black', gridwidth=2)
+            xaxis=dict(title="Precision (Ground-truth)", color="black", gridwidth=2),
+            yaxis=dict(title="Precision (denovo)", color="black", gridwidth=2),
         )
 
         return fig
-
 
     @staticmethod
     def get_modification_scores(mod_dict, mod_labels):
@@ -316,27 +300,24 @@ class PlotDataPoint:
 
         for mod_label in mod_labels:
             x.append(mod_label)
-            y.append(
-                mod_dict[mod_label]['correct_gt'] / mod_dict[mod_label]['counts_gt'] + EPSILON
-            )
+            y.append(mod_dict[mod_label]["correct_gt"] / mod_dict[mod_label]["counts_gt"] + EPSILON)
         return x, y
 
-
     def plot_spectrum_feature(
-            self,
-            benchmark_metrics_df,
-            feature,
-            evaluation_type='mass',
-            software_colors={
-                "AdaNovo": "#8b26ff",
-                "Casanovo": "#8bc6fd",
-                "DeepNovo": "#108E2E",
-                "PepNet": "#F89008",
-                "Pi-HelixNovo": "#E43924",
-                "Pi-PrimeNovo": "#663200",
-                "PEAKS": "#f032e6",
-                'test': 'black'
-            }
+        self,
+        benchmark_metrics_df,
+        feature,
+        evaluation_type="mass",
+        software_colors={
+            "AdaNovo": "#8b26ff",
+            "Casanovo": "#8bc6fd",
+            "DeepNovo": "#108E2E",
+            "PepNet": "#F89008",
+            "Pi-HelixNovo": "#E43924",
+            "Pi-PrimeNovo": "#663200",
+            "PEAKS": "#f032e6",
+            "test": "black",
+        },
     ):
         # Create a subplot with 2 rows, shared x-axis
         fig = make_subplots(
@@ -345,137 +326,116 @@ class PlotDataPoint:
             shared_xaxes=True,
             row_heights=[0.8, 0.2],
             vertical_spacing=0,
-            subplot_titles=(f"{feature} vs Precision", None)
+            subplot_titles=(f"{feature} vs Precision", None),
         )
-        if len(benchmark_metrics_df)==0:
-            fig.add_trace(
-                go.Scatter()
-            )
-            fig.add_trace(
-                go.Bar()
-            )
+        if len(benchmark_metrics_df) == 0:
+            fig.add_trace(go.Scatter())
+            fig.add_trace(go.Bar())
             fig.update_layout(
                 height=600,
                 width=600,
-                xaxis=dict(title=None, color='black'),
-                yaxis=dict(title="Precision", color='black'),
-                xaxis2=dict(title=f"{feature}", color='black'),
-                yaxis2=dict(title="Number of Spectra", color='black'),
-                margin=dict(t=50)
+                xaxis=dict(title=None, color="black"),
+                yaxis=dict(title="Precision", color="black"),
+                xaxis2=dict(title=f"{feature}", color="black"),
+                yaxis2=dict(title="Number of Spectra", color="black"),
+                margin=dict(t=50),
             )
             fig.update_yaxes(
-                autorange='reversed',
+                autorange="reversed",
                 # tickvals=[-v for v in sorted(set(df['y_bar']))],
                 # ticktext=[v for v in sorted(set(df['y_bar']))],
-                row=2, col=1
+                row=2,
+                col=1,
             )
             return fig
 
         ### Reformat df
         benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
 
-        dtps_to_plot = [
-            x['in_depth']['Spectrum'][feature] for x in benchmark_metrics_df['results'].tolist()
-        ]
+        dtps_to_plot = [x["in_depth"]["Spectrum"][feature] for x in benchmark_metrics_df["results"].tolist()]
         # Stringify the keys of the datapoint to plot and convert to dataframe
         df = pd.DataFrame([{str(k): v for k, v in i.items()} for i in dtps_to_plot])
 
-        df = df.fillna(
-            str({
-                'exact': 0.0,
-                'mass': 0.0,
-                'n_spectra': 0
-            })
+        df = df.fillna(str({"exact": 0.0, "mass": 0.0, "n_spectra": 0}))
+        df = (
+            pd.concat([df, benchmark_metrics_df[["software_name", "id"]]], axis=1)
+            .melt(id_vars=["id", "software_name"])
+            .rename(columns={"variable": feature, "value": "metrics"})
         )
-        df = pd.concat(
-            [df, benchmark_metrics_df[['software_name', 'id']]],
-            axis=1
-        ).melt(id_vars=['id', 'software_name']).rename(
-            columns={
-                'variable': feature,
-                'value': 'metrics'
-            }
-        )
-        df['metrics'] = df['metrics'].apply(lambda x: eval(x) if isinstance(x, str) else x)
+        df["metrics"] = df["metrics"].apply(lambda x: eval(x) if isinstance(x, str) else x)
 
         ### Create the scatter-lineplot of the feature
-        for dtp_id in df['id'].unique():
-            df_dtp = df.loc[
-                df['id']==dtp_id
-            ]
-            tool = df_dtp.reset_index().loc[0, 'software_name']
+        for dtp_id in df["id"].unique():
+            df_dtp = df.loc[df["id"] == dtp_id]
+            tool = df_dtp.reset_index().loc[0, "software_name"]
 
             fig.add_trace(
                 go.Scatter(
                     x=df_dtp[feature].tolist(),
-                    y=df_dtp['metrics'].apply(lambda x: x[evaluation_type]).tolist(),
+                    y=df_dtp["metrics"].apply(lambda x: x[evaluation_type]).tolist(),
                     name=tool,
-                    marker=dict(color=software_colors.get(tool, 'gray')),
-                    mode='lines+markers'
+                    marker=dict(color=software_colors.get(tool, "gray")),
+                    mode="lines+markers",
                 ),
-                row=1, col=1
+                row=1,
+                col=1,
             )
 
         ### Create the bar chart
         # Extract the counts as medians for all plotted points
-        bar_data = df.groupby(feature)['metrics'].apply(lambda x: np.median([i['n_spectra'] for i in x]))
+        bar_data = df.groupby(feature)["metrics"].apply(lambda x: np.median([i["n_spectra"] for i in x]))
         bar_counts = bar_data.tolist()
         bar_xaxis = bar_data.index.tolist()
 
         # Construct hover text
         def create_hovertext(df: pd.DataFrame):
-            text = 'Number of spectra for each tool'
-            for i, (id, metric) in df[['id', 'metrics']].iterrows():
+            text = "Number of spectra for each tool"
+            for i, (id, metric) in df[["id", "metrics"]].iterrows():
                 text += f'<br>{id}: {metric["n_spectra"]}'
             return text
-        hovertexts = df.groupby(feature).apply(
-            lambda x: create_hovertext(x)
-        ).tolist()
+
+        hovertexts = df.groupby(feature).apply(lambda x: create_hovertext(x)).tolist()
 
         # Construct the barchart
         fig.add_trace(
-            go.Bar(
-                x=bar_xaxis,
-                y=bar_counts,
-                hovertext=hovertexts,
-                marker=dict(color='gray'),
-                showlegend=False
-            ),
-            row=2, col=1
+            go.Bar(x=bar_xaxis, y=bar_counts, hovertext=hovertexts, marker=dict(color="gray"), showlegend=False),
+            row=2,
+            col=1,
         )
 
         fig.update_layout(
             height=600,
             width=600,
-            xaxis=dict(title=None, color='black'),
-            yaxis=dict(title="Precision", color='black'),
-            xaxis2=dict(title=f"{feature}", color='black'),
-            yaxis2=dict(title="Number of Spectra", color='black'),
-            margin=dict(t=50)
+            xaxis=dict(title=None, color="black"),
+            yaxis=dict(title="Precision", color="black"),
+            xaxis2=dict(title=f"{feature}", color="black"),
+            yaxis2=dict(title="Number of Spectra", color="black"),
+            margin=dict(t=50),
         )
         fig.update_yaxes(
-            autorange='reversed',
+            autorange="reversed",
             # tickvals=[-v for v in sorted(set(df['y_bar']))],
             # ticktext=[v for v in sorted(set(df['y_bar']))],
-            row=2, col=1
+            row=2,
+            col=1,
         )
 
         return fig
-    
+
     def plot_species_overview(
-            self,
-            benchmark_metrics_df,
-            evaluation_type='mass',
-            software_colors={
-                "AdaNovo": "#8b26ff",
-                "Casanovo": "#8bc6fd",
-                "DeepNovo": "#108E2E",
-                "PepNet": "#F89008",
-                "Pi-HelixNovo": "#E43924",
-                "Pi-PrimeNovo": "#663200",
-                "PEAKS": "#f032e6",
-                'test': 'black'
-            }
+        self,
+        benchmark_metrics_df,
+        evaluation_type="mass",
+        software_colors={
+            "AdaNovo": "#8b26ff",
+            "Casanovo": "#8bc6fd",
+            "DeepNovo": "#108E2E",
+            "PepNet": "#F89008",
+            "Pi-HelixNovo": "#E43924",
+            "Pi-PrimeNovo": "#663200",
+            "PEAKS": "#f032e6",
+            "test": "black",
+        },
     ):
         # Create a subplot with 2 rows, shared x-axis
         fig = make_subplots(
@@ -484,119 +444,99 @@ class PlotDataPoint:
             shared_xaxes=True,
             row_heights=[0.8, 0.2],
             vertical_spacing=0,
-            subplot_titles=("Species vs Precision", None)
+            subplot_titles=("Species vs Precision", None),
         )
-        if len(benchmark_metrics_df)==0:
-            fig.add_trace(
-                go.Scatter()
-            )
-            fig.add_trace(
-                go.Bar()
-            )
+        if len(benchmark_metrics_df) == 0:
+            fig.add_trace(go.Scatter())
+            fig.add_trace(go.Bar())
             fig.update_layout(
                 height=600,
                 width=600,
-                xaxis=dict(title=None, color='black'),
-                yaxis=dict(title="Precision", color='black'),
-                xaxis2=dict(title="Species", color='black'),
-                yaxis2=dict(title="Number of Spectra", color='black'),
-                margin=dict(t=50)
+                xaxis=dict(title=None, color="black"),
+                yaxis=dict(title="Precision", color="black"),
+                xaxis2=dict(title="Species", color="black"),
+                yaxis2=dict(title="Number of Spectra", color="black"),
+                margin=dict(t=50),
             )
             fig.update_yaxes(
-                autorange='reversed',
+                autorange="reversed",
                 # tickvals=[-v for v in sorted(set(df['y_bar']))],
                 # ticktext=[v for v in sorted(set(df['y_bar']))],
-                row=2, col=1
+                row=2,
+                col=1,
             )
             return fig
 
         benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
 
-        df = pd.DataFrame(
-            [
-                x['in_depth']['Species'] for x in benchmark_metrics_df['results'].tolist()
-            ]
-        ).fillna(
-            str({
-                'exact': 0.0,
-                'mass': 0.0,
-                'n_spectra': 0
-            })
-        ).map(lambda x: eval(x) if isinstance(x, str) else x)
-        df = pd.concat(
-            [df, benchmark_metrics_df[['software_name', 'id']]],
-            axis=1
-        ).melt(id_vars=['id', 'software_name']).rename(
-            columns={
-                'variable': 'Species',
-                'value': 'metrics'
-            }
+        df = (
+            pd.DataFrame([x["in_depth"]["Species"] for x in benchmark_metrics_df["results"].tolist()])
+            .fillna(str({"exact": 0.0, "mass": 0.0, "n_spectra": 0}))
+            .map(lambda x: eval(x) if isinstance(x, str) else x)
         )
-        df['metrics'] = df['metrics'].apply(lambda x: eval(x) if isinstance(x, str) else x)
+        df = (
+            pd.concat([df, benchmark_metrics_df[["software_name", "id"]]], axis=1)
+            .melt(id_vars=["id", "software_name"])
+            .rename(columns={"variable": "Species", "value": "metrics"})
+        )
+        df["metrics"] = df["metrics"].apply(lambda x: eval(x) if isinstance(x, str) else x)
 
         ### Create the scatter-lineplot of the feature
-        for dtp_id in df['id'].unique():
-            df_dtp = df.loc[
-                df['id']==dtp_id
-            ]
-            tool = df_dtp.reset_index().loc[0, 'software_name']
+        for dtp_id in df["id"].unique():
+            df_dtp = df.loc[df["id"] == dtp_id]
+            tool = df_dtp.reset_index().loc[0, "software_name"]
 
             fig.add_trace(
                 go.Scatter(
-                    x=df_dtp['Species'].tolist(),
-                    y=df_dtp['metrics'].apply(lambda x: x[evaluation_type]).tolist(),
+                    x=df_dtp["Species"].tolist(),
+                    y=df_dtp["metrics"].apply(lambda x: x[evaluation_type]).tolist(),
                     name=tool,
-                    marker=dict(color=software_colors.get(tool, 'gray')),
-                    mode='lines+markers'
+                    marker=dict(color=software_colors.get(tool, "gray")),
+                    mode="lines+markers",
                 ),
-                row=1, col=1
+                row=1,
+                col=1,
             )
 
         ### Create the bar chart
         # Extract the counts as medians for all plotted points
-        bar_data = df.groupby('Species')['metrics'].apply(lambda x: np.median([i['n_spectra'] for i in x]))
+        bar_data = df.groupby("Species")["metrics"].apply(lambda x: np.median([i["n_spectra"] for i in x]))
         bar_counts = bar_data.tolist()
         bar_xaxis = bar_data.index.tolist()
 
         # Construct hover text
         def create_hovertext(df: pd.DataFrame):
-            text = 'Number of spectra for each tool'
-            for i, (id, metric) in df[['id', 'metrics']].iterrows():
+            text = "Number of spectra for each tool"
+            for i, (id, metric) in df[["id", "metrics"]].iterrows():
                 text += f'<br>{id}: {metric["n_spectra"]}'
             return text
-        hovertexts = df.groupby('Species').apply(
-            lambda x: create_hovertext(x)
-        ).tolist()
+
+        hovertexts = df.groupby("Species").apply(lambda x: create_hovertext(x)).tolist()
 
         # Construct the barchart
         fig.add_trace(
-            go.Bar(
-                x=bar_xaxis,
-                y=bar_counts,
-                hovertext=hovertexts,
-                marker=dict(color='gray'),
-                showlegend=False
-            ),
-            row=2, col=1
+            go.Bar(x=bar_xaxis, y=bar_counts, hovertext=hovertexts, marker=dict(color="gray"), showlegend=False),
+            row=2,
+            col=1,
         )
 
         fig.update_layout(
             height=600,
             width=600,
-            xaxis=dict(title=None, color='black'),
-            yaxis=dict(title="Precision", color='black'),
-            xaxis2=dict(title="Species", color='black'),
-            yaxis2=dict(title="Number of Spectra", color='black'),
-            margin=dict(t=50)
+            xaxis=dict(title=None, color="black"),
+            yaxis=dict(title="Precision", color="black"),
+            xaxis2=dict(title="Species", color="black"),
+            yaxis2=dict(title="Number of Spectra", color="black"),
+            margin=dict(t=50),
         )
         fig.update_yaxes(
-            autorange='reversed',
+            autorange="reversed",
             # tickvals=[-v for v in sorted(set(df['y_bar']))],
             # ticktext=[v for v in sorted(set(df['y_bar']))],
-            row=2, col=1
+            row=2,
+            col=1,
         )
         return fig
 
     def plot_species_specific():
         pass
-

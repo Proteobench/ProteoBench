@@ -23,13 +23,7 @@ class VariablesDDADeNovo:
     # TAB 1
     fig_metric: str = "fig_metric_dda_hcd_denovo"
     metric_plot_labels: List[str] = field(
-        default_factory=lambda:[
-            "None",
-            "checkpoint",
-            "n_beams",
-            "precursor_mass_tolerance",
-            "decoding_strategy"
-        ]
+        default_factory=lambda: ["None", "checkpoint", "n_beams", "precursor_mass_tolerance", "decoding_strategy"]
     )
 
     # TAB 3 (in-depth plots)
@@ -70,7 +64,7 @@ class VariablesDDADeNovo:
     radio_evaluation_id_uuid: str = "radio_evaluation_id_dda_hcd_denovo"
     radio_level_id_submitted_uuid: str = "radio_level_id_submitted_dda_hcd_denovo"
     radio_evaluation_id_submitted_uuid: str = "radio_evaluation_id_submitted_dda_hcd_denovo"
-    
+
     download_selector_id_uuid: str = "download_selector_id_dda_hcd_denovo"
     table_id_uuid: str = "table_id_dda_hcd_denovo"
 

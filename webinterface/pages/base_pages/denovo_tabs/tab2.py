@@ -1,8 +1,10 @@
+import tempfile
 
 import streamlit as st
-import tempfile
 from streamlit_utils import display_error, get_error_suggestions
+
 from proteobench.exceptions import ProteoBenchError
+
 
 def process_submission_form(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping):
     """
@@ -16,7 +18,7 @@ def process_submission_form(variables, ionmodule, user_input, level_mapping, eva
     if not user_input["input_csv"]:
         st.error(":x: Please provide a result file", icon="🚨")
         return False
-    
+
     success = _execute_proteobench(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping)
 
     if success:
@@ -26,6 +28,7 @@ def process_submission_form(variables, ionmodule, user_input, level_mapping, eva
             "or 'Results New Data' tab for the next step."
         )
     return success
+
 
 def _execute_proteobench(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping):
     """
@@ -39,14 +42,14 @@ def _execute_proteobench(variables, ionmodule, user_input, level_mapping, evalua
     try:
         if variables.all_datapoints_submitted not in st.session_state:
             initialize_main_data_points(variables, ionmodule)
-        
+
         result_performance, all_datapoints, input_df = _run_benchmarking_process(
             variables, ionmodule, user_input, level_mapping, evaluation_type_mapping
         )
 
         # Mark the uploaded dataset
-        st.session_state[variables.uploaded_id] = all_datapoints.loc[len(all_datapoints)-1, 'id']
-        all_datapoints.loc[len(all_datapoints)-1, 'id'] = 'Uploaded dataset'
+        st.session_state[variables.uploaded_id] = all_datapoints.loc[len(all_datapoints) - 1, "id"]
+        all_datapoints.loc[len(all_datapoints) - 1, "id"] = "Uploaded dataset"
 
         st.session_state[variables.all_datapoints_submitted] = all_datapoints
 
@@ -59,11 +62,12 @@ def _execute_proteobench(variables, ionmodule, user_input, level_mapping, evalua
         st.session_state[variables.input_df] = input_df
 
         return True
-    
+
     except (ProteoBenchError, Exception) as e:
         friendly_msg, suggestions = get_error_suggestions(e, user_input)
         display_error(friendly_msg, exception=e, suggestions=suggestions)
         return False
+
 
 # Only this function is different between quant and denovo
 def _run_benchmarking_process(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping):
@@ -75,7 +79,7 @@ def _run_benchmarking_process(variables, ionmodule, user_input, level_mapping, e
     Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
         The benchmarking results, all data points, and the input data frame.
     """
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as tmp_file:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as tmp_file:
         tmp_file.write(user_input["input_csv"].getvalue().decode("utf-8"))
         temp_file_path = tmp_file.name
 
@@ -88,9 +92,7 @@ def _run_benchmarking_process(variables, ionmodule, user_input, level_mapping, e
         set_level_val = variables.default_level
 
     if st.session_state[variables.radio_evaluation_id_submitted_uuid] in st.session_state.keys():
-        set_evaluation_val = st.session_state[
-            st.session_state[variables.radio_evaluation_id_submitted_uuid]
-        ]
+        set_evaluation_val = st.session_state[st.session_state[variables.radio_evaluation_id_submitted_uuid]]
     else:
         set_evaluation_val = variables.default_evaluation
 
@@ -108,15 +110,13 @@ def _run_benchmarking_process(variables, ionmodule, user_input, level_mapping, e
         evaluation_type=evaluation_type_mapping[set_evaluation_val],
     )
 
+
 def _set_highlight_column_in_submitted_data(variables):
     """
     Initialize the highlight column in the data points.
     """
     df = st.session_state[variables.all_datapoints_submitted]
-    if (
-        variables.highlight_list_submitted not in st.session_state.keys()
-        and "Highlight" not in df.columns
-    ):
+    if variables.highlight_list_submitted not in st.session_state.keys() and "Highlight" not in df.columns:
         df.insert(0, "Highlight", [False] * len(df.index))
     elif "Highlight" not in df.columns:
         df.insert(0, "Highlight", st.session_state[variables.highlight_list_submitted])

@@ -1,21 +1,15 @@
+import json
 from abc import ABC, abstractmethod
-import streamlit as st
 from typing import Any, Dict
 
-import json
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
+
 
 class BaseUIModule(ABC):
     """Base class for all UI modules with common patterns."""
 
-    def __init__(
-            self,
-            variables,
-            ionmodule,
-            parsesettingsbuilder,
-            page_name: str = "/"
-    ) -> None:
+    def __init__(self, variables, ionmodule, parsesettingsbuilder, page_name: str = "/") -> None:
         self.variables = variables
         self.ionmodule = ionmodule
         self.parsesettingsbuilder = parsesettingsbuilder
@@ -41,7 +35,6 @@ class BaseUIModule(ABC):
 
         if self.variables.params_file_dict not in st.session_state.keys():
             st.session_state[self.variables.params_file_dict] = {}
-        
 
     @abstractmethod
     def display_all_data_results_main(self) -> None:
@@ -50,8 +43,7 @@ class BaseUIModule(ABC):
 
     @abstractmethod
     def display_submission_form(self) -> None:
-        """Tab 2 - Create the main submission form for the Streamlit UI
-        """
+        """Tab 2 - Create the main submission form for the Streamlit UI"""
         pass
 
     @abstractmethod

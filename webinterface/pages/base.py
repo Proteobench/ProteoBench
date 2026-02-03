@@ -1,20 +1,13 @@
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 
+
 class BaseStreamlitUI:
     """
     Streamlit UI for the DDA quantification - precursor ions module.
     """
 
-    def __init__(
-            self,
-            variables,
-            texts,
-            ionmodule,
-            parsesettingsbuilder,
-            uiobjects,
-            page_name
-        ):
+    def __init__(self, variables, texts, ionmodule, parsesettingsbuilder, uiobjects, page_name):
         """
         Initialize the Streamlit UI for the DDA quantification - precursor ions module.
         """
@@ -33,16 +26,10 @@ class BaseStreamlitUI:
             token = ""
         self.ionmodule = ionmodule(token=token)
         self.parsesettingsbuilder = parsesettingsbuilder(
-            module_id=self.ionmodule.module_id,
-            parse_settings_dir=self.variables.parse_settings_dir
+            module_id=self.ionmodule.module_id, parse_settings_dir=self.variables.parse_settings_dir
         )
 
-        self.uiobjects = uiobjects(
-            self.variables,
-            self.ionmodule,
-            self.parsesettingsbuilder,
-            page_name=page_name
-        )
+        self.uiobjects = uiobjects(self.variables, self.ionmodule, self.parsesettingsbuilder, page_name=page_name)
 
     def main_page(self) -> None:
         """

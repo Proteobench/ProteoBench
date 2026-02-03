@@ -3,12 +3,13 @@ Streamlit UI for the DDA quantification - precursor ions module.
 """
 
 import logging
-from typing import Any, Dict, Type
 import uuid
+from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import streamlit as st
+from pages.base import BaseStreamlitUI
 from pages.base_pages.denovo import DeNovoUIObjects
 from pages.pages_variables.DeNovo.lfq_DDA_HCD_variables import (
     VariablesDDADeNovo,
@@ -17,7 +18,7 @@ from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.denovo.denovo_lfq_DDA_HCD import DDAHCDDeNovoModule
-from pages.base import BaseStreamlitUI
+
 
 class StreamlitUI(BaseStreamlitUI):
     """
@@ -53,7 +54,12 @@ class StreamlitUI(BaseStreamlitUI):
 
         with tab_results_all:
             st.title(self.variables.title)
-            st.link_button("Go to module documentation", url = self.variables.doc_url, type="secondary", help = "link to the module documentation")
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
             if self.variables.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -69,7 +75,12 @@ class StreamlitUI(BaseStreamlitUI):
         with tab_submission_details:
             st.title(self.variables.title)
 
-            st.link_button("Go to module documentation", url = self.variables.doc_url, type="secondary", help = "link to the module documentation")
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
             if self.variables.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -77,14 +88,19 @@ class StreamlitUI(BaseStreamlitUI):
             if self.variables.alpha_warning:
                 st.warning(
                     "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )  
+                )
             self.uiobjects.display_submission_form()
 
         # Tab 2.5: in-depth plots current data
         with tab_indepth_plots:
             st.title(self.variables.title)
 
-            st.link_button("Go to module documentation", url = self.variables.doc_url, type="secondary", help = "link to the module documentation")
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
             if self.variables.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -99,7 +115,12 @@ class StreamlitUI(BaseStreamlitUI):
         # Tab 3: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables.title)
-            st.link_button("Go to module documentation", url = self.variables.doc_url, type="secondary", help = "link to the module documentation")
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
             if self.variables.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -114,7 +135,12 @@ class StreamlitUI(BaseStreamlitUI):
         # Tab 4: Public Submission
         with tab_public_submission:
             st.title(self.variables.title)
-            st.link_button("Go to module documentation", url = self.variables.doc_url, type="secondary", help = "link to the module documentation")
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
             if self.variables.beta_warning:
                 st.warning(
                     "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
@@ -135,6 +161,6 @@ if __name__ == "__main__":
         ionmodule=DDAHCDDeNovoModule,
         parsesettingsbuilder=ParseSettingsBuilder,
         uiobjects=DeNovoUIObjects,
-        page_name="De novo DDA-HCD peptidoform -ALPHA-"
+        page_name="De novo DDA-HCD peptidoform -ALPHA-",
     )
     st_ui.main_page()

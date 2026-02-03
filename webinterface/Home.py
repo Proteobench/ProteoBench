@@ -5,18 +5,17 @@ from pathlib import Path
 import streamlit as st
 from _base import StreamlitPage
 from UI_utils import (
+    get_monthly_visitors,
     get_n_modules,
     get_n_modules_proposed,
     get_n_submitted_points,
     get_n_supported_tools,
-    get_monthly_visitors,
     stat_box,
 )
 
 # Path to the index.rst file
 file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
 fig_path = Path(__file__).resolve().parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
-
 
 
 class StreamlitPageHome(StreamlitPage):

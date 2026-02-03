@@ -89,12 +89,7 @@ def generate_additional_parameters_fields(
             user_input[key] = None
 
 
-def process_submission_form(
-    variables,
-    ionmodule,
-    user_input,
-    **kwargs
-) -> bool:
+def process_submission_form(variables, ionmodule, user_input, **kwargs) -> bool:
     """
     Handle the form submission logic.
 
@@ -117,12 +112,7 @@ def process_submission_form(
             icon="ℹ️",
         )
 
-    success = execute_proteobench(
-        variables=variables,
-        ionmodule=ionmodule,
-        user_input=user_input,
-        **kwargs
-    )
+    success = execute_proteobench(variables=variables, ionmodule=ionmodule, user_input=user_input, **kwargs)
 
     if success:
         # Inform the user with a link to the next tab

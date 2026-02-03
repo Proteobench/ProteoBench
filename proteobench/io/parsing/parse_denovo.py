@@ -29,7 +29,7 @@ def _load_adanovo(input_mztab: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    input_data_frame = MzTab(input_mztab, encoding='utf-8')
+    input_data_frame = MzTab(input_mztab, encoding="utf-8")
     input_data_frame = input_data_frame.spectrum_match_table
     return input_data_frame
 
@@ -121,13 +121,7 @@ def _load_pihelixnovo(input_path: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_csv(input_path, sep="\t", low_memory=False, header=None)
-    return input_data_frame.rename(
-        columns={
-            0: "0",
-            1: "1",
-            2: "2"
-        }
-    )
+    return input_data_frame.rename(columns={0: "0", 1: "1", 2: "2"})
 
 
 def _load_piprimenovo(input_path: str) -> pd.DataFrame:

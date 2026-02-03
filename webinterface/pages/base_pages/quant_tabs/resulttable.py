@@ -25,8 +25,7 @@ def _get_style_js(bg_color: str) -> JsCode:
     JsCode
         A JavaScript code block that defines the style.
     """
-    return JsCode(
-        f"""
+    return JsCode(f"""
     function(params) {{
         return {{
             'backgroundColor': '{bg_color}',
@@ -34,8 +33,7 @@ def _get_style_js(bg_color: str) -> JsCode:
             'fontWeight': 'normal'
         }}
     }}
-    """
-    )
+    """)
 
 
 def render_aggrid(df: pd.DataFrame, grid_options, key):

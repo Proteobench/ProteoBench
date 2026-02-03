@@ -21,7 +21,7 @@ MODULE_TO_CLASS = {}
 GROUND_TRUTH_DIR_SERVER = "/mnt/data/proteobench/module_data/"
 GROUND_TRUTH_DIR_LOCAL = os.path.join(
     Path(__file__).resolve().parent,
-    'io_parse_settings',
+    "io_parse_settings",
     "denovo",
     "lfq",
     "DDA",

@@ -22,20 +22,20 @@ from pages.pages_variables.DeNovo.lfq_DDA_HCD_variables import (
 )
 from streamlit_extras.let_it_rain import rain
 
+from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_lfq_DDA_HCD import (
     DDAHCDDeNovoModule as IonModule,
 )
-from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.plotting.plot_denovo import PlotDataPoint
 from proteobench.utils.server_io import dataset_folder_exists
 
+from .base import BaseUIModule
 from .denovo_tabs import tab1, tab2, tab3, tab4
 from .quant_tabs import tab2_form_upload_data as tab2_quant
 from .quant_tabs import tab5_public_submission as tab5_quant
-from .base import BaseUIModule
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -55,12 +55,13 @@ class DeNovoUIObjects(BaseUIModule):
     parsesettingsbuilder : ParseSettingsBuilder
         The parse settings builder.
     """
+
     def __init__(
-            self,
-            variables: VariablesDDADeNovo,
-            ionmodule: IonModule,
-            parsesettingsbuilder: ParseSettingsBuilder,
-            page_name: str = "/",
+        self,
+        variables: VariablesDDADeNovo,
+        ionmodule: IonModule,
+        parsesettingsbuilder: ParseSettingsBuilder,
+        page_name: str = "/",
     ) -> None:
         """
         Initialize the Streamlit UI objects for the de novo modules.
@@ -75,10 +76,7 @@ class DeNovoUIObjects(BaseUIModule):
             The parse settings builder.
         """
         super().__init__(
-            variables=variables,
-            ionmodule=ionmodule,
-            parsesettingsbuilder=parsesettingsbuilder,
-            page_name=page_name
+            variables=variables, ionmodule=ionmodule, parsesettingsbuilder=parsesettingsbuilder, page_name=page_name
         )
 
         # Specific to the 'de novo' module.
@@ -93,37 +91,32 @@ class DeNovoUIObjects(BaseUIModule):
 
         # Radio for level (Peptide or Amino Acid)
         tab1.initialize_radio(
-            radio_id_uuid=self.variables.radio_level_id_uuid,
-            default_value=self.variables.default_level
+            radio_id_uuid=self.variables.radio_level_id_uuid, default_value=self.variables.default_level
         )
         tab1.generate_main_radio(
             radio_id_uuid=self.variables.radio_level_id_uuid,
             description="Select at which level precision is calculated",
             options=["Peptide", "Amino Acid"],
-            help="Toggle between different levels of precision calculation."
+            help="Toggle between different levels of precision calculation.",
         )
 
         # Radio for evaluation type (Exact or Mass-Based)
         tab1.initialize_radio(
-            radio_id_uuid=self.variables.radio_evaluation_id_uuid,
-            default_value=self.variables.default_evaluation
+            radio_id_uuid=self.variables.radio_evaluation_id_uuid, default_value=self.variables.default_evaluation
         )
         tab1.generate_main_radio(
             radio_id_uuid=self.variables.radio_evaluation_id_uuid,
             description="Select the stringency of evaluation",
             options=["Exact", "Mass-based"],
-            help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching."
+            help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching.",
         )
 
-        tab1.generate_main_selectbox(
-            self.variables,
-            selectbox_id_uuid=self.variables.selectbox_id_uuid
-        )
+        tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
         tab1.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
             level_mapping=self.level_mapping,
-            evaluation_type_mapping=self.evaluation_type_mapping
+            evaluation_type_mapping=self.evaluation_type_mapping,
         )
 
     def display_submission_form(self) -> None:
@@ -151,15 +144,13 @@ class DeNovoUIObjects(BaseUIModule):
             )
 
         if submit_button:
-            st.info(
-                'Calculating metrics. This will take no more than two minutes. Please be patient.'
-            )
+            st.info("Calculating metrics. This will take no more than two minutes. Please be patient.")
             self.first_point_plotted = tab2.process_submission_form(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
                 level_mapping=self.level_mapping,
-                evaluation_type_mapping=self.evaluation_type_mapping
+                evaluation_type_mapping=self.evaluation_type_mapping,
             )
 
     # Almost entirely unique to denovo module
@@ -197,37 +188,28 @@ class DeNovoUIObjects(BaseUIModule):
             options=dataset_options,
             key=st.session_state[self.variables.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
-            default=[dataset_options[0]]
+            default=[dataset_options[0]],
         )
 
-        modifications = ['M-Oxidation', 'Q-Deamidation', 'N-Deamidation', 'N-term Acetylation', 'N-term Carbamylation', 'N-term Ammonia-loss']
-        feature_names = [
-            'Missing Fragmentation Sites',
-            'Peptide Length',
-            '% Explained Intensity'
+        modifications = [
+            "M-Oxidation",
+            "Q-Deamidation",
+            "N-Deamidation",
+            "N-term Acetylation",
+            "N-term Carbamylation",
+            "N-term Ammonia-loss",
         ]
+        feature_names = ["Missing Fragmentation Sites", "Peptide Length", "% Explained Intensity"]
 
         selected_dtps = st.session_state[self.variables.all_datapoints_submitted][
-            st.session_state[self.variables.all_datapoints_submitted]['id'].isin(
+            st.session_state[self.variables.all_datapoints_submitted]["id"].isin(
                 [dtp_id for dtp_id, _ in dataset_selection]
             )
         ]
 
-        tab3.generate_ptm_plots(
-            variables=self.variables,
-            df=selected_dtps,
-            modifications=modifications
-        )
-        tab3.generate_spectrum_feature_plots(
-            variables=self.variables,
-            df=selected_dtps,
-            feature_names=feature_names
-        )
-        tab3.generate_species_plot(
-            variables=self.variables,
-            df=selected_dtps
-        )
-
+        tab3.generate_ptm_plots(variables=self.variables, df=selected_dtps, modifications=modifications)
+        tab3.generate_spectrum_feature_plots(variables=self.variables, df=selected_dtps, feature_names=feature_names)
+        tab3.generate_species_plot(variables=self.variables, df=selected_dtps)
 
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
@@ -235,33 +217,31 @@ class DeNovoUIObjects(BaseUIModule):
 
         # Radio one for peptide or amino acid precision
         tab1.initialize_radio(
-            radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
-            default_value=self.variables.default_level
+            radio_id_uuid=self.variables.radio_level_id_submitted_uuid, default_value=self.variables.default_level
         )
         tab1.generate_main_radio(
             radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
             description="Select at which level precision is calculated",
             options=["Peptide", "Amino Acid"],
-            help="Toggle between different levels of precision calculation."
+            help="Toggle between different levels of precision calculation.",
         )
 
         # Radio two for evaluation stringency
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
-            default_value=self.variables.default_evaluation
+            default_value=self.variables.default_evaluation,
         )
-        
+
         tab1.generate_main_radio(
             radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
             description="Select the stringency of evaluation",
             options=["Exact", "Mass-based"],
-            help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching."
+            help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching.",
         )
 
         # Plot the selectionbox
         tab1.generate_main_selectbox(
-            variables=self.variables,
-            selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
+            variables=self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
         )
 
         # Plot the datapoints
@@ -358,8 +338,6 @@ class DeNovoUIObjects(BaseUIModule):
                 pr_url=pr_url,
             )
 
-
-
     #####################
     ### TAB 4 METHODS ###
     #####################
@@ -368,17 +346,15 @@ class DeNovoUIObjects(BaseUIModule):
         edits = st.session_state[st.session_state[self.variables.table_id_uuid]]["edited_rows"].items()
         for k, v in edits:
             try:
-                st.session_state[self.variables.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(
-                    v.values()
-                )[0]
+                st.session_state[self.variables.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(v.values())[
+                    0
+                ]
             except TypeError:
                 return
         st.session_state[self.variables.highlight_list_submitted] = list(
             st.session_state[self.variables.all_datapoints_submitted]["Highlight"]
         )
-        st.session_state[self.variables.placeholder_table] = st.session_state[
-            self.variables.all_datapoints_submitted
-        ]
+        st.session_state[self.variables.placeholder_table] = st.session_state[self.variables.all_datapoints_submitted]
 
         if len(st.session_state[self.variables.all_datapoints]) == 0:
             st.error("No datapoints available for plotting", icon="🚨")
@@ -387,12 +363,10 @@ class DeNovoUIObjects(BaseUIModule):
             fig_metric = PlotDataPoint.plot_metric(
                 benchmark_metrics_df=st.session_state[self.variables.all_datapoints],
                 label=st.session_state[st.session_state[self.variables.selectbox_id_uuid]],
-                level=self.level_mapping[
-                    st.session_state[st.session_state[self.variables.radio_level_id_uuid]]
-                ],
+                level=self.level_mapping[st.session_state[st.session_state[self.variables.radio_level_id_uuid]]],
                 evaluation_type=self.evaluation_type_mapping[
                     st.session_state[st.session_state[self.variables.radio_evaluation_id_uuid]]
-                ]
+                ],
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")

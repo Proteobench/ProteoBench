@@ -137,9 +137,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
 
         # generate intermediate data structure (Calculate the scores)
         try:
-            intermediate_metric_structure = denovo_score.generate_intermediate(
-                standard_format
-            )
+            intermediate_metric_structure = denovo_score.generate_intermediate(standard_format)
         except Exception as e:
             raise IntermediateFormatGenerationError("Error generating intermediate data structure.") from e
 
@@ -150,7 +148,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
             input_format=input_format,
             user_input=user_input,
             level=level,
-            evaluation_type=evaluation_type
+            evaluation_type=evaluation_type,
         )
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 

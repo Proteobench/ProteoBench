@@ -1,7 +1,10 @@
-import streamlit as st
-import _uuid
-from proteobench.plotting.plot_denovo import PlotDataPoint
 import uuid
+
+import _uuid
+import streamlit as st
+
+from proteobench.plotting.plot_denovo import PlotDataPoint
+
 
 def display_submitted_results(variables, ionmodule) -> None:
     """
@@ -9,7 +12,7 @@ def display_submitted_results(variables, ionmodule) -> None:
     """
     _initialize_submitted_data_points(
         all_datapoints_submitted=variables.all_datapoints_submitted,
-        obtain_all_data_points=ionmodule.obtain_all_data_points
+        obtain_all_data_points=ionmodule.obtain_all_data_points,
     )
 
     try:
@@ -17,15 +20,10 @@ def display_submitted_results(variables, ionmodule) -> None:
             benchmark_metrics_df=st.session_state[variables.all_datapoints_submitted],
             label=st.session_state[st.session_state[variables.selectbox_id_submitted_uuid]],
         )
-        st.plotly_chart(
-            fig_metric,
-            use_container_width=True,
-            key=variables.fig_metric_submitted
-        )
+        st.plotly_chart(fig_metric, use_container_width=True, key=variables.fig_metric_submitted)
     except Exception as e:
         st.error(f"Umable to plot the datapoints: {e}", icon="🚨")
 
-    
 
 def _initialize_submitted_data_points(all_datapoints_submitted, obtain_all_data_points) -> None:
     """

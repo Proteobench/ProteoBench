@@ -19,7 +19,7 @@ class WebpageTexts:
 
         no_results = "No results available for this module."
 
-        title = "De Novo Identification (DDA - HCD) Module"
+        title = "De Novo Identification (DDA - HCD) Module -ALPHA-"
 
         initial_results = """
             Scroll down if you want to see the public benchmark runs publicly available

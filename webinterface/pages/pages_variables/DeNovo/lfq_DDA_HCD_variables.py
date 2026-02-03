@@ -22,6 +22,15 @@ class VariablesDDADeNovo:
 
     # TAB 1
     fig_metric: str = "fig_metric_dda_hcd_denovo"
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda:[
+            "None",
+            "checkpoint",
+            "n_beams",
+            "precursor_mass_tolerance",
+            "decoding_strategy"
+        ]
+    )
 
     # TAB 3 (in-depth plots)
     fig_ptm_overview: str = "fig_ptm_overview_dda_hcd_denovo"
@@ -34,6 +43,9 @@ class VariablesDDADeNovo:
 
     # Tab 4
     fig_metric_submitted: str = "fig_metric_dda_hcd_denovo_submitted"
+
+    # Tab 5
+    uploaded_id: str = "Uploaded dataset"
 
     result_perf: str = "result_perf_dda_hcd_denovo"
     meta_data: str = "meta_data_dda_hcd_denovo"
@@ -75,7 +87,8 @@ class VariablesDDADeNovo:
     default_level = "Peptide"
     default_evaluation = "Mass-based"
 
-    beta_warning: bool = True
+    beta_warning: bool = False
+    alpha_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_denovo_lfq_DDA_HCD.git"
 
     description_module_md: str = "pages/markdown_files/DeNovo/DDA/introduction_DDA_quan_ions.md"
@@ -92,7 +105,7 @@ class VariablesDDADeNovo:
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/8-quant-lfq-precursor-dda-Astral/"
 
     additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_lfq_DDA_HCD.json"
-    title: str = "De Novo Identification (DDA - HCD) Module"
+    title: str = "De Novo Identification (DDA - HCD) Module -ALPHA-"
     prefix_params: str = "lfq_ion_dda_hcd_denovo_"
     params_json_dict: str = "params_json_dict_lfq_ion_dda_hcd_denovo"
     params_file_dict: str = "params_file_dict_lfq_ion_dda_hcd_denovo"

@@ -78,6 +78,7 @@ class VariablesDDAQuantAstral:
     first_new_plot: bool = True
     default_val_slider: int = 3
     beta_warning: bool = True
+    alpha_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA_Astral.git"
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/introduction_DDA_quan_ions.md"

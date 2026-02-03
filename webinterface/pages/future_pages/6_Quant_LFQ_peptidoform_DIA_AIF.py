@@ -7,7 +7,7 @@ from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
-from pages.base_pages.quant import QuantUIObjects
+from ProteoBench.webinterface.pages.base_pages.ui_objects.quant import QuantUIObjects
 from pages.pages_variables.Quant.DIA.peptidoform import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 

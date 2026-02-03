@@ -10,6 +10,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+EPSILON = .0001
+
 def flatten_results_column(df):
 
     results = {
@@ -212,7 +214,7 @@ class PlotDataPoint:
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-",
+            text="-ALPHA-",
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )
@@ -282,8 +284,11 @@ class PlotDataPoint:
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
             ptm_data = row['results']['in_depth']['PTM']
-            x = ptm_data[mod_label]['correct_gt'] / (ptm_data[mod_label]['counts_gt']+.0001)
-            y = ptm_data[mod_label]['correct_dn'] / (ptm_data[mod_label]['counts_dn']+.0001)
+
+            # To make division by 0 impossible
+            
+            x = ptm_data[mod_label]['correct_gt'] / (ptm_data[mod_label]['counts_gt']+EPSILON)
+            y = ptm_data[mod_label]['correct_dn'] / (ptm_data[mod_label]['counts_dn']+EPSILON)
             tool = row['software_name']
             fig.add_trace(
                 go.Scatter(
@@ -312,7 +317,7 @@ class PlotDataPoint:
         for mod_label in mod_labels:
             x.append(mod_label)
             y.append(
-                mod_dict[mod_label]['correct_gt'] / mod_dict[mod_label]['counts_gt'] + .0001
+                mod_dict[mod_label]['correct_gt'] / mod_dict[mod_label]['counts_gt'] + EPSILON
             )
         return x, y
 
@@ -369,17 +374,19 @@ class PlotDataPoint:
         ### Reformat df
         benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
 
-        df = pd.DataFrame(
-            [
-                x['in_depth']['Spectrum'][feature] for x in benchmark_metrics_df['results'].tolist()
-            ]
-        ).fillna(
+        dtps_to_plot = [
+            x['in_depth']['Spectrum'][feature] for x in benchmark_metrics_df['results'].tolist()
+        ]
+        # Stringify the keys of the datapoint to plot and convert to dataframe
+        df = pd.DataFrame([{str(k): v for k, v in i.items()} for i in dtps_to_plot])
+
+        df = df.fillna(
             str({
                 'exact': 0.0,
                 'mass': 0.0,
                 'n_spectra': 0
             })
-        ).map(lambda x: eval(x) if isinstance(x, str) else x)
+        )
         df = pd.concat(
             [df, benchmark_metrics_df[['software_name', 'id']]],
             axis=1
@@ -389,19 +396,21 @@ class PlotDataPoint:
                 'value': 'metrics'
             }
         )
+        df['metrics'] = df['metrics'].apply(lambda x: eval(x) if isinstance(x, str) else x)
 
         ### Create the scatter-lineplot of the feature
         for dtp_id in df['id'].unique():
             df_dtp = df.loc[
                 df['id']==dtp_id
             ]
+            tool = df_dtp.reset_index().loc[0, 'software_name']
 
             fig.add_trace(
                 go.Scatter(
                     x=df_dtp[feature].tolist(),
                     y=df_dtp['metrics'].apply(lambda x: x[evaluation_type]).tolist(),
-                    name=dtp_id,
-                    marker=dict(color=software_colors.get(df_dtp.reset_index().loc[0, 'software_name'], 'gray')),
+                    name=tool,
+                    marker=dict(color=software_colors.get(tool, 'gray')),
                     mode='lines+markers'
                 ),
                 row=1, col=1
@@ -523,19 +532,21 @@ class PlotDataPoint:
                 'value': 'metrics'
             }
         )
+        df['metrics'] = df['metrics'].apply(lambda x: eval(x) if isinstance(x, str) else x)
 
         ### Create the scatter-lineplot of the feature
         for dtp_id in df['id'].unique():
             df_dtp = df.loc[
                 df['id']==dtp_id
             ]
+            tool = df_dtp.reset_index().loc[0, 'software_name']
 
             fig.add_trace(
                 go.Scatter(
                     x=df_dtp['Species'].tolist(),
                     y=df_dtp['metrics'].apply(lambda x: x[evaluation_type]).tolist(),
-                    name=dtp_id,
-                    marker=dict(color=software_colors.get(df_dtp.reset_index().loc[0, 'software_name'], 'gray')),
+                    name=tool,
+                    marker=dict(color=software_colors.get(tool, 'gray')),
                     mode='lines+markers'
                 ),
                 row=1, col=1

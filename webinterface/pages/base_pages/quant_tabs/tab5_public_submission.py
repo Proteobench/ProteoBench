@@ -42,6 +42,7 @@ def load_user_parameters(variables, ionmodule, user_input) -> Any:
     """
     params = None
 
+
     try:
         params = ionmodule.load_params_file(
             user_input[variables.meta_data],

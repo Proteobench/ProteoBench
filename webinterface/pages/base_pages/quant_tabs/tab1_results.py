@@ -14,7 +14,7 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> No
     """
     Initialize the slider for the main data.
 
-    We use a slider uuid and associate a defalut value with it.
+    We use a slider uuid and associate a default value with it.
     - self.variables_quant.slider_id_uuid
     - self.variables_quant.default_val_slider
     """

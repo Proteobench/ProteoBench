@@ -25,8 +25,11 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
     """
     params = ProteoBenchParameters(json_path="denovo/denovo_lfq_DDA_HCD.json")
 
-    with open(file_path) as f:
-        file = yaml.load(f, yaml.SafeLoader)
+    try:
+        file = yaml.safe_load(file_path)
+    except:
+        with open(file_path) as f:
+            file = yaml.load(f, yaml.SafeLoader)
 
     params.software_name = "InstaNovo"
     params.n_beams = file["n_beams"]

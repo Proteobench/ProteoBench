@@ -259,9 +259,7 @@ class DenovoDatapoint:
                 "Only `aa` and `peptide` levels for accuracy calculation are supported. Should never happen."
             )
 
-        print('Checked metrics, now going into calculate_prc')
         res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
-        print('Caluclated PRC')
         return res
 
 

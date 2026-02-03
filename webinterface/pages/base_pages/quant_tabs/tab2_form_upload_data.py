@@ -93,6 +93,7 @@ def process_submission_form(
     variables,
     ionmodule,
     user_input,
+    **kwargs
 ) -> bool:
     """
     Handle the form submission logic.
@@ -120,6 +121,7 @@ def process_submission_form(
         variables=variables,
         ionmodule=ionmodule,
         user_input=user_input,
+        **kwargs
     )
 
     if success:
@@ -135,7 +137,7 @@ def process_submission_form(
 # function used in process_submission_form
 
 
-def execute_proteobench(variables, ionmodule, user_input) -> bool:
+def execute_proteobench(variables, ionmodule, user_input, **kwargs) -> bool:
     """
     Execute the ProteoBench benchmarking process.
 

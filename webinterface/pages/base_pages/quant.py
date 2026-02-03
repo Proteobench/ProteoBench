@@ -21,7 +21,8 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
 )
 from proteobench.utils.server_io import dataset_folder_exists
 
-from . import (
+from .base import BaseUIModule
+from .quant_tabs import (
     tab1_results,
     tab2_form_upload_data,
     tab3_1_pmultiqc_report,
@@ -33,7 +34,7 @@ from . import (
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class QuantUIObjects:
+class QuantUIObjects(BaseUIModule):
     """Main class for the Streamlit interface of ProteoBench quantification.
     This class handles the creation of the Streamlit UI elements, including the main page layout,
     input forms, results display, and data submission elements.
@@ -67,38 +68,31 @@ class QuantUIObjects:
         parsesettingsbuilder : ParseSettingsBuilder
             The parse settings builder.
         """
-        self.variables: VariablesDDAQuant = variables
-        self.ionmodule: IonModule = ionmodule
-        self.parsesettingsbuilder: ParseSettingsBuilder = parsesettingsbuilder
-        self.user_input: Dict[str, Any] = {}
-        self.page_name = page_name
-        self.submission_ready = False
-        self.params_file_dict_copy: Dict[str, Any] = {}
-
-        # Create page config and sidebar
-        pbb.proteobench_page_config()
-
-        st.markdown(
-            """
-            <style>
-            [data-testid="stSidebarNav"] {
-                display: none;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
+        super().__init__(
+            variables=variables,
+            ionmodule=ionmodule,
+            parsesettingsbuilder=parsesettingsbuilder,
+            page_name=page_name
         )
-
-        pbb.proteobench_sidebar(current_page=self.page_name)
-
-        self.first_point_plotted = False
-        st.session_state[self.variables.submit] = False
-        self.stop_duplicating = False
-
-        if self.variables.params_file_dict not in st.session_state.keys():
-            st.session_state[self.variables.params_file_dict] = {}
         if self.variables.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables.slider_id_submitted_uuid] = str()
+
+    @st.fragment
+    def display_all_data_results_main(self) -> None:
+        """Display the results for all data in Tab 1."""
+        st.title("Results (All Data)")
+        tab1_results.initialize_main_slider(
+            slider_id_uuid=self.variables.slider_id_uuid,
+            default_val_slider=self.variables.default_val_slider,
+        )
+        tab1_results.generate_main_slider(
+            slider_id_uuid=self.variables.slider_id_uuid,
+            description_slider_md=self.variables.description_slider_md,
+            default_val_slider=self.variables.default_val_slider,
+        )
+        tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+        tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
+
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
@@ -200,6 +194,20 @@ class QuantUIObjects:
         else:
             st.warning("No intermediate data available for pMultiQC report. Please first submit data.")
 
+    def display_all_data_results_submitted(self) -> None:
+        """Display the results for all data in Tab 4."""
+        st.title("Results (All Data)")
+        tab4_display_results_submitted.initialize_submitted_slider(
+            self.variables.slider_id_submitted_uuid,
+            self.variables.default_val_slider,
+        )
+        tab4_display_results_submitted.generate_submitted_slider(self.variables)
+        tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
+        tab4_display_results_submitted.display_submitted_results(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )
+
     def display_public_submission_ui(self) -> None:
         """
         Display the public submission section of the page in Tab 5.
@@ -282,32 +290,3 @@ class QuantUIObjects:
                 pr_url=pr_url,
             )
 
-    @st.fragment
-    def display_all_data_results_main(self) -> None:
-        """Display the results for all data in Tab 1."""
-        st.title("Results (All Data)")
-        tab1_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
-        tab1_results.generate_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            description_slider_md=self.variables.description_slider_md,
-            default_val_slider=self.variables.default_val_slider,
-        )
-        tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
-        tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
-
-    def display_all_data_results_submitted(self) -> None:
-        """Display the results for all data in Tab 4."""
-        st.title("Results (All Data)")
-        tab4_display_results_submitted.initialize_submitted_slider(
-            self.variables.slider_id_submitted_uuid,
-            self.variables.default_val_slider,
-        )
-        tab4_display_results_submitted.generate_submitted_slider(self.variables)
-        tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
-        tab4_display_results_submitted.display_submitted_results(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
-        )

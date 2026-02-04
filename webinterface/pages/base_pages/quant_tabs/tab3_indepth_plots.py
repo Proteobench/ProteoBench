@@ -79,48 +79,27 @@ def generate_indepth_plots(
         performance_data,
         parse_settings,
     )
-    fig_CV = PlotDataPoint.plot_CV_violinplot(performance_data)
-    fig_MA = PlotDataPoint.plot_ma_plot(
-        performance_data,
-        parse_settings.species_expected_ratio(),
-    )
 
-    if variables_quant.first_new_plot:
-        col1, col2 = st.columns(2)
-        col1.subheader("Log2 Fold Change distributions by species.")
-        col1.markdown(
-            """
-                log2 fold changes calculated from {}
-            """.format(
-                public_id
-            )
-        )
-        col1.plotly_chart(fig_logfc, width='stretch')
+    for plot_name, fig in plots.items():
+        st.session_state[f"{variables.fig_prefix}_{plot_name}"] = fig
 
-        col2.subheader("Coefficient of variation distribution in Condition A and B.")
-        col2.markdown(
-            """
-                CVs calculated from {}
-            """.format(
-                public_id
-            )
-        )
-        col2.plotly_chart(fig_CV, width='stretch')
+    if variables.first_new_plot:
+        layout_config = plot_generator.get_in_depth_plot_layout()
+        descriptions = plot_generator.get_in_depth_plot_descriptions()
 
-        col1.markdown("---")  # optional horizontal separator
+        for section in layout_config:
+            cols = st.columns(section["columns"])
 
-        col1.subheader("MA plot")
-        col1.markdown(
-            """
-                MA plot calculated from {}
-            """.format(
-                public_id
-            )
-        )
-        # Example: plot another figure or add any other Streamlit element
-        # st.plotly_chart(fig_additional, width='stretch')
-        col1.plotly_chart(fig_MA, width='stretch')
+            for i, plot_name in enumerate(section["plots"]):
+                col = cols[i % section["columns"]]
 
+                with col:
+                    st.subheader(section["titles"][plot_name])
+                    st.markdown(f"{descriptions[plot_name]} calculated from {public_id}")
+                    st.plotly_chart(plots[plot_name], use_container_width=True)
+
+            if len(section["plots"]) > 0:
+                st.markdown("---")
     else:
         pass
 

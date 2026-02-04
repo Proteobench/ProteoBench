@@ -94,7 +94,7 @@ def generate_indepth_plots(
                 public_id
             )
         )
-        col1.plotly_chart(fig_logfc, use_container_width=True)
+        col1.plotly_chart(fig_logfc, width='stretch')
 
         col2.subheader("Coefficient of variation distribution in Condition A and B.")
         col2.markdown(
@@ -104,7 +104,7 @@ def generate_indepth_plots(
                 public_id
             )
         )
-        col2.plotly_chart(fig_CV, use_container_width=True)
+        col2.plotly_chart(fig_CV, width='stretch')
 
         col1.markdown("---")  # optional horizontal separator
 
@@ -117,8 +117,8 @@ def generate_indepth_plots(
             )
         )
         # Example: plot another figure or add any other Streamlit element
-        # st.plotly_chart(fig_additional, use_container_width=True)
-        col1.plotly_chart(fig_MA, use_container_width=True)
+        # st.plotly_chart(fig_additional, width='stretch')
+        col1.plotly_chart(fig_MA, width='stretch')
 
     else:
         pass

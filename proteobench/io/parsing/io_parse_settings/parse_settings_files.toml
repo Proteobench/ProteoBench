@@ -1,5 +1,6 @@
 [quant_lfq_DDA_ion_QExactive]
 "AlphaPept" = "parse_settings_alphapept.toml"
+"DIA-NN" = "parse_settings_diann.toml"
 "FragPipe" = "parse_settings_fragpipe.toml"
 "i2MassChroQ" = "parse_settings_i2massChroQ.toml"
 "MaxQuant" = "parse_settings_maxquant.toml"
@@ -65,6 +66,7 @@
 
 [quant_lfq_DDA_ion_Astral]
 "AlphaPept" = "parse_settings_alphapept.toml"
+"DIA-NN" = "parse_settings_diann.toml"
 "FragPipe" = "parse_settings_fragpipe.toml"
 "i2MassChroQ" = "parse_settings_i2massChroQ.toml"
 "MaxQuant" = "parse_settings_maxquant.toml"

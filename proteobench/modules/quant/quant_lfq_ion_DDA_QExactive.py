@@ -20,7 +20,7 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.benchmarking import run_benchmarking
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quantscores import QuantScoresHYE
+from proteobench.score.quant.quantscores import QuantScoresHYE
 
 
 class DDAQuantIonModuleQExactive(QuantModule):

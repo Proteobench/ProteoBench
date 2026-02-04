@@ -30,7 +30,7 @@ class ProteoBenchParameters:
         Other keyword arguments.
     """
 
-    def __init__(self, json_path="Quant/quant_lfq_DDA_ion.json", **kwargs):
+    def __init__(self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"), **kwargs):
         """
         Read the JSON file and initializes only the attributes present in the file.
 
@@ -41,8 +41,6 @@ class ProteoBenchParameters:
         **kwargs : dict[str, Any]
             Other keyword arguments.
         """
-        filename = os.path.join(os.path.dirname(__file__), "json", json_path)
-
         if not os.path.isfile(filename):
             print(f"Error: File '{filename}' not found.")
             return  # No initialization happens if the file is missing

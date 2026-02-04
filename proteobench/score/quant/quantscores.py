@@ -7,7 +7,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from proteobench.score.score_base import ScoreBase
+from proteobench.score.quant.score_base import ScoreBase
 
 
 class QuantScoresHYE(ScoreBase):

@@ -48,7 +48,7 @@ class VariablesDDADeNovo:
     comments_submission_uuid: str = "comments_submission_uuid_dda_hcd_denovo"
     check_submission_uuid: str = "check_submission_uuid_dda_hcd_denovo"
     meta_data_text: str = "comments_for_submission_dda_hcd_denovo"
-    check_submission: str = "heck_submission_dda_hcd_denovo"
+    check_submission: str = "check_submission_dda_hcd_denovo"
     button_submission_uuid: str = "button_submission_uuid_dda_hcd_denovo"
     df_head: str = "df_head_dda_hcd_denovo"
     placeholder_fig_compare: str = "placeholder_fig_compare_dda_hcd_denovo"

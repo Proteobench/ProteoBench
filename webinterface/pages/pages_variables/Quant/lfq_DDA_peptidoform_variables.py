@@ -81,6 +81,7 @@ class VariablesDDAQuant:
     first_new_plot: bool = True
     default_val_slider: int = 3
     beta_warning: bool = True
+    alpha_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_peptidoform_DDA.git"
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"

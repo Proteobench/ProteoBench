@@ -58,9 +58,7 @@ class StreamlitPage(ABC):
             **If you still have questions, you can email us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query)**
 
             Using proteobench version: {}
-            """.format(
-                proteobench.__version__
-            ),
+            """.format(proteobench.__version__),
             unsafe_allow_html=True,
         )
 

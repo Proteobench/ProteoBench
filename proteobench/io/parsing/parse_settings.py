@@ -3,17 +3,32 @@
 from __future__ import annotations
 
 import os
+import re
 from collections import defaultdict
 from typing import Any, Dict, List
+from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import toml
+from psm_utils import Peptidoform
 
 from .parse_ion import get_proforma_bracketed
 
 # IMPORTANT: it is defined here, but filled in after defining the classes
 # new classes need to be filled in there too!!!
 MODULE_TO_CLASS = {}
+GROUND_TRUTH_DIR_SERVER = "/mnt/data/proteobench/module_data/"
+GROUND_TRUTH_DIR_LOCAL = os.path.join(
+    Path(__file__).resolve().parent,
+    "io_parse_settings",
+    "denovo",
+    "lfq",
+    "DDA",
+    "HCD",
+)
+GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
+GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
 
 class ParseSettingsBuilder:
@@ -469,6 +484,258 @@ class ParseModificationSettings:
             return df
 
 
+class ParseSettingsDeNovo:
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+        self.mapper = parse_settings["mapper"]
+        self.spectrum_id_mapper = parse_settings["spectrum_id_mapper"]
+        self.sequence_mapper = parse_settings["sequence_mapper"]
+        self.modification_parser = None
+        self.analysis_level = "peptidoform"
+
+    def extract_scan_id(self, spectrum_id: str) -> int:
+        """
+        Extract the scan ID from the spectrum ID string.
+
+        Parameters
+        ----------
+        spectrum_id : str
+            The input spectrum ID string.
+
+        Returns
+        -------
+        int
+            The extracted scan ID (a number).
+        """
+        scan_id_match = re.search(self.spectrum_id_mapper["pattern"], spectrum_id)
+        if scan_id_match is None:
+            raise ValueError(
+                f"Scan id not found in the spectrum_id string {spectrum_id}."
+                f" Spectrum id pattern is {self.spectrum_id_mapper['pattern']}."
+            )
+
+        scan_id = scan_id_match.group(1)
+        return int(scan_id)
+
+    def format_sequence(self, sequence: str) -> str:
+        """
+        Format the sequence string.
+
+        Parameters
+        ----------
+        sequence : str
+            The input sequence string.
+
+        Returns
+        -------
+        str
+            The formatted sequence string.
+        """
+        if not isinstance(sequence, str):
+            return ""
+
+        if "replacement_dict" in self.sequence_mapper:
+            for key, value in self.sequence_mapper["replacement_dict"].items():
+                sequence = sequence.replace(key, value)
+        return sequence
+
+    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length=False) -> List[float]:
+        """
+        Format the amino acid scores into a list of float numbers.
+
+        Parameters
+        ----------
+        aa_scores : List[float]
+            The input list of scores.
+
+        Returns
+        -------
+        List[float]
+            The formatted list of scores.
+        """
+        # Fix aa_score length as this modification is collapsed from 2 tokens to 1
+        if (
+            fix_aa_length
+            and isinstance(peptidoform.properties["n_term"], list)
+            and peptidoform.properties["n_term"][0].value == "H-2C1O1"
+        ):
+            aa_scores = list(np.mean(aa_scores[0:2])) + aa_scores[2:]
+
+        if isinstance(aa_scores, list) and all(isinstance(i, float) for i in aa_scores):
+            return aa_scores
+
+        if isinstance(aa_scores, str):
+            aa_scores = eval(aa_scores)
+            # aa_scores = aa_scores.split(",")  # TODO: make it cofigurable separator?
+            # aa_scores = [float(score) for score in aa_scores]
+        return aa_scores
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        self.modification_parser = parser
+
+    def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
+        if peptidoform.properties["n_term"] is None:
+            return len(peptidoform)
+        return len(peptidoform) + len(peptidoform.properties["n_term"])
+
+    def add_features(self, df: pd.DataFrame):
+        columns_to_keep_gt = [
+            "spectrum_id",
+            "peptidoform",
+            "peptidoform_ground_truth",
+            "proforma",
+            "precursor_mz",
+            "retention_time",
+            "title",
+            "score",
+            "aa_scores",
+            ### FEATURES
+            # 1. MFR
+            "missing_frag_sites",
+            "missing_frag_pct",
+            # 2. Explained intensity
+            "explained_y_pct",
+            "explained_b_pct",
+            "explained_by_pct",
+            "explained_all_pct",
+            # 3. peptide length
+            "peptide_length",
+            # 4. cosine similarity with MS2PIP
+            "cos",
+            "cos_ionb",
+            "cos_iony",
+            "spec_pearson",
+            "dotprod",
+            ### PTM-features
+            # GT
+            "M-Oxidation",
+            "Q-Deamidation",
+            "N-Deamidation",
+            "N-term Acetylation",
+            "N-term Carbamylation",
+            "N-term Ammonia-loss",
+            # Predicted
+            "M-Oxidation (denovo)",
+            "Q-Deamidation (denovo)",
+            "N-Deamidation (denovo)",
+            "N-term Acetylation (denovo)",
+            "N-term Carbamylation (denovo)",
+            "N-term Ammonia-loss (denovo)",
+            ### SPECIES
+            "collection",
+        ]
+
+        # PTM-features
+        df["M-Oxidation"] = df.peptidoform_ground_truth.apply(lambda x: "M[UNIMOD:35]" in x)
+        df["Q-Deamidation"] = df.peptidoform_ground_truth.apply(lambda x: "Q[UNIMOD:7]" in x)
+        df["N-Deamidation"] = df.peptidoform_ground_truth.apply(lambda x: "N[UNIMOD:7]" in x)
+        df["N-term Acetylation"] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:1]-" in x)
+        df["N-term Carbamylation"] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:5]-" in x)
+        df["N-term Ammonia-loss"] = df.peptidoform_ground_truth.apply(lambda x: "[UNIMOD:385]-" in x)
+
+        df["M-Oxidation (denovo)"] = df.peptidoform.apply(
+            lambda x: "M[UNIMOD:35]" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["Q-Deamidation (denovo)"] = df.peptidoform.apply(
+            lambda x: "Q[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-Deamidation (denovo)"] = df.peptidoform.apply(
+            lambda x: "N[UNIMOD:7]" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-term Acetylation (denovo)"] = df.peptidoform.apply(
+            lambda x: "[UNIMOD:1]-" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-term Carbamylation (denovo)"] = df.peptidoform.apply(
+            lambda x: "[UNIMOD:5]-" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+        df["N-term Ammonia-loss (denovo)"] = df.peptidoform.apply(
+            lambda x: "[UNIMOD:385]-" in x.modified_sequence if isinstance(x, Peptidoform) else None
+        )
+
+        df["peptidoform_ground_truth"] = df.peptidoform_ground_truth.apply(
+            lambda x: Peptidoform(Peptidoform(x).modified_sequence)
+        )  # Removing precursor charge from peptidoform
+
+        # Peptide length
+        df["peptide_length"] = df.peptidoform_ground_truth.apply(lambda x: self.get_length_peptidoform_with_nterm(x))
+
+        return df[columns_to_keep_gt]
+
+    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+        """
+        Convert a software tool output into a generic format supported by the module.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
+
+        Returns
+        -------
+        tuple[pd.DataFrame, Dict[int, List[str]]]
+            The converted DataFrame and a dictionary mapping replicates to raw data.
+        """
+        # TODO: Add functionality/steps in docstring.
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected de novo tool."
+            )
+
+        df = df.rename(columns=self.mapper, inplace=False)
+
+        if self.spectrum_id_mapper:
+            df["spectrum_id"] = df["spectrum_id"].apply(self.extract_scan_id)
+
+        if self.sequence_mapper:
+            df["sequence"] = df["sequence"].apply(self.format_sequence)
+
+        if self.modification_parser is not None:
+            df = self.modification_parser.convert_to_proforma(df, self.analysis_level)
+        else:
+            df["proforma"] = df["sequence"]
+
+        def convert_to_peptidoform(proforma):
+            try:
+                return Peptidoform(proforma)
+            except:
+                return None
+
+        if "proforma" in df.columns:
+            df["peptidoform"] = df["proforma"].apply(lambda x: convert_to_peptidoform(x))
+            df = df.dropna(subset="peptidoform")
+
+        # If AA scores are not provided, simulate them from peptide score
+        if "aa_scores" not in df.columns:
+            df["aa_scores"] = df.apply(
+                lambda row: [row["score"]] * self.get_length_peptidoform_with_nterm(row["peptidoform"]), axis=1
+            )
+
+        df["aa_scores"] = df.apply(lambda x: self.format_scores(x["aa_scores"], x["peptidoform"]), axis=1)
+
+        columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]
+        df = df[columns_to_keep]
+
+        # Load ground truth PSMs
+        # Determine the path to the ground truth file
+        if os.path.isfile(os.path.join(GROUND_TRUTH_DIR_SERVER, GROUND_TRUTH_FILENAME)):
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_SERVER, GROUND_TRUTH_FILENAME)
+        elif os.path.isfile(os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)):
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)
+        else:
+            # Download from server URL
+            from proteobench.utils.server_io import download_file
+
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)
+            download_file(GROUND_TRUTH_URL, ground_truth_path)
+
+        df_ground_truth = pd.read_csv(ground_truth_path, compression="gzip")
+
+        df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
+        df = self.add_features(df=df)
+
+        return df
+
+
 MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
@@ -476,6 +743,6 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
-    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
+    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo,
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
 }

@@ -1,0 +1,20 @@
+[mapper]
+"TITLE" = "spectrum_id"
+"DENOVO" = "sequence"
+"Score" = "score"
+"Positional Score" = "aa_scores"
+
+[spectrum_id_mapper]
+"pattern" = "scan=(\\d+)"
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"C" = "C(+57.02)"
+
+[modifications_parser]
+"parse_column" = "sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\(([^)]+)\\)"
+"modification_dict" = {"(+57.02)" = "UNIMOD:4"}

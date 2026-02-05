@@ -1,3 +1,3 @@
 """
-Markdown files for the diaPASEF DIA precursor page.
+Markdown files for the de novo DDA module.
 """

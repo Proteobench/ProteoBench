@@ -224,6 +224,7 @@ def run_benchmarking_process(variables, ionmodule, user_input):
         all_datapoints,
         default_cutoff_min_prec=set_slider_val,
         input_file_secondary=tmp_file_secondary.name if tmp_file_secondary else None,
+        max_nr_observed=variables.max_nr_observed,
     )
 
 

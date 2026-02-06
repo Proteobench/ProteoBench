@@ -6,7 +6,9 @@ import streamlit as st
 # functions to plot the metric plot
 
 
-def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, key, plot_generator) -> str | None:
+def render_metric_plot(
+    data: pd.DataFrame, metric: str, mode: str, label: str, key, plot_generator, slider_id_uuid: str = None
+) -> str | None:
     """
     Displays the metric plot and returns the ProteoBench ID of the selected point (if any).
 
@@ -29,6 +31,9 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
 
     plot_generator : PlotGeneratorBase
         The plot generator instance for the module.
+
+    slider_id_uuid : str, optional
+        The UUID for the slider to retrieve the min_nr_observed value.
 
     Returns
     -------
@@ -68,12 +73,21 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
         st.error("No datapoints available for plotting", icon="🚨")
         return None
 
+    highlight_point_id = None
     try:
+        # Get the min_nr_observed value from the slider if provided
+        min_nr_observed = None
+        if slider_id_uuid is not None and slider_id_uuid in st.session_state:
+            slider_key = st.session_state[slider_id_uuid]
+            if slider_key in st.session_state:
+                min_nr_observed = st.session_state[slider_key]
+
         fig_metric = plot_generator.plot_main_metric(
             data,
             metric=metric,
             mode=mode,
             label=label,
+            min_nr_observed=min_nr_observed,
         )
         event_dict = st.plotly_chart(
             fig_metric,

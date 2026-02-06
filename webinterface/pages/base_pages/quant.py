@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pages.texts.proteobench_builder as pbb
+import pandas as pd
 import streamlit as st
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
     VariablesDDAQuant,
@@ -141,11 +142,12 @@ class QuantUIObjects:
             st.error("No data available for plotting.", icon="🚨")
             return
         df = st.session_state[key_in_state]
-        if df.empty:
-            st.error("No data available for plotting.", icon="🚨")
-            return
-        downloads_df = df[["id", "intermediate_hash"]]
-        downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
+        downloads_df = pd.DataFrame()
+        if not df.empty:
+            # st.error("No data available for plotting.", icon="🚨")
+            # return
+            downloads_df = df[["id", "intermediate_hash"]]
+            downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
         key_in_state = self.variables.placeholder_dataset_selection_container
         if key_in_state not in st.session_state.keys():
@@ -155,9 +157,12 @@ class QuantUIObjects:
 
         st.subheader("Select dataset to plot")
 
-        dataset_options = [("Uploaded dataset", None)] + list(
-            zip(downloads_df["id"], downloads_df["intermediate_hash"])
-        )
+        if not downloads_df.empty:
+            dataset_options = [("Uploaded dataset", None)] + list(
+                zip(downloads_df["id"], downloads_df["intermediate_hash"])
+            )
+        else:
+            dataset_options = [("Uploaded dataset", None)]
 
         dataset_selection = st.selectbox(
             "Select dataset",
@@ -286,6 +291,7 @@ class QuantUIObjects:
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
+        
         tab1_results.initialize_main_slider(
             slider_id_uuid=self.variables.slider_id_uuid,
             default_val_slider=self.variables.default_val_slider,
@@ -294,6 +300,7 @@ class QuantUIObjects:
             slider_id_uuid=self.variables.slider_id_uuid,
             description_slider_md=self.variables.description_slider_md,
             default_val_slider=self.variables.default_val_slider,
+            max_nr_observed=self.variables.max_nr_observed,
         )
         tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
         tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
@@ -301,11 +308,15 @@ class QuantUIObjects:
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
+        
         tab4_display_results_submitted.initialize_submitted_slider(
             self.variables.slider_id_submitted_uuid,
             self.variables.default_val_slider,
         )
-        tab4_display_results_submitted.generate_submitted_slider(self.variables)
+        tab4_display_results_submitted.generate_submitted_slider(
+            self.variables,
+            max_nr_observed=self.variables.max_nr_observed,
+        )
         tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
         tab4_display_results_submitted.display_submitted_results(
             variables=self.variables,

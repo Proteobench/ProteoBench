@@ -20,7 +20,7 @@ from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.benchmarking import run_benchmarking
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quantscores import QuantScoresHYE
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class DDAQuantIonModuleQExactive(QuantModule):
@@ -93,6 +93,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
         all_datapoints: pd.DataFrame,
         default_cutoff_min_prec: int = 3,
         input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -128,6 +129,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
             default_cutoff_min_prec=default_cutoff_min_prec,
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
+            max_nr_observed=max_nr_observed,
         )
 
     def get_plot_generator(self):

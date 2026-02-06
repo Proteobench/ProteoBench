@@ -9,32 +9,27 @@ from proteobench.exceptions import ProteoBenchError
 from . import inputs
 
 
-def generate_input_fields(
-    variables,
-    parsesettingsbuilder,
-    user_input,
-) -> None:
+def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input) -> None:
     """
-    Create the input section of the form.
+    Display software selector outside the form and show AlphaDIA-specific information.
+    This allows immediate feedback when AlphaDIA is selected.
     """
     st.subheader("Input files")
     st.markdown(open(variables.description_input_file_md, "r", encoding="utf-8").read())
-    # ! Maybe user_input needs to be returned and assigned manually
-    # ? Not the input form is made persistent?
-    # It returns None or the selected options
-    user_input["input_format"] = st.selectbox(
+
+    # Software tool selector - outside form to enable reactive updates
+    selected_format = st.selectbox(
         "Software tool",
         parsesettingsbuilder.INPUT_FORMATS,
         help=variables.texts.Help.input_format,
-    )
-    # Returns None or the selected file as UploadedFile (a file-like object)
-    user_input["input_csv"] = st.file_uploader(
-        "Software tool result file",
-        help=variables.texts.Help.input_file,
+        key="software_tool_selector",
     )
 
-    # For AlphaDIA, require a second file upload
-    if user_input["input_format"] == "AlphaDIA":
+    # Store selection in user_input for use in form
+    user_input["input_format"] = selected_format
+
+    # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
+    if selected_format == "AlphaDIA":
         st.info(
             "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
             "**If not, you have the following options:**\n\n"
@@ -42,10 +37,27 @@ def generate_input_fields(
             "You can upload them in any order - the system will automatically detect which is which.\n\n"
             "**Single-file upload (legacy):** Alternatively, upload a single pre-merged file in the main uploader above."
         )
+
+
+def generate_input_fields(
+    user_input,
+) -> None:
+    """
+    Create the file upload section of the form.
+    Software tool selection is now handled outside the form.
+    """
+    # Returns None or the selected file as UploadedFile (a file-like object)
+    user_input["input_csv"] = st.file_uploader(
+        "Software tool result file",
+        help="Upload the result file from your selected software tool",
+    )
+
+    # For AlphaDIA, show secondary file uploader after main uploader
+    if user_input.get("input_format") == "AlphaDIA":
         user_input["input_csv_secondary"] = st.file_uploader(
             "Upload second AlphaDIA file (optional)",
             type=["tsv", "csv"],
-            help="ℹ️ Only for AlphaDIA v1:\nUpload the second AlphaDIA file (either precursor.matrix.tsv or precursors.tsv) for automatic merging. Leave empty if uploading a pre-merged file.",
+            key="alphadia_secondary_file",
         )
     else:
         user_input["input_csv_secondary"] = None

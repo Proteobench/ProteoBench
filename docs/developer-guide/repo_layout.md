@@ -40,34 +40,40 @@ ProteoBench
 
 ## ProteoBench python package
 
-Let's see the overview for proteobench `0.8.11`:
+Let's see the overview for proteobench `0.11.0`:
 
 ```bash
 proteobench
 ├── __init__.py
 ├── datapoint
-│   └── quant_datapoint.py
-├── exceptions.py
+│   ├── __init__.py
+│   ├── datapoint_base.py                 # Abstract base class for all datapoints
+│   └── quant_datapoint.py                # Quantification-specific datapoint implementations
+├── exceptions.py                         # Custom exceptions
 ├── github
-│   └── gh.py # sync with benchmark repos (retrieving and uploading result metrics)
+│   └── gh.py                             # Sync with benchmark repos (retrieving and uploading result metrics)
 ├── io
-│   ├── data
-│   ├── params # parameter parsing (module unspecific) of data analysis software
-│   └── parsing # parsing of output files of data analysis software, configuration tomls
-│   ├── __init__.py
+│   ├── data                              # Reference data files
+│   ├── params                            # Parameter parsing (module unspecific) of data analysis software
+│   ├── parsing                           # Parsing of output files of data analysis software, configuration tomls
+│   └── __init__.py
 ├── modules
-│   ├── __init__.py
-│   ├── quant          # quant contains the module specific code for quantification
-│   └── rescoring
-│   ├── constants.py
-├── plotting
-│   └── plot_quant.py  # only example code for Base Module
-├── score
-│   └── quant
-│   ├── __init__.py
+│   ├── __init__.py
+│   ├── quant                             # Quant contains the module specific code for quantification
+│   ├── rescoring                         # Rescoring module implementations
+│   └── constants.py
+├── plotting                              # Modular plotting architecture
+│   ├── __init__.py
+│   ├── plot_generator_base.py            # Abstract base class for all plot generators
+│   └── plot_generator_lfq_HYE.py         # LFQ HYE-specific plot generator implementation
+├── score                                 # Score calculation (computing benchmarking metrics)
+│   ├── __init__.py
+│   ├── score_base.py                     # Abstract base class for all score calculators
+│   ├── quantscores.py                    # Quantification-specific score calculator (QuantScoresHYE)
+│   └── quant/                            # Legacy quantification scoring (deprecated structure)
 └── utils
-    └── plotting
-    ├── __init__.py
+    ├── plotting                          # Utility functions for plotting
+    └── __init__.py
 ```
 
 ## Webinterface

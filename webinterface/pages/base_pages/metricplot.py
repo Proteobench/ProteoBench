@@ -77,7 +77,7 @@ def render_metric_plot(data: pd.DataFrame, metric: str, mode: str, label: str, k
         )
         event_dict = st.plotly_chart(
             fig_metric,
-            use_container_width=True,
+            width='stretch',
             on_select="rerun",
             selection_mode="points",
             key=key,

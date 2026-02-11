@@ -93,6 +93,35 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             "ma_plot": "MA plot calculated from the performance data",
         }
 
+    def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
+        """
+        Get the appropriate metric column names based on metric type and calculation mode.
+
+        Parameters
+        ----------
+        metric : str
+            The metric type: "Median" or "Mean"
+        mode : str
+            The calculation mode: "Global" or "Equal weighted species"
+
+        Returns
+        -------
+        Tuple[str, str, str]
+            Tuple of (metric_lower, mode_suffix, plot_title) for constructing column names
+            and plot title.
+        """
+        metric_lower = metric.lower()
+        mode_suffix = "global" if mode == "Global" else "eq_species"
+
+        mode_description = "global" if mode == "Global" else "equal weighted species"
+
+        plot_title = (
+            f"{metric} absolute difference between measured and expected log2-transformed fold change "
+            f"(calculated {mode_description})"
+        )
+
+        return metric_lower, mode_suffix, plot_title
+
     def plot_main_metric(
         self,
         benchmark_metrics_df: pd.DataFrame,

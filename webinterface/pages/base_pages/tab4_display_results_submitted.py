@@ -23,9 +23,16 @@ def initialize_submitted_slider(slider_id_submitted_uuid, default_val_slider) ->
         st.session_state[value_key_in_state] = default_val_slider
 
 
-def generate_submitted_slider(variables) -> None:
+def generate_submitted_slider(variables, max_nr_observed: int = None) -> None:
     """
     Create a slider input.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing slider configuration.
+    max_nr_observed : int, optional
+        Maximum nr_observed value for the slider. If None, defaults to 6.
     """
     if variables.slider_id_submitted_uuid not in st.session_state:
         st.session_state[variables.slider_id_submitted_uuid] = uuid.uuid4()
@@ -33,9 +40,16 @@ def generate_submitted_slider(variables) -> None:
 
     st.markdown(open(variables.description_slider_md, "r", encoding="utf-8").read())
 
+    # Use provided max_nr_observed or default to 6
+    if max_nr_observed is None:
+        max_nr_observed = 6
+
+    # Generate slider options from 1 to max_nr_observed
+    slider_options = list(range(1, int(max_nr_observed) + 1))
+
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
-        options=[1, 2, 3, 4, 5, 6],
+        options=slider_options,
         value=st.session_state.get(slider_key, variables.default_val_slider),
         key=slider_key,
     )
@@ -98,6 +112,7 @@ def display_submitted_results(variables, ionmodule) -> None:
         label=st.session_state[st.session_state[variables.selectbox_id_submitted_uuid]],
         key=_id_of_key,
         plot_generator=plot_generator,
+        slider_id_uuid=variables.slider_id_submitted_uuid,
     )
 
     df_display = prepare_display_dataframe(st.session_state[variables.all_datapoints_submitted], highlight_point_id)

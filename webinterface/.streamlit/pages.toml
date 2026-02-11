@@ -23,5 +23,9 @@ path = "pages/module_pages/quant_lfq_DIA_ion_singlecell.py"
 name = "DIA Quant Precursor Level - Single Cell (Astral) -BETA-"
 
 [[pages]]
+path = pages/module_pages/quant_lfq_DIA_ion_plasma.py
+name = "DIA Quant Precursor Level - Plasma background -BETA-"
+
+[[pages]]
 path = "pages/module_pages/quant_lfq_DIA_ion_ZenoTOF.py"
 name = "DIA Quant Precursor Level - ZenoTOF -ALPHA-"

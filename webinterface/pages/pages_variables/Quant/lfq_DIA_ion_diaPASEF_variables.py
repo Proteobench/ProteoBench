@@ -42,6 +42,7 @@ class VariablesDIAQuantdiaPASEF:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    max_nr_observed: int = 6
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_diaPASEF.git"
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_diaPASEF"

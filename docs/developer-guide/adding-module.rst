@@ -59,6 +59,7 @@ The backend is organized into four main components that you can extend or custom
 
 **3. Score calculation** - Compute benchmarking metrics
    - Base class: :class:`~proteobench.score.score_base.ScoreBase` (ABC)
+   - For quantification: Use or extend :class:`~proteobench.score.quantscoresHYE.QuantScores`
    - Generates the ``intermediate`` data structure
    - For new module types: Create a new class inheriting from ``ScoreBase``
    - See :ref:`score-configuration` for detailed information

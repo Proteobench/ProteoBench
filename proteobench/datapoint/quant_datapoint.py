@@ -331,7 +331,11 @@ class QuantDatapointHYE(DatapointBase):
 
     @staticmethod
     def generate_datapoint(
-        intermediate: pd.DataFrame, input_format: str, user_input: dict, default_cutoff_min_prec: int = 3
+        intermediate: pd.DataFrame,
+        input_format: str,
+        user_input: dict,
+        default_cutoff_min_prec: int = 3,
+        max_nr_observed: int = None,
     ) -> pd.Series:
         """
         Generate a Datapoint object containing metadata and results from the benchmark run.
@@ -346,6 +350,8 @@ class QuantDatapointHYE(DatapointBase):
             User-defined input values for the benchmark.
         default_cutoff_min_prec : int, optional
             The default minimum precursor cutoff value. Defaults to 3.
+        max_nr_observed : int, optional
+            Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
 
         Returns
         -------
@@ -389,8 +395,17 @@ class QuantDatapointHYE(DatapointBase):
 
         result_datapoint.generate_id()
 
+        # Use provided max_nr_observed or default to 6
+        if max_nr_observed is None:
+            max_nr_observed = 6
+
         results = dict(
-            ChainMap(*[QuantDatapointHYE.get_metrics(intermediate, nr_observed) for nr_observed in range(1, 7)])
+            ChainMap(
+                *[
+                    QuantDatapointHYE.get_metrics(intermediate, nr_observed)
+                    for nr_observed in range(1, int(max_nr_observed) + 1)
+                ]
+            )
         )
         result_datapoint.results = results
         result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
@@ -423,6 +438,7 @@ class QuantDatapointHYE(DatapointBase):
 
         return results_series
 
+    @staticmethod
     def get_epsilon_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
         """
         Compute epsilon-based accuracy metrics using specified aggregation.
@@ -451,6 +467,7 @@ class QuantDatapointHYE(DatapointBase):
             **{f"{agg}_abs_epsilon_{sp}": v for sp, v in per_species_acc.items()},
         }
 
+    @staticmethod
     def get_precision_metrics(df: pd.DataFrame, min_nr_observed: int, agg: str = "median") -> dict[str, float]:
         """
         Compute precision metrics directly from log2FC (log2_A_vs_B) column.
@@ -503,6 +520,7 @@ class QuantDatapointHYE(DatapointBase):
             **{f"{agg}_abs_epsilon_precision_{sp}": v for sp, v in per_species_prec.items()},
         }
 
+    @staticmethod
     def get_cv_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, float]:
         """Compute CV quantiles."""
         df_slice = df[df["nr_observed"] >= min_nr_observed]
@@ -515,88 +533,252 @@ class QuantDatapointHYE(DatapointBase):
             "CV_q95": cv_avg.loc[0.95],
         }
 
-    def get_roc_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, float]:
-        """Compute ROC-AUC metrics."""
-        df_slice = df[df["nr_observed"] >= min_nr_observed]
-        return {
-            "roc_auc": compute_roc_auc(df_slice),
-            "roc_auc_directional": compute_roc_auc_directional(df_slice),
-        }
-
-    def get_count_metrics(df: pd.DataFrame, min_nr_observed: int) -> dict[str, int]:
-        """Compute precursor counts (total and per-species)."""
-        df_slice = df[df["nr_observed"] >= min_nr_observed]
-        species_counts = df_slice["species"].value_counts().to_dict()
-        return {
-            "nr_prec": len(df_slice),
-            **{f"nr_prec_{sp}": count for sp, count in species_counts.items()},
-        }
-
-    def get_metrics(df: pd.DataFrame, min_nr_observed: int = 1) -> dict[int, dict[str, float]]:
-        """
-        Compute all benchmark metrics (backward compatible wrapper).
-
-        Merges: epsilon (accuracy) + precision + cv + roc + counts
-        """
-        df_slice = df[df["nr_observed"] >= min_nr_observed]
-
-        return {
-            min_nr_observed: {
-                **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "median"),
-                **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "mean"),
-                **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "median"),
-                **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "mean"),
-                **QuantDatapointHYE.get_cv_metrics(df, min_nr_observed),
-                **QuantDatapointHYE.get_roc_metrics(df, min_nr_observed),
-                **QuantDatapointHYE.get_count_metrics(df, min_nr_observed),
-                "variance_epsilon_global": df_slice["epsilon"].var(),
-            }
-        }
-
     @staticmethod
-    def get_metrics_old(df: pd.DataFrame, min_nr_observed: int = 1) -> Dict[int, Dict[str, float]]:
+    def get_metrics(df: pd.DataFrame, min_nr_observed: int = 3) -> Dict[int, Dict[str, float]]:
         """
-        Compute various statistical metrics from the provided DataFrame for the benchmark.
+        Compute statistical metrics from the provided DataFrame.
 
         Parameters
         ----------
         df : pd.DataFrame
-            The DataFrame containing the benchmark results.
-        min_nr_observed : int, optional
-            The minimum number of observed values for a valid computation. Defaults to 1.
+            DataFrame containing the intermediate results.
+        min_nr_observed : int
+            Minimum number of observations threshold.
 
         Returns
         -------
-        dict
-            A dictionary containing computed metrics such as 'median_abs_epsilon', 'variance_epsilon', etc.
+        Dict[int, Dict[str, float]]
+            Dictionary mapping quantification cutoffs to their computed metrics.
         """
-        # Filter DataFrame by the minimum number of observations
         df_slice = df[df["nr_observed"] >= min_nr_observed]
         nr_prec = len(df_slice)
 
-        # Calculate the median absolute epsilon (insensitive to outliers)
-        median_abs_epsilon = df_slice["epsilon"].abs().median()
-        # Calculate the mean absolute epsilon (sensitive to outliers)
-        mean_abs_epsilon = df_slice["epsilon"].abs().mean()
-
-        # Calculate the variance of epsilon (sensitive to outliers)
-        variance_epsilon = df_slice["epsilon"].var()
-
-        # Compute the median of the coefficient of variation (CV) for both 'CV_A' and 'CV_B'
-        cv_median = (df_slice["CV_A"].median() + df_slice["CV_B"].median()) / 2
-        cv_q75 = (df_slice["CV_A"].quantile(0.75) + df_slice["CV_B"].quantile(0.75)) / 2
-        cv_q90 = (df_slice["CV_A"].quantile(0.9) + df_slice["CV_B"].quantile(0.9)) / 2
-        cv_q95 = (df_slice["CV_A"].quantile(0.95) + df_slice["CV_B"].quantile(0.95)) / 2
-
-        return {
-            min_nr_observed: {
-                "median_abs_epsilon": median_abs_epsilon,
-                "mean_abs_epsilon": mean_abs_epsilon,
-                "variance_epsilon": variance_epsilon,
-                "nr_prec": nr_prec,
-                "CV_median": cv_median,
-                "CV_q90": cv_q90,
-                "CV_q75": cv_q75,
-                "CV_q95": cv_q95,
-            }
+        # Combine all metrics
+        metrics = {
+            **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "median"),
+            **QuantDatapointHYE.get_epsilon_metrics(df, min_nr_observed, "mean"),
+            **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "median"),
+            **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "mean"),
+            **QuantDatapointHYE.get_cv_metrics(df, min_nr_observed),
+            "variance_epsilon_global": df_slice["epsilon"].var() if len(df_slice) > 0 else 0.0,
+            "nr_prec": nr_prec,
         }
+
+        return {min_nr_observed: metrics}
+
+
+class QuantDatapointPYE(QuantDatapointHYE):
+    """
+    A data structure used to store the results of a quantification benchmark run for plasma (PYE) setups.
+
+    This class extends QuantDatapointHYE to implement plasma-specific metrics and metadata
+    storage for quantification benchmarking runs on plasma samples. The PYE module benchmarks
+    quantification performance across three species (yeast, E. coli, and human plasma) with
+    metrics for visualization in a scatterplot format.
+
+    Attributes:
+        Inherits all attributes from QuantDatapointHYE.
+        median_abs_log2_fc_error_spike_ins (float): Median absolute log2 fold-change error for yeast and E. coli spike-ins.
+        nr_quantified_spike_ins (int): Number of quantified yeast and E. coli spike-in precursors (quantification depth).
+        dynamic_range_human_plasma (float): Dynamic range of human plasma precursors (log10 difference between 90th and 10th percentile).
+        median_abs_epsilon_human_plasma (float): Median absolute epsilon for human plasma precursors (quantification accuracy).
+    """
+
+    # Add plasma-specific metric attributes
+    median_abs_log2_fc_error_spike_ins: float = 0.0
+    nr_quantified_spike_ins: int = 0
+    dynamic_range_human_plasma: float = 0.0
+    median_abs_epsilon_human_plasma: float = 0.0
+
+    @staticmethod
+    def generate_datapoint(
+        intermediate: pd.DataFrame,
+        input_format: str,
+        user_input: dict,
+        default_cutoff_min_prec: int = 3,
+        max_nr_observed: int = None,
+    ) -> pd.Series:
+        """
+        Generate a Datapoint object containing metadata and results from the plasma benchmark run.
+
+        This method extends the parent implementation to compute plasma-specific metrics:
+        - Median fold-change error for yeast and E. coli spike-ins (for x-axis)
+        - Number of quantified spike-in precursors (for y-axis)
+        - Dynamic range of human plasma precursors (for dot size)
+        - Quantification accuracy for human plasma (for transparency/opacity)
+
+        Parameters
+        ----------
+        intermediate : pd.DataFrame
+            The intermediate DataFrame containing benchmark results with species annotations.
+        input_format : str
+            The format of the input data (e.g., file format).
+        user_input : dict
+            User-defined input values for the benchmark.
+        default_cutoff_min_prec : int, optional
+            The default minimum precursor cutoff value. Defaults to 3.
+        max_nr_observed : int, optional
+            Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
+
+        Returns
+        -------
+        pd.Series
+            A Pandas Series containing the Datapoint's attributes as key-value pairs.
+        """
+        # Call parent class implementation to get base datapoint
+        result_series = QuantDatapointHYE.generate_datapoint(
+            intermediate, input_format, user_input, default_cutoff_min_prec, max_nr_observed
+        )
+
+        # Convert to mutable dict for plasma-specific metrics
+        result_dict = result_series.to_dict()
+
+        # Compute plasma-specific metrics for each min_nr_observed threshold
+        # This mirrors the structure of the parent class results dictionary
+        plasma_metrics = QuantDatapointPYE._get_plasma_metrics(intermediate, max_nr_observed)
+
+        # Flatten and merge plasma metrics into results dictionary
+        for min_nr_obs, metrics in plasma_metrics.items():
+            # Store plasma-specific metrics at each min_nr_observed level
+            if "results" in result_dict and min_nr_obs in result_dict["results"]:
+                result_dict["results"][min_nr_obs].update(metrics)
+
+        # Assign default cutoff metrics to top-level fields for backward compatibility
+        if default_cutoff_min_prec in plasma_metrics:
+            result_dict["median_abs_log2_fc_error_spike_ins"] = plasma_metrics[default_cutoff_min_prec].get(
+                "median_abs_log2_fc_error_spike_ins", 0.0
+            )
+            result_dict["nr_quantified_spike_ins"] = plasma_metrics[default_cutoff_min_prec].get(
+                "nr_quantified_spike_ins", 0
+            )
+            result_dict["dynamic_range_human_plasma"] = plasma_metrics[default_cutoff_min_prec].get(
+                "dynamic_range_human_plasma_mean", 0.0
+            )
+            result_dict["median_abs_epsilon_human_plasma"] = plasma_metrics[default_cutoff_min_prec].get(
+                "median_abs_epsilon_human_plasma", 0.0
+            )
+
+        # Convert back to Series
+        result_series = pd.Series(result_dict)
+
+        return result_series
+
+    @staticmethod
+    def _get_plasma_metrics(intermediate: pd.DataFrame, max_nr_observed: int = None) -> dict[int, dict[str, float]]:
+        """
+        Compute plasma-specific metrics for each min_nr_observed threshold.
+
+        Parameters
+        ----------
+        intermediate : pd.DataFrame
+            The intermediate DataFrame containing benchmark results with species annotations.
+        max_nr_observed : int, optional
+            Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
+
+        Returns
+        -------
+        dict[int, dict[str, float]]
+            Dictionary with min_nr_observed as keys and plasma metrics as values.
+        """
+        plasma_metrics = {}
+
+        # Use provided max_nr_observed or default to 6
+        if max_nr_observed is None:
+            max_nr_observed = 12
+
+        # Compute metrics for each min_nr_observed level up to the maximum
+        for min_nr_obs in range(1, int(max_nr_observed) + 1):
+            # Filter data for this min_nr_observed threshold
+            df_slice = intermediate[intermediate["nr_observed"] >= min_nr_obs]
+
+            # If no precursors meet this threshold, return zero metrics for this level
+            if len(df_slice) == 0:
+                plasma_metrics[min_nr_obs] = {
+                    # Global metrics (legacy key names for backward compatibility)
+                    "median_abs_log2_fc_error_spike_ins": 0.0,
+                    "mean_abs_log2_fc_error_spike_ins": 0.0,
+                    # Species-weighted metrics
+                    "median_abs_log2_fc_error_spike_ins_global": 0.0,
+                    "mean_abs_log2_fc_error_spike_ins_global": 0.0,
+                    "median_abs_log2_fc_error_spike_ins_eq_species": 0.0,
+                    "mean_abs_log2_fc_error_spike_ins_eq_species": 0.0,
+                    # Common metrics
+                    "nr_quantified_spike_ins": 0,
+                    "dynamic_range_human_plasma_A": 0.0,
+                    "dynamic_range_human_plasma_B": 0.0,
+                    "dynamic_range_human_plasma_mean": 0.0,
+                    "median_abs_epsilon_human_plasma": 0.0,
+                    "mean_abs_epsilon_human_plasma": 0.0,
+                }
+                continue
+
+            # Compute spike-in metrics (yeast and E. coli combined)
+            spike_ins_df = df_slice[df_slice["species"].isin(["YEAST", "ECOLI"])]
+
+            # Global: Simple aggregation across all spike-ins
+            median_abs_log2_fc_error_spike_ins_global = (
+                spike_ins_df["epsilon"].abs().median() if len(spike_ins_df) > 0 else 0.0
+            )
+            mean_abs_log2_fc_error_spike_ins_global = (
+                spike_ins_df["epsilon"].abs().mean() if len(spike_ins_df) > 0 else 0.0
+            )
+
+            # Species-weighted: Calculate per species, then average
+            median_per_species = []
+            mean_per_species = []
+            for species in ["YEAST", "ECOLI"]:
+                species_df = df_slice[df_slice["species"] == species]
+                if len(species_df) > 0:
+                    median_per_species.append(species_df["epsilon"].abs().median())
+                    mean_per_species.append(species_df["epsilon"].abs().mean())
+
+            median_abs_log2_fc_error_spike_ins_eq_species = np.mean(median_per_species) if median_per_species else 0.0
+            mean_abs_log2_fc_error_spike_ins_eq_species = np.mean(mean_per_species) if mean_per_species else 0.0
+
+            # Compute number of quantified spike-in precursors
+            nr_quantified_spike_ins = len(spike_ins_df)
+
+            # Compute dynamic range of human plasma precursors
+            human_plasma_df = df_slice[df_slice["species"] == "HUMAN"]
+
+            dynamic_ranges = {}
+            for condition in ["A", "B"]:
+                if f"Intensity_mean_{condition}" not in human_plasma_df.columns:
+                    human_plasma_df[f"Intensity_mean_{condition}"] = np.nan
+                else:
+                    human_plasma_df[f"log10_Intensity_mean_{condition}"] = np.log10(
+                        human_plasma_df[f"Intensity_mean_{condition}"].clip(lower=1e-10)
+                    )
+                    dynamic_ranges[condition] = human_plasma_df[f"log10_Intensity_mean_{condition}"].quantile(
+                        0.90
+                    ) - human_plasma_df[f"log10_Intensity_mean_{condition}"].quantile(0.10)
+            if dynamic_ranges:
+                dynamic_range_human_plasma_mean = np.mean(list(dynamic_ranges.values()))
+            else:
+                dynamic_range_human_plasma_mean = 0.0
+
+            # Compute human plasma metrics (global only - no species weighting needed for single species)
+            median_abs_epsilon_human_plasma = (
+                human_plasma_df["epsilon"].abs().median() if len(human_plasma_df) > 0 else 0.0
+            )
+            mean_abs_epsilon_human_plasma = human_plasma_df["epsilon"].abs().mean() if len(human_plasma_df) > 0 else 0.0
+
+            plasma_metrics[min_nr_obs] = {
+                # Global metrics (legacy key names for backward compatibility)
+                "median_abs_log2_fc_error_spike_ins": median_abs_log2_fc_error_spike_ins_global,
+                "mean_abs_log2_fc_error_spike_ins": mean_abs_log2_fc_error_spike_ins_global,
+                # Species-weighted metrics
+                "median_abs_log2_fc_error_spike_ins_global": median_abs_log2_fc_error_spike_ins_global,
+                "mean_abs_log2_fc_error_spike_ins_global": mean_abs_log2_fc_error_spike_ins_global,
+                "median_abs_log2_fc_error_spike_ins_eq_species": median_abs_log2_fc_error_spike_ins_eq_species,
+                "mean_abs_log2_fc_error_spike_ins_eq_species": mean_abs_log2_fc_error_spike_ins_eq_species,
+                # Common metrics
+                "nr_quantified_spike_ins": nr_quantified_spike_ins,
+                "dynamic_range_human_plasma_A": dynamic_ranges.get("A", 0.0),
+                "dynamic_range_human_plasma_B": dynamic_ranges.get("B", 0.0),
+                "dynamic_range_human_plasma_mean": dynamic_range_human_plasma_mean if dynamic_ranges else 0.0,
+                "median_abs_epsilon_human_plasma": median_abs_epsilon_human_plasma,
+                "mean_abs_epsilon_human_plasma": mean_abs_epsilon_human_plasma,
+            }
+
+        return plasma_metrics

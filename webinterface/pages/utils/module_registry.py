@@ -88,7 +88,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             elif hasattr(variables, "beta_warning") and variables.beta_warning:
                 release_stage = "beta"
             else:
-                release_stage = "stable"
+                release_stage = "live"
 
             # Create metadata object
             metadata = ModuleMetadata(

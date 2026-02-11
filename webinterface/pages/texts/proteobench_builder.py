@@ -53,7 +53,7 @@ def render_links(modules, current_page):
             badge_html = ' <span style="background-color: #4169E1; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 600;">BETA</span>'
         elif module.release_stage == "archived":
             badge_html = ' <span style="background-color: #808080; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 600;">ARCHIVED</span>'
-        # No badge for "stable" release stage
+        # No badge for "live" release stage
 
         st.markdown(
             f'<a href="{module.path}" target="_self" class="{css_class}">{module.label}{badge_html}</a>',

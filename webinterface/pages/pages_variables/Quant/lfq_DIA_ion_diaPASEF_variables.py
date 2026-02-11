@@ -44,6 +44,14 @@ class VariablesDIAQuantdiaPASEF:
     default_val_slider: int = 3
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_diaPASEF.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion diaPASEF"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_diaPASEF"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "diaPASEF", "timsTOF", "precursor", "ion", "LFQ", "PASEF"]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_diaPASEF"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_diaPASEF"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_diaPASEF"

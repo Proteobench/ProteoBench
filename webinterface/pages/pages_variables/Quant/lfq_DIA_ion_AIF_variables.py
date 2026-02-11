@@ -43,6 +43,14 @@ class VariablesDIAQuant:
     default_val_slider: int = 3
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion AIF"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_AIF"
+    sidebar_category: str = "Archived"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "AIF", "all ion fragmentation", "precursor", "ion", "LFQ"]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant"
     selectbox_id_uuid: str = "selectbox_id_dia_quant"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant"

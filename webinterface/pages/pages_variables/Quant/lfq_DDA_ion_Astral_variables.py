@@ -80,6 +80,14 @@ class VariablesDDAQuantAstral:
     beta_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA_Astral.git"
 
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DDA ion Astral"
+    sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+    )
+
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/introduction_DDA_quan_ions.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/input_file_description.md"

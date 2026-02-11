@@ -311,8 +311,9 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             )
 
         fig.update_layout(
-            width=700,
+            width=None,
             height=700,
+            autosize=True,
             xaxis=dict(
                 title=plot_title,
                 gridcolor="white",
@@ -325,6 +326,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 gridwidth=2,
                 linecolor="black",
             ),
+            margin=dict(l=80, r=20, t=50, b=80),
         )
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)

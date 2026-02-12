@@ -29,7 +29,7 @@ def proteobench_page_config(page_layout="wide"):
         return "Set already"
 
 
-def render_links(modules, current_page):
+def render_links(modules):
     """
     Render sidebar links for modules with release stage badges using native Streamlit.
 
@@ -37,8 +37,6 @@ def render_links(modules, current_page):
     ----------
     modules : List[ModuleMetadata]
         List of module metadata objects to render.
-    current_page : str
-        The name of the current page to highlight.
     """
     for module in modules:
         # Use wider column ratio to prevent text cutoff

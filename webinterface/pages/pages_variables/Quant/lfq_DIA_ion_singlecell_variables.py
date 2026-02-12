@@ -43,6 +43,7 @@ class VariablesDIAQuantSC:
     default_val_slider: int = 3
     alpha_warning: bool = True
     beta_warning: bool = False
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git_singlecell"
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_singlecell"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_singlecell"

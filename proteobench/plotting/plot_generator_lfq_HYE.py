@@ -196,6 +196,11 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
+                # Add keyword if present
+                if "Keyword" in benchmark_metrics_df.columns:
+                    keyword = benchmark_metrics_df.Keyword[idx]
+                    if isinstance(keyword, str) and keyword.strip():
+                        datapoint_text = datapoint_text + f"Keyword: {keyword}<br>"
                 if "comments" in benchmark_metrics_df.columns:
                     comment = benchmark_metrics_df.comments[idx]
                     if isinstance(comment, str):

@@ -41,8 +41,9 @@ class VariablesDIAQuantZenoTOF:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
-    alpha_warning: bool = True
-    beta_warning: bool = False
+    alpha_warning: bool = False
+    beta_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_ZenoTOF.git"
 
     # Sidebar metadata

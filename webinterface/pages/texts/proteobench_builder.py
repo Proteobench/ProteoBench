@@ -31,7 +31,7 @@ def proteobench_page_config(page_layout="wide"):
 
 def render_links(modules, current_page):
     """
-    Render sidebar links for modules with release stage badges.
+    Render sidebar links for modules with release stage badges using native Streamlit.
 
     Parameters
     ----------
@@ -40,25 +40,30 @@ def render_links(modules, current_page):
     current_page : str
         The name of the current page to highlight.
     """
-    from pages.utils.module_registry import ModuleMetadata
-
     for module in modules:
-        css_class = "sidebar-link-active" if module.label == current_page else "sidebar-link"
+        # Use wider column ratio to prevent text cutoff
+        cols = st.columns([5, 1])
 
-        # Determine badge HTML based on release stage
-        badge_html = ""
-        if module.release_stage == "alpha":
-            badge_html = ' <span style="background-color: #FF8C00; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 600;">ALPHA</span>'
-        elif module.release_stage == "beta":
-            badge_html = ' <span style="background-color: #4169E1; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 600;">BETA</span>'
-        elif module.release_stage == "archived":
-            badge_html = ' <span style="background-color: #808080; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 600;">ARCHIVED</span>'
-        # No badge for "live" release stage
+        with cols[0]:
+            st.page_link(module.file_path, label=module.label)
 
-        st.markdown(
-            f'<a href="{module.path}" target="_self" class="{css_class}">{module.label}{badge_html}</a>',
-            unsafe_allow_html=True,
-        )
+        with cols[1]:
+            # Add styled badge based on release stage
+            if module.release_stage == "alpha":
+                st.markdown(
+                    '<span style="background-color: #FF8C00; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ALPHA</span>',
+                    unsafe_allow_html=True,
+                )
+            elif module.release_stage == "beta":
+                st.markdown(
+                    '<span style="background-color: #4169E1; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">BETA</span>',
+                    unsafe_allow_html=True,
+                )
+            elif module.release_stage == "archived":
+                st.markdown(
+                    '<span style="background-color: #808080; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ARCH</span>',
+                    unsafe_allow_html=True,
+                )
 
 
 def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_logos_sidebar.png"):
@@ -77,34 +82,9 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
     texts = WebpageTexts
     all_modules = get_all_modules()
 
-    # Add custom CSS for links, hover, and badges
-    st.markdown(
-        """
-    <style>
-    .sidebar-link, .sidebar-link:link, .sidebar-link:visited, .sidebar-link:hover, .sidebar-link:active {
-        display: block;
-        padding: 0.3em 0;
-        color: black !important;
-        text-decoration: none;
-        font-size: 0.95rem;
-        transition: all 0.2s ease-in-out;
-    }
-    .sidebar-link:hover {
-        font-weight: 600;
-    }
-    .sidebar-link-active, .sidebar-link-active:visited {
-        font-weight: 700;
-        color: black !important;
-    }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-
     # Sidebar layout
     with st.sidebar:
-        home_class = "sidebar-link-active" if current_page == "Home" else "sidebar-link"
-        st.markdown(f'<a href="/" class="{home_class}">Home</a>', unsafe_allow_html=True)
+        st.page_link("Home.py", label="Home")
 
         # Search box
         search_query = st.text_input(
@@ -114,51 +94,29 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
         )
 
         # Filter modules based on search
-        if all_modules is not None:
-            filtered_modules = filter_modules(all_modules, search_query)
+        filtered_modules = filter_modules(all_modules, search_query)
 
-            # If search is active, show flat filtered list
-            if search_query:
-                st.markdown("### Search Results")
-                all_filtered = []
-                for category in ["DDA", "DIA", "Archived"]:
-                    all_filtered.extend(filtered_modules[category])
+        # If search is active, show flat filtered list
+        if search_query:
+            st.markdown("### Search Results")
+            all_filtered = []
+            for category in ["DDA", "DIA", "Archived"]:
+                all_filtered.extend(filtered_modules[category])
 
-                if all_filtered:
-                    render_links(all_filtered, current_page=current_page)
-                else:
-                    st.markdown("*No modules match your search.*")
+            if all_filtered:
+                render_links(all_filtered, current_page=current_page)
             else:
-                # Show normal categorized expanders
-                with st.expander("DDA", expanded=(current_page in [m.label for m in all_modules["DDA"]])):
-                    render_links(filtered_modules["DDA"], current_page=current_page)
-
-                with st.expander("DIA", expanded=(current_page in [m.label for m in all_modules["DIA"]])):
-                    render_links(filtered_modules["DIA"], current_page=current_page)
-
-                with st.expander("Archived", expanded=(current_page in [m.label for m in all_modules["Archived"]])):
-                    render_links(filtered_modules["Archived"], current_page=current_page)
+                st.markdown("*No modules match your search.*")
         else:
-            dda_pages = None
-            dia_pages = None
-            archived_pages = None
+            # Show normal categorized expanders
+            with st.expander("DDA", expanded=(current_page in [m.label for m in all_modules["DDA"]])):
+                render_links(filtered_modules["DDA"], current_page=current_page)
 
-            # Fallback rendering with old hardcoded dictionaries
-            def render_links_fallback(pages, current_page):
-                for label, path in pages.items():
-                    css_class = "sidebar-link-active" if label == current_page else "sidebar-link"
-                    st.markdown(
-                        f'<a href="{path}" target="_self" class="{css_class}">{label}</a>', unsafe_allow_html=True
-                    )
+            with st.expander("DIA", expanded=(current_page in [m.label for m in all_modules["DIA"]])):
+                render_links(filtered_modules["DIA"], current_page=current_page)
 
-            with st.expander("DDA", expanded=(current_page in dda_pages)):
-                render_links_fallback(dda_pages, current_page=current_page)
-
-            with st.expander("DIA", expanded=(current_page in dia_pages)):
-                render_links_fallback(dia_pages, current_page=current_page)
-
-            with st.expander("Archived", expanded=(current_page in archived_pages)):
-                render_links_fallback(archived_pages, current_page=current_page)
+            with st.expander("Archived", expanded=(current_page in [m.label for m in all_modules["Archived"]])):
+                render_links(filtered_modules["Archived"], current_page=current_page)
 
         st.image(proteobench_logo, width=300)
         st.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")

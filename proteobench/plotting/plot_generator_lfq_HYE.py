@@ -197,6 +197,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
                 # Add keyword if present
+                # TODO: potentially make more generic so that this does not have to be added in multiple plot_generator classes
                 if "Keyword" in benchmark_metrics_df.columns:
                     keyword = benchmark_metrics_df.Keyword[idx]
                     if isinstance(keyword, str) and keyword.strip():

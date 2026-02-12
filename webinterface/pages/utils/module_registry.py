@@ -20,6 +20,7 @@ class ModuleMetadata:
 
     label: str
     path: str
+    file_path: str  # Actual file path for st.page_link
     category: str
     release_stage: str
     keywords: List[str]
@@ -90,10 +91,24 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             else:
                 release_stage = "live"
 
+            # Find the actual page file path
+            page_name = variables.sidebar_path.lstrip("/")
+            pages_dir = current_file.parent.parent  # pages/ directory
+            matching_files = list(pages_dir.glob(f"*{page_name}.py"))
+
+            if matching_files:
+                # Get relative path from webinterface/ directory
+                webinterface_dir = pages_dir.parent
+                file_path = str(matching_files[0].relative_to(webinterface_dir))
+            else:
+                # Fallback
+                file_path = f"pages/{page_name}.py"
+
             # Create metadata object
             metadata = ModuleMetadata(
                 label=variables.sidebar_label,
                 path=variables.sidebar_path,
+                file_path=file_path,
                 category=variables.sidebar_category,
                 release_stage=release_stage,
                 keywords=variables.keywords,

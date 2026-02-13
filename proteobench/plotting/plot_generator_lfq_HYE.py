@@ -122,7 +122,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         highlight_color: str = "#d30067",
         label: str = "",
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
-        hide_annot: bool = False,
+        annotation: str = "",
         **kwargs,
     ) -> go.Figure:
         """
@@ -342,7 +342,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-" if not hide_annot else "",
+            text=annotation,
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )

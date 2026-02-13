@@ -686,6 +686,105 @@ functionality to create the web interface for each quantification module.
 :file:`webinterface.pages.pages_variables` contains files with ``dataclass``\ es for the 
 text for the different modules in the interface.
 
+Module Variables and Sidebar Configuration
+...........................................
+
+Each module requires a variables file in 
+`webinterface/pages/pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
+that defines both the module's behavior and its appearance in the sidebar navigation.
+
+**Creating a Module Variables File**
+
+Create a new file following the pattern ``<module_type>_variables.py`` (e.g., ``lfq_DDA_ion_Astral_variables.py``)
+in the appropriate subdirectory under ``pages_variables/`` (e.g., ``Quant/``).
+
+**Required Sidebar Metadata Fields**
+
+Your variables dataclass must include these fields for the module registry to discover and display it:
+
+.. code-block:: python
+
+    from dataclasses import dataclass, field
+    from typing import List
+    
+    @dataclass
+    class VariablesDDAQuantAstral:
+        # ... other module-specific fields ...
+        
+        # Sidebar metadata (required)
+        sidebar_label: str = "Quant LFQ DDA ion Astral"
+        sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
+        sidebar_category: str = "DDA"
+        keywords: List[str] = field(
+            default_factory=lambda: ["DDA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+        )
+        
+        # Module metadata (required)
+        title: str = "DDA Quantification - Precursor Level - Astral"
+        doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/quant_lfq_DDA_ion_Astral.html"
+
+**Sidebar Configuration Details:**
+
+- **sidebar_label**: Display name shown in the sidebar (keep concise but descriptive)
+- **sidebar_path**: URL path for the page (must match the page filename without numeric prefix)
+  
+  - Example: If your page file is ``8_Quant_LFQ_DDA_ion_Astral.py``, use ``/Quant_LFQ_DDA_ion_Astral``
+  
+- **sidebar_category**: Determines which expandable section contains the module
+  
+  - Valid values: ``"DDA"``, ``"DIA"``, ``"DDA Id"``, ``"Archived"``
+  - Modules are grouped by this category in the sidebar
+  
+- **keywords**: List of search terms for the sidebar search functionality
+  
+  - Users can filter modules by typing any of these keywords
+  - Include: data type, technique, instrument, software names, etc.
+  
+- **title**: Full descriptive title used in documentation and metadata
+- **doc_url**: Link to the module's documentation page
+
+**Release Stage Badges**
+
+ProteoBench automatically displays release stage badges (ALPHA, BETA, ARCHIVED) in the sidebar
+based on warning flags in your variables file. The badge is determined by this priority:
+
+1. **Archived** - If ``archived_warning: bool = True`` → Gray "ARCH" badge
+2. **Alpha** - If ``alpha_warning: bool = True`` → Orange "ALPHA" badge
+3. **Beta** - If ``beta_warning: bool = True`` → Blue "BETA" badge  
+4. **Live** - If none of the above → No badge (production-ready)
+
+**Example: Alpha Stage Module**
+
+.. code-block:: python
+
+    @dataclass
+    class VariablesDIAQuantSingleCell:
+        # ... other fields ...
+        
+        # Release stage flags
+        alpha_warning: bool = True   # Shows ALPHA badge
+        beta_warning: bool = False
+        
+        # Sidebar metadata
+        sidebar_label: str = "Quant LFQ DIA ion Single Cell"
+        sidebar_path: str = "/Quant_LFQ_DIA_ion_singlecell"
+        sidebar_category: str = "DIA"
+        keywords: List[str] = field(
+            default_factory=lambda: ["DIA", "quantification", "single cell", "Astral"]
+        )
+
+**Important Notes:**
+
+- The module registry automatically discovers all ``*_variables.py`` files at startup
+- No manual registration is needed - just create the file with the required fields
+- The release stage badge appears automatically based on the warning flags
+- When a module is moved to ``"Archived"`` category, it gets the ARCH badge regardless of other flags
+- The sidebar search filters modules by matching the search query against:
+  
+  - ``sidebar_label`` (display name)
+  - ``title`` (full title)
+  - ``keywords`` (all keyword strings)
+
 Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObjects`
 ...................................................................................
 
@@ -806,9 +905,36 @@ a new type of module:
    See :ref:`plot-configuration` for detailed examples.
 7. Check, modify or add parameter parsing for new tools in
    `proteobench/io/params <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/params>`_
-8. Add a new page defining the module webinterface to
+8. **Create a module variables file** in
+   `webinterface/pages/pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
+   with a ``dataclass`` defining all module-specific settings. **Required fields:**
+   
+   - **Sidebar metadata** (for automatic discovery and navigation):
+     
+     - ``sidebar_label: str`` - Display name in sidebar
+     - ``sidebar_path: str`` - URL path (must match page filename without numeric prefix)
+     - ``sidebar_category: str`` - Category: ``"DDA"``, ``"DIA"``, ``"DDA Id"``, or ``"Archived"``
+     - ``keywords: List[str]`` - Search terms for sidebar filtering
+   
+   - **Module metadata**:
+     
+     - ``title: str`` - Full descriptive title
+     - ``doc_url: str`` - Link to documentation page
+   
+   - **Release stage** (determines badge in sidebar):
+     
+     - For **Alpha**: Set ``alpha_warning: bool = True`` (orange ALPHA badge)
+     - For **Beta**: Set ``beta_warning: bool = True`` (blue BETA badge)
+     - For **Archived**: Set ``sidebar_category: str = "Archived"`` (gray ARCH badge)
+     - For **Production**: Don't set any warning flags (no badge)
+   
+   The module will be automatically discovered by the module registry system.
+   See the "Module Variables and Sidebar Configuration" section above for detailed examples.
+
+9. Add a new page file to
    `webinterface/pages <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages>`_
-   using the base functionality and adding ``pages_variables`` dataclasses.
-9. Create a new results repository for the module in
-   `Proteobench <https://github.com/Proteobench>`_ and 
-   a fork in `Proteobot <https://github.com/proteobot>`_
+   using the base functionality and your ``pages_variables`` dataclass. Name the file with
+   an optional numeric prefix for ordering (e.g., ``8_Quant_LFQ_DDA_ion_Astral.py``).
+10. Create a new results repository for the module in
+    `Proteobench <https://github.com/Proteobench>`_ and 
+    a fork in `Proteobot <https://github.com/proteobot>`_

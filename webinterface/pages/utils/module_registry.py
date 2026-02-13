@@ -82,7 +82,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             variables = variables_class()
 
             # Determine release stage from warning flags
-            if variables.sidebar_category == "Archived":
+            if hasattr(variables, "archived_warning") and variables.archived_warning:
                 release_stage = "archived"
             elif hasattr(variables, "alpha_warning") and variables.alpha_warning:
                 release_stage = "alpha"

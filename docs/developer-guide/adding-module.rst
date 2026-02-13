@@ -44,7 +44,7 @@ that allow for a more modular and portable implementation.
 Backend
 ------- 
 
-The backend is organized into four main components that you can extend or customize:
+The backend is organized into six main components that you can extend or customize:
 
 **1. Module implementation** - Define how your benchmarking is performed
    - For quantification: Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule`

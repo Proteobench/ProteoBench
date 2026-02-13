@@ -219,6 +219,16 @@ def process_key_value_line(cleaned_line: str, all_parameters: Dict[str, str], ve
         if key == "version":
             version_filled = True
         if key in all_parameters:
+            # Check if the new value is numerically equivalent to avoid duplicates like "10, 10.0"
+            existing_value = all_parameters[key]
+            try:
+                # Try to compare as numbers
+                if float(value.split()[0]) == float(existing_value.split(",")[-1].split()[0]):
+                    # Values are numerically equal, don't concatenate
+                    return version_filled
+            except (ValueError, IndexError):
+                # Not numeric or can't parse, proceed with concatenation
+                pass
             all_parameters[key] += f", {value}"
         else:
             all_parameters[key] = value
@@ -327,14 +337,25 @@ def extract_params(
         if "precursor_charge" in cleaned_line:
             process_precursor_charge(lines, i, all_parameters)
 
-        if "precursor_mz" in cleaned_line and not all_parameters.get("min_precursor_mz"):
+        # Match precursor_mz but not precursor_mz_tolerance
+        if (
+            "precursor_mz" in cleaned_line
+            and "tolerance" not in cleaned_line
+            and not all_parameters.get("min_precursor_mz")
+        ):
             process_precursor_mz(lines, i, all_parameters)
 
-        if "fragment_mz" in cleaned_line and not all_parameters.get("min_fragment_mz"):
+        # Match fragment_mz but not fragment_mz_tolerance
+        if (
+            "fragment_mz" in cleaned_line
+            and "tolerance" not in cleaned_line
+            and not all_parameters.get("min_fragment_mz")
+        ):
             process_fragment_mz(lines, i, all_parameters)
 
     map_keys_to_desired_format(all_parameters)
     clean_up_parameters(all_parameters)
+
     # Format some values
     all_parameters["precursor_mass_tolerance"] = (
         "[-"
@@ -348,7 +369,10 @@ def extract_params(
     )
 
     # 'True' and 'False' to boolean
-    all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"] == "True"
+    if isinstance(all_parameters.get("enable_match_between_runs"), str):
+        all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"].strip() == "True"
+    else:
+        all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
 
     return ProteoBenchParameters(**all_parameters, filename=json_file)
 
@@ -359,6 +383,8 @@ if __name__ == "__main__":
         "../../../test/params/log_alphadia_2.txt",
         "../../../test/params/log_alphadia_1.8.txt",
         "../../../test/params/log_alphadia_1.10.txt",
+        "../../../test/params/log_alphadia_1.12.txt",
+        "../../../test/params/log_alphadia_1.12MBR.txt",
     ]:
         file = pathlib.Path(fname)
         pb_params = extract_params(file)

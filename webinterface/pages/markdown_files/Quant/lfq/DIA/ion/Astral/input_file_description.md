@@ -1,5 +1,5 @@
 Please upload the output of your analysis, and indicate what software
-tool it comes from (this is necessary to correctly parse your table) - find more information in the "[How to use](https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/#how-to-use)" section of this module. To the raw data to run your workflow on please see the section "[Data set](https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/#data-set)". 
+tool it comes from (this is necessary to correctly parse your table) - find more information in the "[How to use](https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/#how-to-use)" section of this module. To the raw data to run your workflow on please see the section "[Data set](https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/#data-set)". 
 
 Remember: contaminant sequences are already present in the fasta file 
 associated to this module. **Do not add other contaminants** to your 

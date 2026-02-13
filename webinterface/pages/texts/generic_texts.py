@@ -49,6 +49,19 @@ class WebpageTexts:
         parameters_additional = """Anything else you want to let us know? Please specifically
             add changes in your search parameters here, that are not obvious from the parameter file.
             """
+        
+        warning_archived =  """This module is ARCHIVED. The figure presented below 
+            and the metrics calculation will no longer be updated. See module documentation 
+            for more details.
+            """
+        
+        warning_alpha =  """This module is in ALPHA phase. It has not yet passed peer review 
+            and should be used with caution.
+            """
+        
+        warning_beta =  """This module is in BETA phase. The figure presented below and 
+            the metrics calculation may change in the near future.
+            """
 
     class Help:
         """
@@ -57,7 +70,7 @@ class WebpageTexts:
 
         input_file = """
             Output file of the software tool. More information on the accepted format can
-            be found [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/)
+            be found [here](https://proteobench.readthedocs.io/en/latest/available-modules/)
             """
 
         pull_req = """
@@ -67,7 +80,7 @@ class WebpageTexts:
         input_format = """
             Please select the software you used to generate the results. If it is not yet
             implemented in ProteoBench, you can use a tab-delimited format that is described
-            further [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/)
+            further [here](https://proteobench.readthedocs.io/en/latest/available-modules/)
         """
 
         parse_button = """
@@ -76,6 +89,6 @@ class WebpageTexts:
 
         meta_data_file = """
             Please add a file with meta data that contains all relevant information about
-            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/)
+            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/available-modules/)
             for all compatible parameter files.
         """

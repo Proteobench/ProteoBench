@@ -24,11 +24,11 @@ def add_fixed_mod(proforma: str, mod_name: str, aas: str) -> str:
     str
         The modified peptide in ProForma format.
     """
-    proforma, charge = proforma.split("|")
+    proforma, charge = proforma.split("\/")
     peptidoform = pu.Peptidoform(proforma)
     peptidoform.add_fixed_modifications([(mod_name, aas)])
     peptidoform.apply_fixed_modifications()
-    return peptidoform.proforma + "|" + charge
+    return peptidoform.proforma + "\/" + charge
 
 
 def add_maxquant_fixed_modifications(params: ProteoBenchParameters, result_perf: pd.DataFrame) -> pd.DataFrame:

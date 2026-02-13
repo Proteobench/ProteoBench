@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -21,7 +21,7 @@ from proteobench.io.parsing.parse_peptidoform import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscores import QuantScoresHYE
 
 
 class DIAQuantPeptidoformModule(QuantModule):
@@ -96,6 +96,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module for benchmarking workflow results.
@@ -112,6 +113,8 @@ class DIAQuantPeptidoformModule(QuantModule):
             DataFrame containing all data points from the repo.
         default_cutoff_min_prec : int, optional
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
 
         Returns
         -------
@@ -149,7 +152,7 @@ class DIAQuantPeptidoformModule(QuantModule):
 
         # Calculate quantification scores
         try:
-            quant_score = QuantScores(
+            quant_score = QuantScoresHYE(
                 self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
@@ -163,7 +166,7 @@ class DIAQuantPeptidoformModule(QuantModule):
 
         # Generate current data point
         try:
-            current_datapoint = QuantDatapoint.generate_datapoint(
+            current_datapoint = QuantDatapointHYE.generate_datapoint(
                 intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
             )
         except Exception as e:
@@ -180,3 +183,14 @@ class DIAQuantPeptidoformModule(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    def get_plot_generator(self):
+        """
+        Get the plot generator for this module.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance.
+        """
+        return super().get_plot_generator()

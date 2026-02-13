@@ -187,6 +187,12 @@ def extract_params(
     params.enzyme = enzyme
     params.allowed_miscleavages = int(fragpipe_params.loc["msfragger.allowed_missed_cleavage_1"])
 
+    if fragpipe_params.loc["msfragger.num_enzyme_termini"] == "2":
+        # 2 is ENZYMATIC, 1 is SEMI, 3 is SEMI_N_TERM, 0 is NONSPECIFIC
+        params.semi_enzymatic = False
+    else:
+        params.semi_enzymatic = True
+
     # Modifications
     params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods"]
     params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods"]

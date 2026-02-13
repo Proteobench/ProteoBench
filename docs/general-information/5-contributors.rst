@@ -30,6 +30,28 @@ People who contributed to ProteoBench, in alphabetical order:
     *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
 
 .. line-block::
+    **Tine Claeys**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Maarten Dhaenens**
+    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent, Belgium*
+
+.. line-block::
+    **Cristina Chiva**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Simon Devos**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
+
+.. line-block::
     **Robbe Devreese**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
@@ -41,6 +63,12 @@ People who contributed to ProteoBench, in alphabetical order:
 .. line-block::
     **Viktoria Dorfer**
     *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Hagenberg, Austria*
+
+.. line-block::
+    **Martin Eisenacher**
+    *Medical Faculty, Medizinisches Proteom-Center, Ruhr University Bochum, Bochum, Germany*
+    *Medical Faculty, Center for Protein Diagnostics (PRODI), Medical Proteome Analysis, Ruhr-University Bochum, Bochum, Germany*
+    *CUBiMed.RUB, Core Unit Bioinformatics, Medical Faculty, Ruhr University Bochum, Bochum, Germany*
 
 .. line-block::
     **Ralf Gabriels**
@@ -62,8 +90,16 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
 .. line-block::
+    **Lars Juhl Jensen**
+    *ZS Discovery, Lottenborgvej 26, 2800 Kgs. Lyngby, Denmark*
+
+.. line-block::
     **Vedran Kasalica**
     *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
+
+.. line-block::
+    **Ville Koskinen**
+    *Matrix Science Ltd, London, United Kingdom*
 
 .. line-block::
     **Olivier Langella**
@@ -92,6 +128,17 @@ People who contributed to ProteoBench, in alphabetical order:
     *Core for Life (C4L)*
 
 .. line-block::
+    **Lennart Martens**
+    *VIB Center for Medical Biotechnology, VIB, Ghent, 9052, Belgium*
+    *Department of Biomolecular Medicine, Faculty of Medicine and Health Sciences, Ghent University, Ghent, 9052, Belgium*
+    *BioOrganic Mass Spectrometry Laboratory (LSMBO), IPHC UMR 7178, University of Strasbourg, CNRS, Strasbourg 67000, France*
+    *Infrastructure Nationale de Protéomique ProFI, UAR2048, Strasbourg 67087, France*
+
+.. line-block::
+    **Mariette Matondo**
+    *Proteomics Core facility, Mass Spectrometry for Biology, Institut Pasteur, CNRS UAR 2024, Université Paris*
+
+.. line-block::
     **Emmanuelle Mouton-Barbosa**
     *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
     *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
@@ -100,6 +147,28 @@ People who contributed to ProteoBench, in alphabetical order:
     **Alireza Nameni**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Michael Lund Nielsen**
+    *Novo Nordisk Foundation Center for Protein Research, Proteomics Program, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Jesper Velgaard Olsen**
+    *Novo Nordisk Foundation Center for Protein Research, Department of Cellular and Molecular Medicine, Faculty of Health and Medical Sciences, University of Copenhagen, Denmark*
+
+.. line-block::
+    **Magnus Palmblad**
+    *Center for Proteomics and Metabolomics, Leiden University Medical Center, Leiden, The Netherlands*
+
+.. line-block::
+    **Yasset Perez-Riverol**
+    *European Molecular Biology Laboratory, European Bioinformatics Institute, Wellcome Genome Campus, Cambridge, UK*
+
+.. line-block::
+    **Christian Panse**
+    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
+    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+    *Core for Life (C4L)*
 
 .. line-block::
     **Marina Pominova**
@@ -123,7 +192,7 @@ People who contributed to ProteoBench, in alphabetical order:
     *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
 
 .. line-block::
-    **Sam van Puyenbroeck**
+    **Sam Van Puyenbroeck**
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
@@ -136,10 +205,27 @@ People who contributed to ProteoBench, in alphabetical order:
     *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
     *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
 
+.. line-block::
+    **Eduard Sabidó**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Martin Schneider**
+    *German Cancer Research Center (DKFZ), Foundation under Public Law, Im Neuenheimer Feld 580, 69120 Heidelberg, Germany*
+    *Core for Life (C4L)*
 
 .. line-block::
     **Veit Schwämmle**
     *Department of Biochemistry and Molecular Biology, University of Southern Denmark, Odense, Denmark*
+
+.. line-block::
+    **An Staes**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
 
 .. line-block::
     **Maximilian T. Strauss**
@@ -156,20 +242,5 @@ People who contributed to ProteoBench, in alphabetical order:
     *Core for Life (C4L)*
 
 .. line-block::
-    **Christian Panse**
-    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
-    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
-    *Core for Life (C4L)*
-
-.. line-block::
-    **Martin Schneider**
-    *German Cancer Research Center (DKFZ), Foundation under Public Law, Im Neuenheimer Feld 580, 69120 Heidelberg, Germany*
-    *Core for Life (C4L)*
-
-.. line-block::
-    **An Staes**
-    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
-    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
-    *VIB-Proteomics Core facility*
-    *Core for Life (C4L)*
-
+    **Runxuan Zhang**
+    *The James Hutton Institute, Errol Road, Invergowrie, DD2 5DA, United Kingdom*

@@ -4,7 +4,7 @@
 Install the package aber cloning it locally.
 
 ```
-pip install --editable .
+pip install --editable '.[dev]'
 ```
 
 Using a virtual environment is highly recommended.

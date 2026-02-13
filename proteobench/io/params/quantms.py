@@ -185,6 +185,7 @@ def extract_params(
         params.search_engine_version = ",".join(engines_version)
 
     params.enzyme = pipeline_params["enzyme"]
+    params.semi_enzymatic = pipeline_params["num_enzyme_termini"] != "fully"
     # "fdr_level": "psm_level_fdrs",
     params.ident_fdr_psm = pipeline_params["psm_level_fdr_cutoff"]
     params.ident_fdr_protein = pipeline_params["protein_level_fdr_cutoff"]
@@ -265,7 +266,7 @@ if __name__ == "__main__":
             assert _versions == versions
             assert _sdrf.equals(sdrf)
             assert _pipeline_params == pipeline_params
-            # display(params.__dict__)
+            # display(params.__dict__)  # Removed debug output
 
     # Convert the extracted parameters to a dictioPnary and then to a pandas Series
     # data_dict = params.__dict__

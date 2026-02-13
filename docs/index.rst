@@ -15,6 +15,7 @@ Home
     Benchmarking modules <available-modules/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
+    Manuscript <https://doi.org/10.64898/2025.12.09.692895>
 
 .. div:: landing-title
     :style: padding: 2rem 2rem 4rem 2rem; background: rgb(49, 65, 89); clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 3rem)); -webkit-clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 3rem));
@@ -124,6 +125,15 @@ Available ProteoBench modules
         ^^^
         additional DIA ion-level module with Astral DIA data
 
+    .. grid-item-card:: Label-free quantification of precursor ions with ZenoTOF 8600 - ZenoSWATH data
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF
+
+        :bdg-success:`active`
+        ^^^
+        additional DIA ion-level module with ZenoTOF 8600 - Zeno SWATH data
+
     .. grid-item-card:: benchmark with Dynamic Organellar Mapping
         :columns: 6 6 4 4
         :padding: 1
@@ -151,6 +161,15 @@ Available ProteoBench modules
         ^^^
         Benchmark the identification sensitivity and specificity of de novo sequencing workflows
 
+    .. grid-item-card:: LFQ in Human Plasma
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/659
+
+        :bdg-info:`in development`
+        ^^^
+        Benchmarking with a high dynamic range multispecies dataset
+
     .. grid-item-card:: DDA identification - phosphopeptides
         :columns: 6 6 4 4
         :padding: 1
@@ -159,15 +178,6 @@ Available ProteoBench modules
         :bdg-warning:`in discussion`
         ^^^
         Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy
-
-    .. grid-item-card:: LFQ in Human Plasma
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/659
-
-        :bdg-warning:`in discussion`
-        ^^^
-        Benchmarking with a high dynamic range multispecies dataset
 
     .. grid-item-card:: Identification with DDA
         :columns: 6 6 4 4
@@ -182,7 +192,7 @@ Available ProteoBench modules
     .. grid-item-card:: Label-free quantification of precursor ions with DIA (AIF)
         :columns: 6 6 4 4
         :padding: 1
-        :link: available-modules/archived-modules/4-quant-lfq-ion-dia-aif.md
+        :link: available-modules/archived-modules/4-quant-lfq-ion-dia-aif
 
         :bdg-dark:`archived`
         ^^^

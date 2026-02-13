@@ -194,6 +194,7 @@ def extract_params(
     params.precursor_mass_tolerance = extract_mass_tolerance(lines, "Precursor Mass Error Tolerance:")
     params.fragment_mass_tolerance = extract_mass_tolerance(lines, "Fragment Mass Error Tolerance:")
     params.enzyme = extract_value(lines, "Enzyme:")
+    params.semi_enzymatic = extract_value(lines, "Digest Mode:") != "Specific"
     params.allowed_miscleavages = int(extract_value(lines, "Max Missed Cleavage:"))
     try:
         peptide_length_range = extract_value(lines, "Peptide Length between:").split(",")

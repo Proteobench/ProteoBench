@@ -35,6 +35,7 @@ fixed_mods_regex_2 = r"Modification (.*) with mass delta \d+\.*\d* at .+ will be
 var_mods_regex = r"Modification (.*) with mass delta \d+\.*\d* at .+ will be considered as variable"
 quant_mode_regex = r"(.*?) quantification mode"
 protein_inference_regex = r"Implicit protein grouping: (.*);"
+normalisation_disabled_regex = r"(Normalisation disabled)"
 
 # Flags
 enable_match_between_runs_regex = r"(MBR enabled)|(reanalyse them)"  # If present, MBR is enabled
@@ -486,7 +487,10 @@ def extract_params(
         )
     # If scan window is not customely set, extract it from the log file
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
-    parameters["abundance_normalization_ions"] = None
+    if "no-norm" in cmdline_dict:
+        parameters["abundance_normalization_ions"] = "None"
+    else:
+        parameters["abundance_normalization_ions"] = "Cross-run normalization"
 
     # If cfg file is used, extract the parameters from the free text below the cmd line.
     if cfg_used:
@@ -516,6 +520,9 @@ def extract_params(
                 "max_precursor_mz": extract_cfg_parameter(lines, max_mz_prec_regex, int),
             }
         )
+
+        if re.search(normalisation_disabled_regex, "".join(lines)):
+            parameters["abundance_normalization_ions"] = "None"
 
         protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
         parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")

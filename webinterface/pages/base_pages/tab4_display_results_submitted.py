@@ -80,6 +80,8 @@ def display_submitted_results(variables, ionmodule) -> None:
     else:
         mode = display_metric_calc_approach_selector(variables)
 
+    colorblind_mode = display_colorblindmode_selector(variables)
+
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")
         return
@@ -96,6 +98,7 @@ def display_submitted_results(variables, ionmodule) -> None:
         metric,
         mode=mode,
         label=st.session_state[st.session_state[variables.selectbox_id_submitted_uuid]],
+        colorblind_mode=colorblind_mode,
         key=_id_of_key,
         plot_generator=plot_generator,
     )
@@ -149,6 +152,19 @@ def display_metric_selector(variables) -> str:
         "Select metric to plot",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_colorblindmode_selector(variables) -> str:
+    key = variables.colorblind_mode_selector_submitted_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.toggle(
+        "Colorblind Mode",
+        help="Toggle colorblind mode on or off.",
         key=_id_of_key,
     )
 

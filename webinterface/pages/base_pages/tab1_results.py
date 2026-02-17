@@ -14,7 +14,7 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> No
     """
     Initialize the slider for the main data.
 
-    We use a slider uuid and associate a defalut value with it.
+    We use a slider uuid and associate a default value with it.
     - self.variables_quant.slider_id_uuid
     - self.variables_quant.default_val_slider
     """
@@ -145,6 +145,8 @@ def display_existing_results(variables, ionmodule) -> None:
     else:
         mode = display_metric_calc_approach_selector(variables)
 
+    colorblind_mode = display_colorblindmode_selector(variables)
+
     # prepare plot key explicitly for tab 1
     key = variables.result_plot_uuid
     if key not in st.session_state.keys():
@@ -157,6 +159,7 @@ def display_existing_results(variables, ionmodule) -> None:
         metric,
         mode,
         label=st.session_state[st.session_state[variables.selectbox_id_uuid]],
+        colorblind_mode=colorblind_mode,
         key=_id_of_key,
         plot_generator=plot_generator,
     )
@@ -201,6 +204,19 @@ def display_metric_selector(variables) -> str:
         "Select metric to plot",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_colorblindmode_selector(variables) -> str:
+    key = variables.colorblind_mode_selector_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.toggle(
+        "Colorblind Mode",
+        help="Toggle colorblind mode on or off.",
         key=_id_of_key,
     )
 

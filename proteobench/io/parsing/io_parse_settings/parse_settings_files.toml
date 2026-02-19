@@ -89,3 +89,6 @@
 "MSAID" = "parse_settings_msaid.toml"
 "Custom" = "parse_settings_custom.toml"
 "PEAKS" = "parse_settings_peaks.toml"
+
+[quant_lfq_DIA_proteingroup_Astral]
+"DIA-NN" = "parse_settings_diann.toml"

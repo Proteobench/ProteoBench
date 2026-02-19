@@ -26,7 +26,7 @@ from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.score.quantscores import QuantScoresHYE
 
 
-class DIAQuantProteinGroupModuleAstral(QuantModule):
+class DIAQuantProteingroupModuleAstral(QuantModule):
     """
     DIA Quantification Module for protein-group level Quantification for Astral.
 

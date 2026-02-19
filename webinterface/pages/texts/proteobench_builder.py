@@ -40,7 +40,7 @@ def render_links(modules):
     """
     for module in modules:
         # Use wider column ratio to prevent text cutoff
-        cols = st.columns([5, 1])
+        cols = st.columns([7, 1])
 
         with cols[0]:
             st.page_link(module.file_path, label=module.label)
@@ -79,6 +79,39 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
 
     texts = WebpageTexts
     all_modules = get_all_modules()
+
+    # Add CSS to prevent sidebar text cutoff
+    st.markdown(
+        """
+        <style>
+        /* Prevent text cutoff in sidebar */
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal !important;
+        }
+        
+        /* Ensure sidebar links wrap properly */
+        [data-testid="stSidebar"] a {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal !important;
+            line-height: 1.4 !important;
+        }
+        
+        /* Allow columns in sidebar to wrap content */
+        [data-testid="stSidebar"] [data-testid="column"] {
+            overflow: visible !important;
+        }
+        
+        /* Ensure expander content wraps */
+        [data-testid="stSidebar"] [data-testid="stExpander"] {
+            overflow-wrap: break-word;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Sidebar layout
     with st.sidebar:

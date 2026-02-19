@@ -28,6 +28,7 @@ from . import (
     tab3_indepth_plots,
     tab4_display_results_submitted,
     tab5_public_submission,
+    tab_compare_workflows,
 )
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -296,6 +297,13 @@ class QuantUIObjects:
         tab4_display_results_submitted.generate_submitted_slider(self.variables)
         tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
         tab4_display_results_submitted.display_submitted_results(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )
+
+    def display_workflow_comparison(self) -> None:
+        """Display the workflow comparison tab."""
+        tab_compare_workflows.display_workflow_comparison(
             variables=self.variables,
             ionmodule=self.ionmodule,
         )

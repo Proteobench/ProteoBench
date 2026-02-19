@@ -29,15 +29,44 @@ def proteobench_page_config(page_layout="wide"):
         return "Set already"
 
 
-def render_links(pages, current_page):
-    for label, path in pages.items():
-        css_class = "sidebar-link-active" if label == current_page else "sidebar-link"
-        st.markdown(f'<a href="{path}" target="_self" class="{css_class}">{label}</a>', unsafe_allow_html=True)
+def render_links(modules):
+    """
+    Render sidebar links for modules with release stage badges using native Streamlit.
+
+    Parameters
+    ----------
+    modules : List[ModuleMetadata]
+        List of module metadata objects to render.
+    """
+    for module in modules:
+        # Use wider column ratio to prevent text cutoff
+        cols = st.columns([5, 1])
+
+        with cols[0]:
+            st.page_link(module.file_path, label=module.label)
+
+        with cols[1]:
+            # Add styled badge based on release stage
+            if module.release_stage == "alpha":
+                st.markdown(
+                    '<span style="background-color: #FF8C00; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ALPHA</span>',
+                    unsafe_allow_html=True,
+                )
+            elif module.release_stage == "beta":
+                st.markdown(
+                    '<span style="background-color: #4169E1; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">BETA</span>',
+                    unsafe_allow_html=True,
+                )
+            elif module.release_stage == "archived":
+                st.markdown(
+                    '<span style="background-color: #808080; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ARCH</span>',
+                    unsafe_allow_html=True,
+                )
 
 
 def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_logos_sidebar.png"):
     """
-    Format the sidebar for ProteoBench with active page highlighting and hover effect.
+    Format the sidebar for ProteoBench with active page highlighting, search, and release stage badges.
 
     Parameters
     ----------
@@ -46,62 +75,46 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
     proteobench_logo : str, optional
         Path to the ProteoBench logo image file.
     """
+    from pages.utils.module_registry import filter_modules, get_all_modules
 
     texts = WebpageTexts
-
-    # Define pages
-    dda_pages = {
-        "Quant LFQ DDA ion QExactive": "/Quant_LFQ_DDA_ion_QExactive",
-        "Quant LFQ DDA ion Astral": "/Quant_LFQ_DDA_ion_Astral",
-        "Quant LFQ DDA peptidoform": "/Quant_LFQ_DDA_peptidoform",
-    }
-    dia_pages = {
-        "Quant LFQ DIA ion diaPASEF": "/Quant_LFQ_DIA_ion_diaPASEF",
-        "Quant LFQ DIA ion Astral": "/Quant_LFQ_DIA_ion_Astral",
-        "Quant LFQ DIA ion Single Cell": "/Quant_LFQ_DIA_ion_singlecell",
-        "Quant LFQ DIA ion ZenoTOF": "/Quant_LFQ_DIA_ion_ZenoTOF",
-    }
-    archived_pages = {
-        "Quant LFQ DIA ion AIF": "/Quant_LFQ_DIA_ion_AIF",
-    }
-
-    # Add custom CSS for links and hover
-    st.markdown(
-        """
-    <style>
-    .sidebar-link, .sidebar-link:link, .sidebar-link:visited, .sidebar-link:hover, .sidebar-link:active {
-        display: block;
-        padding: 0.3em 0;
-        color: black !important;
-        text-decoration: none;
-        font-size: 0.95rem;
-        transition: all 0.2s ease-in-out;
-    }
-    .sidebar-link:hover {
-        font-weight: 600;
-    }
-    .sidebar-link-active, .sidebar-link-active:visited {
-        font-weight: 700;
-        color: black !important;
-    }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
+    all_modules = get_all_modules()
 
     # Sidebar layout
     with st.sidebar:
-        home_class = "sidebar-link-active" if current_page == "Home" else "sidebar-link"
-        st.markdown(f'<a href="/" class="{home_class}">Home</a>', unsafe_allow_html=True)
+        st.page_link("Home.py", label="Home")
 
-        with st.expander("DDA", expanded=(current_page in dda_pages)):
-            render_links(dda_pages, current_page=current_page)
+        # Search box
+        search_query = st.text_input(
+            "🔍 Search modules",
+            key="sidebar_search_input",
+            placeholder="Type to filter modules...",
+        )
 
-        with st.expander("DIA", expanded=(current_page in dia_pages)):
-            render_links(dia_pages, current_page=current_page)
+        # Filter modules based on search
+        filtered_modules = filter_modules(all_modules, search_query)
 
-        with st.expander("Archived", expanded=(current_page in archived_pages)):
-            render_links(archived_pages, current_page=current_page)
+        # If search is active, show flat filtered list
+        if search_query:
+            st.markdown("### Search Results")
+            all_filtered = []
+            for category in ["DDA", "DIA", "Archived"]:
+                all_filtered.extend(filtered_modules[category])
+
+            if all_filtered:
+                render_links(all_filtered)
+            else:
+                st.markdown("*No modules match your search.*")
+        else:
+            # Show normal categorized expanders
+            with st.expander("DDA", expanded=(current_page in [m.label for m in all_modules["DDA"]])):
+                render_links(filtered_modules["DDA"])
+
+            with st.expander("DIA", expanded=(current_page in [m.label for m in all_modules["DIA"]])):
+                render_links(filtered_modules["DIA"])
+
+            with st.expander("Archived", expanded=(current_page in [m.label for m in all_modules["Archived"]])):
+                render_links(filtered_modules["Archived"])
 
         st.image(proteobench_logo, width=300)
         st.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")

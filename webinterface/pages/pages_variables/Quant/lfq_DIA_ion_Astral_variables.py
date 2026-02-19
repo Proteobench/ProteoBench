@@ -46,6 +46,14 @@ class VariablesDIAQuantAstral:
     beta_warning: bool = True
     archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_Astral.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion Astral"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_Astral"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_Astral"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_Astral"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_Astral"

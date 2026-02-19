@@ -44,7 +44,24 @@ class VariablesDIAQuantSC:
     alpha_warning: bool = True
     beta_warning: bool = False
     archived_warning: bool = False
-    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git_singlecell"
+    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_singlecell.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion Single Cell"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_singlecell"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: [
+            "DIA",
+            "quantification",
+            "single cell",
+            "Astral",
+            "precursor",
+            "ion",
+            "LFQ",
+            "single-cell",
+        ]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_singlecell"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_singlecell"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_singlecell"

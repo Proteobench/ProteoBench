@@ -291,10 +291,17 @@ def generate_submission_button(button_submission_uuid) -> Optional[str]:
 
 def clear_highlight_column(all_datapoints_submission: str) -> None:
     """
-    Remove the highlight column from the submission data if it exists.
+    Remove the highlight and keyword columns from the submission data if they exist.
+
+    These columns are for UI/session purposes only and should not be included
+    in public submissions to the repository.
     """
-    if "Highlight" in st.session_state[all_datapoints_submission].columns:
-        st.session_state[all_datapoints_submission].drop("Highlight", inplace=True, axis=1)
+    df = st.session_state[all_datapoints_submission]
+    columns_to_remove = ["Highlight", "Keyword"]
+
+    for col in columns_to_remove:
+        if col in df.columns:
+            df.drop(col, inplace=True, axis=1)
 
 
 def compare_dictionaries(old_dict, new_dict):

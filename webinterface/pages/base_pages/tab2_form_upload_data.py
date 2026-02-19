@@ -62,6 +62,14 @@ def generate_input_fields(
     else:
         user_input["input_csv_secondary"] = None
 
+    # Add keyword field for tracking submissions
+    user_input["submission_keyword"] = st.text_input(
+        "Submission Keyword (optional)",
+        help="Enter a keyword to help you identify this submission in the results. This is only visible to you during this session and will not be saved publicly.",
+        max_chars=50,
+        placeholder="e.g., 'test_run_1', 'optimized_settings', etc.",
+    )
+
 
 # TODO: change additional_params_json for other modules, to capture relevant parameters
 def generate_additional_parameters_fields(
@@ -78,15 +86,7 @@ def generate_additional_parameters_fields(
             editable = False
         else:
             editable = True
-
-        if key == "comments_for_plotting":
-            user_input[key] = inputs.generate_input_widget(
-                user_input["input_format"],
-                value,
-                editable,
-            )
-        else:
-            user_input[key] = None
+        user_input[key] = None
 
 
 def process_submission_form(
@@ -158,6 +158,9 @@ def execute_proteobench(variables, ionmodule, user_input) -> bool:
         )
         st.session_state[variables.all_datapoints_submitted] = all_datapoints
 
+        # Store keyword for this submission (session-only)
+        store_submission_keyword(variables, all_datapoints, user_input)
+
         set_highlight_column_in_submitted_data(
             variables=variables,
         )
@@ -227,6 +230,53 @@ def run_benchmarking_process(variables, ionmodule, user_input):
     )
 
 
+def store_submission_keyword(variables, all_datapoints, user_input) -> None:
+    """
+    Store the keyword for the newly submitted datapoint.
+    Keywords are stored in session state only and not persisted to public submissions.
+    """
+    # Initialize keyword storage if it doesn't exist
+    keyword_storage_key = f"{variables.all_datapoints_submitted}_keywords"
+    if keyword_storage_key not in st.session_state:
+        st.session_state[keyword_storage_key] = {}
+
+    # Get the most recent (new) datapoint
+    new_datapoints = all_datapoints[all_datapoints["old_new"] == "new"]
+    if not new_datapoints.empty:
+        latest_datapoint = new_datapoints.iloc[-1]
+        intermediate_hash = latest_datapoint["intermediate_hash"]
+        keyword = user_input.get("submission_keyword", "").strip()
+
+        if keyword:  # Only store if keyword is not empty
+            st.session_state[keyword_storage_key][intermediate_hash] = keyword
+
+
+def add_keywords_column_to_submitted_data(variables) -> None:
+    """
+    Add a 'Keyword' column to the submitted datapoints showing user-defined keywords.
+    """
+    df = st.session_state[variables.all_datapoints_submitted]
+    keyword_storage_key = f"{variables.all_datapoints_submitted}_keywords"
+
+    if keyword_storage_key in st.session_state:
+        keywords_dict = st.session_state[keyword_storage_key]
+        # Map intermediate_hash to keyword, default to empty string
+        df["Keyword"] = df["intermediate_hash"].map(keywords_dict).fillna("")
+    else:
+        df["Keyword"] = ""
+
+    # Move Keyword column to position 1 (after Highlight)
+    if "Keyword" in df.columns:
+        cols = df.columns.tolist()
+        cols.remove("Keyword")
+        # Insert after Highlight if it exists, otherwise at the beginning
+        insert_pos = 1 if "Highlight" in cols else 0
+        cols.insert(insert_pos, "Keyword")
+        df = df[cols]
+
+    st.session_state[variables.all_datapoints_submitted] = df
+
+
 def set_highlight_column_in_submitted_data(variables) -> None:
     """
     Initialize the highlight column in the data points.
@@ -241,3 +291,6 @@ def set_highlight_column_in_submitted_data(variables) -> None:
         df["Highlight"] = df["Highlight"].astype(bool).fillna(False)
     # only needed for last elif, but to be sure apply always:
     st.session_state[variables.all_datapoints_submitted] = df
+
+    # Also add keywords column
+    add_keywords_column_to_submitted_data(variables)

@@ -19,28 +19,28 @@ class QuantScoresHYE(ScoreBase):
 
     Parameters
     ----------
-    precursor_column_name : str
-        Name of the precursor column.
     species_expected_ratio : dict
         Dictionary containing the expected ratios for each species.
     species_dict : dict
         Dictionary containing the species names and their column mappings.
+    feature_column_name : str
+        Name of the feature column. It could be "Proteins", or "Precursors".
     """
 
-    def __init__(self, precursor_column_name: str, species_expected_ratio, species_dict: Dict[str, str]):
+    def __init__(self, species_expected_ratio, species_dict: Dict[str, str], feature_column_name: str):
         """
         Initialize the QuantScoresHYE object.
 
         Parameters
         ----------
-        precursor_column_name : str
-            Name of the precursor.
         species_expected_ratio : dict
             Dictionary containing the expected ratios for each species.
         species_dict : dict
-            Dictionary containing the species names.
+            Dictionary containing the species names and their column mappings.
+        feature_column_name : str
+            Name of the feature column. It could be "Proteins", or "Precursors".
         """
-        self.precursor_column_name = precursor_column_name
+        self.feature_column_name = feature_column_name
         self.species_expected_ratio = species_expected_ratio
         self.species_dict = species_dict
 
@@ -67,7 +67,14 @@ class QuantScoresHYE(ScoreBase):
 
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
-        relevant_columns_df = filtered_df[["Raw file", self.precursor_column_name, "Intensity"]].copy()
+        
+        # Return an error if no feature column is provided
+        if self.feature_column_name is None:
+            raise Exception("No feature column is provided")
+
+        feature_of_interest = self.feature_column_name
+            
+        relevant_columns_df = filtered_df[["Raw file", feature_of_interest, "Intensity"]].copy()
         replicate_to_raw_df = QuantScoresHYE.convert_replicate_to_raw(replicate_to_raw)
 
         all_present = all(
@@ -82,16 +89,15 @@ class QuantScoresHYE(ScoreBase):
         quant_df = QuantScoresHYE.compute_condition_stats(
             relevant_columns_df,
             min_intensity=0,
-            precursor=self.precursor_column_name,
+            feature_of_interest=feature_of_interest,
         )
 
-        species_prec_ion = list(self.species_dict.values())
-        species_prec_ion.append(self.precursor_column_name)
-        prec_ion_to_species = filtered_df[species_prec_ion].drop_duplicates()
-        # merge dataframes quant_df and species_quant_df and prec_ion_to_species using pepdidoform as index
-        quant_df_withspecies = pd.merge(quant_df, prec_ion_to_species, on=self.precursor_column_name, how="inner")
-        species_expected_ratio = self.species_expected_ratio
-        res = QuantScoresHYE.compute_epsilon(quant_df_withspecies, species_expected_ratio)
+        species_feature = list(self.species_dict.values())
+        species_feature.append(feature_of_interest)
+        feature_to_species = filtered_df[species_feature].drop_duplicates()
+        # merge dataframes quant_df and species_quant_df and feature_to_species using feature_of_interest as index
+        quant_df_withspecies = pd.merge(quant_df, feature_to_species, on=feature_of_interest, how="inner")
+        res = QuantScoresHYE.compute_epsilon(quant_df_withspecies, self.species_expected_ratio)
         return res
 
     @staticmethod
@@ -117,10 +123,10 @@ class QuantScoresHYE(ScoreBase):
     def compute_condition_stats(
         relevant_columns_df: pd.DataFrame,
         min_intensity=0,
-        precursor="precursor ion",
+        feature_of_interest= str,
     ) -> pd.DataFrame:
         """
-        Method used to precursor statistics, such as number of observations, CV, mean per condition etc.
+        Method used to compute precursor/protein group statistics, such as number of observations, CV, mean per condition etc.
 
         Parameters
         ----------
@@ -128,22 +134,26 @@ class QuantScoresHYE(ScoreBase):
             DataFrame containing the relevant columns for the statistics.
         min_intensity : int, optional
             Minimum intensity value to filter for. Defaults to 0.
-        precursor : str, optional
-            Name of the precursor column. Defaults to "precursor ion.
+        feature_of_interest : str
+            Name of the feature column. 
 
         Returns
         -------
         pd.DataFrame
-            DataFrame containing the precursor statistics.
+            DataFrame containing the feature statistics.
         """
 
+        ## check that depending on the selected feature of interest, the corresponding column is present in the dataframe
+        if feature_of_interest not in relevant_columns_df.columns:
+            raise Exception(f"{feature_of_interest} column is not present in the dataframe, cannot compute {feature_of_interest} statistics")
+        
         # fiter for min_intensity
         relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] > min_intensity]
 
-        # TODO: check if this is still needed
-        # sum intensity values of the same precursor and "Raw file" using the sum
+        # TODO: check if this is still needed / TODO: if we keep, shall we use mean value?
+        # sum intensity values of the same feature and "Raw file" using the sum
         quant_raw_df_int = (
-            relevant_columns_df.groupby([precursor, "Raw file", "Condition"])["Intensity"]
+            relevant_columns_df.groupby([feature_of_interest, "Raw file", "Condition"])["Intensity"]
             .agg(Intensity="sum", Count="size")
             .reset_index()
         )
@@ -151,14 +161,14 @@ class QuantScoresHYE(ScoreBase):
         # add column "log_Intensity" to quant_raw_df
         quant_raw_df_int["log_Intensity"] = np.log2(quant_raw_df_int["Intensity"])
 
-        # compute the mean of the log_Intensity per precursor and "Condition"
-        quant_raw_df_count = (quant_raw_df_int.groupby([precursor])).agg(nr_observed=("Raw file", "size"))
+        # compute the mean of the log_Intensity per feature_of_interest and "Condition"
+        quant_raw_df_count = (quant_raw_df_int.groupby([feature_of_interest])).agg(nr_observed=("Raw file", "size"))
 
-        # pivot filtered_df_p1 to wide where index peptide ion, columns Raw file and values Intensity
-        intensities_wide = quant_raw_df_int.pivot(index=precursor, columns="Raw file", values="Intensity").reset_index()
+        # pivot filtered_df_p1 to wide where index feature_of_interest, columns Raw file and values Intensity
+        intensities_wide = quant_raw_df_int.pivot(index=feature_of_interest, columns="Raw file", values="Intensity").reset_index()
 
         quant_raw_df = (
-            quant_raw_df_int.groupby([precursor, "Condition"])
+            quant_raw_df_int.groupby([feature_of_interest, "Condition"])
             .agg(
                 log_Intensity_mean=("log_Intensity", "mean"),
                 log_Intensity_std=("log_Intensity", "std"),
@@ -174,7 +184,7 @@ class QuantScoresHYE(ScoreBase):
         quant_raw_df["CV"] = quant_raw_df["Intensity_std"] / quant_raw_df["Intensity_mean"]
         # pivot dataframe wider so for each condition variable there is a column with log_Intensity_mean, log_Intensity_std, Intensity_mean, Intensity_std and CV
         quant_raw_df = quant_raw_df.pivot(
-            index=precursor,
+            index=feature_of_interest,
             columns="Condition",
             values=[
                 "log_Intensity_mean",
@@ -189,8 +199,8 @@ class QuantScoresHYE(ScoreBase):
 
         quant_raw_df["log2_A_vs_B"] = quant_raw_df["log_Intensity_mean_A"] - quant_raw_df["log_Intensity_mean_B"]
 
-        quant_raw_df = pd.merge(quant_raw_df, intensities_wide, on=precursor, how="inner")
-        quant_raw_df = pd.merge(quant_raw_df, quant_raw_df_count, on=precursor, how="inner")
+        quant_raw_df = pd.merge(quant_raw_df, intensities_wide, on=feature_of_interest, how="inner")
+        quant_raw_df = pd.merge(quant_raw_df, quant_raw_df_count, on=feature_of_interest, how="inner")
         return quant_raw_df
 
     @staticmethod

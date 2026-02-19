@@ -70,9 +70,9 @@ def _convert_format(parse_settings, input_df: DataFrame):
 
 
 @handle_benchmarking_error(QuantificationError, "Error generating quantification scores")
-def _create_quant_scores(precursor_column_name: str, parse_settings):
+def _create_quant_scores(feature_column_name: str, parse_settings):
     """Create quantification scores."""
-    return QuantScoresHYE(precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict())
+    return QuantScoresHYE(feature_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict())
 
 
 @handle_benchmarking_error(IntermediateFormatGenerationError, "Error generating intermediate data structure")
@@ -102,7 +102,7 @@ def run_benchmarking(
     all_datapoints: Optional[pd.DataFrame],
     parse_settings_dir: str,
     module_id: str,
-    precursor_column_name: str,
+    feature_column_name: str,
     default_cutoff_min_prec: int = 3,
     add_datapoint_func=None,
     input_file_secondary: str = None,
@@ -124,7 +124,7 @@ def run_benchmarking(
         Directory containing parse settings.
     module_id : str
         Module identifier for configuration.
-    precursor_column_name : str
+    feature_column_name : str
         Name of the precursor column.
     default_cutoff_min_prec : int, optional
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
@@ -148,7 +148,7 @@ def run_benchmarking(
     standard_format, replicate_to_raw = _convert_format(parse_settings, input_df)
 
     # Create quantification scores
-    quant_score = _create_quant_scores(precursor_column_name, parse_settings)
+    quant_score = _create_quant_scores(feature_column_name, parse_settings)
 
     # Generate intermediate structure
     intermediate_metric_structure = _generate_intermediate(quant_score, standard_format, replicate_to_raw)
@@ -176,7 +176,7 @@ def run_benchmarking_with_timing(
     all_datapoints: Optional[pd.DataFrame],
     parse_settings_dir: str,
     module_id: str,
-    precursor_column_name: str,
+    feature_column_name: str,
     default_cutoff_min_prec: int = 3,
     add_datapoint_func=None,
     input_file_secondary: str = None,
@@ -198,7 +198,7 @@ def run_benchmarking_with_timing(
         Directory containing parse settings.
     module_id : str
         Module identifier for configuration.
-    precursor_column_name : str
+    feature_column_name : str
         Name of the precursor column.
     default_cutoff_min_prec : int, optional
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
@@ -237,7 +237,7 @@ def run_benchmarking_with_timing(
 
     with time_block("instantiate_quant_scores"):
         quant_score = QuantScoresHYE(
-            precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            feature_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
 
     with time_block("generate_intermediate"):

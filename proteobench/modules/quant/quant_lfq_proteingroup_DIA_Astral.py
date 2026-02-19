@@ -1,5 +1,5 @@
 """
-DIA Quantification Module for precursor level Quantification for ZenoTOF.
+DIA Quantification Module for protein-group level Quantification for Astral.
 """
 
 from __future__ import annotations
@@ -19,25 +19,25 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_proteingroup import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
 from proteobench.score.quantscores import QuantScoresHYE
 
 
-class DIAQuantIonModuleZenoTOF(QuantModule):
+class DIAQuantProteinGroupModuleAstral(QuantModule):
     """
-    DIA Quantification Module for precursor level Quantification for Astral.
+    DIA Quantification Module for protein-group level Quantification for Astral.
 
     Parameters
     ----------
     token : str
         GitHub token for the user.
     proteobot_repo_name : str, optional
-        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_ZenoTOF".
+        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_proteingroup_DIA_Astral".
     proteobench_repo_name : str, optional
-        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_ZenoTOF".
+        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_proteingroup_DIA_Astral".
 
     Attributes
     ----------
@@ -47,25 +47,25 @@ class DIAQuantIonModuleZenoTOF(QuantModule):
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_DIA_ion_ZenoTOF"
+    module_id: str = "quant_lfq_DIA_proteingroup_Astral"
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_lfq_DIA_ion_ZenoTOF",
-        proteobench_repo_name: str = "Proteobench/Results_quant_lfq_DIA_ion_ZenoTOF",
+        proteobot_repo_name: str = "Proteobot/Results_quant_proteingroup_DIA_Astral",
+        proteobench_repo_name: str = "Proteobench/Results_quant_proteingroup_DIA_Astral",
     ):
         """
-        Initialize the DIA Quantification Module for precursor level Quantification for Astral.
+        Initialize the DIA Quantification Module for protein-group level Quantification for Astral.
 
         Parameters
         ----------
         token : str
             GitHub token for the user.
         proteobot_repo_name : str, optional
-            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_ZenoTOF".
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_proteingroup_DIA_Astral".
         proteobench_repo_name : str, optional
-            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_ZenoTOF".
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_proteingroup_DIA_Astral".
         """
         super().__init__(
             token,
@@ -74,7 +74,7 @@ class DIAQuantIonModuleZenoTOF(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
         )
-        self.feature_column_name = "precursor ion"
+        self.proteingroup_column_name = "Proteins"
 
     def is_implemented(self) -> bool:
         """
@@ -151,10 +151,12 @@ class DIAQuantIonModuleZenoTOF(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScoresHYE(
-                self.feature_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+                parse_settings.species_expected_ratio(), parse_settings.species_dict(), feature_column_name=self.proteingroup_column_name
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
+        
+        print(quant_score)
 
         # Generate intermediate data structure
         try:
@@ -182,3 +184,6 @@ class DIAQuantIonModuleZenoTOF(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    def get_plot_generator(self):
+        return super().get_plot_generator()

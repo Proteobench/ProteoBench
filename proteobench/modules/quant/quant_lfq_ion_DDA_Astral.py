@@ -42,7 +42,7 @@ class DDAQuantIonAstralModule(QuantModule):
     ----------
     module_id : str
         Module identifier for configuration.
-    precursor_column_name: str
+    feature_column_name: str
         Level of quantification.
     """
 
@@ -74,7 +74,7 @@ class DDAQuantIonAstralModule(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
         )
-        self.precursor_column_name = "precursor ion"
+        self.feature_column_name = "precursor ion"
 
     def is_implemented(self) -> bool:
         """
@@ -126,7 +126,7 @@ class DDAQuantIonAstralModule(QuantModule):
             all_datapoints=all_datapoints,
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
-            precursor_column_name=self.precursor_column_name,
+            feature_column_name=self.feature_column_name,
             default_cutoff_min_prec=default_cutoff_min_prec,
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
@@ -174,7 +174,7 @@ class DDAQuantIonAstralModule(QuantModule):
             all_datapoints=all_datapoints,
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
-            precursor_column_name=self.precursor_column_name,
+            feature_column_name=self.feature_column_name,
             default_cutoff_min_prec=default_cutoff_min_prec,
             add_datapoint_func=self.add_current_data_point,
         )

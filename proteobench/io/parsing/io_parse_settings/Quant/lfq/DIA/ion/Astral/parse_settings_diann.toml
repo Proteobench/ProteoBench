@@ -1,7 +1,7 @@
 [mapper]
 "Modified.Sequence" = "Sequence"
 "Run" = "Raw file"
-"Protein.Names" = "Proteins"
+"Protein.Ids" = "Proteins"
 "Precursor.Charge" = "Charge"
 "Precursor.Normalised" = "Intensity"
 

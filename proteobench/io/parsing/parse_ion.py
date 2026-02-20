@@ -516,6 +516,15 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
         input_data_frame = pd.read_parquet(input_csv)
     else:
         input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+
+    # Map gene names to descriptions
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+
+    input_data_frame["Protein.Ids"] = input_data_frame["Protein.Ids"].map(
+        lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
+    )
     return input_data_frame
 
 

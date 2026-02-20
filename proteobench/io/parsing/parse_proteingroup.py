@@ -10,7 +10,7 @@ import warnings
 import pandas as pd
 
 
-def load_input_file(input_csv: str, input_format: str = None) -> pd.DataFrame:
+def load_input_file(input_csv: str, input_format: str = None, input_csv_secondary: str = None) -> pd.DataFrame:
     """
     Load a dataframe from a CSV file depending on its format.
 
@@ -20,6 +20,8 @@ def load_input_file(input_csv: str, input_format: str = None) -> pd.DataFrame:
         The path to the CSV file.
     input_format : str
         The format of the input file (e.g., "DIA-NN", etc.).
+    input_csv_secondary : str, optional
+        The path to a secondary CSV file (currently unused for protein group parsing).
 
     Returns
     -------
@@ -146,6 +148,14 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
     else:  # streamlit OpenedFile object
         filename = input_csv.name
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    input_data_frame["pg"] = input_data_frame["pg"].str.split(";")
+    input_data_frame["pg"] = input_data_frame["pg"].map(
+        lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
+    )
+    input_data_frame["pg"] = input_data_frame["pg"].str.join(";")
     return input_data_frame
 
 _LOAD_FUNCTIONS = {

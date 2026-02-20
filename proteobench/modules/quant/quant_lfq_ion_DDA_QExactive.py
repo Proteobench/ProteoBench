@@ -51,6 +51,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
+        use_github: bool = True,
     ):
         """
         Initialize the DDA Quantification Module for precursor level Quantification.
@@ -63,6 +64,8 @@ class DDAQuantIonModuleQExactive(QuantModule):
             Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DDA".
         proteobench_repo_name : str, optional
             Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DDA".
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True.
         """
 
         super().__init__(
@@ -71,6 +74,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            use_github=use_github,
         )
         self.feature_column_name = "precursor ion"
 

@@ -54,6 +54,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
+        use_github: bool = True,
     ):
         """
         Initialize the DDA Quantification Module for Peptidoform level Quantification.
@@ -66,6 +67,8 @@ class DDAQuantPeptidoformModule(QuantModule):
             Repository for pull requests and adding new points, by default "Proteobot/Results_quant_peptidoform_DDA".
         proteobench_repo_name : str, optional
             Repository for storing benchmarking results, by default "Proteobench/Results_quant_peptidoform_DDA".
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True.
         """
         super().__init__(
             token,
@@ -73,6 +76,7 @@ class DDAQuantPeptidoformModule(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            use_github=use_github,
         )
         self.feature_column_name = "peptidoform"
 

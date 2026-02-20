@@ -99,6 +99,7 @@ class QuantModule:
         proteobot_repo_name: str,
         parse_settings_dir: str,
         module_id: str,
+        use_github: bool = True,
     ):
         """
         Initialize the QuantModule with GitHub repo and settings.
@@ -115,6 +116,8 @@ class QuantModule:
             The directory containing parse settings.
         module_id : str
             The module identifier for configuration.
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True. Used for dev.
         """
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
@@ -125,7 +128,8 @@ class QuantModule:
             clone_dir=self.t_dir,
             clone_dir_pr=self.t_dir_pr,
         )
-        self.github_repo.clone_repo()
+        if use_github:
+            self.github_repo.clone_repo()
         self.parse_settings_dir = parse_settings_dir
 
         self.feature_column_name = ""

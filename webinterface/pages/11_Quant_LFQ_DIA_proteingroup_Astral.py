@@ -39,7 +39,7 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.proteingroupmodule: DIAQuantProteingroupModuleAstral = DIAQuantProteingroupModuleAstral(token=token)
+        self.proteingroupmodule: DIAQuantProteingroupModuleAstral = DIAQuantProteingroupModuleAstral(token=token, use_github=False)
         self.parsesettingsbuilder = ParseSettingsBuilder(
             module_id=self.proteingroupmodule.module_id, parse_settings_dir=self.variables_dia_quant.parse_settings_dir
         )

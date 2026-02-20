@@ -28,7 +28,7 @@ def load_input_file(input_csv: str, input_format: str = None, input_csv_secondar
     pd.DataFrame
         The loaded dataframe.
     """
-    try: #TODO: is this necessary? I have to try out MQ input.
+    try:  # TODO: is this necessary? I have to try out MQ input.
         if input_format == "MaxQuant":
             warnings.warn(
                 """
@@ -42,6 +42,7 @@ def load_input_file(input_csv: str, input_format: str = None, input_csv_secondar
         raise ValueError(f"Invalid input format: {input_format}") from e
 
     return load_function(input_csv)
+
 
 # def _load_custom(input_csv: str) -> pd.DataFrame:
 #     """
@@ -90,6 +91,7 @@ def _load_alphadia(input_csv: str) -> pd.DataFrame:
     input_data_frame["pg"] = input_data_frame["pg"].str.join(";")
     return input_data_frame
 
+
 def _load_diann(input_csv: str) -> pd.DataFrame:
     """
     Load a DIA-NN output file.
@@ -118,6 +120,7 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
     )
     input_data_frame["Protein.Group"] = input_data_frame["Protein.Group"].str.join(";")
     return input_data_frame
+
 
 _LOAD_FUNCTIONS = {
     # "MaxQuant": _load_maxquant,

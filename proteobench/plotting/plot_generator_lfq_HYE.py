@@ -194,7 +194,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         # Validate that feature_column_name exists in the result data
         sample_result_found = False
         feature_column_exists = False
-        
+
         for v in benchmark_metrics_df["results"]:
             for v2 in v.values():
                 sample_result_found = True
@@ -203,7 +203,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     break
             if feature_column_exists:
                 break
-        
+
         if sample_result_found and not feature_column_exists:
             # Get available columns from a sample result for error message
             available_columns = []
@@ -213,12 +213,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     break
                 if available_columns:
                     break
-            
+
             raise ValueError(
                 f"Feature column '{feature_column_name}' not found in results data. "
                 f"Available columns: {available_columns}"
             )
-        
+
         all_nr_feature = [v2[feature_column_name] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point

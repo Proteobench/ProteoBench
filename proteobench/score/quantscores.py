@@ -67,13 +67,13 @@ class QuantScoresHYE(ScoreBase):
 
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
-        
+
         # Return an error if no feature column is provided
         if self.feature_column_name is None:
             raise Exception("No feature column is provided")
 
         feature_of_interest = self.feature_column_name
-            
+
         relevant_columns_df = filtered_df[["Raw file", feature_of_interest, "Intensity"]].copy()
         replicate_to_raw_df = QuantScoresHYE.convert_replicate_to_raw(replicate_to_raw)
 
@@ -123,7 +123,7 @@ class QuantScoresHYE(ScoreBase):
     def compute_condition_stats(
         relevant_columns_df: pd.DataFrame,
         min_intensity=0,
-        feature_of_interest= str,
+        feature_of_interest=str,
     ) -> pd.DataFrame:
         """
         Method used to compute precursor/protein group statistics, such as number of observations, CV, mean per condition etc.
@@ -135,7 +135,7 @@ class QuantScoresHYE(ScoreBase):
         min_intensity : int, optional
             Minimum intensity value to filter for. Defaults to 0.
         feature_of_interest : str
-            Name of the feature column. 
+            Name of the feature column.
 
         Returns
         -------
@@ -145,8 +145,10 @@ class QuantScoresHYE(ScoreBase):
 
         ## check that depending on the selected feature of interest, the corresponding column is present in the dataframe
         if feature_of_interest not in relevant_columns_df.columns:
-            raise Exception(f"{feature_of_interest} column is not present in the dataframe, cannot compute {feature_of_interest} statistics")
-        
+            raise Exception(
+                f"{feature_of_interest} column is not present in the dataframe, cannot compute {feature_of_interest} statistics"
+            )
+
         # fiter for min_intensity
         relevant_columns_df = relevant_columns_df[relevant_columns_df["Intensity"] > min_intensity]
 
@@ -165,7 +167,9 @@ class QuantScoresHYE(ScoreBase):
         quant_raw_df_count = (quant_raw_df_int.groupby([feature_of_interest])).agg(nr_observed=("Raw file", "size"))
 
         # pivot filtered_df_p1 to wide where index feature_of_interest, columns Raw file and values Intensity
-        intensities_wide = quant_raw_df_int.pivot(index=feature_of_interest, columns="Raw file", values="Intensity").reset_index()
+        intensities_wide = quant_raw_df_int.pivot(
+            index=feature_of_interest, columns="Raw file", values="Intensity"
+        ).reset_index()
 
         quant_raw_df = (
             quant_raw_df_int.groupby([feature_of_interest, "Condition"])

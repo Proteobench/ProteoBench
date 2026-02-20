@@ -65,7 +65,9 @@ class VariablesDIAQuantProteingroupAstral:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_proteingroup_Astral"
     metric_selector_uuid: str = "metric_selector_uuid_dia_quant_proteingroup_Astral"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_proteingroup_Astral"
-    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant_proteingroup_Astral"
+    metric_calc_approach_selector_submitted_uuid: str = (
+        "metric_calc_approach_selector_submitted_uuid_dia_quant_proteingroup_Astral"
+    )
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_proteingroup_Astral"
 
     metric_plot_labels: List[str] = field(
@@ -94,16 +96,16 @@ class VariablesDIAQuantProteingroupAstral:
     placeholder_slider_submitted: str = "placeholder_slider_submitted_dia_quant_proteingroup_Astral"
     highlight_list_submitted: List[str] = field(default_factory=list)
 
-    placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dia_quant_proteingroup_Astral"
+    placeholder_dataset_selection_container: str = (
+        "placeholder_dataset_selection_container_dia_quant_proteingroup_Astral"
+    )
     dataset_selector_id_uuid: str = "dataset_selector_id_dia_quant_proteingroup_Astral"
 
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/proteingroup/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-quant-lfq-proteingroup-dia-Astral_2Th/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-quant-lfq-proteingroup-dia-Astral_2Th/"
 
     title: str = "DIA Protein group quantification - Astral 2 Th"
 

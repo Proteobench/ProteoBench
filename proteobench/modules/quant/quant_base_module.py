@@ -176,7 +176,7 @@ class QuantModule:
             # Create a DataFrame with just the current datapoint
             current_datapoint["old_new"] = "new"
             return pd.DataFrame([current_datapoint]).reset_index(drop=True)
-            
+
         all_datapoints = all_datapoints.T
         current_datapoint["old_new"] = "new"
 
@@ -323,7 +323,10 @@ class QuantModule:
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
+            intermediate_metric_structure,
+            input_format,
+            user_input,
+            default_cutoff_min_feature=default_cutoff_min_feature,
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)

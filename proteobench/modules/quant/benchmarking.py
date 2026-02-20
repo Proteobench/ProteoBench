@@ -245,7 +245,10 @@ def run_benchmarking_with_timing(
 
     with time_block("generate_datapoint"):
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
+            intermediate_metric_structure,
+            input_format,
+            user_input,
+            default_cutoff_min_feature=default_cutoff_min_feature,
         )
 
     if add_datapoint_func is not None:

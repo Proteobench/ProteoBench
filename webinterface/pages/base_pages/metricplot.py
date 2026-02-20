@@ -35,7 +35,7 @@ def render_metric_plot(
     annotation : str, optional
         Annotation text to display on the plot.
 
-    ionmodule : object, optional  
+    ionmodule : object, optional
         The ion module instance containing y_axis_title attribute.
 
     Returns
@@ -48,7 +48,6 @@ def render_metric_plot(
 
     # Check if user selected "Species-weighted" mode but no datapoints have these metrics
     if mode == "Species-weighted":
-
         metric_lower, mode_suffix, _ = plot_generator._get_metric_column_name(metric, mode)
         metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
 
@@ -78,8 +77,8 @@ def render_metric_plot(
 
     try:
         # Get y_axis_title from module if available
-        y_axis_title = getattr(ionmodule, 'y_axis_title', None) if ionmodule else None
-        
+        y_axis_title = getattr(ionmodule, "y_axis_title", None) if ionmodule else None
+
         fig_metric = plot_generator.plot_main_metric(
             data,
             metric=metric,

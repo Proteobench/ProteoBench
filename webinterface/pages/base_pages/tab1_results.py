@@ -163,7 +163,9 @@ def display_existing_results(variables, ionmodule) -> None:
         ionmodule=ionmodule,
     )
 
-    df_display = prepare_display_dataframe(data_points_filtered, highlight_point_id, feature_name=ionmodule.feature_column_name)
+    df_display = prepare_display_dataframe(
+        data_points_filtered, highlight_point_id, feature_name=ionmodule.feature_column_name
+    )
     grid_options = configure_aggrid(df_display)
 
     # prepare df key explicitly for tab 1

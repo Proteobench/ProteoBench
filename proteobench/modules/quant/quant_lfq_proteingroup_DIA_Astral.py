@@ -78,7 +78,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "n_pg" # feature count reported by metrics
+        self.feature_column_name = "n_pg"  # feature count reported by metrics
         self.y_axis_title = "Total number of protein groups quantified in the selected number of raw files"
         self.proteingroup_column_name = "Proteins"
 
@@ -157,11 +157,13 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScoresHYE(
-                parse_settings.species_expected_ratio(), parse_settings.species_dict(), feature_column_name=self.proteingroup_column_name
+                parse_settings.species_expected_ratio(),
+                parse_settings.species_dict(),
+                feature_column_name=self.proteingroup_column_name,
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
-        
+
         print(quant_score)
 
         # Generate intermediate data structure
@@ -173,7 +175,10 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         # Generate current data point
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
-                intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
+                intermediate_metric_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_feature=default_cutoff_min_feature,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

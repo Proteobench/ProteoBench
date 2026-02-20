@@ -9,10 +9,21 @@ from proteobench.exceptions import ProteoBenchError
 from . import inputs
 
 
-def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input) -> None:
+def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input, ionmodule=None) -> None:
     """
     Display software selector outside the form and show AlphaDIA-specific information.
     This allows immediate feedback when AlphaDIA is selected.
+
+    Parameters
+    ----------
+    variables : object
+        Module variables object
+    parsesettingsbuilder : object
+        Parse settings builder
+    user_input : dict
+        User input dictionary
+    ionmodule : object, optional
+        Ion module object to determine feature type. Defaults to None.
     """
     st.subheader("Input files")
     st.markdown(open(variables.description_input_file_md, "r", encoding="utf-8").read())
@@ -29,7 +40,11 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     user_input["input_format"] = selected_format
 
     # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
-    if selected_format == "AlphaDIA":
+    if (
+        selected_format == "AlphaDIA"
+        and hasattr(ionmodule, "feature_column_name")
+        and ionmodule.feature_column_name == "n_prec"
+    ):
         st.info(
             "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
             "**If not, you have the following options:**\n\n"
@@ -41,6 +56,7 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
 
 def generate_input_fields(
     user_input,
+    ionmodule=None,
 ) -> None:
     """
     Create the file upload section of the form.
@@ -53,7 +69,11 @@ def generate_input_fields(
     )
 
     # For AlphaDIA, show secondary file uploader after main uploader
-    if user_input.get("input_format") == "AlphaDIA":
+    if (
+        user_input.get("input_format") == "AlphaDIA"
+        and hasattr(ionmodule, "feature_column_name")
+        and ionmodule.feature_column_name == "n_pg"
+    ):
         user_input["input_csv_secondary"] = st.file_uploader(
             "Upload second AlphaDIA file (optional)",
             type=["tsv", "csv"],
@@ -107,7 +127,12 @@ def process_submission_form(
         return False
 
     # For AlphaDIA, inform about the two-file option but allow single merged file
-    if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
+    if (
+        user_input["input_format"] == "AlphaDIA"
+        and not user_input.get("input_csv_secondary")
+        and hasattr(ionmodule, "feature_column_name")
+        and ionmodule.feature_column_name == "n_prec"
+    ):
         # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
         st.info(
             "Only for AlphaDIA v1: You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "

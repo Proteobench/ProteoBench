@@ -135,7 +135,9 @@ def configure_aggrid(df: pd.DataFrame):
     return gb.build()
 
 
-def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None, feature_name: str = "nr_feature") -> pd.DataFrame:
+def prepare_display_dataframe(
+    df: pd.DataFrame, highlight_id: str | None, feature_name: str = "nr_feature"
+) -> pd.DataFrame:
     """
     Prepares the DataFrame for display, including column filtering, ordering,
     row highlighting, and numeric formatting.
@@ -147,7 +149,7 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None, featur
 
     highlight_id : str or None
         The ProteoBench ID to highlight (adds a marker in the 'selected' column).
-    
+
     feature_name : str, optional
         The name of the feature count column. Defaults to "nr_feature".
 

@@ -80,7 +80,7 @@ class DIAQuantPeptidoformModule(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "n_peptidoforms" # feature count reported by metrics
+        self.feature_column_name = "n_peptidoforms"  # feature count reported by metrics
         self.y_axis_title = "Total number of peptidoforms quantified in the selected number of raw files"
 
     def is_implemented(self) -> bool:
@@ -172,7 +172,10 @@ class DIAQuantPeptidoformModule(QuantModule):
         # Generate current data point
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
-                intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
+                intermediate_metric_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_feature=default_cutoff_min_feature,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

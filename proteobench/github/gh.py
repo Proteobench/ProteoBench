@@ -12,6 +12,7 @@ from git import Repo, exc
 # Make GitHub functionality optional
 try:
     from github import Github
+
     GITHUB_AVAILABLE = True
 except ImportError:
     Github = None
@@ -22,7 +23,7 @@ class GithubProteobotRepo:
     """
     A class to interact with GitHub repositories related to Proteobot and Proteobench,
     allowing cloning, committing, and creating pull requests.
-    
+
     Note
     ----
     Pull request functionality requires PyGithub to be installed.
@@ -83,7 +84,7 @@ class GithubProteobotRepo:
     def is_github_available() -> bool:
         """
         Check if PyGithub is available for GitHub API operations.
-        
+
         Returns
         -------
         bool
@@ -310,7 +311,7 @@ class GithubProteobotRepo:
         -------
         int
             The pull request number assigned by GitHub.
-            
+
         Raises
         ------
         ImportError
@@ -320,16 +321,14 @@ class GithubProteobotRepo:
         """
         if not GITHUB_AVAILABLE:
             raise ImportError(
-                "PyGithub is not installed. Please install it with: "
-                "pip install PyGithub or conda install pygithub"
+                "PyGithub is not installed. Please install it with: " "pip install PyGithub or conda install pygithub"
             )
-            
+
         if not self.token:
             raise ValueError(
-                "GitHub token is required for creating pull requests. "
-                "Please provide a valid GitHub token."
+                "GitHub token is required for creating pull requests. " "Please provide a valid GitHub token."
             )
-            
+
         g = Github(self.token)
         repo = g.get_repo(self.proteobot_repo_name)
         base = repo.get_branch("master")

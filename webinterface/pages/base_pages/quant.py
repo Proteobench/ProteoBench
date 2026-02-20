@@ -95,6 +95,7 @@ class QuantUIObjects:
             variables=self.variables,
             parsesettingsbuilder=self.parsesettingsbuilder,
             user_input=self.user_input,
+            ionmodule=self.ionmodule,
         )
         with st.form(key="main_form"):
             tab2_form_upload_data.generate_input_fields(

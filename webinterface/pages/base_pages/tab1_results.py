@@ -160,6 +160,7 @@ def display_existing_results(variables, ionmodule) -> None:
         key=_id_of_key,
         plot_generator=plot_generator,
         annotation=_get_annotation(variables),
+        ionmodule=ionmodule,
     )
 
     df_display = prepare_display_dataframe(data_points_filtered, highlight_point_id, feature_name=ionmodule.feature_column_name)

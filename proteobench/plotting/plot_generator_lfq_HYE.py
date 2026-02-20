@@ -123,6 +123,8 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         label: str = "",
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         annotation: str = "",
+        feature_column_name: str = "nr_feature",
+        y_axis_title: str = None,
         **kwargs,
     ) -> go.Figure:
         """
@@ -148,6 +150,10 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             Mapping for legend names.
         hide_annot : bool
             Whether to hide annotations on the plot.
+        feature_column_name : str
+            names of the column to use to plot the y axis values
+        y_axis_title : str, optional
+            Custom title for the y-axis. If None, will use default titles based on feature_column_name.
         **kwargs : dict
             Additional module-specific parameters.
         Returns
@@ -185,7 +191,35 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 if value is not None:
                     all_metric_values.append(value)
 
-        all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
+        # Validate that feature_column_name exists in the result data
+        sample_result_found = False
+        feature_column_exists = False
+        
+        for v in benchmark_metrics_df["results"]:
+            for v2 in v.values():
+                sample_result_found = True
+                if feature_column_name in v2:
+                    feature_column_exists = True
+                    break
+            if feature_column_exists:
+                break
+        
+        if sample_result_found and not feature_column_exists:
+            # Get available columns from a sample result for error message
+            available_columns = []
+            for v in benchmark_metrics_df["results"]:
+                for v2 in v.values():
+                    available_columns = list(v2.keys())
+                    break
+                if available_columns:
+                    break
+            
+            raise ValueError(
+                f"Feature column '{feature_column_name}' not found in results data. "
+                f"Available columns: {available_columns}"
+            )
+        
+        all_nr_feature = [v2[feature_column_name] for v in benchmark_metrics_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
         hover_texts = []
@@ -261,10 +295,10 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         else:
             layout_xaxis_range = [0, 1]
 
-        if all_nr_prec:
+        if all_nr_feature:
             layout_yaxis_range = [
-                min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
-                max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
+                min(all_nr_feature) - min(max(all_nr_feature) * 0.05, 2000),
+                max(all_nr_feature) + min(max(all_nr_feature) * 0.05, 2000),
             ]
         else:
             layout_yaxis_range = [0, 1000]
@@ -306,7 +340,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             fig.add_trace(
                 go.Scatter(
                     x=x_values,
-                    y=tmp_df["nr_prec"],
+                    y=tmp_df[feature_column_name],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],
                     text=tmp_df[label] if label != "None" else None,
@@ -315,6 +349,20 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     name=legend_name_map.get(tmp_df["software_name"].iloc[0], tmp_df["software_name"].iloc[0]),
                 )
             )
+
+        # Determine y-axis title based on parameter or fallback to feature column name
+        if y_axis_title is not None:
+            # Use the custom y-axis title provided by the module
+            pass  # y_axis_title is already set
+        elif feature_column_name == "n_prec":
+            y_axis_title = "Total number of precursor ions quantified in the selected number of raw files"
+        elif feature_column_name == "n_peptidoform":
+            y_axis_title = "Total number of peptidoforms quantified in the selected number of raw files"
+        elif feature_column_name == "n_proteingroup":
+            y_axis_title = "Total number of protein groups quantified in the selected number of raw files"
+        else:
+            # Fallback for other feature types
+            y_axis_title = f"Total number of {feature_column_name.replace('n_', '')}s quantified in the selected number of raw files"
 
         fig.update_layout(
             width=None,
@@ -327,7 +375,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 linecolor="black",
             ),
             yaxis=dict(
-                title="Total number of precursor ions quantified in the selected number of raw files",
+                title=y_axis_title,
                 gridcolor="white",
                 gridwidth=2,
                 linecolor="black",

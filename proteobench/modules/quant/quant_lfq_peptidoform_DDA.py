@@ -79,6 +79,7 @@ class DDAQuantPeptidoformModule(QuantModule):
             use_github=use_github,
         )
         self.feature_column_name = "n_peptidoforms" # feature count reported by metrics
+        self.y_axis_title = "Total number of peptidoforms quantified in the selected number of raw files"
 
     def is_implemented(self) -> bool:
         """

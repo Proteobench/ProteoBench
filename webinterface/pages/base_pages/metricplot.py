@@ -7,7 +7,7 @@ import streamlit as st
 
 
 def render_metric_plot(
-    data: pd.DataFrame, metric: str, mode: str, label: str, key, plot_generator, annotation: str = ""
+    data: pd.DataFrame, metric: str, mode: str, label: str, key, plot_generator, annotation: str = "", ionmodule=None
 ) -> str | None:
     """
     Displays the metric plot and returns the ProteoBench ID of the selected point (if any).
@@ -31,6 +31,12 @@ def render_metric_plot(
 
     plot_generator : PlotGeneratorBase
         The plot generator instance for the module.
+
+    annotation : str, optional
+        Annotation text to display on the plot.
+
+    ionmodule : object, optional  
+        The ion module instance containing y_axis_title attribute.
 
     Returns
     -------
@@ -71,12 +77,16 @@ def render_metric_plot(
         return None
 
     try:
+        # Get y_axis_title from module if available
+        y_axis_title = getattr(ionmodule, 'y_axis_title', None) if ionmodule else None
+        
         fig_metric = plot_generator.plot_main_metric(
             data,
             metric=metric,
             mode=mode,
             label=label,
             annotation=annotation,
+            y_axis_title=y_axis_title,
         )
         event_dict = st.plotly_chart(
             fig_metric,

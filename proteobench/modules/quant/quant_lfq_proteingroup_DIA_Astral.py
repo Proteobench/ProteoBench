@@ -79,6 +79,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             use_github=use_github,
         )
         self.feature_column_name = "n_pg" # feature count reported by metrics
+        self.y_axis_title = "Total number of protein groups quantified in the selected number of raw files"
         self.proteingroup_column_name = "Proteins"
 
     def is_implemented(self) -> bool:

@@ -98,6 +98,7 @@ def display_submitted_results(variables, ionmodule) -> None:
         label=st.session_state[st.session_state[variables.selectbox_id_submitted_uuid]],
         key=_id_of_key,
         plot_generator=plot_generator,
+        ionmodule=ionmodule,
     )
 
     df_display = prepare_display_dataframe(st.session_state[variables.all_datapoints_submitted], highlight_point_id, feature_name=ionmodule.feature_column_name)

@@ -78,7 +78,7 @@ class DDAQuantIonAstralModule(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "precursor ion"
+        self.feature_column_name = "n_prec" # feature count reported by metrics
 
     def is_implemented(self) -> bool:
         """
@@ -97,7 +97,7 @@ class DDAQuantIonAstralModule(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: pd.DataFrame,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
@@ -113,8 +113,8 @@ class DDAQuantIonAstralModule(QuantModule):
             User provided parameters for plotting.
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec : int
-            Minimum number of runs an ion has to be identified in.
+        default_cutoff_min_feature : int
+            Minimum number of runs a feature has to be identified in.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
 
@@ -131,7 +131,7 @@ class DDAQuantIonAstralModule(QuantModule):
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
             feature_column_name=self.feature_column_name,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
         )
@@ -144,7 +144,7 @@ class DDAQuantIonAstralModule(QuantModule):
         input_format: str,
         user_input: dict[str, object],
         all_datapoints: pd.DataFrame,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, float]]:
         """
         Main workflow of the module with timing information. Used to benchmark workflow results.
@@ -159,7 +159,7 @@ class DDAQuantIonAstralModule(QuantModule):
             User provided parameters for plotting.
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs an ion has to be identified in (default is 3).
 
         Returns
@@ -179,7 +179,7 @@ class DDAQuantIonAstralModule(QuantModule):
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
             feature_column_name=self.feature_column_name,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
         )
 

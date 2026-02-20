@@ -9,7 +9,7 @@ from proteobench.datapoint.quant_datapoint import (
     _detect_unchanged_species,
     compute_roc_auc,
     filter_df_numquant_epsilon,
-    filter_df_numquant_nr_prec,
+    filter_df_numquant_nr_feature,
 )
 from proteobench.score.quantscores import QuantScoresHYE
 
@@ -126,7 +126,7 @@ class TestQuantDatapoint:
             "median_abs_epsilon_precision_eq_species",
             "mean_abs_epsilon_precision_eq_species",
             "variance_epsilon_global",
-            "nr_prec",
+            "nr_feature",
             "CV_median",
             "CV_q75",
             "CV_q90",
@@ -139,7 +139,7 @@ class TestQuantDatapoint:
         # Test with min_nr_observed = 3
         result = QuantDatapointHYE.get_metrics(sample_dataframe, min_nr_observed=3)
         assert 3 in result
-        assert result[3]["nr_prec"] == 3  # Only 3 rows have nr_observed >= 3
+        assert result[3]["nr_feature"] == 3  # Only 3 rows have nr_observed >= 3
 
     def test_get_metrics_edge_cases(self):
         """Test the get_metrics method with edge cases."""
@@ -159,7 +159,7 @@ class TestQuantDatapoint:
         )
         result = QuantDatapointHYE.get_metrics(empty_df)
         assert 1 in result
-        assert result[1]["nr_prec"] == 0
+        assert result[1]["nr_feature"] == 0
 
         # Test with single row - epsilon_precision is 0 when there's only one value per species
         single_row_df = pd.DataFrame(
@@ -177,13 +177,13 @@ class TestQuantDatapoint:
         )
         result = QuantDatapointHYE.get_metrics(single_row_df)
         assert 1 in result
-        assert result[1]["nr_prec"] == 1
+        assert result[1]["nr_feature"] == 1
         assert result[1]["median_abs_epsilon_global"] == 0.1
         assert result[1]["median_abs_epsilon_precision_global"] == 0.0  # No deviation from self
 
     def test_filter_df_numquant_epsilon(self):
         """Test the filter_df_numquant_epsilon function."""
-        sample_row = {"3": {"median_abs_epsilon": 0.25, "mean_abs_epsilon": 0.3, "nr_prec": 100}}
+        sample_row = {"3": {"median_abs_epsilon": 0.25, "mean_abs_epsilon": 0.3, "nr_feature": 100}}
 
         # Test with default parameters
         result = filter_df_numquant_epsilon(sample_row)

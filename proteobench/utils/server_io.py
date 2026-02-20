@@ -204,7 +204,7 @@ def make_submission(submission_files=[], token="", module_name=""):
         param_file = submission_settings["param_file"]
         input_file = submission_settings["input_file"]
         input_type = submission_settings["input_type"]
-        default_cutoff_min_prec = submission_settings["default_cutoff_min_prec"]
+        default_cutoff_min_feature = submission_settings["default_cutoff_min_feature"]
         user_comments = submission_settings["user_comments"]
 
         user_config = defaultdict(lambda: "")
@@ -214,7 +214,7 @@ def make_submission(submission_files=[], token="", module_name=""):
             input_type,
             user_config,
             results_df,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            default_cutoff_min_feature=default_cutoff_min_feature,
         )
 
         results_df_new.tail(5)

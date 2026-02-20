@@ -21,7 +21,7 @@ from pandas import DataFrame
 from proteobench.datapoint.quant_datapoint import (
     QuantDatapointHYE,
     filter_df_numquant_epsilon,
-    filter_df_numquant_nr_prec,
+    filter_df_numquant_nr_feature,
 )
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
@@ -257,8 +257,8 @@ class QuantModule:
             for v in all_datapoints["results"]
         ]
 
-        all_datapoints["nr_prec"] = [
-            filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        all_datapoints["nr_feature"] = [
+            filter_df_numquant_nr_feature(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
 
         return all_datapoints
@@ -269,7 +269,7 @@ class QuantModule:
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
@@ -285,7 +285,7 @@ class QuantModule:
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all datapoints from the ProteoBench repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
@@ -309,7 +309,7 @@ class QuantModule:
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)

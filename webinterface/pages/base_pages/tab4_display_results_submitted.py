@@ -100,7 +100,7 @@ def display_submitted_results(variables, ionmodule) -> None:
         plot_generator=plot_generator,
     )
 
-    df_display = prepare_display_dataframe(st.session_state[variables.all_datapoints_submitted], highlight_point_id)
+    df_display = prepare_display_dataframe(st.session_state[variables.all_datapoints_submitted], highlight_point_id, feature_name=ionmodule.feature_column_name)
     grid_options = configure_aggrid(df_display)
 
     # prepare df key explicitly for tab 4

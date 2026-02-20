@@ -82,10 +82,10 @@ def _generate_intermediate(quant_score, standard_format, replicate_to_raw):
 
 
 @handle_benchmarking_error(DatapointGenerationError, "Error generating datapoint")
-def _generate_datapoint(intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec):
+def _generate_datapoint(intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature):
     """Generate datapoint."""
     return QuantDatapointHYE.generate_datapoint(
-        intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
     )
 
 
@@ -103,7 +103,7 @@ def run_benchmarking(
     parse_settings_dir: str,
     module_id: str,
     feature_column_name: str,
-    default_cutoff_min_prec: int = 3,
+    default_cutoff_min_feature: int = 3,
     add_datapoint_func=None,
     input_file_secondary: str = None,
 ) -> Tuple[DataFrame, DataFrame, DataFrame]:
@@ -126,7 +126,7 @@ def run_benchmarking(
         Module identifier for configuration.
     feature_column_name : str
         Name of the precursor column.
-    default_cutoff_min_prec : int, optional
+    default_cutoff_min_feature : int, optional
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
         Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
@@ -155,7 +155,7 @@ def run_benchmarking(
 
     # Generate datapoint
     current_datapoint = _generate_datapoint(
-        intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec
+        intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature
     )
 
     # Add datapoint if function provided
@@ -177,7 +177,7 @@ def run_benchmarking_with_timing(
     parse_settings_dir: str,
     module_id: str,
     feature_column_name: str,
-    default_cutoff_min_prec: int = 3,
+    default_cutoff_min_feature: int = 3,
     add_datapoint_func=None,
     input_file_secondary: str = None,
 ) -> Tuple[DataFrame, DataFrame, DataFrame, Dict[str, float]]:
@@ -199,9 +199,9 @@ def run_benchmarking_with_timing(
     module_id : str
         Module identifier for configuration.
     feature_column_name : str
-        Name of the precursor column.
-    default_cutoff_min_prec : int, optional
-        Minimum number of runs a precursor ion must be identified in. Defaults to 3.
+        Name of the feature column.
+    default_cutoff_min_feature : int, optional
+        Minimum number of runs a feature must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
         Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
     input_file_secondary : str, optional
@@ -245,7 +245,7 @@ def run_benchmarking_with_timing(
 
     with time_block("generate_datapoint"):
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
         )
 
     if add_datapoint_func is not None:

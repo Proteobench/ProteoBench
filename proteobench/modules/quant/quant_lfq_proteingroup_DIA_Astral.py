@@ -78,6 +78,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
+        self.feature_column_name = "n_pg" # feature count reported by metrics
         self.proteingroup_column_name = "Proteins"
 
     def is_implemented(self) -> bool:
@@ -97,7 +98,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
@@ -113,7 +114,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all data points from the repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs an precursor ion must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
@@ -171,7 +172,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         # Generate current data point
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
-                intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+                intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature=default_cutoff_min_feature
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

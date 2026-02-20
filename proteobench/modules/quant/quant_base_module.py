@@ -121,6 +121,7 @@ class QuantModule:
         """
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
+        self.use_github = use_github  # Store the use_github flag for later use
         self.github_repo = GithubProteobotRepo(
             token,
             proteobot_repo_name=proteobot_repo_name,
@@ -165,8 +166,17 @@ class QuantModule:
             A DataFrame with the current data point added.
         """
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = self.github_repo.read_results_json_repo()
+            if self.use_github:
+                all_datapoints = self.github_repo.read_results_json_repo()
+            else:
+                # Return empty DataFrame when GitHub is disabled
+                all_datapoints = pd.DataFrame()
 
+        if all_datapoints.empty:
+            # Create a DataFrame with just the current datapoint
+            current_datapoint["old_new"] = "new"
+            return pd.DataFrame([current_datapoint]).reset_index(drop=True)
+            
         all_datapoints = all_datapoints.T
         current_datapoint["old_new"] = "new"
 
@@ -198,7 +208,11 @@ class QuantModule:
             A DataFrame containing all data points.
         """
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = self.github_repo.read_results_json_repo()
+            if self.use_github:
+                all_datapoints = self.github_repo.read_results_json_repo()
+            else:
+                # Return empty DataFrame when GitHub is disabled
+                return pd.DataFrame()
 
         all_datapoints["old_new"] = "old"
 

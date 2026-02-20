@@ -22,3 +22,6 @@ def filter_data_using_slider(
             st.session_state[all_datapoints],
             st.session_state[st.session_state[slider_id_uuid]],
         )
+    else:
+        # Return empty DataFrame if slider not initialized
+        return pd.DataFrame()

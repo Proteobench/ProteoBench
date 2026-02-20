@@ -1,5 +1,5 @@
 [mapper]
-"Protein.Group" = "Proteins"
+"pg" = "Proteins"
 
 [condition_mapper]
 "LFQ_Astral_DIA_15min_50ng_Condition_A_REP1" = "A"

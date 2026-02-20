@@ -43,74 +43,6 @@ def load_input_file(input_csv: str, input_format: str = None, input_csv_secondar
 
     return load_function(input_csv)
 
-
-def count_chars(input_string: str, isalpha: bool = True, isupper: bool = True) -> int:
-    """
-    Count the number of characters in the string that match the given criteria.
-
-    Parameters
-    ----------
-    input_string : str
-        The input string.
-    isalpha : bool, optional
-        Whether to count alphabetic characters. Defaults to True.
-    isupper : bool, optional
-        Whether to count uppercase characters. Defaults to True.
-
-    Returns
-    -------
-    int
-        The count of characters that match the criteria.
-    """
-    if isalpha and isupper:
-        return sum(1 for char in input_string if char.isalpha() and char.isupper())
-    if isalpha:
-        return sum(1 for char in input_string if char.isalpha())
-    if isupper:
-        return sum(1 for char in input_string if char.isupper())
-
-
-def get_stripped_seq(input_string: str, isalpha: bool = True, isupper: bool = True) -> str:
-    """
-    Get a stripped version of the sequence containing only characters that match the given criteria.
-
-    Parameters
-    ----------
-    input_string : str
-        The input string.
-    isalpha : bool, optional
-        Whether to include alphabetic characters. Defaults to True.
-    isupper : bool, optional
-        Whether to include uppercase characters. Defaults to True.
-
-    Returns
-    -------
-    str
-        The stripped sequence.
-    """
-    if isalpha and isupper:
-        return "".join(char for char in input_string if char.isalpha() and char.isupper())
-    if isalpha:
-        return "".join(char for char in input_string if char.isalpha())
-    if isupper:
-        return "".join(char for char in input_string if char.isupper())
-
-def to_lowercase(match) -> str:
-    """
-    Convert a match to lowercase.
-
-    Parameters
-    ----------
-    match : re.Match
-        The match object from a regular expression.
-
-    Returns
-    -------
-    str
-        The lowercase version of the matched string.
-    """
-    return match.group(0).lower()
-
 # def _load_custom(input_csv: str) -> pd.DataFrame:
 #     """
 #     Load a custom output file.
@@ -128,6 +60,35 @@ def to_lowercase(match) -> str:
 #     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
 #     return input_data_frame
 
+
+def _load_alphadia(input_csv: str) -> pd.DataFrame:
+    """
+    Load an AlphaDIA output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the AlphaDIA output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    if isinstance(input_csv, str):
+        filename = input_csv
+    else:  # streamlit OpenedFile object
+        filename = input_csv.name
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    input_data_frame["pg"] = input_data_frame["pg"].str.split(";")
+    input_data_frame["pg"] = input_data_frame["pg"].map(
+        lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
+    )
+    input_data_frame["pg"] = input_data_frame["pg"].str.join(";")
+    return input_data_frame
 
 def _load_diann(input_csv: str) -> pd.DataFrame:
     """
@@ -151,11 +112,11 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
-    input_data_frame["pg"] = input_data_frame["pg"].str.split(";")
-    input_data_frame["pg"] = input_data_frame["pg"].map(
+    input_data_frame["Protein.Group"] = input_data_frame["Protein.Group"].str.split(";")
+    input_data_frame["Protein.Group"] = input_data_frame["Protein.Group"].map(
         lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
     )
-    input_data_frame["pg"] = input_data_frame["pg"].str.join(";")
+    input_data_frame["Protein.Group"] = input_data_frame["Protein.Group"].str.join(";")
     return input_data_frame
 
 _LOAD_FUNCTIONS = {
@@ -169,7 +130,7 @@ _LOAD_FUNCTIONS = {
     # "i2MassChroQ": _load_i2masschroq,
     # "Custom": _load_custom,
     "DIA-NN": _load_diann,
-    # "AlphaDIA": _load_alphadia,
+    "AlphaDIA": _load_alphadia,
     # "FragPipe (DIA-NN quant)": _load_fragpipe_diann_quant,
     # "Spectronaut": _load_spectronaut,
     # "MSAID": _load_msaid,

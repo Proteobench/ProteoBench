@@ -92,3 +92,4 @@
 
 [quant_lfq_DIA_proteingroup_Astral]
 "DIA-NN" = "parse_settings_diann.toml"
+"AlphaDIA" = "parse_settings_alphadia.toml"

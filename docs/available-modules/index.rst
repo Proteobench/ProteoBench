@@ -18,6 +18,7 @@ Links to active modules
 - `Label-free quantification of precursor ions with DIA-PASEF <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF>`_ 
 - `Label-free quantification of precursor ions with DIA (Astral) <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral>`_ 
 - `Label-free quantification of precursor ions with DIA (ZenoTOF 8600 - ZenoSWATH) <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF>`_ 
+- `Label-free quantification of precursor ions with DIA (ZenoTOF 8600 - ZenoSWATH) <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_singlecell>`_ 
 
 .. toctree::
    :maxdepth: 2

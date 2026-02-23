@@ -258,13 +258,13 @@ class ParseSettingsQuant:
         df.rename(columns=self.mapper, inplace=True)
         return df
 
-    def _create_replicate_mapping(self) -> Dict[str, List[str]]:
+    def _create_replicate_mapping(self) -> Dict[int, List[str]]:
         """
         Create replicate mapping for the DataFrame.
 
         Returns
         -------
-        Dict[str, List[str]]
+        Dict[int, List[str]]
             A dictionary mapping replicates to raw data.
         """
         replicate_to_raw = defaultdict(list)
@@ -363,7 +363,7 @@ class ParseSettingsQuant:
         else:
             raise ValueError(f"Analysis level '{self.analysis_level}' not supported.")
 
-    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[str, List[str]]]:
+    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert a software tool output into a generic format supported by the module.
 
@@ -386,7 +386,7 @@ class ParseSettingsQuant:
 
         Returns
         -------
-        tuple[pd.DataFrame, Dict[str, List[str]]]
+        tuple[pd.DataFrame, Dict[int, List[str]]]
             The converted DataFrame and a dictionary mapping replicates to raw data.
         """
         df = self._validate_and_rename_columns(df)
@@ -428,7 +428,7 @@ class ParseModificationSettings:
         self.modifications_pattern = rf"{self.modifications_pattern}"
         self.modifications_parse_column = parse_settings["modifications_parser"]["parse_column"]
 
-    def convert_to_proforma(self, df: pd.DataFrame, analysis_level: str) -> tuple[pd.DataFrame, Dict[str, List[str]]]:
+    def convert_to_proforma(self, df: pd.DataFrame, analysis_level: str) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
         """
         Convert modifications to ProForma format.
 
@@ -441,7 +441,7 @@ class ParseModificationSettings:
 
         Returns
         -------
-        tuple[pd.DataFrame, Dict[str, List[str]]]
+        tuple[pd.DataFrame, Dict[int, List[str]]]
             The converted DataFrame and a dictionary mapping replicates to raw data.
         """
         df["proforma"] = df[self.modifications_parse_column].apply(

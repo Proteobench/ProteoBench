@@ -87,6 +87,11 @@ class QuantUIObjects:
             st.session_state[self.variables.params_file_dict] = {}
         if self.variables.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables.slider_id_submitted_uuid] = str()
+        
+        # Initialize empty dataframe for plotting if not exists -- for dev
+        if self.variables.all_datapoints not in st.session_state.keys():
+            import pandas as pd
+            st.session_state[self.variables.all_datapoints] = pd.DataFrame(columns=["id", "intermediate_hash", "old_new"])
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
@@ -130,6 +135,11 @@ class QuantUIObjects:
             st.error("No data available for plotting.", icon="🚨")
             return
         df = st.session_state[key_in_state]
+        
+        # If all_datapoints is empty, try to use submitted data instead
+        if df.empty and self.variables.all_datapoints_submitted in st.session_state.keys():
+            df = st.session_state[self.variables.all_datapoints_submitted]
+        
         if df.empty:
             st.error("No data available for plotting.", icon="🚨")
             return

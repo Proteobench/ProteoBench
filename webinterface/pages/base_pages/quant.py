@@ -24,7 +24,6 @@ from proteobench.utils.server_io import dataset_folder_exists
 from . import (
     tab1_results,
     tab2_form_upload_data,
-    tab3_1_pmultiqc_report,
     tab3_indepth_plots,
     tab4_display_results_submitted,
     tab5_public_submission,

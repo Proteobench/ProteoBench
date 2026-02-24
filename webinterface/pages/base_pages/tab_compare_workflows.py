@@ -306,15 +306,10 @@ def _display_precursor_overlap(
     precursors_1 = set(p.replace("|Z=", "/") for p in precursors_1)
     precursors_2 = set(p.replace("|Z=", "/") for p in precursors_2)
 
-    print(list(precursors_1)[:10])
-    print(list(precursors_2)[:10])
-
     # Calculate overlap statistics
     overlap = len(precursors_1 & precursors_2)
     unique_1 = len(precursors_1 - precursors_2)
     unique_2 = len(precursors_2 - precursors_1)
-
-    print("Unique to workflow 1:", precursors_1 - precursors_2)
 
     # Create stacked bar chart using Plotly
     fig = go.Figure()
@@ -348,7 +343,7 @@ def _display_precursor_overlap(
 
     fig.update_layout(
         title="Precursor Overlap Distribution",
-        barmode="stack",
+        barmode="group",
         yaxis_title="Number of Precursors",
         showlegend=True,
     )

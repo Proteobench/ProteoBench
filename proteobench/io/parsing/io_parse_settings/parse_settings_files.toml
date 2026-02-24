@@ -94,3 +94,4 @@
 "DIA-NN" = "parse_settings_diann.toml"
 "AlphaDIA" = "parse_settings_alphadia.toml"
 "Spectronaut" = "parse_settings_spectronaut.toml"
+"Custom" = "parse_settings_custom.toml"

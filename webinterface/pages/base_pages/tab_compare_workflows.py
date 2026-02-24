@@ -293,6 +293,13 @@ def _display_precursor_overlap(
     st.markdown("### Precursor Overlap")
     st.markdown("Shows which precursors are shared or unique to each workflow.")
 
+    if ("MaxQuant" in workflow_1_id and workflow_1_data["metadata"]["old_new"] == "new") or (
+        "MaxQuant" in workflow_2_id and workflow_2_data["metadata"]["old_new"] == "new"
+    ):
+        st.warning(
+            "⚠️ Precursor overlaps calculated on private MaxQuant data might be inaccurate. If you want to benchmark local MaxQuant workflows, please submit them in a public submission. Reason: Fixed modifications are not included in MaxQuant output and are parsed from the parameter file during submission."
+        )
+
     perf_1 = workflow_1_data["performance_data"]
     perf_2 = workflow_2_data["performance_data"]
 

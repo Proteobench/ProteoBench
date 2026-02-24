@@ -211,7 +211,8 @@ class ParseSettingsQuant:
             DataFrame with marked contaminants.
         """
         df["contaminant"] = df["Proteins"].str.contains(self.contaminant_flag)
-        return df
+        df_no_contaminants = df[df["contaminant"] == False].copy()
+        return df_no_contaminants
 
     def _process_species_information(self, df: pd.DataFrame) -> pd.DataFrame:
         """

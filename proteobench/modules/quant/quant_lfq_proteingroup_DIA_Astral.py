@@ -164,8 +164,6 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
 
-        print(quant_score)
-
         # Generate intermediate data structure
         try:
             intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)

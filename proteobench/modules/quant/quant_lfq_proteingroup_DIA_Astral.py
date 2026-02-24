@@ -157,9 +157,9 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScoresHYE(
+                self.proteingroup_column_name,
                 parse_settings.species_expected_ratio(),
                 parse_settings.species_dict(),
-                feature_column_name=self.proteingroup_column_name,
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")

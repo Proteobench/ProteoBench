@@ -4,7 +4,7 @@ DIA Quantification Module for protein-group level Quantification for Astral.
 
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import Counter, Optional, Tuple
 
 import pandas as pd
 from pandas import DataFrame
@@ -170,6 +170,19 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
+        # Add protein-group specific metrics
+        ## Add the number of unique single accessions in datapoint
+        ### concatenate all accessions into a single list to check for duplicates across protein groups
+        all_accessions = [
+            acc
+            for sublist in intermediate_metric_structure["Proteins"].apply(
+                lambda x: [acc for acc in x.split(";") if ";" not in acc] if pd.notnull(x) else []
+            )
+            for acc in sublist
+        ]
+        # TODO: could we add the number of unique accessions in each group in the intermediate metric?
+        # len(set(all_accessions))
+
         # Generate current data point
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
@@ -180,6 +193,21 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
+
+        try:
+            current_datapoint["total_nr_unique_accessions"] = len(set(all_accessions))
+            # Add the number of unique single accessions that are present more than once (i.e. in multiple protein groups)
+            acc_count_val = Counter(all_accessions).values()
+            ## return how many accessions are present in more than one protein group
+            current_datapoint["Nr_accessions_present_in_multiple_groups"] = sum([count > 1 for count in acc_count_val])
+            current_datapoint["prop_accessions_present_in_multiple_groups"] = (
+                current_datapoint["Nr_accessions_present_in_multiple_groups"]
+                / current_datapoint["total_nr_unique_accessions"]
+                if current_datapoint["total_nr_unique_accessions"] > 0
+                else 0
+            )
+        except Exception as e:
+            raise DatapointGenerationError(f"Error calculating unique protein group accessions metrics: {e}")
 
         # Add current data point to all datapoints
         try:

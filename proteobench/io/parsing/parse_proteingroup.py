@@ -121,6 +121,7 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
     input_data_frame["Protein.Group"] = input_data_frame["Protein.Group"].str.join(";")
     return input_data_frame
 
+
 def _load_spectronaut(input_csv: str) -> pd.DataFrame:
     """
     Load a Spectronaut output file.
@@ -155,6 +156,7 @@ def _load_spectronaut(input_csv: str) -> pd.DataFrame:
     )
     input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
     return input_data_frame
+
 
 _LOAD_FUNCTIONS = {
     # "MaxQuant": _load_maxquant,

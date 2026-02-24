@@ -66,12 +66,12 @@ class StreamlitUI:
             tab_public_submission,
         ) = st.tabs(
             [
-                "Main Figure",
-                "Upload New Run",
-                "View Single Run",
-                "Main Figure with New Run",
-                "Compare Two Runs",
-                "Submit New Run",
+                "View Public Results",
+                "Upload New Results (Private)",
+                "View Single Results",
+                "View Public + New Results",
+                "Compare Two Results",
+                "Submit New Results",
             ]
         )
 

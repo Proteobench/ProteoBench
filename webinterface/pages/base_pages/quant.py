@@ -166,29 +166,6 @@ class QuantUIObjects:
             public_hash=selected_hash,
         )
 
-    @st.fragment
-    def display_pmultiqc_report(self):
-        """Display the pMultiQC report download option of the page in Tab 3.1.
-
-        Build pmultiqc based on intermediate data and save self-contained html file.
-        """
-        if self.variables.result_perf in st.session_state.keys():
-            html_content = st.session_state.get("tab31_pmultiqc_html_content", "")
-            if not html_content:
-                html_content = tab3_1_pmultiqc_report.create_pmultiqc_report_section(self.variables)
-                st.session_state["tab31_pmultiqc_html_content"] = html_content
-                logger.info(
-                    "pMultiQC report generated.",
-                )
-            else:
-                logger.info('using cached pMultiQC report from session_state["tab31_pmultiqc_html_content"].')
-            download_disactivate = True
-            if html_content:
-                download_disactivate = False
-            tab3_1_pmultiqc_report.show_download_button(html_content, disabled=download_disactivate)
-        else:
-            st.warning("No intermediate data available for pMultiQC report. Please first submit data.")
-
     def display_public_submission_ui(self) -> None:
         """
         Display the public submission section of the page in Tab 5.

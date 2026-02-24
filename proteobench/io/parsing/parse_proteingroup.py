@@ -121,6 +121,40 @@ def _load_diann(input_csv: str) -> pd.DataFrame:
     input_data_frame["Protein.Group"] = input_data_frame["Protein.Group"].str.join(";")
     return input_data_frame
 
+def _load_spectronaut(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Spectronaut output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the Spectronaut output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+
+    if input_data_frame["PG.Quantity"].dtype == object:
+        try:
+            input_csv.seek(0)
+        except AttributeError:
+            # if input_csv is a PathPosix object, it does not have a seek method
+            # This can occur when the io util functions are used.
+            # Should probably be fixed some way in the future
+            pass
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t", decimal=",")
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.split(";")
+    input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].map(
+        lambda x: [mapper[protein] if protein in mapper.keys() else protein for protein in x]
+    )
+    input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
+    return input_data_frame
 
 _LOAD_FUNCTIONS = {
     # "MaxQuant": _load_maxquant,
@@ -135,7 +169,7 @@ _LOAD_FUNCTIONS = {
     "DIA-NN": _load_diann,
     "AlphaDIA": _load_alphadia,
     # "FragPipe (DIA-NN quant)": _load_fragpipe_diann_quant,
-    # "Spectronaut": _load_spectronaut,
+    "Spectronaut": _load_spectronaut,
     # "MSAID": _load_msaid,
     # "PEAKS": _load_peaks,
     # "quantms": _load_quantms,

@@ -356,6 +356,33 @@ def _display_precursor_overlap(
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # create a merged table for download
+    merged_precursors = pd.merge(
+        perf_1,
+        perf_2,
+        on=precursor_col,
+        how="outer",
+        suffixes=(f"_{workflow_1_id}", f"_{workflow_2_id}"),
+        indicator="source",
+    )
+    # Give more descriptive names to the source categories
+    merged_precursors["source"] = merged_precursors["source"].map(
+        {"left_only": f"Unique to {workflow_1_id}", "right_only": f"Unique to {workflow_2_id}", "both": "Shared"}
+    )
+    # move source column next to precursor column
+    cols = merged_precursors.columns.tolist()
+    source_col = cols.pop(cols.index("source"))
+    cols.insert(1, source_col)
+    merged_precursors = merged_precursors[cols]
+
+    st.download_button(
+        label="Download merged precursor table",
+        data=merged_precursors.to_csv(index=False).encode("utf-8"),
+        file_name=f"precursor_merge_{workflow_1_id}_{workflow_2_id}.csv",
+        mime="text/csv",
+        key=f"download_precursor_merge_{workflow_1_id}_{workflow_2_id}",
+    )
+
     # Summary statistics
     st.markdown("#### Summary Statistics")
     col1, col2 = st.columns(2)

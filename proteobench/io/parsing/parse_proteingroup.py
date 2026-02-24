@@ -157,6 +157,23 @@ def _load_spectronaut(input_csv: str) -> pd.DataFrame:
     input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
     return input_data_frame
 
+def _load_custom(input_csv: str) -> pd.DataFrame:
+    """
+    Load a custom output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the custom output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    return input_data_frame
+
 
 _LOAD_FUNCTIONS = {
     # "MaxQuant": _load_maxquant,
@@ -167,7 +184,7 @@ _LOAD_FUNCTIONS = {
     # "ProlineStudio": _load_prolinestudio_msangel,
     # "MSAngel": _load_prolinestudio_msangel,
     # "i2MassChroQ": _load_i2masschroq,
-    # "Custom": _load_custom,
+    "Custom": _load_custom,
     "DIA-NN": _load_diann,
     "AlphaDIA": _load_alphadia,
     # "FragPipe (DIA-NN quant)": _load_fragpipe_diann_quant,

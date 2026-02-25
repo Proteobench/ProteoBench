@@ -136,11 +136,15 @@ class DIAQuantIonModulediaPASEF(QuantModule):
 
         # Parse settings file
         try:
-            print(f"Debug: Attempting to load parse settings for module {self.module_id} with input format {input_format}")
+            print(
+                f"Debug: Attempting to load parse settings for module {self.module_id} with input format {input_format}"
+            )
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
-            print(f"Debug: Successfully loaded parse settings for module {self.module_id} with input format {input_format}")
+            print(
+                f"Debug: Successfully loaded parse settings for module {self.module_id} with input format {input_format}"
+            )
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
         except FileNotFoundError as e:
@@ -149,9 +153,13 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
 
         try:
-            print(f"Debug: Attempting to convert to standard format for module {self.module_id} and input format {input_format}")
+            print(
+                f"Debug: Attempting to convert to standard format for module {self.module_id} and input format {input_format}"
+            )
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-            print(f"Debug: Successfully converted to standard format for module {self.module_id} and input format {input_format}")
+            print(
+                f"Debug: Successfully converted to standard format for module {self.module_id} and input format {input_format}"
+            )
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
         except Exception as e:

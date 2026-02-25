@@ -251,14 +251,12 @@ class ParseSettingsQuant:
         pd.DataFrame
             DataFrame with validated and renamed columns.
         """
-        print(f"Debug: Validating columns for module {self.module_id}. Required columns: {self.mapper.keys()}. Input columns: {df.columns}")
         if not all(k in df.columns for k in self.mapper.keys()):
             raise ValueError(
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
                 " Please check input file and selected software tool."
             )
         df.rename(columns=self.mapper, inplace=True)
-        print(f"Debug: Validated and renamed columns for module {self.module_id}")
         return df
 
     def _create_replicate_mapping(self) -> Dict[int, List[str]]:
@@ -396,25 +394,15 @@ class ParseSettingsQuant:
         tuple[pd.DataFrame, Dict[int, List[str]]]
             The converted DataFrame and a dictionary mapping replicates to raw data.
         """
-        print(f"Debug: Starting conversion to standard format for module {self.module_id}")
         df = self._validate_and_rename_columns(df)
-        print(f"Debug: Validated and renamed columns for module {self.module_id}")
         replicate_to_raw = self._create_replicate_mapping()
-        print(f"Debug: Created replicate mapping for module {self.module_id}: {replicate_to_raw}")
         df = self._filter_decoys(df)
-        print(f"Debug: Filtered decoys for module {self.module_id}, remaining rows: {len(df)}")
         df = self._fix_colnames(df)
-        print(f"Debug: Fixed column names for module {self.module_id}")
         df = self._mark_contaminants(df)
-        print(f"Debug: Marked contaminants for module {self.module_id}, remaining rows: {len(df)}")
         df = self._process_species_information(df)
-        print(f"Debug: Processed species information for module {self.module_id}")
         df = self._process_modifications(df)
-        print(f"Debug: Processed modifications for module {self.module_id}")
         df_melted = self._handle_data_format(df)
-        print(f"Debug: Handled data format for module {self.module_id}, resulting rows: {len(df_melted)}")
         df_melted = self._filter_zero_intensities(df_melted)
-        print(f"Debug: Filtered zero intensities for module {self.module_id}, remaining rows: {len(df_melted)}")
         return self._format_by_analysis_level(df_melted), replicate_to_raw
 
 

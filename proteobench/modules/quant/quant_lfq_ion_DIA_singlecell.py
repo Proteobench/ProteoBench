@@ -135,6 +135,9 @@ class DIAQuantIonModulediaSC(QuantModule):
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")   
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
         except FileNotFoundError as e:
@@ -143,7 +146,11 @@ class DIAQuantIonModulediaSC(QuantModule):
             raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
 
         try:
+            print(f"Debug: Attempting to convert to standard format for module {self.module_id} and input format {input_format}")
+            ## For debugging, print the input DataFrame before conversion
+            print(f"Debug: Input DataFrame head before conversion: {input_df.head()}")
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+            print(f"Debug: Successfully converted to standard format for module {self.module_id} and input format {input_format}")
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
         except Exception as e:

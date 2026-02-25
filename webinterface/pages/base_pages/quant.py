@@ -108,6 +108,7 @@ class QuantUIObjects:
         with st.form(key="main_form"):
             tab2_form_upload_data.generate_input_fields(
                 user_input=self.user_input,
+                ionmodule=self.ionmodule,
             )
             # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
             tab2_form_upload_data.generate_additional_parameters_fields(

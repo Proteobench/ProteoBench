@@ -39,11 +39,13 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     # Store selection in user_input for use in form
     user_input["input_format"] = selected_format
 
+    print(f"Debug: Form submission received with input file: iommodule: {ionmodule.module_id}")
+    
     # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
     if (
         selected_format == "AlphaDIA"
-        and hasattr(ionmodule, "feature_column_name")
-        and ionmodule.feature_column_name == "nr_feature"
+        and hasattr(ionmodule, "module_id")
+        and ionmodule.module_id in ["quant_lfq_DIA_ion_diaPASEF", "quant_lfq_DIA_ion_Astral", "quant_lfq_DIA_ion_singlecell", "quant_lfq_DIA_ion_ZenoTOF"]
     ):
         st.info(
             "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
@@ -71,8 +73,8 @@ def generate_input_fields(
     # For AlphaDIA, show secondary file uploader after main uploader
     if (
         user_input.get("input_format") == "AlphaDIA"
-        and hasattr(ionmodule, "feature_column_name")
-        and ionmodule.feature_column_name == "n_pg"
+        and hasattr(ionmodule, "module_id")
+        and ionmodule.module_id in ["quant_lfq_DIA_ion_diaPASEF", "quant_lfq_DIA_ion_Astral", "quant_lfq_DIA_ion_singlecell", "quant_lfq_DIA_ion_ZenoTOF"]
     ):
         user_input["input_csv_secondary"] = st.file_uploader(
             "Upload second AlphaDIA file (optional)",
@@ -130,8 +132,8 @@ def process_submission_form(
     if (
         user_input["input_format"] == "AlphaDIA"
         and not user_input.get("input_csv_secondary")
-        and hasattr(ionmodule, "feature_column_name")
-        and ionmodule.feature_column_name == "nr_feature"
+        and hasattr(ionmodule, "module_id")
+        and ionmodule.module_id in ["quant_lfq_DIA_ion_diaPASEF", "quant_lfq_DIA_ion_Astral", "quant_lfq_DIA_ion_singlecell", "quant_lfq_DIA_ion_ZenoTOF"]
     ):
         # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
         st.info(

@@ -164,7 +164,7 @@ def display_existing_results(variables, ionmodule) -> None:
     )
 
     df_display = prepare_display_dataframe(
-        data_points_filtered, highlight_point_id, feature_name=ionmodule.feature_column_name
+        data_points_filtered, highlight_point_id,
     )
     grid_options = configure_aggrid(df_display)
 

@@ -132,8 +132,6 @@ class QuantModule:
         if use_github:
             self.github_repo.clone_repo()
         self.parse_settings_dir = parse_settings_dir
-
-        self.feature_column_name = ""
         self.module_id = module_id
 
     def is_implemented(self) -> bool:
@@ -325,6 +323,8 @@ class QuantModule:
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+
+        self.y_axis_title = parse_settings.y_axis_title
 
         # Get quantification data
         quant_score = QuantScoresHYE(

@@ -124,7 +124,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         annotation: str = "",
         feature_column_name: str = "nr_feature",
-        y_axis_title: str = None,
+        y_axis_title: str = None, # should be retrieved from parse settings in the future, but allowing override for now
         **kwargs,
     ) -> go.Figure:
         """

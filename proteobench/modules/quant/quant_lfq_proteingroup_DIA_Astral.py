@@ -148,7 +148,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
         except Exception as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
-
+        
         try:
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
             print(f"Debug: Successfully converted input DataFrame to standard format for module {self.module_id}: {standard_format} with replicate to raw mapping: {replicate_to_raw}")
@@ -169,7 +169,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             print(f"Debug: quant_score.feature_column_name: {quant_score.feature_column_name}, quant_score.species_expected_ratio: {quant_score.species_expected_ratio}, quant_score.species_dict: {quant_score.species_dict}")
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
-        
+
         # Generate intermediate data structure
         try:
             intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)

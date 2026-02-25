@@ -64,6 +64,7 @@ def filter_df_numquant_epsilon(
 def filter_df_numquant_nr_feature(row: pd.Series, min_quant: int = 3) -> int | None:
     """
     Extract the 'nr_feature' value from a row (assumed to be a dictionary).
+    Falls back to 'nr_prec' for backward compatibility with legacy data.
 
     Parameters
     ----------
@@ -75,12 +76,13 @@ def filter_df_numquant_nr_feature(row: pd.Series, min_quant: int = 3) -> int | N
     Returns
     -------
     int, None
-        The 'nr_feature' value if found, otherwise None.
+        The 'nr_feature' or 'nr_prec' value if found, otherwise None.
     """
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("nr_feature")
+        # Try nr_feature first (new standard), then nr_prec (legacy)
+        return row[min_quant].get("nr_feature") or row[min_quant].get("nr_prec")
     return None
 
 
@@ -318,6 +320,12 @@ class QuantDatapointHYE(DatapointBase):
     nr_feature: int = 0
     comments: str = ""
     proteobench_version: str = ""
+    nr_prec: int = None  # Backward compatibility field
+
+    def __post_init__(self):
+        """Handle backward compatibility for nr_prec -> nr_feature migration."""
+        if self.nr_prec is not None and not self.nr_feature:
+            self.nr_feature = self.nr_prec
 
     def generate_id(self) -> None:
         """

@@ -40,7 +40,7 @@ class StreamlitUI:
         except KeyError:
             token = ""
 
-        self.peptidoform_module: DDAQuantPeptidoformModule = DDAQuantPeptidoformModule(token=token, use_github=False)
+        self.peptidoform_module: DDAQuantPeptidoformModule = DDAQuantPeptidoformModule(token=token, use_github=True)
         self.parsesettingsbuilder = ParseSettingsBuilder(
             module_id="dia", parse_settings_dir=self.variables_dda_quant.parse_settings_dir
         )

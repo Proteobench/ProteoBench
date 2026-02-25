@@ -201,9 +201,15 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 if feature_column_name in v2:
                     feature_column_exists = True
                     break
-            if feature_column_exists:
-                break
-
+                elif feature_column_name == "nr_feature" and "nr_prec" in v2:  # Backward compatibility check for precursor ion modules
+                    feature_column_exists = True
+                    ## replace the key "nr_prec" with feature_column_name in the result data benchmark_metrics_df for consistent plotting
+                    print("Debug: 'nr_feature' not found, but 'nr_prec' found. Applying backward compatibility mapping for old versions of precursor ion modules.")
+                    # Rename nr_prec to feature_column_name in ALL nested result dictionaries
+                    v2[feature_column_name] = v2.pop("nr_prec")
+            # if feature_column_exists:
+            #     break
+        
         if sample_result_found and not feature_column_exists:
             # Get available columns from a sample result for error message
             available_columns = []

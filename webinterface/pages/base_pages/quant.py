@@ -88,13 +88,13 @@ class QuantUIObjects:
         if self.variables.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables.slider_id_submitted_uuid] = str()
 
-        # Initialize empty dataframe for plotting if not exists -- for dev
-        if self.variables.all_datapoints not in st.session_state.keys():
-            import pandas as pd
+        # # Initialize empty dataframe for plotting if not exists -- for dev
+        # if self.variables.all_datapoints not in st.session_state.keys():
+        #     import pandas as pd
 
-            st.session_state[self.variables.all_datapoints] = pd.DataFrame(
-                columns=["id", "intermediate_hash", "old_new"]
-            )
+        #     st.session_state[self.variables.all_datapoints] = pd.DataFrame(
+        #         columns=["id", "intermediate_hash", "old_new"]
+        #     )
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""

@@ -78,7 +78,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "n_pg"  # feature count reported by metrics
+        self.feature_column_name = "nr_feature"  # feature count reported by metrics
         self.y_axis_title = "Total number of protein groups quantified in the selected number of raw files"
         self.proteingroup_column_name = "Proteins"
 
@@ -163,7 +163,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
-
+        
         # Generate intermediate data structure
         try:
             intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)

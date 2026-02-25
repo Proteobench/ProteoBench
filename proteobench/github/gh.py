@@ -215,9 +215,9 @@ class GithubProteobotRepo:
                     data.append(pd.read_json(f, typ="series"))
         if not data:
             try:
-                self.read_results_json_repo_single_file()
+                return self.read_results_json_repo_single_file()
             except FileNotFoundError:
-                data = []
+                raise FileNotFoundError("No JSON data files found in repository and no results.json fallback available")
 
         return pd.DataFrame(data)
 

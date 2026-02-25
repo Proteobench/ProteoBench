@@ -3,8 +3,6 @@ import os
 import pandas as pd
 import pytest
 
-from proteobench import proteobench
-
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder

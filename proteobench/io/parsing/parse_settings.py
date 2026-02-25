@@ -124,6 +124,7 @@ class ParseSettingsQuant:
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
+        self.y_axis_title = parse_settings_module["general"]["y_axis_title"]
         self.modification_parser = None
 
     def species_dict(self) -> Dict[str, str]:
@@ -359,6 +360,10 @@ class ParseSettingsQuant:
         elif self.analysis_level == "peptidoform":
             if "proforma" in df.columns:
                 df["peptidoform"] = df["proforma"]
+            return df
+        elif self.analysis_level == "proteingroup":
+            if "Proteins" in df.columns:
+                df["proteingroup"] = df["Proteins"]
             return df
         else:
             raise ValueError(f"Analysis level '{self.analysis_level}' not supported.")

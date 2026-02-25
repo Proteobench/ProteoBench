@@ -78,7 +78,7 @@ class DIAQuantIonModuleAstral(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "nr_feature"  # feature count reported by metrics
+        self.feature_column_name = "precursor ion"  # feature count reported by metrics
         self.y_axis_title = "Total number of precursor ions quantified in the selected number of raw files"
 
     def is_implemented(self) -> bool:
@@ -127,6 +127,7 @@ class DIAQuantIonModuleAstral(QuantModule):
         # Parse workflow output file
         try:
             input_df = load_input_file(input_file, input_format, input_file_secondary)
+            print(f"Debug: Successfully loaded input file: {input_file}")
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
@@ -136,6 +137,7 @@ class DIAQuantIonModuleAstral(QuantModule):
 
         # Parse settings file
         try:
+            print(f"Debug: Attempting to parse settings for module {self.module_id} and input format {input_format}")
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
@@ -147,6 +149,7 @@ class DIAQuantIonModuleAstral(QuantModule):
             raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
 
         try:
+            print(f"Debug: Attempting to convert input DataFrame to standard format for module {self.module_id}")
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
@@ -155,6 +158,7 @@ class DIAQuantIonModuleAstral(QuantModule):
 
         # Calculate quantification scores
         try:
+            print(f"Debug: Attempting to calculate quantification scores for module {self.module_id} with feature column {self.feature_column_name}")
             quant_score = QuantScoresHYE(
                 self.feature_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
@@ -163,24 +167,30 @@ class DIAQuantIonModuleAstral(QuantModule):
 
         # Generate intermediate data structure
         try:
+            print(f"Debug: Attempting to generate intermediate data structure for module {self.module_id} with the following standard format: {standard_format} and replicate to raw mapping: {replicate_to_raw}")
             intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+            print(f"Debug: Successfully generated intermediate data structure: {intermediate_metric_structure}")
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
         # Generate current data point
         try:
+            print(f"Debug: Attempting to generate current data point for module {self.module_id} with intermediate metric structure {intermediate_metric_structure} and input format {input_format}")
             current_datapoint = QuantDatapointHYE.generate_datapoint(
                 intermediate_metric_structure,
                 input_format,
                 user_input,
                 default_cutoff_min_feature=default_cutoff_min_feature,
             )
+            print(f"Debug: Successfully generated current data point: {current_datapoint}")
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
         # Add current data point to all datapoints
         try:
+            print(f"Debug: Attempting to add current data point to all datapoints for module {self.module_id} with current datapoint {current_datapoint} and all_datapoints {all_datapoints}")
             all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
+            print(f"Debug: Successfully added current data point to all datapoints: {all_datapoints}")
         except Exception as e:
             raise DatapointAppendError(f"Error adding current data point: {e}")
 

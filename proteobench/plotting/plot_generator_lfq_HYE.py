@@ -360,15 +360,9 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         if y_axis_title is not None:
             # Use the custom y-axis title provided by the module
             pass  # y_axis_title is already set
-        elif feature_column_name == "n_prec":
-            y_axis_title = "Total number of precursor ions quantified in the selected number of raw files"
-        elif feature_column_name == "n_peptidoform":
-            y_axis_title = "Total number of peptidoforms quantified in the selected number of raw files"
-        elif feature_column_name == "n_proteingroup":
-            y_axis_title = "Total number of protein groups quantified in the selected number of raw files"
         else:
             # Fallback for other feature types
-            y_axis_title = f"Total number of {feature_column_name.replace('n_', '')}s quantified in the selected number of raw files"
+            y_axis_title = f"Total number of {feature_column_name.replace('nr_', '')}s quantified in the selected number of raw files"
 
         fig.update_layout(
             width=None,

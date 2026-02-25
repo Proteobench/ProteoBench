@@ -43,7 +43,7 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     if (
         selected_format == "AlphaDIA"
         and hasattr(ionmodule, "feature_column_name")
-        and ionmodule.feature_column_name == "n_prec"
+        and ionmodule.feature_column_name == "nr_feature"
     ):
         st.info(
             "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
@@ -131,7 +131,7 @@ def process_submission_form(
         user_input["input_format"] == "AlphaDIA"
         and not user_input.get("input_csv_secondary")
         and hasattr(ionmodule, "feature_column_name")
-        and ionmodule.feature_column_name == "n_prec"
+        and ionmodule.feature_column_name == "nr_feature"
     ):
         # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
         st.info(

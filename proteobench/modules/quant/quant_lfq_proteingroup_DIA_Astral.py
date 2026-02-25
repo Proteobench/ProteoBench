@@ -78,9 +78,6 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "nr_feature"  # feature count reported by metrics
-        self.y_axis_title = "Total number of protein groups quantified in the selected number of raw files"
-        self.proteingroup_column_name = "Proteins"
 
     def is_implemented(self) -> bool:
         """
@@ -128,6 +125,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         # Parse workflow output file
         try:
             input_df = load_input_file(input_file, input_format, input_file_secondary)
+            print(f"Debug: Successfully loaded input file: {input_file}")
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
@@ -137,9 +135,13 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
 
         # Parse settings file
         try:
+            print(f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}")
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
         except FileNotFoundError as e:
@@ -149,6 +151,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
 
         try:
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+            print(f"Debug: Successfully converted input DataFrame to standard format for module {self.module_id}: {standard_format} with replicate to raw mapping: {replicate_to_raw}")
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
         except Exception as e:
@@ -156,30 +159,36 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
 
         # Calculate quantification scores
         try:
+            print(f"Debug: Attempting to calculate quantification scores for module {self.module_id} with analysis level {parse_settings.analysis_level}, expected ratio {parse_settings.species_expected_ratio()}, and species dict {parse_settings.species_dict()}")
             quant_score = QuantScoresHYE(
-                self.proteingroup_column_name,
+                parse_settings.analysis_level,
                 parse_settings.species_expected_ratio(),
                 parse_settings.species_dict(),
             )
+            print(f"Debug: Successfully calculated quantification scores: {quant_score}")
+            print(f"Debug: quant_score.feature_column_name: {quant_score.feature_column_name}, quant_score.species_expected_ratio: {quant_score.species_expected_ratio}, quant_score.species_dict: {quant_score.species_dict}")
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
         
         # Generate intermediate data structure
         try:
             intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+            print(f"Debug: Successfully generated intermediate data structure: {intermediate_metric_structure}")
         except Exception as e:
             raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
 
         # Add protein-group specific metrics
         ## Add the number of unique single accessions in datapoint
         ### concatenate all accessions into a single list to check for duplicates across protein groups
+        print("Debug: Attempting to calculate unique protein group accessions metrics")
         all_accessions = [
             acc
-            for sublist in intermediate_metric_structure["Proteins"].apply(
+            for sublist in intermediate_metric_structure[parse_settings.analysis_level].apply(
                 lambda x: [acc for acc in x.split(";") if ";" not in acc] if pd.notnull(x) else []
             )
             for acc in sublist
         ]
+        print(f"Debug: All accessions across protein groups: {all_accessions}")
         # TODO: could we add the number of unique accessions in each group in the intermediate metric?
         # len(set(all_accessions))
 
@@ -191,6 +200,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
                 user_input,
                 default_cutoff_min_feature=default_cutoff_min_feature,
             )
+            print(f"Debug: Successfully generated current data point: {current_datapoint}")
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
@@ -199,9 +209,9 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             # Add the number of unique single accessions that are present more than once (i.e. in multiple protein groups)
             acc_count_val = Counter(all_accessions).values()
             ## return how many accessions are present in more than one protein group
-            current_datapoint["Nr_accessions_present_in_multiple_groups"] = sum([count > 1 for count in acc_count_val])
+            current_datapoint["nr_accessions_present_in_multiple_groups"] = sum([count > 1 for count in acc_count_val])
             current_datapoint["prop_accessions_present_in_multiple_groups"] = (
-                current_datapoint["Nr_accessions_present_in_multiple_groups"]
+                current_datapoint["nr_accessions_present_in_multiple_groups"]
                 / current_datapoint["total_nr_unique_accessions"]
                 if current_datapoint["total_nr_unique_accessions"] > 0
                 else 0
@@ -215,6 +225,7 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
         except Exception as e:
             raise DatapointAppendError(f"Error adding current data point: {e}")
 
+        print(f"Debug: Final intermediate metric structure: {intermediate_metric_structure}")
         # Return intermediate data structure, all datapoints, and input DataFrame
         return (
             intermediate_metric_structure,

@@ -13,4 +13,5 @@
 
 [general]
 "min_count_multispec" = 1
-"level" = "ion"
+"level" = "proteingroup"
+"y_axis_title" = "Total number of protein groups quantified in the selected number of raw files"

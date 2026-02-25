@@ -216,6 +216,16 @@ class QuantModule:
 
         all_datapoints["old_new"] = "old"
 
+        # Backward compatibility: rename legacy nr_prec column to nr_feature
+        if "nr_prec" in all_datapoints.columns:
+            if "nr_feature" not in all_datapoints.columns:
+                all_datapoints = all_datapoints.rename(columns={"nr_prec": "nr_feature"})
+            else:
+                # nr_feature exists but may have NaN where only nr_prec was set
+                mask = all_datapoints["nr_feature"].isna() & all_datapoints["nr_prec"].notna()
+                all_datapoints.loc[mask, "nr_feature"] = all_datapoints.loc[mask, "nr_prec"]
+                all_datapoints = all_datapoints.drop(columns=["nr_prec"])
+
         return all_datapoints
 
     @staticmethod

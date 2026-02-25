@@ -24,7 +24,7 @@ class QuantScoresHYE(ScoreBase):
     species_dict : dict
         Dictionary containing the species names and their column mappings.
     feature_column_name : str
-        Name of the feature column. It could be "Proteins", or "Precursors".
+        Name of the feature column. It could be "proteingroup", or "precursor ion" or "peptidoform". See _format_by_analysis_level in parse_settings.py for more details.
     """
 
     def __init__(self, feature_column_name: str, species_expected_ratio, species_dict: Dict[str, str]):
@@ -34,7 +34,7 @@ class QuantScoresHYE(ScoreBase):
         Parameters
         ----------
         feature_column_name : str
-            Name of the feature column. It could be "Proteins", or "Precursors".
+            Name of the feature column. It could be "proteingroup", "precursor ion", or "peptidoform". See _format_by_analysis_level in parse_settings.py for more details.
         species_expected_ratio : dict
             Dictionary containing the expected ratios for each species.
         species_dict : dict
@@ -67,23 +67,28 @@ class QuantScoresHYE(ScoreBase):
 
         # select columns which are relavant for the statistics
         # TODO, this should be handled different, probably in the parse settings
-
-        # Return an error if no feature column is provided
-        if self.feature_column_name is None:
-            raise Exception("No feature column is provided")
+        print(f"Debug: Starting to generate intermediate data structure with filtered_df columns: {filtered_df.columns} and replicate_to_raw: {replicate_to_raw}. fealure_column_name: {self.feature_column_name}")
 
         relevant_columns_df = filtered_df[["Raw file", self.feature_column_name, "Intensity"]].copy()
+        print(f"Debug: After selecting relevant columns, relevant_columns_df columns: {relevant_columns_df.columns} and head: {relevant_columns_df.head()}")
+        print(f"Debug: df after filtering for feature of interest {self.feature_column_name} has shape: {relevant_columns_df.shape}")
         replicate_to_raw_df = QuantScoresHYE.convert_replicate_to_raw(replicate_to_raw)
+        print(f"Debug: After converting replicate_to_raw to DataFrame, replicate_to_raw_df columns: {replicate_to_raw_df.columns} and head: {replicate_to_raw_df.head()}")
+        print(f"Debug: checking that {replicate_to_raw.values()} are present in relevant_columns_df['Raw file']: {list(filtered_df.columns)}")
 
         all_present = all(
             item in list(filtered_df.columns) for sublist in replicate_to_raw.values() for item in sublist
         )
+        print(f"Debug: All runs from replicate_to_raw are present in filtered_df: {all_present}")
 
         if not all_present:
             raise Exception("Not all runs are present in the quantification file")
 
+       
+        print(f"Debug: set up relevant column df by merging with replicate_to_raw_df, relevant_columns_df columns before merge: {relevant_columns_df.columns} and head: {relevant_columns_df.head()}")
         # add column "Condition" to filtered_df_p1 using inner join on "Raw file"
         relevant_columns_df = pd.merge(relevant_columns_df, replicate_to_raw_df, on="Raw file", how="inner")
+        print(f"Debug: After merging with replicate_to_raw_df, relevant_columns_df columns: {relevant_columns_df.columns} and head: {relevant_columns_df.head()}")
         quant_df = QuantScoresHYE.compute_condition_stats(
             relevant_columns_df,
             min_intensity=0,
@@ -94,9 +99,12 @@ class QuantScoresHYE(ScoreBase):
         species_feature.append(self.feature_column_name)
         feature_to_species = filtered_df[species_feature].drop_duplicates()
         # merge dataframes quant_df and species_quant_df and feature_to_species using feature_of_interest as index
+        print(f"Debug: Before merging with feature_to_species, quant_df columns: {quant_df.columns} and head: {quant_df.head()}")
         quant_df_withspecies = pd.merge(quant_df, feature_to_species, on=self.feature_column_name, how="inner")
+        print(f"Debug: After merging with feature_to_species, quant_df_withspecies columns: {quant_df_withspecies.columns} and head: {quant_df_withspecies.head()}")
         species_expected_ratio = self.species_expected_ratio
         res = QuantScoresHYE.compute_epsilon(quant_df_withspecies, self.species_expected_ratio)
+        print(f"Debug: After computing epsilon, result: {res}")
         return res
 
     @staticmethod

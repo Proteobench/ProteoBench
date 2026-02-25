@@ -78,8 +78,6 @@ class DDAQuantPeptidoformModule(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "n_peptidoforms"  # feature count reported by metrics
-        self.y_axis_title = "Total number of peptidoforms quantified in the selected number of raw files"
 
     def is_implemented(self) -> bool:
         """
@@ -156,7 +154,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScoresHYE(
-                self.feature_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+                parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")

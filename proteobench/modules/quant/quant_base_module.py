@@ -328,7 +328,7 @@ class QuantModule:
 
         # Get quantification data
         quant_score = QuantScoresHYE(
-            self.feature_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 

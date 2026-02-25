@@ -237,7 +237,7 @@ def run_benchmarking_with_timing(
 
     with time_block("instantiate_quant_scores"):
         quant_score = QuantScoresHYE(
-            feature_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
 
     with time_block("generate_intermediate"):

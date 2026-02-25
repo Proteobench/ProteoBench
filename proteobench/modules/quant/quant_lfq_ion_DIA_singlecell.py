@@ -43,8 +43,6 @@ class DIAQuantIonModulediaSC(QuantModule):
     ----------
     module_id : str
         Module identifier for configuration.
-    precursor_name: str
-        Level of quantification.
     """
 
     module_id: str = "quant_lfq_DIA_ion_singlecell"
@@ -78,8 +76,6 @@ class DIAQuantIonModulediaSC(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "n_prec"  # feature count reported by metrics
-        self.y_axis_title = "Total number of precursor ions quantified in the selected number of raw files"
 
     def is_implemented(self) -> bool:
         """
@@ -156,7 +152,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScoresHYE(
-                self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+                parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")

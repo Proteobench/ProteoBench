@@ -78,8 +78,6 @@ class DDAQuantIonAstralModule(QuantModule):
             module_id=self.module_id,
             use_github=use_github,
         )
-        self.feature_column_name = "nr_feature"  # feature count reported by metrics
-        self.y_axis_title = "Total number of precursor ions quantified in the selected number of raw files"
 
     def is_implemented(self) -> bool:
         """

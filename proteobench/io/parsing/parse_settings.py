@@ -353,7 +353,7 @@ class ParseSettingsQuant:
         pd.DataFrame
             Formatted DataFrame according to analysis level.
         """
-        if self.analysis_level == "ion":
+        if self.analysis_level == "precursor ion":
             if "proforma" in df.columns and "Charge" in df.columns:
                 df["precursor ion"] = df["proforma"] + "/" + df["Charge"].astype(str)
             return df
@@ -458,7 +458,7 @@ class ParseModificationSettings:
             modification_dict=self.modifications_mapper,
         )
 
-        if analysis_level == "ion":
+        if analysis_level == "precursor ion":
             try:
                 df["precursor ion"] = df["proforma"] + "/" + df["Charge"].astype(str)
             except KeyError as e:

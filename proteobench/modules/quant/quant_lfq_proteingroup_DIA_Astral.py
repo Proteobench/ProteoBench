@@ -135,7 +135,9 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
 
         # Parse settings file
         try:
-            print(f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}")
+            print(
+                f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}"
+            )
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
@@ -148,10 +150,12 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
             raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
         except Exception as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
-        
+
         try:
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-            print(f"Debug: Successfully converted input DataFrame to standard format for module {self.module_id}: {standard_format} with replicate to raw mapping: {replicate_to_raw}")
+            print(
+                f"Debug: Successfully converted input DataFrame to standard format for module {self.module_id}: {standard_format} with replicate to raw mapping: {replicate_to_raw}"
+            )
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
         except Exception as e:
@@ -159,14 +163,18 @@ class DIAQuantProteingroupModuleAstral(QuantModule):
 
         # Calculate quantification scores
         try:
-            print(f"Debug: Attempting to calculate quantification scores for module {self.module_id} with analysis level {parse_settings.analysis_level}, expected ratio {parse_settings.species_expected_ratio()}, and species dict {parse_settings.species_dict()}")
+            print(
+                f"Debug: Attempting to calculate quantification scores for module {self.module_id} with analysis level {parse_settings.analysis_level}, expected ratio {parse_settings.species_expected_ratio()}, and species dict {parse_settings.species_dict()}"
+            )
             quant_score = QuantScoresHYE(
                 parse_settings.analysis_level,
                 parse_settings.species_expected_ratio(),
                 parse_settings.species_dict(),
             )
             print(f"Debug: Successfully calculated quantification scores: {quant_score}")
-            print(f"Debug: quant_score.feature_column_name: {quant_score.feature_column_name}, quant_score.species_expected_ratio: {quant_score.species_expected_ratio}, quant_score.species_dict: {quant_score.species_dict}")
+            print(
+                f"Debug: quant_score.feature_column_name: {quant_score.feature_column_name}, quant_score.species_expected_ratio: {quant_score.species_expected_ratio}, quant_score.species_dict: {quant_score.species_dict}"
+            )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
 

@@ -156,7 +156,9 @@ class DIAQuantIonModuleAstral(QuantModule):
 
         # Calculate quantification scores
         try:
-            print(f"Debug: Attempting to calculate quantification scores for module {self.module_id} with feature column {self.feature_column_name}")
+            print(
+                f"Debug: Attempting to calculate quantification scores for module {self.module_id} with feature column {self.feature_column_name}"
+            )
             quant_score = QuantScoresHYE(
                 parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
@@ -165,7 +167,9 @@ class DIAQuantIonModuleAstral(QuantModule):
 
         # Generate intermediate data structure
         try:
-            print(f"Debug: Attempting to generate intermediate data structure for module {self.module_id} with the following standard format: {standard_format} and replicate to raw mapping: {replicate_to_raw}")
+            print(
+                f"Debug: Attempting to generate intermediate data structure for module {self.module_id} with the following standard format: {standard_format} and replicate to raw mapping: {replicate_to_raw}"
+            )
             intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
             print(f"Debug: Successfully generated intermediate data structure: {intermediate_metric_structure}")
         except Exception as e:
@@ -173,7 +177,9 @@ class DIAQuantIonModuleAstral(QuantModule):
 
         # Generate current data point
         try:
-            print(f"Debug: Attempting to generate current data point for module {self.module_id} with intermediate metric structure {intermediate_metric_structure} and input format {input_format}")
+            print(
+                f"Debug: Attempting to generate current data point for module {self.module_id} with intermediate metric structure {intermediate_metric_structure} and input format {input_format}"
+            )
             current_datapoint = QuantDatapointHYE.generate_datapoint(
                 intermediate_metric_structure,
                 input_format,
@@ -186,7 +192,9 @@ class DIAQuantIonModuleAstral(QuantModule):
 
         # Add current data point to all datapoints
         try:
-            print(f"Debug: Attempting to add current data point to all datapoints for module {self.module_id} with current datapoint {current_datapoint} and all_datapoints {all_datapoints}")
+            print(
+                f"Debug: Attempting to add current data point to all datapoints for module {self.module_id} with current datapoint {current_datapoint} and all_datapoints {all_datapoints}"
+            )
             all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
             print(f"Debug: Successfully added current data point to all datapoints: {all_datapoints}")
         except Exception as e:

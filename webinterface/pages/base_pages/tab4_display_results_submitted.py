@@ -134,14 +134,14 @@ def initialize_submitted_data_points(
     Initialize the all_datapoints variable in the session state.
     """
     key_in_state = all_datapoints_submitted
-    
+
     if key_in_state not in st.session_state.keys():
         st.session_state[key_in_state] = None
         # ? So all_datapoints argument is always None?
         loaded_datapoints = obtain_all_data_points(
             all_datapoints=st.session_state[key_in_state],
         )
-        
+
         st.session_state[key_in_state] = loaded_datapoints
     else:
         existing_data = st.session_state[key_in_state]

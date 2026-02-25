@@ -157,6 +157,7 @@ def _load_spectronaut(input_csv: str) -> pd.DataFrame:
     input_data_frame["PG.ProteinGroups"] = input_data_frame["PG.ProteinGroups"].str.join(";")
     return input_data_frame
 
+
 def _load_custom(input_csv: str) -> pd.DataFrame:
     """
     Load a custom output file.

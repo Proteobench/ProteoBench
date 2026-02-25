@@ -125,6 +125,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         # Parse workflow output file
         try:
             input_df = load_input_file(input_file, input_format)
+            print(f"Debug: Successfully loaded input file: {input_file}")
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
@@ -134,6 +135,7 @@ class DDAQuantPeptidoformModule(QuantModule):
 
         # Parse settings file
         try:
+            print(f"Attempting to parse settings for module {self.module_id} and input format {input_format}")
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)

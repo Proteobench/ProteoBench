@@ -122,6 +122,24 @@ class DDAQuantIonAstralModule(QuantModule):
         tuple[DataFrame, DataFrame, DataFrame]
             Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
         """
+
+        try:
+            print(
+                f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}"
+            )
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")
+        except KeyError as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
+
         result = run_benchmarking_with_timing(
             input_file=input_file_loc,
             input_format=input_format,
@@ -129,7 +147,7 @@ class DDAQuantIonAstralModule(QuantModule):
             all_datapoints=all_datapoints,
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
-            feature_column_name=self.feature_column_name,
+            feature_column_name=parse_settings.analysis_level,
             default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
@@ -170,6 +188,24 @@ class DDAQuantIonAstralModule(QuantModule):
               - input_df (pd.DataFrame)
               - timings (dict of step names to elapsed seconds)
         """
+
+        try:
+            print(
+                f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}"
+            )
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")
+        except KeyError as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
+
         return run_benchmarking_with_timing(
             input_file=input_file_loc,
             input_format=input_format,
@@ -177,7 +213,7 @@ class DDAQuantIonAstralModule(QuantModule):
             all_datapoints=all_datapoints,
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
-            feature_column_name=self.feature_column_name,
+            feature_column_name=parse_settings.analysis_level,
             default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
         )

@@ -42,7 +42,7 @@ class StreamlitUI:
             token = st.secrets["gh"]["token"]
         except KeyError:
             token = ""
-        self.ionmodule: DDAQuantIonModuleQExactive = DDAQuantIonModuleQExactive(token=token)
+        self.ionmodule: DDAQuantIonModuleQExactive = DDAQuantIonModuleQExactive(token=token, use_github=True)
         self.parsesettingsbuilder = ParseSettingsBuilder(
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dda_quant.parse_settings_dir
         )

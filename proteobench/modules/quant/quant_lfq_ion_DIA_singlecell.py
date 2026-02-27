@@ -43,8 +43,6 @@ class DIAQuantIonModulediaSC(QuantModule):
     ----------
     module_id : str
         Module identifier for configuration.
-    precursor_name: str
-        Level of quantification.
     """
 
     module_id: str = "quant_lfq_DIA_ion_singlecell"
@@ -54,6 +52,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_singlecell",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_singlecell",
+        use_github: bool = True,
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for low input data.
@@ -66,6 +65,8 @@ class DIAQuantIonModulediaSC(QuantModule):
             Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_singlecell".
         proteobench_repo_name : str, optional
             Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_singlecell".
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True.
         """
         super().__init__(
             token,
@@ -73,8 +74,8 @@ class DIAQuantIonModulediaSC(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            use_github=use_github,
         )
-        self.precursor_name = "precursor ion"
 
     def is_implemented(self) -> bool:
         """
@@ -93,7 +94,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
@@ -109,7 +110,7 @@ class DIAQuantIonModulediaSC(QuantModule):
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all data points from the repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
@@ -134,6 +135,9 @@ class DIAQuantIonModulediaSC(QuantModule):
             parse_settings = ParseSettingsBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")
         except KeyError as e:
             raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
         except FileNotFoundError as e:
@@ -142,7 +146,15 @@ class DIAQuantIonModulediaSC(QuantModule):
             raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
 
         try:
+            print(
+                f"Debug: Attempting to convert to standard format for module {self.module_id} and input format {input_format}"
+            )
+            ## For debugging, print the input DataFrame before conversion
+            print(f"Debug: Input DataFrame head before conversion: {input_df.head()}")
             standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+            print(
+                f"Debug: Successfully converted to standard format for module {self.module_id} and input format {input_format}"
+            )
         except KeyError as e:
             raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
         except Exception as e:
@@ -151,7 +163,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScoresHYE(
-                self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+                parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
@@ -165,7 +177,10 @@ class DIAQuantIonModulediaSC(QuantModule):
         # Generate current data point
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
-                intermediate_data_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+                intermediate_data_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_feature=default_cutoff_min_feature,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

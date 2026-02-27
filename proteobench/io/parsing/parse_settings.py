@@ -124,6 +124,7 @@ class ParseSettingsQuant:
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
+        self.y_axis_title = parse_settings_module["general"]["y_axis_title"]
         self.modification_parser = None
 
     def species_dict(self) -> Dict[str, str]:
@@ -352,13 +353,17 @@ class ParseSettingsQuant:
         pd.DataFrame
             Formatted DataFrame according to analysis level.
         """
-        if self.analysis_level == "ion":
+        if self.analysis_level == "precursor ion":
             if "proforma" in df.columns and "Charge" in df.columns:
                 df["precursor ion"] = df["proforma"] + "/" + df["Charge"].astype(str)
             return df
         elif self.analysis_level == "peptidoform":
             if "proforma" in df.columns:
                 df["peptidoform"] = df["proforma"]
+            return df
+        elif self.analysis_level == "proteingroup":
+            if "Proteins" in df.columns:
+                df["proteingroup"] = df["Proteins"]
             return df
         else:
             raise ValueError(f"Analysis level '{self.analysis_level}' not supported.")
@@ -453,7 +458,7 @@ class ParseModificationSettings:
             modification_dict=self.modifications_mapper,
         )
 
-        if analysis_level == "ion":
+        if analysis_level == "precursor ion":
             try:
                 df["precursor ion"] = df["proforma"] + "/" + df["Charge"].astype(str)
             except KeyError as e:
@@ -479,4 +484,5 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
+    "quant_lfq_DIA_proteingroup_Astral": ParseSettingsQuant,
 }

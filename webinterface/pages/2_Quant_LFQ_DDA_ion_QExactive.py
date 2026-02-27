@@ -65,17 +65,17 @@ class StreamlitUI:
             tab_results_all,
             tab_submission_details,
             tab_indepth_plots,
-            tab_multqc_plot,
             tab_results_new,
+            tab_compare_workflows,
             tab_public_submission,
         ) = st.tabs(
             [
-                "Public Benchmark Runs",
-                "Submit New Data",
-                "Results In-Depth",
-                "pMultiQC Plot",
-                "Results New Data",
-                "Public Submission",
+                "View Public Results",
+                "Upload New Results (Private)",
+                "View Single Result",
+                "View Public + New Results",
+                "Compare Two Results",
+                "Submit New Results",
             ]
         )
 
@@ -116,14 +116,6 @@ class StreamlitUI:
             display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_indepth_plots()
 
-        # Tab 3_1: pMultiQC plot based on intermediate data
-
-        with tab_multqc_plot:
-            st.title("pMultiQC Report for selected dataset.")
-            # self.quant_uiobjects.display_multqc_plot()
-
-            self.quant_uiobjects.display_pmultiqc_report()
-
         # Tab 4: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables_dda_quant.title)
@@ -135,6 +127,18 @@ class StreamlitUI:
             )
             display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_all_data_results_submitted()
+
+        # Tab: Compare Workflows
+        with tab_compare_workflows:
+            st.title(self.variables_dda_quant.title)
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables_dda_quant.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
+            display_banner(self.variables_dda_quant)
+            self.quant_uiobjects.display_workflow_comparison()
 
         # Tab 5: Public Submission
         with tab_public_submission:

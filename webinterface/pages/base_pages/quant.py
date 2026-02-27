@@ -22,10 +22,10 @@ from proteobench.utils.server_io import dataset_folder_exists
 from . import (
     tab1_results,
     tab2_form_upload_data,
-    tab3_1_pmultiqc_report,
     tab3_indepth_plots,
     tab4_display_results_submitted,
     tab5_public_submission,
+    tab_compare_workflows,
 )
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -163,29 +163,6 @@ class QuantUIObjects:
             public_hash=selected_hash,
         )
 
-    @st.fragment
-    def display_pmultiqc_report(self):
-        """Display the pMultiQC report download option of the page in Tab 3.1.
-
-        Build pmultiqc based on intermediate data and save self-contained html file.
-        """
-        if self.variables.result_perf in st.session_state.keys():
-            html_content = st.session_state.get("tab31_pmultiqc_html_content", "")
-            if not html_content:
-                html_content = tab3_1_pmultiqc_report.create_pmultiqc_report_section(self.variables)
-                st.session_state["tab31_pmultiqc_html_content"] = html_content
-                logger.info(
-                    "pMultiQC report generated.",
-                )
-            else:
-                logger.info('using cached pMultiQC report from session_state["tab31_pmultiqc_html_content"].')
-            download_disactivate = True
-            if html_content:
-                download_disactivate = False
-            tab3_1_pmultiqc_report.show_download_button(html_content, disabled=download_disactivate)
-        else:
-            st.warning("No intermediate data available for pMultiQC report. Please first submit data.")
-
     def display_public_submission_ui(self) -> None:
         """
         Display the public submission section of the page in Tab 5.
@@ -317,6 +294,13 @@ class QuantUIObjects:
         tab4_display_results_submitted.generate_submitted_slider(self.variables)
         tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
         tab4_display_results_submitted.display_submitted_results(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )
+
+    def display_workflow_comparison(self) -> None:
+        """Display the workflow comparison tab."""
+        tab_compare_workflows.display_workflow_comparison(
             variables=self.variables,
             ionmodule=self.ionmodule,
         )

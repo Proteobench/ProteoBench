@@ -24,6 +24,6 @@ min_fragment_mz,50
 max_fragment_mz,2000
 quantification_method,QuantUMS high-precision
 protein_inference,1
-abundance_normalization_ions,
+abundance_normalization_ions,Cross-run normalization
 predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
 scan_window,13

@@ -85,6 +85,14 @@ class VariablesDDAQuant:
     archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA.git"
 
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DDA ion QExactive"
+    sidebar_path: str = "/Quant_LFQ_DDA_ion_QExactive"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "quantification", "QExactive", "orbitrap", "precursor", "ion", "LFQ"]
+    )
+
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/QExactive/introduction_DDA_quan_ions.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/QExactive/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/QExactive/input_file_description.md"

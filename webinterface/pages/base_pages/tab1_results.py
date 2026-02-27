@@ -151,6 +151,7 @@ def display_existing_results(variables, ionmodule, metric, mode, colorblind_mode
         colorblind_mode=colorblind_mode,
         key=_id_of_key,
         plot_generator=plot_generator,
+        annotation=_get_annotation(variables),
     )
 
     df_display = prepare_display_dataframe(data_points_filtered, highlight_point_id)
@@ -247,3 +248,14 @@ def initialize_main_data_points(all_datapoints: str, obtain_all_data_points: Cal
     if all_datapoints not in st.session_state.keys():
         st.session_state[all_datapoints] = None
         st.session_state[all_datapoints] = obtain_all_data_points(all_datapoints=st.session_state[all_datapoints])
+
+
+def _get_annotation(variables) -> str:
+    if variables.archived_warning:
+        return "-Archived-"
+    elif variables.alpha_warning:
+        return "-Alpha-"
+    elif variables.beta_warning:
+        return "-Beta-"
+    else:
+        return ""

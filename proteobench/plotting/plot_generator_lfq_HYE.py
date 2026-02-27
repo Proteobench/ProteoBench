@@ -143,7 +143,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         highlight_color: str = "#d30067",
         label: str = "",
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
-        hide_annot: bool = False,
+        annotation: str = "",
         **kwargs,
     ) -> go.Figure:
         """
@@ -221,6 +221,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
+                # Add keyword if present
+                # TODO: potentially make more generic so that this does not have to be added in multiple plot_generator classes
+                if "Keyword" in benchmark_metrics_df.columns:
+                    keyword = benchmark_metrics_df.Keyword[idx]
+                    if isinstance(keyword, str) and keyword.strip():
+                        datapoint_text = datapoint_text + f"Keyword: {keyword}<br>"
                 if "comments" in benchmark_metrics_df.columns:
                     comment = benchmark_metrics_df.comments[idx]
                     if isinstance(comment, str):
@@ -368,7 +374,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-" if not hide_annot else "",
+            text=annotation,
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )

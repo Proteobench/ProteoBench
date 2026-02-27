@@ -75,18 +75,6 @@ class QuantUIObjects:
 
         # Create page config and sidebar
         pbb.proteobench_page_config()
-
-        st.markdown(
-            """
-            <style>
-            [data-testid="stSidebarNav"] {
-                display: none;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
         pbb.proteobench_sidebar(current_page=self.page_name)
 
         self.first_point_plotted = False

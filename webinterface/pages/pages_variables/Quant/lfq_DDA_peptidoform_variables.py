@@ -87,6 +87,14 @@ class VariablesDDAQuant:
     archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_peptidoform_DDA.git"
 
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DDA peptidoform"
+    sidebar_path: str = "/Quant_LFQ_DDA_peptidoform"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "quantification", "peptidoform", "modified peptide", "LFQ"]
+    )
+
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/introduction_DDA_quan_peptidoforms.md"

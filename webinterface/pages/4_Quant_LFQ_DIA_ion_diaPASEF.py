@@ -71,7 +71,7 @@ class StreamlitUI:
             [
                 "View Public Results",
                 "Upload New Results (Private)",
-                "View Single Results",
+                "View Single Result",
                 "View Public + New Results",
                 "Compare Two Results",
                 "Submit New Results",

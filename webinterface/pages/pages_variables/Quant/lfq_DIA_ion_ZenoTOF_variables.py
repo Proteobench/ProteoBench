@@ -55,6 +55,8 @@ class VariablesDIAQuantZenoTOF:
     )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_ZenoTOF"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_ZenoTOF"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dia_quant_ZenoTOF"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dia_quant_ZenoTOF"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_ZenoTOF"
     slider_id_uuid: str = "slider_id_dia_quant_ZenoTOF"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_ZenoTOF"

@@ -42,6 +42,8 @@ class VariablesDDAQuantAstral:
     highlight_list_submitted: List[str] = field(default_factory=list)
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dda_quant_Astral"
     selectbox_id_uuid: str = "selectbox_id_dda_quant_Astral"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dda_quant_Astral"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_quant_Astral"
     slider_id_submitted_uuid: str = "slider_id_submitted_dda_quant_Astral"
     slider_id_uuid: str = "slider_id_dda_quant_Astral"
     download_selector_id_uuid: str = "download_selector_id_dda_quant_Astral"

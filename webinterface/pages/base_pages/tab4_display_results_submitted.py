@@ -31,13 +31,12 @@ def generate_submitted_slider(variables) -> None:
         st.session_state[variables.slider_id_submitted_uuid] = uuid.uuid4()
     slider_key = st.session_state[variables.slider_id_submitted_uuid]
 
-    st.markdown(open(variables.description_slider_md, "r", encoding="utf-8").read())
-
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
         options=[1, 2, 3, 4, 5, 6],
         value=st.session_state.get(slider_key, variables.default_val_slider),
         key=slider_key,
+        help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
     )
 
 
@@ -50,7 +49,7 @@ def generate_submitted_selectbox(variables) -> None:
 
     try:
         st.selectbox(
-            "Select label to plot",
+            "Label",
             variables.metric_plot_labels,
             key=st.session_state[variables.selectbox_id_submitted_uuid],
         )
@@ -80,6 +79,8 @@ def display_submitted_results(variables, ionmodule) -> None:
     else:
         mode = display_metric_calc_approach_selector(variables)
 
+    colorblind_mode = display_colorblindmode_selector(variables)
+
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")
         return
@@ -96,6 +97,7 @@ def display_submitted_results(variables, ionmodule) -> None:
         metric,
         mode=mode,
         label=st.session_state[st.session_state[variables.selectbox_id_submitted_uuid]],
+        colorblind_mode=colorblind_mode,
         key=_id_of_key,
         plot_generator=plot_generator,
         ionmodule=ionmodule,
@@ -155,9 +157,22 @@ def display_metric_selector(variables) -> str:
 
     # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
-        "Select metric to plot",
+        "Metric",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_colorblindmode_selector(variables) -> str:
+    key = variables.colorblind_mode_selector_submitted_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.toggle(
+        "Colorblind Mode",
+        help="Toggle colorblind mode on or off.",
         key=_id_of_key,
     )
 
@@ -169,7 +184,7 @@ def display_metric_calc_approach_selector(variables) -> str:
     _id_of_key = st.session_state[key]
 
     return st.radio(
-        "Select metric calculation approach",
+        "Weighting approach",
         options=["Global", "Species-weighted"],
         help="Toggle between Species-weighted and global absolute difference metrics.",
         key=_id_of_key,

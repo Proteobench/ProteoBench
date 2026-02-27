@@ -55,7 +55,7 @@ def generate_main_selectbox(variables_quant, selectbox_id_uuid) -> None:
     try:
         # TODO: Other labels based on different modules, e.g. mass tolerances are less relevant for DIA
         st.selectbox(
-            "Select label to plot",
+            "Label",
             variables_quant.metric_plot_labels,
             key=st.session_state[selectbox_id_uuid],
         )
@@ -119,7 +119,7 @@ def display_download_section(variables, reset_uuid=False) -> None:
             )
 
 
-def display_existing_results(variables, ionmodule) -> None:
+def display_existing_results(variables, ionmodule, metric, mode, colorblind_mode) -> None:
     """
     Orchestrates the full display of quantification results in Streamlit,
     including plotting and interactive tabular output with styling.
@@ -135,18 +135,6 @@ def display_existing_results(variables, ionmodule) -> None:
     """
     initialize_and_filter_data(variables, ionmodule)
     data_points_filtered = variables.filtered_data
-
-    selector_cols = st.columns([2, 2, 1])
-    with selector_cols[0]:
-        metric = display_metric_selector(variables)
-    with selector_cols[1]:
-        # ROC-AUC has no mode variants (it's already species-aware by design)
-        if metric == "ROC-AUC":
-            mode = None
-        else:
-            mode = display_metric_calc_approach_selector(variables)
-    with selector_cols[2]:
-        colorblind_mode = display_colorblindmode_selector(variables)
 
     # prepare plot key explicitly for tab 1
     key = variables.result_plot_uuid
@@ -202,7 +190,7 @@ def display_metric_selector(variables) -> str:
 
     # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
-        "Select metric to plot",
+        "Metric",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
         key=_id_of_key,
@@ -229,7 +217,7 @@ def display_metric_calc_approach_selector(variables_quant) -> str:
     _id_of_key = st.session_state[key]
 
     return st.radio(
-        "Select metric calculation approach",
+        "Weighting approach",
         options=["Global", "Species-weighted"],
         help="Toggle between species-weighted and global absolute difference metrics. Global considers all metrics equally, while species-weighted account for species abundance variations, i.e. the mean/median metric is calculated per species first before averaging across species.",
         key=_id_of_key,

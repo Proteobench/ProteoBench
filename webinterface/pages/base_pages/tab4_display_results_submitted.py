@@ -49,7 +49,7 @@ def generate_submitted_selectbox(variables) -> None:
 
     try:
         st.selectbox(
-            "Select label to plot",
+            "Label",
             variables.metric_plot_labels,
             key=st.session_state[variables.selectbox_id_submitted_uuid],
         )
@@ -148,7 +148,7 @@ def display_metric_selector(variables) -> str:
 
     # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
-        "Select metric to plot",
+        "Metric",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
         key=_id_of_key,
@@ -175,7 +175,7 @@ def display_metric_calc_approach_selector(variables) -> str:
     _id_of_key = st.session_state[key]
 
     return st.radio(
-        "Select metric calculation approach",
+        "Weighting approach",
         options=["Global", "Species-weighted"],
         help="Toggle between Species-weighted and global absolute difference metrics.",
         key=_id_of_key,

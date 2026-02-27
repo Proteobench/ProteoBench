@@ -160,7 +160,7 @@ def display_pmultiqc_report(performance_data: pd.DataFrame, sample_name: str) ->
 
     st.subheader("pMultiQC Report")
     st.markdown(
-        "pMultiQC Reports contain additional QC plots for e.g. missing values, CV distributions, and intensity distributions. Report generation might take up to a minute."
+        "pMultiQC Reports contain additional QC plots for e.g. missing values, CV distributions, and intensity distributions. Report generation might take a few minutes."
     )
 
     html_content = st.session_state.get("tab31_pmultiqc_html_content_" + sample_name, "")

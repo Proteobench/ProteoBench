@@ -35,15 +35,13 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
         st.session_state[slider_id_uuid] = uuid.uuid4()
     slider_key = st.session_state[slider_id_uuid]
 
-    fpath = description_slider_md
-    st.markdown(open(fpath, "r").read())
-
     default_value = st.session_state.get(slider_key, default_val_slider)
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
         options=[1, 2, 3, 4, 5, 6],
         value=default_value,
         key=slider_key,
+        help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
     )
 
 
@@ -86,7 +84,7 @@ def display_download_section(variables, reset_uuid=False) -> None:
         st.session_state[variables.download_selector_id_uuid] = uuid.uuid4()
 
     # with st.session_state[variables.placeholder_downloads_container].container(border=True):
-    st.subheader("Download raw datasets")
+    st.subheader("Download all data for a point")
 
     # Sort the intermediate_hash values and get the corresponding ids
     sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"].iloc[i])
@@ -138,14 +136,17 @@ def display_existing_results(variables, ionmodule) -> None:
     initialize_and_filter_data(variables, ionmodule)
     data_points_filtered = variables.filtered_data
 
-    metric = display_metric_selector(variables)
-    # ROC-AUC has no mode variants (it's already species-aware by design)
-    if metric == "ROC-AUC":
-        mode = None
-    else:
-        mode = display_metric_calc_approach_selector(variables)
-
-    colorblind_mode = display_colorblindmode_selector(variables)
+    selector_cols = st.columns([2, 2, 1])
+    with selector_cols[0]:
+        metric = display_metric_selector(variables)
+    with selector_cols[1]:
+        # ROC-AUC has no mode variants (it's already species-aware by design)
+        if metric == "ROC-AUC":
+            mode = None
+        else:
+            mode = display_metric_calc_approach_selector(variables)
+    with selector_cols[2]:
+        colorblind_mode = display_colorblindmode_selector(variables)
 
     # prepare plot key explicitly for tab 1
     key = variables.result_plot_uuid

@@ -285,17 +285,19 @@ class QuantUIObjects:
     @st.fragment
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
-        st.title("Results (All Data)")
         tab1_results.initialize_main_slider(
             slider_id_uuid=self.variables.slider_id_uuid,
             default_val_slider=self.variables.default_val_slider,
         )
-        tab1_results.generate_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            description_slider_md=self.variables.description_slider_md,
-            default_val_slider=self.variables.default_val_slider,
-        )
-        tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+        filter_cols = st.columns(2)
+        with filter_cols[0]:
+            tab1_results.generate_main_slider(
+                slider_id_uuid=self.variables.slider_id_uuid,
+                description_slider_md=self.variables.description_slider_md,
+                default_val_slider=self.variables.default_val_slider,
+            )
+        with filter_cols[1]:
+            tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
         tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
 
     def display_all_data_results_submitted(self) -> None:

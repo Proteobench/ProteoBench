@@ -1,11 +1,11 @@
 [species_expected_ratio]
 [species_expected_ratio.YEAST]
 "A_vs_B" = 0.2
-"color" = "red"
+"color" = "#88ccef"
 
 [species_expected_ratio.HUMAN]
 "A_vs_B" = 1.2
-"color" = "green"
+"color" = "#ddcc77"
 
 [general]
 "min_count_multispec" = 1

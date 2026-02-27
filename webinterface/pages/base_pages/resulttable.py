@@ -56,12 +56,25 @@ def render_aggrid(df: pd.DataFrame, grid_options, key):
     None
         This function renders the grid in the Streamlit interface and does not return a value.
     """
+    # Calculate dynamic height based on number of rows
+    # Row height ~50px + header ~40px + padding
+    row_height = 50
+    header_height = 40
+    padding = 10
+    num_rows = len(df)
+    calculated_height = (num_rows * row_height) + header_height + padding
+
+    # Set min and max bounds for usability
+    min_height = 150
+    max_height = 800
+    dynamic_height = max(min_height, min(calculated_height, max_height))
+
     AgGrid(
         df,
         gridOptions=grid_options,
         theme="alpine",
         fit_columns_on_grid_load=False,
-        height=600,
+        height=dynamic_height,
         allow_unsafe_jscode=True,
         key=f"aggrid::{str(key)}",  # AgGrid does not work with UUID keys
     )

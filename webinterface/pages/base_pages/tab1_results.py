@@ -14,7 +14,7 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: float) -> No
     """
     Initialize the slider for the main data.
 
-    We use a slider uuid and associate a defalut value with it.
+    We use a slider uuid and associate a default value with it.
     - self.variables_quant.slider_id_uuid
     - self.variables_quant.default_val_slider
     """
@@ -35,15 +35,13 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
         st.session_state[slider_id_uuid] = uuid.uuid4()
     slider_key = st.session_state[slider_id_uuid]
 
-    fpath = description_slider_md
-    st.markdown(open(fpath, "r").read())
-
     default_value = st.session_state.get(slider_key, default_val_slider)
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
         options=[1, 2, 3, 4, 5, 6],
         value=default_value,
         key=slider_key,
+        help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
     )
 
 
@@ -57,7 +55,7 @@ def generate_main_selectbox(variables_quant, selectbox_id_uuid) -> None:
     try:
         # TODO: Other labels based on different modules, e.g. mass tolerances are less relevant for DIA
         st.selectbox(
-            "Select label to plot",
+            "Label",
             variables_quant.metric_plot_labels,
             key=st.session_state[selectbox_id_uuid],
         )
@@ -86,7 +84,7 @@ def display_download_section(variables, reset_uuid=False) -> None:
         st.session_state[variables.download_selector_id_uuid] = uuid.uuid4()
 
     # with st.session_state[variables.placeholder_downloads_container].container(border=True):
-    st.subheader("Download raw datasets")
+    st.subheader("Download all data for a point")
 
     # Sort the intermediate_hash values and get the corresponding ids
     sorted_indices = sorted(range(len(downloads_df["id"])), key=lambda i: downloads_df["id"].iloc[i])
@@ -121,7 +119,7 @@ def display_download_section(variables, reset_uuid=False) -> None:
             )
 
 
-def display_existing_results(variables, ionmodule) -> None:
+def display_existing_results(variables, ionmodule, metric, mode, colorblind_mode) -> None:
     """
     Orchestrates the full display of quantification results in Streamlit,
     including plotting and interactive tabular output with styling.
@@ -138,13 +136,6 @@ def display_existing_results(variables, ionmodule) -> None:
     initialize_and_filter_data(variables, ionmodule)
     data_points_filtered = variables.filtered_data
 
-    metric = display_metric_selector(variables)
-    # ROC-AUC has no mode variants (it's already species-aware by design)
-    if metric == "ROC-AUC":
-        mode = None
-    else:
-        mode = display_metric_calc_approach_selector(variables)
-
     # prepare plot key explicitly for tab 1
     key = variables.result_plot_uuid
     if key not in st.session_state.keys():
@@ -157,6 +148,7 @@ def display_existing_results(variables, ionmodule) -> None:
         metric,
         mode,
         label=st.session_state[st.session_state[variables.selectbox_id_uuid]],
+        colorblind_mode=colorblind_mode,
         key=_id_of_key,
         plot_generator=plot_generator,
         annotation=_get_annotation(variables),
@@ -199,9 +191,22 @@ def display_metric_selector(variables) -> str:
 
     # TODO: Add "ROC-AUC" to options list to enable ROC-AUC metric display
     return st.radio(
-        "Select metric to plot",
+        "Metric",
         options=["Median", "Mean"],
         help="Toggle between median and mean absolute difference metrics.",
+        key=_id_of_key,
+    )
+
+
+def display_colorblindmode_selector(variables) -> str:
+    key = variables.colorblind_mode_selector_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.toggle(
+        "Colorblind Mode",
+        help="Toggle colorblind mode on or off.",
         key=_id_of_key,
     )
 
@@ -213,7 +218,7 @@ def display_metric_calc_approach_selector(variables_quant) -> str:
     _id_of_key = st.session_state[key]
 
     return st.radio(
-        "Select metric calculation approach",
+        "Weighting approach",
         options=["Global", "Species-weighted"],
         help="Toggle between species-weighted and global absolute difference metrics. Global considers all metrics equally, while species-weighted account for species abundance variations, i.e. the mean/median metric is calculated per species first before averaging across species.",
         key=_id_of_key,

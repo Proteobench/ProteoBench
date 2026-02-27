@@ -42,6 +42,8 @@ class VariablesDDAQuant:
     highlight_list_submitted: List[str] = field(default_factory=list)
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted"
     selectbox_id_uuid: str = "selectbox_id"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted"
     slider_id_submitted_uuid: str = "slider_id_submitted"
     slider_id_uuid: str = "slider_id"
     download_selector_id_uuid: str = "download_selector_id"

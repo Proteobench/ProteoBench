@@ -31,13 +31,12 @@ def generate_submitted_slider(variables) -> None:
         st.session_state[variables.slider_id_submitted_uuid] = uuid.uuid4()
     slider_key = st.session_state[variables.slider_id_submitted_uuid]
 
-    st.markdown(open(variables.description_slider_md, "r", encoding="utf-8").read())
-
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
         options=[1, 2, 3, 4, 5, 6],
         value=st.session_state.get(slider_key, variables.default_val_slider),
         key=slider_key,
+        help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
     )
 
 

@@ -3,7 +3,7 @@
 Anyone can start a discussion or more formally propose new module.
 
 Proposals can be started by opening a [discussion on GitHub](https://github.com/orgs/Proteobench/discussions/new?category=potential-new-module-to-discuss), using a specific template. 
-At least one expert, independent from both existing ProteoBench contributors and from the proposal submitters, should be contacted to give input on the proposal. If the module is developed and released before this is done, it will contain a very visible "caution" banner that will only be removed after getting input for external expert(s). You will find below how we propose expert input to be requested and at what stage. 
+At least one expert, independent from both existing ProteoBench contributors and from the proposal submitters, should be contacted to give input on the proposal. If the module is developed and released before this is done, it will contain a very visible "caution" banner indicating that the module is still in alpha stage (see the [page on module life cycle](./2-module-life-cycle.md)). It will only be removed after getting input for external expert(s). You will find below how we propose expert input to be requested and at what stage. 
 
 ## Sending a new module proposal
 

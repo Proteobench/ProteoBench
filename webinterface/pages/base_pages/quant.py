@@ -2,9 +2,7 @@
 
 import copy
 import logging
-import subprocess
 import uuid
-from pathlib import Path
 from typing import Any, Dict
 
 import pages.texts.proteobench_builder as pbb
@@ -73,22 +71,6 @@ class QuantUIObjects(BaseUIModule):
         )
         if self.variables.slider_id_submitted_uuid not in st.session_state.keys():
             st.session_state[self.variables.slider_id_submitted_uuid] = str()
-
-    @st.fragment
-    def display_all_data_results_main(self) -> None:
-        """Display the results for all data in Tab 1."""
-        st.title("Results (All Data)")
-        tab1_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
-        tab1_results.generate_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            description_slider_md=self.variables.description_slider_md,
-            default_val_slider=self.variables.default_val_slider,
-        )
-        tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
-        tab1_results.display_existing_results(variables=self.variables, ionmodule=self.ionmodule)
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
@@ -285,3 +267,56 @@ class QuantUIObjects(BaseUIModule):
                 variables=self.variables,
                 pr_url=pr_url,
             )
+
+    @st.fragment
+    def display_all_data_results_main(self) -> None:
+        """Display the results for all data in Tab 1."""
+        tab1_results.initialize_main_slider(
+            slider_id_uuid=self.variables.slider_id_uuid,
+            default_val_slider=self.variables.default_val_slider,
+        )
+
+        with st.expander("Plot options", expanded=True):
+            filter_cols = st.columns(2)
+            with filter_cols[0]:
+                tab1_results.generate_main_slider(
+                    slider_id_uuid=self.variables.slider_id_uuid,
+                    description_slider_md=self.variables.description_slider_md,
+                    default_val_slider=self.variables.default_val_slider,
+                )
+            with filter_cols[1]:
+                tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+
+            selector_cols = st.columns([1, 1, 1, 1])
+            with selector_cols[0]:
+                metric = tab1_results.display_metric_selector(self.variables)
+            with selector_cols[1]:
+                # ROC-AUC has no mode variants (it's already species-aware by design)
+                if metric == "ROC-AUC":
+                    mode = None
+                else:
+                    mode = tab1_results.display_metric_calc_approach_selector(self.variables)
+            with selector_cols[2]:
+                colorblind_mode = tab1_results.display_colorblindmode_selector(self.variables)
+
+        tab1_results.display_existing_results(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+            metric=metric,
+            mode=mode,
+            colorblind_mode=colorblind_mode,
+        )
+
+    def display_all_data_results_submitted(self) -> None:
+        """Display the results for all data in Tab 4."""
+        st.title("Results (All Data)")
+        tab4_display_results_submitted.initialize_submitted_slider(
+            self.variables.slider_id_submitted_uuid,
+            self.variables.default_val_slider,
+        )
+        tab4_display_results_submitted.generate_submitted_slider(self.variables)
+        tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
+        tab4_display_results_submitted.display_submitted_results(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )

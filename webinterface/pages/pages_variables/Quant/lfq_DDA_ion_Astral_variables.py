@@ -42,6 +42,8 @@ class VariablesDDAQuantAstral:
     highlight_list_submitted: List[str] = field(default_factory=list)
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dda_quant_Astral"
     selectbox_id_uuid: str = "selectbox_id_dda_quant_Astral"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dda_quant_Astral"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_quant_Astral"
     slider_id_submitted_uuid: str = "slider_id_submitted_dda_quant_Astral"
     slider_id_uuid: str = "slider_id_dda_quant_Astral"
     download_selector_id_uuid: str = "download_selector_id_dda_quant_Astral"
@@ -77,9 +79,18 @@ class VariablesDDAQuantAstral:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
-    beta_warning: bool = True
     alpha_warning: bool = False
+    beta_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA_Astral.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DDA ion Astral"
+    sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+    )
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/introduction_DDA_quan_ions.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/file_description.md"

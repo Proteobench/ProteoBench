@@ -125,6 +125,24 @@ Available ProteoBench modules
         ^^^
         additional DIA ion-level module with Astral DIA data
 
+    .. grid-item-card:: Label-free quantification of precursor ions with ZenoTOF 8600 - ZenoSWATH data
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF
+
+        :bdg-success:`active`
+        ^^^
+        additional DIA ion-level module with ZenoTOF 8600 - Zeno SWATH data
+
+    .. grid-item-card:: single-cell label free DIA quantification
+        :columns: 6 6 4 4
+        :padding: 1
+        :link: https://github.com/orgs/Proteobench/discussions/426
+
+        :bdg-success:`active`
+        ^^^
+        benchmarking identification and quantification workflows for low-input and single cell proteomics (SCP)
+
     .. grid-item-card:: benchmark with Dynamic Organellar Mapping
         :columns: 6 6 4 4
         :padding: 1
@@ -133,15 +151,6 @@ Available ProteoBench modules
         :bdg-info:`in development`
         ^^^
         Single-species benchmark using spatial proteomics
-
-    .. grid-item-card:: single-cell label free DIA quantification
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/426
-
-        :bdg-info:`in development`
-        ^^^
-        benchmarking identification and quantification workflows for low-input and single cell proteomics (SCP)
 
     .. grid-item-card:: De novo identification
         :columns: 6 6 4 4

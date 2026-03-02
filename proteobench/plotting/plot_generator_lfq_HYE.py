@@ -98,16 +98,17 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df: pd.DataFrame,
         metric: str = "Median",
         mode: str = "Species-weighted",
+        colorblind_mode: bool = True,
         software_colors: Dict[str, str] = {
-            "MaxQuant": "#8bc6fd",
-            "AlphaPept": "#17212b",
-            "ProlineStudio": "#8b26ff",
-            "MSAngel": "#C0FA7D",
-            "FragPipe": "#F89008",
-            "i2MassChroQ": "#108E2E",
-            "Sage": "#E43924",
-            "WOMBAT": "#663200",
-            "DIA-NN": "#d42f2f",
+            "MaxQuant": "#88ccef",
+            "AlphaPept": "#cc6777",
+            "ProlineStudio": "#ddcc77",
+            "MSAngel": "#147733",
+            "FragPipe": "#342288",
+            "i2MassChroQ": "#aa4599",
+            "Sage": "#671100",
+            "WOMBAT": "#44aa9a",
+            "DIA-NN": "#999934",
             "AlphaDIA": "#1D2732",
             "Custom": "#000000",
             "Spectronaut": "#007548",
@@ -118,11 +119,31 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             "PEAKS": "#f032e6",
             "quantms": "#f5e830",
         },
+        software_markers: Dict[str, str] = {
+            "MaxQuant": "circle",
+            "AlphaPept": "square",
+            "ProlineStudio": "diamond",
+            "MSAngel": "cross",
+            "FragPipe": "x",
+            "i2MassChroQ": "triangle-up",
+            "Sage": "triangle-down",
+            "WOMBAT": "pentagon",
+            "DIA-NN": "star",
+            "AlphaDIA": "star-triangle-up",
+            "Custom": "star-square",
+            "Spectronaut": "diamond-tall",
+            "FragPipe (DIA-NN quant)": "circle-x",
+            "MSAID": "square-cross",
+            "MetaMorpheus": "asterisk",
+            "Proteome Discoverer": "hash",
+            "PEAKS": "diamond-wide",
+            "quantms": "hexagram",
+        },
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
-        hide_annot: bool = False,
+        annotation: str = "",
         **kwargs,
     ) -> go.Figure:
         """
@@ -136,8 +157,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             Metric to plot, either "Median" or "Mean".
         mode : str, optional
             Mode of calculation, either, "Species-weighted" or "Global". Case-insensitive.
+        colorblind_mode : Bool, optional
+            If True, use different shapes for workflows.
         software_colors : Dict[str, str]
             Mapping of software names to colors.
+        software_markers : Dict[str, str]
+            Mapping of software names to markers.
         mapping : Dict[str, str]
             Mapping for renaming software versions.
         highlight_color : str
@@ -196,6 +221,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
                     + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
                 )
+                # Add keyword if present
+                # TODO: potentially make more generic so that this does not have to be added in multiple plot_generator classes
+                if "Keyword" in benchmark_metrics_df.columns:
+                    keyword = benchmark_metrics_df.Keyword[idx]
+                    if isinstance(keyword, str) and keyword.strip():
+                        datapoint_text = datapoint_text + f"Keyword: {keyword}<br>"
                 if "comments" in benchmark_metrics_df.columns:
                     comment = benchmark_metrics_df.comments[idx]
                     if isinstance(comment, str):
@@ -237,6 +268,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
         # Color plot based on software tool
         colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        markers = [software_markers[software] for software in benchmark_metrics_df["software_name"]]
         if "Highlight" in benchmark_metrics_df.columns:
             colors = [
                 highlight_color if highlight else item
@@ -246,6 +278,11 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df["color"] = colors
         benchmark_metrics_df["hover_text"] = hover_texts
         benchmark_metrics_df["scatter_size"] = scatter_size
+
+        if colorblind_mode:
+            benchmark_metrics_df["marker"] = markers
+        else:
+            benchmark_metrics_df["marker"] = "circle"
 
         if all_metric_values:
             layout_xaxis_range = [
@@ -269,7 +306,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         )
 
         # Get all unique color-software combinations (necessary for highlighting)
-        color_software_combinations = benchmark_metrics_df[["color", "software_name"]].drop_duplicates()
+        color_software_combinations = benchmark_metrics_df[["color", "software_name", "marker"]].drop_duplicates()
         benchmark_metrics_df["enable_match_between_runs"] = benchmark_metrics_df["enable_match_between_runs"].astype(
             str
         )
@@ -277,6 +314,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         for _, row in color_software_combinations.iterrows():
             color = row["color"]
             software = row["software_name"]
+            marker = row["marker"]
 
             tmp_df = benchmark_metrics_df[
                 (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
@@ -304,15 +342,16 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],
                     text=tmp_df[label] if label != "None" else None,
-                    marker=dict(color=tmp_df["color"], showscale=False),
+                    marker=dict(color=tmp_df["color"], showscale=False, symbol=tmp_df["marker"]),
                     marker_size=tmp_df["scatter_size"],
                     name=legend_name_map.get(tmp_df["software_name"].iloc[0], tmp_df["software_name"].iloc[0]),
                 )
             )
 
         fig.update_layout(
-            width=700,
+            width=None,
             height=700,
+            autosize=True,
             xaxis=dict(
                 title=plot_title,
                 gridcolor="white",
@@ -325,6 +364,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 gridwidth=2,
                 linecolor="black",
             ),
+            margin=dict(l=80, r=20, t=50, b=80),
         )
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
@@ -334,7 +374,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-" if not hide_annot else "",
+            text=annotation,
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )

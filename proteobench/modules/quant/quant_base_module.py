@@ -382,7 +382,6 @@ class QuantModule:
         # Append the URL to the user comments
         submission_comments += f"\n\nDataset URL: {dataset_url}"
         current_datapoint["submission_comments"] = submission_comments
-
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
 
         if not self.check_new_unique_hash(all_datapoints):

@@ -98,6 +98,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
 
 .. line-block::
+    **Ville Koskinen**
+    *Matrix Science Ltd, London, United Kingdom*
+
+.. line-block::
     **Olivier Langella**
     *Université Paris-Saclay, INRAE, CNRS, AgroParisTech, GQE - Le Moulon, PAPPSO, 91190, Gif-Sur-Yvette, France*
     *PAPPSO - Plateforme d'Analyse Protéomique de Paris Sud Ouest (France)*

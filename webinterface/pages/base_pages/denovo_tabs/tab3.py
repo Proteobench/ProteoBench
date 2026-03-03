@@ -6,12 +6,16 @@ from proteobench.plotting.plot_denovo import PlotDataPoint
 def generate_ptm_plots(variables, df, modifications):
     st.markdown("# PTMs")
     st.markdown("### Overview PTM precision")
+    with st.expander("Description"):
+        st.markdown(variables.texts.Description.ptm_overview)
 
     fig = PlotDataPoint.plot_ptm_overview(self=PlotDataPoint(), benchmark_metrics_df=df, mod_labels=modifications)
 
     st.plotly_chart(fig, use_container_width=True, key=variables.fig_ptm_overview)
 
     st.markdown("### Precision per modification")
+    with st.expander("Description"):
+        st.markdown(variables.texts.Description.ptm_specific)
     tabs = st.tabs(modifications)
     tab_dict = {mod_label: tab for mod_label, tab in zip(modifications, tabs)}
 
@@ -33,6 +37,9 @@ def generate_spectrum_feature_plots(variables, df, feature_names):
     else:
         evaluation_type = "mass"
 
+    with st.expander("Description"):
+        st.markdown(variables.texts.Description.spectrum_features_overview)
+
     tabs = st.tabs(feature_names)
     tab_dict = {feature_name: tab for feature_name, tab in zip(feature_names, tabs)}
 
@@ -47,6 +54,9 @@ def generate_spectrum_feature_plots(variables, df, feature_names):
 
 def generate_species_plot(variables, df):
     st.markdown("# Species")
+
+    with st.expander("Description"):
+        st.markdown(variables.texts.Description.species)
 
     exact_mode = st.toggle(
         label="Exact evaluation mode", value=False, key=variables.evaluation_mode_toggle_tab3_species

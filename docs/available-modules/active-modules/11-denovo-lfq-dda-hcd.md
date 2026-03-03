@@ -1,4 +1,4 @@
-# *De Novo* - DDA - HCD (**We are working on the documentation: come back soon.**)
+# *De Novo* - DDA - HCD (**Alpha phase**) *[Work in Progress]*
 
 This module compares the peptide sequencing accuracy of *de novo* models and algorithms for data acquired with data-dependent acquisition (DDA) on orbitrap instruments. Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
@@ -39,11 +39,43 @@ The benchmark dataset (nine-species-balanced.zip) can be downloaded here: [zenod
 
 ## Metric calculation
 
-The performance is evaluated at both the amino acid and peptide level. As introduced by [DeepNovo](https://www.pnas.org/doi/10.1073/pnas.1705691114), a correct amino acid whose mass differs by less than 0.1 Da from the corresponding ground truth amino acid. Additionally, this predicted amino acid must have either a prefix or suffix that differs by no more thatn 0.5 Da in mass from the corresponding amino acid sequence in the ground truth peptide. Correct peptides are defined as sequences where all amino acid predictions meet these criteria, ensuring that only fully accurate predictions are considered correct at the peptide level. In the module, this mode of evaluation is called '**mass-based**'. However, a more strict evaluation mode can be selected and is termed '**exact mode**'. In this mode, the two sequences should be exactly the same, where also cases such as deamidated-Q and E are considered incorrect. Only isoleucine and leucine substitutions are allowed.
+The performance is evaluated at both the amino acid and peptide level. As introduced by [DeepNovo](https://www.pnas.org/doi/10.1073/pnas.1705691114), a correct amino acid whose mass differs by less than 0.1 Da from the corresponding ground truth amino acid. Additionally, this predicted amino acid must have either a prefix or suffix that differs by no more than 0.5 Da in mass from the corresponding amino acid sequence in the ground truth peptide. Correct peptides are defined as sequences where all amino acid predictions meet these criteria, ensuring that only fully accurate predictions are considered correct at the peptide level. In the module, this mode of evaluation is called '**mass-based**'. However, a more strict evaluation mode can be selected and is termed '**exact mode**'. In this mode, the two sequences should be exactly the same, where also cases such as deamidated-Q and E are considered incorrect. Only isoleucine and leucine substitutions are allowed.
 
 ### Main benchmarking plot
 
-In the main benchmarking results plot, *precision* is calculated as the proportions of correct predictions among the predictions made by the *de novo* tool. This metric is plotted against the *coverage*, defined as the proportion of predictions made, which accounts for the fact that some *de novo* tools don't report results for all spectra. In this plot, the user can toggle between amino acid-level or peptide-level accuracy.
+The main accuracy plot provides a **global overview of de novo sequencing performance** across the evaluated tools. It visualizes the relationship between **peptide-level identification performance** and **amino-acid level sequence accuracy**. Each point in the plot corresponds to a de novo sequencing tool and shows the amino acid and peptide level accuracy. The plot combines two levels of evaluation:
+
+**X-axis – Peptide-level metric**  
+The x-axis displays either peptide-level **precision** or **recall**, depending on the selected setting.
+
+**Y-axis – Amino-acid level metric**  
+The y-axis always shows the corresponding **amino-acid level metric**, measuring how accurately the individual residues in the predicted sequences match the ground truth.
+
+This design allows the plot to simultaneously capture both **identification reliability** and **sequence-level correctness**.
+
+The **Precision vs Recall** setting determines which peptide-level metric is shown on the x-axis.
+Precision measures how many reported peptide predictions are correct:
+
+    Precision = correct predictions ÷ predictions above threshold
+
+This view emphasizes the **reliability of reported identifications**. Tools that achieve high precision produce predictions that are more likely to be correct.
+
+Recall measures how many spectra were successfully identified:
+
+    Recall = correct predictions ÷ total number of spectra
+
+This view emphasizes the **coverage of the dataset**, indicating how many spectra a tool can successfully sequence.
+
+The **evaluation mode** determines how predictions are classified as correct.
+
+In **exact** evaluation mode, a prediction is considered correct only if the predicted peptide sequence **exactly matches the ground-truth sequence**, including both amino acids and modifications. This represents the **strictest accuracy definition**. In **mass-based** evaluation mode, predictions are considered correct when they match the ground-truth sequence based on **cumulative fragment masses**, even if the exact amino-acid sequence differs.
+ he algorithm identifies the longest **mass-matching prefix and suffix** between the predicted and reference peptide sequences. Two mass tolerances are used during this process:
+
+- **Cumulative mass threshold** – maximum allowed difference between cumulative fragment masses (50 ppm)  
+- **Individual mass threshold** – maximum allowed difference between individual amino-acid masses (20 ppm)
+
+This evaluation accounts for typical ambiguities in mass spectrometry data. Match-based evaluation therefore counts both **exact matches and mass-equivalent matches**, while exact evaluation only counts **perfect sequence matches**.
+
 
 ### In-depth plots
 
@@ -68,7 +100,7 @@ Firstly, the ability of the tool to accuratly predict several **PTM's** can be e
 
 #### Spectrum characteristics
 
-Secondly, the ability of the tool to correctly predict spectra with specific characteristics can be evaluated. As shown in previous benchmark publications ([Denis et al](https://doi.org/10.1093/bib/bbac542), [Muth et al](https://doi.org/10.1093/bib/bbx033), [McDonnel et al](https://doi.org/10.1016/j.csbj.2022.03.008)), the accuracy of any *de novo* tool is dependent on several spectrum properties. To show this effect, we calculate precision on a selection of PSMs subsetted by each of the following characteristics:
+Secondly, the ability of the tool to correctly predict spectra with specific characteristics can be evaluated. As shown in previous benchmark publications ([Denis et al](https://doi.org/10.1093/bib/bbac542), [Muth et al](https://doi.org/10.1093/bib/bbx033), [McDonnel et al](https://doi.org/10.1016/j.csbj.2022.03.008), [van Puyenbroeck et al](https://www.biorxiv.org/content/10.1101/2025.08.19.671052v1)), the accuracy of any *de novo* tool is dependent on several spectrum properties. To show this effect, we calculate precision on a selection of PSMs subsetted by each of the following characteristics:
 - Missing fragmentation sites: The number of missing complementary (b and y) ions
 - Peptide length: Not specifically a spectrum characteristic, but reported to impact the performance of *de novo* tools
 - % Explained intensity: Serves as an inverse of the noise. Defined as the proportion of the intensity of annotated peaks over all peaks (TIC)
@@ -81,10 +113,6 @@ Protein sequences can differ considerably between species. Therefore, particular
 
 Beware, this set up was meant to work as training-test split procedure, where the data of eight species was used to train a model and evaluated on the unseen spectra from the excluded species. Here, we do not use it as intented since training the models is not directly supported in ProteoBench. If the user wants to use this feature as intented, the predictions should be generated accordingly as described. The results should be concatenated into a single result file in the format compatible with ProteoBench (see below).
 
-#### Spectrum identification overlap
-
-TODO
-
 ## How to use
 
 The module is flexible in terms of what workflow the participants can run. To ensure fair comparison, we suggest PTM support as stated in table 2.
@@ -93,34 +121,36 @@ The module is flexible in terms of what workflow the participants can run. To en
 
 The module is flexible of what workflow the participants can run. However, to ensure a fair comparison of the different *de novo* models, we suggest using the following general parameters listed in Table 2.
 
-**Table 1. Suggested paramaters**
-
-TODO: Insert table here
-
 ### Submit your run for public usage
 
-General description I believe
+When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available.
 
-Description on pull requests for public datapoint submission
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field Meta data for searches. Currently, we accept outputs from AdaNovo, Casanovo, InstaNovo, PepNet, π-HelixNovo, and π-PrimeNovo. Please fill the Comments for submission if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button I confirm that the metadata is correct. Then the button I really want to upload it will appear to trigger the submission.
 
 ## Important tool-specific settings
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-Table 2: Required input files
 
-Will probably be a bit general for the de novo module
+**Table 3. Overview of input files required for metric calculation and public submission**
+|Tool|Input file|Parameter File|
+|---------|-----|--------------|
+|AdaNovo|results.mztab|config.yaml|
+|Casanovo|results.mztab|config.yaml|
+|InstaNovo|results.csv|config.yaml|
+|PepNet|results.tsv|/|
+|π-HelixNovo|results.tsv|config.yaml|
+|π-PrimeNovo|results.tsv|config.yaml|
 
-Description of the Custom format and how the format is expected for each supported tool
 
 ## toml file description
 
-How the toml file parses the output files
+*Coming soon*
 
 ## Result Description
 
-Descripe the table format the of the intermediate
+*Coming soon*
 
 ## Define Parameters
 
-Describe the supported parameters
+*Coming soon*

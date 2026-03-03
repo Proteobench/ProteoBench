@@ -306,17 +306,3 @@ class QuantUIObjects(BaseUIModule):
             mode=mode,
             colorblind_mode=colorblind_mode,
         )
-
-    def display_all_data_results_submitted(self) -> None:
-        """Display the results for all data in Tab 4."""
-        st.title("Results (All Data)")
-        tab4_display_results_submitted.initialize_submitted_slider(
-            self.variables.slider_id_submitted_uuid,
-            self.variables.default_val_slider,
-        )
-        tab4_display_results_submitted.generate_submitted_slider(self.variables)
-        tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
-        tab4_display_results_submitted.display_submitted_results(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
-        )

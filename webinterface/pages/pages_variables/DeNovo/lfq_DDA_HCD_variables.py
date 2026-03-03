@@ -78,7 +78,7 @@ class VariablesDDADeNovo:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
 
-    default_level = "Peptide"
+    default_level = "Precision"
     default_evaluation = "Mass-based"
 
     beta_warning: bool = False
@@ -96,10 +96,18 @@ class VariablesDDADeNovo:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/denovo/lfq/DDA/HCD"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/8-quant-lfq-precursor-dda-Astral/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/11-denovo-lfq-dda-hcd/"
 
     additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_lfq_DDA_HCD.json"
     title: str = "De Novo Identification (DDA - HCD) Module -ALPHA-"
     prefix_params: str = "lfq_ion_dda_hcd_denovo_"
     params_json_dict: str = "params_json_dict_lfq_ion_dda_hcd_denovo"
     params_file_dict: str = "params_file_dict_lfq_ion_dda_hcd_denovo"
+
+    # Sidebar metadata
+    sidebar_label: str = "De novo DDA peptidoform"
+    sidebar_path: str = "/DeNovo_LFQ_DDA_HCD"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "de novo", "orbitrap", "precursor", "identification"]
+    )

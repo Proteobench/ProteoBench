@@ -80,8 +80,8 @@ class DeNovoUIObjects(BaseUIModule):
         )
 
         # Specific to the 'de novo' module.
-        self.level_mapping = {"Peptide": "peptide", "Amino Acid": "aa"}
-        self.level_mapping_submitted = {"Peptide": "peptide", "Amino Acid": "aa"}
+        self.level_mapping = {"Precision": "precision", "Recall": "recall"}
+        self.level_mapping_submitted = {"Precision": "precision", "Recall": "recall"}
         self.evaluation_type_mapping = {"Exact": "exact", "Mass-based": "mass"}
 
     @st.fragment
@@ -89,15 +89,15 @@ class DeNovoUIObjects(BaseUIModule):
         """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
 
-        # Radio for level (Peptide or Amino Acid)
+        # Radio for level (Precision or Recall)
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_uuid, default_value=self.variables.default_level
         )
         tab1.generate_main_radio(
             radio_id_uuid=self.variables.radio_level_id_uuid,
-            description="Select at which level precision is calculated",
-            options=["Peptide", "Amino Acid"],
-            help="Toggle between different levels of precision calculation.",
+            description="Select the classification metric",
+            options=["Precision", "Recall"],
+            help=self.variables.texts.Help.radio_level,
         )
 
         # Radio for evaluation type (Exact or Mass-Based)
@@ -108,7 +108,7 @@ class DeNovoUIObjects(BaseUIModule):
             radio_id_uuid=self.variables.radio_evaluation_id_uuid,
             description="Select the stringency of evaluation",
             options=["Exact", "Mass-based"],
-            help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching.",
+            help=self.variables.texts.Help.radio_evaluation,
         )
 
         tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
@@ -189,6 +189,7 @@ class DeNovoUIObjects(BaseUIModule):
             key=st.session_state[self.variables.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
             default=[dataset_options[0]],
+            help=self.variables.texts.Help.dataset_selection_indepth
         )
 
         modifications = [
@@ -215,15 +216,15 @@ class DeNovoUIObjects(BaseUIModule):
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
 
-        # Radio one for peptide or amino acid precision
+        # Radio one for precisio or recall
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_submitted_uuid, default_value=self.variables.default_level
         )
         tab1.generate_main_radio(
             radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
-            description="Select at which level precision is calculated",
-            options=["Peptide", "Amino Acid"],
-            help="Toggle between different levels of precision calculation.",
+            description="Select the classification metric",
+            options=["Precision", "Recall"],
+            help=self.variables.texts.Help.radio_level,
         )
 
         # Radio two for evaluation stringency
@@ -236,7 +237,7 @@ class DeNovoUIObjects(BaseUIModule):
             radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
             description="Select the stringency of evaluation",
             options=["Exact", "Mass-based"],
-            help="Toggle between amino acid identify (Exact) matching and an equal mass-based matching.",
+            help=self.variables.texts.Help.radio_evaluation,
         )
 
         # Plot the selectionbox

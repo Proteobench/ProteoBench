@@ -58,7 +58,7 @@ class PlotDataPoint:
     @staticmethod
     def plot_metric(
         benchmark_metrics_df: pd.DataFrame,
-        level: str = "peptide",
+        level: str = "precision",
         evaluation_type: str = "mass",
         software_colors: Dict[str, str] = {
             "AdaNovo": "#8b26ff",
@@ -145,19 +145,19 @@ class PlotDataPoint:
         benchmark_metrics_df["scatter_size"] = scatter_size
 
         layout_xaxis_range = [
-            results_min[f"{level}_{evaluation_type}_coverage"]
-            - results_min[f"{level}_{evaluation_type}_coverage"] * 0.05,
-            results_max[f"{level}_{evaluation_type}_coverage"]
-            + results_max[f"{level}_{evaluation_type}_coverage"] * 0.05,
+            results_min[f"peptide_{evaluation_type}_{level}"]
+            - results_min[f"peptide_{evaluation_type}_{level}"] * 0.05,
+            results_max[f"peptide_{evaluation_type}_{level}"]
+            + results_max[f"peptide_{evaluation_type}_{level}"] * 0.05,
         ]
         layout_yaxis_range = [
-            results_min[f"{level}_{evaluation_type}_precision"]
-            - results_min[f"{level}_{evaluation_type}_precision"] * 0.05,
-            results_max[f"{level}_{evaluation_type}_precision"]
-            + results_max[f"{level}_{evaluation_type}_precision"] * 0.05,
+            results_min[f"aa_{evaluation_type}_{level}"]
+            - results_min[f"aa_{evaluation_type}_{level}"] * 0.05,
+            results_max[f"aa_{evaluation_type}_{level}"]
+            + results_max[f"aa_{evaluation_type}_{level}"] * 0.05,
         ]
-        layout_xaxis_title = "Coverage"
-        layout_yaxis_title = "Precision"
+        layout_xaxis_title = f"Peptide {level.capitalize()}"
+        layout_yaxis_title = f"Amino Acid {level.capitalize()}"
 
         fig = go.Figure(
             layout_yaxis_range=layout_yaxis_range,
@@ -178,8 +178,8 @@ class PlotDataPoint:
 
             fig.add_trace(
                 go.Scatter(
-                    x=tmp_df[f"{level}_{evaluation_type}_coverage"],
-                    y=tmp_df[f"{level}_{evaluation_type}_precision"],
+                    x=tmp_df[f"peptide_{evaluation_type}_{level}"],
+                    y=tmp_df[f"aa_{evaluation_type}_{level}"],
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],
                     text=tmp_df[label] if label != "None" else None,

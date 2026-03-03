@@ -198,7 +198,7 @@ def display_metric_selector(variables) -> str:
     )
 
 
-def display_colorblindmode_selector(variables) -> bool:
+def display_colorblindmode_selector(variables) -> str:
     key = variables.colorblind_mode_selector_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()

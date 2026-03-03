@@ -15,13 +15,12 @@ def initialize_submitted_slider(slider_id_submitted_uuid, default_val_slider) ->
     """
     Initialize the slider for the submitted data.
     """
-    id_key_in_state = slider_id_submitted_uuid
-    if id_key_in_state not in st.session_state.keys():
-        st.session_state[id_key_in_state] = uuid.uuid4()
-    if st.session_state[id_key_in_state] not in st.session_state.keys():
-        value_key_in_state = st.session_state[id_key_in_state]  # the uuid4 as key
-        st.session_state[value_key_in_state] = default_val_slider
-
+    key = slider_id_submitted_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+    if _id_of_key not in st.session_state.keys():
+        st.session_state[_id_of_key] = default_val_slider
 
 def generate_submitted_slider(variables) -> None:
     """

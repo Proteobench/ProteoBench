@@ -89,7 +89,11 @@ def generate_additional_parameters_fields(
         user_input[key] = None
 
 
-def process_submission_form(variables, ionmodule, user_input, **kwargs) -> bool:
+def process_submission_form(
+    variables,
+    ionmodule,
+    user_input,
+) -> bool:
     """
     Handle the form submission logic.
 
@@ -112,7 +116,11 @@ def process_submission_form(variables, ionmodule, user_input, **kwargs) -> bool:
             icon="ℹ️",
         )
 
-    success = execute_proteobench(variables=variables, ionmodule=ionmodule, user_input=user_input, **kwargs)
+    success = execute_proteobench(
+        variables=variables,
+        ionmodule=ionmodule,
+        user_input=user_input,
+    )
 
     if success:
         # Inform the user with a link to the next tab
@@ -127,7 +135,7 @@ def process_submission_form(variables, ionmodule, user_input, **kwargs) -> bool:
 # function used in process_submission_form
 
 
-def execute_proteobench(variables, ionmodule, user_input, **kwargs) -> bool:
+def execute_proteobench(variables, ionmodule, user_input) -> bool:
     """
     Execute the ProteoBench benchmarking process.
 

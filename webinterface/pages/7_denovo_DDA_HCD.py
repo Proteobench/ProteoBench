@@ -44,11 +44,11 @@ class StreamlitUI(BaseStreamlitUI):
             tab_public_submission,
         ) = st.tabs(
             [
-                "Public Benchmark Runs",
-                "Submit New Data",
-                "Results In-Depth",
-                "Results New Data",
-                "Public Submission",
+                "View Public Results",
+                "Upload New Results (Private)",
+                "View Results in-depth",
+                "View Public + New Results",
+                "Submit New Results",
             ]
         )
 

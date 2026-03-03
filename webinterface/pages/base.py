@@ -1,6 +1,6 @@
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
-
+from pages.base_pages.banner import display_banner
 
 class BaseStreamlitUI:
     """
@@ -40,17 +40,17 @@ class BaseStreamlitUI:
             tab_results_all,
             tab_submission_details,
             tab_indepth_plots,
-            tab_multqc_plot,
             tab_results_new,
+            tab_compare_workflows,
             tab_public_submission,
         ) = st.tabs(
             [
-                "Public Benchmark Runs",
-                "Submit New Data",
-                "Results In-Depth",
-                "pMultiQC Plot",
-                "Results New Data",
-                "Public Submission",
+                "View Public Results",
+                "Upload New Results (Private)",
+                "View Single Result",
+                "View Public + New Results",
+                "Compare Two Results",
+                "Submit New Results",
             ]
         )
 
@@ -62,14 +62,7 @@ class BaseStreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            display_banner(self.variables)
             self.uiobjects.display_all_data_results_main()
 
         # Tab 2: Submission Details
@@ -82,17 +75,10 @@ class BaseStreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            display_banner(self.variables)
             self.uiobjects.display_submission_form()
 
-        # Tab 3: in-depth plots current data
+        # Tab 2.5: in-depth plots current data
         with tab_indepth_plots:
             st.title(self.variables.title)
 
@@ -102,25 +88,10 @@ class BaseStreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            display_banner(self.variables)
             self.uiobjects.display_indepth_plots()
 
-        # Tab 3_1: pMultiQC plot based on intermediate data
-
-        with tab_multqc_plot:
-            st.title("pMultiQC Report for selected dataset.")
-            # self.uiobjects.display_multqc_plot()
-
-            self.uiobjects.display_pmultiqc_report()
-
-        # Tab 4: Results (New Submissions)
+        # Tab 3: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables.title)
             st.link_button(
@@ -129,16 +100,20 @@ class BaseStreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-
+            display_banner(self.variables)
             self.uiobjects.display_all_data_results_submitted()
+
+        # Tab: Compare Workflows
+        with tab_compare_workflows:
+            st.title(self.variables.title)
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
+            display_banner(self.variables)
+            self.uiobjects.display_workflow_comparison()
 
         # Tab 5: Public Submission
         with tab_public_submission:
@@ -149,12 +124,5 @@ class BaseStreamlitUI:
                 type="secondary",
                 help="link to the module documentation",
             )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            display_banner(self.variables)
             self.uiobjects.display_public_submission_ui()

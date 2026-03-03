@@ -219,10 +219,10 @@ class DenovoDatapoint:
 
         results["in_depth"] = DenovoDatapoint.get_indepth_metrics(self=DenovoDatapoint(), df=intermediate)
         result_datapoint.results = results
-        result_datapoint.precision_peptide = result_datapoint.results['peptide'][evaluation_type]["precision"]
-        result_datapoint.recall_peptide = result_datapoint.results['peptide'][evaluation_type]["recall"]
-        result_datapoint.precision_aa = result_datapoint.results['aa'][evaluation_type]["precision"]
-        result_datapoint.recall_aa = result_datapoint.results['aa'][evaluation_type]["recall"]
+        result_datapoint.precision_peptide = result_datapoint.results["peptide"][evaluation_type]["precision"]
+        result_datapoint.recall_peptide = result_datapoint.results["peptide"][evaluation_type]["recall"]
+        result_datapoint.precision_aa = result_datapoint.results["aa"][evaluation_type]["precision"]
+        result_datapoint.recall_aa = result_datapoint.results["aa"][evaluation_type]["recall"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
         return results_series

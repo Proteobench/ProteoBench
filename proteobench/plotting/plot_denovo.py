@@ -151,10 +151,8 @@ class PlotDataPoint:
             + results_max[f"peptide_{evaluation_type}_{level}"] * 0.05,
         ]
         layout_yaxis_range = [
-            results_min[f"aa_{evaluation_type}_{level}"]
-            - results_min[f"aa_{evaluation_type}_{level}"] * 0.05,
-            results_max[f"aa_{evaluation_type}_{level}"]
-            + results_max[f"aa_{evaluation_type}_{level}"] * 0.05,
+            results_min[f"aa_{evaluation_type}_{level}"] - results_min[f"aa_{evaluation_type}_{level}"] * 0.05,
+            results_max[f"aa_{evaluation_type}_{level}"] + results_max[f"aa_{evaluation_type}_{level}"] * 0.05,
         ]
         layout_xaxis_title = f"Peptide {level.capitalize()}"
         layout_yaxis_title = f"Amino Acid {level.capitalize()}"

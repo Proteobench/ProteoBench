@@ -61,14 +61,16 @@ class StreamlitUI:
             tab_submission_details,
             tab_indepth_plots,
             tab_results_new,
+            tab_compare_workflows,
             tab_public_submission,
         ) = st.tabs(
             [
-                "Public Benchmark Runs",
-                "Submit New Data",
-                "Results In-Depth",
-                "Results New Data",
-                "Public Submission",
+                "View Public Results",
+                "Upload New Results (Private)",
+                "View Single Result",
+                "View Public + New Results",
+                "Compare Two Results",
+                "Submit New Results",
             ]
         )
 
@@ -118,6 +120,18 @@ class StreamlitUI:
             )
             display_banner(self.variables_dda_quant)
             self.quant_uiobjects.display_all_data_results_submitted()
+
+        # Tab: Compare Workflows
+        with tab_compare_workflows:
+            st.title(self.variables_dda_quant.title)
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables_dda_quant.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
+            display_banner(self.variables_dda_quant)
+            self.quant_uiobjects.display_workflow_comparison()
 
         # Tab 4: Public Submission
         with tab_public_submission:

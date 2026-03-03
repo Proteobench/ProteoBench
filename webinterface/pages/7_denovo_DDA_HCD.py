@@ -11,9 +11,7 @@ import pandas as pd
 import streamlit as st
 from pages.base import BaseStreamlitUI
 from pages.base_pages.denovo import DeNovoUIObjects
-from pages.pages_variables.DeNovo.DDA_HCD_variables import (
-    VariablesDDADeNovo,
-)
+from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
@@ -161,6 +159,6 @@ if __name__ == "__main__":
         ionmodule=DDAHCDDeNovoModule,
         parsesettingsbuilder=ParseSettingsBuilder,
         uiobjects=DeNovoUIObjects,
-        page_name="De novo DDA-HCD peptidoform -ALPHA-",
+        page_name="De novo DDA-HCD peptidoform",
     )
     st_ui.main_page()

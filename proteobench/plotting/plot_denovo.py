@@ -211,7 +211,7 @@ class PlotDataPoint:
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-ALPHA-",
+            text="-Alpha-",
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )

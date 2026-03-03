@@ -133,8 +133,10 @@ class DenovoDatapoint:
     intermediate_hash: str = ""
     results: dict = None
     # Add other elements here such as PR lists
-    precision: float = 0
-    recall: float = 0
+    precision_peptide: float = 0
+    precision_aa: float = 0
+    recall_aa: float = 0
+    recall_peptide: float = 0
     comments: str = ""
     proteobench_version: str = ""
 
@@ -154,7 +156,6 @@ class DenovoDatapoint:
         input_format: str,
         user_input: dict,
         subset_columns_hash: List[str] = ["spectrum_id", "peptide_str", "score"],
-        level: str = "peptide",
         evaluation_type: str = "mass",
         # Maybe add here aa/peptide precision
         # And also type of match required (exact/mass-based)
@@ -218,8 +219,10 @@ class DenovoDatapoint:
 
         results["in_depth"] = DenovoDatapoint.get_indepth_metrics(self=DenovoDatapoint(), df=intermediate)
         result_datapoint.results = results
-        result_datapoint.precision = result_datapoint.results[level][evaluation_type]["precision"]
-        result_datapoint.recall = result_datapoint.results[level][evaluation_type]["recall"]
+        result_datapoint.precision_peptide = result_datapoint.results['peptide'][evaluation_type]["precision"]
+        result_datapoint.recall_peptide = result_datapoint.results['peptide'][evaluation_type]["recall"]
+        result_datapoint.precision_aa = result_datapoint.results['aa'][evaluation_type]["precision"]
+        result_datapoint.recall_aa = result_datapoint.results['aa'][evaluation_type]["recall"]
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
         return results_series

@@ -6,7 +6,7 @@ from streamlit_utils import display_error, get_error_suggestions
 from proteobench.exceptions import ProteoBenchError
 
 
-def process_submission_form(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping):
+def process_submission_form(variables, ionmodule, user_input, evaluation_type_mapping):
     """
     Handle the form submission logic.
 
@@ -19,7 +19,7 @@ def process_submission_form(variables, ionmodule, user_input, level_mapping, eva
         st.error(":x: Please provide a result file", icon="🚨")
         return False
 
-    success = _execute_proteobench(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping)
+    success = _execute_proteobench(variables, ionmodule, user_input, evaluation_type_mapping)
 
     if success:
         # Inform the user with a link to the next tab
@@ -30,7 +30,7 @@ def process_submission_form(variables, ionmodule, user_input, level_mapping, eva
     return success
 
 
-def _execute_proteobench(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping):
+def _execute_proteobench(variables, ionmodule, user_input, evaluation_type_mapping):
     """
     Execute the benchmarking process and returns the results.
 
@@ -44,7 +44,7 @@ def _execute_proteobench(variables, ionmodule, user_input, level_mapping, evalua
             initialize_main_data_points(variables, ionmodule)
 
         result_performance, all_datapoints, input_df = _run_benchmarking_process(
-            variables, ionmodule, user_input, level_mapping, evaluation_type_mapping
+            variables, ionmodule, user_input, evaluation_type_mapping
         )
 
         # Mark the uploaded dataset
@@ -70,7 +70,7 @@ def _execute_proteobench(variables, ionmodule, user_input, level_mapping, evalua
 
 
 # Only this function is different between quant and denovo
-def _run_benchmarking_process(variables, ionmodule, user_input, level_mapping, evaluation_type_mapping):
+def _run_benchmarking_process(variables, ionmodule, user_input, evaluation_type_mapping):
     """
     Execute the benchmarking process and returns the results.
 
@@ -106,7 +106,6 @@ def _run_benchmarking_process(variables, ionmodule, user_input, level_mapping, e
         input_format=user_input["input_format"],
         user_input=user_input,
         all_datapoints=all_datapoints,
-        level=level_mapping[set_level_val],
         evaluation_type=evaluation_type_mapping[set_evaluation_val],
     )
 

@@ -27,7 +27,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
     De Novo Module.
     """
 
-    module_id = "denovo_lfq_DDA_HCD"
+    module_id = "denovo_DDA_HCD"
 
     def __init__(
         self,
@@ -73,7 +73,6 @@ class DDAHCDDeNovoModule(DeNovoModule):
         input_format: str,
         user_input: dict,
         all_datapoints: pd.DataFrame,
-        level: str = "peptide",
         evaluation_type: str = "mass",
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
@@ -90,7 +89,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
         level : str
-            The level precision and recall is calculated. Either `peptide` or `aa`
+            The level precision and recall is calculated. Either `precision` or `recall`
         evaluation_type : str
             The evaluation type for precision calculation. Either `exact` or `mass`-based
 
@@ -147,7 +146,6 @@ class DDAHCDDeNovoModule(DeNovoModule):
             intermediate=intermediate_metric_structure,
             input_format=input_format,
             user_input=user_input,
-            level=level,
             evaluation_type=evaluation_type,
         )
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)

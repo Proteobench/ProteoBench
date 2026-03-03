@@ -17,7 +17,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.DeNovo.lfq_DDA_HCD_variables import (
+from pages.pages_variables.DeNovo.DDA_HCD_variables import (
     VariablesDDADeNovo,
 )
 from streamlit_extras.let_it_rain import rain
@@ -26,7 +26,7 @@ from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
-from proteobench.modules.denovo.denovo_lfq_DDA_HCD import (
+from proteobench.modules.denovo.denovo_DDA_HCD import (
     DDAHCDDeNovoModule as IonModule,
 )
 from proteobench.plotting.plot_denovo import PlotDataPoint
@@ -149,7 +149,6 @@ class DeNovoUIObjects(BaseUIModule):
                 variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
-                level_mapping=self.level_mapping,
                 evaluation_type_mapping=self.evaluation_type_mapping,
             )
 

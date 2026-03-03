@@ -93,20 +93,20 @@ class VariablesDDADeNovo:
     description_results_md: str = "pages/markdown_files/DeNovo/DDA/result_description.md"
     description_submission_md: str = "pages/markdown_files/DeNovo/DDA/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/denovo/lfq/DDA/HCD"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/denovo/DDA/HCD"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/11-denovo-lfq-dda-hcd/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/11-denovo-dda-hcd/"
 
-    additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_lfq_DDA_HCD.json"
+    additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_DDA_HCD.json"
     title: str = "De Novo Identification (DDA - HCD) Module -ALPHA-"
-    prefix_params: str = "lfq_ion_dda_hcd_denovo_"
-    params_json_dict: str = "params_json_dict_lfq_ion_dda_hcd_denovo"
-    params_file_dict: str = "params_file_dict_lfq_ion_dda_hcd_denovo"
+    prefix_params: str = "ion_dda_hcd_denovo_"
+    params_json_dict: str = "params_json_dict_ion_dda_hcd_denovo"
+    params_file_dict: str = "params_file_dict_ion_dda_hcd_denovo"
 
     # Sidebar metadata
     sidebar_label: str = "De novo DDA peptidoform"
-    sidebar_path: str = "/DeNovo_LFQ_DDA_HCD"
+    sidebar_path: str = "/denovo_DDA_HCD"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(
         default_factory=lambda: ["DDA", "de novo", "orbitrap", "precursor", "identification"]

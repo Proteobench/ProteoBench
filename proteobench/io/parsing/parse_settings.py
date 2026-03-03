@@ -19,14 +19,15 @@ from .parse_ion import get_proforma_bracketed
 # new classes need to be filled in there too!!!
 MODULE_TO_CLASS = {}
 GROUND_TRUTH_DIR_SERVER = "/mnt/data/proteobench/module_data/"
-GROUND_TRUTH_DIR_LOCAL = os.path.join(
+
+GROUND_TRUTH_DIR_LOCAL_DENOVO = os.path.join(
     Path(__file__).resolve().parent,
     "io_parse_settings",
     "denovo",
-    "lfq",
     "DDA",
     "HCD",
 )
+
 GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
 GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
@@ -720,13 +721,13 @@ class ParseSettingsDeNovo:
         # Determine the path to the ground truth file
         if os.path.isfile(os.path.join(GROUND_TRUTH_DIR_SERVER, GROUND_TRUTH_FILENAME)):
             ground_truth_path = os.path.join(GROUND_TRUTH_DIR_SERVER, GROUND_TRUTH_FILENAME)
-        elif os.path.isfile(os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)):
-            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)
+        elif os.path.isfile(os.path.join(GROUND_TRUTH_DIR_LOCAL_DENOVO, GROUND_TRUTH_FILENAME)):
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL_DENOVO, GROUND_TRUTH_FILENAME)
         else:
             # Download from server URL
             from proteobench.utils.server_io import download_file
 
-            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL, GROUND_TRUTH_FILENAME)
+            ground_truth_path = os.path.join(GROUND_TRUTH_DIR_LOCAL_DENOVO, GROUND_TRUTH_FILENAME)
             download_file(GROUND_TRUTH_URL, ground_truth_path)
 
         df_ground_truth = pd.read_csv(ground_truth_path, compression="gzip")
@@ -744,6 +745,6 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
-    "denovo_lfq_DDA_HCD": ParseSettingsDeNovo,
+    "denovo_DDA_HCD": ParseSettingsDeNovo,
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
 }

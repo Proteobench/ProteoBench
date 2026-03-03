@@ -11,13 +11,13 @@ import pandas as pd
 import streamlit as st
 from pages.base import BaseStreamlitUI
 from pages.base_pages.denovo import DeNovoUIObjects
-from pages.pages_variables.DeNovo.lfq_DDA_HCD_variables import (
+from pages.pages_variables.DeNovo.DDA_HCD_variables import (
     VariablesDDADeNovo,
 )
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.denovo.denovo_lfq_DDA_HCD import DDAHCDDeNovoModule
+from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule
 
 
 class StreamlitUI(BaseStreamlitUI):

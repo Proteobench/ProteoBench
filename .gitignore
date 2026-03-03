@@ -152,3 +152,6 @@ jupyter_notebooks/analysis/temp_results/*CLAUDE.md
 CLAUDE.md
 .claude
 uv.lock
+
+# Large files
+*.gz

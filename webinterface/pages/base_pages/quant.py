@@ -19,7 +19,7 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
 )
 from proteobench.utils.server_io import dataset_folder_exists
 
-from . import (
+from .quant_tabs import (
     tab1_results,
     tab2_form_upload_data,
     tab3_indepth_plots,
@@ -83,8 +83,6 @@ class QuantUIObjects:
 
         if self.variables.params_file_dict not in st.session_state.keys():
             st.session_state[self.variables.params_file_dict] = {}
-        if self.variables.slider_id_submitted_uuid not in st.session_state.keys():
-            st.session_state[self.variables.slider_id_submitted_uuid] = str()
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""

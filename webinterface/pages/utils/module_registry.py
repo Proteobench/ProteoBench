@@ -9,7 +9,7 @@ import importlib
 import inspect
 from dataclasses import dataclass, is_dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import streamlit as st
 

@@ -291,11 +291,32 @@ class QuantUIObjects:
             self.variables.slider_id_submitted_uuid,
             self.variables.default_val_slider,
         )
-        tab4_display_results_submitted.generate_submitted_slider(self.variables)
-        tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
+
+        with st.expander("Plot options", expanded=True):
+            filter_cols = st.columns(2)
+            with filter_cols[0]:
+                tab4_display_results_submitted.generate_submitted_slider(self.variables)
+            with filter_cols[1]:
+                tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
+
+            selector_cols = st.columns([1, 1, 1, 1])
+            with selector_cols[0]:
+                metric = tab4_display_results_submitted.display_metric_selector(self.variables)
+            with selector_cols[1]:
+                # ROC-AUC has no mode variants (it's already species-aware by design)
+                if metric == "ROC-AUC":
+                    mode = None
+                else:
+                    mode = tab4_display_results_submitted.display_metric_calc_approach_selector(self.variables)
+            with selector_cols[2]:
+                colorblind_mode = tab4_display_results_submitted.display_colorblindmode_selector(self.variables)
+
         tab4_display_results_submitted.display_submitted_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
+            metric=metric,
+            mode=mode,
+            colorblind_mode=colorblind_mode,
         )
 
     def display_workflow_comparison(self) -> None:

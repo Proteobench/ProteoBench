@@ -57,7 +57,7 @@ def generate_submitted_selectbox(variables) -> None:
         st.error(f"Unable to create the selectbox: {e}", icon="🚨")
 
 
-def display_submitted_results(variables, ionmodule) -> None:
+def display_submitted_results(variables, ionmodule, metric, mode, colorblind_mode) -> None:
     """
     Display the results section of the page for submitted data.
     """
@@ -71,15 +71,6 @@ def display_submitted_results(variables, ionmodule) -> None:
         all_datapoints=key_all_datapoints_submitted,
         filter_data_point=ionmodule.filter_data_point,
     )
-
-    metric = display_metric_selector(variables)
-    # ROC-AUC has no mode variants (it's already species-aware by design)
-    if metric == "ROC-AUC":
-        mode = None
-    else:
-        mode = display_metric_calc_approach_selector(variables)
-
-    colorblind_mode = display_colorblindmode_selector(variables)
 
     if len(data_points_filtered) == 0:
         st.error("No datapoints available for plotting", icon="🚨")

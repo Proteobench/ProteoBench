@@ -382,12 +382,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             fig.add_trace(
                 go.Scatter(
                     x=x_values,
-                    y=tmp_df[feature_column_name],
+                    y=tmp_df[feature_column_name].tolist(),
                     mode="markers" if label == "None" else "markers+text",
-                    hovertext=tmp_df["hover_text"],
-                    text=tmp_df[label] if label != "None" else None,
-                    marker=dict(color=tmp_df["color"], showscale=False, symbol=tmp_df["marker"]),
-                    marker_size=tmp_df["scatter_size"],
+                    hovertext=tmp_df["hover_text"].tolist(),
+                    text=tmp_df[label].tolist() if label != "None" else None,
+                    marker=dict(color=tmp_df["color"].tolist(), showscale=False, symbol=tmp_df["marker"].tolist()),
+                    marker_size=tmp_df["scatter_size"].tolist(),
                     name=legend_name_map.get(tmp_df["software_name"].iloc[0], tmp_df["software_name"].iloc[0]),
                 )
             )

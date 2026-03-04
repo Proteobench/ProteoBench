@@ -1,6 +1,6 @@
 import base64
-import re
 import json
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Dict

@@ -50,7 +50,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
-from proteobench.score.quantscores import QuantScoresHYE
+from proteobench.score.quant.quantscores import QuantScoresHYE
 
 
 class QuantModule:

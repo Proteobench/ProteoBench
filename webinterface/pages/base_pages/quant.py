@@ -19,7 +19,7 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
 )
 from proteobench.utils.server_io import dataset_folder_exists
 
-from .quant_tabs import (
+from .tabs import (
     tab1_results,
     tab2_form_upload_data,
     tab3_indepth_plots,

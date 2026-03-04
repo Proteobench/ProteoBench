@@ -10,6 +10,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+
 EPSILON = 0.0001
 
 
@@ -50,29 +52,58 @@ def flatten_results_column(df):
     return pd.DataFrame(results)
 
 
-class PlotDataPoint:
+class DeNovoPlotGenerator(PlotGeneratorBase):
     """
-    Class for plotting data points.
+    Plot generator for de novo sequencing data points.
+    Implements the PlotGeneratorBase interface for consistent module plotting.
     """
 
-    @staticmethod
-    def plot_metric(
-        benchmark_metrics_df: pd.DataFrame,
-        level: str = "precision",
-        evaluation_type: str = "mass",
-        software_colors: Dict[str, str] = {
-            "AdaNovo": "#8b26ff",
-            "Casanovo": "#8bc6fd",
-            "DeepNovo": "#108E2E",
-            "PepNet": "#F89008",
-            "Pi-HelixNovo": "#E43924",
-            "Pi-PrimeNovo": "#663200",
-            "PEAKS": "#f032e6",
-        },
-        mapping: Dict[str, int] = {"old": 10, "new": 20},
-        highlight_color: str = "#d30067",
-        label: str = "None",
-    ) -> go.Figure:
+    def plot_main_metric(self, result_df: pd.DataFrame, hide_annot: bool = False, **kwargs) -> go.Figure:
+        """
+        Generate the main performance metric plot.
+
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            DataFrame containing the results to plot.
+        hide_annot : bool, optional
+            Whether to hide annotations on the plot (default is False).
+        **kwargs : dict
+            Additional parameters:
+            - level: str (default "precision") - metric type ("precision" or "recall")
+            - evaluation_type: str (default "mass") - evaluation type ("mass" or "exact")
+            - software_colors: Dict[str, str] - color mapping for software tools
+            - mapping: Dict[str, int] - size mapping for old/new datapoints
+            - highlight_color: str - color for highlighted datapoints
+            - label: str - label field to display
+
+        Returns
+        -------
+        go.Figure
+            The generated plotly figure for the main performance metric.
+        """
+        # Extract parameters from kwargs with defaults
+        level = kwargs.get("level", "precision")
+        evaluation_type = kwargs.get("evaluation_type", "mass")
+        software_colors = kwargs.get(
+            "software_colors",
+            {
+                "AdaNovo": "#8b26ff",
+                "Casanovo": "#8bc6fd",
+                "DeepNovo": "#108E2E",
+                "PepNet": "#F89008",
+                "Pi-HelixNovo": "#E43924",
+                "Pi-PrimeNovo": "#663200",
+                "PEAKS": "#f032e6",
+            },
+        )
+        mapping = kwargs.get("mapping", {"old": 10, "new": 20})
+        highlight_color = kwargs.get("highlight_color", "#d30067")
+        label = kwargs.get("label", "None")
+
+        # Use result_df as the main dataframe (renamed from benchmark_metrics_df)
+        benchmark_metrics_df = result_df
+
         # Define layout
         results_df = flatten_results_column(benchmark_metrics_df)
         benchmark_metrics_df = pd.concat([benchmark_metrics_df, results_df], axis=1)
@@ -219,6 +250,110 @@ class PlotDataPoint:
         fig.update_layout(clickmode="event+select")
 
         return fig
+
+    def generate_in_depth_plots(self, performance_data: pd.DataFrame, **kwargs) -> Dict[str, go.Figure]:
+        """
+        Generate module-specific in-depth plots.
+
+        Parameters
+        ----------
+        performance_data : pd.DataFrame
+            The performance data to plot.
+        **kwargs : dict
+            Additional parameters:
+            - mod_labels: List[str] - list of PTM modification labels
+            - mod_label: str - specific PTM label for detailed plot
+            - feature: str - spectrum feature to plot
+            - evaluation_type: str - evaluation type ("mass" or "exact")
+
+        Returns
+        -------
+        Dict[str, go.Figure]
+            Dictionary mapping plot names to plotly figures.
+        """
+        plots = {}
+
+        # Extract parameters with defaults
+        mod_labels = kwargs.get(
+            "mod_labels",
+            [
+                "M-Oxidation",
+                "Q-Deamidation",
+                "N-Deamidation",
+                "N-term Acetylation",
+                "N-term Carbamylation",
+                "N-term Ammonia-loss",
+            ],
+        )
+        mod_label = kwargs.get("mod_label", "M-Oxidation")
+        feature = kwargs.get("feature", "Missing Fragmentation Sites")
+        evaluation_type = kwargs.get("evaluation_type", "mass")
+        software_colors = kwargs.get(
+            "software_colors",
+            {
+                "AdaNovo": "#8b26ff",
+                "Casanovo": "#8bc6fd",
+                "DeepNovo": "#108E2E",
+                "PepNet": "#F89008",
+                "Pi-HelixNovo": "#E43924",
+                "Pi-PrimeNovo": "#663200",
+                "PEAKS": "#f032e6",
+            },
+        )
+
+        # Generate PTM plots
+        plots["ptm_overview"] = self.plot_ptm_overview(
+            performance_data, mod_labels=mod_labels, software_colors=software_colors
+        )
+        plots["ptm_specific"] = self.plot_ptm_specific(
+            performance_data, mod_label=mod_label, software_colors=software_colors
+        )
+
+        # Generate spectrum feature plot
+        plots["spectrum_feature"] = self.plot_spectrum_feature(
+            performance_data, feature=feature, evaluation_type=evaluation_type, software_colors=software_colors
+        )
+
+        # Generate species plot
+        plots["species_overview"] = self.plot_species_overview(
+            performance_data, evaluation_type=evaluation_type, software_colors=software_colors
+        )
+
+        return plots
+
+    def get_in_depth_plot_layout(self) -> list:
+        """
+        Define the layout configuration for displaying plots.
+
+        Returns
+        -------
+        list
+            List of plot configurations for organizing the UI display.
+        """
+        return [
+            {"plots": ["ptm_overview", "ptm_specific"], "columns": 2, "title": "PTM Analysis"},
+            {"plots": ["spectrum_feature"], "columns": 1, "title": "Spectrum Features"},
+            {"plots": ["species_overview"], "columns": 1, "title": "Species Analysis"},
+        ]
+
+    def get_in_depth_plot_descriptions(self) -> Dict[str, str]:
+        """
+        Get descriptions for each in-depth plot.
+
+        Returns
+        -------
+        Dict[str, str]
+            Dictionary mapping plot names to their descriptions.
+        """
+        return {
+            "ptm_overview": "Overview of precision across different post-translational modifications (PTMs). "
+            "Shows how well each tool identifies modified amino acids.",
+            "ptm_specific": "Detailed analysis of a specific PTM, comparing precision between ground truth "
+            "and de novo predictions.",
+            "spectrum_feature": "Analysis of precision relative to spectrum features such as missing "
+            "fragmentation sites, peptide length, or explained intensity.",
+            "species_overview": "Breakdown of precision across different species in the dataset.",
+        }
 
     def plot_ptm_overview(
         self,

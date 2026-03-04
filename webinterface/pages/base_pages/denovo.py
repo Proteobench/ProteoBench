@@ -29,13 +29,15 @@ from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_DDA_HCD import (
     DDAHCDDeNovoModule as IonModule,
 )
-from proteobench.plotting.plot_denovo import PlotDataPoint
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
-from .denovo_tabs import tab1, tab2, tab3, tab4
-from .quant_tabs import tab2_form_upload_data as tab2_quant
-from .quant_tabs import tab5_public_submission as tab5_quant
+from .tabs import tab1_results as tab1
+from .tabs import tab2_form_upload_data as tab2
+from .tabs import tab2_form_upload_data as tab2_quant
+from .tabs import tab3_indepth_plots as tab3
+from .tabs import tab4_display_results_submitted as tab4
+from .tabs import tab5_public_submission as tab5_quant
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -257,6 +259,14 @@ class DeNovoUIObjects(BaseUIModule):
         st.markdown(
             "If you want to make this point — and the associated data — publicly available, please go to “Public Submission"
         )
+    def display_workflow_comparison(self) -> None:
+        """Display the workflow comparison tab."""
+        from .tabs import tab_compare_workflows
+        
+        tab_compare_workflows.display_workflow_comparison(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )
 
     def display_public_submission_ui(self) -> None:
         """Display the public submission section of the page in Tab 5."""
@@ -360,8 +370,12 @@ class DeNovoUIObjects(BaseUIModule):
             st.error("No datapoints available for plotting", icon="🚨")
 
         try:
-            fig_metric = PlotDataPoint.plot_metric(
-                benchmark_metrics_df=st.session_state[self.variables.all_datapoints],
+            # Get plot generator from module (following Quant pattern)
+            plot_generator = self.ionmodule.get_plot_generator()
+            
+            fig_metric = plot_generator.plot_main_metric(
+                result_df=st.session_state[self.variables.all_datapoints],
+                hide_annot=False,
                 label=st.session_state[st.session_state[self.variables.selectbox_id_uuid]],
                 level=self.level_mapping[st.session_state[st.session_state[self.variables.radio_level_id_uuid]]],
                 evaluation_type=self.evaluation_type_mapping[

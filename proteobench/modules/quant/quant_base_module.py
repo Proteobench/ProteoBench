@@ -21,7 +21,7 @@ from pandas import DataFrame
 from proteobench.datapoint.quant_datapoint import (
     QuantDatapointHYE,
     filter_df_numquant_epsilon,
-    filter_df_numquant_nr_prec,
+    filter_df_numquant_nr_feature,
 )
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
@@ -99,6 +99,7 @@ class QuantModule:
         proteobot_repo_name: str,
         parse_settings_dir: str,
         module_id: str,
+        use_github: bool = True,
     ):
         """
         Initialize the QuantModule with GitHub repo and settings.
@@ -115,9 +116,12 @@ class QuantModule:
             The directory containing parse settings.
         module_id : str
             The module identifier for configuration.
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True. Used for dev.
         """
         self.t_dir = TemporaryDirectory().name
         self.t_dir_pr = TemporaryDirectory().name
+        self.use_github = use_github  # Store the use_github flag for later use
         self.github_repo = GithubProteobotRepo(
             token,
             proteobot_repo_name=proteobot_repo_name,
@@ -125,10 +129,9 @@ class QuantModule:
             clone_dir=self.t_dir,
             clone_dir_pr=self.t_dir_pr,
         )
-        self.github_repo.clone_repo()
+        if use_github:
+            self.github_repo.clone_repo()
         self.parse_settings_dir = parse_settings_dir
-
-        self.precursor_column_name = ""
         self.module_id = module_id
 
     def is_implemented(self) -> bool:
@@ -161,7 +164,16 @@ class QuantModule:
             A DataFrame with the current data point added.
         """
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = self.github_repo.read_results_json_repo()
+            if self.use_github:
+                all_datapoints = self.github_repo.read_results_json_repo()
+            else:
+                # Return empty DataFrame when GitHub is disabled
+                all_datapoints = pd.DataFrame()
+
+        if all_datapoints.empty:
+            # Create a DataFrame with just the current datapoint
+            current_datapoint["old_new"] = "new"
+            return pd.DataFrame([current_datapoint]).reset_index(drop=True)
 
         all_datapoints = all_datapoints.T
         current_datapoint["old_new"] = "new"
@@ -194,9 +206,23 @@ class QuantModule:
             A DataFrame containing all data points.
         """
         if not isinstance(all_datapoints, pd.DataFrame):
-            all_datapoints = self.github_repo.read_results_json_repo()
+            if self.use_github:
+                all_datapoints = self.github_repo.read_results_json_repo()
+            else:
+                # Return empty DataFrame when GitHub is disabled
+                return pd.DataFrame()
 
         all_datapoints["old_new"] = "old"
+
+        # Backward compatibility: rename legacy nr_prec column to nr_feature
+        if "nr_prec" in all_datapoints.columns:
+            if "nr_feature" not in all_datapoints.columns:
+                all_datapoints = all_datapoints.rename(columns={"nr_prec": "nr_feature"})
+            else:
+                # nr_feature exists but may have NaN where only nr_prec was set
+                mask = all_datapoints["nr_feature"].isna() & all_datapoints["nr_prec"].notna()
+                all_datapoints.loc[mask, "nr_feature"] = all_datapoints.loc[mask, "nr_prec"]
+                all_datapoints = all_datapoints.drop(columns=["nr_prec"])
 
         return all_datapoints
 
@@ -253,8 +279,8 @@ class QuantModule:
             for v in all_datapoints["results"]
         ]
 
-        all_datapoints["nr_prec"] = [
-            filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        all_datapoints["nr_feature"] = [
+            filter_df_numquant_nr_feature(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
 
         return all_datapoints
@@ -265,7 +291,7 @@ class QuantModule:
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
@@ -281,7 +307,7 @@ class QuantModule:
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all datapoints from the ProteoBench repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
@@ -298,14 +324,19 @@ class QuantModule:
         ).build_parser(input_format)
         standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
 
+        self.y_axis_title = parse_settings.y_axis_title
+
         # Get quantification data
         quant_score = QuantScoresHYE(
-            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            intermediate_metric_structure,
+            input_format,
+            user_input,
+            default_cutoff_min_feature=default_cutoff_min_feature,
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)

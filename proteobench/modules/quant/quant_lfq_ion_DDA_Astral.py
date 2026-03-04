@@ -42,7 +42,7 @@ class DDAQuantIonAstralModule(QuantModule):
     ----------
     module_id : str
         Module identifier for configuration.
-    precursor_column_name: str
+    feature_column_name: str
         Level of quantification.
     """
 
@@ -53,6 +53,7 @@ class DDAQuantIonAstralModule(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA_Astral",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA_Astral",
+        use_github: bool = True,
     ):
         """
         Initialize the DDA Quantification Module for Ion level Quantification for Astral.
@@ -65,6 +66,8 @@ class DDAQuantIonAstralModule(QuantModule):
             Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DDA".
         proteobench_repo_name : str, optional
             Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DDA".
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True.
         """
 
         super().__init__(
@@ -73,8 +76,8 @@ class DDAQuantIonAstralModule(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            use_github=use_github,
         )
-        self.precursor_column_name = "precursor ion"
 
     def is_implemented(self) -> bool:
         """
@@ -93,7 +96,7 @@ class DDAQuantIonAstralModule(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: pd.DataFrame,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
@@ -109,8 +112,8 @@ class DDAQuantIonAstralModule(QuantModule):
             User provided parameters for plotting.
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec : int
-            Minimum number of runs an ion has to be identified in.
+        default_cutoff_min_feature : int
+            Minimum number of runs a feature has to be identified in.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
 
@@ -119,6 +122,24 @@ class DDAQuantIonAstralModule(QuantModule):
         tuple[DataFrame, DataFrame, DataFrame]
             Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
         """
+
+        try:
+            print(
+                f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}"
+            )
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")
+        except KeyError as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
+
         result = run_benchmarking_with_timing(
             input_file=input_file_loc,
             input_format=input_format,
@@ -126,8 +147,8 @@ class DDAQuantIonAstralModule(QuantModule):
             all_datapoints=all_datapoints,
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
-            precursor_column_name=self.precursor_column_name,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            feature_column_name=parse_settings.analysis_level,
+            default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
         )
@@ -140,7 +161,7 @@ class DDAQuantIonAstralModule(QuantModule):
         input_format: str,
         user_input: dict[str, object],
         all_datapoints: pd.DataFrame,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, float]]:
         """
         Main workflow of the module with timing information. Used to benchmark workflow results.
@@ -155,7 +176,7 @@ class DDAQuantIonAstralModule(QuantModule):
             User provided parameters for plotting.
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs an ion has to be identified in (default is 3).
 
         Returns
@@ -167,6 +188,24 @@ class DDAQuantIonAstralModule(QuantModule):
               - input_df (pd.DataFrame)
               - timings (dict of step names to elapsed seconds)
         """
+
+        try:
+            print(
+                f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}"
+            )
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")
+        except KeyError as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
+
         return run_benchmarking_with_timing(
             input_file=input_file_loc,
             input_format=input_format,
@@ -174,8 +213,8 @@ class DDAQuantIonAstralModule(QuantModule):
             all_datapoints=all_datapoints,
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
-            precursor_column_name=self.precursor_column_name,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            feature_column_name=parse_settings.analysis_level,
+            default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
         )
 

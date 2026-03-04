@@ -9,10 +9,21 @@ from proteobench.exceptions import ProteoBenchError
 from . import inputs
 
 
-def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input) -> None:
+def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input, ionmodule=None) -> None:
     """
     Display software selector outside the form and show AlphaDIA-specific information.
     This allows immediate feedback when AlphaDIA is selected.
+
+    Parameters
+    ----------
+    variables : object
+        Module variables object
+    parsesettingsbuilder : object
+        Parse settings builder
+    user_input : dict
+        User input dictionary
+    ionmodule : object, optional
+        Ion module object to determine feature type. Defaults to None.
     """
     st.subheader("Input files")
     st.markdown(open(variables.description_input_file_md, "r", encoding="utf-8").read())
@@ -28,8 +39,20 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     # Store selection in user_input for use in form
     user_input["input_format"] = selected_format
 
+    print(f"Debug: Form submission received with input file: iommodule: {ionmodule.module_id}")
+
     # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
-    if selected_format == "AlphaDIA":
+    if (
+        selected_format == "AlphaDIA"
+        and hasattr(ionmodule, "module_id")
+        and ionmodule.module_id
+        in [
+            "quant_lfq_DIA_ion_diaPASEF",
+            "quant_lfq_DIA_ion_Astral",
+            "quant_lfq_DIA_ion_singlecell",
+            "quant_lfq_DIA_ion_ZenoTOF",
+        ]
+    ):
         st.info(
             "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
             "**If not, you have the following options:**\n\n"
@@ -41,6 +64,7 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
 
 def generate_input_fields(
     user_input,
+    ionmodule=None,
 ) -> None:
     """
     Create the file upload section of the form.
@@ -53,7 +77,17 @@ def generate_input_fields(
     )
 
     # For AlphaDIA, show secondary file uploader after main uploader
-    if user_input.get("input_format") == "AlphaDIA":
+    if (
+        user_input.get("input_format") == "AlphaDIA"
+        and hasattr(ionmodule, "module_id")
+        and ionmodule.module_id
+        in [
+            "quant_lfq_DIA_ion_diaPASEF",
+            "quant_lfq_DIA_ion_Astral",
+            "quant_lfq_DIA_ion_singlecell",
+            "quant_lfq_DIA_ion_ZenoTOF",
+        ]
+    ):
         user_input["input_csv_secondary"] = st.file_uploader(
             "Upload second AlphaDIA file (optional)",
             type=["tsv", "csv"],
@@ -107,7 +141,18 @@ def process_submission_form(
         return False
 
     # For AlphaDIA, inform about the two-file option but allow single merged file
-    if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
+    if (
+        user_input["input_format"] == "AlphaDIA"
+        and not user_input.get("input_csv_secondary")
+        and hasattr(ionmodule, "module_id")
+        and ionmodule.module_id
+        in [
+            "quant_lfq_DIA_ion_diaPASEF",
+            "quant_lfq_DIA_ion_Astral",
+            "quant_lfq_DIA_ion_singlecell",
+            "quant_lfq_DIA_ion_ZenoTOF",
+        ]
+    ):
         # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
         st.info(
             "Only for AlphaDIA v1: You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
@@ -225,7 +270,7 @@ def run_benchmarking_process(variables, ionmodule, user_input):
         user_input["input_format"],
         user_input,
         all_datapoints,
-        default_cutoff_min_prec=set_slider_val,
+        default_cutoff_min_feature=set_slider_val,
         input_file_secondary=tmp_file_secondary.name if tmp_file_secondary else None,
     )
 

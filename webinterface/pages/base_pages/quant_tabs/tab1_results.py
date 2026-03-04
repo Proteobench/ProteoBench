@@ -152,9 +152,13 @@ def display_existing_results(variables, ionmodule, metric, mode, colorblind_mode
         key=_id_of_key,
         plot_generator=plot_generator,
         annotation=_get_annotation(variables),
+        ionmodule=ionmodule,
     )
 
-    df_display = prepare_display_dataframe(data_points_filtered, highlight_point_id)
+    df_display = prepare_display_dataframe(
+        data_points_filtered,
+        highlight_point_id,
+    )
     grid_options = configure_aggrid(df_display)
 
     # prepare df key explicitly for tab 1

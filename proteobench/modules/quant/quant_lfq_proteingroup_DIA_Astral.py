@@ -1,0 +1,245 @@
+"""
+DIA Quantification Module for protein-group level Quantification for Astral.
+"""
+
+from __future__ import annotations
+
+from typing import Counter, Optional, Tuple
+
+import pandas as pd
+from pandas import DataFrame
+
+from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
+from proteobench.exceptions import (
+    ConvertStandardFormatError,
+    DatapointAppendError,
+    DatapointGenerationError,
+    IntermediateFormatGenerationError,
+    ParseError,
+    ParseSettingsError,
+    QuantificationError,
+)
+from proteobench.io.parsing.parse_proteingroup import load_input_file
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.constants import MODULE_SETTINGS_DIRS
+from proteobench.modules.quant.quant_base_module import QuantModule
+from proteobench.score.quantscores import QuantScoresHYE
+
+
+class DIAQuantProteingroupModuleAstral(QuantModule):
+    """
+    DIA Quantification Module for protein-group level Quantification for Astral.
+
+    Parameters
+    ----------
+    token : str
+        GitHub token for the user.
+    proteobot_repo_name : str, optional
+        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_proteingroup_DIA_Astral".
+    proteobench_repo_name : str, optional
+        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_proteingroup_DIA_Astral".
+
+    Attributes
+    ----------
+    module_id : str
+        Module identifier for configuration.
+    feature_column_name: str
+        Level of quantification.
+    """
+
+    module_id: str = "quant_lfq_DIA_proteingroup_Astral"
+
+    def __init__(
+        self,
+        token: str,
+        proteobot_repo_name: str = "Proteobot/Results_quant_proteingroup_DIA_Astral",
+        proteobench_repo_name: str = "Proteobench/Results_quant_proteingroup_DIA_Astral",
+        use_github: bool = True,
+    ):
+        """
+        Initialize the DIA Quantification Module for protein-group level Quantification for Astral.
+
+        Parameters
+        ----------
+        token : str
+            GitHub token for the user.
+        proteobot_repo_name : str, optional
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_proteingroup_DIA_Astral".
+        proteobench_repo_name : str, optional
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_proteingroup_DIA_Astral".
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True.
+        """
+        super().__init__(
+            token,
+            proteobot_repo_name=proteobot_repo_name,
+            proteobench_repo_name=proteobench_repo_name,
+            parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
+            module_id=self.module_id,
+            use_github=use_github,
+        )
+
+    def is_implemented(self) -> bool:
+        """
+        Return whether the module is fully implemented.
+
+        Returns
+        -------
+        bool
+            Whether the module is fully implemented.
+        """
+        return False
+
+    def benchmarking(
+        self,
+        input_file: str,
+        input_format: str,
+        user_input: dict,
+        all_datapoints: Optional[pd.DataFrame],
+        default_cutoff_min_feature: int = 3,
+        input_file_secondary: str = None,
+    ) -> Tuple[DataFrame, DataFrame, DataFrame]:
+        """
+        Main workflow of the module for benchmarking workflow results.
+
+        Parameters
+        ----------
+        input_file : str
+            Path to the workflow output file.
+        input_format : str
+            Format of the workflow output file.
+        user_input : dict
+            User-provided parameters for plotting.
+        all_datapoints : Optional[pd.DataFrame]
+            DataFrame containing all data points from the repo.
+        default_cutoff_min_feature : int, optional
+            Minimum number of runs an precursor ion must be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
+
+        Returns
+        -------
+        Tuple[DataFrame, DataFrame, DataFrame]
+            A tuple containing the intermediate data structure, all data points, and the input DataFrame.
+        """
+        # Parse workflow output file
+        try:
+            input_df = load_input_file(input_file, input_format, input_file_secondary)
+            print(f"Debug: Successfully loaded input file: {input_file}")
+        except pd.errors.ParserError as e:
+            raise ParseError(
+                f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
+            )
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing the input file: {e}")
+
+        # Parse settings file
+        try:
+            print(
+                f"Debug: Attempting to parse settings for module {self.module_id} self.parse_settings_dir: {self.parse_settings_dir} and input format {input_format}"
+            )
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+            print(f"Debug: Successfully parsed settings for module {self.module_id} and input format {input_format}")
+            ## For debugging, print all information in the parse settings
+            print(f"Debug: Parse settings details: {parse_settings}")
+        except KeyError as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing, settings missing: {e}")
+        except FileNotFoundError as e:
+            raise ParseSettingsError(f"Could not find the parsing settings file: {e}")
+        except Exception as e:
+            raise ParseSettingsError(f"Error parsing settings file for parsing: {e}")
+
+        try:
+            standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+            print(
+                f"Debug: Successfully converted input DataFrame to standard format for module {self.module_id}: {standard_format} with replicate to raw mapping: {replicate_to_raw}"
+            )
+        except KeyError as e:
+            raise ConvertStandardFormatError(f"Error converting to standard format, key missing: {e}")
+        except Exception as e:
+            raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
+
+        # Calculate quantification scores
+        try:
+            print(
+                f"Debug: Attempting to calculate quantification scores for module {self.module_id} with analysis level {parse_settings.analysis_level}, expected ratio {parse_settings.species_expected_ratio()}, and species dict {parse_settings.species_dict()}"
+            )
+            quant_score = QuantScoresHYE(
+                parse_settings.analysis_level,
+                parse_settings.species_expected_ratio(),
+                parse_settings.species_dict(),
+            )
+            print(f"Debug: Successfully calculated quantification scores: {quant_score}")
+            print(
+                f"Debug: quant_score.feature_column_name: {quant_score.feature_column_name}, quant_score.species_expected_ratio: {quant_score.species_expected_ratio}, quant_score.species_dict: {quant_score.species_dict}"
+            )
+        except Exception as e:
+            raise QuantificationError(f"Error generating quantification scores: {e}")
+
+        # Generate intermediate data structure
+        try:
+            intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+            print(f"Debug: Successfully generated intermediate data structure: {intermediate_metric_structure}")
+        except Exception as e:
+            raise IntermediateFormatGenerationError(f"Error generating intermediate data structure: {e}")
+
+        # Add protein-group specific metrics
+        ## Add the number of unique single accessions in datapoint
+        ### concatenate all accessions into a single list to check for duplicates across protein groups
+        print("Debug: Attempting to calculate unique protein group accessions metrics")
+        all_accessions = [
+            acc
+            for sublist in intermediate_metric_structure[parse_settings.analysis_level].apply(
+                lambda x: [acc for acc in x.split(";") if ";" not in acc] if pd.notnull(x) else []
+            )
+            for acc in sublist
+        ]
+        print(f"Debug: All accessions across protein groups: {all_accessions}")
+        # TODO: could we add the number of unique accessions in each group in the intermediate metric?
+        # len(set(all_accessions))
+
+        # Generate current data point
+        try:
+            current_datapoint = QuantDatapointHYE.generate_datapoint(
+                intermediate_metric_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_feature=default_cutoff_min_feature,
+            )
+            print(f"Debug: Successfully generated current data point: {current_datapoint}")
+        except Exception as e:
+            raise DatapointGenerationError(f"Error generating datapoint: {e}")
+
+        try:
+            current_datapoint["total_nr_unique_accessions"] = len(set(all_accessions))
+            # Add the number of unique single accessions that are present more than once (i.e. in multiple protein groups)
+            acc_count_val = Counter(all_accessions).values()
+            ## return how many accessions are present in more than one protein group
+            current_datapoint["nr_accessions_present_in_multiple_groups"] = sum([count > 1 for count in acc_count_val])
+            current_datapoint["prop_accessions_present_in_multiple_groups"] = (
+                current_datapoint["nr_accessions_present_in_multiple_groups"]
+                / current_datapoint["total_nr_unique_accessions"]
+                if current_datapoint["total_nr_unique_accessions"] > 0
+                else 0
+            )
+        except Exception as e:
+            raise DatapointGenerationError(f"Error calculating unique protein group accessions metrics: {e}")
+
+        # Add current data point to all datapoints
+        try:
+            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
+        except Exception as e:
+            raise DatapointAppendError(f"Error adding current data point: {e}")
+
+        print(f"Debug: Final intermediate metric structure: {intermediate_metric_structure}")
+        # Return intermediate data structure, all datapoints, and input DataFrame
+        return (
+            intermediate_metric_structure,
+            all_datapoints,
+            input_df,
+        )
+
+    def get_plot_generator(self):
+        return super().get_plot_generator()

@@ -8,13 +8,26 @@ from typing import Optional
 
 import pandas as pd
 from git import Repo, exc
-from github import Github
+
+# Make GitHub functionality optional
+try:
+    from github import Github
+
+    GITHUB_AVAILABLE = True
+except ImportError:
+    Github = None
+    GITHUB_AVAILABLE = False
 
 
 class GithubProteobotRepo:
     """
     A class to interact with GitHub repositories related to Proteobot and Proteobench,
     allowing cloning, committing, and creating pull requests.
+
+    Note
+    ----
+    Pull request functionality requires PyGithub to be installed.
+    Repository cloning and local Git operations work without PyGithub.
 
     Parameters
     ----------
@@ -66,6 +79,18 @@ class GithubProteobotRepo:
         self.proteobench_repo_name = proteobench_repo_name
         self.username = username
         self.repo = None
+
+    @staticmethod
+    def is_github_available() -> bool:
+        """
+        Check if PyGithub is available for GitHub API operations.
+
+        Returns
+        -------
+        bool
+            True if PyGithub is available, False otherwise.
+        """
+        return GITHUB_AVAILABLE
 
     def get_remote_url_anon(self) -> str:
         """
@@ -190,9 +215,9 @@ class GithubProteobotRepo:
                     data.append(pd.read_json(f, typ="series"))
         if not data:
             try:
-                self.read_results_json_repo_single_file()
+                return self.read_results_json_repo_single_file()
             except FileNotFoundError:
-                data = []
+                raise FileNotFoundError("No JSON data files found in repository and no results.json fallback available")
 
         return pd.DataFrame(data)
 
@@ -286,7 +311,24 @@ class GithubProteobotRepo:
         -------
         int
             The pull request number assigned by GitHub.
+
+        Raises
+        ------
+        ImportError
+            If PyGithub is not installed.
+        ValueError
+            If no GitHub token is provided.
         """
+        if not GITHUB_AVAILABLE:
+            raise ImportError(
+                "PyGithub is not installed. Please install it with: " "pip install PyGithub or conda install pygithub"
+            )
+
+        if not self.token:
+            raise ValueError(
+                "GitHub token is required for creating pull requests. " "Please provide a valid GitHub token."
+            )
+
         g = Github(self.token)
         repo = g.get_repo(self.proteobot_repo_name)
         base = repo.get_branch("master")

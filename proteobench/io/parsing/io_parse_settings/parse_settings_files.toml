@@ -98,3 +98,10 @@
 "Pi-HelixNovo" = "parse_settings_pihelixnovo.toml"
 "Pi-PrimeNovo" = "parse_settings_piprimenovo.toml"
 "PepNet" = "parse_settings_pepnet.toml"
+
+
+[quant_lfq_DIA_proteingroup_Astral]
+"DIA-NN" = "parse_settings_diann.toml"
+"AlphaDIA" = "parse_settings_alphadia.toml"
+"Spectronaut" = "parse_settings_spectronaut.toml"
+"Custom" = "parse_settings_custom.toml"

@@ -12,6 +12,65 @@ import pandas as pd
 import streamlit as st
 
 
+def initialize_uuid_state(key: str, default_value: Any = None) -> None:
+    """
+    Initialize a UUID-based state key with an optional default value.
+
+    Parameters
+    ----------
+    key : str
+        The session state key to initialize.
+    default_value : Any, optional
+        The default value to associate with the generated UUID.
+    """
+    if key not in st.session_state:
+        st.session_state[key] = uuid.uuid4()
+
+    if default_value is not None:
+        uuid_key = st.session_state[key]
+        if uuid_key not in st.session_state:
+            st.session_state[uuid_key] = default_value
+
+
+def initialize_submitted_slider(slider_id_uuid: str, default_val_slider: int) -> None:
+    """Initialize the submitted slider state with UUID and default value."""
+    initialize_uuid_state(slider_id_uuid, default_val_slider)
+
+
+def generate_submitted_slider(variables) -> None:
+    """Generate the slider for filtering submitted data."""
+    slider_uuid = st.session_state[variables.slider_id_submitted_uuid]
+    help_text = getattr(variables.texts.Help, "slider", None) if hasattr(variables, "texts") else None
+    st.slider(
+        "Minimum number of precursors per protein group",
+        1,
+        10,
+        key=slider_uuid,
+        help=help_text,
+    )
+
+
+def generate_submitted_selectbox(variables) -> None:
+    """Generate the selectbox for submitted data label selection."""
+    # Initialize if not already done
+    if variables.selectbox_id_submitted_uuid not in st.session_state:
+        st.session_state[variables.selectbox_id_submitted_uuid] = uuid.uuid4()
+
+    selectbox_uuid = st.session_state[variables.selectbox_id_submitted_uuid]
+
+    # Initialize the selectbox value if not present
+    if selectbox_uuid not in st.session_state:
+        st.session_state[selectbox_uuid] = "None"
+
+    help_text = getattr(variables.texts.Help, "selectbox", None) if hasattr(variables, "texts") else None
+    st.selectbox(
+        "Select label",
+        variables.metric_plot_labels,
+        key=selectbox_uuid,
+        help=help_text,
+    )
+
+
 def initialize_submitted_data_points(variables, ionmodule) -> None:
     """
     Initialize the submitted datapoints in the session state.

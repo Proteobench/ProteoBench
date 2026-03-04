@@ -10,7 +10,7 @@ from streamlit_extras.let_it_rain import rain
 
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 
-from .inputs import generate_input_widget
+from ..utils.inputs import generate_input_widget
 
 
 def generate_submission_ui_elements(variables, user_input) -> bool:

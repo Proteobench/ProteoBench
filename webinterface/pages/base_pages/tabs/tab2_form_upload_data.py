@@ -6,8 +6,6 @@ from streamlit_utils import display_error, get_error_suggestions
 
 from proteobench.exceptions import ProteoBenchError
 
-from . import inputs
-
 
 def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input) -> None:
     """

@@ -250,6 +250,10 @@ class QuantUIObjects:
             slider_id_uuid=self.variables.slider_id_uuid,
             default_val_slider=self.variables.default_val_slider,
         )
+        tab1_results.initialize_main_selectbox(
+            selectbox_id_uuid=self.variables.selectbox_id_uuid,
+            default_value="None",
+        )
 
         with st.expander("Plot options", expanded=True):
             filter_cols = st.columns(2)
@@ -277,9 +281,12 @@ class QuantUIObjects:
         tab1_results.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
-            metric=metric,
-            mode=mode,
-            colorblind_mode=colorblind_mode,
+            plot_params={
+                "metric": metric,
+                "mode": mode,
+                "colorblind_mode": colorblind_mode,
+                "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+            },
         )
 
     def display_all_data_results_submitted(self) -> None:
@@ -291,9 +298,19 @@ class QuantUIObjects:
         )
         tab4_display_results_submitted.generate_submitted_slider(self.variables)
         tab4_display_results_submitted.generate_submitted_selectbox(self.variables)
+
+        # Get current selections from session state
+        label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
+
         tab4_display_results_submitted.display_submitted_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
+            plot_params={
+                "metric": "Median",  # Default for submitted results
+                "mode": "Global",  # Default for submitted results
+                "colorblind_mode": False,
+                "label": label,
+            },
         )
 
     def display_workflow_comparison(self) -> None:

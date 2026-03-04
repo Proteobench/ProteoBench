@@ -17,25 +17,20 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.DeNovo.DDA_HCD_variables import (
-    VariablesDDADeNovo,
-)
+from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
-from proteobench.modules.denovo.denovo_DDA_HCD import (
-    DDAHCDDeNovoModule as IonModule,
-)
+from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
 from .tabs import tab1_results as tab1
 from .tabs import tab2_form_upload_data as tab2
 from .tabs import tab2_form_upload_data as tab2_quant
-from .tabs import tab3_indepth_plots as tab3
 from .tabs import tab4_display_results_submitted as tab4
 from .tabs import tab5_public_submission as tab5_quant
 
@@ -91,6 +86,12 @@ class DeNovoUIObjects(BaseUIModule):
         """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
 
+        # Initialize selectbox
+        tab1.initialize_main_selectbox(
+            selectbox_id_uuid=self.variables.selectbox_id_uuid,
+            default_value="None",
+        )
+
         # Radio for level (Precision or Recall)
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_uuid, default_value=self.variables.default_level
@@ -117,8 +118,16 @@ class DeNovoUIObjects(BaseUIModule):
         tab1.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
-            level_mapping=self.level_mapping,
-            evaluation_type_mapping=self.evaluation_type_mapping,
+            plot_params={
+                "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+                "level": self.level_mapping[
+                    st.session_state.get(st.session_state.get(self.variables.radio_level_id_uuid, ""), "Precision")
+                ],
+                "evaluation_type": self.evaluation_type_mapping[
+                    st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
+                ],
+            },
+            use_slider=False,
         )
 
     def display_submission_form(self) -> None:
@@ -190,7 +199,7 @@ class DeNovoUIObjects(BaseUIModule):
             key=st.session_state[self.variables.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
             default=[dataset_options[0]],
-            help=self.variables.texts.Help.dataset_selection_indepth
+            help=self.variables.texts.Help.dataset_selection_indepth,
         )
 
         modifications = [
@@ -209,13 +218,52 @@ class DeNovoUIObjects(BaseUIModule):
             )
         ]
 
-        tab3.generate_ptm_plots(variables=self.variables, df=selected_dtps, modifications=modifications)
-        tab3.generate_spectrum_feature_plots(variables=self.variables, df=selected_dtps, feature_names=feature_names)
-        tab3.generate_species_plot(variables=self.variables, df=selected_dtps)
+        # Generate in-depth plots using plot generator
+        if not selected_dtps.empty:
+            plot_generator = self.ionmodule.get_plot_generator()
+
+            # Create kwargs with De Novo-specific parameters
+            plot_kwargs = {
+                "mod_labels": modifications,
+                "feature": feature_names[0] if feature_names else "Missing Fragmentation Sites",
+                "evaluation_type": "mass",
+            }
+
+            try:
+                # Generate all plots
+                plots = plot_generator.generate_in_depth_plots(selected_dtps, **plot_kwargs)
+
+                # Display plots using layout from plot generator
+                layout = plot_generator.get_in_depth_plot_layout()
+                descriptions = plot_generator.get_in_depth_plot_descriptions()
+
+                for section in layout:
+                    st.subheader(section.get("title", ""))
+                    cols = st.columns(section.get("columns", 1))
+                    for idx, plot_name in enumerate(section["plots"]):
+                        with cols[idx % len(cols)]:
+                            if plot_name in plots:
+                                st.plotly_chart(plots[plot_name], use_container_width=True)
+                                if plot_name in descriptions:
+                                    st.caption(descriptions[plot_name])
+            except Exception as e:
+                st.error(f"Error generating in-depth plots: {e}", icon="🚨")
+                import traceback
+
+                with st.expander("Error details"):
+                    st.code(traceback.format_exc())
+        else:
+            st.info("No datasets selected for plotting.")
 
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
+
+        # Initialize selectbox
+        tab1.initialize_main_selectbox(
+            selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
+            default_value="None",
+        )
 
         # Radio one for precisio or recall
         tab1.initialize_radio(
@@ -246,8 +294,25 @@ class DeNovoUIObjects(BaseUIModule):
             variables=self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
         )
 
+        # Get current selections from session state
+        label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
+        level = self.level_mapping[
+            st.session_state.get(st.session_state.get(self.variables.radio_level_id_submitted_uuid, ""), "Precision")
+        ]
+        evaluation_type = self.evaluation_type_mapping[
+            st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_submitted_uuid, ""), "Exact")
+        ]
+
         # Plot the datapoints
-        tab4.display_submitted_results(self.variables, self.ionmodule)
+        tab4.display_submitted_results(
+            self.variables,
+            self.ionmodule,
+            plot_params={
+                "label": label,
+                "level": level,
+                "evaluation_type": evaluation_type,
+            },
+        )
         st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
         st.data_editor(
             st.session_state[self.variables.all_datapoints_submitted],
@@ -259,10 +324,11 @@ class DeNovoUIObjects(BaseUIModule):
         st.markdown(
             "If you want to make this point — and the associated data — publicly available, please go to “Public Submission"
         )
+
     def display_workflow_comparison(self) -> None:
         """Display the workflow comparison tab."""
         from .tabs import tab_compare_workflows
-        
+
         tab_compare_workflows.display_workflow_comparison(
             variables=self.variables,
             ionmodule=self.ionmodule,
@@ -372,7 +438,7 @@ class DeNovoUIObjects(BaseUIModule):
         try:
             # Get plot generator from module (following Quant pattern)
             plot_generator = self.ionmodule.get_plot_generator()
-            
+
             fig_metric = plot_generator.plot_main_metric(
                 result_df=st.session_state[self.variables.all_datapoints],
                 hide_annot=False,

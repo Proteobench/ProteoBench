@@ -51,6 +51,101 @@ def initialize_main_data_points(variables, ionmodule: Callable) -> None:
         )
 
 
+# UI Control Functions
+
+
+def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None:
+    """Initialize the slider state with UUID and default value."""
+    initialize_uuid_state(slider_id_uuid, default_val_slider)
+
+
+def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float) -> None:
+    """
+    Create a slider input.
+    """
+    # key for slider_uuid in session state
+    if slider_id_uuid not in st.session_state:
+        st.session_state[slider_id_uuid] = uuid.uuid4()
+    slider_key = st.session_state[slider_id_uuid]
+
+    default_value = st.session_state.get(slider_key, default_val_slider)
+    st.select_slider(
+        label="Minimal precursor quantifications (# samples)",
+        options=[1, 2, 3, 4, 5, 6],
+        value=default_value,
+        key=slider_key,
+        help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
+    )
+
+
+def initialize_radio(radio_id_uuid: str, default_value: str) -> None:
+    """Initialize radio button state with UUID and default value."""
+    initialize_uuid_state(radio_id_uuid, default_value)
+
+
+def generate_main_radio(radio_id_uuid: str, description: str, options: list, help: str = None) -> None:
+    """Generate a radio button selector."""
+    radio_uuid = st.session_state[radio_id_uuid]
+    st.radio(description, options, key=radio_uuid, help=help)
+
+
+def initialize_main_selectbox(selectbox_id_uuid: str, default_value: str = "None") -> None:
+    """Initialize the selectbox state with UUID and default value."""
+    initialize_uuid_state(selectbox_id_uuid, default_value)
+
+
+def generate_main_selectbox(variables, selectbox_id_uuid: str) -> None:
+    """Generate the main selectbox for label selection."""
+    selectbox_uuid = st.session_state[selectbox_id_uuid]
+
+    # Get help text if available
+    help_text = getattr(variables.texts.Help, "selectbox", None) if hasattr(variables, "texts") else None
+
+    st.selectbox(
+        "Select label",
+        variables.metric_plot_labels,
+        key=selectbox_uuid,
+        help=help_text,
+    )
+
+
+def display_metric_selector(variables) -> str:
+    """Display metric selector and return selected metric."""
+    help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
+    metric = st.radio(
+        "Select metric",
+        ["Median", "Mean"],
+        help=help_text,
+        horizontal=True,
+    )
+    return metric
+
+
+def display_metric_calc_approach_selector(variables) -> str:
+    """Display metric calculation approach selector and return selected mode."""
+    help_text = getattr(variables.texts.Help, "radio_mode", None) if hasattr(variables, "texts") else None
+    mode = st.radio(
+        "Select metric calculation approach",
+        ["Global", "Species-weighted"],
+        help=help_text,
+        horizontal=True,
+    )
+    return mode
+
+
+def display_colorblindmode_selector(variables) -> str:
+    key = variables.colorblind_mode_selector_uuid
+    if key not in st.session_state.keys():
+        st.session_state[key] = uuid.uuid4()
+    _id_of_key = st.session_state[key]
+
+    return st.toggle(
+        "Colorblind Mode",
+        help="Toggle colorblind mode on or off.",
+        key=_id_of_key,
+    )
+
+
 def filter_data_if_applicable(variables, ionmodule, use_slider: bool = True) -> pd.DataFrame:
     """
     Filter data using module-specific filtering logic.

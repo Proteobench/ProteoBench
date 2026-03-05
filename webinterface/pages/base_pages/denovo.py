@@ -28,11 +28,12 @@ from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonM
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
-from .tabs import tab1_results as tab1
-from .tabs import tab2_form_upload_data as tab2
-from .tabs import tab2_form_upload_data as tab2_quant
-from .tabs import tab4_display_results_submitted as tab4
-from .tabs import tab5_public_submission as tab5_quant
+from .tabs import tab1_view_public_results as tab1
+from .tabs import tab2_upload_results as tab2
+from .tabs import tab2_upload_results as tab2_quant
+from .tabs import tab4_view_public_and_new_results as tab4
+from .tabs import tab5_compare_results
+from .tabs import tab6_submit_results as tab5_quant
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -223,6 +224,11 @@ class DeNovoUIObjects(BaseUIModule):
             help=self.variables.texts.Help.dataset_selection_indepth,
         )
 
+        # Use default values for plot rendering (no user controls on this tab)
+        level = "precision"
+        evaluation_type = "exact"
+        colorblind_mode = False
+
         modifications = [
             "M-Oxidation",
             "Q-Deamidation",
@@ -236,7 +242,7 @@ class DeNovoUIObjects(BaseUIModule):
         # Handle dataset selection - separate uploaded data from public data
         all_datapoints_df = st.session_state[self.variables.all_datapoints_submitted]
         selected_dtps = pd.DataFrame()
-        
+
         for dtp_id, dtp_hash in dataset_selection:
             if dtp_hash is None:  # "Uploaded dataset" case
                 # Get the newly uploaded data (marked as "new")
@@ -251,11 +257,13 @@ class DeNovoUIObjects(BaseUIModule):
         if not selected_dtps.empty:
             plot_generator = self.ionmodule.get_plot_generator()
 
-            # Create kwargs with De Novo-specific parameters
+            # Create kwargs with De Novo-specific parameters (now using user selections)
             plot_kwargs = {
                 "mod_labels": modifications,
                 "feature": feature_names[0] if feature_names else "Missing Fragmentation Sites",
-                "evaluation_type": "mass",
+                "level": level,
+                "evaluation_type": evaluation_type,
+                "colorblind_mode": colorblind_mode,
             }
 
             try:
@@ -284,6 +292,7 @@ class DeNovoUIObjects(BaseUIModule):
         else:
             st.info("No datasets selected for plotting.")
 
+    @st.fragment
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
@@ -375,9 +384,7 @@ class DeNovoUIObjects(BaseUIModule):
 
     def display_workflow_comparison(self) -> None:
         """Display the workflow comparison tab."""
-        from .tabs import tab_compare_workflows
-
-        tab_compare_workflows.display_workflow_comparison(
+        tab5_compare_results.display_workflow_comparison(
             variables=self.variables,
             ionmodule=self.ionmodule,
         )

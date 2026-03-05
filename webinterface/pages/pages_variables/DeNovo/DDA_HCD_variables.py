@@ -62,10 +62,13 @@ class VariablesDDADeNovo:
 
     radio_level_id_uuid: str = "radio_level_id_dda_hcd_denovo"
     radio_evaluation_id_uuid: str = "radio_evaluation_id_dda_hcd_denovo"
+    radio_level_id_indepth_uuid: str = "radio_level_id_indepth_dda_hcd_denovo"
+    radio_evaluation_id_indepth_uuid: str = "radio_evaluation_id_indepth_dda_hcd_denovo"
     radio_level_id_submitted_uuid: str = "radio_level_id_submitted_dda_hcd_denovo"
     radio_evaluation_id_submitted_uuid: str = "radio_evaluation_id_submitted_dda_hcd_denovo"
 
     colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dda_hcd_denovo"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dda_hcd_denovo"
     colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_hcd_denovo"
 
     download_selector_id_uuid: str = "download_selector_id_dda_hcd_denovo"
@@ -102,7 +105,7 @@ class VariablesDDADeNovo:
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/11-denovo-dda-hcd/"
 
     additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_DDA_HCD.json"
-    title: str = "De Novo Identification (DDA - HCD) Module -ALPHA-"
+    title: str = "De Novo Identification (DDA - HCD) Module"
     prefix_params: str = "ion_dda_hcd_denovo_"
     params_json_dict: str = "params_json_dict_ion_dda_hcd_denovo"
     params_file_dict: str = "params_file_dict_ion_dda_hcd_denovo"

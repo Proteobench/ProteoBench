@@ -92,6 +92,37 @@ def initialize_submitted_data_points(variables, ionmodule) -> None:
         )
 
 
+def filter_submitted_data_if_applicable(variables, ionmodule, use_slider: bool = True) -> pd.DataFrame:
+    """
+    Filter submitted data using module-specific filtering logic.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys.
+    ionmodule : object
+        The module instance with filter_data_point method.
+    use_slider : bool, optional
+        Whether to use slider-based filtering (Quant) or return all data (De Novo).
+
+    Returns
+    -------
+    pd.DataFrame
+        Filtered or unfiltered data points.
+    """
+    if not use_slider or not hasattr(ionmodule, "filter_data_point"):
+        # No filtering for this module type
+        return st.session_state[variables.all_datapoints_submitted]
+
+    # Slider-based filtering (Quant modules)
+    if hasattr(variables, "slider_id_submitted_uuid"):
+        slider_key = st.session_state.get(variables.slider_id_submitted_uuid)
+        filter_value = st.session_state.get(slider_key, 3)
+        return ionmodule.filter_data_point(st.session_state[variables.all_datapoints_submitted], filter_value)
+
+    return st.session_state[variables.all_datapoints_submitted]
+
+
 def render_submitted_results_table(
     data: pd.DataFrame, table_style: str = "dataframe", column_config: Optional[Dict] = None
 ) -> None:
@@ -160,6 +191,9 @@ def display_submitted_results(
     """
     # Initialize submitted data
     initialize_submitted_data_points(variables, ionmodule)
+    
+    # Filter data using slider if applicable
+    filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()
@@ -173,7 +207,7 @@ def display_submitted_results(
     try:
         # Generate plot using plot_generator interface
         fig = plot_generator.plot_main_metric(
-            result_df=st.session_state[variables.all_datapoints_submitted],
+            result_df=filtered_data,
             hide_annot=plot_params.get("hide_annot", False),
             **plot_params,
         )
@@ -186,4 +220,4 @@ def display_submitted_results(
             st.code(traceback.format_exc())
 
     # Render results table
-    render_submitted_results_table(st.session_state[variables.all_datapoints_submitted], table_style, column_config)
+    render_submitted_results_table(filtered_data, table_style, column_config)

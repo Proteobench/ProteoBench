@@ -37,15 +37,15 @@ class StreamlitUI(BaseStreamlitUI):
         (
             tab_results_all,
             tab_submission_details,
-            tab_indepth_plots,
             tab_results_new,
+            tab_indepth_plots,
             tab_public_submission,
         ) = st.tabs(
             [
                 "View Public Results",
                 "Upload New Results (Private)",
-                "View Results in-depth",
                 "View Public + New Results",
+                "Compare Results",
                 "Submit New Results",
             ]
         )
@@ -89,27 +89,6 @@ class StreamlitUI(BaseStreamlitUI):
                 )
             self.uiobjects.display_submission_form()
 
-        # Tab 2.5: in-depth plots current data
-        with tab_indepth_plots:
-            st.title(self.variables.title)
-
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-
-            self.uiobjects.display_indepth_plots()
-
         # Tab 3: Results (New Submissions)
         with tab_results_new:
             st.title(self.variables.title)
@@ -130,7 +109,27 @@ class StreamlitUI(BaseStreamlitUI):
 
             self.uiobjects.display_all_data_results_submitted()
 
-        # Tab 4: Public Submission
+        # Tab 4: Compare Results (in-depth plots)
+        with tab_indepth_plots:
+            st.title(self.variables.title)
+            st.link_button(
+                "Go to module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                help="link to the module documentation",
+            )
+            if self.variables.beta_warning:
+                st.warning(
+                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+            if self.variables.alpha_warning:
+                st.warning(
+                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
+                )
+
+            self.uiobjects.display_indepth_plots()
+
+        # Tab 5: Public Submission
         with tab_public_submission:
             st.title(self.variables.title)
             st.link_button(

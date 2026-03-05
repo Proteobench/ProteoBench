@@ -25,6 +25,9 @@ def generate_indepth_plots(
     user_input,
     public_id: Optional[str],
     public_hash: Optional[str],
+    metric: str = "Median",
+    mode: str = "Global",
+    colorblind_mode: bool = False,
 ) -> Optional[go.Figure]:
     """
     Generate and display in-depth plots for the selected dataset.
@@ -45,6 +48,12 @@ def generate_indepth_plots(
         The dataset identifier ("Uploaded dataset" or public run name).
     public_hash : Optional[str]
         The hash of the selected public dataset.
+    metric : str, optional
+        The metric to use for plotting (e.g., "Median", "Mean"). Defaults to "Median".
+    mode : str, optional
+        The mode for metric calculation (e.g., "Global", "Species-specific"). Defaults to "Global".
+    colorblind_mode : bool, optional
+        Whether to use colorblind-friendly colors. Defaults to False.
 
     Returns
     -------
@@ -78,6 +87,9 @@ def generate_indepth_plots(
         plots = plot_generator.generate_in_depth_plots(
             performance_data,
             parse_settings,
+            metric=metric,
+            mode=mode,
+            colorblind_mode=colorblind_mode,
         )
     except Exception as e:
         st.error(f"Error generating in-depth plots: {e}", icon="🚨")

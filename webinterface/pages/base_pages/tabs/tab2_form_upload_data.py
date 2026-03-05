@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 
 import streamlit as st
@@ -195,37 +196,56 @@ def run_benchmarking_process(variables, ionmodule, user_input):
     Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
         The benchmarking results, all data points, and the input data frame.
     """
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+    # Get file extension from uploaded file to preserve it in temp file
+    _, file_extension = os.path.splitext(user_input["input_csv"].name)
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as tmp_file:
         tmp_file.write(user_input["input_csv"].getbuffer())
+        tmp_file.flush()
 
     # For AlphaDIA, also create temporary file for secondary input
-    tmp_file_secondary = None
+    tmp_file_secondary_name = None
     if user_input.get("input_csv_secondary"):
-        tmp_file_secondary = tempfile.NamedTemporaryFile(delete=False)
-        tmp_file_secondary.write(user_input["input_csv_secondary"].getbuffer())
-        tmp_file_secondary.flush()
+        _, file_extension_secondary = os.path.splitext(user_input["input_csv_secondary"].name)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension_secondary) as tmp_file_secondary:
+            tmp_file_secondary.write(user_input["input_csv_secondary"].getbuffer())
+            tmp_file_secondary.flush()
+            tmp_file_secondary_name = tmp_file_secondary.name
         user_input["input_csv_secondary"].seek(0)
 
     # reload buffer: https://stackoverflow.com/a/64478151/9684872
     user_input["input_csv"].seek(0)
-    if st.session_state[variables.slider_id_submitted_uuid] in st.session_state.keys():
-        set_slider_val = st.session_state[st.session_state[variables.slider_id_submitted_uuid]]
+    user_input_tmp = tmp_file.name
+
+    # Get slider value if module uses sliders (e.g., quant module)
+    if hasattr(variables, "slider_id_submitted_uuid") and hasattr(variables, "default_val_slider"):
+        if st.session_state[variables.slider_id_submitted_uuid] in st.session_state.keys():
+            set_slider_val = st.session_state[st.session_state[variables.slider_id_submitted_uuid]]
+        else:
+            set_slider_val = variables.default_val_slider
     else:
-        set_slider_val = variables.default_val_slider
+        set_slider_val = None
 
     if variables.all_datapoints_submitted in st.session_state.keys():
         all_datapoints = st.session_state[variables.all_datapoints_submitted]
     else:
         all_datapoints = st.session_state[variables.all_datapoints]
 
-    return ionmodule.benchmarking(
-        user_input["input_csv"],
-        user_input["input_format"],
-        user_input,
-        all_datapoints,
-        default_cutoff_min_prec=set_slider_val,
-        input_file_secondary=tmp_file_secondary.name if tmp_file_secondary else None,
-    )
+    benchmark_kwargs = {
+        "input_format": user_input["input_format"],
+        "user_input": user_input,
+        "all_datapoints": all_datapoints,
+    }
+
+    # Only add slider/cutoff parameter if module uses it
+    if set_slider_val is not None:
+        benchmark_kwargs["default_cutoff_min_prec"] = set_slider_val
+
+    # Only add secondary file if provided
+    if tmp_file_secondary_name:
+        benchmark_kwargs["input_file_secondary"] = tmp_file_secondary_name
+
+    return ionmodule.benchmarking(user_input_tmp, **benchmark_kwargs)
 
 
 def store_submission_keyword(variables, all_datapoints, user_input) -> None:

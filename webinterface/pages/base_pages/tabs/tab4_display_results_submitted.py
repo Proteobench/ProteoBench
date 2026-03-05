@@ -39,6 +39,9 @@ def initialize_submitted_slider(slider_id_uuid: str, default_val_slider: int) ->
 
 def generate_submitted_slider(variables) -> None:
     """Generate the slider for filtering submitted data."""
+    if not hasattr(variables, "slider_id_submitted_uuid"):
+        return  # Module doesn't use sliders
+
     slider_uuid = st.session_state[variables.slider_id_submitted_uuid]
     help_text = getattr(variables.texts.Help, "slider", None) if hasattr(variables, "texts") else None
     st.slider(

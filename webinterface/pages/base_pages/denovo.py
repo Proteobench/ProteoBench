@@ -182,7 +182,6 @@ class DeNovoUIObjects(BaseUIModule):
                 variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
-                evaluation_type_mapping=self.evaluation_type_mapping,
             )
 
     # Almost entirely unique to denovo module
@@ -234,11 +233,19 @@ class DeNovoUIObjects(BaseUIModule):
         ]
         feature_names = ["Missing Fragmentation Sites", "Peptide Length", "% Explained Intensity"]
 
-        selected_dtps = st.session_state[self.variables.all_datapoints_submitted][
-            st.session_state[self.variables.all_datapoints_submitted]["id"].isin(
-                [dtp_id for dtp_id, _ in dataset_selection]
-            )
-        ]
+        # Handle dataset selection - separate uploaded data from public data
+        all_datapoints_df = st.session_state[self.variables.all_datapoints_submitted]
+        selected_dtps = pd.DataFrame()
+        
+        for dtp_id, dtp_hash in dataset_selection:
+            if dtp_hash is None:  # "Uploaded dataset" case
+                # Get the newly uploaded data (marked as "new")
+                uploaded_data = all_datapoints_df[all_datapoints_df["old_new"] == "new"]
+                selected_dtps = pd.concat([selected_dtps, uploaded_data], ignore_index=True)
+            else:
+                # Get public dataset by hash
+                public_data = all_datapoints_df[all_datapoints_df["intermediate_hash"] == dtp_hash]
+                selected_dtps = pd.concat([selected_dtps, public_data], ignore_index=True)
 
         # Generate in-depth plots using plot generator
         if not selected_dtps.empty:

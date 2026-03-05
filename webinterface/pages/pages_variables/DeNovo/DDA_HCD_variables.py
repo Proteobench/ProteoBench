@@ -111,6 +111,4 @@ class VariablesDDADeNovo:
     sidebar_label: str = "De novo DDA peptidoform"
     sidebar_path: str = "/denovo_DDA_HCD"
     sidebar_category: str = "DDA"
-    keywords: List[str] = field(
-        default_factory=lambda: ["DDA", "de novo", "orbitrap", "precursor", "identification"]
-    )
+    keywords: List[str] = field(default_factory=lambda: ["DDA", "de novo", "orbitrap", "precursor", "identification"])

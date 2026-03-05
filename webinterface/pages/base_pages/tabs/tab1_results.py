@@ -133,8 +133,22 @@ def display_metric_calc_approach_selector(variables) -> str:
     return mode
 
 
-def display_colorblindmode_selector(variables) -> str:
-    key = variables.colorblind_mode_selector_uuid
+def display_colorblindmode_selector(variables, use_submitted: bool = False) -> str:
+    """Display colorblind mode selector toggle.
+    
+    Parameters
+    ----------
+    variables : VariablesClass
+        Variables object containing selector UUIDs
+    use_submitted : bool, optional
+        If True, use the submitted selector UUID, by default False
+    
+    Returns
+    -------
+    bool
+        Current state of the colorblind mode toggle
+    """
+    key = variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]

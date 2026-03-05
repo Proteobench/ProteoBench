@@ -72,7 +72,9 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             Additional parameters:
             - level: str (default "precision") - metric type ("precision" or "recall")
             - evaluation_type: str (default "mass") - evaluation type ("mass" or "exact")
+            - colorblind_mode: bool (default False) - whether to use different shapes for software tools
             - software_colors: Dict[str, str] - color mapping for software tools
+            - software_markers: Dict[str, str] - marker mapping for software tools (used when colorblind_mode is True)
             - mapping: Dict[str, int] - size mapping for old/new datapoints
             - highlight_color: str - color for highlighted datapoints
             - label: str - label field to display
@@ -85,6 +87,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # Extract parameters from kwargs with defaults
         level = kwargs.get("level", "precision")
         evaluation_type = kwargs.get("evaluation_type", "mass")
+        colorblind_mode = kwargs.get("colorblind_mode", False)
         software_colors = kwargs.get(
             "software_colors",
             {
@@ -95,6 +98,18 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 "Pi-HelixNovo": "#E43924",
                 "Pi-PrimeNovo": "#663200",
                 "PEAKS": "#f032e6",
+            },
+        )
+        software_markers = kwargs.get(
+            "software_markers",
+            {
+                "AdaNovo": "circle",
+                "Casanovo": "square",
+                "DeepNovo": "diamond",
+                "PepNet": "cross",
+                "Pi-HelixNovo": "x",
+                "Pi-PrimeNovo": "triangle-up",
+                "PEAKS": "star",
             },
         )
         mapping = kwargs.get("mapping", {"old": 10, "new": 20})
@@ -171,9 +186,17 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
             ]
 
+        # Set markers based on software tool (if colorblind mode is enabled)
+        markers = [software_markers[software] for software in benchmark_metrics_df["software_name"]]
+
         benchmark_metrics_df["color"] = colors
         benchmark_metrics_df["hover_text"] = hover_texts
         benchmark_metrics_df["scatter_size"] = scatter_size
+
+        if colorblind_mode:
+            benchmark_metrics_df["marker"] = markers
+        else:
+            benchmark_metrics_df["marker"] = "circle"
 
         layout_xaxis_range = [
             results_min[f"peptide_{evaluation_type}_{level}"]
@@ -212,7 +235,11 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"],
                     text=tmp_df[label] if label != "None" else None,
-                    marker=dict(color=tmp_df["color"], showscale=False),
+                    marker=dict(
+                        color=tmp_df["color"],
+                        showscale=False,
+                        symbol=tmp_df["marker"].iloc[0] if colorblind_mode else "circle",
+                    ),
                     marker_size=tmp_df["scatter_size"],
                     name=tmp_df["software_name"].iloc[0],
                 )

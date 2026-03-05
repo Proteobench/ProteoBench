@@ -98,7 +98,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         result_df: pd.DataFrame,
         metric: str = "Median",
         mode: str = "Species-weighted",
-        colorblind_mode: bool = True,
+        colorblind_mode: bool = False,
         software_colors: Dict[str, str] = {
             "MaxQuant": "#88ccef",
             "AlphaPept": "#cc6777",

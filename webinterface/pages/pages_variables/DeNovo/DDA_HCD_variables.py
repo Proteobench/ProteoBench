@@ -65,6 +65,9 @@ class VariablesDDADeNovo:
     radio_level_id_submitted_uuid: str = "radio_level_id_submitted_dda_hcd_denovo"
     radio_evaluation_id_submitted_uuid: str = "radio_evaluation_id_submitted_dda_hcd_denovo"
 
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dda_hcd_denovo"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_hcd_denovo"
+
     download_selector_id_uuid: str = "download_selector_id_dda_hcd_denovo"
     table_id_uuid: str = "table_id_dda_hcd_denovo"
 

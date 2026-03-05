@@ -19,6 +19,7 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
 )
 from proteobench.utils.server_io import dataset_folder_exists
 
+from .base import BaseUIModule
 from .tabs import (
     tab1_results,
     tab2_form_upload_data,
@@ -31,7 +32,7 @@ from .tabs import (
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-class QuantUIObjects:
+class QuantUIObjects(BaseUIModule):
     """Main class for the Streamlit interface of ProteoBench quantification.
     This class handles the creation of the Streamlit UI elements, including the main page layout,
     input forms, results display, and data submission elements.
@@ -65,24 +66,14 @@ class QuantUIObjects:
         parsesettingsbuilder : ParseSettingsBuilder
             The parse settings builder.
         """
-        self.variables: VariablesDDAQuant = variables
-        self.ionmodule: IonModule = ionmodule
-        self.parsesettingsbuilder: ParseSettingsBuilder = parsesettingsbuilder
-        self.user_input: Dict[str, Any] = {}
-        self.page_name = page_name
-        self.submission_ready = False
-        self.params_file_dict_copy: Dict[str, Any] = {}
+        super().__init__(
+            variables=variables, ionmodule=ionmodule, parsesettingsbuilder=parsesettingsbuilder, page_name=page_name
+        )
 
-        # Create page config and sidebar
-        pbb.proteobench_page_config()
-        pbb.proteobench_sidebar(current_page=self.page_name)
-
+        # Quant-specific attributes
         self.first_point_plotted = False
         st.session_state[self.variables.submit] = False
         self.stop_duplicating = False
-
-        if self.variables.params_file_dict not in st.session_state.keys():
-            st.session_state[self.variables.params_file_dict] = {}
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
@@ -255,28 +246,47 @@ class QuantUIObjects:
             default_value="None",
         )
 
-        with st.expander("Plot options", expanded=True):
-            filter_cols = st.columns(2)
-            with filter_cols[0]:
-                tab1_results.generate_main_slider(
-                    slider_id_uuid=self.variables.slider_id_uuid,
-                    description_slider_md=self.variables.description_slider_md,
-                    default_val_slider=self.variables.default_val_slider,
-                )
-            with filter_cols[1]:
-                tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+        # Define callbacks for plot options
+        def render_slider():
+            tab1_results.generate_main_slider(
+                slider_id_uuid=self.variables.slider_id_uuid,
+                description_slider_md=self.variables.description_slider_md,
+                default_val_slider=self.variables.default_val_slider,
+            )
 
-            selector_cols = st.columns([1, 1, 1, 1])
-            with selector_cols[0]:
-                metric = tab1_results.display_metric_selector(self.variables)
-            with selector_cols[1]:
-                # ROC-AUC has no mode variants (it's already species-aware by design)
-                if metric == "ROC-AUC":
-                    mode = None
-                else:
-                    mode = tab1_results.display_metric_calc_approach_selector(self.variables)
-            with selector_cols[2]:
-                colorblind_mode = tab1_results.display_colorblindmode_selector(self.variables)
+        def render_selectbox():
+            tab1_results.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+
+        # Store metric in a container to share between callbacks
+        metric_container = {"metric": None}
+
+        def render_metric_selector():
+            metric = tab1_results.display_metric_selector(self.variables)
+            metric_container["metric"] = metric
+            return metric
+
+        def render_mode_selector():
+            # ROC-AUC has no mode variants (it's already species-aware by design)
+            if metric_container["metric"] == "ROC-AUC":
+                return None
+            else:
+                return tab1_results.display_metric_calc_approach_selector(self.variables)
+
+        def render_colorblind_selector():
+            return tab1_results.display_colorblindmode_selector(self.variables)
+
+        # Render plot options expander and capture return values
+        results = self.render_plot_options_expander(
+            filter_callbacks=[render_slider, render_selectbox],
+            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            filter_cols_spec=2,
+            selector_cols_spec=[1, 1, 1, 1],
+        )
+
+        # Extract returned values
+        metric = results[2] if len(results) > 2 else "Median"
+        mode = results[3] if len(results) > 3 else "Global"
+        colorblind_mode = results[4] if len(results) > 4 else False
 
         tab1_results.display_existing_results(
             variables=self.variables,

@@ -96,25 +96,46 @@ class DeNovoUIObjects(BaseUIModule):
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_uuid, default_value=self.variables.default_level
         )
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_level_id_uuid,
-            description="Select the classification metric",
-            options=["Precision", "Recall"],
-            help=self.variables.texts.Help.radio_level,
-        )
 
         # Radio for evaluation type (Exact or Mass-Based)
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_evaluation_id_uuid, default_value=self.variables.default_evaluation
         )
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_evaluation_id_uuid,
-            description="Select the stringency of evaluation",
-            options=["Exact", "Mass-based"],
-            help=self.variables.texts.Help.radio_evaluation,
+
+        # Define callbacks for plot options
+        def render_selectbox():
+            tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+
+        def render_level_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_level_id_uuid,
+                description="Select the classification metric",
+                options=["Precision", "Recall"],
+                help=self.variables.texts.Help.radio_level,
+            )
+
+        def render_evaluation_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_evaluation_id_uuid,
+                description="Select the stringency of evaluation",
+                options=["Exact", "Mass-based"],
+                help=self.variables.texts.Help.radio_evaluation,
+            )
+
+        def render_colorblind_selector():
+            return tab1.display_colorblindmode_selector(self.variables)
+
+        # Render plot options expander
+        results = self.render_plot_options_expander(
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_level_radio, render_evaluation_radio, render_colorblind_selector],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1, 1, 1],
         )
 
-        tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+        # Extract colorblind mode from results
+        colorblind_mode = results[3] if len(results) > 3 else False
+
         tab1.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
@@ -126,6 +147,7 @@ class DeNovoUIObjects(BaseUIModule):
                 "evaluation_type": self.evaluation_type_mapping[
                     st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
                 ],
+                "colorblind_mode": colorblind_mode,
             },
             use_slider=False,
         )
@@ -265,15 +287,9 @@ class DeNovoUIObjects(BaseUIModule):
             default_value="None",
         )
 
-        # Radio one for precisio or recall
+        # Radio one for precision or recall
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_submitted_uuid, default_value=self.variables.default_level
-        )
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
-            description="Select the classification metric",
-            options=["Precision", "Recall"],
-            help=self.variables.texts.Help.radio_level,
         )
 
         # Radio two for evaluation stringency
@@ -282,17 +298,41 @@ class DeNovoUIObjects(BaseUIModule):
             default_value=self.variables.default_evaluation,
         )
 
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
-            description="Select the stringency of evaluation",
-            options=["Exact", "Mass-based"],
-            help=self.variables.texts.Help.radio_evaluation,
+        # Define callbacks for plot options
+        def render_selectbox():
+            tab1.generate_main_selectbox(
+                variables=self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
+            )
+
+        def render_level_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
+                description="Select the classification metric",
+                options=["Precision", "Recall"],
+                help=self.variables.texts.Help.radio_level,
+            )
+
+        def render_evaluation_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
+                description="Select the stringency of evaluation",
+                options=["Exact", "Mass-based"],
+                help=self.variables.texts.Help.radio_evaluation,
+            )
+
+        def render_colorblind_selector():
+            return tab1.display_colorblindmode_selector(self.variables, use_submitted=True)
+
+        # Render plot options expander
+        results = self.render_plot_options_expander(
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_level_radio, render_evaluation_radio, render_colorblind_selector],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1, 1, 1],
         )
 
-        # Plot the selectionbox
-        tab1.generate_main_selectbox(
-            variables=self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
-        )
+        # Extract colorblind mode from results
+        colorblind_mode = results[3] if len(results) > 3 else False
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
@@ -311,6 +351,7 @@ class DeNovoUIObjects(BaseUIModule):
                 "label": label,
                 "level": level,
                 "evaluation_type": evaluation_type,
+                "colorblind_mode": colorblind_mode,
             },
         )
         st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
@@ -439,6 +480,14 @@ class DeNovoUIObjects(BaseUIModule):
             # Get plot generator from module (following Quant pattern)
             plot_generator = self.ionmodule.get_plot_generator()
 
+            # Get colorblind mode from session state
+            colorblind_key = self.variables.colorblind_mode_selector_uuid
+            if colorblind_key in st.session_state:
+                colorblind_mode_id = st.session_state[colorblind_key]
+                colorblind_mode = st.session_state.get(colorblind_mode_id, False)
+            else:
+                colorblind_mode = False
+
             fig_metric = plot_generator.plot_main_metric(
                 result_df=st.session_state[self.variables.all_datapoints],
                 hide_annot=False,
@@ -447,6 +496,7 @@ class DeNovoUIObjects(BaseUIModule):
                 evaluation_type=self.evaluation_type_mapping[
                     st.session_state[st.session_state[self.variables.radio_evaluation_id_uuid]]
                 ],
+                colorblind_mode=colorblind_mode,
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")

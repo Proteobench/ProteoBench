@@ -89,6 +89,7 @@ class VariablesDDADeNovo:
 
     beta_warning: bool = False
     alpha_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_denovo_lfq_DDA_HCD.git"
 
     description_module_md: str = "pages/markdown_files/DeNovo/DDA/introduction_DDA_quan_ions.md"
@@ -102,7 +103,7 @@ class VariablesDDADeNovo:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/denovo/DDA/HCD"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/11-denovo-dda-hcd/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-denovo-dda-hcd/"
 
     additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_DDA_HCD.json"
     title: str = "De Novo Identification (DDA - HCD) Module"

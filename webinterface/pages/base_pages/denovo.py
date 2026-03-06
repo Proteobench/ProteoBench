@@ -178,7 +178,7 @@ class DeNovoUIObjects(BaseUIModule):
             )
 
         if submit_button:
-            st.info("Calculating metrics. This will take no more than two minutes. Please be patient.")
+            st.info("Calculating metrics. This will take around two minutes. Please be patient.")
             self.first_point_plotted = tab2.process_submission_form(
                 variables=self.variables,
                 ionmodule=self.ionmodule,

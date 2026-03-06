@@ -29,124 +29,15 @@ class StreamlitUI(BaseStreamlitUI):
         """
         super().__init__(**kwargs)
 
-    def main_page(self) -> None:
-        """
-        Set up the main page layout for the Streamlit application.
-        """
-        # Create tabs
-        (
-            tab_results_all,
-            tab_submission_details,
-            tab_results_new,
-            tab_indepth_plots,
-            tab_public_submission,
-        ) = st.tabs(
-            [
-                "View Public Results",
-                "Upload New Results (Private)",
-                "View Public + New Results",
-                "Compare Results",
-                "Submit New Results",
-            ]
-        )
-
-        with tab_results_all:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-
-            self.uiobjects.display_all_data_results_main()
-
-        # Tab 2: Submission Details
-        with tab_submission_details:
-            st.title(self.variables.title)
-
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            self.uiobjects.display_submission_form()
-
-        # Tab 3: Results (New Submissions)
-        with tab_results_new:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-
-            self.uiobjects.display_all_data_results_submitted()
-
-        # Tab 4: Compare Results (in-depth plots)
-        with tab_indepth_plots:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-
-            self.uiobjects.display_indepth_plots()
-
-        # Tab 5: Public Submission
-        with tab_public_submission:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            if self.variables.alpha_warning:
-                st.warning(
-                    "This module is in ALPHA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
-            self.uiobjects.display_public_submission_ui()
+    def get_tab_config(self) -> list:
+        """Override tab configuration for De Novo module (5 tabs instead of 6)."""
+        return [
+            ("View Public Results", "display_all_data_results_main"),
+            ("Upload New Results (Private)", "display_submission_form"),
+            ("View Public + New Results", "display_all_data_results_submitted"),
+            ("Compare Results", "display_indepth_plots"),
+            ("Submit New Results", "display_public_submission_ui"),
+        ]
 
 
 if __name__ == "__main__":

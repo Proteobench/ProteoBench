@@ -8,8 +8,10 @@ import numpy as np
 import pandas as pd
 from psm_utils import Peptidoform
 
+from proteobench.score.quant.score_base import ScoreBase
 
-class DenovoScores:
+
+class DenovoScores(ScoreBase):
     """
     Class for computing de novo scores.
 
@@ -42,21 +44,21 @@ class DenovoScores:
             "W": 186.07931294673998,
         }
 
-    def generate_intermediate(self, standard_format: pd.DataFrame) -> pd.DataFrame:
+    def generate_intermediate(self, filtered_df: pd.DataFrame, replicate_to_raw=None) -> pd.DataFrame:
         # TODO: Evaluate which PSMs match, and which don't and return new table
 
         # Add match type label (exact, mass, mismatch) and the amino acid-level evaluations
-        standard_format["match_dict"] = standard_format.apply(
+        filtered_df["match_dict"] = filtered_df.apply(
             lambda x: self.evaluate_match(ground_truth=x["peptidoform_ground_truth"], de_novo=x["peptidoform"]), axis=1
         )
-        standard_format["match_type"] = standard_format["match_dict"].apply(lambda x: x["match_type"])
-        standard_format["aa_matches_dn"] = standard_format["match_dict"].apply(lambda x: x["aa_matches_dn"])
-        standard_format["aa_matches_gt"] = standard_format["match_dict"].apply(lambda x: x["aa_matches_gt"])
-        standard_format["aa_exact_gt"] = standard_format["match_dict"].apply(lambda x: x["aa_exact_gt"])
-        standard_format["aa_exact_dn"] = standard_format["match_dict"].apply(lambda x: x["aa_exact_dn"])
-        standard_format["pep_match"] = standard_format["match_dict"].apply(lambda x: x["pep_match"])
-        _ = standard_format.pop("match_dict")
-        return standard_format
+        filtered_df["match_type"] = filtered_df["match_dict"].apply(lambda x: x["match_type"])
+        filtered_df["aa_matches_dn"] = filtered_df["match_dict"].apply(lambda x: x["aa_matches_dn"])
+        filtered_df["aa_matches_gt"] = filtered_df["match_dict"].apply(lambda x: x["aa_matches_gt"])
+        filtered_df["aa_exact_gt"] = filtered_df["match_dict"].apply(lambda x: x["aa_exact_gt"])
+        filtered_df["aa_exact_dn"] = filtered_df["match_dict"].apply(lambda x: x["aa_exact_dn"])
+        filtered_df["pep_match"] = filtered_df["match_dict"].apply(lambda x: x["pep_match"])
+        _ = filtered_df.pop("match_dict")
+        return filtered_df
 
     def evaluate_match(self, ground_truth: Peptidoform, de_novo: Peptidoform):
         """
@@ -255,7 +257,7 @@ class DenovoScores:
         if n_mod is None:
             n_mod = [None]
 
-        # If there is an N-terminal mod, this is seperately tokenized.
+        # If there is an N-terminal mod, this is separately tokenized.
         else:
             out.append(("", n_mod))
 

@@ -2,6 +2,7 @@ import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
 
+
 class BaseStreamlitUI:
     """
     Streamlit UI for the DDA quantification - precursor ions module.
@@ -31,98 +32,45 @@ class BaseStreamlitUI:
 
         self.uiobjects = uiobjects(self.variables, self.ionmodule, self.parsesettingsbuilder, page_name=page_name)
 
+    def _render_tab_header(self) -> None:
+        """Render common tab header elements: title, documentation link, and banner."""
+        st.title(self.variables.title)
+        st.link_button(
+            "Go to module documentation",
+            url=self.variables.doc_url,
+            type="secondary",
+            help="link to the module documentation",
+        )
+        display_banner(self.variables)
+
+    def get_tab_config(self) -> list:
+        """Return tab configuration as list of (tab_name, method_name) tuples.
+
+        Override this method in subclasses to customize tabs.
+        """
+        return [
+            ("View Public Results", "display_all_data_results_main"),
+            ("Upload New Results (Private)", "display_submission_form"),
+            ("View Single Result", "display_indepth_plots"),
+            ("View Public + New Results", "display_all_data_results_submitted"),
+            ("Compare Two Results", "display_workflow_comparison"),
+            ("Submit New Results", "display_public_submission_ui"),
+        ]
+
     def main_page(self) -> None:
         """
         Set up the main page layout for the Streamlit application.
         """
-        # Create tabs
-        (
-            tab_results_all,
-            tab_submission_details,
-            tab_indepth_plots,
-            tab_results_new,
-            tab_compare_workflows,
-            tab_public_submission,
-        ) = st.tabs(
-            [
-                "View Public Results",
-                "Upload New Results (Private)",
-                "View Single Result",
-                "View Public + New Results",
-                "Compare Two Results",
-                "Submit New Results",
-            ]
-        )
+        # Get tab configuration
+        tab_config = self.get_tab_config()
+        tab_names = [name for name, _ in tab_config]
 
-        with tab_results_all:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            display_banner(self.variables)
-            self.uiobjects.display_all_data_results_main()
+        # Create tabs dynamically
+        tabs = st.tabs(tab_names)
 
-        # Tab 2: Submission Details
-        with tab_submission_details:
-            st.title(self.variables.title)
-
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            display_banner(self.variables)
-            self.uiobjects.display_submission_form()
-
-        # Tab 2.5: in-depth plots current data
-        with tab_indepth_plots:
-            st.title(self.variables.title)
-
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            display_banner(self.variables)
-            self.uiobjects.display_indepth_plots()
-
-        # Tab 3: Results (New Submissions)
-        with tab_results_new:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            display_banner(self.variables)
-            self.uiobjects.display_all_data_results_submitted()
-
-        # Tab: Compare Workflows
-        with tab_compare_workflows:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            display_banner(self.variables)
-            self.uiobjects.display_workflow_comparison()
-
-        # Tab 5: Public Submission
-        with tab_public_submission:
-            st.title(self.variables.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            display_banner(self.variables)
-            self.uiobjects.display_public_submission_ui()
+        # Render each tab
+        for tab, (tab_name, method_name) in zip(tabs, tab_config):
+            with tab:
+                self._render_tab_header()
+                # Call the appropriate method on uiobjects
+                getattr(self.uiobjects, method_name)()

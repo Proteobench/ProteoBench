@@ -89,13 +89,13 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors = kwargs.get(
             "software_colors",
             {
-                "AdaNovo": "#8b26ff",
-                "Casanovo": "#8bc6fd",
-                "DeepNovo": "#108E2E",
-                "PepNet": "#F89008",
-                "Pi-HelixNovo": "#E43924",
-                "Pi-PrimeNovo": "#663200",
-                "PEAKS": "#f032e6",
+                "AdaNovo": "#88ccef",
+                "Casanovo": "#cc6777",
+                "DeepNovo": "#ddcc77",
+                "PepNet": "#147733",
+                "Pi-HelixNovo": "#342288",
+                "Pi-PrimeNovo": "#aa4599",
+                "PEAKS": "#671100",
             },
         )
         software_markers = kwargs.get(
@@ -320,13 +320,13 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors = kwargs.get(
             "software_colors",
             {
-                "AdaNovo": "#8b26ff",
-                "Casanovo": "#8bc6fd",
-                "DeepNovo": "#108E2E",
-                "PepNet": "#F89008",
-                "Pi-HelixNovo": "#E43924",
-                "Pi-PrimeNovo": "#663200",
-                "PEAKS": "#f032e6",
+                "AdaNovo": "#88ccef",
+                "Casanovo": "#cc6777",
+                "DeepNovo": "#ddcc77",
+                "PepNet": "#147733",
+                "Pi-HelixNovo": "#342288",
+                "Pi-PrimeNovo": "#aa4599",
+                "PEAKS": "#671100",
             },
         )
 

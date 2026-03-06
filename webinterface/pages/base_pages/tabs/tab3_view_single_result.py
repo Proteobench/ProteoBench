@@ -86,7 +86,7 @@ def generate_indepth_plots(
     try:
         plots = plot_generator.generate_in_depth_plots(
             performance_data,
-            parse_settings,
+            parse_settings=parse_settings,
             metric=metric,
             mode=mode,
             colorblind_mode=colorblind_mode,

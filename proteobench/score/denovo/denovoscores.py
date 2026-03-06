@@ -44,7 +44,7 @@ class DenovoScores(ScoreBase):
             "W": 186.07931294673998,
         }
 
-    def generate_intermediate(self, filtered_df: pd.DataFrame) -> pd.DataFrame:
+    def generate_intermediate(self, filtered_df: pd.DataFrame, replicate_to_raw=None) -> pd.DataFrame:
         # TODO: Evaluate which PSMs match, and which don't and return new table
 
         # Add match type label (exact, mass, mismatch) and the amino acid-level evaluations

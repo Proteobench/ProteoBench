@@ -2,6 +2,7 @@ import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
 
+
 class BaseStreamlitUI:
     """
     Streamlit UI for the DDA quantification - precursor ions module.
@@ -44,7 +45,7 @@ class BaseStreamlitUI:
 
     def get_tab_config(self) -> list:
         """Return tab configuration as list of (tab_name, method_name) tuples.
-        
+
         Override this method in subclasses to customize tabs.
         """
         return [
@@ -63,10 +64,10 @@ class BaseStreamlitUI:
         # Get tab configuration
         tab_config = self.get_tab_config()
         tab_names = [name for name, _ in tab_config]
-        
+
         # Create tabs dynamically
         tabs = st.tabs(tab_names)
-        
+
         # Render each tab
         for tab, (tab_name, method_name) in zip(tabs, tab_config):
             with tab:

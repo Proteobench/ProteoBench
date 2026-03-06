@@ -20,15 +20,24 @@ class PlotGeneratorBase(ABC):
         ----------
         performance_data : pd.DataFrame
             The performance data to plot
-        recalculate : bool
-            Whether to recalculate or use cached plots
         **kwargs : dict
-            Additional module-specific parameters
+            Additional module-specific parameters. Common parameters include:
+            - parse_settings: ParseSettings - module-specific parse settings (may be optional for some modules)
+            - metric: str - metric to display (e.g., "Median", "Mean")
+            - mode: str - calculation mode (e.g., "Global", "Species-weighted")
+            - colorblind_mode: bool - whether to use colorblind-friendly visualization
+
+            Each implementation should document which parameters it accepts.
 
         Returns
         -------
         Dict[str, go.Figure]
             Dictionary mapping plot names to plotly figures
+
+        Notes
+        -----
+        Implementations may add parse_settings as an explicit positional parameter
+        for consistency with generic tab code, even if not used by the module.
         """
         pass
 

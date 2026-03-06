@@ -34,7 +34,7 @@ The widely used 'balanced' nine species dataset from [Noble et al., 2024](https:
 | [PXD004424]()                                                       | *Homo sapiens*            | QExactive              | 684,821    | **44,555**  |
 | Total                                                               |                           |                        | 15,165,161 | **779,879** |
 
-The benchmark dataset (nine-species-balanced.zip) can be downloaded here: [zenodo](https://zenodo.org/records/13685813). In this zip-file, each species is represented by a seperate mgf-file. We used this [script](https://github.com/Proteobench/ProteoBench/tree/denovo_module/proteobench/io/data) to combine the mgf-files and reannotate the spectrum identifiers to prevent duplicate identifiers.
+The benchmark dataset (nine-species-balanced.zip) can be downloaded here: [zenodo](https://zenodo.org/records/13685813). In this zip-file, each species is represented by a separate mgf-file. We used this [script](https://github.com/Proteobench/ProteoBench/tree/denovo_module/proteobench/io/data) to combine the mgf-files and reannotate the spectrum identifiers to prevent duplicate identifiers.
 
 
 ## Metric calculation
@@ -109,7 +109,7 @@ The precision is calculated on the peptide level as the proportion of correct pe
 
 #### Species
 
-Protein sequences can differ considerably between species. Therefore, particularly for deep learning methods, models trained on data from one species might not be directly applicable to predict peptide sequences from other species. To roughly explore these differences, precision is calculated as above for each species seperately.
+Protein sequences can differ considerably between species. Therefore, particularly for deep learning methods, models trained on data from one species might not be directly applicable to predict peptide sequences from other species. To roughly explore these differences, precision is calculated as above for each species separately.
 
 Beware, this set up was meant to work as training-test split procedure, where the data of eight species was used to train a model and evaluated on the unseen spectra from the excluded species. Here, we do not use it as intented since training the models is not directly supported in ProteoBench. If the user wants to use this feature as intented, the predictions should be generated accordingly as described. The results should be concatenated into a single result file in the format compatible with ProteoBench (see below).
 

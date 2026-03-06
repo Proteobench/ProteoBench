@@ -58,7 +58,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
     Implements the PlotGeneratorBase interface for consistent module plotting.
     """
 
-    def plot_main_metric(self, result_df: pd.DataFrame, hide_annot: bool = False, **kwargs) -> go.Figure:
+    def plot_main_metric(self, result_df: pd.DataFrame, **kwargs) -> go.Figure:
         """
         Generate the main performance metric plot.
 
@@ -66,8 +66,6 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         ----------
         result_df : pd.DataFrame
             DataFrame containing the results to plot.
-        hide_annot : bool, optional
-            Whether to hide annotations on the plot (default is False).
         **kwargs : dict
             Additional parameters:
             - level: str (default "precision") - metric type ("precision" or "recall")
@@ -278,7 +276,9 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
 
         return fig
 
-    def generate_in_depth_plots(self, performance_data: pd.DataFrame, **kwargs) -> Dict[str, go.Figure]:
+    def generate_in_depth_plots(
+        self, performance_data: pd.DataFrame, parse_settings: any = None, **kwargs
+    ) -> Dict[str, go.Figure]:
         """
         Generate module-specific in-depth plots.
 
@@ -286,6 +286,8 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         ----------
         performance_data : pd.DataFrame
             The performance data to plot.
+        parse_settings : any, optional
+            Parse settings for the module (not used by de novo, included for signature compatibility).
         **kwargs : dict
             Additional parameters:
             - mod_labels: List[str] - list of PTM modification labels

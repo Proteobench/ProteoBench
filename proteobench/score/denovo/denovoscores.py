@@ -257,7 +257,7 @@ class DenovoScores(ScoreBase):
         if n_mod is None:
             n_mod = [None]
 
-        # If there is an N-terminal mod, this is seperately tokenized.
+        # If there is an N-terminal mod, this is separately tokenized.
         else:
             out.append(("", n_mod))
 

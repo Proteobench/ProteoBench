@@ -136,4 +136,3 @@ class DDAQuantIonModuleQExactive(QuantModule):
 
     def get_plot_generator(self):
         return super().get_plot_generator()
-        return super().get_plot_generator()

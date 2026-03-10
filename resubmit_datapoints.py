@@ -355,7 +355,8 @@ def _extract_hash_from_pr(
     # Strategy 4: list changed files
     try:
         files_url = pr.get("url", "") + "/files"
-        files = _gh_get(files_url, token)
+        files_response = _gh_get(files_url, token)
+        files = files_response.json()
         if isinstance(files, list):
             filenames = [f.get("filename", "") for f in files]
             has_patch = any(f.get("patch") for f in files)
@@ -524,6 +525,57 @@ def discover_datapoints(
     return found
 
 
+def _safe_extract_member(zf: zipfile.ZipFile, member_name: str, tmp_dir: str) -> str | None:
+    """
+    Safely extract a zip member, validating the path to prevent Zip Slip attacks.
+
+    Parameters
+    ----------
+    zf : zipfile.ZipFile
+        Open zip file object.
+    member_name : str
+        Name of the member to extract.
+    tmp_dir : str
+        Base directory for extraction.
+
+    Returns
+    -------
+    str | None
+        Absolute path to extracted file, or None if path validation failed.
+    """
+    # Normalize the member name and check for path traversal attempts
+    member_normalized = os.path.normpath(member_name)
+
+    # Reject absolute paths
+    if os.path.isabs(member_normalized):
+        logger.warning(f"Rejecting zip member with absolute path: {member_name}")
+        return None
+
+    # Reject paths containing .. or starting with /
+    if member_normalized.startswith("..") or "/.." in member_normalized or "\\.." in member_normalized:
+        logger.warning(f"Rejecting zip member with path traversal: {member_name}")
+        return None
+
+    # Construct the target path and verify it's within tmp_dir
+    tmp_dir_abs = os.path.abspath(tmp_dir)
+    target_path = os.path.abspath(os.path.join(tmp_dir, member_normalized))
+
+    # Ensure the resolved path is still within tmp_dir
+    if not target_path.startswith(tmp_dir_abs + os.sep) and target_path != tmp_dir_abs:
+        logger.warning(f"Rejecting zip member that resolves outside tmp_dir: {member_name}")
+        return None
+
+    # Create parent directory if needed
+    target_dir = os.path.dirname(target_path)
+    os.makedirs(target_dir, exist_ok=True)
+
+    # Safely extract the member
+    with zf.open(member_name) as source, open(target_path, "wb") as target:
+        target.write(source.read())
+
+    return target_path
+
+
 def extract_zip_contents(zip_path: Path, tmp_dir: str) -> dict[str, str]:
     """
     Extract relevant files from a datapoint zip archive.
@@ -551,7 +603,12 @@ def extract_zip_contents(zip_path: Path, tmp_dir: str) -> dict[str, str]:
 
     with zipfile.ZipFile(zip_path, "r") as zf:
         for member in zf.namelist():
-            extracted = zf.extract(member, tmp_dir)
+            # Safely extract the member, validating path to prevent Zip Slip
+            extracted = _safe_extract_member(zf, member, tmp_dir)
+
+            # Skip if extraction failed due to path validation
+            if extracted is None:
+                continue
 
             if member.startswith("input_file_secondary"):
                 result["input_file_secondary"] = extracted
@@ -989,7 +1046,8 @@ def create_batch_pr(
             if old_hash != new_hash:
                 old_json_path = os.path.join(clone_dir_pr, f"{old_hash}.json")
                 if os.path.exists(old_json_path):
-                    gh_repo.repo.git.mv(old_json_path, new_json_path)
+                    # Use relative paths for git commands (relative to repo root)
+                    gh_repo.repo.git.mv(f"{old_hash}.json", f"{new_hash}.json")
                     logger.debug(f"  git mv {old_hash[:12]}.json → {new_hash[:12]}.json")
 
             # Write (or overwrite after rename) the new content
@@ -1003,7 +1061,8 @@ def create_batch_pr(
         for del_hash in hashes_to_delete:
             del_path = os.path.join(clone_dir_pr, f"{del_hash}.json")
             if os.path.exists(del_path):
-                gh_repo.repo.git.rm(del_path)
+                # Use relative path for git command (relative to repo root)
+                gh_repo.repo.git.rm(f"{del_hash}.json")
                 deletions_made += 1
                 logger.debug(f"  git rm {del_hash[:12]}.json (failed resubmission)")
             else:
@@ -1485,7 +1544,6 @@ def main() -> None:
     # --- Intersect and filter ---
     processable: list[tuple[str, Path, str, str, type, Path, dict]] = []
     skipped_no_module = 0
-    skipped_no_pr = 0
     skipped_filter = 0
     skipped_no_data = 0
 
@@ -1551,7 +1609,6 @@ def main() -> None:
     logger.info(f"Processable: {len(processable)}")
     logger.info(f"Skipped (no module match): {skipped_no_module}")
     logger.debug(f"  Skipped hashes (no module): {[h[:12] for h in disk_datapoints if h not in hash_to_module]}")
-    logger.info(f"Skipped (no merged PR): {skipped_no_pr}")
     logger.info(f"Skipped (filter): {skipped_filter}")
     logger.info(f"Failed (no data in {data_dir}): {skipped_no_data}")
 

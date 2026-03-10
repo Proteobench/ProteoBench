@@ -146,8 +146,11 @@ class GithubProteobotRepo:
         """
         Clone the Proteobench repository anonymously with a shallow clone (without authentication).
 
-        If ``self.branch`` is set, that branch is cloned directly (``--branch`` flag) so that
-        ``read_results_json_repo`` reads its JSON files instead of the default branch.
+        If ``self.branch`` is set, the repository is cloned from the **Proteobot** repository
+        (not Proteobench) and the specified branch is checked out. This allows reading JSON files
+        from a PR branch that has not yet been merged into Proteobench (for testing purposes). When the clone directory
+        already exists, the method fetches and checks out the requested branch to ensure the
+        correct revision is used.
 
         Returns
         -------
@@ -158,13 +161,25 @@ class GithubProteobotRepo:
             # Branch is on the Proteobot repo (PR not yet merged into Proteobench)
             branch_remote_url = f"https://github.com/{self.proteobot_repo_name}.git"
             if os.path.exists(self.clone_dir):
-                print(f"Repository already exists in {self.clone_dir}. Trying to use existing files.")
+                print(f"Repository already exists in {self.clone_dir}. Verifying branch...")
                 try:
                     self.repo = Repo(self.clone_dir)
+                    # Fetch the requested branch and check it out to ensure we're on the correct revision
+                    remote = self.repo.remote("origin")
+                    remote.fetch(self.branch, depth=1)
+                    self.repo.git.checkout(self.branch)
+                    print(f"Checked out branch '{self.branch}' in existing repository.")
                     return self.repo
                 except exc.InvalidGitRepositoryError:
                     print("Repository invalid, will clone again.")
+                except Exception as e:
+                    print(f"Failed to fetch/checkout branch '{self.branch}': {e}. Recloning...")
+                    # If fetch/checkout fails, remove the directory and reclone
+                    import shutil
+
+                    shutil.rmtree(self.clone_dir)
             self.repo = Repo.clone_from(branch_remote_url.rstrip("/"), self.clone_dir, depth=1, branch=self.branch)
+            print(f"Cloned branch '{self.branch}' from {self.proteobot_repo_name}")
         else:
             remote_url = self.get_remote_url_anon()
             self.repo = self.shallow_clone(remote_url, self.clone_dir)
@@ -220,6 +235,10 @@ class GithubProteobotRepo:
 
         If `token` is provided, it will use authenticated access; otherwise, it will clone anonymously.
 
+        When ``self.branch`` is set, the repository is cloned from the **Proteobot** repository
+        and the specified branch is checked out. If the directory already exists, the method
+        fetches and checks out the requested branch to ensure the correct revision is used.
+
         Returns
         -------
         Repo
@@ -231,7 +250,25 @@ class GithubProteobotRepo:
             if self.branch is not None:
                 # Branch is on the Proteobot repo (PR not yet merged into Proteobench)
                 remote = f"https://{self.username}:{self.token}@github.com/{self.proteobot_repo_name}.git"
+                if os.path.exists(self.clone_dir):
+                    print(f"Repository already exists in {self.clone_dir}. Verifying branch...")
+                    try:
+                        self.repo = Repo(self.clone_dir)
+                        # Fetch the requested branch and check it out
+                        remote_obj = self.repo.remote("origin")
+                        remote_obj.fetch(self.branch, depth=1)
+                        self.repo.git.checkout(self.branch)
+                        print(f"Checked out branch '{self.branch}' in existing repository.")
+                        return self.repo
+                    except exc.InvalidGitRepositoryError:
+                        print("Repository invalid, will clone again.")
+                    except Exception as e:
+                        print(f"Failed to fetch/checkout branch '{self.branch}': {e}. Recloning...")
+                        import shutil
+
+                        shutil.rmtree(self.clone_dir)
                 self.repo = Repo.clone_from(remote.rstrip("/"), self.clone_dir, depth=1, branch=self.branch)
+                print(f"Cloned branch '{self.branch}' from {self.proteobot_repo_name} with authentication")
             else:
                 remote = f"https://{self.username}:{self.token}@github.com/{self.proteobench_repo_name}.git"
                 self.repo = self.clone(remote, self.clone_dir)

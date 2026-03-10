@@ -40,6 +40,7 @@ class GithubProteobotRepo:
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
         username: str = "Proteobot",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the GithubProteobotRepo class with required parameters for cloning and managing repositories.
@@ -65,6 +66,7 @@ class GithubProteobotRepo:
         self.proteobot_repo_name = proteobot_repo_name
         self.proteobench_repo_name = proteobench_repo_name
         self.username = username
+        self.branch = branch
         self.repo = None
 
     def get_remote_url_anon(self) -> str:
@@ -144,13 +146,29 @@ class GithubProteobotRepo:
         """
         Clone the Proteobench repository anonymously with a shallow clone (without authentication).
 
+        If ``self.branch`` is set, that branch is cloned directly (``--branch`` flag) so that
+        ``read_results_json_repo`` reads its JSON files instead of the default branch.
+
         Returns
         -------
         Repo
             The cloned repository object.
         """
-        remote_url = self.get_remote_url_anon()
-        self.repo = self.shallow_clone(remote_url, self.clone_dir)
+        if self.branch is not None:
+            # Branch is on the Proteobot repo (PR not yet merged into Proteobench)
+            branch_remote_url = f"https://github.com/{self.proteobot_repo_name}.git"
+            if os.path.exists(self.clone_dir):
+                print(f"Repository already exists in {self.clone_dir}. Trying to use existing files.")
+                try:
+                    self.repo = Repo(self.clone_dir)
+                    return self.repo
+                except exc.InvalidGitRepositoryError:
+                    print("Repository invalid, will clone again.")
+            self.repo = Repo.clone_from(branch_remote_url.rstrip("/"), self.clone_dir, depth=1, branch=self.branch)
+        else:
+            remote_url = self.get_remote_url_anon()
+            self.repo = self.shallow_clone(remote_url, self.clone_dir)
+            print(f"Shallow cloned repository from {remote_url} to {self.clone_dir}")
         return self.repo
 
     def read_results_json_repo_single_file(self) -> pd.DataFrame:
@@ -210,8 +228,13 @@ class GithubProteobotRepo:
         if self.token is None or self.token == "":
             self.repo = self.clone_repo_anonymous()
         else:
-            remote = f"https://{self.username}:{self.token}@github.com/{self.proteobench_repo_name}.git"
-            self.repo = self.clone(remote, self.clone_dir)
+            if self.branch is not None:
+                # Branch is on the Proteobot repo (PR not yet merged into Proteobench)
+                remote = f"https://{self.username}:{self.token}@github.com/{self.proteobot_repo_name}.git"
+                self.repo = Repo.clone_from(remote.rstrip("/"), self.clone_dir, depth=1, branch=self.branch)
+            else:
+                remote = f"https://{self.username}:{self.token}@github.com/{self.proteobench_repo_name}.git"
+                self.repo = self.clone(remote, self.clone_dir)
         return self.repo
 
     def clone_repo_pr(self) -> Repo:

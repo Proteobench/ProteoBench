@@ -54,6 +54,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DDA Quantification Module for Peptidoform level Quantification.
@@ -73,6 +74,7 @@ class DDAQuantPeptidoformModule(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            branch=branch,
         )
         self.precursor_column_name = "peptidoform"
 

@@ -17,25 +17,23 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
-from pages.pages_variables.DeNovo.DDA_HCD_variables import (
-    VariablesDDADeNovo,
-)
+from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
-from proteobench.modules.denovo.denovo_DDA_HCD import (
-    DDAHCDDeNovoModule as IonModule,
-)
-from proteobench.plotting.plot_denovo import PlotDataPoint
+from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
-from .denovo_tabs import tab1, tab2, tab3, tab4
-from .quant_tabs import tab2_form_upload_data as tab2_quant
-from .quant_tabs import tab5_public_submission as tab5_quant
+from .tabs import tab1_view_public_results as tab1
+from .tabs import tab2_upload_results as tab2
+from .tabs import tab2_upload_results as tab2_quant
+from .tabs import tab4_view_public_and_new_results as tab4
+from .tabs import tab5_compare_results
+from .tabs import tab6_submit_results as tab5_quant
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -89,34 +87,70 @@ class DeNovoUIObjects(BaseUIModule):
         """Display the results for all data in Tab 1."""
         st.title("Results (All Data)")
 
+        # Initialize selectbox
+        tab1.initialize_main_selectbox(
+            selectbox_id_uuid=self.variables.selectbox_id_uuid,
+            default_value="None",
+        )
+
         # Radio for level (Precision or Recall)
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_uuid, default_value=self.variables.default_level
-        )
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_level_id_uuid,
-            description="Select the classification metric",
-            options=["Precision", "Recall"],
-            help=self.variables.texts.Help.radio_level,
         )
 
         # Radio for evaluation type (Exact or Mass-Based)
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_evaluation_id_uuid, default_value=self.variables.default_evaluation
         )
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_evaluation_id_uuid,
-            description="Select the stringency of evaluation",
-            options=["Exact", "Mass-based"],
-            help=self.variables.texts.Help.radio_evaluation,
+
+        # Define callbacks for plot options
+        def render_selectbox():
+            tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+
+        def render_level_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_level_id_uuid,
+                description="Select the classification metric",
+                options=["Precision", "Recall"],
+                help=self.variables.texts.Help.radio_level,
+            )
+
+        def render_evaluation_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_evaluation_id_uuid,
+                description="Select the stringency of evaluation",
+                options=["Exact", "Mass-based"],
+                help=self.variables.texts.Help.radio_evaluation,
+            )
+
+        def render_colorblind_selector():
+            return tab1.display_colorblindmode_selector(self.variables)
+
+        # Render plot options expander
+        results = self.render_plot_options_expander(
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_level_radio, render_evaluation_radio, render_colorblind_selector],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1, 1, 1],
         )
 
-        tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+        # Extract colorblind mode from results
+        colorblind_mode = results[3] if len(results) > 3 else False
+
         tab1.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
-            level_mapping=self.level_mapping,
-            evaluation_type_mapping=self.evaluation_type_mapping,
+            plot_params={
+                "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+                "level": self.level_mapping[
+                    st.session_state.get(st.session_state.get(self.variables.radio_level_id_uuid, ""), "Precision")
+                ],
+                "evaluation_type": self.evaluation_type_mapping[
+                    st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
+                ],
+                "colorblind_mode": colorblind_mode,
+            },
+            use_slider=False,
         )
 
     def display_submission_form(self) -> None:
@@ -144,12 +178,11 @@ class DeNovoUIObjects(BaseUIModule):
             )
 
         if submit_button:
-            st.info("Calculating metrics. This will take no more than two minutes. Please be patient.")
+            st.info("Calculating metrics. This will take around two minutes. Please be patient.")
             self.first_point_plotted = tab2.process_submission_form(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
-                evaluation_type_mapping=self.evaluation_type_mapping,
             )
 
     # Almost entirely unique to denovo module
@@ -188,8 +221,13 @@ class DeNovoUIObjects(BaseUIModule):
             key=st.session_state[self.variables.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
             default=[dataset_options[0]],
-            help=self.variables.texts.Help.dataset_selection_indepth
+            help=self.variables.texts.Help.dataset_selection_indepth,
         )
+
+        # Use default values for plot rendering (no user controls on this tab)
+        level = "precision"
+        evaluation_type = "exact"
+        colorblind_mode = False
 
         modifications = [
             "M-Oxidation",
@@ -201,29 +239,73 @@ class DeNovoUIObjects(BaseUIModule):
         ]
         feature_names = ["Missing Fragmentation Sites", "Peptide Length", "% Explained Intensity"]
 
-        selected_dtps = st.session_state[self.variables.all_datapoints_submitted][
-            st.session_state[self.variables.all_datapoints_submitted]["id"].isin(
-                [dtp_id for dtp_id, _ in dataset_selection]
-            )
-        ]
+        # Handle dataset selection - separate uploaded data from public data
+        all_datapoints_df = st.session_state[self.variables.all_datapoints_submitted]
+        selected_dtps = pd.DataFrame()
 
-        tab3.generate_ptm_plots(variables=self.variables, df=selected_dtps, modifications=modifications)
-        tab3.generate_spectrum_feature_plots(variables=self.variables, df=selected_dtps, feature_names=feature_names)
-        tab3.generate_species_plot(variables=self.variables, df=selected_dtps)
+        for dtp_id, dtp_hash in dataset_selection:
+            if dtp_hash is None:  # "Uploaded dataset" case
+                # Get the newly uploaded data (marked as "new")
+                uploaded_data = all_datapoints_df[all_datapoints_df["old_new"] == "new"]
+                selected_dtps = pd.concat([selected_dtps, uploaded_data], ignore_index=True)
+            else:
+                # Get public dataset by hash
+                public_data = all_datapoints_df[all_datapoints_df["intermediate_hash"] == dtp_hash]
+                selected_dtps = pd.concat([selected_dtps, public_data], ignore_index=True)
 
+        # Generate in-depth plots using plot generator
+        if not selected_dtps.empty:
+            plot_generator = self.ionmodule.get_plot_generator()
+
+            # Create kwargs with De Novo-specific parameters (now using user selections)
+            plot_kwargs = {
+                "mod_labels": modifications,
+                "feature": feature_names[0] if feature_names else "Missing Fragmentation Sites",
+                "level": level,
+                "evaluation_type": evaluation_type,
+                "colorblind_mode": colorblind_mode,
+            }
+
+            try:
+                # Generate all plots
+                plots = plot_generator.generate_in_depth_plots(selected_dtps, **plot_kwargs)
+
+                # Display plots using layout from plot generator
+                layout = plot_generator.get_in_depth_plot_layout()
+                descriptions = plot_generator.get_in_depth_plot_descriptions()
+
+                for section in layout:
+                    st.subheader(section.get("title", ""))
+                    cols = st.columns(section.get("columns", 1))
+                    for idx, plot_name in enumerate(section["plots"]):
+                        with cols[idx % len(cols)]:
+                            if plot_name in plots:
+                                st.plotly_chart(plots[plot_name], use_container_width=True)
+                                if plot_name in descriptions:
+                                    st.caption(descriptions[plot_name])
+            except Exception as e:
+                st.error(f"Error generating in-depth plots: {e}", icon="🚨")
+                import traceback
+
+                with st.expander("Error details"):
+                    st.code(traceback.format_exc())
+        else:
+            st.info("No datasets selected for plotting.")
+
+    @st.fragment
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
 
-        # Radio one for precisio or recall
+        # Initialize selectbox
+        tab1.initialize_main_selectbox(
+            selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
+            default_value="None",
+        )
+
+        # Radio one for precision or recall
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_submitted_uuid, default_value=self.variables.default_level
-        )
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
-            description="Select the classification metric",
-            options=["Precision", "Recall"],
-            help=self.variables.texts.Help.radio_level,
         )
 
         # Radio two for evaluation stringency
@@ -232,20 +314,62 @@ class DeNovoUIObjects(BaseUIModule):
             default_value=self.variables.default_evaluation,
         )
 
-        tab1.generate_main_radio(
-            radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
-            description="Select the stringency of evaluation",
-            options=["Exact", "Mass-based"],
-            help=self.variables.texts.Help.radio_evaluation,
+        # Define callbacks for plot options
+        def render_selectbox():
+            tab1.generate_main_selectbox(
+                variables=self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
+            )
+
+        def render_level_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
+                description="Select the classification metric",
+                options=["Precision", "Recall"],
+                help=self.variables.texts.Help.radio_level,
+            )
+
+        def render_evaluation_radio():
+            tab1.generate_main_radio(
+                radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
+                description="Select the stringency of evaluation",
+                options=["Exact", "Mass-based"],
+                help=self.variables.texts.Help.radio_evaluation,
+            )
+
+        def render_colorblind_selector():
+            return tab1.display_colorblindmode_selector(self.variables, use_submitted=True)
+
+        # Render plot options expander
+        results = self.render_plot_options_expander(
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_level_radio, render_evaluation_radio, render_colorblind_selector],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1, 1, 1],
         )
 
-        # Plot the selectionbox
-        tab1.generate_main_selectbox(
-            variables=self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
-        )
+        # Extract colorblind mode from results
+        colorblind_mode = results[3] if len(results) > 3 else False
+
+        # Get current selections from session state
+        label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
+        level = self.level_mapping[
+            st.session_state.get(st.session_state.get(self.variables.radio_level_id_submitted_uuid, ""), "Precision")
+        ]
+        evaluation_type = self.evaluation_type_mapping[
+            st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_submitted_uuid, ""), "Exact")
+        ]
 
         # Plot the datapoints
-        tab4.display_submitted_results(self.variables, self.ionmodule)
+        tab4.display_submitted_results(
+            self.variables,
+            self.ionmodule,
+            plot_params={
+                "label": label,
+                "level": level,
+                "evaluation_type": evaluation_type,
+                "colorblind_mode": colorblind_mode,
+            },
+        )
         st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
         st.data_editor(
             st.session_state[self.variables.all_datapoints_submitted],
@@ -256,6 +380,13 @@ class DeNovoUIObjects(BaseUIModule):
         st.title("Public submission")
         st.markdown(
             "If you want to make this point — and the associated data — publicly available, please go to “Public Submission"
+        )
+
+    def display_workflow_comparison(self) -> None:
+        """Display the workflow comparison tab."""
+        tab5_compare_results.display_workflow_comparison(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
         )
 
     def display_public_submission_ui(self) -> None:
@@ -360,13 +491,26 @@ class DeNovoUIObjects(BaseUIModule):
             st.error("No datapoints available for plotting", icon="🚨")
 
         try:
-            fig_metric = PlotDataPoint.plot_metric(
-                benchmark_metrics_df=st.session_state[self.variables.all_datapoints],
+            # Get plot generator from module (following Quant pattern)
+            plot_generator = self.ionmodule.get_plot_generator()
+
+            # Get colorblind mode from session state
+            colorblind_key = self.variables.colorblind_mode_selector_uuid
+            if colorblind_key in st.session_state:
+                colorblind_mode_id = st.session_state[colorblind_key]
+                colorblind_mode = st.session_state.get(colorblind_mode_id, False)
+            else:
+                colorblind_mode = False
+
+            fig_metric = plot_generator.plot_main_metric(
+                result_df=st.session_state[self.variables.all_datapoints],
+                hide_annot=False,
                 label=st.session_state[st.session_state[self.variables.selectbox_id_uuid]],
                 level=self.level_mapping[st.session_state[st.session_state[self.variables.radio_level_id_uuid]]],
                 evaluation_type=self.evaluation_type_mapping[
                     st.session_state[st.session_state[self.variables.radio_evaluation_id_uuid]]
                 ],
+                colorblind_mode=colorblind_mode,
             )
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")

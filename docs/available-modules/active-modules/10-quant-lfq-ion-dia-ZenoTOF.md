@@ -174,7 +174,7 @@ mapping between the headers in the input file (left-hand side) and the header of
  
   - "Charge" = precursor charge.
  
-  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST"). *Curently, there is an exception for FragPipe's .toml where we combine two columns, and protein IDs are seperated by "," (see the FragPipe section).*
+  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST"). *Curently, there is an exception for FragPipe's .toml where we combine two columns, and protein IDs are separated by "," (see the FragPipe section).*
  
   - "Intensity" = field containing the intensities utilised to calculate the module metrics. Used for long-format input.
 

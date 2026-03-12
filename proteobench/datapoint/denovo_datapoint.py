@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 
 import proteobench
+from proteobench.datapoint.datapoint_base import DatapointBase
 
 
 def calculate_prc(scores_correct, scores_all, n_spectra, threshold=None):
@@ -80,7 +81,7 @@ def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str):
 
 
 @dataclass
-class DenovoDatapoint:
+class DenovoDatapoint(DatapointBase):
     """
     A data structure used to store the results of a benchmark run.
 

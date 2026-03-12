@@ -309,33 +309,6 @@ Here's a complete example for a hypothetical peptide identification module:
             # ... implementation
             return fig
 
-**Integrating Plots with Your Module**
-
-After creating your plot generator, integrate it with your module class:
-
-.. code-block:: python
-
-    from proteobench.modules.quant.quant_base_module import QuantModule
-    from proteobench.plotting.my_custom_plots import MyPlotGenerator
-    
-    class MyCustomModule(QuantModule):
-        def __init__(self, token):
-            super().__init__(token)
-            self.plot_generator = MyPlotGenerator()  # Initialize plot generator
-        
-        def benchmarking(self, input_file, input_format, user_input, all_datapoints):
-            # ... benchmarking logic ...
-            
-            # Generate plots using the plot generator
-            plots = self.plot_generator.generate_in_depth_plots(
-                performance_data=intermediate,
-                parse_settings=parse_settings
-            )
-            
-            # Main metric plot
-            main_fig = self.plot_generator.plot_main_metric(all_datapoints)
-            
-            return intermediate, all_datapoints, input_df
 
 .. _score-configuration:
 
@@ -812,6 +785,110 @@ to show the respective figures with the right metadata.
 
 Change the text and the field names accordingly in the ``dataclass``
 in `webinterface.pages.pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_.
+
+Creating a Module Page with StreamlitUI
+........................................
+
+Each module page inherits from :class:`~webinterface.pages.base.BaseStreamlitUI`,
+which provides a standardized structure for creating multi-tab interfaces with minimal code duplication.
+
+**BaseStreamlitUI Architecture**
+
+The base class handles common functionality:
+
+- Tab creation and rendering
+- Standard header elements (title, documentation link, banner)
+- Integration with module backend and UI objects
+
+**For Standard Quantification Modules (6 tabs)**
+
+Most quantification modules use the default 6-tab configuration and require minimal code:
+
+.. code-block:: python
+
+    # webinterface/pages/2_Quant_LFQ_DDA_ion_QExactive.py
+    from pages.base import BaseStreamlitUI
+    from pages.base_pages.quant import QuantUIObjects
+    from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
+    from pages.texts.generic_texts import WebpageTexts
+    from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+    from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
+    
+    if __name__ == "__main__":
+        # Instantiate and run directly - no subclass needed
+        st_ui = BaseStreamlitUI(
+            variables=VariablesDDAQuant(),
+            texts=WebpageTexts,
+            ionmodule=DDAQuantIonModuleQExactive,
+            parsesettingsbuilder=ParseSettingsBuilder,
+            uiobjects=QuantUIObjects,
+            page_name="Quant LFQ DDA ion QExactive",
+        )
+        st_ui.main_page()
+
+**Default Tab Configuration (Quant Modules)**
+
+The default :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config` returns:
+
+1. **View Public Results** → ``display_all_data_results_main()``
+2. **Upload New Results (Private)** → ``display_submission_form()``
+3. **View Single Result** → ``display_indepth_plots()``
+4. **View Public + New Results** → ``display_all_data_results_submitted()``
+5. **Compare Two Results** → ``display_workflow_comparison()``
+6. **Submit New Results** → ``display_public_submission_ui()``
+
+**For Custom Tab Configurations**
+
+If your module needs a different number or order of tabs, create a subclass and override
+:meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config`:
+
+.. code-block:: python
+
+    # webinterface/pages/7_denovo_DDA_HCD.py
+    from pages.base import BaseStreamlitUI
+    from pages.base_pages.denovo import DeNovoUIObjects
+    
+    class StreamlitUI(BaseStreamlitUI):
+        """Streamlit UI for the DDA de novo identification module."""
+        
+        def get_tab_config(self) -> list:
+            """Override tab configuration for De Novo module (5 tabs instead of 6)."""
+            return [
+                ("View Public Results", "display_all_data_results_main"),
+                ("Upload New Results (Private)", "display_submission_form"),
+                ("View Public + New Results", "display_all_data_results_submitted"),
+                ("Compare Results", "display_indepth_plots"),
+                ("Submit New Results", "display_public_submission_ui"),
+            ]
+    
+    if __name__ == "__main__":
+        st_ui = StreamlitUI(
+            variables=VariablesDDADeNovo(),
+            texts=WebpageTexts,
+            ionmodule=DDAHCDDeNovoModule,
+            parsesettingsbuilder=ParseSettingsBuilder,
+            uiobjects=DeNovoUIObjects,
+            page_name="De novo DDA-HCD peptidoform",
+        )
+        st_ui.main_page()
+
+**Tab Configuration Format**
+
+The :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config` method returns a list of tuples:
+
+.. code-block:: python
+
+    [
+        (tab_display_name, uiobjects_method_name),
+        ...
+    ]
+
+- **tab_display_name**: String shown in the tab header
+- **uiobjects_method_name**: Name of the method to call on the ``uiobjects`` instance
+
+Each method is automatically called when its tab is rendered, with the standard header
+(title, documentation link, banner) added automatically by 
+:meth:`~webinterface.pages.base.BaseStreamlitUI._render_tab_header`.
 
 Storing results
 ----------------

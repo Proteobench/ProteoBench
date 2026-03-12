@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from psm_utils import Peptidoform
 
-from proteobench.score.quant.score_base import ScoreBase
+from proteobench.score.score_base import ScoreBase
 
 
 class DenovoScores(ScoreBase):

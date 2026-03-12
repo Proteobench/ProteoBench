@@ -309,33 +309,6 @@ Here's a complete example for a hypothetical peptide identification module:
             # ... implementation
             return fig
 
-**Integrating Plots with Your Module**
-
-After creating your plot generator, integrate it with your module class:
-
-.. code-block:: python
-
-    from proteobench.modules.quant.quant_base_module import QuantModule
-    from proteobench.plotting.my_custom_plots import MyPlotGenerator
-    
-    class MyCustomModule(QuantModule):
-        def __init__(self, token):
-            super().__init__(token)
-            self.plot_generator = MyPlotGenerator()  # Initialize plot generator
-        
-        def benchmarking(self, input_file, input_format, user_input, all_datapoints):
-            # ... benchmarking logic ...
-            
-            # Generate plots using the plot generator
-            plots = self.plot_generator.generate_in_depth_plots(
-                performance_data=intermediate,
-                parse_settings=parse_settings
-            )
-            
-            # Main metric plot
-            main_fig = self.plot_generator.plot_main_metric(all_datapoints)
-            
-            return intermediate, all_datapoints, input_df
 
 .. _score-configuration:
 

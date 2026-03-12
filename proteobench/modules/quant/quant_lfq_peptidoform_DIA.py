@@ -52,6 +52,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DIA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DIA",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for Peptidoform level Quantification.
@@ -75,6 +76,7 @@ class DIAQuantPeptidoformModule(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            branch=branch,
         )
         self.precursor_column_name = "peptidoform"
 

@@ -99,6 +99,7 @@ class QuantModule:
         proteobot_repo_name: str,
         parse_settings_dir: str,
         module_id: str,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the QuantModule with GitHub repo and settings.
@@ -115,8 +116,12 @@ class QuantModule:
             The directory containing parse settings.
         module_id : str
             The module identifier for configuration.
+        branch : Optional[str]
+            If set, check out this branch of the Proteobench repo after cloning.
+            Useful for previewing a PR branch without merging.
         """
         self.t_dir = TemporaryDirectory().name
+        print(f"Cloning GitHub repo to temporary directory: {self.t_dir}")
         self.t_dir_pr = TemporaryDirectory().name
         self.github_repo = GithubProteobotRepo(
             token,
@@ -124,6 +129,7 @@ class QuantModule:
             proteobench_repo_name=proteobench_repo_name,
             clone_dir=self.t_dir,
             clone_dir_pr=self.t_dir_pr,
+            branch=branch,
         )
         self.github_repo.clone_repo()
         self.parse_settings_dir = parse_settings_dir
@@ -296,9 +302,9 @@ class QuantModule:
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-
-        # Get quantification data
+        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(
+            input_df
+        )  # Get quantification data
         quant_score = QuantScoresHYE(
             self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )

@@ -54,6 +54,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_diaPASEF",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_diaPASEF",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for diaPASEF.
@@ -73,6 +74,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            branch=branch,
         )
         self.precursor_column_name = "precursor ion"
 

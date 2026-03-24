@@ -48,6 +48,9 @@ Currently supported input formats in this module:
 - DIA-NN
 - AlphaDIA
 - Spectronaut
+- PEAKS
+- FragPipe (DIA-NN Quant)
+- Custom
 
 ### Submit your run for public usage
 
@@ -62,9 +65,12 @@ Then confirm metadata and submit. A GitHub pull request link is generated for tr
 
 | Tool | Quantification input | Metadata / parameter file |
 |---|---|---|
-| DIA-NN | `*_report.tsv` or `*_report.parquet` | `*report.log.txt` |
-| AlphaDIA | `precursors.tsv` (or `.parquet` in newer versions; v1 may require matrix file handling) | `log.txt` |
+| DIA-NN | `*_report.tsv` or `*_report.parquet` | `*_report.log.txt` |
+| AlphaDIA | `precursors.tsv` + `precursor.matrix.tsv` (both required; see Jupyter Notebook for preprocessing) | `log.txt` |
 | Spectronaut | `*_Report.tsv` (BGS factory report format) | `*_Report.setup.txt` |
+| FragPipe (DIA-NN Quant) | `*_report.tsv` | `fragpipe.workflow` |
+| PEAKS | PEAKS DIA output file (`.txt` format - export as text report) | Settings text file (`.txt`) |
+| Custom | Tab-separated values (`.tsv` or `.csv`) following standard format | Not required |
 
 ## Notes
 

@@ -105,12 +105,12 @@ class VariablesDIAQuantPlasma:
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-Plasma/"
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-quant-lfq-ion-dia-Plasma/"
     )
 
     title: str = "DIA Precursor quantification - Plasma"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_Plasma_quant_"
-    params_json_dict: str = "params_json_dict_lfq_ion_dda_Plasma_quant"
+    params_json_dict: str = "params_json_dict_lfq_ion_dia_Plasma_quant"
     params_file_dict: str = "params_file_dict_lfq_ion_dia_Plasma_quant"

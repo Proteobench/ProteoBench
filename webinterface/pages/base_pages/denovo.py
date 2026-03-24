@@ -149,6 +149,8 @@ class DeNovoUIObjects(BaseUIModule):
                     st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
                 ],
                 "colorblind_mode": colorblind_mode,
+                "alpha_warning": getattr(self.variables, "alpha_warning", False),
+                "beta_warning": getattr(self.variables, "beta_warning", False),
             },
             use_slider=False,
         )

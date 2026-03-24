@@ -227,9 +227,19 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
         st.session_state[key] = uuid.uuid4()
     plot_uuid = st.session_state[key]
 
+    # Build annotation text based on alpha/beta warnings
+    annotation = ""
+    if plot_params.get("beta_warning", False):
+        annotation = "-Beta-"
+    elif plot_params.get("alpha_warning", False):
+        annotation = "-Alpha-"
+
     try:
         fig = plot_generator.plot_main_metric(
-            result_df=data, hide_annot=plot_params.get("hide_annot", False), **plot_params
+            result_df=data, 
+            hide_annot=plot_params.get("hide_annot", False),
+            annotation=annotation,
+            **plot_params
         )
         st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
     except Exception as e:

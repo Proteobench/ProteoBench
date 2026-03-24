@@ -43,8 +43,19 @@ class VariablesDIAQuantPlasma:
     first_new_plot: bool = True
     default_val_slider: int = 6
     max_nr_observed: int = 12
-    beta_warning: bool = True
+    alpha_warning: bool = True
+    beta_warning: bool = False
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_Plasma.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion Plasma"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_Plasma"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "Plasma", "precursor", "ion", "LFQ", "spike-in"]
+    )
+
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_Plasma"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_Plasma"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_Plasma"
@@ -58,6 +69,8 @@ class VariablesDIAQuantPlasma:
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_Plasma"
     metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant_Plasma"
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_Plasma"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_uuid_dia_quant_Plasma"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_uuid_dia_quant_Plasma"
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [
             "None",

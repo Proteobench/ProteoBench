@@ -254,7 +254,7 @@ class QuantUIObjects(BaseUIModule):
         # Define callbacks for plot options
         def render_slider():
             # Get max_nr_observed for slider range if available
-            max_nr_obs = getattr(self.variables, 'max_nr_observed', 6)
+            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
             tab1_view_public_results.generate_main_slider(
                 slider_id_uuid=self.variables.slider_id_uuid,
                 description_slider_md=self.variables.description_slider_md,
@@ -314,6 +314,8 @@ class QuantUIObjects(BaseUIModule):
                 "colorblind_mode": colorblind_mode,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
                 "min_nr_observed": min_nr_observed,
+                "alpha_warning": getattr(self.variables, "alpha_warning", False),
+                "beta_warning": getattr(self.variables, "beta_warning", False),
             },
         )
 
@@ -335,7 +337,7 @@ class QuantUIObjects(BaseUIModule):
         # Define callbacks for plot options
         def render_slider():
             # Get max_nr_observed for slider range if available
-            max_nr_obs = getattr(self.variables, 'max_nr_observed', 6)
+            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
             tab1_view_public_results.generate_main_slider(
                 slider_id_uuid=self.variables.slider_id_submitted_uuid,
                 description_slider_md=self.variables.description_slider_md,
@@ -427,6 +429,8 @@ class QuantUIObjects(BaseUIModule):
                 "colorblind_mode": colorblind_mode,
                 "label": label,
                 "min_nr_observed": min_nr_observed,
+                "alpha_warning": getattr(self.variables, "alpha_warning", False),
+                "beta_warning": getattr(self.variables, "beta_warning", False),
             },
         )
 

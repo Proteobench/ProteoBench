@@ -646,13 +646,35 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             "PEAKS": "#f032e6",
             "quantms": "#f5e830",
         },
+        software_markers: Dict[str, str] = {
+            "MaxQuant": "circle",
+            "AlphaPept": "square",
+            "ProlineStudio": "diamond",
+            "MSAngel": "cross",
+            "FragPipe": "x",
+            "i2MassChroQ": "triangle-up",
+            "Sage": "triangle-down",
+            "WOMBAT": "pentagon",
+            "DIA-NN": "star",
+            "AlphaDIA": "star-triangle-up",
+            "Custom": "star-square",
+            "Spectronaut": "diamond-tall",
+            "FragPipe (DIA-NN quant)": "circle-x",
+            "MSAID": "square-cross",
+            "MetaMorpheus": "asterisk",
+            "Proteome Discoverer": "hash",
+            "PEAKS": "diamond-wide",
+            "quantms": "hexagram",
+        },
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         hide_annot: bool = False,
+        colorblind_mode: bool = False,
         default_cutoff_min_prec: int = 3,
         min_nr_observed: int = None,
+        annotation: str = "",
         **kwargs,
     ) -> go.Figure:
         """
@@ -685,6 +707,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Default min precursor threshold for extracting metrics.
         min_nr_observed : int, optional
             Override the cutoff level with this value if provided.
+        annotation : str, optional
+            Text annotation to display on the plot (e.g., "-Alpha-", "-Beta-").
         **kwargs : dict
             Additional parameters.
 
@@ -700,12 +724,15 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             metric=metric,
             mode=mode,
             software_colors=software_colors,
+            software_markers=software_markers,
             mapping=mapping,
             highlight_color=highlight_color,
             label=label,
             legend_name_map=legend_name_map,
             hide_annot=hide_annot,
+            colorblind_mode=colorblind_mode,
             default_cutoff_min_prec=cutoff_level,
+            annotation=annotation,
             **kwargs,
         )
 
@@ -735,12 +762,34 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             "PEAKS": "#f032e6",
             "quantms": "#f5e830",
         },
+        software_markers: Dict[str, str] = {
+            "MaxQuant": "circle",
+            "AlphaPept": "square",
+            "ProlineStudio": "diamond",
+            "MSAngel": "cross",
+            "FragPipe": "x",
+            "i2MassChroQ": "triangle-up",
+            "Sage": "triangle-down",
+            "WOMBAT": "pentagon",
+            "DIA-NN": "star",
+            "AlphaDIA": "star-triangle-up",
+            "Custom": "star-square",
+            "Spectronaut": "diamond-tall",
+            "FragPipe (DIA-NN quant)": "circle-x",
+            "MSAID": "square-cross",
+            "MetaMorpheus": "asterisk",
+            "Proteome Discoverer": "hash",
+            "PEAKS": "diamond-wide",
+            "quantms": "hexagram",
+        },
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         hide_annot: bool = False,
+        colorblind_mode: bool = False,
         default_cutoff_min_prec: int = 3,
+        annotation: str = "",
         **kwargs,
     ) -> go.Figure:
         """
@@ -775,6 +824,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Whether to hide annotations on the plot.
         default_cutoff_min_prec : int
             Default min precursor threshold for extracting metrics.
+        annotation : str, optional
+            Text annotation to display on the plot (e.g., "-Alpha-", "-Beta-").
         **kwargs : dict
             Additional parameters.
 
@@ -797,81 +848,94 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Human plasma metrics don't have mode variants (single species)
         opacity_metric_key = f"{metric_lower}_abs_epsilon_human_plasma"
 
-        # Extract plasma-specific metrics from results dictionary
-        x_values = []  # abs_log2_fc_error_spike_ins (median or mean, global or species-weighted)
-        y_values = []  # nr_quantified_spike_ins
-        sizes = []  # dynamic_range_human_plasma
-        opacities = []  # abs_epsilon_human_plasma (median or mean)
-        colors_list = []
-        hover_texts = []
-
-        for idx, row in result_df.iterrows():
-            # Get metrics from the results dictionary at default cutoff level
-            results_dict = row["results"]
-            if default_cutoff_min_prec in results_dict:
-                metrics = results_dict[default_cutoff_min_prec]
-
-                # Try new mode-specific key first, fall back to legacy key
-                x_val = metrics.get(x_metric_key)
-                if x_val is None:
-                    x_val = metrics.get(x_metric_key_legacy, 0.0)
-
-                y_val = metrics.get("nr_quantified_spike_ins", 0)
-                size_val = metrics.get("dynamic_range_human_plasma_mean", 0.0)
-                opacity_val = metrics.get(opacity_metric_key, 0.0)
-
-                x_values.append(x_val)
-                y_values.append(y_val)
-
-                # Size scaling: normalize dynamic range to reasonable marker sizes (5-30)
-                # Larger dynamic range = larger dots
-                if size_val > 0:
-                    normalized_size = 5 + (size_val / 3) * 25  # Scale to 5-30 range
-                else:
-                    normalized_size = 8
-                sizes.append(min(normalized_size, 30))
-
-                # Opacity: lower error = higher opacity (higher alpha)
-                # Scale error to opacity: 0 error = 0.9 opacity, 1.0+ error = 0.2 opacity
-                opacity = max(0.2, 0.9 - (opacity_val * 0.7))
-                opacities.append(opacity)
-
-                # Get software color
-                software = row["software_name"]
-                color = software_colors.get(software, "#000000")
-                if "Highlight" in result_df.columns and result_df.loc[idx, "Highlight"]:
-                    color = highlight_color
-                colors_list.append(color)
-
-                # Build hover text
-                mode_label = "global" if mode == "Global" else "species-weighted"
-                hover_text = (
-                    f"<b>{software} {row['software_version']}</b><br>"
-                    f"Spike-in error ({metric_lower}, {mode_label}): {x_val:.3f}<br>"
-                    f"Quantified spike-ins: {y_val}<br>"
-                    f"Plasma dynamic range: {size_val:.2f}<br>"
-                    f"Plasma accuracy error ({metric_lower}): {opacity_val:.3f}<br>"
-                    f"ID: {row['id']}"
-                )
-                hover_texts.append(hover_text)
-
         # Create scatter plot with all four visual dimensions
-        fig.add_trace(
-            go.Scatter(
-                x=x_values,
-                y=y_values,
-                mode="markers",
-                marker=dict(
-                    size=sizes,
-                    color=colors_list,
-                    opacity=opacities,
-                    line=dict(width=1, color="white"),
-                ),
-                text=hover_texts,
-                hovertemplate="%{text}<extra></extra>",
-                name="Results",
+        # Group by software to create separate traces (allows colorblind markers)
+        software_data = {}
+        for idx, row in result_df.iterrows():
+            if default_cutoff_min_prec not in row["results"]:
+                continue
+
+            software = row["software_name"]
+            if software not in software_data:
+                software_data[software] = {
+                    "x": [],
+                    "y": [],
+                    "sizes": [],
+                    "opacities": [],
+                    "colors": [],
+                    "markers": [],
+                    "hover_texts": [],
+                }
+
+            metrics = row["results"][default_cutoff_min_prec]
+
+            # Try new mode-specific key first, fall back to legacy key
+            x_val = metrics.get(x_metric_key)
+            if x_val is None:
+                x_val = metrics.get(x_metric_key_legacy, 0.0)
+
+            y_val = metrics.get("nr_quantified_spike_ins", 0)
+            size_val = metrics.get("dynamic_range_human_plasma_mean", 0.0)
+            opacity_val = metrics.get(opacity_metric_key, 0.0)
+
+            software_data[software]["x"].append(x_val)
+            software_data[software]["y"].append(y_val)
+
+            # Size scaling: normalize dynamic range to reasonable marker sizes (5-30)
+            if size_val > 0:
+                normalized_size = 5 + (size_val / 3) * 25
+            else:
+                normalized_size = 8
+            software_data[software]["sizes"].append(min(normalized_size, 30))
+
+            # Opacity: lower error = higher opacity (higher alpha)
+            opacity = max(0.2, 0.9 - (opacity_val * 0.7))
+            software_data[software]["opacities"].append(opacity)
+
+            # Get software color
+            color = software_colors.get(software, "#000000")
+            if "Highlight" in result_df.columns and result_df.loc[idx, "Highlight"]:
+                color = highlight_color
+            software_data[software]["colors"].append(color)
+
+            # Get marker
+            marker = software_markers.get(software, "circle")
+            software_data[software]["markers"].append(marker)
+
+            # Build hover text
+            mode_label = "global" if mode == "Global" else "species-weighted"
+            hover_text = (
+                f"<b>{software} {row['software_version']}</b><br>"
+                f"Spike-in error ({metric_lower}, {mode_label}): {x_val:.3f}<br>"
+                f"Quantified spike-ins: {y_val}<br>"
+                f"Plasma dynamic range: {size_val:.2f}<br>"
+                f"Plasma accuracy error ({metric_lower}): {opacity_val:.3f}<br>"
+                f"ID: {row['id']}"
             )
-        )
+            software_data[software]["hover_texts"].append(hover_text)
+
+        # Add traces for each software
+        for software, data in software_data.items():
+            # Get unique marker for this software
+            marker_symbol = data["markers"][0] if colorblind_mode else "circle"
+
+            fig.add_trace(
+                go.Scatter(
+                    x=data["x"],
+                    y=data["y"],
+                    mode="markers",
+                    marker=dict(
+                        size=data["sizes"],
+                        color=data["colors"],
+                        opacity=data["opacities"],
+                        symbol=marker_symbol,
+                        line=dict(width=1, color="white"),
+                    ),
+                    text=data["hover_texts"],
+                    hovertemplate="%{text}<extra></extra>",
+                    name=legend_name_map.get(software, software),
+                )
+            )
 
         # Update layout
         mode_description = "global" if mode == "Global" else "species-weighted"
@@ -915,7 +979,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-" if not hide_annot else "",
+            text=annotation if not hide_annot else "",
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )

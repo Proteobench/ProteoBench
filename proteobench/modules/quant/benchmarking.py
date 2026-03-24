@@ -21,7 +21,7 @@ from proteobench.exceptions import (
 )
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.score.quantscoresHYE import QuantScoresHYE
+from proteobench.score.quant.quantscores import QuantScoresHYE
 
 
 def handle_benchmarking_error(error_type: Type[Exception], error_message: str):
@@ -82,10 +82,16 @@ def _generate_intermediate(quant_score, standard_format, replicate_to_raw):
 
 
 @handle_benchmarking_error(DatapointGenerationError, "Error generating datapoint")
-def _generate_datapoint(intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec, max_nr_observed=None):
+def _generate_datapoint(
+    intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec, max_nr_observed=None
+):
     """Generate datapoint."""
     return QuantDatapointHYE.generate_datapoint(
-        intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
+        intermediate_metric_structure,
+        input_format,
+        user_input,
+        default_cutoff_min_prec=default_cutoff_min_prec,
+        max_nr_observed=max_nr_observed,
     )
 
 
@@ -156,7 +162,11 @@ def run_benchmarking(
 
     # Generate datapoint
     current_datapoint = _generate_datapoint(
-        intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec, max_nr_observed=max_nr_observed
+        intermediate_metric_structure,
+        input_format,
+        user_input,
+        default_cutoff_min_prec,
+        max_nr_observed=max_nr_observed,
     )
 
     # Add datapoint if function provided
@@ -247,7 +257,11 @@ def run_benchmarking_with_timing(
 
     with time_block("generate_datapoint"):
         current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
+            intermediate_metric_structure,
+            input_format,
+            user_input,
+            default_cutoff_min_prec=default_cutoff_min_prec,
+            max_nr_observed=max_nr_observed,
         )
 
     if add_datapoint_func is not None:

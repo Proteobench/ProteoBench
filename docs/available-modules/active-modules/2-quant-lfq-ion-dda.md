@@ -1,4 +1,4 @@
-# DDA quantification - precursor ion level
+# DDA quantification - precursor ion level (QExactive)
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
@@ -252,7 +252,7 @@ mapping between the headers in the input file (left-hand side) and the header of
  
   - "Charge" = precursor charge.
  
-  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST"). *Curently, there is an exception for FragPipe's .toml where we combine two columns, and protein IDs are seperated by "," (see the FragPipe section).*
+  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST"). *Curently, there is an exception for FragPipe's .toml where we combine two columns, and protein IDs are separated by "," (see the FragPipe section).*
  
   - "Intensity" = field containing the intensities utilised to calculate the module metrics. Used for long-format input.
 

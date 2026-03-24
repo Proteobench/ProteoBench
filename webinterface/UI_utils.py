@@ -1,6 +1,6 @@
 import base64
-import re
 import json
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Dict
@@ -56,7 +56,9 @@ def get_n_modules():
     # The number of modules is defined by the number of .py files in the pages directory that are not __init__.py
 
     pages_dir = Path(__file__).parent / "pages"
-    n_modules = len([f for f in pages_dir.glob("*.py") if f.name != "__init__.py"])
+    n_modules = len(
+        [f for f in pages_dir.glob("*.py") if not f.name == "__init__.py" and not f.name.startswith("base")]
+    )
     return n_modules
 
 

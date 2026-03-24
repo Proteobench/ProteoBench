@@ -44,7 +44,7 @@ that allow for a more modular and portable implementation.
 Backend
 ------- 
 
-The backend is organized into four main components that you can extend or customize:
+The backend is organized into six main components that you can extend or customize:
 
 **1. Module implementation** - Define how your benchmarking is performed
    - For quantification: Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule`
@@ -310,33 +310,6 @@ Here's a complete example for a hypothetical peptide identification module:
             # ... implementation
             return fig
 
-**Integrating Plots with Your Module**
-
-After creating your plot generator, integrate it with your module class:
-
-.. code-block:: python
-
-    from proteobench.modules.quant.quant_base_module import QuantModule
-    from proteobench.plotting.my_custom_plots import MyPlotGenerator
-    
-    class MyCustomModule(QuantModule):
-        def __init__(self, token):
-            super().__init__(token)
-            self.plot_generator = MyPlotGenerator()  # Initialize plot generator
-        
-        def benchmarking(self, input_file, input_format, user_input, all_datapoints):
-            # ... benchmarking logic ...
-            
-            # Generate plots using the plot generator
-            plots = self.plot_generator.generate_in_depth_plots(
-                performance_data=intermediate,
-                parse_settings=parse_settings
-            )
-            
-            # Main metric plot
-            main_fig = self.plot_generator.plot_main_metric(all_datapoints)
-            
-            return intermediate, all_datapoints, input_df
 
 .. _score-configuration:
 
@@ -687,6 +660,105 @@ functionality to create the web interface for each quantification module.
 :file:`webinterface.pages.pages_variables` contains files with ``dataclass``\ es for the 
 text for the different modules in the interface.
 
+Module Variables and Sidebar Configuration
+...........................................
+
+Each module requires a variables file in 
+`webinterface/pages/pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
+that defines both the module's behavior and its appearance in the sidebar navigation.
+
+**Creating a Module Variables File**
+
+Create a new file following the pattern ``<module_type>_variables.py`` (e.g., ``lfq_DDA_ion_Astral_variables.py``)
+in the appropriate subdirectory under ``pages_variables/`` (e.g., ``Quant/``).
+
+**Required Sidebar Metadata Fields**
+
+Your variables dataclass must include these fields for the module registry to discover and display it:
+
+.. code-block:: python
+
+    from dataclasses import dataclass, field
+    from typing import List
+    
+    @dataclass
+    class VariablesDDAQuantAstral:
+        # ... other module-specific fields ...
+        
+        # Sidebar metadata (required)
+        sidebar_label: str = "Quant LFQ DDA ion Astral"
+        sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
+        sidebar_category: str = "DDA"
+        keywords: List[str] = field(
+            default_factory=lambda: ["DDA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+        )
+        
+        # Module metadata (required)
+        title: str = "DDA Quantification - Precursor Level - Astral"
+        doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/quant_lfq_DDA_ion_Astral.html"
+
+**Sidebar Configuration Details:**
+
+- **sidebar_label**: Display name shown in the sidebar (keep concise but descriptive)
+- **sidebar_path**: URL path for the page (must match the page filename without numeric prefix)
+  
+  - Example: If your page file is ``8_Quant_LFQ_DDA_ion_Astral.py``, use ``/Quant_LFQ_DDA_ion_Astral``
+  
+- **sidebar_category**: Determines which expandable section contains the module
+  
+  - Valid values: ``"DDA"``, ``"DIA"``, ``"DDA Id"``, ``"Archived"``
+  - Modules are grouped by this category in the sidebar
+  
+- **keywords**: List of search terms for the sidebar search functionality
+  
+  - Users can filter modules by typing any of these keywords
+  - Include: data type, technique, instrument, software names, etc.
+  
+- **title**: Full descriptive title used in documentation and metadata
+- **doc_url**: Link to the module's documentation page
+
+**Release Stage Badges**
+
+ProteoBench automatically displays release stage badges (ALPHA, BETA, ARCHIVED) in the sidebar
+based on warning flags in your variables file. The badge is determined by this priority:
+
+1. **Archived** - If ``archived_warning: bool = True`` → Gray "ARCH" badge
+2. **Alpha** - If ``alpha_warning: bool = True`` → Orange "ALPHA" badge
+3. **Beta** - If ``beta_warning: bool = True`` → Blue "BETA" badge  
+4. **Live** - If none of the above → No badge (production-ready)
+
+**Example: Alpha Stage Module**
+
+.. code-block:: python
+
+    @dataclass
+    class VariablesDIAQuantSingleCell:
+        # ... other fields ...
+        
+        # Release stage flags
+        alpha_warning: bool = True   # Shows ALPHA badge
+        beta_warning: bool = False
+        
+        # Sidebar metadata
+        sidebar_label: str = "Quant LFQ DIA ion Single Cell"
+        sidebar_path: str = "/Quant_LFQ_DIA_ion_singlecell"
+        sidebar_category: str = "DIA"
+        keywords: List[str] = field(
+            default_factory=lambda: ["DIA", "quantification", "single cell", "Astral"]
+        )
+
+**Important Notes:**
+
+- The module registry automatically discovers all ``*_variables.py`` files at startup
+- No manual registration is needed - just create the file with the required fields
+- The release stage badge appears automatically based on the warning flags
+- When a module is moved to ``"Archived"`` category, it gets the ARCH badge regardless of other flags
+- The sidebar search filters modules by matching the search query against:
+  
+  - ``sidebar_label`` (display name)
+  - ``title`` (full title)
+  - ``keywords`` (all keyword strings)
+
 Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObjects`
 ...................................................................................
 
@@ -714,6 +786,110 @@ to show the respective figures with the right metadata.
 
 Change the text and the field names accordingly in the ``dataclass``
 in `webinterface.pages.pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_.
+
+Creating a Module Page with StreamlitUI
+........................................
+
+Each module page inherits from :class:`~webinterface.pages.base.BaseStreamlitUI`,
+which provides a standardized structure for creating multi-tab interfaces with minimal code duplication.
+
+**BaseStreamlitUI Architecture**
+
+The base class handles common functionality:
+
+- Tab creation and rendering
+- Standard header elements (title, documentation link, banner)
+- Integration with module backend and UI objects
+
+**For Standard Quantification Modules (6 tabs)**
+
+Most quantification modules use the default 6-tab configuration and require minimal code:
+
+.. code-block:: python
+
+    # webinterface/pages/2_Quant_LFQ_DDA_ion_QExactive.py
+    from pages.base import BaseStreamlitUI
+    from pages.base_pages.quant import QuantUIObjects
+    from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
+    from pages.texts.generic_texts import WebpageTexts
+    from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+    from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
+    
+    if __name__ == "__main__":
+        # Instantiate and run directly - no subclass needed
+        st_ui = BaseStreamlitUI(
+            variables=VariablesDDAQuant(),
+            texts=WebpageTexts,
+            ionmodule=DDAQuantIonModuleQExactive,
+            parsesettingsbuilder=ParseSettingsBuilder,
+            uiobjects=QuantUIObjects,
+            page_name="Quant LFQ DDA ion QExactive",
+        )
+        st_ui.main_page()
+
+**Default Tab Configuration (Quant Modules)**
+
+The default :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config` returns:
+
+1. **View Public Results** → ``display_all_data_results_main()``
+2. **Upload New Results (Private)** → ``display_submission_form()``
+3. **View Single Result** → ``display_indepth_plots()``
+4. **View Public + New Results** → ``display_all_data_results_submitted()``
+5. **Compare Two Results** → ``display_workflow_comparison()``
+6. **Submit New Results** → ``display_public_submission_ui()``
+
+**For Custom Tab Configurations**
+
+If your module needs a different number or order of tabs, create a subclass and override
+:meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config`:
+
+.. code-block:: python
+
+    # webinterface/pages/7_denovo_DDA_HCD.py
+    from pages.base import BaseStreamlitUI
+    from pages.base_pages.denovo import DeNovoUIObjects
+    
+    class StreamlitUI(BaseStreamlitUI):
+        """Streamlit UI for the DDA de novo identification module."""
+        
+        def get_tab_config(self) -> list:
+            """Override tab configuration for De Novo module (5 tabs instead of 6)."""
+            return [
+                ("View Public Results", "display_all_data_results_main"),
+                ("Upload New Results (Private)", "display_submission_form"),
+                ("View Public + New Results", "display_all_data_results_submitted"),
+                ("Compare Results", "display_indepth_plots"),
+                ("Submit New Results", "display_public_submission_ui"),
+            ]
+    
+    if __name__ == "__main__":
+        st_ui = StreamlitUI(
+            variables=VariablesDDADeNovo(),
+            texts=WebpageTexts,
+            ionmodule=DDAHCDDeNovoModule,
+            parsesettingsbuilder=ParseSettingsBuilder,
+            uiobjects=DeNovoUIObjects,
+            page_name="De novo DDA-HCD peptidoform",
+        )
+        st_ui.main_page()
+
+**Tab Configuration Format**
+
+The :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config` method returns a list of tuples:
+
+.. code-block:: python
+
+    [
+        (tab_display_name, uiobjects_method_name),
+        ...
+    ]
+
+- **tab_display_name**: String shown in the tab header
+- **uiobjects_method_name**: Name of the method to call on the ``uiobjects`` instance
+
+Each method is automatically called when its tab is rendered, with the standard header
+(title, documentation link, banner) added automatically by 
+:meth:`~webinterface.pages.base.BaseStreamlitUI._render_tab_header`.
 
 Storing results
 ----------------
@@ -807,9 +983,36 @@ a new type of module:
    See :ref:`plot-configuration` for detailed examples.
 7. Check, modify or add parameter parsing for new tools in
    `proteobench/io/params <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/params>`_
-8. Add a new page defining the module webinterface to
+8. **Create a module variables file** in
+   `webinterface/pages/pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
+   with a ``dataclass`` defining all module-specific settings. **Required fields:**
+   
+   - **Sidebar metadata** (for automatic discovery and navigation):
+     
+     - ``sidebar_label: str`` - Display name in sidebar
+     - ``sidebar_path: str`` - URL path (must match page filename without numeric prefix)
+     - ``sidebar_category: str`` - Category: ``"DDA"``, ``"DIA"``, ``"DDA Id"``, or ``"Archived"``
+     - ``keywords: List[str]`` - Search terms for sidebar filtering
+   
+   - **Module metadata**:
+     
+     - ``title: str`` - Full descriptive title
+     - ``doc_url: str`` - Link to documentation page
+   
+   - **Release stage** (determines badge in sidebar):
+     
+     - For **Alpha**: Set ``alpha_warning: bool = True`` (orange ALPHA badge)
+     - For **Beta**: Set ``beta_warning: bool = True`` (blue BETA badge)
+     - For **Archived**: Set ``sidebar_category: str = "Archived"`` (gray ARCH badge)
+     - For **Production**: Don't set any warning flags (no badge)
+   
+   The module will be automatically discovered by the module registry system.
+   See the "Module Variables and Sidebar Configuration" section above for detailed examples.
+
+9. Add a new page file to
    `webinterface/pages <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages>`_
-   using the base functionality and adding ``pages_variables`` dataclasses.
-9. Create a new results repository for the module in
-   `Proteobench <https://github.com/Proteobench>`_ and 
-   a fork in `Proteobot <https://github.com/proteobot>`_
+   using the base functionality and your ``pages_variables`` dataclass. Name the file with
+   an optional numeric prefix for ordering (e.g., ``8_Quant_LFQ_DDA_ion_Astral.py``).
+10. Create a new results repository for the module in
+    `Proteobench <https://github.com/Proteobench>`_ and 
+    a fork in `Proteobot <https://github.com/proteobot>`_

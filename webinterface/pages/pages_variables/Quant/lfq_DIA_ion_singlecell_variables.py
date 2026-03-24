@@ -44,11 +44,34 @@ class VariablesDIAQuantSC:
     max_nr_observed: int = 6
     alpha_warning: bool = True
     beta_warning: bool = False
-    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git_singlecell"
+    archived_warning: bool = False
+    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_singlecell.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion Single Cell"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_singlecell"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: [
+            "DIA",
+            "quantification",
+            "single cell",
+            "Astral",
+            "precursor",
+            "ion",
+            "LFQ",
+            "single-cell",
+        ]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_singlecell"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_singlecell"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dia_quant_singlecell"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_singlecell"
     slider_id_uuid: str = "slider_id_dia_quant_singlecell"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dia_quant_singlecell"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dia_quant_singlecell"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dia_quant_singlecell"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dia_quant_singlecell"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_singlecell"
     table_id_uuid: str = "table_id_dia_quant_singlecell"
     table_new_results_uuid: str = "table_new_results_uuid_dia_quant_singlecell"
@@ -56,10 +79,12 @@ class VariablesDIAQuantSC:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_singlecell"
     metric_selector_uuid: str = "metric_selector_uuid_dia_quant_singlecell"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_singlecell"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dia_quant_singlecell"
     metric_calc_approach_selector_submitted_uuid: str = (
         "metric_calc_approach_selector_submitted_uuid_dia_quant_singlecell"
     )
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_singlecell"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dia_quant_singlecell"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [

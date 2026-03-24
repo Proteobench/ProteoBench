@@ -20,18 +20,6 @@ class StreamlitPage(ABC):
         self.state = st.session_state
 
         pbb.proteobench_page_config(page_layout="centered")
-        # Hide the default page navigation
-        st.markdown(
-            """
-            <style>
-            [data-testid="stSidebarNav"] {
-                display: none;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
         pbb.proteobench_sidebar(current_page="/")
 
         self._preface()
@@ -58,9 +46,7 @@ class StreamlitPage(ABC):
             **If you still have questions, you can email us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query)**
 
             Using proteobench version: {}
-            """.format(
-                proteobench.__version__
-            ),
+            """.format(proteobench.__version__),
             unsafe_allow_html=True,
         )
 

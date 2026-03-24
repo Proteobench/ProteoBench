@@ -42,12 +42,27 @@ class VariablesDIAQuant:
     first_new_plot: bool = True
     default_val_slider: int = 3
     max_nr_observed: int = 6
+    alpha_warning: bool = False
     beta_warning: bool = True
+    archived_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion AIF"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_AIF"
+    sidebar_category: str = "Archived"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "AIF", "all ion fragmentation", "precursor", "ion", "LFQ"]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant"
     selectbox_id_uuid: str = "selectbox_id_dia_quant"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dia_quant"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant"
     slider_id_uuid: str = "slider_id_dia_quant"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dia_quant"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dia_quant"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dia_quant"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dia_quant"
     download_selector_id_uuid: str = "download_selector_id_dia_quant"
     table_id_uuid: str = "table_id_dia_quant"
     table_new_results_uuid: str = "table_new_results_uuid_dia_quant"
@@ -55,8 +70,10 @@ class VariablesDIAQuant:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant"
     metric_selector_uuid: str = "metric_selector_uuid_dia_quant"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dia_quant"
     metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant"
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dia_quant"
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/AIF/file_description.md"

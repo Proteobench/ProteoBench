@@ -23,7 +23,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quantscoresHYE import QuantScoresHYE
+from proteobench.score.quant.quantscores import QuantScoresHYE
 
 
 class DIAQuantIonModulediaPASEF(QuantModule):
@@ -166,7 +166,11 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         # Generate current data point
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
-                intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec, max_nr_observed=max_nr_observed
+                intermediate_metric_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_prec=default_cutoff_min_prec,
+                max_nr_observed=max_nr_observed,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

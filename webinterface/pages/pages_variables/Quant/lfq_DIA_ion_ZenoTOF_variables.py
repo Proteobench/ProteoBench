@@ -24,6 +24,7 @@ class VariablesDIAQuantZenoTOF:
     fig_metric: str = "fig_metric_dia_quant_ZenoTOF"
     fig_cv: str = "fig_CV_violinplot_dia_quant_ZenoTOF"
     fig_ma_plot: str = "fig_ma_plot_dia_quant_ZenoTOF"
+    fig_prefix: str = "fig_dia_quant_ZenoTOF_"
     result_perf: str = "result_perf_dia_quant_ZenoTOF"
     meta_data: str = "meta_data_dia_quant_ZenoTOF"
     input_df: str = "input_df_dia_quant_ZenoTOF"
@@ -34,7 +35,7 @@ class VariablesDIAQuantZenoTOF:
     check_submission: str = "check_submission_dia_quant_ZenoTOF"
     button_submission_uuid: str = "button_submission_uuid_dia_quant_ZenoTOF"
     df_head: str = "df_head_dia_quant_ZenoTOF"
-    placeholder_fig_compare: str = "placeholder_fig_compare_dia_quant_diPASEF"
+    placeholder_fig_compare: str = "placeholder_fig_compare_dia_quant_ZenoTOF"
     placeholder_table: str = "placeholder_table_dia_quant_ZenoTOF"
     placeholder_slider: str = "placeholder_slider_dia_quant_ZenoTOF"
     placeholder_downloads_container: str = "placeholder_downloads_container_dia_quant_ZenoTOF"
@@ -42,13 +43,27 @@ class VariablesDIAQuantZenoTOF:
     first_new_plot: bool = True
     default_val_slider: int = 3
     max_nr_observed: int = 6
-    alpha_warning: bool = True
-    beta_warning: bool = False
+    alpha_warning: bool = False
+    beta_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_ZenoTOF.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion ZenoTOF"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_ZenoTOF"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "ZenoTOF", "SCIEX", "precursor", "ion", "LFQ", "TOF"]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_ZenoTOF"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_ZenoTOF"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dia_quant_ZenoTOF"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dia_quant_ZenoTOF"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dia_quant_ZenoTOF"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dia_quant_ZenoTOF"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_ZenoTOF"
     slider_id_uuid: str = "slider_id_dia_quant_ZenoTOF"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dia_quant_ZenoTOF"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_ZenoTOF"
     table_id_uuid: str = "table_id_dia_quant_ZenoTOF"
     table_new_results_uuid: str = "table_new_results_uuid_dia_quant_ZenoTOF"
@@ -56,8 +71,10 @@ class VariablesDIAQuantZenoTOF:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_ZenoTOF"
     metric_selector_uuid: str = "metric_selector_uuid_dia_quant_ZenoTOF"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_ZenoTOF"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dia_quant_ZenoTOF"
     metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant_ZenoTOF"
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_ZenoTOF"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dia_quant_ZenoTOF"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [

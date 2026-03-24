@@ -42,8 +42,13 @@ class VariablesDDAQuant:
     highlight_list_submitted: List[str] = field(default_factory=list)
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dda_quant_peptidoform"
     selectbox_id_uuid: str = "selectbox_id_dda_quant_peptidoform"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dda_quant_peptidoform"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dda_quant_peptidoform"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_quant_peptidoform"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dda_quant_peptidoform"
     slider_id_submitted_uuid: str = "slider_id_submitted_dda_quant_peptidoform"
     slider_id_uuid: str = "slider_id_dda_quant_peptidoform"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dda_quant_peptidoform"
     download_selector_id_uuid: str = "download_selector_id_dda_quant_peptidoform"
     table_id_uuid: str = "table_id_dda_quant_peptidoform"
     table_new_results_uuid: str = "table_new_results_uuid_dda_quant_peptidoform"
@@ -51,10 +56,12 @@ class VariablesDDAQuant:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dda_quant_peptidoform"
     metric_selector_uuid: str = "metric_selector_uuid_dda_quant_peptidoform"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dda_quant_peptidoform"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dda_quant_peptidoform"
     metric_calc_approach_selector_submitted_uuid: str = (
         "metric_calc_approach_selector_submitted_uuid_dda_quant_peptidoform"
     )
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dda_quant_peptidoform"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dda_quant_peptidoform"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [
@@ -82,7 +89,17 @@ class VariablesDDAQuant:
     default_val_slider: int = 3
     max_nr_observed: int = 6
     beta_warning: bool = True
+    alpha_warning: bool = False
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_peptidoform_DDA.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DDA peptidoform"
+    sidebar_path: str = "/Quant_LFQ_DDA_peptidoform"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "quantification", "peptidoform", "modified peptide", "LFQ"]
+    )
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 

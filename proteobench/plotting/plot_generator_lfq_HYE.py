@@ -124,19 +124,20 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
     def plot_main_metric(
         self,
-        benchmark_metrics_df: pd.DataFrame,
+        result_df: pd.DataFrame,
         metric: str = "Median",
         mode: str = "Species-weighted",
+        colorblind_mode: bool = False,
         software_colors: Dict[str, str] = {
-            "MaxQuant": "#8bc6fd",
-            "AlphaPept": "#17212b",
-            "ProlineStudio": "#8b26ff",
-            "MSAngel": "#C0FA7D",
-            "FragPipe": "#F89008",
-            "i2MassChroQ": "#108E2E",
-            "Sage": "#E43924",
-            "WOMBAT": "#663200",
-            "DIA-NN": "#d42f2f",
+            "MaxQuant": "#88ccef",
+            "AlphaPept": "#cc6777",
+            "ProlineStudio": "#ddcc77",
+            "MSAngel": "#147733",
+            "FragPipe": "#342288",
+            "i2MassChroQ": "#aa4599",
+            "Sage": "#671100",
+            "WOMBAT": "#44aa9a",
+            "DIA-NN": "#999934",
             "AlphaDIA": "#1D2732",
             "Custom": "#000000",
             "Spectronaut": "#007548",
@@ -147,11 +148,31 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             "PEAKS": "#f032e6",
             "quantms": "#f5e830",
         },
+        software_markers: Dict[str, str] = {
+            "MaxQuant": "circle",
+            "AlphaPept": "square",
+            "ProlineStudio": "diamond",
+            "MSAngel": "cross",
+            "FragPipe": "x",
+            "i2MassChroQ": "triangle-up",
+            "Sage": "triangle-down",
+            "WOMBAT": "pentagon",
+            "DIA-NN": "star",
+            "AlphaDIA": "star-triangle-up",
+            "Custom": "star-square",
+            "Spectronaut": "diamond-tall",
+            "FragPipe (DIA-NN quant)": "circle-x",
+            "MSAID": "square-cross",
+            "MetaMorpheus": "asterisk",
+            "Proteome Discoverer": "hash",
+            "PEAKS": "diamond-wide",
+            "quantms": "hexagram",
+        },
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
-        hide_annot: bool = False,
+        annotation: str = "",
         **kwargs,
     ) -> go.Figure:
         """
@@ -159,14 +180,18 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
         Parameters
         ----------
-        benchmark_metrics_df : pd.DataFrame
+        result_df : pd.DataFrame
             DataFrame containing the results to plot.
         metric : str, optional
             Metric to plot, either "Median" or "Mean".
         mode : str, optional
             Mode of calculation, either, "Species-weighted" or "Global". Case-insensitive.
+        colorblind_mode : Bool, optional
+            If True, use different shapes for workflows.
         software_colors : Dict[str, str]
             Mapping of software names to colors.
+        software_markers : Dict[str, str]
+            Mapping of software names to markers.
         mapping : Dict[str, str]
             Mapping for renaming software versions.
         highlight_color : str
@@ -192,7 +217,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             metric_col_name = "roc_auc"
             legacy_metric_col_name = None  # No legacy column for ROC-AUC
             # Filter to only datapoints that have ROC-AUC calculated
-            benchmark_metrics_df = self._filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
+            result_df = self._filter_datapoints_with_metric(result_df, metric_col_name)
         else:
             metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
             legacy_metric_col_name = f"{metric_lower}_abs_epsilon"
@@ -200,12 +225,12 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             # Filter based on mode
             # If user selects "Species-weighted" mode, only show datapoints that have the new metrics
             if mode == "Species-weighted":
-                benchmark_metrics_df = self._filter_datapoints_with_metric(benchmark_metrics_df, metric_col_name)
+                result_df = self._filter_datapoints_with_metric(result_df, metric_col_name)
 
         # Extract all values for the selected metric mode
         # Handle mixed old/new datapoints by trying the new key first, then falling back to legacy
         all_metric_values = []
-        for v in benchmark_metrics_df["results"]:
+        for v in result_df["results"]:
             for v2 in v.values():
                 # Try new metric name first, fall back to legacy if not present
                 value = v2.get(metric_col_name)
@@ -214,19 +239,25 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 if value is not None:
                     all_metric_values.append(value)
 
-        all_nr_prec = [v2["nr_prec"] for v in benchmark_metrics_df["results"] for v2 in v.values()]
+        all_nr_prec = [v2["nr_prec"] for v in result_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
         hover_texts = []
-        for idx, _ in benchmark_metrics_df.iterrows():
+        for idx, _ in result_df.iterrows():
             datapoint_text = ""
-            if benchmark_metrics_df.is_temporary[idx] == True:
+            if result_df.is_temporary[idx] == True:
                 datapoint_text = (
-                    f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
-                    + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
+                    f"ProteoBench ID: {result_df.id[idx]}<br>"
+                    + f"Software tool: {result_df.software_name[idx]} {result_df.software_version[idx]}<br>"
                 )
-                if "comments" in benchmark_metrics_df.columns:
-                    comment = benchmark_metrics_df.comments[idx]
+                # Add keyword if present
+                # TODO: potentially make more generic so that this does not have to be added in multiple plot_generator classes
+                if "Keyword" in result_df.columns:
+                    keyword = result_df.Keyword[idx]
+                    if isinstance(keyword, str) and keyword.strip():
+                        datapoint_text = datapoint_text + f"Keyword: {keyword}<br>"
+                if "comments" in result_df.columns:
+                    comment = result_df.comments[idx]
                     if isinstance(comment, str):
                         datapoint_text = (
                             datapoint_text
@@ -235,20 +266,20 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             else:
                 # TODO: Determine parameters based on module
                 datapoint_text = (
-                    f"ProteoBench ID: {benchmark_metrics_df.id[idx]}<br>"
-                    + f"Software tool: {benchmark_metrics_df.software_name[idx]} {benchmark_metrics_df.software_version[idx]}<br>"
-                    + f"Search engine: {benchmark_metrics_df.search_engine[idx]} {benchmark_metrics_df.search_engine_version[idx]}<br>"
-                    + f"FDR psm: {benchmark_metrics_df.ident_fdr_psm[idx]}<br>"
-                    + f"MBR: {benchmark_metrics_df.enable_match_between_runs[idx]}<br>"
-                    + f"Precursor Tolerance: {benchmark_metrics_df.precursor_mass_tolerance[idx]}<br>"
-                    + f"Fragment Tolerance: {benchmark_metrics_df.fragment_mass_tolerance[idx]}<br>"
-                    + f"Enzyme: {benchmark_metrics_df.enzyme[idx]} <br>"
-                    + f"Missed Cleavages: {benchmark_metrics_df.allowed_miscleavages[idx]}<br>"
-                    + f"Min peptide length: {benchmark_metrics_df.min_peptide_length[idx]}<br>"
-                    + f"Max peptide length: {benchmark_metrics_df.max_peptide_length[idx]}<br>"
+                    f"ProteoBench ID: {result_df.id[idx]}<br>"
+                    + f"Software tool: {result_df.software_name[idx]} {result_df.software_version[idx]}<br>"
+                    + f"Search engine: {result_df.search_engine[idx]} {result_df.search_engine_version[idx]}<br>"
+                    + f"FDR psm: {result_df.ident_fdr_psm[idx]}<br>"
+                    + f"MBR: {result_df.enable_match_between_runs[idx]}<br>"
+                    + f"Precursor Tolerance: {result_df.precursor_mass_tolerance[idx]}<br>"
+                    + f"Fragment Tolerance: {result_df.fragment_mass_tolerance[idx]}<br>"
+                    + f"Enzyme: {result_df.enzyme[idx]} <br>"
+                    + f"Missed Cleavages: {result_df.allowed_miscleavages[idx]}<br>"
+                    + f"Min peptide length: {result_df.min_peptide_length[idx]}<br>"
+                    + f"Max peptide length: {result_df.max_peptide_length[idx]}<br>"
                 )
-                if "submission_comments" in benchmark_metrics_df.columns:
-                    comment = benchmark_metrics_df.submission_comments[idx]
+                if "submission_comments" in result_df.columns:
+                    comment = result_df.submission_comments[idx]
                     if isinstance(comment, str):
                         datapoint_text = (
                             datapoint_text
@@ -257,24 +288,26 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
             hover_texts.append(datapoint_text)
 
-        scatter_size = [mapping[item] for item in benchmark_metrics_df["old_new"]]
-        if "Highlight" in benchmark_metrics_df.columns:
+        scatter_size = [mapping[item] for item in result_df["old_new"]]
+        if "Highlight" in result_df.columns:
             scatter_size = [
-                item * 2 if highlight else item
-                for item, highlight in zip(scatter_size, benchmark_metrics_df["Highlight"])
+                item * 2 if highlight else item for item, highlight in zip(scatter_size, result_df["Highlight"])
             ]
 
         # Color plot based on software tool
-        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
-        if "Highlight" in benchmark_metrics_df.columns:
-            colors = [
-                highlight_color if highlight else item
-                for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
-            ]
+        colors = [software_colors[software] for software in result_df["software_name"]]
+        markers = [software_markers[software] for software in result_df["software_name"]]
+        if "Highlight" in result_df.columns:
+            colors = [highlight_color if highlight else item for item, highlight in zip(colors, result_df["Highlight"])]
 
-        benchmark_metrics_df["color"] = colors
-        benchmark_metrics_df["hover_text"] = hover_texts
-        benchmark_metrics_df["scatter_size"] = scatter_size
+        result_df["color"] = colors
+        result_df["hover_text"] = hover_texts
+        result_df["scatter_size"] = scatter_size
+
+        if colorblind_mode:
+            result_df["marker"] = markers
+        else:
+            result_df["marker"] = "circle"
 
         if all_metric_values:
             layout_xaxis_range = [
@@ -298,18 +331,15 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         )
 
         # Get all unique color-software combinations (necessary for highlighting)
-        color_software_combinations = benchmark_metrics_df[["color", "software_name"]].drop_duplicates()
-        benchmark_metrics_df["enable_match_between_runs"] = benchmark_metrics_df["enable_match_between_runs"].astype(
-            str
-        )
+        color_software_combinations = result_df[["color", "software_name", "marker"]].drop_duplicates()
+        result_df["enable_match_between_runs"] = result_df["enable_match_between_runs"].astype(str)
         # plot the data points, one trace per software tool
         for _, row in color_software_combinations.iterrows():
             color = row["color"]
             software = row["software_name"]
+            marker = row["marker"]
 
-            tmp_df = benchmark_metrics_df[
-                (benchmark_metrics_df["color"] == color) & (benchmark_metrics_df["software_name"] == software)
-            ]
+            tmp_df = result_df[(result_df["color"] == color) & (result_df["software_name"] == software)]
             # to do: remove this line as soon as parameters are homogeneous, see #380
             # tmp_df["enable_match_between_runs"] = tmp_df["enable_match_between_runs"].astype(str)
 
@@ -329,19 +359,20 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             fig.add_trace(
                 go.Scatter(
                     x=x_values,
-                    y=tmp_df["nr_prec"],
+                    y=tmp_df["nr_prec"].tolist(),
                     mode="markers" if label == "None" else "markers+text",
-                    hovertext=tmp_df["hover_text"],
-                    text=tmp_df[label] if label != "None" else None,
-                    marker=dict(color=tmp_df["color"], showscale=False),
-                    marker_size=tmp_df["scatter_size"],
+                    hovertext=tmp_df["hover_text"].tolist(),
+                    text=tmp_df[label].tolist() if label != "None" else None,
+                    marker=dict(color=tmp_df["color"].tolist(), showscale=False, symbol=tmp_df["marker"].tolist()),
+                    marker_size=tmp_df["scatter_size"].tolist(),
                     name=legend_name_map.get(tmp_df["software_name"].iloc[0], tmp_df["software_name"].iloc[0]),
                 )
             )
 
         fig.update_layout(
-            width=700,
+            width=None,
             height=700,
+            autosize=True,
             xaxis=dict(
                 title=plot_title,
                 gridcolor="white",
@@ -354,6 +385,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 gridwidth=2,
                 linecolor="black",
             ),
+            margin=dict(l=80, r=20, t=50, b=80),
         )
         fig.update_xaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray", gridwidth=1)
@@ -363,7 +395,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             y=0.5,
             xref="paper",
             yref="paper",
-            text="-Beta-" if not hide_annot else "",
+            text=annotation,
             font=dict(size=50, color="rgba(0,0,0,0.1)"),
             showarrow=False,
         )
@@ -594,7 +626,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
         return metric_lower, mode_suffix, plot_title
 
-    def _filter_datapoints_with_metric(self, benchmark_metrics_df: pd.DataFrame, metric_col_name: str) -> pd.DataFrame:
+    def _filter_datapoints_with_metric(self, result_df: pd.DataFrame, metric_col_name: str) -> pd.DataFrame:
         """
         Filter datapoints to only include those that have the specified metric calculated.
 
@@ -604,7 +636,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
         Parameters
         ----------
-        benchmark_metrics_df : pd.DataFrame
+        result_df : pd.DataFrame
             DataFrame containing benchmark metrics for datapoints.
         metric_col_name : str
             The name of the metric column to filter on.
@@ -626,4 +658,4 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             return False
 
         # Filter to only datapoints that have the specified metric calculated
-        return benchmark_metrics_df[benchmark_metrics_df["results"].apply(has_metric)].copy()
+        return result_df[result_df["results"].apply(has_metric)].copy()

@@ -43,12 +43,27 @@ class VariablesDIAQuantAstral:
     first_new_plot: bool = True
     default_val_slider: int = 3
     max_nr_observed: int = 6
+    alpha_warning: bool = False
     beta_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_Astral.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion Astral"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_Astral"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_Astral"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_Astral"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dia_quant_Astral"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_Astral"
     slider_id_uuid: str = "slider_id_dia_quant_Astral"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dia_quant_Astral"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dia_quant_Astral"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dia_quant_Astral"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dia_quant_Astral"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_Astral"
     table_id_uuid: str = "table_id_dia_quant_Astral"
     table_new_results_uuid: str = "table_new_results_uuid_dia_quant_Astral"
@@ -56,8 +71,10 @@ class VariablesDIAQuantAstral:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_Astral"
     metric_selector_uuid: str = "metric_selector_uuid_dia_quant_Astral"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_Astral"
-    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_Astral"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dia_quant_Astral"
     metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant_Astral"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_Astral"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dia_quant_Astral"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [

@@ -355,7 +355,6 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         conditions_data = []
 
         if len(performance_data) > 0:
-
             # Calculate mean intensity across both conditions
             performance_data_copy = performance_data.copy()
             performance_data_copy["mean_intensity"] = performance_data_copy[

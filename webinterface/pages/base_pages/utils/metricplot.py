@@ -14,6 +14,7 @@ def render_metric_plot(
     colorblind_mode: bool,
     key,
     plot_generator,
+    slider_id_uuid: str = None,
     annotation: str = "",
 ) -> str | None:
     """
@@ -33,6 +34,9 @@ def render_metric_plot(
     label : str
         The label for the data points.
 
+    colorblind_mode : bool
+        Whether to use colorblind-safe colors.
+
     key : str
         Unique key for the plot in the Streamlit session state.
 
@@ -41,6 +45,9 @@ def render_metric_plot(
 
     slider_id_uuid : str, optional
         The UUID for the slider to retrieve the min_nr_observed value.
+
+    annotation : str, optional
+        Optional annotation to display on the plot.
 
     Returns
     -------

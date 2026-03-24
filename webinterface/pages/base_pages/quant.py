@@ -253,11 +253,13 @@ class QuantUIObjects(BaseUIModule):
 
         # Define callbacks for plot options
         def render_slider():
+            # Get max_nr_observed for slider range if available
+            max_nr_obs = getattr(self.variables, 'max_nr_observed', 6)
             tab1_view_public_results.generate_main_slider(
                 slider_id_uuid=self.variables.slider_id_uuid,
                 description_slider_md=self.variables.description_slider_md,
                 default_val_slider=self.variables.default_val_slider,
-                max_nr_observed=self.variables.max_nr_observed,
+                max_nr_observed=max_nr_obs,
             )
 
         def render_selectbox():
@@ -296,6 +298,13 @@ class QuantUIObjects(BaseUIModule):
         mode = results[3] if len(results) > 3 else "Global"
         colorblind_mode = results[4] if len(results) > 4 else False
 
+        # Get the min_nr_observed value from the slider if available
+        min_nr_observed = None
+        if self.variables.slider_id_uuid in st.session_state:
+            slider_key = st.session_state[self.variables.slider_id_uuid]
+            if slider_key in st.session_state:
+                min_nr_observed = st.session_state[slider_key]
+
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
@@ -304,6 +313,7 @@ class QuantUIObjects(BaseUIModule):
                 "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+                "min_nr_observed": min_nr_observed,
             },
         )
 
@@ -324,17 +334,19 @@ class QuantUIObjects(BaseUIModule):
 
         # Define callbacks for plot options
         def render_slider():
+            # Get max_nr_observed for slider range if available
+            max_nr_obs = getattr(self.variables, 'max_nr_observed', 6)
             tab1_view_public_results.generate_main_slider(
                 slider_id_uuid=self.variables.slider_id_submitted_uuid,
                 description_slider_md=self.variables.description_slider_md,
                 default_val_slider=self.variables.default_val_slider,
+                max_nr_observed=max_nr_obs,
             )
 
         def render_selectbox():
             tab1_view_public_results.generate_main_selectbox(
                 self.variables,
                 selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
-                max_nr_observed=self.variables.max_nr_observed,
             )
 
         # Store metric in a container to share between callbacks
@@ -399,6 +411,13 @@ class QuantUIObjects(BaseUIModule):
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
 
+        # Get the min_nr_observed value from the slider if available
+        min_nr_observed = None
+        if self.variables.slider_id_submitted_uuid in st.session_state:
+            slider_key = st.session_state[self.variables.slider_id_submitted_uuid]
+            if slider_key in st.session_state:
+                min_nr_observed = st.session_state[slider_key]
+
         tab4_view_public_and_new_results.display_submitted_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
@@ -407,6 +426,7 @@ class QuantUIObjects(BaseUIModule):
                 "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": label,
+                "min_nr_observed": min_nr_observed,
             },
         )
 

@@ -59,9 +59,20 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None
     initialize_uuid_state(slider_id_uuid, default_val_slider)
 
 
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float) -> None:
+def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6) -> None:
     """
     Create a slider input.
+    
+    Parameters
+    ----------
+    slider_id_uuid : str
+        UUID for the slider state key
+    description_slider_md : str
+        Path to markdown file with slider description
+    default_val_slider : float
+        Default value for the slider
+    max_nr_observed : int, optional
+        Maximum value for the slider range (default 6)
     """
     # key for slider_uuid in session state
     if slider_id_uuid not in st.session_state:
@@ -69,9 +80,13 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     slider_key = st.session_state[slider_id_uuid]
 
     default_value = st.session_state.get(slider_key, default_val_slider)
+    
+    # Generate slider options based on max_nr_observed
+    slider_options = list(range(1, max_nr_observed + 1))
+    
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
-        options=[1, 2, 3, 4, 5, 6],
+        options=slider_options,
         value=default_value,
         key=slider_key,
         help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",

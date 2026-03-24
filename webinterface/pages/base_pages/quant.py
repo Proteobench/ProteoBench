@@ -311,7 +311,7 @@ class QuantUIObjects(BaseUIModule):
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
-        
+
         # Initialize plot options controls (same as tab 1)
         tab1_view_public_results.initialize_main_slider(
             slider_id_uuid=self.variables.slider_id_submitted_uuid,
@@ -332,7 +332,9 @@ class QuantUIObjects(BaseUIModule):
 
         def render_selectbox():
             tab1_view_public_results.generate_main_selectbox(
-                self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid, max_nr_observed=self.variables.max_nr_observed
+                self.variables,
+                selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
+                max_nr_observed=self.variables.max_nr_observed,
             )
 
         # Store metric in a container to share between callbacks
@@ -343,8 +345,10 @@ class QuantUIObjects(BaseUIModule):
             if key not in st.session_state:
                 st.session_state[key] = uuid.uuid4()
             metric_uuid = st.session_state[key]
-            
-            help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
             metric = st.radio(
                 "Select metric",
                 ["Median", "Mean"],
@@ -359,13 +363,15 @@ class QuantUIObjects(BaseUIModule):
             # ROC-AUC has no mode variants (it's already species-aware by design)
             if metric_container["metric"] == "ROC-AUC":
                 return None
-            
+
             key = self.variables.metric_calc_approach_selector_submitted_uuid
             if key not in st.session_state:
                 st.session_state[key] = uuid.uuid4()
             mode_uuid = st.session_state[key]
-            
-            help_text = getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio(
                 "Select metric calculation approach",
                 ["Global", "Species-weighted"],
@@ -409,5 +415,4 @@ class QuantUIObjects(BaseUIModule):
         tab5_compare_results.display_workflow_comparison(
             variables=self.variables,
             ionmodule=self.ionmodule,
-        )
         )

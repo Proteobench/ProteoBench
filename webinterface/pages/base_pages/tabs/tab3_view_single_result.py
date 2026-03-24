@@ -6,16 +6,22 @@ across all ProteoBench module types (Quant, De Novo, etc.).
 """
 
 import glob
+import logging
 import os
+import subprocess
 import uuid
 import zipfile
 from datetime import datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Optional
 
 import pandas as pd
 import streamlit as st
 import streamlit_utils
 from plotly import graph_objects as go
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def generate_indepth_plots(
@@ -247,6 +253,8 @@ def display_performance_table(performance_data: pd.DataFrame, variables, user_in
         icon=":material/download:",
     )
 
+    display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name)
+
 
 def generate_sample_name(input_format: str) -> str:
     """
@@ -304,3 +312,105 @@ def display_in_depth_plots_generic(variables, ionmodule, performance_data: pd.Da
 
     # Display plots with layout
     display_plots_with_layout(plots, plot_generator, variables, "Current Dataset")
+
+
+def display_pmultiqc_report(performance_data: pd.DataFrame, sample_name: str) -> None:
+    """
+    Display the pMultiQC report section.
+
+    Parameters
+    ----------
+    performance_data : pd.DataFrame
+        The performance data to generate the report from.
+    sample_name : str
+        The name of the sample for the report.
+    """
+    st.subheader("pMultiQC Report")
+    st.markdown(
+        "pMultiQC Reports contain additional QC plots for e.g. missing values, CV distributions, and intensity distributions. Report generation might take up to a minute."
+    )
+
+    html_content = st.session_state.get("tab31_pmultiqc_html_content_" + sample_name, "")
+    if not html_content:
+        html_content = create_pmultiqc_report_section(performance_data)
+        st.session_state["tab31_pmultiqc_html_content_" + sample_name] = html_content
+        logger.info(
+            "pMultiQC report generated.",
+        )
+    else:
+        logger.info(
+            'using cached pMultiQC report from session_state["tab31_pmultiqc_html_content_{}"].'.format(sample_name)
+        )
+    download_disactivate = True
+    if html_content:
+        download_disactivate = False
+    show_download_button(html_content, disabled=download_disactivate, sample_name=sample_name)
+
+
+def show_download_button(html_content: str, disabled: bool, sample_name: str) -> None:
+    """
+    Display a download button for the pMultiQC report.
+
+    Parameters
+    ----------
+    html_content : str
+        The HTML content of the report.
+    disabled : bool
+        Whether the download button should be disabled.
+    sample_name : str
+        The name of the sample for the report filename.
+    """
+    st.markdown("Download the pMultiQC report generated from the intermediate data.")
+    # components.html(html_content, height=800, scrolling=True)
+    st.download_button(
+        label="Download pMultiQC Report",
+        file_name="pMultiQC_report_{}.html".format(sample_name),
+        data=html_content,
+        disabled=disabled,
+        mime="text/html",
+    )
+
+
+def create_pmultiqc_report_section(performance_data: pd.DataFrame) -> str:
+    """
+    Create a section in the Streamlit app to display the pMultiQC report.
+
+    Parameters
+    ----------
+    performance_data : pd.DataFrame
+        The performance data to generate the report from.
+
+    Returns
+    -------
+    str
+        The HTML content of the generated report.
+    """
+    html_content = ""
+    if st.button("Generate pMultiQC Report"):
+        df_intermediate_results = performance_data
+        with TemporaryDirectory() as tmp_dir:
+            tmp_dir = Path(tmp_dir)
+            tmp_data = (tmp_dir / "data").resolve()
+            tmp_data.mkdir(parents=True, exist_ok=True)
+            df_intermediate_results.to_csv(tmp_data / "result_performance.csv", index=False)
+            file_out = tmp_dir
+            ret_code = subprocess.run(
+                [
+                    "multiqc",
+                    "--parse_proteobench",
+                    f"{tmp_data}",
+                    "-o",
+                    f"{file_out}",
+                    "-f",
+                    "--clean-up",
+                ],
+                check=False,
+            )
+            html_path = Path(file_out) / "multiqc_report.html"
+            if html_path.exists() and ret_code.returncode == 0:
+                with open(html_path, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+                st.success("pMultiQC report generated successfully.")
+            else:
+                st.error("Error generating pMultiQC report. Please check the logs.")
+    return html_content

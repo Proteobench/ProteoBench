@@ -65,15 +65,15 @@ class StreamlitUI:
             tab_public_submission,
         ) = st.tabs(
             [
-                "Public Benchmark Runs",
-                "Submit New Data",
-                "Results In-Depth",
-                "Results New Data",
-                "Public Submission",
+                "View Public Results",
+                "Upload New Results (Private)",
+                "View Single Result",
+                "View Public + New Results",
+                "Submit New Results",
             ]
         )
 
-        # Tab 1: Results (All Data)
+        # Tab 1: View Public Results
         with tab_results_all:
             st.title(self.variables_dia_quant.title)
             st.link_button(
@@ -88,7 +88,7 @@ class StreamlitUI:
                 )
             self.quant_uiobjects.display_all_data_results_main()
 
-        # Tab 2: Submission Details
+        # Tab 2: Upload New Results (Private)
         with tab_submission_details:
             st.title(self.variables_dia_quant.title)
             st.link_button(
@@ -103,7 +103,7 @@ class StreamlitUI:
                 )
             self.quant_uiobjects.display_submission_form()
 
-        # Tab 2.5: in-depth plots current data
+        # Tab 3: View Single Result
         with tab_indepth_plots:
             st.title(self.variables_dia_quant.title)
             st.link_button(
@@ -119,7 +119,7 @@ class StreamlitUI:
 
             self.quant_uiobjects.display_indepth_plots()
 
-        # Tab 3: Results (New Submissions)
+        # Tab 4: View Public + New Results
         with tab_results_new:
             st.title(self.variables_dia_quant.title)
             st.link_button(
@@ -134,7 +134,7 @@ class StreamlitUI:
                 )
             self.quant_uiobjects.display_all_data_results_submitted()
 
-        # Tab 4: Public Submission
+        # Tab 5: Submit New Results
         with tab_public_submission:
             st.title(self.variables_dia_quant.title)
             st.link_button(

@@ -21,6 +21,8 @@ import streamlit as st
 import streamlit_utils
 from plotly import graph_objects as go
 
+from ..utils.general import clean_dataframe_for_export
+
 logger: logging.Logger = logging.getLogger(__name__)
 
 
@@ -244,9 +246,11 @@ def display_performance_table(performance_data: pd.DataFrame, variables, user_in
 
     # Download button
     random_uuid = uuid.uuid4()
+    # Clean data for CSV export (replace newlines with spaces)
+    cleaned_data = clean_dataframe_for_export(performance_data)
     st.download_button(
         label="Download table",
-        data=streamlit_utils.save_dataframe(performance_data),
+        data=streamlit_utils.save_dataframe(cleaned_data),
         file_name=f"{sample_name}.csv",
         mime="text/csv",
         key=f"{random_uuid}",

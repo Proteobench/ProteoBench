@@ -45,4 +45,3 @@ def clean_dataframe_for_export(data: pd.DataFrame) -> pd.DataFrame:
             lambda x: str(x).replace("\n", " ").replace("\r", " ").replace(",", ";") if isinstance(x, str) else x
         )
     return data_copy
-    return data_copy

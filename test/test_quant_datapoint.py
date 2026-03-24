@@ -157,7 +157,7 @@ class TestQuantDatapointHYE:
                 "epsilon_precision_mean",
             ]
         )
-        result = QuantDatapointHYE.get_metrics(empty_df)
+        result = QuantDatapointHYE.get_metrics(empty_df, min_nr_observed=1)
         assert 1 in result
         assert result[1]["nr_prec"] == 0
 
@@ -175,7 +175,7 @@ class TestQuantDatapointHYE:
                 "epsilon_precision_mean": [0.0],  # Single value = 0 deviation from mean
             }
         )
-        result = QuantDatapointHYE.get_metrics(single_row_df)
+        result = QuantDatapointHYE.get_metrics(single_row_df, min_nr_observed=1)
         assert 1 in result
         assert result[1]["nr_prec"] == 1
         assert result[1]["median_abs_epsilon_global"] == 0.1

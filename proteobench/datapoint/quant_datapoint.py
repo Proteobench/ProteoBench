@@ -562,6 +562,7 @@ class QuantDatapointHYE(DatapointBase):
             **QuantDatapointHYE.get_cv_metrics(df, min_nr_observed),
             "variance_epsilon_global": df_slice["epsilon"].var() if len(df_slice) > 0 else 0.0,
             "nr_prec": nr_prec,
+            "roc_auc": compute_roc_auc(df_slice),
         }
 
         return {min_nr_observed: metrics}

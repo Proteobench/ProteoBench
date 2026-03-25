@@ -209,4 +209,3 @@ class TestDDAQuantIonModule:
 
         assert first_software_tool == second_software_tool
         assert len(all_datapoints) == 1
-        assert len(all_datapoints) == 1

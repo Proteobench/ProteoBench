@@ -11,7 +11,7 @@ from proteobench.datapoint.quant_datapoint import (
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
-from proteobench.score.quant.quantscores import QuantScoresHYE
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 DATAPOINT_USER_INPUT_TYPE = {
     "DDA_MaxQuant": {

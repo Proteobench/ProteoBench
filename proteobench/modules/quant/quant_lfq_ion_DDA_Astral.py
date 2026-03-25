@@ -9,20 +9,9 @@ from typing import Dict, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
-from proteobench.exceptions import (
-    ConvertStandardFormatError,
-    IntermediateFormatGenerationError,
-    ParseError,
-    ParseSettingsError,
-    QuantificationError,
-)
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.benchmarking import run_benchmarking_with_timing
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScoresHYE
 
 
 class DDAQuantIonAstralModule(QuantModule):
@@ -182,4 +171,5 @@ class DDAQuantIonAstralModule(QuantModule):
         )
 
     def get_plot_generator(self):
+        return super().get_plot_generator()
         return super().get_plot_generator()

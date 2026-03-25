@@ -557,6 +557,11 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             )
             return fig
 
+        # Compute logIntensityMean locally to avoid hidden dependency on _plot_ma_plot
+        human_slice["logIntensityMean"] = (
+            human_slice["log_Intensity_mean_A"] + human_slice["log_Intensity_mean_B"]
+        ) / 2
+
         human_slice = human_slice.sort_values(by="logIntensityMean", ascending=False)  # Across conditions
         human_slice["rank"] = range(1, len(human_slice) + 1)
         human_slice["missingness"] = (1 - human_slice["nr_observed"] / max_observations) * 100

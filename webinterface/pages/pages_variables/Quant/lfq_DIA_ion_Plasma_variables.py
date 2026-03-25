@@ -100,12 +100,12 @@ class VariablesDIAQuantPlasma:
     placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dia_quant_Plasma"
     dataset_selector_id_uuid: str = "dataset_selector_id_dia_quant_Plasma"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Plasma"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/plasma"
 
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-quant-lfq-ion-dia-Plasma/"
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/"
     )
 
     title: str = "DIA Precursor quantification - Plasma"

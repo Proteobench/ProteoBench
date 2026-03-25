@@ -115,7 +115,7 @@ def generate_indepth_plots(
     display_plots_with_layout(plots, plot_generator, variables, public_id)
 
     # Display performance data table
-    display_performance_table(performance_data, variables, user_input, public_id)
+    display_performance_table(performance_data, variables, user_input, public_id, public_hash)
 
     return plots.get(next(iter(plots))) if plots else None
 
@@ -214,7 +214,9 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
             st.markdown("---")
 
 
-def display_performance_table(performance_data: pd.DataFrame, variables, user_input: dict, public_id: str) -> None:
+def display_performance_table(
+    performance_data: pd.DataFrame, variables, user_input: dict, public_id: str, public_hash: Optional[str] = None
+) -> None:
     """
     Display the performance data table with download option.
 
@@ -228,6 +230,8 @@ def display_performance_table(performance_data: pd.DataFrame, variables, user_in
         User input parameters.
     public_id : str
         The dataset identifier.
+    public_hash : Optional[str]
+        The hash of the public dataset (for stable cache key).
     """
     st.subheader(f"Sample of the processed file for {public_id}")
 
@@ -238,11 +242,17 @@ def display_performance_table(performance_data: pd.DataFrame, variables, user_in
     # Display table
     st.dataframe(performance_data.head(100))
 
-    # Generate sample name
+    # Generate sample name (used for user-facing filenames)
     if public_id == "Uploaded dataset":
         sample_name = generate_sample_name(user_input.get("input_format", "unknown"))
     else:
         sample_name = public_id
+
+    # Generate stable cache key (for session state, independent of reruns)
+    if public_id == "Uploaded dataset":
+        cache_key = user_input.get("input_format", "unknown")
+    else:
+        cache_key = public_hash or public_id
 
     # Download button
     random_uuid = uuid.uuid4()
@@ -257,7 +267,7 @@ def display_performance_table(performance_data: pd.DataFrame, variables, user_in
         icon=":material/download:",
     )
 
-    display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name)
+    display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name, cache_key=cache_key)
 
 
 def generate_sample_name(input_format: str) -> str:
@@ -318,7 +328,7 @@ def display_in_depth_plots_generic(variables, ionmodule, performance_data: pd.Da
     display_plots_with_layout(plots, plot_generator, variables, "Current Dataset")
 
 
-def display_pmultiqc_report(performance_data: pd.DataFrame, sample_name: str) -> None:
+def display_pmultiqc_report(performance_data: pd.DataFrame, sample_name: str, cache_key: str) -> None:
     """
     Display the pMultiQC report section.
 
@@ -327,24 +337,25 @@ def display_pmultiqc_report(performance_data: pd.DataFrame, sample_name: str) ->
     performance_data : pd.DataFrame
         The performance data to generate the report from.
     sample_name : str
-        The name of the sample for the report.
+        The name of the sample for the report (used in filenames).
+    cache_key : str
+        Stable identifier for caching (independent of reruns).
     """
     st.subheader("pMultiQC Report")
     st.markdown(
         "pMultiQC Reports contain additional QC plots for e.g. missing values, CV distributions, and intensity distributions. Report generation might take up to a minute."
     )
 
-    html_content = st.session_state.get("tab31_pmultiqc_html_content_" + sample_name, "")
+    session_key = "tab31_pmultiqc_html_content_" + cache_key
+    html_content = st.session_state.get(session_key, "")
     if not html_content:
         html_content = create_pmultiqc_report_section(performance_data)
-        st.session_state["tab31_pmultiqc_html_content_" + sample_name] = html_content
+        st.session_state[session_key] = html_content
         logger.info(
             "pMultiQC report generated.",
         )
     else:
-        logger.info(
-            'using cached pMultiQC report from session_state["tab31_pmultiqc_html_content_{}"].'.format(sample_name)
-        )
+        logger.info('using cached pMultiQC report from session_state["{}"]'.format(session_key))
     download_disactivate = True
     if html_content:
         download_disactivate = False
@@ -398,23 +409,35 @@ def create_pmultiqc_report_section(performance_data: pd.DataFrame) -> str:
             tmp_data.mkdir(parents=True, exist_ok=True)
             df_intermediate_results.to_csv(tmp_data / "result_performance.csv", index=False)
             file_out = tmp_dir
-            ret_code = subprocess.run(
-                [
-                    "multiqc",
-                    "--parse_proteobench",
-                    f"{tmp_data}",
-                    "-o",
-                    f"{file_out}",
-                    "-f",
-                    "--clean-up",
-                ],
-                check=False,
-            )
-            html_path = Path(file_out) / "multiqc_report.html"
-            if html_path.exists() and ret_code.returncode == 0:
-                with open(html_path, "r", encoding="utf-8") as f:
-                    html_content = f.read()
-                st.success("pMultiQC report generated successfully.")
-            else:
-                st.error("Error generating pMultiQC report. Please check the logs.")
+            try:
+                ret_code = subprocess.run(
+                    [
+                        "multiqc",
+                        "--parse_proteobench",
+                        f"{tmp_data}",
+                        "-o",
+                        f"{file_out}",
+                        "-f",
+                        "--clean-up",
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    timeout=500,  # Set a timeout to prevent hanging
+                )
+                html_path = Path(file_out) / "multiqc_report.html"
+                if html_path.exists() and ret_code.returncode == 0:
+                    with open(html_path, "r", encoding="utf-8") as f:
+                        html_content = f.read()
+                    st.success("pMultiQC report generated successfully.")
+                else:
+                    error_msg = ret_code.stderr if ret_code.stderr else "Unknown error"
+                    logger.error(f"pMultiQC failed with return code {ret_code.returncode}: {error_msg}")
+                    st.error(f"Error generating pMultiQC report: {error_msg}")
+            except subprocess.TimeoutExpired:
+                logger.error("pMultiQC report generation timed out after 500 seconds")
+                st.error("pMultiQC report generation timed out. The analysis may be too complex for the current input.")
+            except Exception as e:
+                logger.error(f"Unexpected error during pMultiQC report generation: {str(e)}")
+                st.error(f"Unexpected error generating pMultiQC report: {str(e)}")
     return html_content

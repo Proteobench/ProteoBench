@@ -1,10 +1,11 @@
-# *De Novo* - DDA - HCD (**Alpha phase**) *[Work in Progress]*
+# *De Novo* - DDA - HCD 
 
 This module compares the peptide sequencing accuracy of *de novo* models and algorithms for data acquired with data-dependent acquisition (DDA) on orbitrap instruments. Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
-**Beware, deep learning models can be trained (and thus overfit) on the provided test data, which will result in a biased performance comparison. Therefore, in the case of using deep learning models, we advise to explicitly descripe the training data and training procedure used in the `Comments for submission` field before uploading the datapoint.**
+**Beware, deep learning models can be trained (and thus overfit) on the provided test data, which will result in a biased performance comparison. Therefore, if you retrained any of the models compatible with ProteoBench, we advise to explicitly descripe the training data and training procedure used in the `Comments for submission` field before uploading the datapoint.**
 
 We believe the module can be used to evaluate the impact of the following characteristics on the identification accuracy of the *de novo* tools:
+
 - Post-translational modifications (PTMs)
 - Missing fragments
 - Peptide length
@@ -21,20 +22,20 @@ The widely used 'balanced' nine species dataset from [Noble et al., 2024](https:
 
 **Table 1: Benchmark dataset statistics ([Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2))**
 
-|PRIDE|Species|Instrument|Spectra|PSMs|
-|-----|-----|-----|-----|-----|
-|[PXD005025](https://www.ebi.ac.uk/pride/archive/projects/PXD005025)|*Vigna Mungo*|QExactive|932,848|**102,255**|
-|[PXD004948](https://www.ebi.ac.uk/pride/archive/projects/PXD004948)|*Mus musculus*|LTQ-Orbitrap Velos|306,786|**25,522**|
-|[PXD004325](https://www.ebi.ac.uk/pride/archive/projects/PXD004325)|*Methanosarcina mazei*|QExative Plus|3,728,183|**100,485**|
-|[PXD004565](https://www.ebi.ac.uk/pride/archive/projects/PXD004565)|*Bacillus subtilis*|QExactive|4,336,428|**113,234**|
-|[PXD004536](https://www.ebi.ac.uk/pride/archive/projects/PXD004536)|*Candidatus endoloripes*|Q Exactive Plus Hybrid|2,272,023|**82,514**|
-|[PXD004947](https://www.ebi.ac.uk/pride/archive/projects/PXD004947)|*Solanum lycopersicum*|QExactive|603,506|**100,056**|
-|[PXD003868](https://www.ebi.ac.uk/pride/archive/projects/PXD003868)|*Saccharomyces cervisiae*|Q-Exactive Plus|1,477,397|**108,973**|
-|[PXD004467](https://www.ebi.ac.uk/pride/archive/projects/PXD004467)|*Apis mellifera*|QExactive|823,169|**102,285**|
-|[PXD004424]()|*Homo sapiens*|QExactive|684,821|**44,555**|
-|Total|||15,165,161|**779,879**|
+| PRIDE                                                               | Species                   | Instrument             | Spectra    | PSMs        |
+| ------------------------------------------------------------------- | ------------------------- | ---------------------- | ---------- | ----------- |
+| [PXD005025](https://www.ebi.ac.uk/pride/archive/projects/PXD005025) | *Vigna Mungo*             | QExactive              | 932,848    | **102,255** |
+| [PXD004948](https://www.ebi.ac.uk/pride/archive/projects/PXD004948) | *Mus musculus*            | LTQ-Orbitrap Velos     | 306,786    | **25,522**  |
+| [PXD004325](https://www.ebi.ac.uk/pride/archive/projects/PXD004325) | *Methanosarcina mazei*    | QExative Plus          | 3,728,183  | **100,485** |
+| [PXD004565](https://www.ebi.ac.uk/pride/archive/projects/PXD004565) | *Bacillus subtilis*       | QExactive              | 4,336,428  | **113,234** |
+| [PXD004536](https://www.ebi.ac.uk/pride/archive/projects/PXD004536) | *Candidatus endoloripes*  | Q Exactive Plus Hybrid | 2,272,023  | **82,514**  |
+| [PXD004947](https://www.ebi.ac.uk/pride/archive/projects/PXD004947) | *Solanum lycopersicum*    | QExactive              | 603,506    | **100,056** |
+| [PXD003868](https://www.ebi.ac.uk/pride/archive/projects/PXD003868) | *Saccharomyces cervisiae* | Q-Exactive Plus        | 1,477,397  | **108,973** |
+| [PXD004467](https://www.ebi.ac.uk/pride/archive/projects/PXD004467) | *Apis mellifera*          | QExactive              | 823,169    | **102,285** |
+| [PXD004424]()                                                       | *Homo sapiens*            | QExactive              | 684,821    | **44,555**  |
+| Total                                                               |                           |                        | 15,165,161 | **779,879** |
 
-The benchmark dataset (nine-species-balanced.zip) can be downloaded here: [zenodo](https://zenodo.org/records/13685813). In this zip-file, each species is represented by a seperate mgf-file. We used this [script](https://github.com/Proteobench/ProteoBench/tree/denovo_module/proteobench/io/data) to combine the mgf-files and reannotate the spectrum identifiers to prevent duplicate identifiers.
+The benchmark dataset (nine-species-balanced.zip) can be downloaded here: [zenodo](https://zenodo.org/records/13685813). In this zip-file, each species is represented by a separate mgf-file. We used this [script](https://github.com/Proteobench/ProteoBench/tree/denovo_module/proteobench/io/data) to combine the mgf-files and reannotate the spectrum identifiers to prevent duplicate identifiers.
 
 
 ## Metric calculation
@@ -84,23 +85,24 @@ The in-depth section provides a more detailed picture of the (relative) performa
 
 #### PTMs
 
-Firstly, the ability of the tool to accuratly predict several **PTM's** can be evaluated. Since the ground-truth dataset was generated by searching against specific modifications, only these are supported. In Table 2, an overview of supported PTMs and their statistics are stated. Two types of plots are created for this: (i) an overview plot and (ii) PTM-specific plots. In the overview plot, the precision across all modifications are plotted together where precision is defined as the proportion of correctly predicted modifications over all peptides containing this modification in the ground-truth. A correct prediction does not require a fully correctly predicted peptide, only the specific amino acid with its PTM at the correct position. In the PTM-specific plots, this precision is plotted against the precision calculated as the proportion over all peptides containing this modification in the predicted peptide list. By doing so, biased precision estimates are handled in cases when the *de novo* tool would predict PTMs abundantly yet spuriously.
+Firstly, the ability of the tool to accurately predict several **PTM's** can be evaluated. Since the ground-truth dataset was generated by searching against specific modifications, only these are supported. In Table 2, an overview of supported PTMs and their statistics are stated. Two types of plots are created for this: (i) an overview plot and (ii) PTM-specific plots. In the overview plot, the precision across all modifications are plotted together where precision is defined as the proportion of correctly predicted modifications over all peptides containing this modification in the ground-truth. A correct prediction does not require a fully correctly predicted peptide, only the specific amino acid with its PTM at the correct position. In the PTM-specific plots, this precision is plotted against the precision calculated as the proportion over all peptides containing this modification in the predicted peptide list. By doing so, biased precision estimates are handled in cases when the *de novo* tool would predict PTMs abundantly yet spuriously.
 
 **Table 2. PTMs in the ground-truth dataset**
-|PTM|Occurences|
-|---------|-----|
-|Methionine Oxidation|62815|
-|Endopeptidase|Trypsin/P|
-|Fixed modifications|Carbamidomethylation (C)|
-|Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
-|Precursor mass tolerance|10 ppm|
-|Fragment mass tolerance|0.02 Da|
-|Minimum peptide length|7 residues|
 
+| PTM                      | Occurrences                            |
+| ------------------------ | -------------------------------------- |
+| Methionine Oxidation     | 62815                                  |
+| Endopeptidase            | Trypsin/P                              |
+| Fixed modifications      | Carbamidomethylation (C)               |
+| Variable modifications   | Oxidation (M), Acetyl (Protein N-term) |
+| Precursor mass tolerance | 10 ppm                                 |
+| Fragment mass tolerance  | 0.02 Da                                |
+| Minimum peptide length   | 7 residues                             |
 
 #### Spectrum characteristics
 
 Secondly, the ability of the tool to correctly predict spectra with specific characteristics can be evaluated. As shown in previous benchmark publications ([Denis et al](https://doi.org/10.1093/bib/bbac542), [Muth et al](https://doi.org/10.1093/bib/bbx033), [McDonnel et al](https://doi.org/10.1016/j.csbj.2022.03.008), [van Puyenbroeck et al](https://www.biorxiv.org/content/10.1101/2025.08.19.671052v1)), the accuracy of any *de novo* tool is dependent on several spectrum properties. To show this effect, we calculate precision on a selection of PSMs subsetted by each of the following characteristics:
+
 - Missing fragmentation sites: The number of missing complementary (b and y) ions
 - Peptide length: Not specifically a spectrum characteristic, but reported to impact the performance of *de novo* tools
 - % Explained intensity: Serves as an inverse of the noise. Defined as the proportion of the intensity of annotated peaks over all peaks (TIC)
@@ -109,7 +111,7 @@ The precision is calculated on the peptide level as the proportion of correct pe
 
 #### Species
 
-Protein sequences can differ considerably between species. Therefore, particularly for deep learning methods, models trained on data from one species might not be directly applicable to predict peptide sequences from other species. To roughly explore these differences, precision is calculated as above for each species seperately.
+Protein sequences can differ considerably between species. Therefore, particularly for deep learning methods, models trained on data from one species might not be directly applicable to predict peptide sequences from other species. To roughly explore these differences, precision is calculated as above for each species separately.
 
 Beware, this set up was meant to work as training-test split procedure, where the data of eight species was used to train a model and evaluated on the unseen spectra from the excluded species. Here, we do not use it as intented since training the models is not directly supported in ProteoBench. If the user wants to use this feature as intented, the predictions should be generated accordingly as described. The results should be concatenated into a single result file in the format compatible with ProteoBench (see below).
 
@@ -133,15 +135,17 @@ Table 2 provides an overview of the required input files for public submission. 
 
 
 **Table 3. Overview of input files required for metric calculation and public submission**
-|Tool|Input file|Parameter File|
-|---------|-----|--------------|
-|AdaNovo|results.mztab|config.yaml|
-|Casanovo|results.mztab|config.yaml|
-|InstaNovo|results.csv|config.yaml|
-|PepNet|results.tsv|/|
-|π-HelixNovo|results.tsv|config.yaml|
-|π-PrimeNovo|results.tsv|config.yaml|
 
+| Tool        | Input file    | Parameter File |
+| ----------- | ------------- | -------------- |
+| AdaNovo     | results.mztab | config.yaml    |
+| Casanovo    | results.mztab | config.yaml    |
+| InstaNovo   | results.csv   | config.yaml    |
+| PepNet      | results.tsv   | / *             |
+| π-HelixNovo | results.tsv   | config.yaml    |
+| π-PrimeNovo | results.tsv   | config.yaml    |
+
+\* PepNet does not have adaptable parameters, so no parameter file is required
 
 ## toml file description
 

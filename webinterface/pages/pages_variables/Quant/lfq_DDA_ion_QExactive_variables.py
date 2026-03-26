@@ -42,10 +42,13 @@ class VariablesDDAQuant:
     highlight_list_submitted: List[str] = field(default_factory=list)
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted"
     selectbox_id_uuid: str = "selectbox_id"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth"
     colorblind_mode_selector_uuid: str = "colorblind_mode_selector"
     colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth"
     slider_id_submitted_uuid: str = "slider_id_submitted"
     slider_id_uuid: str = "slider_id"
+    slider_id_indepth_uuid: str = "slider_id_indepth"
     download_selector_id_uuid: str = "download_selector_id"
     table_id_uuid: str = "table_id"
     table_new_results_uuid: str = "table_new_results_uuid"
@@ -53,8 +56,10 @@ class VariablesDDAQuant:
     result_submitted_plot_uuid: str = "result_submitted_figure_uuid"
     metric_selector_uuid: str = "metric_selector_uuid"
     metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid"
     metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid"
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid"
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [

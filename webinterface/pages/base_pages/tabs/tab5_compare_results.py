@@ -79,15 +79,19 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
         return []
 
     # Apply filter based on slider if available
-    slider_key = variables.slider_id_uuid
-    if slider_key in st.session_state:
-        slider_uuid = st.session_state[slider_key]
-        if slider_uuid in st.session_state:
-            min_prec = st.session_state[slider_uuid]
-            filtered_data = ionmodule.filter_data_point(all_datapoints_submitted, min_prec)
+    if hasattr(variables, 'slider_id_uuid'):
+        slider_key = variables.slider_id_uuid
+        if slider_key in st.session_state:
+            slider_uuid = st.session_state[slider_key]
+            if slider_uuid in st.session_state:
+                min_prec = st.session_state[slider_uuid]
+                filtered_data = ionmodule.filter_data_point(all_datapoints_submitted, min_prec)
+            else:
+                filtered_data = all_datapoints_submitted
         else:
             filtered_data = all_datapoints_submitted
     else:
+        # No slider for this module
         filtered_data = all_datapoints_submitted
 
     if filtered_data.empty:

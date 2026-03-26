@@ -33,6 +33,7 @@ from proteobench.io.params.piprimenovo import (
 from proteobench.io.params.pointnovo import extract_params as extract_params_pointnovo
 from proteobench.io.parsing.parse_denovo import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
 
 class DeNovoModule:
@@ -112,6 +113,19 @@ class DeNovoModule:
             Always returns True in this implementation.
         """
         return False
+
+    def get_plot_generator(self) -> PlotGeneratorBase:
+        """
+        Get the plot generator for this module.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance for creating module-specific plots.
+        """
+        from proteobench.plotting.plot_denovo import DeNovoPlotGenerator
+
+        return DeNovoPlotGenerator()
 
     def add_current_data_point(
         self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None

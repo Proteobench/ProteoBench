@@ -62,8 +62,14 @@ class VariablesDDADeNovo:
 
     radio_level_id_uuid: str = "radio_level_id_dda_hcd_denovo"
     radio_evaluation_id_uuid: str = "radio_evaluation_id_dda_hcd_denovo"
+    radio_level_id_indepth_uuid: str = "radio_level_id_indepth_dda_hcd_denovo"
+    radio_evaluation_id_indepth_uuid: str = "radio_evaluation_id_indepth_dda_hcd_denovo"
     radio_level_id_submitted_uuid: str = "radio_level_id_submitted_dda_hcd_denovo"
     radio_evaluation_id_submitted_uuid: str = "radio_evaluation_id_submitted_dda_hcd_denovo"
+
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dda_hcd_denovo"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dda_hcd_denovo"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_hcd_denovo"
 
     download_selector_id_uuid: str = "download_selector_id_dda_hcd_denovo"
     table_id_uuid: str = "table_id_dda_hcd_denovo"
@@ -83,6 +89,7 @@ class VariablesDDADeNovo:
 
     beta_warning: bool = False
     alpha_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_denovo_lfq_DDA_HCD.git"
 
     description_module_md: str = "pages/markdown_files/DeNovo/DDA/introduction_DDA_quan_ions.md"
@@ -96,10 +103,10 @@ class VariablesDDADeNovo:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/denovo/DDA/HCD"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/11-denovo-dda-hcd/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-denovo-dda-hcd/"
 
     additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_DDA_HCD.json"
-    title: str = "De Novo Identification (DDA - HCD) Module -ALPHA-"
+    title: str = "De Novo Identification (DDA - HCD) Module"
     prefix_params: str = "ion_dda_hcd_denovo_"
     params_json_dict: str = "params_json_dict_ion_dda_hcd_denovo"
     params_file_dict: str = "params_file_dict_ion_dda_hcd_denovo"
@@ -108,6 +115,4 @@ class VariablesDDADeNovo:
     sidebar_label: str = "De novo DDA peptidoform"
     sidebar_path: str = "/denovo_DDA_HCD"
     sidebar_category: str = "DDA"
-    keywords: List[str] = field(
-        default_factory=lambda: ["DDA", "de novo", "orbitrap", "precursor", "identification"]
-    )
+    keywords: List[str] = field(default_factory=lambda: ["DDA", "de novo", "orbitrap", "precursor", "identification"])

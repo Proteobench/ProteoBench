@@ -22,9 +22,9 @@ if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
     # Instantiate and run the extended UI class
     st_ui = BaseStreamlitUI(
-        variables=VariablesDIAQuantAstral(),
+        variables=VariablesDIAQuantProteingroupAstral(),
         texts=WebpageTexts,
-        ionmodule=DIAQuantIonModuleAstral,
+        ionmodule=DIAQuantProteingroupModuleAstral,
         parsesettingsbuilder=ParseSettingsBuilder,
         uiobjects=QuantUIObjects,
         page_name="Quant LFQ DIA ion Astral",

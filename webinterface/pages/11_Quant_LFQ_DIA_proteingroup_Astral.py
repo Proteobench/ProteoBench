@@ -29,4 +29,4 @@ if __name__ == "__main__":
         uiobjects=QuantUIObjects,
         page_name="Quant LFQ DIA ion Astral",
     )
-    st_ui.main_page(
+    st_ui.main_page()

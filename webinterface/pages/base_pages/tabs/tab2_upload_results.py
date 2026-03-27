@@ -284,7 +284,12 @@ def run_benchmarking_process(variables, ionmodule, user_input):
 
     # Only add slider/cutoff parameter if module uses it
     if set_slider_val is not None:
-        benchmark_kwargs["default_cutoff_min_prec"] = set_slider_val
+        import inspect
+        sig = inspect.signature(ionmodule.benchmarking)
+        if "default_cutoff_min_feature" in sig.parameters:
+            benchmark_kwargs["default_cutoff_min_feature"] = set_slider_val
+        else:
+            benchmark_kwargs["default_cutoff_min_prec"] = set_slider_val
 
     # Only add secondary file if provided
     if tmp_file_secondary_name:

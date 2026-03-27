@@ -207,10 +207,17 @@ class QuantModule:
         """
         if not isinstance(all_datapoints, pd.DataFrame):
             if self.use_github:
-                all_datapoints = self.github_repo.read_results_json_repo()
+                try:
+                    all_datapoints = self.github_repo.read_results_json_repo()
+                except FileNotFoundError:
+                    # Repo exists but has no datapoints yet (new module)
+                    return pd.DataFrame()
             else:
                 # Return empty DataFrame when GitHub is disabled
                 return pd.DataFrame()
+
+        if all_datapoints.empty:
+            return all_datapoints
 
         all_datapoints["old_new"] = "old"
 

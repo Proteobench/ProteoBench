@@ -1015,3 +1015,7 @@ a new type of module:
 10. Create a new results repository for the module in
     `Proteobench <https://github.com/Proteobench>`_ and 
     a fork in `Proteobot <https://github.com/proteobot>`_
+11. **Register your module in** :file:`resubmit_datapoints.py` by adding one line to
+    ``REPO_MODULE_REGISTRY`` with the format:
+    ``"Results_repo_name": ("module_id", ModuleClass, path_to_params_json)``
+    This enables automatic datapoint reprocessing for your module.

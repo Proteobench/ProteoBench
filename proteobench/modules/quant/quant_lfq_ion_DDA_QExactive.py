@@ -4,6 +4,8 @@ DDA Quantification Module for precursor level Quantification.
 
 from __future__ import annotations
 
+from typing import Dict, Optional, Tuple
+
 import pandas as pd
 from pandas import DataFrame
 
@@ -40,6 +42,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DDA Quantification Module for precursor level Quantification.
@@ -60,6 +63,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            branch=branch,
         )
         self.precursor_column_name = "precursor ion"
 

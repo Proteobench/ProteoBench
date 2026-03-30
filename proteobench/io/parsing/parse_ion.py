@@ -751,7 +751,10 @@ def _load_fragpipe_diann_quant(input_csv: str) -> pd.DataFrame:
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()
-    input_data_frame["Protein.Names"] = input_data_frame["Protein.Ids"].map(mapper)
+    # Map Protein.Ids (gene names) to species-suffixed descriptions (e.g. "sp|Q86U42|PABP2_HUMAN").
+    input_data_frame["Protein.Ids"] = input_data_frame["Protein.Ids"].map(
+        lambda x: ";".join([mapper.get(p, p) for p in x.split(";")]) if isinstance(x, str) else x
+    )
     return input_data_frame
 
 
@@ -849,7 +852,10 @@ def _load_peaks(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    return pd.read_csv(input_csv, low_memory=False, sep=",")
+    df = pd.read_csv(input_csv, low_memory=False, sep=",")
+    # Strip .raw or .mzML suffixes that PEAKS may add to sample names (e.g. "Sample.raw Normalized Area")
+    df.columns = [re.sub(r"\.(raw|mzML)(\s)", r"\2", c) for c in df.columns]
+    return df
 
 
 def _load_quantms(input_csv: str) -> pd.DataFrame:

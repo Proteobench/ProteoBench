@@ -54,6 +54,7 @@ class DIAQuantIonModuleAstral(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_Astral",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_Astral",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for Astral.
@@ -66,6 +67,8 @@ class DIAQuantIonModuleAstral(QuantModule):
             Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_Astral".
         proteobench_repo_name : str, optional
             Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_Astral".
+        branch : Optional[str], optional
+            Branch of the Proteobench repo to check out for result display.
         """
         super().__init__(
             token,
@@ -73,6 +76,7 @@ class DIAQuantIonModuleAstral(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            branch=branch,
         )
         self.precursor_column_name = "precursor ion"
 

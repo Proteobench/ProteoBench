@@ -13,7 +13,7 @@ We think that this module is more suited to evaluate the impact of (non exhausti
 
 Other modules will be more suited to explore further post-processing steps.
 
-**Release stage: BETA.**
+**Release stage: ALPHA.**
 
 ## Data set
 

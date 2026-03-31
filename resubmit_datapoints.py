@@ -60,6 +60,7 @@ from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
+from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
 from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
     DIAQuantIonModulediaSC,
 )
@@ -93,6 +94,7 @@ REPO_MODULE_REGISTRY: dict[str, tuple[str, type, Path]] = {
     "Results_quant_ion_DIA_singlecell":   ("quant_lfq_DIA_ion_singlecell", DIAQuantIonModulediaSC,      _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_ion_DIA_Astral":       ("quant_lfq_DIA_ion_Astral",     DIAQuantIonModuleAstral,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_lfq_DIA_ion_ZenoTOF":  ("quant_lfq_DIA_ion_ZenoTOF",   DIAQuantIonModuleZenoTOF,    _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
+    "Results_quant_ion_DIA_plasma":       ("quant_lfq_DIA_ion_Plasma",     DIAQuantIonModulePlasma,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"), 
     # Quant — DIA peptidoform
     "Results_quant_peptidoform_DIA":      ("quant_lfq_DIA_peptidoform",     DIAQuantPeptidoformModule,   _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_peptidoform.json"),
     # De novo

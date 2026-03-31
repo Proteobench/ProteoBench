@@ -84,6 +84,7 @@ class VariablesDDAQuantAstral:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    max_nr_observed: int = 6
     alpha_warning: bool = False
     beta_warning: bool = True
     archived_warning: bool = False

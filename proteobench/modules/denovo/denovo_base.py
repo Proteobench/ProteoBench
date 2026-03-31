@@ -123,7 +123,7 @@ class DeNovoModule:
         PlotGeneratorBase
             The plot generator instance for creating module-specific plots.
         """
-        from proteobench.plotting.plot_denovo import DeNovoPlotGenerator
+        from proteobench.plotting.plot_generator_denovo import DeNovoPlotGenerator
 
         return DeNovoPlotGenerator()
 

@@ -90,6 +90,14 @@
 "Custom" = "parse_settings_custom.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 
+[quant_lfq_DIA_ion_plasma]
+"DIA-NN" = "parse_settings_diann.toml"
+"Spectronaut" = "parse_settings_spectronaut.toml"
+"FragPipe (DIA-NN quant)" = "parse_settings_diann.toml"
+"AlphaDIA" = "parse_settings_alphadia.toml"
+"PEAKS" = "parse_settings_peaks.toml"
+"Custom" = "parse_settings_custom.toml"
+
 [denovo_DDA_HCD]
 "AdaNovo" = "parse_settings_adanovo.toml"
 "Casanovo" = "parse_settings_casanovo.toml"

@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
+from proteobench.datapoint.quant_datapoint import QuantDatapointPYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -23,10 +23,11 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quantscoresHYE import QuantScoresHYE
+from proteobench.plotting.plot_generator_lfq_PYE import LFQPYEPlotGenerator
+from proteobench.score.quantscoresPYE import QuantScoresPYE
 
 
-class DIAQuantIonModulediaSC(QuantModule):
+class DIAQuantIonModulePlasma(QuantModule):
     """
     DIA Quantification Module for precursor level Quantification for low input (single-cell) data.
 
@@ -35,9 +36,9 @@ class DIAQuantIonModulediaSC(QuantModule):
     token : str
         GitHub token for the user.
     proteobot_repo_name : str, optional
-        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_singlecell".
+        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_plasma".
     proteobench_repo_name : str, optional
-        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_singlecell".
+        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_plasma".
 
     Attributes
     ----------
@@ -47,14 +48,13 @@ class DIAQuantIonModulediaSC(QuantModule):
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_DIA_ion_singlecell"
+    module_id: str = "quant_lfq_DIA_ion_plasma"
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_singlecell",
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_singlecell",
-        branch: Optional[str] = None,
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_plasma",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_plasma",
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for low input data.
@@ -64,9 +64,9 @@ class DIAQuantIonModulediaSC(QuantModule):
         token : str
             GitHub token for the user.
         proteobot_repo_name : str, optional
-            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_singlecell".
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_plasma".
         proteobench_repo_name : str, optional
-            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_singlecell".
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_plasma".
         """
         super().__init__(
             token,
@@ -74,7 +74,6 @@ class DIAQuantIonModulediaSC(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
-            branch=branch,
         )
         self.precursor_name = "precursor ion"
 
@@ -116,6 +115,8 @@ class DIAQuantIonModulediaSC(QuantModule):
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
+        max_nr_observed : int, optional
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 12 for plasma).
 
         Returns
         -------
@@ -153,7 +154,7 @@ class DIAQuantIonModulediaSC(QuantModule):
 
         # Calculate quantification scores
         try:
-            quant_score = QuantScoresHYE(
+            quant_score = QuantScoresPYE(
                 self.precursor_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
@@ -167,7 +168,7 @@ class DIAQuantIonModulediaSC(QuantModule):
 
         # Generate current data point
         try:
-            current_datapoint = QuantDatapointHYE.generate_datapoint(
+            current_datapoint = QuantDatapointPYE.generate_datapoint(
                 intermediate_data_structure,
                 input_format,
                 user_input,
@@ -191,4 +192,12 @@ class DIAQuantIonModulediaSC(QuantModule):
         )
 
     def get_plot_generator(self):
-        return super().get_plot_generator()
+        """Return the plot generator for the module.
+
+        Returns
+        -------
+        PlotGenerator
+            The plot generator for the module.
+        """
+
+        return LFQPYEPlotGenerator()

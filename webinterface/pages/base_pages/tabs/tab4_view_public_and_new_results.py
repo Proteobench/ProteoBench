@@ -10,6 +10,9 @@ from typing import Any, Dict, Optional
 
 import pandas as pd
 import streamlit as st
+import streamlit_utils
+
+from ..utils.general import clean_dataframe_for_export
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -127,7 +130,7 @@ def render_submitted_results_table(
     data: pd.DataFrame, table_style: str = "dataframe", column_config: Optional[Dict] = None
 ) -> None:
     """
-    Render the submitted results table with configurable styling.
+    Render the submitted results table with configurable styling and download button.
 
     Parameters
     ----------
@@ -163,6 +166,19 @@ def render_submitted_results_table(
     else:
         st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
 
+    # Add download button for the results table
+    random_uuid = uuid.uuid4()
+    # Clean data for CSV export (replace newlines with spaces)
+    cleaned_data = clean_dataframe_for_export(data)
+    st.download_button(
+        label="Download table",
+        data=streamlit_utils.save_dataframe(cleaned_data),
+        file_name="submitted_benchmark_results.csv",
+        mime="text/csv",
+        key=f"tab4_download_{random_uuid}",
+        icon=":material/download:",
+    )
+
 
 def display_submitted_results(
     variables,
@@ -191,7 +207,7 @@ def display_submitted_results(
     """
     # Initialize submitted data
     initialize_submitted_data_points(variables, ionmodule)
-    
+
     # Filter data using slider if applicable
     filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
 

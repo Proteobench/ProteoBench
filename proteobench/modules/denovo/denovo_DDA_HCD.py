@@ -19,7 +19,7 @@ from proteobench.io.parsing.parse_denovo import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.denovo.denovo_base import DeNovoModule
-from proteobench.score.denovo.denovoscores import DenovoScores
+from proteobench.score.denovoscores import DenovoScores
 
 
 class DDAHCDDeNovoModule(DeNovoModule):

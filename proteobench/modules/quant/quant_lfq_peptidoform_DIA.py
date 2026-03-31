@@ -53,6 +53,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DIA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DIA",
         use_github: bool = True,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for Peptidoform level Quantification.
@@ -79,6 +80,7 @@ class DIAQuantPeptidoformModule(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
             use_github=use_github,
+            branch=branch,
         )
 
     def is_implemented(self) -> bool:

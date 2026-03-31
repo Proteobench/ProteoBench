@@ -4,7 +4,7 @@ DDA Quantification Module for Ion level Quantification.
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import pandas as pd
 from pandas import DataFrame
@@ -54,6 +54,7 @@ class DDAQuantIonAstralModule(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA_Astral",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA_Astral",
         use_github: bool = True,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DDA Quantification Module for Ion level Quantification for Astral.
@@ -77,6 +78,7 @@ class DDAQuantIonAstralModule(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
             use_github=use_github,
+            branch=branch,
         )
 
     def is_implemented(self) -> bool:

@@ -5,8 +5,8 @@ from __future__ import annotations
 import os
 import re
 from collections import defaultdict
-from typing import Any, Dict, List
 from pathlib import Path
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
@@ -747,6 +747,7 @@ MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,

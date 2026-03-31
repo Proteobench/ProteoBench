@@ -413,6 +413,8 @@ def _load_peaks(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    # Strip .raw or .mzML suffixes that PEAKS may add to sample names (e.g. "Sample.raw Normalized Area")
+    input_data_frame.columns = [re.sub(r"\.(raw|mzML)(\s)", r"\2", c) for c in input_data_frame.columns]
     return input_data_frame
 
 

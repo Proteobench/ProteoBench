@@ -55,6 +55,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DDA",
         use_github: bool = True,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DDA Quantification Module for Peptidoform level Quantification.
@@ -77,6 +78,7 @@ class DDAQuantPeptidoformModule(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
             use_github=use_github,
+            branch=branch,
         )
 
     def is_implemented(self) -> bool:

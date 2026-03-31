@@ -53,6 +53,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_singlecell",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_singlecell",
         use_github: bool = True,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for low input data.
@@ -75,6 +76,7 @@ class DIAQuantIonModulediaSC(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
             use_github=use_github,
+            branch=branch,
         )
 
     def is_implemented(self) -> bool:

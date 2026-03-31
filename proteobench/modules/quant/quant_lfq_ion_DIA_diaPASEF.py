@@ -55,6 +55,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_diaPASEF",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_diaPASEF",
         use_github: bool = True,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for diaPASEF.
@@ -77,6 +78,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
             use_github=use_github,
+            branch=branch,
         )
 
     def is_implemented(self) -> bool:

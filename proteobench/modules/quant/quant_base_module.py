@@ -100,6 +100,7 @@ class QuantModule:
         parse_settings_dir: str,
         module_id: str,
         use_github: bool = True,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the QuantModule with GitHub repo and settings.
@@ -118,8 +119,12 @@ class QuantModule:
             The module identifier for configuration.
         use_github : bool, optional
             Whether to clone the GitHub repository. Defaults to True. Used for dev.
+        branch : Optional[str]
+            If set, check out this branch of the Proteobench repo after cloning.
+            Useful for previewing a PR branch without merging.
         """
         self.t_dir = TemporaryDirectory().name
+        print(f"Cloning GitHub repo to temporary directory: {self.t_dir}")
         self.t_dir_pr = TemporaryDirectory().name
         self.use_github = use_github  # Store the use_github flag for later use
         self.github_repo = GithubProteobotRepo(
@@ -128,6 +133,7 @@ class QuantModule:
             proteobench_repo_name=proteobench_repo_name,
             clone_dir=self.t_dir,
             clone_dir_pr=self.t_dir_pr,
+            branch=branch,
         )
         if use_github:
             self.github_repo.clone_repo()
@@ -329,11 +335,11 @@ class QuantModule:
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-
+        
+        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(
+            input_df
+        )  # Get quantification data
         self.y_axis_title = parse_settings.y_axis_title
-
-        # Get quantification data
         quant_score = QuantScoresHYE(
             parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )

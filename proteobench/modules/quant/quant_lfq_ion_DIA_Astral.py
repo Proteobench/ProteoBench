@@ -55,6 +55,7 @@ class DIAQuantIonModuleAstral(QuantModule):
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_Astral",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_Astral",
         use_github: bool = True,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for Astral.
@@ -69,6 +70,8 @@ class DIAQuantIonModuleAstral(QuantModule):
             Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_Astral".
         use_github : bool, optional
             Whether to clone the GitHub repository. Defaults to True.
+        branch : Optional[str], optional
+            Branch of the Proteobench repo to check out for result display.
         """
         super().__init__(
             token,
@@ -77,6 +80,7 @@ class DIAQuantIonModuleAstral(QuantModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
             use_github=use_github,
+            branch=branch,
         )
 
     def is_implemented(self) -> bool:

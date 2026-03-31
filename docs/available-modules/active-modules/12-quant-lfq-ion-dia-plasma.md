@@ -68,9 +68,11 @@ Alternatively, you can download them from the ProteoBench server here: [proteobe
 
 ### FASTA database
 
-Download the zipped FASTA file here: [ProteoBenchFASTA_Distler_PYE.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_Distler_PYE.zip).
+Download the zipped FASTA file here: [ProteoBenchFASTA_MixedSpecies_HYE.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip).
 
-The FASTA file provided for this module contains the three species present in the samples (HUMAN, YEAST, ECOLI) **and contaminant proteins**. It is the same FASTA that was used in the original article describing the dataset ([Distler et al., Nat. Comms.](https://www.nature.com/articles/s41467-025-64501-z)).
+The fasta file provided for this module contains the three species
+present in the samples **and contaminant proteins**
+([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
 
 ## Metric calculation
 

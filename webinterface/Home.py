@@ -40,13 +40,13 @@ class StreamlitPageHome(StreamlitPage):
             and "matomo_idsite" in st.secrets["tracking"]
             and "matomo_token" in st.secrets["tracking"]
         ):
-            monthly_visitors = get_monthly_visitors(
+            monthly_uniq_visitors = get_monthly_visitors(
                 st.secrets["tracking"]["matomo_endpoint"],
                 st.secrets["tracking"]["matomo_token"],
                 st.secrets["tracking"]["matomo_idsite"],
             )
         else:
-            monthly_visitors = "not configured"
+            monthly_uniq_visitors = "not configured"
 
         st.header("ProteoBench Overview")
         st.markdown(
@@ -134,7 +134,10 @@ class StreamlitPageHome(StreamlitPage):
         # Third row
         row3 = st.columns(1)
         with row3[0]:
-            st.markdown(stat_box("Monthly visitors", monthly_visitors, fig_path / "user.png"), unsafe_allow_html=True)
+            st.markdown(
+                stat_box("Monthly unique visitors", monthly_uniq_visitors, fig_path / "user.png"),
+                unsafe_allow_html=True,
+            )
 
 
 if __name__ == "__main__":

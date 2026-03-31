@@ -3,7 +3,7 @@ import json
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import requests
 
@@ -171,7 +171,7 @@ def get_n_modules_proposed(rst_text: str) -> int:
     return status_counts.get("in discussion", 0) + status_counts.get("in development", 0)
 
 
-def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
+def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optional[int]:
     """
     Gets the monthly visitors count from the Matomo API.
 
@@ -186,8 +186,9 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
 
     Returns
     -------
-    int
-        The number of monthly visitors (nb_visits of last 30 days)
+    Optional[int]
+        The number of monthly visitors (nb_uniq_visitors of last 30 days), or
+        ``None`` if retrieval/parsing failed.
     """
 
     # data to be sent to api
@@ -208,11 +209,13 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
 
         return int(response_data.get("nb_uniq_visitors", 0))
 
-    except requests.RequestException as e:
-        return f"Retrieval failed"
+    except requests.RequestException:
+        print("Failed to retrieve monthly visitors from Matomo API")
+        return None
 
-    except (ValueError, KeyError) as e:
-        return f"Error parsing response"
+    except (ValueError, KeyError):
+        print("Error parsing Matomo API response")
+        return None
 
 
 if __name__ == "__main__":

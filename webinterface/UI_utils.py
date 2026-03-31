@@ -193,24 +193,26 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
     # data to be sent to api
     data = {
         "module": "API",
-        "method": "Actions.getPageTitles",
+        "method": "VisitsSummary.get",
         "idSite": id_site,
-        "period": "day",
+        "period": "range",
         "date": "last30",
         "format": "json",
         "token_auth": token,
     }
 
-    r = requests.post(url=api_endpoint, data=data)
+    try:
+        r = requests.post(url=api_endpoint, data=data)
+        r.raise_for_status()
+        response_data = r.json()
 
-    json_visits = json.loads(r.text)
-    visits_count = 0
-    for _, visits in json_visits.items():
-        if len(visits) > 0:
-            for page in visits:
-                visits_count += page["nb_visits"]
+        return int(response_data.get("nb_uniq_visitors", 0))
 
-    return visits_count
+    except requests.RequestException as e:
+        return f"Retrieval failed"
+
+    except (ValueError, KeyError) as e:
+        return f"Error parsing response"
 
 
 if __name__ == "__main__":

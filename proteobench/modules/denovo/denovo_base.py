@@ -289,6 +289,7 @@ class DeNovoModule:
         datapoint_params: Any,
         remote_git: str,
         submission_comments: str = "no comments",
+        submission_source: str = "unknown",
     ) -> str:
         """
         Clone the repo and open a pull request with the new data points.
@@ -303,6 +304,9 @@ class DeNovoModule:
             Remote Git repository URL.
         submission_comments : str, optional
             Comments to be included in the pull request. Defaults to "no comments".
+        submission_source : str, optional
+            Origin of the submission: 'web-server', 'local', or 'resubmission-script'.
+            Defaults to 'unknown'.
 
         Returns
         -------
@@ -349,7 +353,9 @@ class DeNovoModule:
         try:
             self.github_repo.create_branch(branch_name)
             self.github_repo.commit(commit_name, commit_message)
-            pr_id = self.github_repo.create_pull_request(commit_name, commit_message)
+            pr_id = self.github_repo.create_pull_request(
+                commit_name, commit_message, submission_source=submission_source
+            )
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."

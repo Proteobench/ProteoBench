@@ -13,6 +13,7 @@ from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
 )
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
+from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
@@ -161,6 +162,15 @@ class QuantUIObjects(BaseUIModule):
         """
         Display the public submission section of the page in Tab 5.
         """
+        submission_source = get_submission_source()
+        if not is_official_server():
+            st.warning(
+                "You are running ProteoBench locally. Submissions from local installs "
+                "will be labeled as 'local' and will NOT be merged into the public dataset. "
+                "To submit data for public inclusion, please use the official web server at "
+                "https://proteobench.cubimed.rub.de/"
+            )
+
         try:
             resolved_hash = st.session_state[self.variables.all_datapoints][
                 st.session_state[self.variables.all_datapoints][st.session_state["old_new"] == "new"]
@@ -222,6 +232,7 @@ class QuantUIObjects(BaseUIModule):
                     user_input=self.user_input,
                     params_from_file=self.params_file_dict_copy,
                     params=params,
+                    submission_source=submission_source,
                 )
             except DatasetAlreadyExistsOnServerError as e:
                 st.error(str(e), icon="🚫")

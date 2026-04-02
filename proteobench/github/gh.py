@@ -387,12 +387,15 @@ class GithubProteobotRepo:
             head=head,
         )
 
-        if submission_source == "local":
-            pr.set_labels("local-submission", "do-not-merge")
-        elif submission_source == "web-server":
-            pr.set_labels("server-submission")
-        elif submission_source == "resubmission-script":
-            pr.set_labels("batch-resubmission")
+        try:
+            if submission_source == "local":
+                pr.set_labels("local-submission", "do-not-merge")
+            elif submission_source == "web-server":
+                pr.set_labels("server-submission")
+            elif submission_source == "resubmission-script":
+                pr.set_labels("batch-resubmission")
+        except Exception as e:
+            logger.warning(f"Failed to set labels on PR #{pr.number}: {e}")
 
         logger.info(f"Created PR #{pr.number} with submission_source='{submission_source}'")
 

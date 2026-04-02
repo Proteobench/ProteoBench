@@ -353,7 +353,9 @@ class DeNovoModule:
         try:
             self.github_repo.create_branch(branch_name)
             self.github_repo.commit(commit_name, commit_message)
-            pr_id = self.github_repo.create_pull_request(commit_name, commit_message, submission_source=submission_source)
+            pr_id = self.github_repo.create_pull_request(
+                commit_name, commit_message, submission_source=submission_source
+            )
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."

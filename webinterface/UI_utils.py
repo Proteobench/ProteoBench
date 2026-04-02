@@ -1,9 +1,8 @@
 import base64
-import json
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import requests
 
@@ -171,7 +170,7 @@ def get_n_modules_proposed(rst_text: str) -> int:
     return status_counts.get("in discussion", 0) + status_counts.get("in development", 0)
 
 
-def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
+def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optional[int]:
     """
     Gets the monthly visitors count from the Matomo API.
 
@@ -186,31 +185,36 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
 
     Returns
     -------
-    int
-        The number of monthly visitors (nb_visits of last 30 days)
+    Optional[int]
+        The number of monthly visitors (nb_uniq_visitors of last 30 days), or
+        ``None`` if retrieval/parsing failed.
     """
 
     # data to be sent to api
     data = {
         "module": "API",
-        "method": "Actions.getPageTitles",
+        "method": "VisitsSummary.get",
         "idSite": id_site,
-        "period": "day",
+        "period": "range",
         "date": "last30",
         "format": "json",
         "token_auth": token,
     }
 
-    r = requests.post(url=api_endpoint, data=data)
+    try:
+        r = requests.post(url=api_endpoint, data=data)
+        r.raise_for_status()
+        response_data = r.json()
 
-    json_visits = json.loads(r.text)
-    visits_count = 0
-    for _, visits in json_visits.items():
-        if len(visits) > 0:
-            for page in visits:
-                visits_count += page["nb_visits"]
+        return int(response_data.get("nb_uniq_visitors", 0))
 
-    return visits_count
+    except requests.RequestException:
+        print("Failed to retrieve monthly visitors from Matomo API")
+        return None
+
+    except (ValueError, KeyError):
+        print("Error parsing Matomo API response")
+        return None
 
 
 if __name__ == "__main__":

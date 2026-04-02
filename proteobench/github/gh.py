@@ -3,12 +3,34 @@ This module provides the `GithubProteobotRepo` class to interact with GitHub rep
 It allows cloning repositories, reading JSON result files, creating branches, committing changes, and creating pull requests.
 """
 
+import logging
 import os
 from typing import Optional
 
 import pandas as pd
 from git import Repo, exc
 from github import Github
+
+logger = logging.getLogger(__name__)
+
+
+def is_official_server() -> bool:
+    """Check if running on the official ProteoBench server.
+
+    Uses the presence of storage configuration in Streamlit secrets
+    as the signal - only the production server has this configured.
+    """
+    try:
+        import streamlit as st
+
+        return "storage" in st.secrets.keys()
+    except (ImportError, FileNotFoundError):
+        return False
+
+
+def get_submission_source() -> str:
+    """Return the submission source: 'web-server' or 'local'."""
+    return "web-server" if is_official_server() else "local"
 
 
 class GithubProteobotRepo:
@@ -331,7 +353,7 @@ class GithubProteobotRepo:
         self.repo.index.commit("\n".join([commit_name, commit_message]))
         self.repo.git.push("--set-upstream", "origin", self.repo.active_branch)
 
-    def create_pull_request(self, commit_name: str, commit_message: str) -> int:
+    def create_pull_request(self, commit_name: str, commit_message: str, submission_source: str = "unknown") -> int:
         """
         Create a pull request on GitHub using the PyGithub API.
 
@@ -341,6 +363,9 @@ class GithubProteobotRepo:
             The title of the pull request.
         commit_message : str
             The body of the pull request.
+        submission_source : str, optional
+            Origin of the submission: 'web-server', 'local', or 'resubmission-script'.
+            Defaults to 'unknown'.
 
         Returns
         -------
@@ -352,6 +377,9 @@ class GithubProteobotRepo:
         base = repo.get_branch("master")
         head = f"{self.username}:{self.repo.active_branch.name}"
 
+        if submission_source == "local":
+            commit_name = f"[LOCAL - DO NOT MERGE] {commit_name}"
+
         pr = repo.create_pull(
             title=commit_name,
             body=commit_message,
@@ -359,5 +387,16 @@ class GithubProteobotRepo:
             head=head,
         )
 
-        pr_number = pr.number
-        return pr_number
+        try:
+            if submission_source == "local":
+                pr.set_labels("local-submission", "do-not-merge")
+            elif submission_source == "web-server":
+                pr.set_labels("server-submission")
+            elif submission_source == "resubmission-script":
+                pr.set_labels("batch-resubmission")
+        except Exception as e:
+            logger.warning(f"Failed to set labels on PR #{pr.number}: {e}")
+
+        logger.info(f"Created PR #{pr.number} with submission_source='{submission_source}'")
+
+        return pr.number

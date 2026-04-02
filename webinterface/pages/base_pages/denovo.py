@@ -21,6 +21,7 @@ from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
+from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
@@ -393,6 +394,15 @@ class DeNovoUIObjects(BaseUIModule):
 
     def display_public_submission_ui(self) -> None:
         """Display the public submission section of the page in Tab 5."""
+        submission_source = get_submission_source()
+        if not is_official_server():
+            st.warning(
+                "You are running ProteoBench locally. Submissions from local installs "
+                "will be labeled as 'local' and will NOT be merged into the public dataset. "
+                "To submit data for public inclusion, please use the official web server at "
+                "https://proteobench.cubimed.rub.de/"
+            )
+
         try:
             resolved_hash = st.session_state[self.variables.all_datapoints][
                 st.session_state[self.variables.all_datapoints][st.session_state["old_new"] == "new"]
@@ -454,6 +464,7 @@ class DeNovoUIObjects(BaseUIModule):
                     user_input=self.user_input,
                     params_from_file=self.params_file_dict_copy,
                     params=params,
+                    submission_source=submission_source,
                 )
             except DatasetAlreadyExistsOnServerError as e:
                 st.error(str(e), icon="🚫")

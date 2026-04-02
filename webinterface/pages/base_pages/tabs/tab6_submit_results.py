@@ -158,6 +158,7 @@ def submit_to_repository(
     user_input,
     params_from_file,
     params,
+    submission_source: str = "unknown",
 ) -> Optional[str]:
     """
     Handle the submission process of the benchmark results to the ProteoBench repository.
@@ -199,6 +200,7 @@ def submit_to_repository(
         user_input=user_input,
         params_from_file=params_from_file,
         params=params,
+        submission_source=submission_source,
     )
 
     if pr_url:
@@ -343,6 +345,7 @@ def create_pull_request(
     user_input,
     params_from_file: dict[str, Any],
     params: dataclass,
+    submission_source: str = "unknown",
 ) -> Optional[str]:
     """
     Submit the pull request with the benchmark results and returns the PR URL.
@@ -367,6 +370,7 @@ def create_pull_request(
             params,
             remote_git=variables.github_link_pr,
             submission_comments=user_comments + "\n" + changed_params_str,
+            submission_source=submission_source,
         )
     except Exception as e:
         st.error(f"Unable to create the pull request: {e}", icon="🚨")

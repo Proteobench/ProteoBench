@@ -7,10 +7,181 @@ across all ProteoBench module types (Quant, De Novo, etc.).
 
 import os
 import uuid
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 import streamlit as st
+
+
+# ---------------------------------------------------------------------------
+# Parameter-based filtering
+# ---------------------------------------------------------------------------
+
+_NOT_SPECIFIED = "Not specified"
+
+_PARAMETER_FILTERS = [
+    {"col": "software_name", "label": "Software tool", "type": "multiselect"},
+    {"col": "enable_match_between_runs", "label": "Match between runs", "type": "radio_bool"},
+    {"col": "search_engine", "label": "Search engine", "type": "multiselect"},
+    {"col": "enzyme", "label": "Enzyme", "type": "multiselect"},
+    {"col": "allowed_miscleavages", "label": "Allowed miscleavages", "type": "multiselect"},
+    {"col": "ident_fdr_psm", "label": "PSM FDR", "type": "multiselect"},
+    {"col": "quantification_method", "label": "Quantification method", "type": "multiselect"},
+    {"col": "precursor_mass_tolerance", "label": "Precursor mass tol.", "type": "multiselect"},
+    {"col": "fragment_mass_tolerance", "label": "Fragment mass tol.", "type": "multiselect"},
+]
+
+
+def _get_unique_values(series: pd.Series) -> List[str]:
+    """Return sorted unique string values from *series*, mapping NaN to _NOT_SPECIFIED."""
+    values = series.fillna(_NOT_SPECIFIED).astype(str).unique()
+    return sorted(values, key=lambda v: (v == _NOT_SPECIFIED, v))
+
+
+def apply_parameter_filters(
+    data: pd.DataFrame,
+    filter_selections: Dict[str, Any],
+) -> pd.DataFrame:
+    """
+    Apply parameter-based filters to a DataFrame of benchmark datapoints.
+
+    This is the pure filtering logic, separated from UI rendering so it can
+    be tested independently.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The benchmark datapoints to filter.
+    filter_selections : dict
+        Mapping of column name to the selected filter value(s).
+        For ``multiselect`` filters the value is a list of allowed strings.
+        For ``radio_bool`` filters the value is one of ``"All"``,
+        ``"Enabled"``, or ``"Disabled"``.
+
+    Returns
+    -------
+    pd.DataFrame
+        The subset of *data* matching all active filters.
+    """
+    if data.empty:
+        return data
+
+    mask = pd.Series(True, index=data.index)
+
+    for spec in _PARAMETER_FILTERS:
+        col = spec["col"]
+        if col not in filter_selections or col not in data.columns:
+            continue
+
+        selection = filter_selections[col]
+
+        if spec["type"] == "radio_bool":
+            if selection == "Enabled":
+                mask &= data[col].astype(bool)
+            elif selection == "Disabled":
+                mask &= ~data[col].astype(bool)
+            # "All" → no filtering
+
+        elif spec["type"] == "multiselect":
+            if isinstance(selection, list):
+                str_col = data[col].fillna(_NOT_SPECIFIED).astype(str)
+                mask &= str_col.isin(selection)
+
+    return data.loc[mask]
+
+
+def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filter") -> pd.DataFrame:
+    """
+    Render parameter-based filter widgets and return the filtered DataFrame.
+
+    Displays an ``st.expander`` with multiselect / radio widgets for each
+    workflow parameter that has more than one unique non-null value in *data*.
+    Filtering is applied **after** the existing k-slider filter.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Benchmark datapoints (already filtered by the k-slider).
+    key_prefix : str, optional
+        Prefix for Streamlit session-state keys to avoid collisions when the
+        function is rendered on multiple tabs. Defaults to ``"param_filter"``.
+
+    Returns
+    -------
+    pd.DataFrame
+        The subset of *data* matching all active parameter filters.
+
+    Notes
+    -----
+    Session-state keys use the pattern ``{key_prefix}_{column_name}`` and do
+    not require UUID indirection because the column names are unique and stable.
+    """
+    if data.empty:
+        return data
+
+    total_count = len(data)
+
+    # Determine which filters are applicable for this dataset
+    applicable: List[dict] = []
+    for spec in _PARAMETER_FILTERS:
+        col = spec["col"]
+        if col not in data.columns:
+            continue
+        n_unique = data[col].dropna().nunique()
+        if n_unique < 2:
+            continue
+        applicable.append(spec)
+
+    if not applicable:
+        return data
+
+    filter_selections: Dict[str, Any] = {}
+
+    with st.expander("Filter by workflow parameters", expanded=False):
+        # Reset button
+        if st.button("Reset all filters", key=f"{key_prefix}_reset"):
+            for spec in applicable:
+                sk = f"{key_prefix}_{spec['col']}"
+                if sk in st.session_state:
+                    del st.session_state[sk]
+            st.rerun()
+
+        # Lay out filters in a 3-column grid
+        cols = st.columns(3)
+        for idx, spec in enumerate(applicable):
+            col_name = spec["col"]
+            label = spec["label"]
+            sk = f"{key_prefix}_{col_name}"
+
+            with cols[idx % 3]:
+                if spec["type"] == "radio_bool":
+                    default = st.session_state.get(sk, "All")
+                    choice = st.radio(
+                        label,
+                        ["All", "Enabled", "Disabled"],
+                        index=["All", "Enabled", "Disabled"].index(default),
+                        key=sk,
+                        horizontal=True,
+                    )
+                    filter_selections[col_name] = choice
+
+                elif spec["type"] == "multiselect":
+                    all_options = _get_unique_values(data[col_name])
+                    default = st.session_state.get(sk, all_options)
+                    selected = st.multiselect(
+                        label,
+                        options=all_options,
+                        default=default,
+                        key=sk,
+                    )
+                    filter_selections[col_name] = selected
+
+        filtered = apply_parameter_filters(data, filter_selections)
+        filtered_count = len(filtered)
+        st.caption(f"Showing {filtered_count} of {total_count} datapoints")
+
+    return filtered
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -402,6 +573,11 @@ def display_existing_results(
     # Initialize and filter data
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
+
+    # Apply parameter-based filters (key_prefix must be unique per module page)
+    filtered_data = generate_parameter_filters(
+        filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}"
+    )
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()

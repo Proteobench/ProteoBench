@@ -211,6 +211,13 @@ def display_submitted_results(
     # Filter data using slider if applicable
     filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
 
+    # Apply parameter-based filters
+    from .tab1_view_public_results import generate_parameter_filters
+
+    filtered_data = generate_parameter_filters(
+        filtered_data, key_prefix=f"param_filter_{variables.all_datapoints_submitted}"
+    )
+
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()
 

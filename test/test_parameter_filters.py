@@ -36,6 +36,8 @@ def sample_datapoints():
             "quantification_method": ["LFQ", "LFQ", "LFQ", "LFQ"],
             "precursor_mass_tolerance": ["20 ppm", "10 ppm", "20 ppm", "10 ppm"],
             "fragment_mass_tolerance": ["20 ppm", "20 ppm", "20 ppm", np.nan],
+            "min_peptide_length": [7, 7, 8, 9],
+            "max_peptide_length": [30, 40, 50, 50],
         }
     )
 
@@ -145,3 +147,26 @@ class TestApplyParameterFilters:
             {"software_name": ["NonExistent"]},
         )
         assert len(result) == 0
+
+    def test_select_slider_full_range(self, sample_datapoints):
+        result = apply_parameter_filters(
+            sample_datapoints,
+            {"min_peptide_length": (7, 9)},
+        )
+        assert len(result) == 4
+
+    def test_select_slider_partial_range(self, sample_datapoints):
+        result = apply_parameter_filters(
+            sample_datapoints,
+            {"min_peptide_length": (8, 9)},
+        )
+        assert len(result) == 2
+        assert set(result["id"]) == {"dp3", "dp4"}
+
+    def test_select_slider_single_value_range(self, sample_datapoints):
+        result = apply_parameter_filters(
+            sample_datapoints,
+            {"max_peptide_length": (50, 50)},
+        )
+        assert len(result) == 2
+        assert set(result["id"]) == {"dp3", "dp4"}

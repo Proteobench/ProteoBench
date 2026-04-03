@@ -1,14 +1,14 @@
 ,0
 software_name,FragPipe
-software_version,22.0
+software_version,23.0
 search_engine,MSFragger
-search_engine_version,
+search_engine_version,4.2
 ident_fdr_psm,0.01
 ident_fdr_peptide,0.01
 ident_fdr_protein,0.01
-enable_match_between_runs,True
+enable_match_between_runs,False
 precursor_mass_tolerance,"[-20 ppm, 20 ppm]"
-fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
+fragment_mass_tolerance,"[-20 ppm, 20 ppm]"
 enzyme,Trypsin/P
 semi_enzymatic,False
 allowed_miscleavages,2

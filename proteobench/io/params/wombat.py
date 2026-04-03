@@ -74,4 +74,5 @@ if __name__ == "__main__":
         params = extract_params(file)
         data_dict = params.__dict__
         series = pd.Series(data_dict)
+        print(series)
         series.to_csv(file.with_suffix(".csv"))

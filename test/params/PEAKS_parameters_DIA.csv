@@ -3,8 +3,8 @@ software_name,PEAKS
 software_version,13 20250520
 search_engine,PEAKS
 search_engine_version,13 20250520
-ident_fdr_psm,1.0%
-ident_fdr_peptide,1.0%
+ident_fdr_psm,
+ident_fdr_peptide,
 ident_fdr_protein,
 enable_match_between_runs,True
 precursor_mass_tolerance,Auto Detected

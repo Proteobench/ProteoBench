@@ -8,8 +8,7 @@ Normalized parameters (coerced by ``normalize()``):
 - ``allowed_miscleavages``, ``min/max_peptide_length``,
   ``min/max_precursor_charge``, ``max_mods`` — int (shared quant/denovo)
 - ``min/max_precursor_mz``, ``min/max_fragment_mz`` — int (quant, m/z ranges)
-- ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz``,
-  ``min_intensity``, ``max_intensity`` — int (de novo specific)
+- ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz`` — int (de novo specific)
 - ``enable_match_between_runs`` — bool
 - ``enzyme`` — canonical capitalized name (e.g. "Trypsin", "Trypsin/P", "Lys-C")
 
@@ -22,6 +21,7 @@ NOT normalized (kept as-is from parsers):
   ``abundance_normalization_ions`` — string
 - ``software_name``, ``software_version``, ``search_engine``,
   ``search_engine_version`` — string
+- ``min_intensity``, ``max_intensity`` — float/int, kept as-is (can be fractional)
 - ``tokens`` — string, semicolon-separated amino acids/modifications
 - ``isotope_error_range`` — string representation of list (e.g. "[0, 2]")
 - ``decoding_strategy``, ``checkpoint`` — string, tool-specific
@@ -49,6 +49,8 @@ _ENZYME_MAP = {
     "trypsin": "Trypsin",
     "trypsin/p": "Trypsin/P",
     "stricttrypsin": "Trypsin",
+    "[rk]|{p}": "Trypsin",
+    "[rk]": "Trypsin/P",
     "lys-c": "Lys-C",
     "lysc": "Lys-C",
     "arg-c": "Arg-C",
@@ -82,8 +84,6 @@ _INT_FIELDS = (
     "n_peaks",
     "min_mz",
     "max_mz",
-    "min_intensity",
-    "max_intensity",
 )
 
 
@@ -128,7 +128,6 @@ class ProteoBenchParameters:
                 setattr(self, key, None)
 
         for key, value in kwargs.items():
-            print(key, value)
             if hasattr(self, key) and value == "None":
                 setattr(self, key, np.nan)
             elif hasattr(self, key):

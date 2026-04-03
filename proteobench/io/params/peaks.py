@@ -237,6 +237,7 @@ def extract_params(
     params.protein_inference = None
     params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Normalization Method:")
+    params.fill_none()
     return params
 
 

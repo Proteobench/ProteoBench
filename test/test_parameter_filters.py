@@ -148,25 +148,46 @@ class TestApplyParameterFilters:
         )
         assert len(result) == 0
 
-    def test_select_slider_full_range(self, sample_datapoints):
+    def test_combined_range_full(self, sample_datapoints):
+        """Full range includes all datapoints."""
         result = apply_parameter_filters(
             sample_datapoints,
-            {"min_peptide_length": (7, 9)},
+            {"min_peptide_length__max_peptide_length": (7, 50)},
         )
         assert len(result) == 4
 
-    def test_select_slider_partial_range(self, sample_datapoints):
+    def test_combined_range_narrow(self, sample_datapoints):
+        """Narrowing the range excludes datapoints outside it."""
+        # dp1: min=7, max=30 -> included (7>=7, 30<=40)
+        # dp2: min=7, max=40 -> included (7>=7, 40<=40)
+        # dp3: min=8, max=50 -> excluded (50 > 40)
+        # dp4: min=9, max=50 -> excluded (50 > 40)
         result = apply_parameter_filters(
             sample_datapoints,
-            {"min_peptide_length": (8, 9)},
+            {"min_peptide_length__max_peptide_length": (7, 40)},
+        )
+        assert len(result) == 2
+        assert set(result["id"]) == {"dp1", "dp2"}
+
+    def test_combined_range_raise_lower_bound(self, sample_datapoints):
+        """Raising the lower bound excludes datapoints with small min values."""
+        # dp1: min=7 -> excluded (7 < 8)
+        # dp2: min=7 -> excluded (7 < 8)
+        # dp3: min=8, max=50 -> included
+        # dp4: min=9, max=50 -> included
+        result = apply_parameter_filters(
+            sample_datapoints,
+            {"min_peptide_length__max_peptide_length": (8, 50)},
         )
         assert len(result) == 2
         assert set(result["id"]) == {"dp3", "dp4"}
 
-    def test_select_slider_single_value_range(self, sample_datapoints):
+    def test_select_slider_range(self, sample_datapoints):
+        """select_slider with range tuple works."""
+        sample_datapoints["max_mods"] = [2, 3, 4, 5]
         result = apply_parameter_filters(
             sample_datapoints,
-            {"max_peptide_length": (50, 50)},
+            {"max_mods": (2, 3)},
         )
         assert len(result) == 2
-        assert set(result["id"]) == {"dp3", "dp4"}
+        assert set(result["id"]) == {"dp1", "dp2"}

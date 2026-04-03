@@ -29,11 +29,9 @@ _PARAMETER_FILTERS = [
     {"col": "quantification_method", "label": "Quantification method", "type": "multiselect"},
     {"col": "precursor_mass_tolerance", "label": "Precursor mass tol.", "type": "multiselect"},
     {"col": "fragment_mass_tolerance", "label": "Fragment mass tol.", "type": "multiselect"},
-    {"col": "min_peptide_length", "label": "Min peptide length", "type": "select_slider"},
-    {"col": "max_peptide_length", "label": "Max peptide length", "type": "select_slider"},
+    {"col_min": "min_peptide_length", "col_max": "max_peptide_length", "label": "Peptide length", "type": "combined_range"},
     {"col": "max_mods", "label": "Max mods per peptide", "type": "select_slider"},
-    {"col": "min_precursor_charge", "label": "Min precursor charge", "type": "select_slider"},
-    {"col": "max_precursor_charge", "label": "Max precursor charge", "type": "select_slider"},
+    {"col_min": "min_precursor_charge", "col_max": "max_precursor_charge", "label": "Precursor charge", "type": "combined_range"},
 ]
 
 
@@ -74,8 +72,23 @@ def apply_parameter_filters(
     mask = pd.Series(True, index=data.index)
 
     for spec in _PARAMETER_FILTERS:
-        col = spec["col"]
-        if col not in filter_selections or col not in data.columns:
+        if spec["type"] == "combined_range":
+            col_min = spec["col_min"]
+            col_max = spec["col_max"]
+            filter_key = f"{col_min}__{col_max}"
+            if filter_key not in filter_selections:
+                continue
+            selection = filter_selections[filter_key]
+            if isinstance(selection, (list, tuple)) and len(selection) == 2:
+                lo, hi = selection
+                if col_min in data.columns:
+                    mask &= data[col_min].fillna(lo) >= lo
+                if col_max in data.columns:
+                    mask &= data[col_max].fillna(hi) <= hi
+            continue
+
+        col = spec.get("col")
+        if col is None or col not in filter_selections or col not in data.columns:
             continue
 
         selection = filter_selections[col]
@@ -134,13 +147,27 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
     # Determine which filters are applicable for this dataset
     applicable: List[dict] = []
     for spec in _PARAMETER_FILTERS:
-        col = spec["col"]
-        if col not in data.columns:
-            continue
-        n_unique = data[col].dropna().nunique()
-        if n_unique < 2:
-            continue
-        applicable.append(spec)
+        if spec["type"] == "combined_range":
+            col_min, col_max = spec["col_min"], spec["col_max"]
+            has_min = col_min in data.columns and data[col_min].dropna().nunique() >= 1
+            has_max = col_max in data.columns and data[col_max].dropna().nunique() >= 1
+            if has_min or has_max:
+                # Need at least 2 distinct values across both columns combined
+                all_vals = set()
+                if has_min:
+                    all_vals.update(data[col_min].dropna().unique())
+                if has_max:
+                    all_vals.update(data[col_max].dropna().unique())
+                if len(all_vals) >= 2:
+                    applicable.append(spec)
+        else:
+            col = spec["col"]
+            if col not in data.columns:
+                continue
+            n_unique = data[col].dropna().nunique()
+            if n_unique < 2:
+                continue
+            applicable.append(spec)
 
     if not applicable:
         return data
@@ -151,7 +178,10 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
         # Reset button
         if st.button("Reset all filters", key=f"{key_prefix}_reset"):
             for spec in applicable:
-                sk = f"{key_prefix}_{spec['col']}"
+                if spec["type"] == "combined_range":
+                    sk = f"{key_prefix}_{spec['col_min']}__{spec['col_max']}"
+                else:
+                    sk = f"{key_prefix}_{spec['col']}"
                 if sk in st.session_state:
                     del st.session_state[sk]
             st.rerun()
@@ -159,12 +189,33 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
         # Lay out filters in a 3-column grid
         cols = st.columns(3)
         for idx, spec in enumerate(applicable):
-            col_name = spec["col"]
             label = spec["label"]
-            sk = f"{key_prefix}_{col_name}"
 
             with cols[idx % 3]:
-                if spec["type"] == "radio_bool":
+                if spec["type"] == "combined_range":
+                    col_min, col_max = spec["col_min"], spec["col_max"]
+                    filter_key = f"{col_min}__{col_max}"
+                    sk = f"{key_prefix}_{filter_key}"
+                    # Build option range from both columns
+                    all_vals = set()
+                    if col_min in data.columns:
+                        all_vals.update(data[col_min].dropna().unique())
+                    if col_max in data.columns:
+                        all_vals.update(data[col_max].dropna().unique())
+                    all_options = sorted(all_vals)
+                    full_range = (all_options[0], all_options[-1])
+                    default = st.session_state.get(sk, full_range)
+                    selected = st.select_slider(
+                        label,
+                        options=all_options,
+                        value=default,
+                        key=sk,
+                    )
+                    filter_selections[filter_key] = selected
+
+                elif spec["type"] == "radio_bool":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
                     default = st.session_state.get(sk, "All")
                     choice = st.radio(
                         label,
@@ -176,6 +227,8 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
                     filter_selections[col_name] = choice
 
                 elif spec["type"] == "multiselect":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
                     all_options = _get_unique_values(data[col_name])
                     default = st.session_state.get(sk, all_options)
                     selected = st.multiselect(
@@ -187,6 +240,8 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
                     filter_selections[col_name] = selected
 
                 elif spec["type"] == "select_slider":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
                     all_options = sorted(data[col_name].dropna().unique())
                     if len(all_options) < 2:
                         continue

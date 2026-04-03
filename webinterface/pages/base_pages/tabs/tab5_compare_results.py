@@ -100,7 +100,7 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
 
     # Get metric settings
     metric = "Median"  # Default metric
-    mode = "Global"  # Default mode
+    mode = "Species-weighted"  # Default mode
 
     st.subheader("Select Two Workflows to Compare")
     st.markdown("Click on points in the plot below. Your selections will be highlighted.")

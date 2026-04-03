@@ -630,7 +630,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         self,
         result_df: pd.DataFrame,
         metric: str = "Median",
-        mode: str = "Global",
+        mode: str = "Species-weighted",
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",
             "AlphaPept": "#17212b",
@@ -745,7 +745,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         self,
         result_df: pd.DataFrame,
         metric: str = "Median",
-        mode: str = "Global",
+        mode: str = "Species-weighted",
         # TODO: move software_colors to constants
         software_colors: Dict[str, str] = {
             "MaxQuant": "#8bc6fd",

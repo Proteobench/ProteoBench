@@ -34,7 +34,7 @@ def generate_indepth_plots(
     public_id: Optional[str],
     public_hash: Optional[str],
     metric: str = "Median",
-    mode: str = "Global",
+    mode: str = "Species-weighted",
     colorblind_mode: bool = False,
 ) -> Optional[go.Figure]:
     """

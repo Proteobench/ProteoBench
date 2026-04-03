@@ -306,7 +306,7 @@ class QuantUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Global"
+        mode = results[3] if len(results) > 3 else "Species-weighted"
         colorblind_mode = results[4] if len(results) > 4 else False
 
         # Get the min_nr_observed value from the slider if available
@@ -418,7 +418,7 @@ class QuantUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Global"
+        mode = results[3] if len(results) > 3 else "Species-weighted"
         colorblind_mode = results[4] if len(results) > 4 else False
 
         # Get current selections from session state

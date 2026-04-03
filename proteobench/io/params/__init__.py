@@ -6,17 +6,25 @@ Normalized parameters (coerced by ``normalize()``):
 
 - ``ident_fdr_psm``, ``ident_fdr_peptide``, ``ident_fdr_protein`` — float in [0, 1]
 - ``allowed_miscleavages``, ``min/max_peptide_length``,
-  ``min/max_precursor_charge``, ``max_mods`` — int
+  ``min/max_precursor_charge``, ``max_mods`` — int (shared quant/denovo)
+- ``min/max_precursor_mz``, ``min/max_fragment_mz`` — int (quant, m/z ranges)
+- ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz``,
+  ``min_intensity``, ``max_intensity`` — int (de novo specific)
 - ``enable_match_between_runs`` — bool
 - ``enzyme`` — canonical capitalized name (e.g. "Trypsin", "Trypsin/P", "Lys-C")
 
 NOT normalized (kept as-is from parsers):
 
-- ``precursor_mass_tolerance``, ``fragment_mass_tolerance`` — string, format varies
+- ``precursor_mass_tolerance``, ``fragment_mass_tolerance``,
+  ``remove_precursor_tol`` — string, format varies by tool
 - ``fixed_mods``, ``variable_mods`` — string, tool-specific format
-- ``quantification_method`` — string
+- ``quantification_method``, ``protein_inference``,
+  ``abundance_normalization_ions`` — string
 - ``software_name``, ``software_version``, ``search_engine``,
   ``search_engine_version`` — string
+- ``tokens`` — string, semicolon-separated amino acids/modifications
+- ``isotope_error_range`` — string representation of list (e.g. "[0, 2]")
+- ``decoding_strategy``, ``checkpoint`` — string, tool-specific
 
 Classes
 -------
@@ -57,12 +65,25 @@ _FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")
 
 # Fields that must be coerced to int.
 _INT_FIELDS = (
+    # Shared quant / de novo
     "allowed_miscleavages",
     "min_peptide_length",
     "max_peptide_length",
     "min_precursor_charge",
     "max_precursor_charge",
     "max_mods",
+    # Quant specific (m/z ranges)
+    "min_precursor_mz",
+    "max_precursor_mz",
+    "min_fragment_mz",
+    "max_fragment_mz",
+    # De novo specific
+    "n_beams",
+    "n_peaks",
+    "min_mz",
+    "max_mz",
+    "min_intensity",
+    "max_intensity",
 )
 
 

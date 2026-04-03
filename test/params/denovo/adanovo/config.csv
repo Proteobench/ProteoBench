@@ -1,0 +1,33 @@
+,0
+software_name,AdaNovo
+software_version,1.0
+search_engine,
+search_engine_version,
+ident_fdr_psm,
+ident_fdr_peptide,
+ident_fdr_protein,
+enable_match_between_runs,False
+precursor_mass_tolerance,50
+fragment_mass_tolerance,
+enzyme,
+semi_enzymatic,False
+allowed_miscleavages,
+min_peptide_length,6
+max_peptide_length,100
+fixed_mods,
+variable_mods,
+max_mods,
+min_precursor_charge,
+max_precursor_charge,10
+quantification_method,
+protein_inference,
+abundance_normalization_ions,
+n_beams,5
+n_peaks,150
+min_mz,50
+max_mz,2500
+min_intensity,0
+tokens,G; A; S; P; V; T; C(+57.02); L; I; N; D; Q; K; E; M; H; F; R; Y; W; M(+15.99); N(+.98); Q(+.98); +42.011; +43.006; -17.027; +43.006-17.027
+remove_precursor_tol,2.0
+isotope_error_range,"[0, 1]"
+decoding_strategy,beam search

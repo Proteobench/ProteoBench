@@ -24,15 +24,13 @@ def display_workflow_comparison(variables, ionmodule) -> None:
         Module for accessing data and methods.
     """
     st.header("Workflow Comparison")
-    st.markdown(
-        """
+    st.markdown("""
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
         - **Precursor overlap**: Bar plot showing number of shared and unique precursors
         - **Parameter differences**: Table highlighting what differs between workflows
-        """
-    )
+        """)
 
     # Initialize data
     _initialize_comparison_data(variables, ionmodule)
@@ -79,7 +77,8 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
         return []
 
     # Apply filter based on slider if available
-    if hasattr(variables, 'slider_id_uuid'):
+    min_prec = None
+    if hasattr(variables, "slider_id_uuid"):
         slider_key = variables.slider_id_uuid
         if slider_key in st.session_state:
             slider_uuid = st.session_state[slider_key]
@@ -104,6 +103,12 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
 
     st.subheader("Select Two Workflows to Compare")
     st.markdown("Click on points in the plot below. Your selections will be highlighted.")
+    default_slider = getattr(variables, "default_val_slider", 3)
+    st.info(
+        f"Below plot uses default settings: **{metric}** metric, **{mode}** mode, "
+        f"min. precursor quantifications = **{min_prec if min_prec is not None else default_slider}**.",
+        icon="ℹ️",
+    )
 
     # Create unique key for this plot
     plot_key = f"{variables.all_datapoints}_compare_plot"

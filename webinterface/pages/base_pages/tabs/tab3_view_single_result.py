@@ -59,7 +59,7 @@ def generate_indepth_plots(
     metric : str, optional
         The metric to use for plotting (e.g., "Median", "Mean"). Defaults to "Median".
     mode : str, optional
-        The mode for metric calculation (e.g., "Global", "Species-specific"). Defaults to "Global".
+        The mode for metric calculation (e.g., "Global", "Species-specific"). Defaults to "Species-specific".
     colorblind_mode : bool, optional
         Whether to use colorblind-friendly colors. Defaults to False.
 

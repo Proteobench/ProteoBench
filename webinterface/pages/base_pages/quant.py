@@ -399,7 +399,7 @@ class QuantUIObjects(BaseUIModule):
             )
             return st.radio(
                 "Select metric calculation approach",
-                ["Global", "Species-weighted"],
+                ["Species-weighted", "Global"],
                 help=help_text,
                 horizontal=True,
                 key=mode_uuid,

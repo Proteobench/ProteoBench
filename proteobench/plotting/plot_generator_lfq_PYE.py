@@ -695,7 +695,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Metric to use for calculations: "Median" or "Mean". Defaults to "Median".
         mode : str, optional
             Mode for metric calculation: "Global" or "Species-weighted". Currently both modes
-            use the same metrics for plasma. Defaults to "Global".
+            use the same metrics for plasma. Defaults to "Species-weighted".
         software_colors : Dict[str, str]
             Mapping of software names to colors.
         mapping : Dict[str, str]
@@ -814,7 +814,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Metric to use: "Median" or "Mean". Defaults to "Median".
         mode : str, optional
             Mode for metric calculation: "Global" or "Species-weighted". Currently both modes
-            use the same metrics for plasma. Defaults to "Global".
+            use the same metrics for plasma. Defaults to "Species-weighted".
         software_colors : Dict[str, str]
             Mapping of software names to colors.
         mapping : Dict[str, str]

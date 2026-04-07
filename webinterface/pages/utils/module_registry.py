@@ -109,7 +109,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             # e.g. "github.com/Proteobot/Results_quant_ion_DDA.git" -> "Results_quant_ion_DDA"
             results_repo = None
             if hasattr(variables, "github_link_pr") and variables.github_link_pr:
-                results_repo = variables.github_link_pr.rstrip(".git").split("/")[-1]
+                results_repo = variables.github_link_pr.removesuffix(".git").split("/")[-1]
 
             # Create metadata object
             metadata = ModuleMetadata(

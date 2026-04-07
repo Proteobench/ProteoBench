@@ -255,23 +255,42 @@ def get_module_submission_data() -> Dict[str, Dict[str, int]]:
     ]
 
     def _fetch_tool_breakdown(repo_name: str) -> tuple:
+        import logging
+
+        logger = logging.getLogger(__name__)
+
         try:
             url = f"https://api.github.com/repos/Proteobench/{repo_name}/tarball/main"
             resp = requests.get(url, headers=headers, timeout=30)
             resp.raise_for_status()
-            tools = Counter()
+        except requests.RequestException:
+            logger.warning("Failed to download archive for %s", repo_name, exc_info=True)
+            return repo_name, {}
+
+        tools = Counter()
+        try:
             with tarfile.open(fileobj=io.BytesIO(resp.content), mode="r:gz") as tar:
                 for member in tar.getmembers():
                     if member.name.endswith(".json") and member.isfile():
-                        f = tar.extractfile(member)
-                        data = json.loads(f.read())
-                        tools[data.get("software_name", "Unknown")] += 1
-            return repo_name, dict(tools)
-        except Exception:
+                        try:
+                            f = tar.extractfile(member)
+                            data = json.loads(f.read())
+                            tools[data.get("software_name", "Unknown")] += 1
+                        except (json.JSONDecodeError, KeyError, OSError):
+                            logger.warning(
+                                "Skipping malformed file %s in %s", member.name, repo_name, exc_info=True
+                            )
+        except tarfile.TarError:
+            logger.warning("Failed to read archive for %s", repo_name, exc_info=True)
             return repo_name, {}
 
+        return repo_name, dict(tools)
+
+    if not repo_names:
+        return {}
+
     result: Dict[str, Dict[str, int]] = {}
-    with ThreadPoolExecutor(max_workers=len(repo_names)) as executor:
+    with ThreadPoolExecutor(max_workers=min(len(repo_names), 10)) as executor:
         futures = {executor.submit(_fetch_tool_breakdown, name): name for name in repo_names}
         for future in as_completed(futures):
             repo_name, tool_counts = future.result()

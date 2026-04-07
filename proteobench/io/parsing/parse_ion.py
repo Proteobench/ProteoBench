@@ -30,11 +30,13 @@ def load_input_file(input_csv: str, input_format: str, input_csv_secondary: str 
     """
     try:
         if input_format == "MaxQuant":
-            warnings.warn("""
+            warnings.warn(
+                """
                 WARNING: MaxQuant proforma parsing does not take into account fixed modifications\n
                 because they are implicit. Only after providing the appropriate parameter file,\n
                 fixed modifications will be added correctly.
-                """)
+                """
+            )
         load_function = _LOAD_FUNCTIONS[input_format]
     except KeyError as e:
         raise ValueError(f"Invalid input format: {input_format}") from e

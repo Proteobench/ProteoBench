@@ -13,9 +13,6 @@ import requests
 import streamlit as st
 from pages.utils.module_registry import get_all_modules
 
-SECRETS_FILE = Path(__file__).parent / ".streamlit" / "secrets.toml"
-GRAPHQL_URL = "https://api.github.com/graphql"
-
 logger = logging.getLogger(__name__)
 
 

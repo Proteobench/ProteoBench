@@ -16,6 +16,8 @@ from pages.utils.module_registry import get_all_modules
 SECRETS_FILE = Path(__file__).parent / ".streamlit" / "secrets.toml"
 GRAPHQL_URL = "https://api.github.com/graphql"
 
+logger = logging.getLogger(__name__)
+
 
 def get_base64_image(path):
     with open(path, "rb") as image_file:
@@ -254,8 +256,6 @@ def get_module_submission_data() -> Dict[str, Dict[str, int]]:
     ]
 
     def _fetch_tool_breakdown(repo_name: str) -> tuple:
-
-        logger = logging.getLogger(__name__)
 
         try:
             url = f"https://api.github.com/repos/Proteobench/{repo_name}/tarball/main"

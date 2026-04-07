@@ -1,11 +1,17 @@
 import base64
+import io
+import json
+import logging
 import re
+import tarfile
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, Optional
 
 import requests
 import streamlit as st
+from pages.utils.module_registry import get_all_modules
 
 SECRETS_FILE = Path(__file__).parent / ".streamlit" / "secrets.toml"
 GRAPHQL_URL = "https://api.github.com/graphql"
@@ -230,13 +236,6 @@ def get_module_submission_data() -> Dict[str, Dict[str, int]]:
     Dict[str, Dict[str, int]]
         Mapping of results_repo name to {software_name: count} dict.
     """
-    import io
-    import json
-    import tarfile
-    from collections import Counter
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    from pages.utils.module_registry import get_all_modules
 
     modules_by_category = get_all_modules()
 
@@ -245,17 +244,16 @@ def get_module_submission_data() -> Dict[str, Dict[str, int]]:
         token = st.secrets["gh"]["token"]
         headers["Authorization"] = f"token {token}"
     except Exception:
+        logger.warning(
+            "Could not obtain GitHub token, proceeding with unauthenticated requests which may be rate-limited."
+        )
         pass
 
     repo_names = [
-        module.results_repo
-        for modules in modules_by_category.values()
-        for module in modules
-        if module.results_repo
+        module.results_repo for modules in modules_by_category.values() for module in modules if module.results_repo
     ]
 
     def _fetch_tool_breakdown(repo_name: str) -> tuple:
-        import logging
 
         logger = logging.getLogger(__name__)
 
@@ -277,9 +275,7 @@ def get_module_submission_data() -> Dict[str, Dict[str, int]]:
                             data = json.loads(f.read())
                             tools[data.get("software_name", "Unknown")] += 1
                         except (json.JSONDecodeError, KeyError, OSError):
-                            logger.warning(
-                                "Skipping malformed file %s in %s", member.name, repo_name, exc_info=True
-                            )
+                            logger.warning("Skipping malformed file %s in %s", member.name, repo_name, exc_info=True)
         except tarfile.TarError:
             logger.warning("Failed to read archive for %s", repo_name, exc_info=True)
             return repo_name, {}
@@ -310,10 +306,9 @@ def build_submissions_figure():
     tuple(plotly.graph_objects.Figure, Dict[str, Dict[str, int]]) or (None, None)
         The bar figure and a mapping of module title to per-tool counts.
     """
+    from pages.utils.module_registry import get_all_modules
     from plotly import graph_objects as go
     from plotly.subplots import make_subplots
-
-    from pages.utils.module_registry import get_all_modules
 
     modules_by_category = get_all_modules()
     submission_data = get_module_submission_data()

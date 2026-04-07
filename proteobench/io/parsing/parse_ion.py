@@ -30,13 +30,11 @@ def load_input_file(input_csv: str, input_format: str, input_csv_secondary: str 
     """
     try:
         if input_format == "MaxQuant":
-            warnings.warn(
-                """
+            warnings.warn("""
                 WARNING: MaxQuant proforma parsing does not take into account fixed modifications\n
                 because they are implicit. Only after providing the appropriate parameter file,\n
                 fixed modifications will be added correctly.
-                """
-            )
+                """)
         load_function = _LOAD_FUNCTIONS[input_format]
     except KeyError as e:
         raise ValueError(f"Invalid input format: {input_format}") from e
@@ -748,6 +746,8 @@ def _load_fragpipe_diann_quant(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    if "All Mapped Proteins" in input_data_frame.columns:
+        input_data_frame["Protein.Ids"] = input_data_frame["All Mapped Proteins"]
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
     mapper = mapper_df["description"].to_dict()

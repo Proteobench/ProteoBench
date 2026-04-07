@@ -152,7 +152,13 @@ class StreamlitPageHome(StreamlitPage):
         st.subheader("Submissions per Module")
         bar_fig, tool_data = build_submissions_figure()
         if bar_fig is not None:
-            event = st.plotly_chart(bar_fig, use_container_width=True, on_select="rerun", key="submissions_chart")
+            event = st.plotly_chart(
+                bar_fig,
+                use_container_width=True,
+                on_select="rerun",
+                selection_mode="points",
+                key="submissions_chart",
+            )
 
             # Show pie chart in a dialog popup when a bar is clicked
             selection = event.get("selection", {}) if event else {}

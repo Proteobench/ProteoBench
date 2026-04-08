@@ -261,9 +261,9 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
 
     Operates **in-place** on *df* and also returns it for convenience.
     """
-    # A. Sanitize missing sentinel strings across all object columns
+    # A. Sanitize missing sentinel strings across all object/string columns
     for col in df.columns:
-        if df[col].dtype == object:
+        if df[col].dtype == object or pd.api.types.is_string_dtype(df[col]):
             mask = df[col].apply(lambda v: isinstance(v, str) and v.strip().lower() in _MISSING_SENTINELS)
             df.loc[mask, col] = np.nan
 

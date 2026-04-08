@@ -14,7 +14,7 @@ sys.modules.setdefault("streamlit", MagicMock())
 sys.modules.setdefault("streamlit_utils", MagicMock())
 
 # Now we can import the pure-logic helpers from the module.
-from webinterface.pages.base_pages.tabs.tab1_view_public_results import (
+from webinterface.pages.base_pages.utils.parameter_filters import (
     _NOT_SPECIFIED,
     _get_unique_values,
     apply_parameter_filters,

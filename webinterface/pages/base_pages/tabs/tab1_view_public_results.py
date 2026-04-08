@@ -7,10 +7,259 @@ across all ProteoBench module types (Quant, De Novo, etc.).
 
 import os
 import uuid
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 import streamlit as st
+
+# ---------------------------------------------------------------------------
+# Parameter-based filtering
+# ---------------------------------------------------------------------------
+
+_NOT_SPECIFIED = "Not specified"
+
+_PARAMETER_FILTERS = [
+    {"col": "software_name", "label": "Software tool", "type": "multiselect"},
+    {"col": "enable_match_between_runs", "label": "Match between runs", "type": "radio_bool"},
+    {"col": "search_engine", "label": "Search engine", "type": "multiselect"},
+    {"col": "enzyme", "label": "Enzyme", "type": "multiselect"},
+    {"col": "allowed_miscleavages", "label": "Allowed miscleavages", "type": "multiselect"},
+    {"col": "ident_fdr_psm", "label": "PSM FDR", "type": "multiselect"},
+    {"col": "quantification_method", "label": "Quantification method", "type": "multiselect"},
+    {"col": "precursor_mass_tolerance", "label": "Precursor mass tol.", "type": "multiselect"},
+    {"col": "fragment_mass_tolerance", "label": "Fragment mass tol.", "type": "multiselect"},
+    {"col_min": "min_peptide_length", "col_max": "max_peptide_length", "label": "Peptide length", "type": "combined_range"},
+    {"col": "max_mods", "label": "Max mods per peptide", "type": "select_slider"},
+    {"col_min": "min_precursor_charge", "col_max": "max_precursor_charge", "label": "Precursor charge", "type": "combined_range"},
+]
+
+
+def _get_unique_values(series: pd.Series) -> List[str]:
+    """Return sorted unique string values from *series*, mapping NaN to _NOT_SPECIFIED."""
+    values = series.fillna(_NOT_SPECIFIED).astype(str).unique()
+    return sorted(values, key=lambda v: (v == _NOT_SPECIFIED, v))
+
+
+def apply_parameter_filters(
+    data: pd.DataFrame,
+    filter_selections: Dict[str, Any],
+) -> pd.DataFrame:
+    """
+    Apply parameter-based filters to a DataFrame of benchmark datapoints.
+
+    This is the pure filtering logic, separated from UI rendering so it can
+    be tested independently.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The benchmark datapoints to filter.
+    filter_selections : dict
+        Mapping of column name to the selected filter value(s).
+        For ``multiselect`` filters the value is a list of allowed strings.
+        For ``radio_bool`` filters the value is one of ``"All"``,
+        ``"Enabled"``, or ``"Disabled"``.
+
+    Returns
+    -------
+    pd.DataFrame
+        The subset of *data* matching all active filters.
+    """
+    if data.empty:
+        return data
+
+    mask = pd.Series(True, index=data.index)
+
+    for spec in _PARAMETER_FILTERS:
+        if spec["type"] == "combined_range":
+            col_min = spec["col_min"]
+            col_max = spec["col_max"]
+            filter_key = f"{col_min}__{col_max}"
+            if filter_key not in filter_selections:
+                continue
+            selection = filter_selections[filter_key]
+            if isinstance(selection, (list, tuple)) and len(selection) == 2:
+                lo, hi = selection
+                if col_min in data.columns:
+                    mask &= data[col_min].fillna(lo) >= lo
+                if col_max in data.columns:
+                    mask &= data[col_max].fillna(hi) <= hi
+            continue
+
+        col = spec.get("col")
+        if col is None or col not in filter_selections or col not in data.columns:
+            continue
+
+        selection = filter_selections[col]
+
+        if spec["type"] == "radio_bool":
+            if selection == "Enabled":
+                mask &= data[col].astype(bool)
+            elif selection == "Disabled":
+                mask &= ~data[col].astype(bool)
+            # "All" → no filtering
+
+        elif spec["type"] == "multiselect":
+            if isinstance(selection, list):
+                str_col = data[col].fillna(_NOT_SPECIFIED).astype(str)
+                mask &= str_col.isin(selection)
+
+        elif spec["type"] == "select_slider":
+            if isinstance(selection, (list, tuple)) and len(selection) == 2:
+                lo, hi = selection
+                mask &= data[col].fillna(lo).between(lo, hi)
+
+    return data.loc[mask]
+
+
+def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filter") -> pd.DataFrame:
+    """
+    Render parameter-based filter widgets and return the filtered DataFrame.
+
+    Displays an ``st.expander`` with multiselect / radio widgets for each
+    workflow parameter that has more than one unique non-null value in *data*.
+    Filtering is applied **after** the existing k-slider filter.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Benchmark datapoints (already filtered by the k-slider).
+    key_prefix : str, optional
+        Prefix for Streamlit session-state keys to avoid collisions when the
+        function is rendered on multiple tabs. Defaults to ``"param_filter"``.
+
+    Returns
+    -------
+    pd.DataFrame
+        The subset of *data* matching all active parameter filters.
+
+    Notes
+    -----
+    Session-state keys use the pattern ``{key_prefix}_{column_name}`` and do
+    not require UUID indirection because the column names are unique and stable.
+    """
+    if data.empty:
+        return data
+
+    total_count = len(data)
+
+    # Determine which filters are applicable for this dataset
+    applicable: List[dict] = []
+    for spec in _PARAMETER_FILTERS:
+        if spec["type"] == "combined_range":
+            col_min, col_max = spec["col_min"], spec["col_max"]
+            has_min = col_min in data.columns and data[col_min].dropna().nunique() >= 1
+            has_max = col_max in data.columns and data[col_max].dropna().nunique() >= 1
+            if has_min or has_max:
+                # Need at least 2 distinct values across both columns combined
+                all_vals = set()
+                if has_min:
+                    all_vals.update(data[col_min].dropna().unique())
+                if has_max:
+                    all_vals.update(data[col_max].dropna().unique())
+                if len(all_vals) >= 2:
+                    applicable.append(spec)
+        else:
+            col = spec["col"]
+            if col not in data.columns:
+                continue
+            n_unique = data[col].dropna().nunique()
+            if n_unique < 2:
+                continue
+            applicable.append(spec)
+
+    if not applicable:
+        return data
+
+    filter_selections: Dict[str, Any] = {}
+
+    with st.expander("Filter by workflow parameters", expanded=False):
+        # Reset button
+        if st.button("Reset all filters", key=f"{key_prefix}_reset"):
+            for spec in applicable:
+                if spec["type"] == "combined_range":
+                    sk = f"{key_prefix}_{spec['col_min']}__{spec['col_max']}"
+                else:
+                    sk = f"{key_prefix}_{spec['col']}"
+                if sk in st.session_state:
+                    del st.session_state[sk]
+            st.rerun()
+
+        # Lay out filters in a 3-column grid
+        cols = st.columns(3)
+        for idx, spec in enumerate(applicable):
+            label = spec["label"]
+
+            with cols[idx % 3]:
+                if spec["type"] == "combined_range":
+                    col_min, col_max = spec["col_min"], spec["col_max"]
+                    filter_key = f"{col_min}__{col_max}"
+                    sk = f"{key_prefix}_{filter_key}"
+                    # Build option range from both columns
+                    all_vals = set()
+                    if col_min in data.columns:
+                        all_vals.update(data[col_min].dropna().unique())
+                    if col_max in data.columns:
+                        all_vals.update(data[col_max].dropna().unique())
+                    all_options = sorted(all_vals)
+                    full_range = (all_options[0], all_options[-1])
+                    default = st.session_state.get(sk, full_range)
+                    selected = st.select_slider(
+                        label,
+                        options=all_options,
+                        value=default,
+                        key=sk,
+                    )
+                    filter_selections[filter_key] = selected
+
+                elif spec["type"] == "radio_bool":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
+                    default = st.session_state.get(sk, "All")
+                    choice = st.radio(
+                        label,
+                        ["All", "Enabled", "Disabled"],
+                        index=["All", "Enabled", "Disabled"].index(default),
+                        key=sk,
+                        horizontal=True,
+                    )
+                    filter_selections[col_name] = choice
+
+                elif spec["type"] == "multiselect":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
+                    all_options = _get_unique_values(data[col_name])
+                    default = st.session_state.get(sk, all_options)
+                    selected = st.multiselect(
+                        label,
+                        options=all_options,
+                        default=default,
+                        key=sk,
+                    )
+                    filter_selections[col_name] = selected
+
+                elif spec["type"] == "select_slider":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
+                    all_options = sorted(data[col_name].dropna().unique())
+                    if len(all_options) < 2:
+                        continue
+                    full_range = (all_options[0], all_options[-1])
+                    default = st.session_state.get(sk, full_range)
+                    selected = st.select_slider(
+                        label,
+                        options=all_options,
+                        value=default,
+                        key=sk,
+                    )
+                    filter_selections[col_name] = selected
+
+        filtered = apply_parameter_filters(data, filter_selections)
+        filtered_count = len(filtered)
+        st.caption(f"Showing {filtered_count} of {total_count} datapoints")
+
+    return filtered
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -59,10 +308,12 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None
     initialize_uuid_state(slider_id_uuid, default_val_slider)
 
 
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6) -> None:
+def generate_main_slider(
+    slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6
+) -> None:
     """
     Create a slider input.
-    
+
     Parameters
     ----------
     slider_id_uuid : str
@@ -80,10 +331,10 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     slider_key = st.session_state[slider_id_uuid]
 
     default_value = st.session_state.get(slider_key, default_val_slider)
-    
+
     # Generate slider options based on max_nr_observed
     slider_options = list(range(1, max_nr_observed + 1))
-    
+
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
         options=slider_options,
@@ -150,20 +401,22 @@ def display_metric_calc_approach_selector(variables) -> str:
 
 def display_colorblindmode_selector(variables, use_submitted: bool = False) -> str:
     """Display colorblind mode selector toggle.
-    
+
     Parameters
     ----------
     variables : VariablesClass
         Variables object containing selector UUIDs
     use_submitted : bool, optional
         If True, use the submitted selector UUID, by default False
-    
+
     Returns
     -------
     bool
         Current state of the colorblind mode toggle
     """
-    key = variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    key = (
+        variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    )
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
@@ -236,10 +489,7 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
 
     try:
         fig = plot_generator.plot_main_metric(
-            result_df=data, 
-            hide_annot=plot_params.get("hide_annot", False),
-            annotation=annotation,
-            **plot_params
+            result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
         )
         st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
     except Exception as e:
@@ -368,7 +618,9 @@ def display_download_section(variables, sort_by: str = "id") -> None:
                 icon="⚠️",
             )
     elif selected_hash is not None:
-        st.info("Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️")
+        st.info(
+            "Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️"
+        )
 
 
 def display_existing_results(
@@ -402,6 +654,9 @@ def display_existing_results(
     # Initialize and filter data
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
+
+    # Apply parameter-based filters (key_prefix must be unique per module page)
+    filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()

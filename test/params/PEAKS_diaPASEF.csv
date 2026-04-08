@@ -3,9 +3,9 @@ software_name,PEAKS
 software_version,
 search_engine,PEAKS
 search_engine_version,
-ident_fdr_psm,1.0%
+ident_fdr_psm,0.01
 ident_fdr_peptide,
-ident_fdr_protein,1.0%
+ident_fdr_protein,0.01
 enable_match_between_runs,True
 precursor_mass_tolerance,Auto Detected
 fragment_mass_tolerance,Auto Detected

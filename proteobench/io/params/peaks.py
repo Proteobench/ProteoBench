@@ -181,14 +181,23 @@ def extract_params(
     params.search_engine_version = params.software_version
 
     psm_fdr = extract_value(lines, "Precursor FDR:")
+
     # Its either "Precursor FDR:" (DIA) or "PSM FDR:" (DDA)
     if not psm_fdr:
         psm_fdr = extract_value(lines, "PSM FDR:")
     peptide_fdr = extract_value(lines, "Peptide FDR:")
+
+    if psm_fdr:
+        psm_fdr = psm_fdr.replace("%", "").strip()
+    if peptide_fdr:
+        peptide_fdr = peptide_fdr.replace("%", "").strip()
+
     params.ident_fdr_peptide = peptide_fdr
     params.ident_fdr_psm = psm_fdr
     # peaks uses  Proteins -10LgP >= 15.0  instead of FDR
     protein_fdr = extract_value(lines, "Protein Group FDR:")
+    if protein_fdr:
+        protein_fdr = protein_fdr.replace("%", "").strip()
     params.ident_fdr_protein = protein_fdr
     params.enable_match_between_runs = True if extract_value(lines, "Match Between Run:") == "Yes" else False
     params.precursor_mass_tolerance = extract_mass_tolerance(lines, "Precursor Mass Error Tolerance:")
@@ -237,6 +246,7 @@ def extract_params(
     params.protein_inference = None
     params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Normalization Method:")
+    params.fill_none()
     return params
 
 
@@ -245,10 +255,10 @@ if __name__ == "__main__":
     Reads PEAKS settings files, extracts parameters, and writes them to CSV files.
     """
     fnames = [
-        "../../../test/params/PEAKS_parameters.txt",
-        "../../../test/params/PEAKS_parameters_DDA.txt",
-        "../../../test/params/PEAKS_parameters_DIA.txt",
-        "../../../test/params/PEAKS_parameters_DDA_new.txt",
+        # "../../../test/params/PEAKS_parameters.txt",
+        # "../../../test/params/PEAKS_parameters_DDA.txt",
+        # "../../../test/params/PEAKS_parameters_DIA.txt",
+        # "../../../test/params/PEAKS_parameters_DDA_new.txt",
         "../../../test/params/PEAKS_diaPASEF.txt",
     ]
 
@@ -259,6 +269,4 @@ if __name__ == "__main__":
         # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)
         actual.to_csv(Path(file).with_suffix(".csv"))
-
-        # Optionally, print the parameters to the console
         print(parameters)

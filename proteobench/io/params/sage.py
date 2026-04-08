@@ -90,6 +90,7 @@ def extract_params(
     params.max_precursor_charge = int(data["precursor_charge"][1])
     params.enable_match_between_runs = True
 
+    params.fill_none()
     return params
 
 

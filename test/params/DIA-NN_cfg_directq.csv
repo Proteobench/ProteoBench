@@ -4,7 +4,7 @@ software_version,1.9.2
 search_engine,DIA-NN
 search_engine_version,1.9.2
 ident_fdr_psm,0.01
-ident_fdr_peptide,None
+ident_fdr_peptide,
 ident_fdr_protein,
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-2.31639 ppm, 2.31639 ppm]"
@@ -24,6 +24,6 @@ min_fragment_mz,50
 max_fragment_mz,2000
 quantification_method,Legacy (direct)
 protein_inference,Genes
-abundance_normalization_ions,
+abundance_normalization_ions,Cross-run normalization
 predictors_library,
 scan_window,6

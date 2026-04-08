@@ -23,6 +23,6 @@ quantification_method,
 protein_inference,ProteinProphet: --maxppmdiff 2000000
 abundance_normalization_ions,
 min_precursor_mz,
-max_precursor_mz,5000.0
+max_precursor_mz,5000
 min_fragment_mz,
 max_fragment_mz,

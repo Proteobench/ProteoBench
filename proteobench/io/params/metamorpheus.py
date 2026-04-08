@@ -166,6 +166,7 @@ def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
     params.ident_fdr_peptide = None
     params.ident_fdr_protein = None
     params.search_engine_version = None
+    params.fill_none()
     return params
 
 

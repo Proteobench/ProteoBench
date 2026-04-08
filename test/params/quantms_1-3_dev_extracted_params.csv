@@ -4,7 +4,7 @@ software_version,v1.3.1dev-g70337bc
 search_engine,comet
 search_engine_version,2023.01 rev. 2
 ident_fdr_psm,0.01
-ident_fdr_peptide,None
+ident_fdr_peptide,
 ident_fdr_protein,0.01
 enable_match_between_runs,False
 precursor_mass_tolerance,5 ppm
@@ -21,4 +21,4 @@ min_precursor_charge,2
 max_precursor_charge,4
 quantification_method,feature_intensity
 protein_inference,aggregation
-abundance_normalization_ions,None
+abundance_normalization_ions,

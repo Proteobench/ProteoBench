@@ -4,8 +4,8 @@ software_version,1.9
 search_engine,DIA-NN
 search_engine_version,1.9
 ident_fdr_psm,0.01
-ident_fdr_peptide,None
-ident_fdr_protein,None
+ident_fdr_peptide,
+ident_fdr_protein,
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-8.36737 ppm, 8.36737 ppm]"
 fragment_mass_tolerance,"[-13.7907 ppm, 13.7907 ppm]"

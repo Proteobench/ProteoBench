@@ -4,8 +4,8 @@ software_version,1.8.2 beta 8
 search_engine,DIA-NN
 search_engine_version,1.8.2 beta 8
 ident_fdr_psm,0.01
-ident_fdr_peptide,None
-ident_fdr_protein,None
+ident_fdr_peptide,
+ident_fdr_protein,
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-15.0 ppm, 15.0 ppm]"
 fragment_mass_tolerance,"[-20.0 ppm, 20.0 ppm]"
@@ -24,6 +24,6 @@ min_fragment_mz,200
 max_fragment_mz,1800
 quantification_method,QuantUMS high-precision
 protein_inference,Genes
-abundance_normalization_ions,None
+abundance_normalization_ions,
 predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
 scan_window,13

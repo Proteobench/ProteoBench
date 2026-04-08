@@ -264,6 +264,7 @@ def read_spectronaut_settings(
     params.protein_inference = extract_value(lines, "Inference Algorithm:")  # or Protein Inference Workflow:
     params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Cross-Run Normalization:")
+    params.fill_none()
     return params
 
 

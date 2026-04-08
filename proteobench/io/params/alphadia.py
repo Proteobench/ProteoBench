@@ -374,7 +374,9 @@ def extract_params(
     else:
         all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
 
-    return ProteoBenchParameters(**all_parameters, filename=json_file)
+    params = ProteoBenchParameters(**all_parameters, filename=json_file)
+    params.fill_none()
+    return params
 
 
 if __name__ == "__main__":
@@ -390,5 +392,6 @@ if __name__ == "__main__":
         pb_params = extract_params(file)
         params = pb_params.__dict__
         series = pd.Series(params)
+        print(series)
         series.to_csv(file.with_suffix(".csv"))
         print("\n" * 3)

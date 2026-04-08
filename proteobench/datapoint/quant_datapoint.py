@@ -294,9 +294,9 @@ class QuantDatapointHYE(DatapointBase):
     software_version: int = 0
     search_engine: str = None
     search_engine_version: int = 0
-    ident_fdr_psm: int = 0
-    ident_fdr_peptide: int = 0
-    ident_fdr_protein: int = 0
+    ident_fdr_psm: float = 0.0
+    ident_fdr_peptide: float = 0.0
+    ident_fdr_protein: float = 0.0
     enable_match_between_runs: bool = False
     precursor_mass_tolerance: str = None
     fragment_mass_tolerance: str = None

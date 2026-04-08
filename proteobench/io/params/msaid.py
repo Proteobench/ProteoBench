@@ -73,7 +73,9 @@ def extract_params(
     else:
         parameters["enable_match_between_runs"] = False
 
-    return ProteoBenchParameters(**parameters, filename=json_file)
+    params = ProteoBenchParameters(**parameters, filename=json_file)
+    params.fill_none()
+    return params
 
 
 if __name__ == "__main__":
@@ -92,5 +94,6 @@ if __name__ == "__main__":
         data_dict = params.__dict__
         series = pd.Series(data_dict)
 
+        print(series)
         # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".tsv"), sep="\t")

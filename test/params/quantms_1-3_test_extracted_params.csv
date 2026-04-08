@@ -3,9 +3,9 @@ software_name,quantms
 software_version,v1.3.1dev-gb7c9b6a
 search_engine,"comet,msgf"
 search_engine_version,"2023.01 rev. 2,MS-GF+ Release (v2023.01.12) (12 January 2023)"
-ident_fdr_psm,1
-ident_fdr_peptide,None
-ident_fdr_protein,1
+ident_fdr_psm,0.01
+ident_fdr_peptide,
+ident_fdr_protein,0.01
 enable_match_between_runs,False
 precursor_mass_tolerance,5 ppm
 fragment_mass_tolerance,0.03 Da
@@ -21,4 +21,4 @@ min_precursor_charge,2
 max_precursor_charge,4
 quantification_method,feature_intensity
 protein_inference,aggregation
-abundance_normalization_ions,None
+abundance_normalization_ions,

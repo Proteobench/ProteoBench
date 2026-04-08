@@ -20,10 +20,10 @@ _PARAMETER_FILTERS = [
     {"col": "enable_match_between_runs", "label": "Match between runs", "type": "radio_bool"},
     {"col": "search_engine", "label": "Search engine", "type": "multiselect"},
     {"col": "enzyme", "label": "Enzyme", "type": "multiselect"},
-    {"col": "allowed_miscleavages", "label": "Allowed miscleavages", "type": "multiselect"},
-    {"col": "ident_fdr_psm", "label": "PSM FDR", "type": "multiselect"},
-    {"col": "ident_fdr_peptide", "label": "Peptide FDR", "type": "multiselect"},
-    {"col": "ident_fdr_protein", "label": "Protein FDR", "type": "multiselect"},
+    {"col": "allowed_miscleavages", "label": "Allowed miscleavages", "type": "max_slider"},
+    {"col": "ident_fdr_psm", "label": "PSM FDR", "type": "max_slider"},
+    {"col": "ident_fdr_peptide", "label": "Peptide FDR", "type": "max_slider"},
+    {"col": "ident_fdr_protein", "label": "Protein FDR", "type": "max_slider"},
     {"col": "quantification_method", "label": "Quantification method", "type": "multiselect"},
     {"col": "precursor_mass_tolerance", "label": "Precursor mass tol.", "type": "tolerance_range"},
     {"col": "fragment_mass_tolerance", "label": "Fragment mass tol.", "type": "tolerance_range"},
@@ -33,7 +33,7 @@ _PARAMETER_FILTERS = [
         "label": "Peptide length",
         "type": "combined_range",
     },
-    {"col": "max_mods", "label": "Max mods per peptide", "type": "select_slider"},
+    {"col": "max_mods", "label": "Max mods per peptide", "type": "max_slider"},
     {
         "col_min": "min_precursor_charge",
         "col_max": "max_precursor_charge",
@@ -173,6 +173,10 @@ def apply_parameter_filters(
             if isinstance(selection, (list, tuple)) and len(selection) == 2:
                 lo, hi = selection
                 mask &= data[col].fillna(lo).between(lo, hi)
+
+        elif spec["type"] == "max_slider":
+            threshold = selection
+            mask &= pd.to_numeric(data[col], errors="coerce").fillna(0) <= threshold
 
     return data.loc[mask]
 
@@ -319,6 +323,23 @@ def generate_parameter_filters(
                     default = st.session_state.get(sk, full_range)
                     selected = st.select_slider(
                         label,
+                        options=all_options,
+                        value=default,
+                        key=sk,
+                    )
+                    filter_selections[col_name] = selected
+
+                elif spec["type"] == "max_slider":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
+                    numeric_vals = pd.to_numeric(data[col_name], errors="coerce").dropna()
+                    all_options = sorted(numeric_vals.unique())
+                    if len(all_options) < 2:
+                        continue
+                    max_val = all_options[-1]
+                    default = st.session_state.get(sk, max_val)
+                    selected = st.select_slider(
+                        f"{label} \u2264",
                         options=all_options,
                         value=default,
                         key=sk,

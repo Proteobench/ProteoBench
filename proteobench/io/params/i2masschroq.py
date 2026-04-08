@@ -169,7 +169,9 @@ def _extract_sage_params(
 
     # Sage uses space-separated mods; convert to ", " for _homogenize_mods
     fixed_mods_list = params.loc["sage_database_static_mods"].replace(" ", ", ")  # C:57.021465
-    var_mods_list = params.loc["sage_database_variable_mods"].replace(" ", ", ")  # "M:15.994915, ^E:-18.010565, ^Q:-17.026548"
+    var_mods_list = params.loc["sage_database_variable_mods"].replace(
+        " ", ", "
+    )  # "M:15.994915, ^E:-18.010565, ^Q:-17.026548"
 
     min_precursor_charge, max_precursor_charge = params.loc["sage_precursor_charge"].split()
 

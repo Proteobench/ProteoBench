@@ -89,8 +89,12 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
             # params.search_engine_version =
             input_params.enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["CLE"]
             # params.allowed_miscleavages =
-            input_params.fixed_mods = _homogenize_mods(each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["MODS"])
-            input_params.variable_mods = _homogenize_mods(each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["IT_MODS"])
+            input_params.fixed_mods = _homogenize_mods(
+                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["MODS"]
+            )
+            input_params.variable_mods = _homogenize_mods(
+                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["IT_MODS"]
+            )
             input_params.allowed_miscleavages = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["PFA"]
             second_pass = input_params.allowed_miscleavages = each_search_params["searchEnginesWithForms"][0][1][
                 "paramMap"

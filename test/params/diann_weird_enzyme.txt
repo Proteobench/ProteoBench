@@ -1,0 +1,347 @@
+
+DIA-NN 2.1.0 Academia  (Data-Independent Acquisition by Neural Networks)
+Compiled on Mar 25 2025 10:59:54
+Current date and time: Tue Oct 28 10:23:02 2025
+CPU: GenuineIntel Intel(R) Xeon(R) Gold 5220R CPU @ 2.20GHz
+SIMD instructions: AVX AVX2 AVX512CD AVX512F FMA SSE4.1 SSE4.2 
+Logical CPU cores: 48
+diann.exe --f D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP3.wiff  --f D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP2.wiff  --f D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP1.wiff  --f D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP3.wiff  --f D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP2.wiff  --f D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP1.wiff  --lib Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\250418_predicted_HYE_Universalcontaminants.predicted.speclib --threads 24 --verbose 1 --out Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.parquet --qvalue 0.01 --matrices --out-lib Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-lib.parquet --gen-spec-lib --unimod4 --var-mods 1 --var-mod UniMod:35,15.994915,M --var-mod UniMod:1,42.010565,*n --peptidoforms --reanalyse --rt-profiling --no-norm 
+
+Thread number set to 24
+Output will be filtered at 0.01 FDR
+Precursor/protein x samples expression level matrices will be saved along with the main report
+A spectral library will be generated
+Cysteine carbamidomethylation enabled as a fixed modification
+Maximum number of variable modifications set to 1
+Modification UniMod:35 with mass delta 15.9949 at M will be considered as variable
+Modification UniMod:1 with mass delta 42.0106 at *n will be considered as variable
+Peptidoform scoring enabled
+MBR enabled; .quant files will only be saved to disk during the first pass
+The spectral library (if generated) will retain the original spectra but will include empirically-aligned RTs
+Normalisation disabled
+DIA-NN will automatically optimise the mass accuracy for the first run of the experiment, use this mode for preliminary analyses only
+WARNING: protein inference is enabled but no FASTA provided - is this intended?
+The following variable modifications will be localised: UniMod:35 UniMod:1 
+
+6 files will be processed
+[0:00] Loading spectral library Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\250418_predicted_HYE_Universalcontaminants.predicted.speclib
+[0:55] Library annotated with sequence database(s): Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\FASTA\uniprotkb_proteome_HYE_UniversalContaminants.fasta
+[0:55] Gene names missing for some isoforms
+[0:55] Library contains 31265 proteins, and 30133 genes
+[0:58] Spectral library loaded: 31416 protein isoforms, 54863 protein groups and 12423235 precursors in 5742916 elution groups.
+[1:13] Initialising library
+
+First pass: generating a spectral library from DIA data
+
+[2:22] File #1/6
+[2:22] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP3.wiff
+[5:18] Pre-processing...
+[5:32] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 7899997 precursors in range
+[5:46] Calibrating with mass accuracies 25 (MS1), 25 (MS2)
+[7:36] RT window set to 1.20262
+[7:36] Peak width: 2.376
+[7:36] Scan window radius set to 5
+[7:36] Recommended MS1 mass accuracy setting: 29 ppm
+[11:08] Optimised mass accuracy: 17 ppm
+[12:30] Searching decoys
+[16:55] Main search
+[25:37] Removing low confidence identifications
+[26:18] Removing interfering precursors
+[26:45] Training neural networks on 167240 target and 126355 decoy PSMs
+[29:18] Training neural networks on 167240 target and 122859 decoy PSMs
+[31:29] Number of IDs at 0.01 FDR: 84224
+[31:31] Precursors at 1% peptidoform FDR: 80804
+[31:34] Calculating protein q-values
+[31:36] Number of genes identified at 1% FDR: 9280 (precursor-level), 8268 (protein-level) (inference performed using proteotypic peptides only)
+[31:36] Quantification
+[31:38] Precursors with scored PTMs at 1% FDR: 1870 out of 2158 considered
+[31:38] Precursors with all scored PTM sites unoccupied at 1% FDR: 78934
+[31:38] Precursors with PTMs localised (when required) with > 90% confidence: 993 out of 1870
+[31:40] Quantification information saved to D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP3.wiff.quant
+
+[31:41] File #2/6
+[31:41] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP2.wiff
+[35:00] Pre-processing...
+[35:13] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 7899997 precursors in range
+[35:26] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[37:02] RT window set to 1.22369
+[37:02] Recommended MS1 mass accuracy setting: 31 ppm
+[39:44] Searching decoys
+[45:20] Main search
+[57:14] Removing low confidence identifications
+[58:31] Removing interfering precursors
+[59:28] Training neural networks on 160798 target and 118866 decoy PSMs
+[63:27] Training neural networks on 160798 target and 114872 decoy PSMs
+[66:34] Number of IDs at 0.01 FDR: 84418
+[66:39] Precursors at 1% peptidoform FDR: 80126
+[66:45] Calculating protein q-values
+[66:48] Number of genes identified at 1% FDR: 9329 (precursor-level), 8271 (protein-level) (inference performed using proteotypic peptides only)
+[66:49] Quantification
+[66:51] Precursors with scored PTMs at 1% FDR: 1371 out of 1859 considered
+[66:51] Precursors with all scored PTM sites unoccupied at 1% FDR: 78755
+[66:51] Precursors with PTMs localised (when required) with > 90% confidence: 569 out of 1371
+[66:56] Quantification information saved to D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP2.wiff.quant
+
+[66:57] File #3/6
+[66:57] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP1.wiff
+[71:04] Pre-processing...
+[71:20] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 7899997 precursors in range
+[71:35] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[73:51] RT window set to 1.059
+[73:52] Recommended MS1 mass accuracy setting: 30 ppm
+[75:54] Searching decoys
+[80:23] Main search
+[90:17] Removing low confidence identifications
+[90:57] Removing interfering precursors
+[91:23] Training neural networks on 163139 target and 120802 decoy PSMs
+[95:01] Training neural networks on 163139 target and 117606 decoy PSMs
+[97:59] Number of IDs at 0.01 FDR: 83875
+[98:01] Precursors at 1% peptidoform FDR: 80335
+[98:05] Calculating protein q-values
+[98:07] Number of genes identified at 1% FDR: 9253 (precursor-level), 8193 (protein-level) (inference performed using proteotypic peptides only)
+[98:07] Quantification
+[98:09] Precursors with scored PTMs at 1% FDR: 1833 out of 2144 considered
+[98:09] Precursors with all scored PTM sites unoccupied at 1% FDR: 78502
+[98:09] Precursors with PTMs localised (when required) with > 90% confidence: 973 out of 1833
+[98:12] Quantification information saved to D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP1.wiff.quant
+
+[98:12] File #4/6
+[98:12] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP3.wiff
+[101:35] Pre-processing...
+[101:51] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 7899997 precursors in range
+[102:06] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[104:16] RT window set to 1.12773
+[104:16] Recommended MS1 mass accuracy setting: 28 ppm
+[106:16] Searching decoys
+[111:11] Main search
+[121:13] Removing low confidence identifications
+[122:05] Removing interfering precursors
+[122:31] Training neural networks on 168887 target and 126063 decoy PSMs
+[125:07] Training neural networks on 168887 target and 123023 decoy PSMs
+[127:15] Number of IDs at 0.01 FDR: 85277
+[127:17] Precursors at 1% peptidoform FDR: 81490
+[127:20] Calculating protein q-values
+[127:22] Number of genes identified at 1% FDR: 9322 (precursor-level), 8255 (protein-level) (inference performed using proteotypic peptides only)
+[127:22] Quantification
+[127:24] Precursors with scored PTMs at 1% FDR: 1773 out of 2098 considered
+[127:24] Precursors with all scored PTM sites unoccupied at 1% FDR: 79717
+[127:24] Precursors with PTMs localised (when required) with > 90% confidence: 884 out of 1773
+[127:26] Quantification information saved to D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP3.wiff.quant
+
+[127:26] File #5/6
+[127:26] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP2.wiff
+[131:12] Pre-processing...
+[131:27] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 7899997 precursors in range
+[131:43] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[133:58] RT window set to 1.34521
+[133:58] Recommended MS1 mass accuracy setting: 28 ppm
+[135:59] Searching decoys
+[140:59] Main search
+[150:38] Removing low confidence identifications
+[151:15] Removing interfering precursors
+[151:38] Training neural networks on 173700 target and 132075 decoy PSMs
+[153:54] Training neural networks on 173700 target and 128337 decoy PSMs
+[155:49] Number of IDs at 0.01 FDR: 85184
+[155:51] Precursors at 1% peptidoform FDR: 81585
+[155:54] Calculating protein q-values
+[155:56] Number of genes identified at 1% FDR: 9338 (precursor-level), 8365 (protein-level) (inference performed using proteotypic peptides only)
+[155:56] Quantification
+[155:57] Precursors with scored PTMs at 1% FDR: 1681 out of 2004 considered
+[155:57] Precursors with all scored PTM sites unoccupied at 1% FDR: 79904
+[155:57] Precursors with PTMs localised (when required) with > 90% confidence: 827 out of 1681
+[155:59] Quantification information saved to D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP2.wiff.quant
+
+[156:00] File #6/6
+[156:00] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP1.wiff
+[158:47] Pre-processing...
+[158:58] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 7899997 precursors in range
+[159:10] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[160:39] RT window set to 1.12244
+[160:39] Recommended MS1 mass accuracy setting: 32 ppm
+[162:04] Searching decoys
+[165:43] Main search
+[173:07] Removing low confidence identifications
+[173:45] Removing interfering precursors
+[174:08] Training neural networks on 166950 target and 123294 decoy PSMs
+[176:15] Training neural networks on 166950 target and 119246 decoy PSMs
+[178:01] Number of IDs at 0.01 FDR: 84839
+[178:03] Precursors at 1% peptidoform FDR: 81333
+[178:06] Calculating protein q-values
+[178:07] Number of genes identified at 1% FDR: 9270 (precursor-level), 8272 (protein-level) (inference performed using proteotypic peptides only)
+[178:07] Quantification
+[178:09] Precursors with scored PTMs at 1% FDR: 1704 out of 1990 considered
+[178:09] Precursors with all scored PTM sites unoccupied at 1% FDR: 79629
+[178:09] Precursors with PTMs localised (when required) with > 90% confidence: 850 out of 1704
+[178:11] Quantification information saved to D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP1.wiff.quant
+
+[178:11] Cross-run analysis
+[178:11] Reading quantification information: 6 files
+[178:59] Quantifying peptides
+[179:41] Assembling protein groups
+[179:46] Quantifying proteins
+[179:46] Calculating q-values for protein and gene groups
+[179:53] Calculating global q-values for protein and gene groups
+[179:53] Protein groups with global q-value <= 0.01: 9858
+[179:58] Compressed report saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-first-pass.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[179:58] Saving precursor levels matrix
+[180:02] Precursor levels matrix (1% precursor and protein group FDR) saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-first-pass.pr_matrix.tsv.
+[180:02] Manifest saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-first-pass.manifest.txt
+[180:02] Stats report saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-first-pass.stats.tsv
+[180:02] Generating spectral library:
+[180:05] 106300 target and 1092 decoy precursors saved
+[180:06] Spectral library saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-lib.parquet
+
+[180:06] Loading spectral library Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-lib.parquet
+[180:09] Spectral library loaded: 11756 protein isoforms, 11588 protein groups and 107392 precursors in 92166 elution groups.
+[180:09] Initialising library
+[180:10] Saving the library to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report-lib.parquet.skyline.speclib
+
+
+Second pass: using the newly created spectral library to reanalyse the data
+
+[180:14] File #1/6
+[180:14] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP3.wiff
+[183:09] Pre-processing...
+[183:12] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 106300 precursors in range
+[183:12] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[183:13] RT window set to 0.310036
+[183:13] Recommended MS1 mass accuracy setting: 36 ppm
+[183:14] Searching decoys
+[183:15] Main search
+[183:19] Removing low confidence identifications
+[183:26] Removing interfering precursors
+[183:27] Training neural networks on 87972 target and 53732 decoy PSMs
+[184:16] Training neural networks on 87958 target and 56949 decoy PSMs
+[185:05] Number of IDs at 0.01 FDR: 93043
+[185:05] Precursors at 1% peptidoform FDR: 90152
+[185:06] No protein annotation, skipping protein q-value calculation
+[185:06] Quantification
+[185:07] Precursors with scored PTMs at 1% FDR: 2091 out of 2201 considered
+[185:07] Precursors with all scored PTM sites unoccupied at 1% FDR: 88061
+[185:07] Precursors with PTMs localised (when required) with > 90% confidence: 1096 out of 2091
+
+[185:08] File #2/6
+[185:08] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP2.wiff
+[188:01] Pre-processing...
+[188:04] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 106300 precursors in range
+[188:04] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[188:05] RT window set to 0.303134
+[188:05] Recommended MS1 mass accuracy setting: 32 ppm
+[188:06] Searching decoys
+[188:07] Main search
+[188:11] Removing low confidence identifications
+[188:17] Removing interfering precursors
+[188:19] Training neural networks on 87715 target and 53251 decoy PSMs
+[189:08] Training neural networks on 87695 target and 56510 decoy PSMs
+[189:57] Number of IDs at 0.01 FDR: 93269
+[189:57] Precursors at 1% peptidoform FDR: 90041
+[189:57] No protein annotation, skipping protein q-value calculation
+[189:57] Quantification
+[189:58] Precursors with scored PTMs at 1% FDR: 2113 out of 2214 considered
+[189:58] Precursors with all scored PTM sites unoccupied at 1% FDR: 87928
+[189:58] Precursors with PTMs localised (when required) with > 90% confidence: 1098 out of 2113
+
+[190:00] File #3/6
+[190:00] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP1.wiff
+[192:50] Pre-processing...
+[192:53] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 106300 precursors in range
+[192:53] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[192:54] RT window set to 0.308777
+[192:54] Recommended MS1 mass accuracy setting: 33 ppm
+[192:55] Searching decoys
+[192:56] Main search
+[193:00] Removing low confidence identifications
+[193:06] Removing interfering precursors
+[193:07] Training neural networks on 87781 target and 53720 decoy PSMs
+[193:57] Training neural networks on 87762 target and 56787 decoy PSMs
+[194:47] Number of IDs at 0.01 FDR: 93316
+[194:47] Precursors at 1% peptidoform FDR: 90700
+[194:47] No protein annotation, skipping protein q-value calculation
+[194:47] Quantification
+[194:48] Precursors with scored PTMs at 1% FDR: 2109 out of 2213 considered
+[194:48] Precursors with all scored PTM sites unoccupied at 1% FDR: 88591
+[194:48] Precursors with PTMs localised (when required) with > 90% confidence: 1092 out of 2109
+
+[194:49] File #4/6
+[194:49] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP3.wiff
+[197:38] Pre-processing...
+[197:41] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 106300 precursors in range
+[197:41] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[197:42] RT window set to 0.309748
+[197:42] Recommended MS1 mass accuracy setting: 33 ppm
+[197:43] Searching decoys
+[197:45] Main search
+[197:48] Removing low confidence identifications
+[197:55] Removing interfering precursors
+[197:57] Training neural networks on 87827 target and 53797 decoy PSMs
+[198:46] Training neural networks on 87815 target and 56862 decoy PSMs
+[199:35] Number of IDs at 0.01 FDR: 93276
+[199:35] Precursors at 1% peptidoform FDR: 90346
+[199:35] No protein annotation, skipping protein q-value calculation
+[199:35] Quantification
+[199:36] Precursors with scored PTMs at 1% FDR: 2056 out of 2169 considered
+[199:36] Precursors with all scored PTM sites unoccupied at 1% FDR: 88290
+[199:36] Precursors with PTMs localised (when required) with > 90% confidence: 1039 out of 2056
+
+[199:37] File #5/6
+[199:37] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP2.wiff
+[202:29] Pre-processing...
+[202:32] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 106300 precursors in range
+[202:32] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[202:33] RT window set to 0.307871
+[202:33] Recommended MS1 mass accuracy setting: 34 ppm
+[202:34] Searching decoys
+[202:35] Main search
+[202:39] Removing low confidence identifications
+[202:45] Removing interfering precursors
+[202:47] Training neural networks on 87989 target and 53615 decoy PSMs
+[203:36] Training neural networks on 87976 target and 56690 decoy PSMs
+[204:26] Number of IDs at 0.01 FDR: 93383
+[204:26] Precursors at 1% peptidoform FDR: 90440
+[204:26] No protein annotation, skipping protein q-value calculation
+[204:26] Quantification
+[204:27] Precursors with scored PTMs at 1% FDR: 2039 out of 2174 considered
+[204:27] Precursors with all scored PTM sites unoccupied at 1% FDR: 88401
+[204:27] Precursors with PTMs localised (when required) with > 90% confidence: 1044 out of 2039
+
+[204:28] File #6/6
+[204:28] Loading run D:\LFQ\8600_Nano_Data\LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP1.wiff
+[207:19] Pre-processing...
+[207:22] 1747 MS1 and 148495 MS2 scans in 1747 (inferred) and 1747 (encoded) cycles, 106300 precursors in range
+[207:22] Calibrating with mass accuracies 29 (MS1), 25 (MS2)
+[207:22] RT window set to 0.309718
+[207:23] Recommended MS1 mass accuracy setting: 31 ppm
+[207:23] Searching decoys
+[207:25] Main search
+[207:29] Removing low confidence identifications
+[207:35] Removing interfering precursors
+[207:37] Training neural networks on 88025 target and 53968 decoy PSMs
+[208:27] Training neural networks on 88008 target and 57010 decoy PSMs
+[209:16] Number of IDs at 0.01 FDR: 93180
+[209:16] Precursors at 1% peptidoform FDR: 90711
+[209:16] No protein annotation, skipping protein q-value calculation
+[209:16] Quantification
+[209:17] Precursors with scored PTMs at 1% FDR: 2021 out of 2131 considered
+[209:17] Precursors with all scored PTM sites unoccupied at 1% FDR: 88690
+[209:17] Precursors with PTMs localised (when required) with > 90% confidence: 1022 out of 2021
+
+[209:18] Cross-run analysis
+[209:18] Reading quantification information: 6 files
+[209:21] Quantifying peptides
+[211:58] Quantification parameters: 0.309242, 0.0589985, 0.25476, 0.01289, 0.137825, 0.0869565, 0.0486023, 0.0821508, 0.0563714, 0.0559816, 0.0461127, 0.0482828, 0.283212, 0.0938022, 0.120998, 0.0115754
+[212:01] Quantifying proteins
+[212:01] Calculating q-values for protein and gene groups
+[212:01] Calculating global q-values for protein and gene groups
+[212:01] Protein groups with global q-value <= 0.01: 9517
+[212:07] Compressed report saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[212:07] Saving precursor levels matrix
+[212:11] Precursor levels matrix (1% precursor and protein group FDR) saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.pr_matrix.tsv.
+[212:11] Saving protein group levels matrix
+[212:11] Protein groups matrix saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.pg_matrix.tsv.
+[212:11] Saving gene group levels matrix
+[212:11] Gene groups matrix saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.gg_matrix.tsv.
+[212:11] Saving unique genes levels matrix
+[212:12] Unique genes matrix saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.unique_genes_matrix.tsv.
+[212:12] Manifest saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.manifest.txt
+[212:12] Stats report saved to Q:\ACTIVE\2024\LFQbenchmark_2ndgeneration\DATA_ANALYSIS\DIANN\ZenoTOF8600\251028_DIANNv210_Proteobench_ZenoSWATH_AB_3replicates_report.stats.tsv
+

@@ -582,13 +582,14 @@ def extract_params(
 
 if __name__ == "__main__":
     for fname in [
-        "../../../test/params/DIANN_output_20240229_report.log.txt",
-        "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
-        "../../../test/params/DIANN_WU304578_report.log.txt",
-        "../../../test/params/DIANN_1.7.16.log.txt",
-        "../../../test/params/DIANN_cfg_settings.txt",
-        "../../../test/params/DIANN_cfg_MBR.txt",
-        "../../../test/params/DIA-NN_cfg_directq.txt",
+        # "../../../test/params/DIANN_output_20240229_report.log.txt",
+        # "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
+        # "../../../test/params/DIANN_WU304578_report.log.txt",
+        # "../../../test/params/DIANN_1.7.16.log.txt",
+        # "../../../test/params/DIANN_cfg_settings.txt",
+        # "../../../test/params/DIANN_cfg_MBR.txt",
+        # "../../../test/params/DIA-NN_cfg_directq.txt",
+        "../../../test/params/diann_weird_enzyme.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

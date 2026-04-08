@@ -6,12 +6,15 @@ across all ProteoBench module types (Quant, De Novo, etc.).
 """
 
 import os
+import re
 import uuid
 from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 import streamlit as st
+
+from proteobench.io.params import _AUTO_CALIBRATION_LABEL
 
 # ---------------------------------------------------------------------------
 # Parameter-based filtering
@@ -26,12 +29,36 @@ _PARAMETER_FILTERS = [
     {"col": "enzyme", "label": "Enzyme", "type": "multiselect"},
     {"col": "allowed_miscleavages", "label": "Allowed miscleavages", "type": "multiselect"},
     {"col": "ident_fdr_psm", "label": "PSM FDR", "type": "multiselect"},
+    {"col": "ident_fdr_peptide", "label": "Peptide FDR", "type": "multiselect"},
+    {"col": "ident_fdr_protein", "label": "Protein FDR", "type": "multiselect"},
     {"col": "quantification_method", "label": "Quantification method", "type": "multiselect"},
-    {"col": "precursor_mass_tolerance", "label": "Precursor mass tol.", "type": "multiselect"},
-    {"col": "fragment_mass_tolerance", "label": "Fragment mass tol.", "type": "multiselect"},
-    {"col_min": "min_peptide_length", "col_max": "max_peptide_length", "label": "Peptide length", "type": "combined_range"},
+    {"col": "precursor_mass_tolerance", "label": "Precursor mass tol.", "type": "tolerance_range"},
+    {"col": "fragment_mass_tolerance", "label": "Fragment mass tol.", "type": "tolerance_range"},
+    {
+        "col_min": "min_peptide_length",
+        "col_max": "max_peptide_length",
+        "label": "Peptide length",
+        "type": "combined_range",
+    },
     {"col": "max_mods", "label": "Max mods per peptide", "type": "select_slider"},
-    {"col_min": "min_precursor_charge", "col_max": "max_precursor_charge", "label": "Precursor charge", "type": "combined_range"},
+    {
+        "col_min": "min_precursor_charge",
+        "col_max": "max_precursor_charge",
+        "label": "Precursor charge",
+        "type": "combined_range",
+    },
+    {
+        "col_min": "min_precursor_mz",
+        "col_max": "max_precursor_mz",
+        "label": "Precursor m/z",
+        "type": "combined_range",
+    },
+    {
+        "col_min": "min_fragment_mz",
+        "col_max": "max_fragment_mz",
+        "label": "Fragment m/z",
+        "type": "combined_range",
+    },
 ]
 
 
@@ -39,6 +66,35 @@ def _get_unique_values(series: pd.Series) -> List[str]:
     """Return sorted unique string values from *series*, mapping NaN to _NOT_SPECIFIED."""
     values = series.fillna(_NOT_SPECIFIED).astype(str).unique()
     return sorted(values, key=lambda v: (v == _NOT_SPECIFIED, v))
+
+
+# Pattern to extract numeric value + unit pairs from tolerance strings.
+# Applied with findall to capture both the min and max value.
+_TOL_VALUE_PATTERN = re.compile(
+    r"([+-]?\d+(?:\.\d+)?)\s*(ppm|da|th)",
+    re.IGNORECASE,
+)
+
+
+def _parse_tolerance(val: str) -> Optional[tuple]:
+    """Parse a tolerance string and return ``(min_value, max_value, unit_lower)`` or *None*.
+
+    For symmetric strings like ``"[-10 ppm, 10 ppm]"`` returns ``(-10.0, 10.0, "ppm")``.
+    For single-value strings like ``"20 ppm"`` returns ``(-20.0, 20.0, "ppm")``.
+    Returns *None* for non-parseable values (e.g. ``"Automatic calibration"``).
+    """
+    if not isinstance(val, str) or val == _AUTO_CALIBRATION_LABEL:
+        return None
+    matches = _TOL_VALUE_PATTERN.findall(val)
+    if not matches:
+        return None
+    unit = matches[0][1].lower()
+    values = sorted(float(m[0]) for m in matches)
+    if len(values) == 1:
+        # Single value like "20 ppm" → symmetric window
+        v = abs(values[0])
+        return -v, v, unit
+    return values[0], values[-1], unit
 
 
 def apply_parameter_filters(
@@ -85,6 +141,31 @@ def apply_parameter_filters(
                     mask &= data[col_min].fillna(lo) >= lo
                 if col_max in data.columns:
                     mask &= data[col_max].fillna(hi) <= hi
+            continue
+
+        if spec["type"] == "tolerance_range":
+            col = spec["col"]
+            if col not in data.columns:
+                continue
+            auto_key = f"{col}__auto"
+            include_auto = filter_selections.get(auto_key, True)
+            row_mask = pd.Series(True, index=data.index)
+            for idx_row, val in data[col].items():
+                if val == _AUTO_CALIBRATION_LABEL:
+                    row_mask[idx_row] = include_auto
+                    continue
+                parsed = _parse_tolerance(val)
+                if parsed is None:
+                    continue
+                min_val, max_val, unit = parsed
+                unit_key = f"{col}__{unit}"
+                if unit_key not in filter_selections:
+                    continue
+                sel_lo, sel_hi = filter_selections[unit_key]
+                # Both bounds must fit within the slider range
+                if min_val < sel_lo or max_val > sel_hi:
+                    row_mask[idx_row] = False
+            mask &= row_mask
             continue
 
         col = spec.get("col")
@@ -180,10 +261,18 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
             for spec in applicable:
                 if spec["type"] == "combined_range":
                     sk = f"{key_prefix}_{spec['col_min']}__{spec['col_max']}"
+                    for k in list(st.session_state):
+                        if k == sk:
+                            del st.session_state[k]
+                elif spec["type"] == "tolerance_range":
+                    prefix = f"{key_prefix}_{spec['col']}"
+                    for k in list(st.session_state):
+                        if k.startswith(prefix):
+                            del st.session_state[k]
                 else:
                     sk = f"{key_prefix}_{spec['col']}"
-                if sk in st.session_state:
-                    del st.session_state[sk]
+                    if sk in st.session_state:
+                        del st.session_state[sk]
             st.rerun()
 
         # Lay out filters in a 3-column grid
@@ -199,9 +288,9 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
                     # Build option range from both columns
                     all_vals = set()
                     if col_min in data.columns:
-                        all_vals.update(data[col_min].dropna().unique())
+                        all_vals.update(int(x) for x in data[col_min].dropna().unique())
                     if col_max in data.columns:
-                        all_vals.update(data[col_max].dropna().unique())
+                        all_vals.update(int(x) for x in data[col_max].dropna().unique())
                     all_options = sorted(all_vals)
                     full_range = (all_options[0], all_options[-1])
                     default = st.session_state.get(sk, full_range)
@@ -254,6 +343,44 @@ def generate_parameter_filters(data: pd.DataFrame, key_prefix: str = "param_filt
                         key=sk,
                     )
                     filter_selections[col_name] = selected
+
+                elif spec["type"] == "tolerance_range":
+                    col_name = spec["col"]
+                    parsed = data[col_name].dropna().apply(_parse_tolerance)
+                    has_auto = (data[col_name] == _AUTO_CALIBRATION_LABEL).any()
+
+                    # Collect all values (min + max) per unit
+                    vals_by_unit: Dict[str, List[float]] = {}
+                    for p in parsed.dropna():
+                        min_val, max_val, unit = p
+                        vals_by_unit.setdefault(unit, []).extend([min_val, max_val])
+
+                    # Auto-calibration checkbox
+                    if has_auto:
+                        sk_auto = f"{key_prefix}_{col_name}_auto"
+                        default_auto = st.session_state.get(sk_auto, True)
+                        include_auto = st.checkbox(
+                            f"{label}: include auto-calibrated",
+                            value=default_auto,
+                            key=sk_auto,
+                        )
+                        filter_selections[f"{col_name}__auto"] = include_auto
+
+                    # One slider per unit covering all min+max values
+                    for unit in sorted(vals_by_unit):
+                        all_vals = sorted(set(vals_by_unit[unit]))
+                        if len(all_vals) < 2:
+                            continue
+                        sk_unit = f"{key_prefix}_{col_name}_{unit}"
+                        full_range = (all_vals[0], all_vals[-1])
+                        default_range = st.session_state.get(sk_unit, full_range)
+                        selected = st.select_slider(
+                            f"{label} ({unit})",
+                            options=all_vals,
+                            value=default_range,
+                            key=sk_unit,
+                        )
+                        filter_selections[f"{col_name}__{unit}"] = selected
 
         filtered = apply_parameter_filters(data, filter_selections)
         filtered_count = len(filtered)

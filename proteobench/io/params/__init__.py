@@ -40,15 +40,17 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 import numpy as np
+import pandas as pd
 
 # Strings that should be treated as missing / unset values.
 _MISSING_SENTINELS = frozenset({"none", "n/a", "not specified", "unknown", "placeholder", "na", "nan", "", "-"})
 
-# Canonical enzyme name mapping (lowercase key → display name).
+# Canonical enzyme name mapping (lowercase key → display name). Add keys here in lowercase.
 _ENZYME_MAP = {
     "trypsin": "Trypsin",
     "trypsin/p": "Trypsin/P",
-    "stricttrypsin": "Trypsin",
+    "stricttrypsin": "Trypsin/P",
+    "k*,r*,!p*": "Trypsin",
     "[rk]|{p}": "Trypsin",
     "[rk]": "Trypsin/P",
     "lys-c": "Lys-C",
@@ -61,6 +63,13 @@ _ENZYME_MAP = {
     "gluc": "Glu-C",
     "glu-c": "Glu-C",
 }
+
+# Tolerance values (lowercase) that indicate automatic calibration.
+_AUTO_CALIBRATION_SENTINELS = frozenset({"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]"})
+_AUTO_CALIBRATION_LABEL = "Automatic calibration"
+
+# Tolerance fields to which the auto-calibration mapping applies.
+_TOLERANCE_FIELDS = ("precursor_mass_tolerance", "fragment_mass_tolerance")
 
 # Fields that must be coerced to float (FDR values, decimal 0-1).
 _FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")
@@ -235,6 +244,74 @@ class ProteoBenchParameters:
                 if canonical is not None:
                     setattr(self, "enzyme", canonical)
                 # If not in map, keep original value as-is
+
+        # --- F. Tolerance auto-calibration mapping ----------------------------
+        for fld in _TOLERANCE_FIELDS:
+            val = getattr(self, fld, None)
+            if val is not None and not (isinstance(val, float) and np.isnan(val)):
+                check = val.strip().lower() if isinstance(val, str) else val
+                if check in _AUTO_CALIBRATION_SENTINELS:
+                    setattr(self, fld, _AUTO_CALIBRATION_LABEL)
+
+
+# Note: this should be able to be removed when we have resubmitted all points again.
+def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Apply the same coercion rules as :meth:`ProteoBenchParameters.normalize`
+    to an entire DataFrame of historical results.
+
+    Operates **in-place** on *df* and also returns it for convenience.
+    """
+    # A. Sanitize missing sentinel strings across all object columns
+    for col in df.columns:
+        if df[col].dtype == object:
+            mask = df[col].apply(lambda v: isinstance(v, str) and v.strip().lower() in _MISSING_SENTINELS)
+            df.loc[mask, col] = np.nan
+
+    # B. Float coercion (FDR fields — decimal in [0, 1])
+    for col in _FLOAT_FIELDS:
+        if col not in df.columns:
+            continue
+        df[col] = pd.to_numeric(df[col], errors="coerce").astype(float)
+        # Values >= 1 are assumed to be percentages
+        pct_mask = df[col] >= 1
+        df.loc[pct_mask, col] = df.loc[pct_mask, col] / 100
+
+    # C. Integer coercion (nullable Int64 so NaN is preserved)
+    for col in _INT_FIELDS:
+        if col not in df.columns:
+            continue
+        df[col] = pd.to_numeric(df[col], errors="coerce").round().astype("Int64")
+
+    # D. Boolean coercion
+    if "enable_match_between_runs" in df.columns:
+        col = "enable_match_between_runs"
+        df[col] = df[col].apply(
+            lambda v: (
+                v
+                if isinstance(v, (bool, np.bool_))
+                else (str(v).strip().lower() in ("true", "1", "yes") if pd.notna(v) else np.nan)
+            )
+        )
+
+    # E. Enzyme name normalization
+    if "enzyme" in df.columns:
+        df["enzyme"] = df["enzyme"].apply(
+            lambda v: (_ENZYME_MAP.get(v.strip().lower(), v) if isinstance(v, str) and pd.notna(v) else v)
+        )
+
+    # F. Tolerance auto-calibration mapping
+    for col in _TOLERANCE_FIELDS:
+        if col not in df.columns:
+            continue
+        df[col] = df[col].apply(
+            lambda v: (
+                _AUTO_CALIBRATION_LABEL
+                if (v.strip().lower() if isinstance(v, str) else v) in _AUTO_CALIBRATION_SENTINELS and pd.notna(v)
+                else v
+            )
+        )
+
+    return df
 
 
 # Automatically initialize from fields.json if run directly

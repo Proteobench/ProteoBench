@@ -13,8 +13,8 @@ enzyme,Trypsin
 allowed_miscleavages,1
 min_peptide_length,6
 max_peptide_length,40
-fixed_mods,Carbamidomethyl@C
-variable_mods,Oxidation@M;Acetyl@Protein N-term
+fixed_mods,C[Carbamidomethyl]
+variable_mods,"M[Oxidation], Protein N-term[Acetyl]"
 max_mods,1
 min_precursor_charge,1
 max_precursor_charge,4

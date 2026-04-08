@@ -16,6 +16,7 @@ import pandas as pd
 import yaml
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.maxquant import _homogenize_mods
 
 logger = logging.getLogger(__name__)
 
@@ -189,8 +190,8 @@ def extract_params(
     # "fdr_level": "psm_level_fdrs",
     params.ident_fdr_psm = pipeline_params["psm_level_fdr_cutoff"]
     params.ident_fdr_protein = pipeline_params["protein_level_fdr_cutoff"]
-    params.variable_mods = pipeline_params["variable_mods"]
-    params.fixed_mods = pipeline_params["fixed_mods"]
+    params.variable_mods = _homogenize_mods(pipeline_params["variable_mods"])
+    params.fixed_mods = _homogenize_mods(pipeline_params["fixed_mods"])
     params.max_mods = pipeline_params["max_mods"]
     params.min_precursor_charge = pipeline_params["min_precursor_charge"]
     params.max_precursor_charge = pipeline_params["max_precursor_charge"]

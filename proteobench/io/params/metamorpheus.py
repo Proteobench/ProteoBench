@@ -13,6 +13,34 @@ import pandas as pd
 from proteobench.io.params import ProteoBenchParameters
 
 
+def _homogenize_mod(mod_str: str) -> str:
+    """Convert MetaMorpheus modification format to ProForma-like notation.
+
+    MetaMorpheus format: ``{modname} on {residue}``
+    with optional terminal qualifiers like ``(Pep N-term)`` or ``(Prot N-term)``.
+
+    Examples:
+        ``Carbamidomethyl on C`` -> ``C[Carbamidomethyl]``
+        ``Acetylation on X (Prot N-term)`` -> ``Protein N-term[Acetylation]``
+        ``Oxidation on M`` -> ``M[Oxidation]``
+    """
+    mod_str = mod_str.strip()
+    if " on " not in mod_str:
+        return mod_str
+    name, residue_part = mod_str.split(" on ", 1)
+    residue_part = residue_part.strip()
+    if "(Prot N-Term)" in residue_part:
+        return f"Protein N-term[{name}]"
+    elif "(Pep N-Term)" in residue_part:
+        return f"N-term[{name}]"
+    elif "(Prot C-Term)" in residue_part:
+        return f"Protein C-term[{name}]"
+    elif "(Pep C-Term)" in residue_part:
+        return f"C-term[{name}]"
+    else:
+        return f"{residue_part}[{name}]"
+
+
 def load_files(file1: Union[str, IO], file2: Union[str, IO]) -> Tuple[Union[str, None], Union[dict, None]]:
     """
     Load two files (IO objects or file paths), returning:
@@ -108,9 +136,9 @@ def parse_modifications(mods: str) -> list:
     mod_list = mods.split("\t\t")
     for mod in mod_list:
         mod_spec = mod.split("\t")[1]
-        parsed_mod_list.append(mod_spec)
+        parsed_mod_list.append(_homogenize_mod(mod_spec))
 
-    return ";".join(parsed_mod_list) if parsed_mod_list else []
+    return ", ".join(parsed_mod_list) if parsed_mod_list else []
 
 
 def format_tolerances(tolerance: str) -> str:

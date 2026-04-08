@@ -9,6 +9,7 @@ from typing import Dict
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.maxquant import _homogenize_mods
 
 
 def extract_params(
@@ -56,8 +57,8 @@ def extract_params(
     parameters["allowed_miscleavages"] = int(params_dict["Max. Missed Cleavage Sites"])
     parameters["min_peptide_length"] = int(params_dict["Min. Peptide Length"])
     parameters["max_peptide_length"] = int(params_dict["Max. Peptide Length"])
-    parameters["fixed_mods"] = params_dict["Static Modifications"]
-    parameters["variable_mods"] = params_dict["Variable Modifications"]
+    parameters["fixed_mods"] = _homogenize_mods(params_dict["Static Modifications"])
+    parameters["variable_mods"] = _homogenize_mods(params_dict["Variable Modifications"])
     parameters["max_mods"] = int(params_dict["Maximum Number of Modifications"])
     parameters["min_precursor_charge"] = int(params_dict["Min. Peptide Charge"])
     parameters["max_precursor_charge"] = int(params_dict["Max. Peptide Charge"])

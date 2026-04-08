@@ -13,8 +13,8 @@ enzyme,"K*,R*,!"
 allowed_miscleavages,1
 min_peptide_length,6
 max_peptide_length,30
-fixed_mods,UniMod:4
-variable_mods,"UniMod:35,UniMod:1"
+fixed_mods,C[Carbamidomethyl]
+variable_mods,"M[Oxidation], N-term[Acetyl]"
 max_mods,2
 min_precursor_charge,1
 max_precursor_charge,4

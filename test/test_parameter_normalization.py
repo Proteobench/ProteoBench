@@ -168,7 +168,7 @@ class TestEnzymeNormalization:
 
     def test_stricttrypsin(self):
         p = _make_params(enzyme="stricttrypsin")
-        assert p.enzyme == "Trypsin"
+        assert p.enzyme == "Trypsin/P"
 
     def test_lysc_variants(self):
         assert _make_params(enzyme="lys-c").enzyme == "Lys-C"
@@ -182,3 +182,30 @@ class TestEnzymeNormalization:
     def test_nan_enzyme(self):
         p = _make_params(enzyme=np.nan)
         assert isinstance(p.enzyme, float) and math.isnan(p.enzyme)
+
+
+# ── Tolerance auto-calibration mapping ───────────────────────────────────
+
+
+class TestToleranceNormalization:
+    @pytest.mark.parametrize("val", ["Dynamic", "dynamic", "Auto Detected", "0", "0 ppm"])
+    def test_precursor_sentinels(self, val):
+        p = _make_params(precursor_mass_tolerance=val)
+        assert p.precursor_mass_tolerance == "Automatic calibration"
+
+    @pytest.mark.parametrize("val", ["Dynamic", "0", "0 ppm"])
+    def test_fragment_sentinels(self, val):
+        p = _make_params(fragment_mass_tolerance=val)
+        assert p.fragment_mass_tolerance == "Automatic calibration"
+
+    def test_integer_zero(self):
+        p = _make_params(precursor_mass_tolerance=0)
+        assert p.precursor_mass_tolerance == "Automatic calibration"
+
+    def test_normal_value_kept(self):
+        p = _make_params(precursor_mass_tolerance="[-10 ppm, 10 ppm]")
+        assert p.precursor_mass_tolerance == "[-10 ppm, 10 ppm]"
+
+    def test_nan_untouched(self):
+        p = _make_params(precursor_mass_tolerance=np.nan)
+        assert isinstance(p.precursor_mass_tolerance, float) and math.isnan(p.precursor_mass_tolerance)

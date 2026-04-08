@@ -11,6 +11,49 @@ import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
 
+MASS_TO_MOD_MAPPING = {
+    57.021464: "Carbamidomethyl",
+    15.9949: "Oxidation",
+    42.0106: "Acetyl",
+}
+MASS_TOLERANCE = 0.001
+
+# Sage uses "[" for N-terminal and "]" for C-terminal modifications
+RESIDUE_MAP = {"[": "Protein N-term", "]": "Protein C-term", "^": "N-term", "$": "C-term"}
+
+
+def _lookup_mod_name(mass: float) -> str:
+    """Look up a modification name by mass shift within tolerance."""
+    for ref_mass, name in MASS_TO_MOD_MAPPING.items():
+        if abs(mass - ref_mass) < MASS_TOLERANCE:
+            return name
+    return str(mass)
+
+
+def _parse_static_mods(mods: dict) -> str:
+    """Parse Sage static_mods dict into ProForma-like format."""
+    if not mods:
+        return ""
+    results = []
+    for residue, mass in mods.items():
+        mod_name = _lookup_mod_name(mass)
+        res = RESIDUE_MAP.get(residue, residue)
+        results.append(f"{res}[{mod_name}]")
+    return ", ".join(results)
+
+
+def _parse_variable_mods(mods: dict) -> str:
+    """Parse Sage variable_mods dict into ProForma-like format."""
+    if not mods:
+        return ""
+    results = []
+    for residue, masses in mods.items():
+        res = RESIDUE_MAP.get(residue, residue)
+        for mass in masses:
+            mod_name = _lookup_mod_name(mass)
+            results.append(f"{res}[{mod_name}]")
+    return ", ".join(results)
+
 
 def extract_params(
     fname: Union[str, pathlib.Path],
@@ -64,8 +107,8 @@ def extract_params(
     else:
         raise ValueError(f"Unknown value for semi_enzymatic: {data['database']['enzyme']['semi_enzymatic']}")
 
-    params.fixed_mods = data["database"]["static_mods"]
-    params.variable_mods = data["database"]["variable_mods"]
+    params.fixed_mods = _parse_static_mods(data["database"]["static_mods"])
+    params.variable_mods = _parse_variable_mods(data["database"]["variable_mods"])
 
     try:
         _precursor_mass_tolerance = data["precursor_tol"]["ppm"]

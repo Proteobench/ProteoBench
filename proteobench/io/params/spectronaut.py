@@ -10,6 +10,7 @@ from typing import List, Optional, Tuple
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.maxquant import _homogenize_mods
 
 VENDOR_SYSTEM_MAP = {
     "Thermo": "Thermo Orbitrap",
@@ -237,8 +238,8 @@ def read_spectronaut_settings(
     params.allowed_miscleavages = int(extract_value(lines, "Missed Cleavages:"))
     params.max_peptide_length = int(extract_value(lines, "Max Peptide Length:"))
     params.min_peptide_length = int(extract_value(lines, "Min Peptide Length:"))
-    params.fixed_mods = extract_value(lines, "Fixed Modifications:")
-    params.variable_mods = extract_value_regex(lines, "^Variable Modifications:")
+    params.fixed_mods = _homogenize_mods(extract_value(lines, "Fixed Modifications:"))
+    params.variable_mods = _homogenize_mods(extract_value_regex(lines, "^Variable Modifications:"))
     params.max_mods = int(extract_value(lines, "Max Variable Modifications:"))
     _min_precursor_charge = extract_value(lines, "Peptide Charge:")
     if _min_precursor_charge == "False":

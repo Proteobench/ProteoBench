@@ -13,8 +13,8 @@ enzyme,Trypsin
 allowed_miscleavages,2
 min_peptide_length,6
 max_peptide_length,30
-fixed_mods,"Cysteine carbamidomethylation,Acetyl"
-variable_mods,"UniMod:35,UniMod:1"
+fixed_mods,"C[Carbamidomethyl], N-term[Acetyl]"
+variable_mods,"M[Oxidation], N-term[Acetyl]"
 max_mods,3
 min_precursor_charge,2
 max_precursor_charge,4

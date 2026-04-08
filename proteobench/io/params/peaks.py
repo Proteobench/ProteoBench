@@ -12,6 +12,12 @@ import yaml
 
 from proteobench.io.params import ProteoBenchParameters
 
+MODIFICATION_MAPPING = {
+    "Carbamidomethylation (+57.02)": "C[Carbamidomethyl]",
+    "Oxidation (M) (+15.99)": "M[Oxidation]",
+    "Acetylation (Protein N-term) (+42.01)": "Protein N-term[Acetylation]",
+}
+
 
 def clean_text(text: str) -> str:
     """
@@ -212,9 +218,9 @@ def extract_params(
     params.max_peptide_length = int(peptide_length_range[1])
     params.min_peptide_length = int(peptide_length_range[0])
     fixed = get_items_between(lines, "Fixed Modifications:", "Variable Modifications:", only_last=True)
-    params.fixed_mods = " ,".join(fixed)
+    params.fixed_mods = ", ".join(MODIFICATION_MAPPING.get(m, m) for m in fixed)
     varmods = get_items_between(lines, "Variable Modifications:", "Database:", only_last=True)
-    params.variable_mods = " ,".join(varmods)
+    params.variable_mods = ", ".join(MODIFICATION_MAPPING.get(m, m) for m in varmods)
     params.max_mods = int(extract_value(lines, "Max Variable PTM per Peptide:"))
     try:
         precursor_charge_between = extract_value(lines, "Precursor Charge between:").split(",")
@@ -255,10 +261,10 @@ if __name__ == "__main__":
     Reads PEAKS settings files, extracts parameters, and writes them to CSV files.
     """
     fnames = [
-        # "../../../test/params/PEAKS_parameters.txt",
-        # "../../../test/params/PEAKS_parameters_DDA.txt",
-        # "../../../test/params/PEAKS_parameters_DIA.txt",
-        # "../../../test/params/PEAKS_parameters_DDA_new.txt",
+        "../../../test/params/PEAKS_parameters.txt",
+        "../../../test/params/PEAKS_parameters_DDA.txt",
+        "../../../test/params/PEAKS_parameters_DIA.txt",
+        "../../../test/params/PEAKS_parameters_DDA_new.txt",
         "../../../test/params/PEAKS_diaPASEF.txt",
     ]
 

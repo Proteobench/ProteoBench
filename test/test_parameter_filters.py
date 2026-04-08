@@ -117,13 +117,48 @@ class TestApplyParameterFilters:
         assert all(result["software_name"] == "MaxQuant")
         assert all(result["enable_match_between_runs"])
 
-    def test_nan_values_filterable(self, sample_datapoints):
+    def test_tolerance_range_filter(self, sample_datapoints):
+        """Tolerance range slider restricts both min and max of each row."""
+        # "20 ppm" → (-20, 20), "10 ppm" → (-10, 10)
+        # Slider set to [-15, 15]: min=-20 < -15 fails, min=-10 >= -15 passes
         result = apply_parameter_filters(
             sample_datapoints,
-            {"fragment_mass_tolerance": [_NOT_SPECIFIED]},
+            {"fragment_mass_tolerance__ppm": (-15.0, 15.0)},
         )
+        # dp1-dp3 have "20 ppm" → min=-20 < -15 → excluded. dp4 has NaN → kept
         assert len(result) == 1
         assert result.iloc[0]["id"] == "dp4"
+
+    def test_tolerance_range_auto_excluded(self, sample_datapoints):
+        """Auto-calibration checkbox excludes those rows when False."""
+        df = sample_datapoints.copy()
+        df.loc[3, "fragment_mass_tolerance"] = "Automatic calibration"
+        result = apply_parameter_filters(
+            df,
+            {"fragment_mass_tolerance__auto": False},
+        )
+        assert len(result) == 3
+        assert "dp4" not in result["id"].values
+
+    def test_tolerance_range_asymmetric(self):
+        """Asymmetric tolerance windows: both min and max must fit in the slider range."""
+        df = pd.DataFrame(
+            {
+                "id": ["a", "b", "c"],
+                "precursor_mass_tolerance": [
+                    "[-15 ppm, 10 ppm]",
+                    "[-10 ppm, 10 ppm]",
+                    "[-5 ppm, 20 ppm]",
+                ],
+            }
+        )
+        # Slider range [-12, 12]: a's min=-15 is out, c's max=20 is out
+        result = apply_parameter_filters(
+            df,
+            {"precursor_mass_tolerance__ppm": (-12.0, 12.0)},
+        )
+        assert len(result) == 1
+        assert result.iloc[0]["id"] == "b"
 
     def test_empty_dataframe(self):
         empty_df = pd.DataFrame(columns=["software_name", "enzyme"])

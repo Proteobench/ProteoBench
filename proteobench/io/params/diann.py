@@ -12,6 +12,31 @@ from packaging.version import Version
 
 from proteobench.io.params import ProteoBenchParameters
 
+MODIFICATION_MAPPING = {
+    # Command-line short forms
+    "unimod4": "C[Carbamidomethyl]",
+    # Descriptive forms
+    "Carbamidomethyl (C)": "C[Carbamidomethyl]",
+    "Cysteine carbamidomethylation": "C[Carbamidomethyl]",
+    "Oxidation (M)": "M[Oxidation]",
+    "Acetyl": "N-term[Acetyl]",
+    # UniMod short forms (from cfg-extracted log text)
+    "UniMod:4": "C[Carbamidomethyl]",
+    "UniMod:35": "M[Oxidation]",
+    "UniMod:1": "N-term[Acetyl]",
+    "UniMod:21": "S[Phospho], T[Phospho], Y[Phospho]",
+    "UniMod:121": "K[GG]",
+    # UniMod full forms with slash separators (from command-line parsing)
+    "UniMod:35/15.994915/M": "M[Oxidation]",
+    "UniMod:1/42.010565/*n": "N-term[Acetyl]",
+    "UniMod:21/79.966331/STY": "STY[Phospho]",
+    "UniMod:121/114.042927/K": "K[GG]",
+    # UniMod full forms with comma separators (alternative notation)
+    "UniMod:1,42.010565,*n": "N-term[Acetyl]",
+    "UniMod:21,79.966331,STY": "STY[Phospho]",
+    "UniMod:121,114.042927,K": "K[GG]",
+}
+
 # Regexes
 fragment_mass_tolerance_regex = r"Optimised mass accuracy: (\d*\.?\d+) ppm"
 precursor_mass_tolerance_regex = r"Recommended MS1 mass accuracy setting: (\d*\.?\d+) ppm"
@@ -538,6 +563,17 @@ def extract_params(
 
         protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
         parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")
+
+    # Map modification strings to ProForma-like notation
+    for mod_key in ("fixed_mods", "variable_mods"):
+        raw = parameters.get(mod_key)
+        if not raw or not isinstance(raw, str):
+            continue
+        mapped = []
+        for mod in raw.split(","):
+            mod = mod.strip()
+            mapped.append(MODIFICATION_MAPPING.get(mod, mod))
+        parameters[mod_key] = ", ".join(mapped)
 
     params = ProteoBenchParameters(**parameters, filename=json_file)
     params.fill_none()

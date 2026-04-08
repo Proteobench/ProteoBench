@@ -8,6 +8,7 @@ import pandas as pd
 import yaml
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.msangel import _homogenize_mod_xtandem
 
 
 def extract_params(
@@ -45,8 +46,8 @@ def extract_params(
     if params.enzyme == "trypsin":
         params.enzyme = "Trypsin"
     params.allowed_miscleavages = summary["miscleavages"]
-    params.fixed_mods = summary["fixed_mods"]
-    params.variable_mods = summary["variable_mods"]
+    params.fixed_mods = ", ".join(_homogenize_mod_xtandem(m) for m in summary["fixed_mods"].split(","))
+    params.variable_mods = ", ".join(_homogenize_mod_xtandem(m) for m in summary["variable_mods"].split(","))
     params.max_mods = summary["max_mods"]
     params.min_peptide_length = summary["min_peptide_length"]
     params.max_peptide_length = summary["max_peptide_length"]

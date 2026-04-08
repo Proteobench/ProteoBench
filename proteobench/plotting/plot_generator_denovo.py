@@ -118,6 +118,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df = result_df
 
         # Define layout
+        benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
         results_df = flatten_results_column(benchmark_metrics_df)
         benchmark_metrics_df = pd.concat([benchmark_metrics_df, results_df], axis=1)
         results_min = results_df.min()

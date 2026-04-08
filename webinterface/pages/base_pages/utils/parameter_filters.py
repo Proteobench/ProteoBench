@@ -40,6 +40,7 @@ _PARAMETER_FILTERS = [
         "label": "Precursor charge",
         "type": "combined_range",
     },
+    {"col": "max_precursor_charge", "label": "Max precursor charge", "type": "max_slider", "fallback_for": "combined_range:min_precursor_charge__max_precursor_charge"},
     {
         "col_min": "min_precursor_mz",
         "col_max": "max_precursor_mz",
@@ -52,6 +53,23 @@ _PARAMETER_FILTERS = [
         "label": "Fragment m/z",
         "type": "combined_range",
     },
+    # De novo specific filters (only shown when columns exist with 2+ unique values)
+    {"col": "n_beams", "label": "Number of beams", "type": "max_slider"},
+    {"col": "n_peaks", "label": "Number of peaks", "type": "max_slider"},
+    {
+        "col_min": "min_mz",
+        "col_max": "max_mz",
+        "label": "m/z range",
+        "type": "combined_range",
+    },
+    {
+        "col_min": "min_intensity",
+        "col_max": "max_intensity",
+        "label": "Intensity range",
+        "type": "combined_range",
+    },
+    {"col": "isotope_error_range", "label": "Isotope error range", "type": "multiselect"},
+    {"col": "decoding_strategy", "label": "Decoding strategy", "type": "multiselect"},
 ]
 
 
@@ -212,22 +230,26 @@ def generate_parameter_filters(
 
     # Determine which filters are applicable for this dataset
     applicable: List[dict] = []
+    added_combined: set = set()  # tracks "col_min__col_max" keys for added combined_range filters
     for spec in _PARAMETER_FILTERS:
         if spec["type"] == "combined_range":
             col_min, col_max = spec["col_min"], spec["col_max"]
-            has_min = col_min in data.columns and data[col_min].dropna().nunique() >= 1
-            has_max = col_max in data.columns and data[col_max].dropna().nunique() >= 1
-            if has_min or has_max:
+            has_min = col_min in data.columns and data[col_min].dropna().nunique() >= 2
+            has_max = col_max in data.columns and data[col_max].dropna().nunique() >= 2
+            if has_min and has_max:
                 all_vals = set()
-                if has_min:
-                    all_vals.update(data[col_min].dropna().unique())
-                if has_max:
-                    all_vals.update(data[col_max].dropna().unique())
+                all_vals.update(data[col_min].dropna().unique())
+                all_vals.update(data[col_max].dropna().unique())
                 if len(all_vals) >= 2:
                     applicable.append(spec)
+                    added_combined.add(f"combined_range:{col_min}__{col_max}")
         else:
             col = spec["col"]
             if col not in data.columns:
+                continue
+            # Skip fallback filter when corresponding combined_range was already added
+            fallback_for = spec.get("fallback_for")
+            if fallback_for and fallback_for in added_combined:
                 continue
             n_unique = data[col].dropna().nunique()
             if n_unique < 2:

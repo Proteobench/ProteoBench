@@ -217,12 +217,12 @@ class TestApplyParameterFilters:
         assert len(result) == 2
         assert set(result["id"]) == {"dp3", "dp4"}
 
-    def test_select_slider_range(self, sample_datapoints):
-        """select_slider with range tuple works."""
+    def test_max_slider(self, sample_datapoints):
+        """max_slider keeps rows where value <= threshold."""
         sample_datapoints["max_mods"] = [2, 3, 4, 5]
         result = apply_parameter_filters(
             sample_datapoints,
-            {"max_mods": (2, 3)},
+            {"max_mods": 3},
         )
         assert len(result) == 2
         assert set(result["id"]) == {"dp1", "dp2"}

@@ -219,8 +219,42 @@ Once submitted, a GitHub pull request will be automatically generated for tracki
 | PEAKS | PEAKS DIA output file (`.txt` format - export as text report) | Settings text file (`.txt`) |
 | Custom | Tab-separated values (`.tsv` or `.csv`) following standard format | Not required |
 
+## Result description
+
+The result DataFrame produced by this module contains the following columns:
+
+| Column | Description |
+|--------|-------------|
+| id | Unique identifier for the benchmark run |
+| software_name | Name of the software tool used |
+| software_version | Version of the software tool |
+| search_engine | Name of the search engine |
+| search_engine_version | Version of the search engine |
+| ident_fdr_psm | FDR at PSM/precursor level |
+| ident_fdr_peptide | FDR at peptide level |
+| ident_fdr_protein | FDR at protein level |
+| enable_match_between_runs | Whether match between runs was enabled |
+| precursor_mass_tolerance | Precursor mass tolerance setting |
+| fragment_mass_tolerance | Fragment mass tolerance setting |
+| enzyme | Enzyme used for digestion |
+| allowed_miscleavages | Maximum missed cleavages |
+| fixed_mods | Fixed modifications in ProForma-like format |
+| variable_mods | Variable modifications in ProForma-like format |
+| nr_observed | Number of quantified spike-in precursor ions |
+| epsilon | Mean or median absolute log2 fold-change error |
+| old_new | Whether the datapoint is from a new submission or existing |
+
 ## Notes
 
 - Contaminants are expected to be flagged with `Cont_`.
 - Species annotation in protein identifiers must support `_HUMAN`, `_YEAST`, and `_ECOLI` mapping.
 - For this module page, only currently implemented formats and behavior are documented.
+
+---
+
+> **DOCUMENTATION GAPS** (compared to other quantification modules like Module 2, Module 5)
+>
+> - **TOML file description**: Other modules include a section explaining the TOML configuration (mapper, condition_mapper, run_mapper, species_mapper, general, modifications_parser). Missing here.
+> - **Result description**: Other modules include a table describing each column in the result DataFrame (e.g. id, software_name, epsilon, nr_observed). Missing here.
+> - **MaxDIA support**: Other DIA modules list MaxDIA (even as work-in-progress). Not mentioned here.
+> - **Data availability**: Files are on JPOST, but the ProteomeXchange/PRIDE availability status is not mentioned (other modules note this explicitly).

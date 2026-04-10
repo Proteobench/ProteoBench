@@ -101,3 +101,15 @@ webinterface
 ├── requirements.txt
 └── streamlit_utils.py                    # mainly logging functionality (is it used?)
 ```
+
+---
+
+> **DOCUMENTATION GAPS**
+>
+> - **Outdated file listings**: The webinterface tree lists pages 2-6 but the actual pages have changed significantly (DIA modules, de novo, plasma, etc.). The tree should be updated to reflect the current state.
+> - **Version reference**: The proteobench tree references version `0.11.0` but the current version may differ. Consider either removing the version reference or keeping it updated.
+> - **Missing directories**: The `proteobench/modules/denovo/` directory is not listed but exists. Similarly, `proteobench/plotting/plot_generator_denovo.py` is missing.
+> - **Missing utils/parameter_filters.py**: The webinterface tree does not mention `pages/base_pages/utils/` which contains shared filtering logic.
+> - **No architectural diagrams**: The page describes the layout textually but has no visual diagrams showing data flow or component relationships.
+> - **`files_provided_to_users`**: Noted as "probably accidentally added" — should this be cleaned up or documented?
+```

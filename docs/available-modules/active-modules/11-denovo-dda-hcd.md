@@ -32,7 +32,7 @@ The widely used 'balanced' nine species dataset from [Noble et al., 2024](https:
 | [PXD004947](https://www.ebi.ac.uk/pride/archive/projects/PXD004947) | *Solanum lycopersicum*    | QExactive              | 603,506    | **100,056** |
 | [PXD003868](https://www.ebi.ac.uk/pride/archive/projects/PXD003868) | *Saccharomyces cervisiae* | Q-Exactive Plus        | 1,477,397  | **108,973** |
 | [PXD004467](https://www.ebi.ac.uk/pride/archive/projects/PXD004467) | *Apis mellifera*          | QExactive              | 823,169    | **102,285** |
-| [PXD004424]()                                                       | *Homo sapiens*            | QExactive              | 684,821    | **44,555**  |
+| [PXD004424](https://www.ebi.ac.uk/pride/archive/projects/PXD004424) | *Homo sapiens*            | QExactive              | 684,821    | **44,555**  |
 | Total                                                               |                           |                        | 15,165,161 | **779,879** |
 
 The benchmark dataset (nine-species-balanced.zip) can be downloaded here: [zenodo](https://zenodo.org/records/13685813). In this zip-file, each species is represented by a separate mgf-file. We used this [script](https://github.com/Proteobench/ProteoBench/tree/denovo_module/proteobench/io/data) to combine the mgf-files and reannotate the spectrum identifiers to prevent duplicate identifiers.
@@ -147,14 +147,75 @@ Table 2 provides an overview of the required input files for public submission. 
 
 \* PepNet does not have adaptable parameters, so no parameter file is required
 
-## toml file description
+## TOML file description
 
-*Coming soon*
+Each supported de novo tool has a TOML parse settings file (located in `proteobench/io/parsing/io_parse_settings/denovo/DDA/HCD/`) that defines how the tool's output is parsed. The TOML files specify:
 
-## Result Description
+- **mapper**: Column name mappings from the tool's output format to ProteoBench's internal format (e.g. which column contains the peptide sequence, score, charge, etc.)
+- **general**: General parsing settings such as file format (CSV, TSV, mzTab), separator character, and header handling
+- **modifications_parser**: How modifications in the tool's notation are converted to ProForma format for standardized evaluation
 
-*Coming soon*
+> **DOCUMENTATION GAP**: Other modules (e.g. Module 2, Module 5) include a full TOML file description with explanations of mapper, condition_mapper, run_mapper, species_mapper, general, and modifications_parser sections. This section should follow the same structure.
 
-## Define Parameters
+## Result description
 
-*Coming soon*
+Each benchmark run produces a datapoint with the following key fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | str | Unique identifier for the benchmark run |
+| software_name | str | Name of the de novo tool (e.g. Casanovo, AdaNovo) |
+| software_version | str | Version of the tool |
+| checkpoint | str | Model checkpoint identifier |
+| n_beams | int | Number of beams used in beam search decoding |
+| n_peaks | int | Number of peaks considered per spectrum |
+| precursor_mass_tolerance | str | Precursor mass tolerance (e.g. "5 ppm") |
+| min_mz | int | Minimum m/z value for spectrum processing |
+| max_mz | int | Maximum m/z value for spectrum processing |
+| min_intensity | int | Minimum intensity threshold |
+| max_intensity | int | Maximum intensity threshold |
+| min_peptide_length | int | Minimum allowed peptide length |
+| max_peptide_length | int | Maximum allowed peptide length |
+| max_precursor_charge | int | Maximum precursor charge allowed |
+| remove_precursor_tol | str | Tolerance for removing precursor peaks |
+| isotope_error_range | str | Allowed isotope error range (e.g. "0,1") |
+| decoding_strategy | str | Decoding strategy (e.g. "greedy search", "beam search") |
+| tokens | str | Semicolon-separated list of allowed amino acid tokens |
+| results | dict | Nested dictionary containing precision, recall, and coverage at peptide and amino acid level, for both exact and mass-based evaluation |
+
+> **DOCUMENTATION GAP**: Other modules include a table describing each column in the result DataFrame (e.g. id, software_name, epsilon, nr_observed, etc.). This section should document the de novo-specific result columns (e.g. precision, recall, coverage at peptide and amino acid level).
+
+## Define parameters
+
+The following parameters are tracked for each de novo benchmark run. These are extracted from the tool's configuration file (e.g. `config.yaml`).
+
+| Parameter | Description |
+|-----------|-------------|
+| software_name | Name of the de novo sequencing tool |
+| software_version | Version of the tool |
+| checkpoint | Model checkpoint used for prediction |
+| n_beams | Number of beams in beam search (1 = greedy search) |
+| n_peaks | Number of peaks used per spectrum |
+| precursor_mass_tolerance | Precursor mass tolerance with unit |
+| min_mz / max_mz | m/z range for spectrum processing |
+| min_intensity / max_intensity | Intensity thresholds |
+| min_peptide_length / max_peptide_length | Allowed peptide length range |
+| max_precursor_charge | Maximum precursor charge state |
+| remove_precursor_tol | Tolerance for precursor peak removal |
+| isotope_error_range | Allowed isotope error range |
+| decoding_strategy | Strategy used for sequence decoding |
+| tokens | Allowed amino acid and modification tokens |
+
+Note: PepNet does not have configurable parameters, so no parameter file is required for submission.
+
+> **DOCUMENTATION GAP**: Other modules include a list of all parameters that are tracked for each benchmark run (software_name, software_version, FDR thresholds, modifications, etc.). This section should document which parameters are tracked for de novo tools and how they are parsed.
+
+---
+
+> **ADDITIONAL DOCUMENTATION GAPS** (compared to other modules)
+>
+> - **Suggested parameters table**: Table 2 in the text references PTM settings but is labelled inconsistently — it mixes PTM statistics with search parameters. Consider splitting into a clear "suggested parameters" table (as in Module 2) and a separate PTM statistics table.
+> - **Tool-specific detailed instructions**: Each tool (AdaNovo, Casanovo, etc.) should have a subsection with step-by-step instructions for generating compatible output, as done for tools in Module 2 and Module 5.
+> - **FASTA database section**: Other modules have a dedicated section with a download link for the FASTA file. The de novo module references a zenodo download for the benchmark dataset but does not provide a FASTA download link.
+> - **PXD004424 link**: The PRIDE link for Homo sapiens in Table 1 is empty (`[PXD004424]()`).
+> - **File format specification**: The input file formats (results.mztab, results.csv, results.tsv) should be documented with required columns and examples.

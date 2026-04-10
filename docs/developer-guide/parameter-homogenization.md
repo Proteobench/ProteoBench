@@ -202,7 +202,7 @@ When adding a new parameter parser:
 
 1. Create `proteobench/io/params/<toolname>.py`
 2. Implement `extract_params()` returning a `ProteoBenchParameters` object
-3. **Homogenize modifications** using one of the approaches above
+3. **Homogenize modifications** using one of the approaches above, or a new approach
 4. Format tolerances as `[-value unit, value unit]`
 5. Store FDR as decimal (0-1)
 6. Add any new enzyme names to `_ENZYME_MAP` in `__init__.py`

@@ -26,6 +26,7 @@ class ModuleMetadata:
     keywords: List[str]
     title: str
     doc_url: str
+    results_repo: Optional[str] = None  # e.g. "Results_quant_ion_DDA"
 
 
 @st.cache_resource
@@ -104,6 +105,12 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
                 # Fallback
                 file_path = f"pages/{page_name}.py"
 
+            # Extract results repo name from github_link_pr
+            # e.g. "github.com/Proteobot/Results_quant_ion_DDA.git" -> "Results_quant_ion_DDA"
+            results_repo = None
+            if hasattr(variables, "github_link_pr") and variables.github_link_pr:
+                results_repo = variables.github_link_pr.removesuffix(".git").split("/")[-1]
+
             # Create metadata object
             metadata = ModuleMetadata(
                 label=variables.sidebar_label,
@@ -114,6 +121,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
                 keywords=variables.keywords,
                 title=variables.title,
                 doc_url=variables.doc_url,
+                results_repo=results_repo,
             )
 
             # Add to appropriate category

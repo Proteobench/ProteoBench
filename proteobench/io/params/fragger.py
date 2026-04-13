@@ -176,6 +176,12 @@ def extract_params(
     params.search_engine = "MSFragger"
     params.search_engine_version = msfragger_version
 
+    # FASTA database path
+    try:
+        params.fasta_database = fragpipe_params.loc["database.db-path"]
+    except KeyError:
+        params.fasta_database = None
+
     # Enzyme and cleavage settings
     enzyme = fragpipe_params.loc["msfragger.search_enzyme_name_1"]
     if fragpipe_params.loc["msfragger.search_enzyme_name_2"] != "null":

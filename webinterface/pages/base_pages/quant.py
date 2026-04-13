@@ -204,6 +204,18 @@ class QuantUIObjects(BaseUIModule):
             st.session_state[self.variables.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
 
+            # Run checks and balances: verify that the parameter file is
+            # consistent with the search results and that the approved FASTA
+            # was used.
+            if params is not None and self.variables.result_perf in st.session_state:
+                intermediate_df = st.session_state[self.variables.result_perf]
+                if intermediate_df is not None:
+                    validation_warnings = self.ionmodule.validate_params_with_results(
+                        params, intermediate_df
+                    )
+                    for msg in validation_warnings:
+                        st.warning(msg, icon="⚠️")
+
             tab6_submit_results.generate_additional_parameters_fields_submission(
                 variables=self.variables,
                 user_input=self.user_input,

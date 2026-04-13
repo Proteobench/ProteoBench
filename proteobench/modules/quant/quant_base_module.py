@@ -46,6 +46,7 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
+from proteobench.io.params.validation import validate_all as validate_params_and_results
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
@@ -572,6 +573,41 @@ class QuantModule:
         )
         params.software_name = input_format
         return params
+
+    def validate_params_with_results(
+        self,
+        params: ProteoBenchParameters,
+        intermediate_df: pd.DataFrame,
+    ) -> List[str]:
+        """
+        Run checks to verify that the parameter file is consistent with the
+        search results and that an approved ProteoBench FASTA was used.
+
+        The following checks are performed:
+
+        * Charge range: the charge states observed in the results should be
+          within the range declared in the parameter file.
+        * Peptide length range: the peptide lengths observed in the results
+          should be within the range declared in the parameter file.
+        * FASTA name: if the parameter file contains a database path, its
+          filename should match the approved ProteoBench FASTA patterns.
+        * Expected species: the results should contain proteins from every
+          expected species (HUMAN, YEAST, ECOLI for mixed-species modules).
+
+        Parameters
+        ----------
+        params : ProteoBenchParameters
+            Parameters extracted from the uploaded parameter file.
+        intermediate_df : pd.DataFrame
+            The intermediate metric structure returned by :meth:`benchmarking`.
+
+        Returns
+        -------
+        List[str]
+            A list of warning messages.  An empty list means no issues were
+            detected.
+        """
+        return validate_params_and_results(params, intermediate_df)
 
     def get_plot_generator(self) -> PlotGeneratorBase:
         """

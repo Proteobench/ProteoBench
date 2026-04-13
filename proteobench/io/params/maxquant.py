@@ -307,6 +307,25 @@ def extract_params(
         record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "maxCharge", :]].squeeze()
     )
 
+    # FASTA database path
+    try:
+        # MaxQuant >= 1.6: fastaFiles/FastaFileInfo/fastaFilePath
+        fasta_val = record.loc[pd.IndexSlice["fastaFiles", "FastaFileInfo", "fastaFilePath", :]].squeeze()
+        if isinstance(fasta_val, str):
+            params.fasta_database = fasta_val.strip()
+        else:
+            params.fasta_database = None
+    except KeyError:
+        try:
+            # MaxQuant 1.5: fastaFiles/string
+            fasta_val = record.loc[pd.IndexSlice["fastaFiles", "string", :, :]].squeeze()
+            if isinstance(fasta_val, str):
+                params.fasta_database = fasta_val.strip()
+            else:
+                params.fasta_database = None
+        except KeyError:
+            params.fasta_database = None
+
     params.fill_none()
     return params
 

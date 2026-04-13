@@ -31,7 +31,7 @@ class VariablesDDAQuant:
     comments_submission_uuid: str = "comments_submission_uuid_dda_quant_QExactive"
     check_submission_uuid: str = "check_submission_uuid_dda_quant_QExactive"
     meta_data_text: str = "comments_for_submission_dda_quant_QExactive"
-    check_submission: str = "heck_submission_dda_quant_QExactive"
+    check_submission: str = "check_submission_dda_quant_QExactive"
     button_submission_uuid: str = "button_submission_uuid_dda_quant_QExactive"
     df_head: str = "df_head_dda_quant_QExactive"
     placeholder_fig_compare: str = "placeholder_fig_compare_dda_quant_QExactive"

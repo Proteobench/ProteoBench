@@ -1,6 +1,6 @@
-# Proteobench web inteface 
+# Proteobench web interface
 
-Start the streamlit GUI from your terminal with the following commands. 
+Start the streamlit GUI from your terminal with the following commands.
 
 ```bash
 streamlit run Home.py
@@ -8,98 +8,112 @@ streamlit run Home.py
 
 ## Session state
 
-
-In VSCode you can search under this folder, `webinterface`, for `session_state` to see 
+In VSCode you can search under this folder, `webinterface`, for `session_state` to see
 how it is used in the code. This page tries to summarize some of the usage.
 
-### Submission State
+### Naming Convention
 
-Each module (page) has it's own state for submission. This allows switching between module
-pages without losing the information for the Streamlit session for each module.
+Each module (page) has its own namespace in the session state. This allows switching between
+module pages without the session state of one module interfering with another.
 
+Every session state key is defined as a string field inside the module's `dataclass` in
+[`pages_variables`](pages/pages_variables/). All string values **must** include a
+module-specific suffix (e.g. `_dda_quant_QExactive`, `_dia_quant_Astral`) so that keys
+from different modules never collide.
+
+Example — reading a value:
 ```python
-st.session_state[self.variables_dda_quant.submit] = False
-st.session_state[self.variables_quant.submit] = True
+# key resolved via the dataclass, e.g. "all_datapoints_dda_quant_QExactive"
+st.session_state[self.variables.all_datapoints]
 ```
 
-The key to be used in the session state is defined by the `dataclass` for the module 
-in [`pages_variables`](pages/pages_variables/) to ensure separated namespaces. Each 
-class should have the same attributes with different values assigned. 
-
-Some other attributes can be set on the fly, e.g. `input_df`.
-
-So separating the keys set in the `dataclass`es from the actual data could be a
-good first step to more easily understand the session state.
-
-## Information
-
-> [!NOTE]
-> This overview is not yet completly checked. An analysis of set variables between the
-> modules is still pending.
-
+Example — toggling the submit flag:
 ```python
-# parsed parameter file for module, e.g. "params_file_dict_lfq_ion_dda_quant_astral"
-st.session_state[self.variables_quant.params_file_dict] = {}
-st.session_state[self.variables_quant.params_file_dict] = params.__dict__
-# UI element string identifiers, e.g. slider ID
-st.session_state[self.variables_quant.slider_id_submitted_uuid] = "uuid"
-st.session_state[self.variables_quant.slider_id_uuid] = "uuid"
-st.session_state[self.variables_quant.selectbox_id_submitted_uuid] = "uuid"
-st.session_state[self.variables_quant.table_id_uuid] = "uuid"
-# data
-st.session_state[self.variables_quant.all_datapoints]
-st.session_state[self.variables_quant.all_datapoints_submitted]
-
-st.session_state[self.variables_quant.input_df]  # string key
-st.session_state[self.variables_quant.input_df_submission]  # string key
-st.session_state[self.variables_quant.all_datapoints_submission].columns  # DataFrame
-
-st.session_state[self.variables_quant.result_perf]
+st.session_state[self.variables.submit] = False   # e.g. "submit_dda_quant_QExactive"
 ```
 
-So in general everthing scoped with a variable `variables_quant`, which is a `dataclass` 
-is a list of dictionary keys (unique to the model). For now the session state is a flat
-dictionary with many keys, which are kept separated by unique keys for each entry. One 
-could also imagine to use a nested dictionary structure, e.g. with the module name as the first key
-and the variable name as the second key. This would allow to have a more scoped session state
-by namespaces defined by dictionary keys: `st.session_state.module_name.variable_name`
+### Module suffix reference
 
+| Module | Suffix |
+|--------|--------|
+| DDA QExactive | `_dda_quant_QExactive` |
+| DDA Astral | `_dda_quant_Astral` |
+| DDA peptidoform | `_dda_quant_peptidoform` |
+| DIA AIF | `_dia_quant` |
+| DIA Astral | `_dia_quant_Astral` |
+| DIA diaPASEF | `_dia_quant_diaPASEF` |
+| DIA singlecell | `_dia_quant_singlecell` |
+| DIA ZenoTOF | `_dia_quant_ZenoTOF` |
+| DIA Plasma | `_dia_quant_Plasma` |
+| De Novo HCD | `_dda_hcd_denovo` |
 
+### Debug panel
 
-Other keys:
+A collapsible **🔧 Debug: Session State** expander is available at the bottom of the
+sidebar on every page. It lists all current session state keys grouped into:
+
+- **Data keys** – module data such as `DataFrame`s, booleans, strings
+- **Widget/UUID keys** – internal Streamlit widget identifiers (UUID values)
+
+A standalone `render_session_state_debug(variables)` helper is also available in
+`webinterface/streamlit_utils.py` for rendering a module-scoped view inline on a page.
+
+## Session state keys reference
+
+All keys are accessed exclusively through the variables dataclass; never use raw string
+literals for session state. The keys used across modules are:
+
 ```python
-st.session_state[self.variables_quant.submit]
-st.session_state[self.variables_quant.params_file_dict]
-st.session_state[self.variables_quant.params_json_dict]
-st.session_state[self.variables_quant.slider_id_uuid]
-st.session_state[self.variables_quant.slider_id_submitted_uuid]
-st.session_state[self.variables_quant.selectbox_id_uuid]
-st.session_state[self.variables_quant.selectbox_id_submitted_uuid]
-st.session_state[self.variables_quant.table_id_uuid]
-st.session_state[self.variables_quant.placeholder_table]
-st.session_state[self.variables_quant.placeholder_slider]
-st.session_state[self.variables_quant.placeholder_downloads_container]
-st.session_state[self.variables_quant.download_selector_id_uuid]
-st.session_state[self.variables_quant.highlight_list]
-st.session_state[self.variables_quant.highlight_list_submitted]
-st.session_state[self.variables_quant.all_datapoints]
-st.session_state[self.variables_quant.all_datapoints_submitted]
-st.session_state[self.variables_quant.all_datapoints_submission]
-st.session_state[self.variables_quant.input_df]
-st.session_state[self.variables_quant.input_df_submission]
-st.session_state[self.variables_quant.result_perf]
-st.session_state[self.variables_quant.result_performance_submission]
-st.session_state[self.variables_quant.meta_data]
-st.session_state[self.variables_quant.meta_data_text]
-st.session_state[self.variables_quant.meta_file_uploader_uuid]
-st.session_state[self.variables_quant.comments_submission_uuid]
-st.session_state[self.variables_quant.check_submission]
-st.session_state[self.variables_quant.check_submission_uuid]
-st.session_state[self.variables_quant.button_submission_uuid]
-st.session_state[self.variables_quant.df_head]
-st.session_state[self.variables_quant.fig_logfc]
-st.session_state[self.variables_quant.fig_metric]
-st.session_state[self.variables_quant.fig_cv]
-st.session_state[self.variables_quant.fig_ma_plot]
-st.session_state[self.variables_quant.placeholder_fig_compare]
+# Submission flow
+st.session_state[self.variables.submit]
+st.session_state[self.variables.check_submission]
+st.session_state[self.variables.check_submission_uuid]
+
+# Parameter files
+st.session_state[self.variables.params_file_dict]
+st.session_state[self.variables.params_json_dict]
+
+# UI element widget identifiers (hold UUID values)
+st.session_state[self.variables.slider_id_uuid]
+st.session_state[self.variables.slider_id_submitted_uuid]
+st.session_state[self.variables.selectbox_id_uuid]
+st.session_state[self.variables.selectbox_id_submitted_uuid]
+st.session_state[self.variables.table_id_uuid]
+st.session_state[self.variables.download_selector_id_uuid]
+st.session_state[self.variables.dataset_selector_id_uuid]
+st.session_state[self.variables.meta_file_uploader_uuid]
+st.session_state[self.variables.comments_submission_uuid]
+st.session_state[self.variables.button_submission_uuid]
+
+# Placeholders (Streamlit empty/container objects)
+st.session_state[self.variables.placeholder_table]
+st.session_state[self.variables.placeholder_slider]
+st.session_state[self.variables.placeholder_downloads_container]
+st.session_state[self.variables.placeholder_dataset_selection_container]
+st.session_state[self.variables.placeholder_fig_compare]
+
+# Highlight lists
+st.session_state[self.variables.highlight_list]
+st.session_state[self.variables.highlight_list_submitted]
+
+# Data
+st.session_state[self.variables.all_datapoints]
+st.session_state[self.variables.all_datapoints_submitted]
+st.session_state[self.variables.all_datapoints_submission]
+st.session_state[self.variables.input_df]
+st.session_state[self.variables.input_df_submission]
+st.session_state[self.variables.result_perf]
+st.session_state[self.variables.result_performance_submission]
+
+# Metadata / submission text
+st.session_state[self.variables.meta_data]
+st.session_state[self.variables.meta_data_text]
+st.session_state[self.variables.df_head]
+
+# Cached figures
+st.session_state[self.variables.fig_logfc]
+st.session_state[self.variables.fig_metric]
+st.session_state[self.variables.fig_cv]
+st.session_state[self.variables.fig_ma_plot]
 ```
+

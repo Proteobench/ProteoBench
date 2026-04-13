@@ -188,6 +188,62 @@ def display_error(
             st.code(technical_details)
 
 
+def render_session_state_debug(variables=None) -> None:
+    """
+    Render a collapsible debug panel showing the current Streamlit session state.
+
+    Parameters
+    ----------
+    variables : dataclass instance, optional
+        The module variables dataclass. When provided, its string field values are
+        used to identify keys belonging to the current module, which are shown first.
+    """
+    with st.expander("🔧 Debug: Session State", expanded=False):
+        st.caption(f"Total keys in session state: {len(st.session_state)}")
+
+        if not st.session_state:
+            st.write("Session state is empty.")
+            return
+
+        # Collect keys that belong to the current module (via variables dataclass)
+        module_keys = set()
+        if variables is not None:
+            import dataclasses
+
+            if dataclasses.is_dataclass(variables):
+                for f in dataclasses.fields(variables):
+                    val = getattr(variables, f.name)
+                    if isinstance(val, str):
+                        module_keys.add(val)
+
+        # Show module-specific keys first, then the rest
+        def _fmt(key, value):
+            type_name = type(value).__name__
+            if hasattr(value, "shape"):  # DataFrame / ndarray
+                return f"`{key}` → **{type_name}** {getattr(value, 'shape', '')}"
+            elif isinstance(value, (str, int, float, bool)):
+                return f"`{key}` → **{type_name}** = `{value!r}`"
+            else:
+                return f"`{key}` → **{type_name}**"
+
+        if module_keys:
+            module_state = {k: v for k, v in st.session_state.items() if k in module_keys}
+            other_state = {k: v for k, v in st.session_state.items() if k not in module_keys}
+
+            if module_state:
+                st.markdown("**Module keys:**")
+                for k, v in sorted(module_state.items(), key=lambda x: str(x[0])):
+                    st.markdown(_fmt(k, v))
+
+            if other_state:
+                st.markdown("**Other keys:**")
+                for k, v in sorted(other_state.items(), key=lambda x: str(x[0])):
+                    st.markdown(_fmt(k, v))
+        else:
+            for k, v in sorted(st.session_state.items(), key=lambda x: str(x[0])):
+                st.markdown(_fmt(k, v))
+
+
 def get_error_suggestions(exception: Exception, context: dict) -> tuple:
     """
     Analyze exception and return user-friendly message with suggestions.

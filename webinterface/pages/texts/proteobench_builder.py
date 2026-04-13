@@ -5,6 +5,63 @@ import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
 
 
+def _render_session_state_sidebar() -> None:
+    """
+    Render a summary of the current Streamlit session state inside the sidebar debug panel.
+
+    Groups UUID-like keys (internal widget identifiers) separately from meaningful data
+    keys so that developers can quickly identify module-level data.
+    """
+    import uuid
+
+    state = st.session_state
+    st.caption(f"Total keys: {len(state)}")
+
+    if not state:
+        st.write("Session state is empty.")
+        return
+
+    def _is_uuid(value) -> bool:
+        try:
+            uuid.UUID(str(value))
+            return True
+        except ValueError:
+            return False
+
+    def _fmt_value(value) -> str:
+        type_name = type(value).__name__
+        if hasattr(value, "shape"):
+            return f"{type_name} {getattr(value, 'shape', '')}"
+        elif isinstance(value, (str, int, float, bool)):
+            truncated = repr(value)
+            if len(truncated) > 60:
+                truncated = truncated[:57] + "..."
+            return f"{type_name} = {truncated}"
+        elif isinstance(value, (list, dict)):
+            return f"{type_name}[{len(value)}]"
+        return type_name
+
+    data_lines = []
+    uuid_lines = []
+    for key in sorted(state.keys(), key=str):
+        val = state[key]
+        line = f"**{key}**: {_fmt_value(val)}"
+        if _is_uuid(val) or _is_uuid(key):
+            uuid_lines.append(line)
+        else:
+            data_lines.append(line)
+
+    if data_lines:
+        st.markdown("**Data keys:**")
+        for line in data_lines:
+            st.markdown(line)
+
+    if uuid_lines:
+        st.markdown("**Widget/UUID keys:**")
+        for line in uuid_lines:
+            st.markdown(line)
+
+
 def proteobench_page_config(page_layout="wide"):
     """
     Set some ProteoBench wide page settings.
@@ -152,6 +209,10 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
         st.image(proteobench_logo, width=300)
         st.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")
         st.page_link(texts.ShortMessages.legal_notice, label="legal notice")
+
+        # Debug session state panel – always shown but collapsed by default
+        with st.expander("🔧 Debug: Session State", expanded=False):
+            _render_session_state_sidebar()
 
         if "tracking" in st.secrets and "html_js" in st.secrets["tracking"]:
             json_html = st.secrets["tracking"]["html_js"]

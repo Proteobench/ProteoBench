@@ -9,6 +9,7 @@ and whether the FASTA file used appears to be an approved ProteoBench FASTA.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from typing import List, Optional
 
@@ -134,7 +135,7 @@ def check_peptide_length_range(
     elif peptidoform_column in intermediate_df.columns:
         # For peptidoform-level modules use the peptidoform column
         peptide_lengths = intermediate_df[peptidoform_column].dropna().apply(
-            lambda x: len(re.sub(r"\[.*?\]|\(.*?\)", "", str(x)).strip("/"))
+            _peptide_length_from_peptidoform
         )
 
     if peptide_lengths is None or peptide_lengths.empty:
@@ -197,7 +198,7 @@ def check_fasta_from_params(
     if not fasta_db:
         return warnings
 
-    fasta_filename = fasta_db.replace("\\", "/").split("/")[-1]
+    fasta_filename = os.path.basename(fasta_db.replace("\\", "/"))
     if not any(pattern in fasta_filename for pattern in approved_patterns):
         warnings.append(
             f"The FASTA database referenced in the parameter file "
@@ -383,3 +384,17 @@ def _to_int_or_none(value) -> Optional[int]:
         return int(value)
     except (ValueError, TypeError):
         return None
+
+
+def _peptide_length_from_peptidoform(peptidoform: str) -> int:
+    """
+    Return the number of residues in a peptidoform string.
+
+    Strips ProForma-style modification annotations (``[...]`` and ``(...)``),
+    leading/trailing ``-`` terminators, and any other non-alphabetic characters,
+    then returns the length of the remaining string.
+    """
+    seq = str(peptidoform)
+    seq = re.sub(r"\[.*?\]|\(.*?\)", "", seq)
+    seq = re.sub(r"[^A-Za-z]", "", seq)
+    return len(seq)

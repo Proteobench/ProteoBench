@@ -207,14 +207,13 @@ class QuantUIObjects(BaseUIModule):
             # Run checks and balances: verify that the parameter file is
             # consistent with the search results and that the approved FASTA
             # was used.
-            if params is not None and self.variables.result_perf in st.session_state:
-                intermediate_df = st.session_state[self.variables.result_perf]
-                if intermediate_df is not None:
-                    validation_warnings = self.ionmodule.validate_params_with_results(
-                        params, intermediate_df
-                    )
-                    for msg in validation_warnings:
-                        st.warning(msg, icon="⚠️")
+            intermediate_df = st.session_state.get(self.variables.result_perf)
+            if params is not None and intermediate_df is not None:
+                validation_warnings = self.ionmodule.validate_params_with_results(
+                    params, intermediate_df
+                )
+                for msg in validation_warnings:
+                    st.warning(msg, icon="⚠️")
 
             tab6_submit_results.generate_additional_parameters_fields_submission(
                 variables=self.variables,

@@ -41,6 +41,11 @@ class _Params:
 # ---------------------------------------------------------------------------
 
 
+def _default_species_flags(n: int, position: int) -> list:
+    """Return a boolean list of length *n* with ``True`` only at *position*."""
+    return [i == position for i in range(n)]
+
+
 def _make_intermediate_df(
     precursor_ions=None,
     yeast=None,
@@ -53,9 +58,9 @@ def _make_intermediate_df(
     n = len(precursor_ions)
     data = {
         "precursor ion": precursor_ions,
-        "YEAST": yeast if yeast is not None else ([True] + [False] * (n - 1)),
-        "ECOLI": ecoli if ecoli is not None else ([False, True] + [False] * (n - 2) if n > 1 else [False]),
-        "HUMAN": human if human is not None else ([False, False] + [True] * (n - 2) if n > 1 else [True]),
+        "YEAST": yeast if yeast is not None else _default_species_flags(n, 0),
+        "ECOLI": ecoli if ecoli is not None else _default_species_flags(n, 1),
+        "HUMAN": human if human is not None else [i >= 2 for i in range(n)],
     }
     return pd.DataFrame(data)
 
@@ -324,20 +329,20 @@ class TestValidateAll:
     def test_collects_all_warnings(self):
         params = _Params(
             min_precursor_charge=2,
-            max_precursor_charge=3,
+            max_precursor_charge=4,
             min_peptide_length=10,
-            max_peptide_length=8,  # intentionally inconsistent (min>max to force both warnings)
+            max_peptide_length=30,
             fasta_database="/path/uniprot_human.fasta",  # not approved
         )
-        # charge 1 < min 2 → warning; length 7 < min 10 → warning; fasta → warning; no ECOLI → warning
+        # charge 1 < min 2 → warning; length 7 < min 10 → warning; fasta → warning; ECOLI missing → warning
         df = _make_intermediate_df(
-            precursor_ions=["PEPTIDE/1"],  # charge 1, length 7
+            precursor_ions=["PEPTIDE/1"],  # charge 1 (below min=2), length 7 (below min=10)
             yeast=[True],
             ecoli=[False],
             human=[True],
         )
         warnings = validate_all(params, df)
-        assert len(warnings) >= 3  # charge, peptide length, fasta name, possibly ECOLI
+        assert len(warnings) >= 3  # charge, peptide length, fasta name, ECOLI missing
 
 
 # ===========================================================================

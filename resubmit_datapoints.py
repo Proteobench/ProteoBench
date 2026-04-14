@@ -60,6 +60,7 @@ from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
+from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
 from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
     DIAQuantIonModulediaSC,
 )
@@ -93,6 +94,7 @@ REPO_MODULE_REGISTRY: dict[str, tuple[str, type, Path]] = {
     "Results_quant_ion_DIA_singlecell":   ("quant_lfq_DIA_ion_singlecell", DIAQuantIonModulediaSC,      _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_ion_DIA_Astral":       ("quant_lfq_DIA_ion_Astral",     DIAQuantIonModuleAstral,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_lfq_DIA_ion_ZenoTOF":  ("quant_lfq_DIA_ion_ZenoTOF",   DIAQuantIonModuleZenoTOF,    _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
+    "Results_quant_ion_DIA_plasma":       ("quant_lfq_DIA_ion_Plasma",     DIAQuantIonModulePlasma,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"), 
     # Quant — DIA peptidoform
     "Results_quant_peptidoform_DIA":      ("quant_lfq_DIA_peptidoform",     DIAQuantPeptidoformModule,   _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_peptidoform.json"),
     # De novo
@@ -1088,7 +1090,7 @@ def create_batch_pr(
 
         try:
             gh_repo.commit(commit_name, commit_message)
-            pr_number = gh_repo.create_pull_request(commit_name, commit_message)
+            pr_number = gh_repo.create_pull_request(commit_name, commit_message, submission_source="resubmission-script")
             pr_url = f"https://github.com/{proteobot_name}/pull/{pr_number}"
             logger.info(f"  PR created: {pr_url}")
             return pr_url
@@ -1340,9 +1342,6 @@ def reprocess_datapoint(
                 _PRESERVE_FIELDS = (
                     "id",  # contains original submission timestamp
                     "intermediate_hash",  # keeps JSON filename stable for clean PR diffs
-                    "color",
-                    "hover_text",
-                    "scatter_size",
                     "submission_comments",
                 )
                 for _field in _PRESERVE_FIELDS:
@@ -1353,7 +1352,10 @@ def reprocess_datapoint(
 
                 new_dp_hash = intermediate_hash
                 result["new_hash"] = new_dp_hash
-                result["json_data"] = new_datapoint.to_dict()
+                datapoint_dict = new_datapoint.to_dict()
+                for _key in ("color", "hover_text", "scatter_size", "marker"):
+                    datapoint_dict.pop(_key, None)
+                result["json_data"] = datapoint_dict
                 result["repo_suffix"] = repo_suffix
 
             except Exception as e:

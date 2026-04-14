@@ -50,7 +50,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
-from proteobench.score.quant.quantscores import QuantScoresHYE
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class QuantModule:
@@ -306,6 +306,7 @@ class QuantModule:
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -324,6 +325,8 @@ class QuantModule:
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
+        max_nr_observed : int, optional
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 6).
 
         Returns
         -------
@@ -347,9 +350,13 @@ class QuantModule:
 
         current_datapoint = QuantDatapointHYE.generate_datapoint(
             intermediate_metric_structure,
+           
             input_format,
+           
             user_input,
+           
             default_cutoff_min_feature=default_cutoff_min_feature,
+            max_nr_observed=max_nr_observed,
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
@@ -392,6 +399,7 @@ class QuantModule:
         datapoint_params: Any,
         remote_git: str,
         submission_comments: str = "no comments",
+        submission_source: str = "unknown",
     ) -> str:
         """
         Clone the repo and open a pull request with the new data points.
@@ -406,6 +414,9 @@ class QuantModule:
             Remote Git repository URL.
         submission_comments : str, optional
             Comments to be included in the pull request. Defaults to "no comments".
+        submission_source : str, optional
+            Origin of the submission: 'web-server', 'local', or 'resubmission-script'.
+            Defaults to 'unknown'.
 
         Returns
         -------
@@ -442,8 +453,11 @@ class QuantModule:
 
         path_write_individual_point = os.path.join(self.t_dir_pr, current_datapoint["intermediate_hash"] + ".json")
         logging.info(f"Writing the json (single point) to: {path_write_individual_point}")
+        datapoint_dict = current_datapoint.to_dict()
+        for key in ("color", "hover_text", "scatter_size", "marker"):
+            datapoint_dict.pop(key, None)
         with open(path_write_individual_point, "w") as f:
-            json.dump(current_datapoint.to_dict(), f, indent=2)
+            json.dump(datapoint_dict, f, indent=2)
 
         commit_name = f"Added new run with id {branch_name}"
         commit_message = f"User comments: {submission_comments}"
@@ -451,7 +465,9 @@ class QuantModule:
         try:
             self.github_repo.create_branch(branch_name)
             self.github_repo.commit(commit_name, commit_message)
-            pr_id = self.github_repo.create_pull_request(commit_name, commit_message)
+            pr_id = self.github_repo.create_pull_request(
+                commit_name, commit_message, submission_source=submission_source
+            )
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."
@@ -491,9 +507,12 @@ class QuantModule:
         fname = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {fname}")
 
+        cols_to_drop = [c for c in ("color", "hover_text", "scatter_size", "marker") if c in all_datapoints.columns]
+        all_datapoints_clean = all_datapoints.drop(columns=cols_to_drop)
+
         f = open(os.path.join(self.t_dir_pr, "results.json"), "w")
 
-        all_datapoints.to_json(f, orient="records", indent=2)
+        all_datapoints_clean.to_json(f, orient="records", indent=2)
 
         return os.path.join(self.t_dir_pr, "results.json")
 

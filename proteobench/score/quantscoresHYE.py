@@ -65,7 +65,7 @@ class QuantScoresHYE(ScoreBase):
             DataFrame containing the intermediate data structure.
         """
 
-        # select columns which are relavant for the statistics
+        # select columns which are relevant for the statistics
         # TODO, this should be handled different, probably in the parse settings
         print(
             f"Debug: Starting to generate intermediate data structure with filtered_df columns: {filtered_df.columns} and replicate_to_raw: {replicate_to_raw}. fealure_column_name: {self.feature_column_name}"

@@ -243,7 +243,7 @@ def run_benchmarking_process(variables, ionmodule, user_input):
     """
     # Get file extension from uploaded file to preserve it in temp file
     _, file_extension = os.path.splitext(user_input["input_csv"].name)
-    
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as tmp_file:
         tmp_file.write(user_input["input_csv"].getbuffer())
         tmp_file.flush()
@@ -276,6 +276,11 @@ def run_benchmarking_process(variables, ionmodule, user_input):
     else:
         all_datapoints = st.session_state[variables.all_datapoints]
 
+    if hasattr(variables, "max_nr_observed"):
+        max_nr_observed = variables.max_nr_observed
+    else:
+        max_nr_observed = None
+
     benchmark_kwargs = {
         "input_format": user_input["input_format"],
         "user_input": user_input,
@@ -294,6 +299,9 @@ def run_benchmarking_process(variables, ionmodule, user_input):
     # Only add secondary file if provided
     if tmp_file_secondary_name:
         benchmark_kwargs["input_file_secondary"] = tmp_file_secondary_name
+
+    if max_nr_observed is not None:
+        benchmark_kwargs["max_nr_observed"] = max_nr_observed
 
     return ionmodule.benchmarking(user_input_tmp, **benchmark_kwargs)
 

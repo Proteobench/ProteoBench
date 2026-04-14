@@ -21,6 +21,7 @@ from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
+from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
@@ -149,6 +150,8 @@ class DeNovoUIObjects(BaseUIModule):
                     st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
                 ],
                 "colorblind_mode": colorblind_mode,
+                "alpha_warning": getattr(self.variables, "alpha_warning", False),
+                "beta_warning": getattr(self.variables, "beta_warning", False),
             },
             use_slider=False,
         )
@@ -225,8 +228,8 @@ class DeNovoUIObjects(BaseUIModule):
         )
 
         # Use default values for plot rendering (no user controls on this tab)
-        level = "precision"
-        evaluation_type = "exact"
+        levels = ["precision", "recall"]
+        evaluation_types = ["exact", "mass"]
         colorblind_mode = False
 
         modifications = [
@@ -260,9 +263,9 @@ class DeNovoUIObjects(BaseUIModule):
             # Create kwargs with De Novo-specific parameters (now using user selections)
             plot_kwargs = {
                 "mod_labels": modifications,
-                "feature": feature_names[0] if feature_names else "Missing Fragmentation Sites",
-                "level": level,
-                "evaluation_type": evaluation_type,
+                "feature": feature_names,
+                "level": levels,
+                "evaluation_type": evaluation_types,
                 "colorblind_mode": colorblind_mode,
             }
 
@@ -276,13 +279,17 @@ class DeNovoUIObjects(BaseUIModule):
 
                 for section in layout:
                     st.subheader(section.get("title", ""))
-                    cols = st.columns(section.get("columns", 1))
                     for idx, plot_name in enumerate(section["plots"]):
-                        with cols[idx % len(cols)]:
-                            if plot_name in plots:
-                                st.plotly_chart(plots[plot_name], use_container_width=True)
-                                if plot_name in descriptions:
-                                    st.caption(descriptions[plot_name])
+                        if plot_name in plots:
+                            if plot_name in descriptions:
+                                st.caption(descriptions[plot_name])
+                            self._display_indepth_plot(
+                                plot_name=plot_name,
+                                figs=plots[plot_name]
+                            )
+                            # st.plotly_chart(plots[plot_name], use_container_width=True)
+                                
+                                
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
                 import traceback
@@ -291,6 +298,93 @@ class DeNovoUIObjects(BaseUIModule):
                     st.code(traceback.format_exc())
         else:
             st.info("No datasets selected for plotting.")
+
+    def _display_ptm_overview(self, figs) -> None:
+        # Overview PTM plot
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.ptm_overview)
+        
+        st.plotly_chart(
+            figs,
+            use_container_width=True
+        )
+        
+    def _display_ptm_specific(self, figs) -> None:
+        # Specific PTM plots
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.ptm_specific)
+        
+        modification_labels = list(figs.keys())
+        tabs = st.tabs(
+            modification_labels
+        )
+        tab_dict = {
+            mod_label: tab for mod_label, tab in zip(modification_labels, tabs)
+        }
+        for mod_label, tab in tab_dict.items():
+            with tab:
+                st.header(mod_label)
+                st.plotly_chart(
+                    figs[mod_label],
+                    use_container_width=True,
+                )
+    
+    def _display_spectrum_features(self, figs) -> None:
+        feature_names = list(figs.keys())
+        exact_mode = st.toggle(
+            label='Exact evaluation mode',
+            value=False,
+            key=self.variables.evaluation_mode_toggle_tab3_features
+        )
+        if exact_mode:
+            evaluation_type = 'exact'
+        else:
+            evaluation_type = 'mass'
+        
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.spectrum_features_overview)
+        
+        tabs = st.tabs(feature_names)
+        tab_dict = {feature_name: tab for feature_name, tab in zip(feature_names, tabs)}
+        for feature_name, tab in tab_dict.items():
+            with tab:
+                st.header(feature_name)
+                st.plotly_chart(
+                    figs[feature_name][evaluation_type],
+                    use_container_width=True
+                )
+    
+    def _display_species_overview(self, figs) -> None:
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.species)
+
+        exact_mode = st.toggle(
+            label="Exact evaluation mode",
+            value=False,
+            key=self.variables.evaluation_mode_toggle_tab3_species
+        )
+        if exact_mode:
+            evaluation_type = "exact"
+        else:
+            evaluation_type = "mass"
+
+        st.plotly_chart(
+            figs[evaluation_type],
+            use_container_width=True,
+            key=self.variables.fig_species_overview
+        )
+
+    def _display_indepth_plot(self, plot_name: str, figs) -> None:
+        if plot_name == 'ptm_overview':
+            self._display_ptm_overview(figs)
+        elif plot_name == 'ptm_specific':
+            self._display_ptm_specific(figs)
+        elif plot_name == 'spectrum_feature':
+            self._display_spectrum_features(figs)
+        elif plot_name == 'species_overview':
+            self._display_species_overview(figs)
+        else:
+            raise Exception("Cannot display non-implemented in-depth plot.")
 
     @st.fragment
     def display_all_data_results_submitted(self) -> None:
@@ -391,6 +485,15 @@ class DeNovoUIObjects(BaseUIModule):
 
     def display_public_submission_ui(self) -> None:
         """Display the public submission section of the page in Tab 5."""
+        submission_source = get_submission_source()
+        if not is_official_server():
+            st.warning(
+                "You are running ProteoBench locally. Submissions from local installs "
+                "will be labeled as 'local' and will NOT be merged into the public dataset. "
+                "To submit data for public inclusion, please use the official web server at "
+                "https://proteobench.cubimed.rub.de/"
+            )
+
         try:
             resolved_hash = st.session_state[self.variables.all_datapoints][
                 st.session_state[self.variables.all_datapoints][st.session_state["old_new"] == "new"]
@@ -452,6 +555,7 @@ class DeNovoUIObjects(BaseUIModule):
                     user_input=self.user_input,
                     params_from_file=self.params_file_dict_copy,
                     params=params,
+                    submission_source=submission_source,
                 )
             except DatasetAlreadyExistsOnServerError as e:
                 st.error(str(e), icon="🚫")

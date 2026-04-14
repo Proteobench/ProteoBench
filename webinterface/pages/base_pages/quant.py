@@ -6,18 +6,21 @@ import uuid
 from typing import Any, Dict
 
 import pages.texts.proteobench_builder as pbb
+import pandas as pd
 import streamlit as st
 from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
     VariablesDDAQuant,
 )
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
+from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
     DDAQuantIonModuleQExactive as IonModule,
 )
 from proteobench.utils.server_io import dataset_folder_exists
+
 from .base import BaseUIModule
 from .tabs import (
     tab1_view_public_results,
@@ -128,16 +131,12 @@ class QuantUIObjects(BaseUIModule):
             st.error("No data available for plotting.", icon="🚨")
             return
         df = st.session_state[key_in_state]
-
-        # If all_datapoints is empty, try to use submitted data instead
-        if df.empty and self.variables.all_datapoints_submitted in st.session_state.keys():
-            df = st.session_state[self.variables.all_datapoints_submitted]
-
-        if df.empty:
-            st.error("No data available for plotting.", icon="🚨")
-            return
-        downloads_df = df[["id", "intermediate_hash"]]
-        downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
+        downloads_df = pd.DataFrame()
+        if not df.empty:
+            # st.error("No data available for plotting.", icon="🚨")
+            # return
+            downloads_df = df[["id", "intermediate_hash"]]
+            downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
         key_in_state = self.variables.placeholder_dataset_selection_container
         if key_in_state not in st.session_state.keys():
@@ -147,9 +146,12 @@ class QuantUIObjects(BaseUIModule):
 
         st.subheader("Select dataset to plot")
 
-        dataset_options = [("Uploaded dataset", None)] + list(
-            zip(downloads_df["id"], downloads_df["intermediate_hash"])
-        )
+        if not downloads_df.empty:
+            dataset_options = [("Uploaded dataset", None)] + list(
+                zip(downloads_df["id"], downloads_df["intermediate_hash"])
+            )
+        else:
+            dataset_options = [("Uploaded dataset", None)]
 
         dataset_selection = st.selectbox(
             "Select dataset",
@@ -173,6 +175,15 @@ class QuantUIObjects(BaseUIModule):
         """
         Display the public submission section of the page in Tab 5.
         """
+        submission_source = get_submission_source()
+        if not is_official_server():
+            st.warning(
+                "You are running ProteoBench locally. Submissions from local installs "
+                "will be labeled as 'local' and will NOT be merged into the public dataset. "
+                "To submit data for public inclusion, please use the official web server at "
+                "https://proteobench.cubimed.rub.de/"
+            )
+
         try:
             resolved_hash = st.session_state[self.variables.all_datapoints][
                 st.session_state[self.variables.all_datapoints][st.session_state["old_new"] == "new"]
@@ -234,6 +245,7 @@ class QuantUIObjects(BaseUIModule):
                     user_input=self.user_input,
                     params_from_file=self.params_file_dict_copy,
                     params=params,
+                    submission_source=submission_source,
                 )
             except DatasetAlreadyExistsOnServerError as e:
                 st.error(str(e), icon="🚫")
@@ -265,10 +277,13 @@ class QuantUIObjects(BaseUIModule):
 
         # Define callbacks for plot options
         def render_slider():
+            # Get max_nr_observed for slider range if available
+            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
             tab1_view_public_results.generate_main_slider(
                 slider_id_uuid=self.variables.slider_id_uuid,
                 description_slider_md=self.variables.description_slider_md,
                 default_val_slider=self.variables.default_val_slider,
+                max_nr_observed=max_nr_obs,
             )
 
         def render_selectbox():
@@ -304,8 +319,15 @@ class QuantUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Global"
+        mode = results[3] if len(results) > 3 else "Species-weighted"
         colorblind_mode = results[4] if len(results) > 4 else False
+
+        # Get the min_nr_observed value from the slider if available
+        min_nr_observed = None
+        if self.variables.slider_id_uuid in st.session_state:
+            slider_key = st.session_state[self.variables.slider_id_uuid]
+            if slider_key in st.session_state:
+                min_nr_observed = st.session_state[slider_key]
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
@@ -315,6 +337,9 @@ class QuantUIObjects(BaseUIModule):
                 "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+                "min_nr_observed": min_nr_observed,
+                "alpha_warning": getattr(self.variables, "alpha_warning", False),
+                "beta_warning": getattr(self.variables, "beta_warning", False),
             },
         )
 
@@ -322,7 +347,7 @@ class QuantUIObjects(BaseUIModule):
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
-        
+
         # Initialize plot options controls (same as tab 1)
         tab1_view_public_results.initialize_main_slider(
             slider_id_uuid=self.variables.slider_id_submitted_uuid,
@@ -335,15 +360,19 @@ class QuantUIObjects(BaseUIModule):
 
         # Define callbacks for plot options
         def render_slider():
+            # Get max_nr_observed for slider range if available
+            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
             tab1_view_public_results.generate_main_slider(
                 slider_id_uuid=self.variables.slider_id_submitted_uuid,
                 description_slider_md=self.variables.description_slider_md,
                 default_val_slider=self.variables.default_val_slider,
+                max_nr_observed=max_nr_obs,
             )
 
         def render_selectbox():
             tab1_view_public_results.generate_main_selectbox(
-                self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
+                self.variables,
+                selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
             )
 
         # Store metric in a container to share between callbacks
@@ -354,8 +383,10 @@ class QuantUIObjects(BaseUIModule):
             if key not in st.session_state:
                 st.session_state[key] = uuid.uuid4()
             metric_uuid = st.session_state[key]
-            
-            help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
             metric = st.radio(
                 "Select metric",
                 ["Median", "Mean"],
@@ -370,16 +401,18 @@ class QuantUIObjects(BaseUIModule):
             # ROC-AUC has no mode variants (it's already species-aware by design)
             if metric_container["metric"] == "ROC-AUC":
                 return None
-            
+
             key = self.variables.metric_calc_approach_selector_submitted_uuid
             if key not in st.session_state:
                 st.session_state[key] = uuid.uuid4()
             mode_uuid = st.session_state[key]
-            
-            help_text = getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio(
                 "Select metric calculation approach",
-                ["Global", "Species-weighted"],
+                ["Species-weighted", "Global"],
                 help=help_text,
                 horizontal=True,
                 key=mode_uuid,
@@ -398,11 +431,18 @@ class QuantUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Global"
+        mode = results[3] if len(results) > 3 else "Species-weighted"
         colorblind_mode = results[4] if len(results) > 4 else False
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
+
+        # Get the min_nr_observed value from the slider if available
+        min_nr_observed = None
+        if self.variables.slider_id_submitted_uuid in st.session_state:
+            slider_key = st.session_state[self.variables.slider_id_submitted_uuid]
+            if slider_key in st.session_state:
+                min_nr_observed = st.session_state[slider_key]
 
         tab4_view_public_and_new_results.display_submitted_results(
             variables=self.variables,
@@ -412,6 +452,9 @@ class QuantUIObjects(BaseUIModule):
                 "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": label,
+                "min_nr_observed": min_nr_observed,
+                "alpha_warning": getattr(self.variables, "alpha_warning", False),
+                "beta_warning": getattr(self.variables, "beta_warning", False),
             },
         )
 

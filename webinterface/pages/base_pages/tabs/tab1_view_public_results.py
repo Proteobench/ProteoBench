@@ -59,9 +59,20 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None
     initialize_uuid_state(slider_id_uuid, default_val_slider)
 
 
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float) -> None:
+def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6) -> None:
     """
     Create a slider input.
+    
+    Parameters
+    ----------
+    slider_id_uuid : str
+        UUID for the slider state key
+    description_slider_md : str
+        Path to markdown file with slider description
+    default_val_slider : float
+        Default value for the slider
+    max_nr_observed : int, optional
+        Maximum value for the slider range (default 6)
     """
     # key for slider_uuid in session state
     if slider_id_uuid not in st.session_state:
@@ -69,9 +80,13 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     slider_key = st.session_state[slider_id_uuid]
 
     default_value = st.session_state.get(slider_key, default_val_slider)
+    
+    # Generate slider options based on max_nr_observed
+    slider_options = list(range(1, max_nr_observed + 1))
+    
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
-        options=[1, 2, 3, 4, 5, 6],
+        options=slider_options,
         value=default_value,
         key=slider_key,
         help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
@@ -126,7 +141,7 @@ def display_metric_calc_approach_selector(variables) -> str:
     help_text = getattr(variables.texts.Help, "radio_mode", None) if hasattr(variables, "texts") else None
     mode = st.radio(
         "Select metric calculation approach",
-        ["Global", "Species-weighted"],
+        ["Species-weighted", "Global"],
         help=help_text,
         horizontal=True,
     )
@@ -212,9 +227,19 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
         st.session_state[key] = uuid.uuid4()
     plot_uuid = st.session_state[key]
 
+    # Build annotation text based on alpha/beta warnings
+    annotation = ""
+    if plot_params.get("beta_warning", False):
+        annotation = "-Beta-"
+    elif plot_params.get("alpha_warning", False):
+        annotation = "-Alpha-"
+
     try:
         fig = plot_generator.plot_main_metric(
-            result_df=data, hide_annot=plot_params.get("hide_annot", False), **plot_params
+            result_df=data, 
+            hide_annot=plot_params.get("hide_annot", False),
+            annotation=annotation,
+            **plot_params
         )
         st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
     except Exception as e:

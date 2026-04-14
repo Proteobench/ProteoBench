@@ -23,7 +23,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScoresHYE
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class DIAQuantIonModulediaSC(QuantModule):
@@ -98,6 +98,7 @@ class DIAQuantIonModulediaSC(QuantModule):
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module for benchmarking workflow results.
@@ -180,9 +181,13 @@ class DIAQuantIonModulediaSC(QuantModule):
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
                 intermediate_data_structure,
+               
                 input_format,
+               
                 user_input,
+               
                 default_cutoff_min_feature=default_cutoff_min_feature,
+                max_nr_observed=max_nr_observed,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

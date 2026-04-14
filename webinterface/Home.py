@@ -5,6 +5,8 @@ from pathlib import Path
 import streamlit as st
 from _base import StreamlitPage
 from UI_utils import (
+    build_submissions_figure,
+    build_tool_pie_chart,
     get_monthly_visitors,
     get_n_modules,
     get_n_modules_proposed,
@@ -12,6 +14,12 @@ from UI_utils import (
     get_n_supported_tools,
     stat_box,
 )
+
+
+@st.dialog("Tool Breakdown", width="large")
+def _show_tool_breakdown(module_title, tool_counts):
+    pie_fig = build_tool_pie_chart(module_title, tool_counts)
+    st.plotly_chart(pie_fig, use_container_width=True)
 
 # Path to the index.rst file
 file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
@@ -40,13 +48,13 @@ class StreamlitPageHome(StreamlitPage):
             and "matomo_idsite" in st.secrets["tracking"]
             and "matomo_token" in st.secrets["tracking"]
         ):
-            monthly_visitors = get_monthly_visitors(
+            monthly_uniq_visitors = get_monthly_visitors(
                 st.secrets["tracking"]["matomo_endpoint"],
                 st.secrets["tracking"]["matomo_token"],
                 st.secrets["tracking"]["matomo_idsite"],
             )
         else:
-            monthly_visitors = "not configured"
+            monthly_uniq_visitors = "not configured"
 
         st.header("ProteoBench Overview")
         st.markdown(
@@ -134,7 +142,33 @@ class StreamlitPageHome(StreamlitPage):
         # Third row
         row3 = st.columns(1)
         with row3[0]:
-            st.markdown(stat_box("Monthly visitors", monthly_visitors, fig_path / "user.png"), unsafe_allow_html=True)
+            st.markdown(
+                stat_box("Monthly unique visitors", monthly_uniq_visitors, fig_path / "user.png"),
+                unsafe_allow_html=True,
+            )
+
+        # Submissions per module barplot
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader("Submissions per Module")
+        bar_fig, tool_data = build_submissions_figure()
+        if bar_fig is not None:
+            event = st.plotly_chart(
+                bar_fig,
+                use_container_width=True,
+                on_select="rerun",
+                selection_mode="points",
+                key="submissions_chart",
+            )
+
+            # Show pie chart in a dialog popup when a bar is clicked
+            selection = event.get("selection", {}) if event else {}
+            points = selection.get("points", [])
+            if points:
+                module_title = points[0].get("x")
+                if module_title and module_title in tool_data and tool_data[module_title]:
+                    _show_tool_breakdown(module_title, tool_data[module_title])
+        else:
+            st.info("Submission data is currently unavailable.")
 
 
 if __name__ == "__main__":

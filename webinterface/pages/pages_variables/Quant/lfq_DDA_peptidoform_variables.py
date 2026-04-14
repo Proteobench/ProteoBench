@@ -87,6 +87,7 @@ class VariablesDDAQuant:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    max_nr_observed: int = 6
     beta_warning: bool = True
     alpha_warning: bool = False
     archived_warning: bool = False

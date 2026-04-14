@@ -14,6 +14,7 @@ def render_metric_plot(
     colorblind_mode: bool,
     key,
     plot_generator,
+    slider_id_uuid: str = None,
     annotation: str = "",
     ionmodule=None,
 ) -> str | None:
@@ -34,17 +35,20 @@ def render_metric_plot(
     label : str
         The label for the data points.
 
+    colorblind_mode : bool
+        Whether to use colorblind-safe colors.
+
     key : str
         Unique key for the plot in the Streamlit session state.
 
     plot_generator : PlotGeneratorBase
         The plot generator instance for the module.
 
-    annotation : str, optional
-        Annotation text to display on the plot.
+    slider_id_uuid : str, optional
+        The UUID for the slider to retrieve the min_nr_observed value.
 
-    ionmodule : object, optional
-        The ion module instance containing y_axis_title attribute.
+    annotation : str, optional
+        Optional annotation to display on the plot.
 
     Returns
     -------
@@ -83,7 +87,15 @@ def render_metric_plot(
         st.error("No datapoints available for plotting", icon="🚨")
         return None
 
+    highlight_point_id = None
     try:
+        # Get the min_nr_observed value from the slider if provided
+        min_nr_observed = None
+        if slider_id_uuid is not None and slider_id_uuid in st.session_state:
+            slider_key = st.session_state[slider_id_uuid]
+            if slider_key in st.session_state:
+                min_nr_observed = st.session_state[slider_key]
+
         # Get y_axis_title from module if available
         y_axis_title = getattr(ionmodule, "y_axis_title", None) if ionmodule else None
 

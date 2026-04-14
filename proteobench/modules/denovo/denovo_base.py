@@ -123,7 +123,7 @@ class DeNovoModule:
         PlotGeneratorBase
             The plot generator instance for creating module-specific plots.
         """
-        from proteobench.plotting.plot_denovo import DeNovoPlotGenerator
+        from proteobench.plotting.plot_generator_denovo import DeNovoPlotGenerator
 
         return DeNovoPlotGenerator()
 
@@ -289,6 +289,7 @@ class DeNovoModule:
         datapoint_params: Any,
         remote_git: str,
         submission_comments: str = "no comments",
+        submission_source: str = "unknown",
     ) -> str:
         """
         Clone the repo and open a pull request with the new data points.
@@ -303,6 +304,9 @@ class DeNovoModule:
             Remote Git repository URL.
         submission_comments : str, optional
             Comments to be included in the pull request. Defaults to "no comments".
+        submission_source : str, optional
+            Origin of the submission: 'web-server', 'local', or 'resubmission-script'.
+            Defaults to 'unknown'.
 
         Returns
         -------
@@ -340,8 +344,11 @@ class DeNovoModule:
 
         path_write_individual_point = os.path.join(self.t_dir_pr, current_datapoint["intermediate_hash"] + ".json")
         logging.info(f"Writing the json (single point) to: {path_write_individual_point}")
+        datapoint_dict = current_datapoint.to_dict()
+        for key in ("color", "hover_text", "scatter_size", "marker"):
+            datapoint_dict.pop(key, None)
         with open(path_write_individual_point, "w") as f:
-            json.dump(current_datapoint.to_dict(), f, indent=2)
+            json.dump(datapoint_dict, f, indent=2)
 
         commit_name = f"Added new run with id {branch_name}"
         commit_message = f"User comments: {submission_comments}"
@@ -349,7 +356,9 @@ class DeNovoModule:
         try:
             self.github_repo.create_branch(branch_name)
             self.github_repo.commit(commit_name, commit_message)
-            pr_id = self.github_repo.create_pull_request(commit_name, commit_message)
+            pr_id = self.github_repo.create_pull_request(
+                commit_name, commit_message, submission_source=submission_source
+            )
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."

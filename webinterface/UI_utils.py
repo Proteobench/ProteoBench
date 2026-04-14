@@ -1,14 +1,19 @@
 import base64
+import io
 import json
+import logging
 import re
+import tarfile
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import requests
+import streamlit as st
+from pages.utils.module_registry import get_all_modules
 
-SECRETS_FILE = Path(__file__).parent / ".streamlit" / "secrets.toml"
-GRAPHQL_URL = "https://api.github.com/graphql"
+logger = logging.getLogger(__name__)
 
 
 def get_base64_image(path):
@@ -171,7 +176,7 @@ def get_n_modules_proposed(rst_text: str) -> int:
     return status_counts.get("in discussion", 0) + status_counts.get("in development", 0)
 
 
-def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
+def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optional[int]:
     """
     Gets the monthly visitors count from the Matomo API.
 
@@ -186,31 +191,229 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> int:
 
     Returns
     -------
-    int
-        The number of monthly visitors (nb_visits of last 30 days)
+    Optional[int]
+        The number of monthly visitors (nb_uniq_visitors of last 30 days), or
+        ``None`` if retrieval/parsing failed.
     """
 
     # data to be sent to api
     data = {
         "module": "API",
-        "method": "Actions.getPageTitles",
+        "method": "VisitsSummary.get",
         "idSite": id_site,
-        "period": "day",
+        "period": "range",
         "date": "last30",
         "format": "json",
         "token_auth": token,
     }
 
-    r = requests.post(url=api_endpoint, data=data)
+    try:
+        r = requests.post(url=api_endpoint, data=data)
+        r.raise_for_status()
+        response_data = r.json()
 
-    json_visits = json.loads(r.text)
-    visits_count = 0
-    for _, visits in json_visits.items():
-        if len(visits) > 0:
-            for page in visits:
-                visits_count += page["nb_visits"]
+        return int(response_data.get("nb_uniq_visitors", 0))
 
-    return visits_count
+    except requests.RequestException:
+        print("Failed to retrieve monthly visitors from Matomo API")
+        return None
+
+    except (ValueError, KeyError):
+        print("Error parsing Matomo API response")
+        return None
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_module_submission_data() -> Dict[str, Dict[str, int]]:
+    """
+    Fetch submission data per module by downloading repo archives.
+    Returns per-tool submission counts for each module.
+    Requests are made concurrently to minimize latency.
+
+    Returns
+    -------
+    Dict[str, Dict[str, int]]
+        Mapping of results_repo name to {software_name: count} dict.
+    """
+
+    modules_by_category = get_all_modules()
+
+    headers = {}
+    try:
+        token = st.secrets["gh"]["token"]
+        headers["Authorization"] = f"token {token}"
+    except Exception:
+        logger.warning(
+            "Could not obtain GitHub token, proceeding with unauthenticated requests which may be rate-limited."
+        )
+        pass
+
+    repo_names = [
+        module.results_repo for modules in modules_by_category.values() for module in modules if module.results_repo
+    ]
+
+    def _fetch_tool_breakdown(repo_name: str) -> tuple:
+
+        try:
+            url = f"https://api.github.com/repos/Proteobench/{repo_name}/tarball/main"
+            resp = requests.get(url, headers=headers, timeout=30)
+            resp.raise_for_status()
+        except requests.RequestException:
+            logger.warning("Failed to download archive for %s", repo_name, exc_info=True)
+            return repo_name, {}
+
+        tools = Counter()
+        try:
+            with tarfile.open(fileobj=io.BytesIO(resp.content), mode="r:gz") as tar:
+                for member in tar.getmembers():
+                    if member.name.endswith(".json") and member.isfile():
+                        try:
+                            f = tar.extractfile(member)
+                            data = json.loads(f.read())
+                            tools[data.get("software_name", "Unknown")] += 1
+                        except (json.JSONDecodeError, KeyError, OSError):
+                            logger.warning("Skipping malformed file %s in %s", member.name, repo_name, exc_info=True)
+        except tarfile.TarError:
+            logger.warning("Failed to read archive for %s", repo_name, exc_info=True)
+            return repo_name, {}
+
+        return repo_name, dict(tools)
+
+    if not repo_names:
+        return {}
+
+    result: Dict[str, Dict[str, int]] = {}
+    with ThreadPoolExecutor(max_workers=min(len(repo_names), 10)) as executor:
+        futures = {executor.submit(_fetch_tool_breakdown, name): name for name in repo_names}
+        for future in as_completed(futures):
+            repo_name, tool_counts = future.result()
+            result[repo_name] = tool_counts
+
+    return result
+
+
+def build_submissions_figure():
+    """
+    Build a Plotly figure with faceted vertical bar charts showing submissions per module,
+    one subplot per category (DDA, DIA, etc.). Excludes archived modules.
+    Each bar stores its results_repo name in customdata for click-based pie chart interaction.
+
+    Returns
+    -------
+    tuple(plotly.graph_objects.Figure, Dict[str, Dict[str, int]]) or (None, None)
+        The bar figure and a mapping of module title to per-tool counts.
+    """
+    from pages.utils.module_registry import get_all_modules
+    from plotly import graph_objects as go
+    from plotly.subplots import make_subplots
+
+    modules_by_category = get_all_modules()
+    submission_data = get_module_submission_data()
+
+    # Build per-category data, excluding archived modules
+    category_data: Dict[str, list] = {}
+    tool_data_by_title: Dict[str, Dict[str, int]] = {}
+    for category, modules in modules_by_category.items():
+        rows = []
+        for module in modules:
+            if module.release_stage == "archived":
+                continue
+            if module.results_repo and module.results_repo in submission_data:
+                tool_counts = submission_data[module.results_repo]
+                total = sum(tool_counts.values())
+                rows.append({"label": module.title, "count": total})
+                tool_data_by_title[module.title] = tool_counts
+        if rows:
+            rows.sort(key=lambda r: r["count"], reverse=True)
+            category_data[category] = rows
+
+    if not category_data:
+        return None, None
+
+    categories = sorted(category_data.keys())
+    n_cats = len(categories)
+
+    palette = ["#F4A582", "#92C5DE", "#B2DF8A", "#CAB2D6", "#FDBF6F", "#FB9A99"]
+    color_map = {cat: palette[i % len(palette)] for i, cat in enumerate(categories)}
+
+    fig = make_subplots(
+        rows=1,
+        cols=n_cats,
+        subplot_titles=[f"{cat} Modules" for cat in categories],
+        shared_yaxes=False,
+        horizontal_spacing=0.08,
+    )
+
+    for col_idx, cat in enumerate(categories, start=1):
+        rows = category_data[cat]
+        labels = [r["label"] for r in rows]
+        values = [r["count"] for r in rows]
+
+        fig.add_trace(
+            go.Bar(
+                x=labels,
+                y=values,
+                marker_color=color_map[cat],
+                name=cat,
+                hovertemplate="<b>%{x}</b><br>Submissions: %{y}<br><i>Click for tool breakdown</i><extra></extra>",
+                showlegend=False,
+            ),
+            row=1,
+            col=col_idx,
+        )
+
+        fig.update_xaxes(tickangle=-45, row=1, col=col_idx)
+        fig.update_yaxes(title_text="# public workflow results" if col_idx == 1 else "", row=1, col=col_idx)
+
+    max_modules = max(len(v) for v in category_data.values())
+    fig.update_layout(
+        height=max(350, 200 + max_modules * 25),
+        margin=dict(l=40, r=20, t=40, b=120),
+    )
+
+    return fig, tool_data_by_title
+
+
+def build_tool_pie_chart(module_title: str, tool_counts: Dict[str, int]):
+    """
+    Build a Plotly pie chart showing tool breakdown for a given module.
+
+    Parameters
+    ----------
+    module_title : str
+        The module title for the chart heading.
+    tool_counts : Dict[str, int]
+        Mapping of software_name to submission count.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+    """
+    from plotly import graph_objects as go
+
+    labels = list(tool_counts.keys())
+    values = list(tool_counts.values())
+
+    fig = go.Figure(
+        data=[
+            go.Pie(
+                labels=labels,
+                values=values,
+                hovertemplate="<b>%{label}</b><br>Submissions: %{value}<br>(%{percent})<extra></extra>",
+                textinfo="label+value",
+                textposition="auto",
+            )
+        ]
+    )
+    fig.update_layout(
+        title=dict(text=f"Tool breakdown: {module_title}", font=dict(size=14)),
+        height=350,
+        margin=dict(l=20, r=20, t=50, b=20),
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+    )
+
+    return fig
 
 
 if __name__ == "__main__":

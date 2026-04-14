@@ -2,7 +2,7 @@
 authors = [
   { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
   { name = "Henry Webel", email = "heweb@dtu.dk" },
-  { name = 'Witold Wolski', email = 'witold.wolski@fgcz.uzh.ch' }
+  { name = 'Witold Wolski', email = 'witold.wolski@fgcz.uzh.ch' },
 ] # TODO: Add others
 description = "ProteoBench compares the outputs of mass spectrometry-based proteomics data analysis pipelines"
 classifiers = [
@@ -24,10 +24,6 @@ dependencies = [
   "plotly>=6.0.0",
   "upsetplot",
   "seaborn",
-  "streamlit>=1.31",
-  "streamlit-aggrid>=1.1.7",
-  "streamlit_extras",
-  "streamlit-plotly-events",
   "scipy",
   "matplotlib",
   "toml",
@@ -41,7 +37,16 @@ name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = ["black~=23.0", "jupyterlab", "ipywidgets", "notebook", "tqdm", "wget", "nox", "pytest"]
+dev = [
+  "black~=23.0",
+  "jupyterlab",
+  "ipywidgets",
+  "notebook",
+  "tqdm",
+  "wget",
+  "nox",
+  "pytest",
+]
 docs = [
   "sphinx",
   "sphinx-design",
@@ -52,7 +57,13 @@ docs = [
   "sphinx_new_tab_link",
   "sphinx_copybutton",
 ]
-web = ["streamlit>1.27", "scipy"]
+web = [
+  "streamlit>1.31",
+  "streamlit>=1.31",
+  "streamlit-aggrid>=1.1.7",
+  "streamlit_extras",
+  "streamlit-plotly-events",
+]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/ProteoBench/ProteoBench/issues/"
@@ -81,14 +92,12 @@ max-line-length = 120
 
 [tool.numpydoc_validation]
 checks = [
-    "all",   # report on all checks, except the below
-    "EX01",
-    "SA01",
-    "ES01",
-    "RT03",
-    "SS06",
+  "all",  # report on all checks, except the below
+  "EX01",
+  "SA01",
+  "ES01",
+  "RT03",
+  "SS06",
 ]
 
-exclude = [
-'^test/.*',
-]
+exclude = ['^test/.*']

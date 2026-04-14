@@ -37,6 +37,7 @@
 
 - Defined but never called anywhere in the codebase
 - Only `compute_roc_auc` (without "directional") is used
+TODO: Add a test.
 
 ### 7. `proteobench/plotting/plot_generator_denovo.py` -- `plot_species_specific()` (lines 700-701)
 

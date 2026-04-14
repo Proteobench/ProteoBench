@@ -149,9 +149,7 @@ class ParseSettingsQuant:
             self._run_name_cleanup = re.compile(cleanup_pattern)
         else:
             # Default: strip common MS file extensions and known suffixes
-            self._run_name_cleanup = re.compile(
-                r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$"
-            )
+            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
 
         # Normalize the condition_mapper and run_mapper keys using the same cleanup
         # so that keys like "file.mzML" and column names like "file.mzML" both

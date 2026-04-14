@@ -15,7 +15,7 @@ And find them in the PRIDE repository TOADD.
 **It is imperative not to rename the files once downloaded!**
 
 For this module, we built a fasta file with the UniProt Human proteome (version 2026_01) including isoforms. It contails 105,657 entries (without contaminants and decoys). We added **contaminant proteins** from
-([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145)), and entrapment sequences generated with [FDRBench](https://github.com/Noble-Lab/FDRBench) (see [Wen, B., Freestone, J., Riffle, M. et al., 2025](https://doi-org.insb.bib.cnrs.fr/10.1038/s41592-025-02719-x) for more details on its generation). In this fasta file, the isoleucines are replaced by leucines since they are indistinguishable in these data. Protein N-terminal methionines are kept in the shuffled entrapment sequences. 
+([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145)), and entrapment sequences generated with [FDRBench](https://github.com/Noble-Lab/FDRBench) (see [Wen, B., Freestone, J., Riffle, M. et al., 2025](https://doi-org.insb.bib.cnrs.fr/10.1038/s41592-025-02719-x) for more details on its generation). In this fasta file, the isoleucines are replaced by leucines since they are indistinguishable in these data. All protein N-terminal residues are kept in the shuffled entrapment sequences. 
 Download the zipped FASTA file here: [TOADD](https://proteobench.cubimed.rub.de/fasta/TOADD).
 
 ## Metric calculation

@@ -15,7 +15,6 @@ from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
@@ -325,6 +324,7 @@ class QuantModule:
 
         return intermediate_metric_structure, all_datapoints, input_df
 
+    # ! is it used?
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """
         Check if the new data point has a unique hash.
@@ -348,10 +348,11 @@ class QuantModule:
         overlap = set_current_datapoint.intersection(set_all_datapoints_old)
 
         if len(overlap) > 0:
-            overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
-            st.error(
-                f"The run you want to submit has been previously submitted under the identifier: {str(overlap_name)}"
-            )
+            # remove
+            # overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
+            # st.error(
+            #     f"The run you want to submit has been previously submitted under the identifier: {str(overlap_name)}"
+            # )
             return False
         return True
 

@@ -314,9 +314,15 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 "N-term Ammonia-loss",
             ],
         )
-        mod_label = kwargs.get("mod_label", "M-Oxidation")
-        feature = kwargs.get("feature", "Missing Fragmentation Sites")
-        evaluation_type = kwargs.get("evaluation_type", "mass")
+        features = kwargs.get(
+            "features",
+            [
+                "Missing Fragmentation Sites",
+                "Peptide Length",
+                "% Explained Intensity"
+            ]
+        )
+        evaluation_types = kwargs.get("evaluation_type", ['mass', 'exact'])
         software_colors = kwargs.get(
             "software_colors",
             {
@@ -334,19 +340,28 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         plots["ptm_overview"] = self.plot_ptm_overview(
             performance_data, mod_labels=mod_labels, software_colors=software_colors
         )
-        plots["ptm_specific"] = self.plot_ptm_specific(
-            performance_data, mod_label=mod_label, software_colors=software_colors
-        )
+        
+        plots['ptm_specific'] = {}
+        for mod_label in mod_labels:
+            plots["ptm_specific"][mod_label] = self.plot_ptm_specific(
+                performance_data, mod_label=mod_label, software_colors=software_colors
+            )
 
         # Generate spectrum feature plot
-        plots["spectrum_feature"] = self.plot_spectrum_feature(
-            performance_data, feature=feature, evaluation_type=evaluation_type, software_colors=software_colors
-        )
+        plots['spectrum_feature'] = {}
+        for feature in features:
+            plots['spectrum_feature'][feature] = {}
+            for evaluation_type in evaluation_types:
+                plots["spectrum_feature"][feature][evaluation_type] = self.plot_spectrum_feature(
+                    performance_data, feature=feature, evaluation_type=evaluation_type, software_colors=software_colors
+                )
 
         # Generate species plot
-        plots["species_overview"] = self.plot_species_overview(
-            performance_data, evaluation_type=evaluation_type, software_colors=software_colors
-        )
+        plots["species_overview"] = {}
+        for evaluation_type in evaluation_types:
+            plots["species_overview"][evaluation_type] = self.plot_species_overview(
+                performance_data, evaluation_type=evaluation_type, software_colors=software_colors
+            )
 
         return plots
 
@@ -360,7 +375,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             List of plot configurations for organizing the UI display.
         """
         return [
-            {"plots": ["ptm_overview", "ptm_specific"], "columns": 2, "title": "PTM Analysis"},
+            {"plots": ["ptm_overview", "ptm_specific"], "columns": 1, "title": "PTM Analysis"},
             {"plots": ["spectrum_feature"], "columns": 1, "title": "Spectrum Features"},
             {"plots": ["species_overview"], "columns": 1, "title": "Species Analysis"},
         ]

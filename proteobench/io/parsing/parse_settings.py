@@ -146,7 +146,13 @@ class ParseSettingsQuant:
         # Can be overridden per-tool in the TOML [general] section
         cleanup_pattern = parse_settings["general"].get("run_name_cleanup", "")
         if cleanup_pattern:
-            self._run_name_cleanup = re.compile(cleanup_pattern)
+            try:
+                self._run_name_cleanup = re.compile(cleanup_pattern)
+            except re.error as exc:
+                raise ValueError(
+                    f"Invalid regex in [general].run_name_cleanup: {cleanup_pattern!r}. "
+                    f"Please fix the pattern in the TOML configuration. Details: {exc}"
+                ) from exc
         else:
             # Default: strip common MS file extensions and known suffixes
             self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")

@@ -1,0 +1,144 @@
+i2MassChroQ_VERSION	1.0.18
+AnalysisSoftware_name	X!Tandem
+AnalysisSoftware_version	
+decoy_accession_regexp	.*:reversed$
+list path, default parameters	/gorgone/pappso/tmp/i2masschroq.DNlELT/QExactive_analysis_FDR_nosemi_2mc.xml
+list path, sequence source #1	/gorgone/pappso/moulon/users/Olivier/20240131_proteobench/database/ProteoBenchFASTA_DDAQuantification.fasta
+list path, sequence source description #1	no description
+list path, taxonomy information	/gorgone/pappso/tmp/i2masschroq.DNlELT/database.xml
+modelling, duplicate peptide ids	3321
+modelling, duplicate proteins	712
+modelling, total peptides used	841156326
+modelling, total proteins used	63778
+modelling, total spectra used	116593
+output, histogram column width	30
+output, histograms	yes
+output, maximum valid expectation value	0.05
+output, maximum valid protein expectation value	0.05
+output, mzid	yes
+output, one sequence copy	yes
+output, parameters	yes
+output, path	/gorgone/pappso/moulon/users/Olivier/20240131_proteobench/tandem/2mc/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.xml
+output, path hashing	no
+output, performance	yes
+output, proteins	yes
+output, results	all
+output, sequences	yes
+output, sort results by	spectrum
+output, spectra	yes
+output, spectrum index	true
+output, xsl path	tandem-style.xsl
+process, start time	2024-11-21T16:07:54
+process, tandemng	tandemng 2017 0.3.12
+process, version	X! Tandem Alanine (2017.2.1.4)
+protein, C-terminal residue modification mass	0
+protein, N-terminal residue modification mass	0
+protein, cleavage C-terminal mass change	17.00305
+protein, cleavage N-terminal mass change	1.00794
+protein, cleavage semi	no
+protein, cleavage site	[RK]|{P}
+protein, modified residue mass file	
+protein, quick acetyl	yes
+protein, quick pyrolidone	yes
+protein, stP bias	yes
+protein, taxon	usedefined
+protein, use minimal annotations	yes
+quality values	4208 6572 5174 4456 4121 3890 3400 3263 3027 2796 2530 2352 2044 1873 1685 1606 1405 1299 1211 1146
+refine	yes
+refine, cleavage semi	no
+refine, maximum missed cleavage sites	2
+refine, maximum valid expectation value	0.01
+refine, modification mass	57.02146@C
+refine, modification mass 1	
+refine, modification mass 2	
+refine, point mutations	no
+refine, potential C-terminus modifications	
+refine, potential N-terminus modifications	+42.01056@[
+refine, potential modification mass	15.99491@M
+refine, potential modification mass 1	
+refine, potential modification mass 2	
+refine, potential modification motif	
+refine, potential modification motif 1	
+refine, potential modification motif 2	
+refine, spectrum synthesis	yes
+refine, unanticipated cleavage	no
+refine, use potential modifications for full refinement	yes
+refining, # input models	6220
+refining, # input spectra	73169
+refining, # partial cleavage	1445
+refining, # point mutations	0
+refining, # potential C-terminii	0
+refining, # potential N-terminii	3056
+refining, # unanticipated cleavage	0
+residue, modification mass	57.02146@C
+residue, modification mass 1	
+residue, modification mass 2	
+residue, potential modification mass	15.99491@M
+residue, potential modification mass 1	
+residue, potential modification mass 2	
+residue, potential modification motif	
+residue, potential modification motif 1	
+residue, potential modification motif 2	
+scoring, a ions	no
+scoring, b ions	yes
+scoring, c ions	no
+scoring, cyclic permutation	yes
+scoring, include reverse	yes
+scoring, maximum missed cleavage sites	1
+scoring, minimum ion count	4
+scoring, pluggable scoring	no
+scoring, x ions	no
+scoring, y ions	yes
+scoring, z ions	no
+spectrum, dynamic range	100
+spectrum, fragment mass type	monoisotopic
+spectrum, fragment monoisotopic mass error	0.02
+spectrum, fragment monoisotopic mass error units	Daltons
+spectrum, maximum parent charge	4
+spectrum, minimum fragment mz	150
+spectrum, minimum parent m+h	500
+spectrum, minimum peaks	15
+spectrum, mzFormat	1
+spectrum, neutral loss mass	18.01057
+spectrum, neutral loss window	0.02
+spectrum, parent monoisotopic mass error minus	10
+spectrum, parent monoisotopic mass error plus	10
+spectrum, parent monoisotopic mass error units	ppm
+spectrum, parent monoisotopic mass isotope error	yes
+spectrum, path	/gorgone/pappso/moulon/raw/20240131_proteobench/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mzML
+spectrum, sequence batch size	1000
+spectrum, threads	4
+spectrum, total peaks	100
+spectrum, use contrast angle	no
+spectrum, use neutral loss window	yes
+spectrum, use noise suppression	yes
+timing, initial modelling total (sec)	893.46
+timing, initial modelling/spectrum (sec)	0.0077
+timing, load sequence models (sec)	0.26
+timing, refinement/spectrum (sec)	0.0188
+xtandem_preset_file	/gorgone/pappso/tmp/i2masschroq.DNlELT/QExactive_analysis_FDR_nosemi_2mc.xml
+i2m_count_peptides_per_protein_accross_msruns	false
+i2m_minimum_peptides_per_protein	1
+i2m_minimum_protein_log10_evalue	-3.399996913
+i2m_pep_repro	1
+i2m_psm_fdr_threshold_target	0.0097
+peptide_fdr	0.01356727105
+protein_fdr	0.008595988539
+psm_fdr	0.009952004517
+mcq_alignment_ms1_smoothing_halfwindow	0
+mcq_alignment_ms2_smoothing_halfwindow	15
+mcq_alignment_ms2_tendency_halfwindow	10
+mcq_alignment_msrun_reference_for_rt_alignment	LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mzML
+mcq_detection_detection_threshold_on_max	200000
+mcq_detection_detection_threshold_on_min	150000
+mcq_detection_maxmin_half_edge	6
+mcq_detection_mean_filter_half_edge	1
+mcq_detection_minmax_half_edge	7
+mcq_filter_anti_spike_half	5
+mcq_mbr	T
+mcq_version	2.4.30
+mcq_xic_extraction_type	max
+mcq_xic_ppm_range_max	10
+mcq_xic_ppm_range_min	10
+mcqr_normalization_method	median.RT
+mcqr_version	0.6.15

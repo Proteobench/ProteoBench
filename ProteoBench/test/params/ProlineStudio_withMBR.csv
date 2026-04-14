@@ -1,0 +1,24 @@
+,0
+software_name,ProlineStudio
+software_version,1.0
+search_engine,Mascot
+search_engine_version,2.8.3
+ident_fdr_psm,-
+ident_fdr_peptide,
+ident_fdr_protein,
+enable_match_between_runs,True
+precursor_mass_tolerance,"[-10.0 ppm, 10.0 ppm]"
+fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
+enzyme,Trypsin/P
+semi_enzymatic,False
+allowed_miscleavages,2
+min_peptide_length,7
+max_peptide_length,
+fixed_mods,Carbamidomethyl (C)
+variable_mods,Acetyl (Protein N-term); Oxidation (M)
+max_mods,
+min_precursor_charge,2
+max_precursor_charge,3
+quantification_method,
+protein_inference,
+abundance_normalization_ions,

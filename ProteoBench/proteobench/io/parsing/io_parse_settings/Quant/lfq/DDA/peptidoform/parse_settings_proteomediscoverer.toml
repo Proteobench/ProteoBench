@@ -1,0 +1,29 @@
+[mapper]
+"Protein Accessions" = "Proteins"
+"Sequence" = "sequence"
+"Modifications" = "modifications"
+
+[condition_mapper]
+"Abundances (Normalized): F1: Sample, ConditionA" = "A"
+"Abundances (Normalized): F2: Sample, ConditionA" = "A"
+"Abundances (Normalized): F3: Sample, ConditionA" = "A"
+"Abundances (Normalized): F4: Sample, ConditionB" = "B"
+"Abundances (Normalized): F5: Sample, ConditionB" = "B"
+"Abundances (Normalized): F6: Sample, ConditionB" = "B"
+
+[run_mapper]
+"Abundances (Normalized): F1: Sample, ConditionA" = "Condition_A_Sample_Alpha_01"
+"Abundances (Normalized): F2: Sample, ConditionA" = "Condition_A_Sample_Alpha_02"
+"Abundances (Normalized): F3: Sample, ConditionA" = "Condition_A_Sample_Alpha_03"
+"Abundances (Normalized): F4: Sample, ConditionB" = "Condition_B_Sample_Alpha_01"
+"Abundances (Normalized): F5: Sample, ConditionB" = "Condition_B_Sample_Alpha_02"
+"Abundances (Normalized): F6: Sample, ConditionB" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

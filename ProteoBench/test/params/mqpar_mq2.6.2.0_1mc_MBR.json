@@ -1,0 +1,1156 @@
+{
+    "fastaFiles": {
+        "FastaFileInfo": [
+            {
+                "fastaFilePath": "\\\\unicph.domain\\users\\abc123\\proteobench_202407\\mq2.6.2.0_1mc_MBR\\ProteoBenchFASTA_DDAQuantification.fasta"
+            },
+            {
+                "identifierParseRule": ">([^\\s]*)"
+            },
+            {
+                "descriptionParseRule": ">(.*)"
+            },
+            {
+                "taxonomyParseRule": null
+            },
+            {
+                "variationParseRule": null
+            },
+            {
+                "modificationParseRule": null
+            },
+            {
+                "taxonomyId": null
+            }
+        ]
+    },
+    "fastaFilesProteogenomics": null,
+    "fastaFilesFirstSearch": null,
+    "fixedSearchFolder": null,
+    "andromedaCacheSize": "350000",
+    "advancedRatios": "True",
+    "pvalThres": "0.005",
+    "rtShift": "False",
+    "separateLfq": "False",
+    "lfqStabilizeLargeRatios": "True",
+    "lfqRequireMsms": "True",
+    "lfqBayesQuant": "False",
+    "decoyMode": "revert",
+    "includeContaminants": "False",
+    "maxPeptideMass": "4600",
+    "epsilonMutationScore": "True",
+    "mutatedPeptidesSeparately": "True",
+    "proteogenomicPeptidesSeparately": "True",
+    "minDeltaScoreUnmodifiedPeptides": "0",
+    "minDeltaScoreModifiedPeptides": "6",
+    "minScoreUnmodifiedPeptides": "0",
+    "minScoreModifiedPeptides": "40",
+    "secondPeptide": "True",
+    "matchBetweenRuns": "True",
+    "matchUnidentifiedFeatures": "False",
+    "matchBetweenRunsFdr": "False",
+    "dependentPeptides": "False",
+    "dependentPeptideFdr": "0",
+    "dependentPeptideMassBin": "0",
+    "dependentPeptidesBetweenRuns": "False",
+    "dependentPeptidesWithinExperiment": "False",
+    "dependentPeptidesWithinParameterGroup": "False",
+    "dependentPeptidesRestrictFractions": "False",
+    "dependentPeptidesFractionDifference": "0",
+    "ibaq": "False",
+    "top3": "False",
+    "independentEnzymes": "False",
+    "useDeltaScore": "False",
+    "splitProteinGroupsByTaxonomy": "True",
+    "taxonomyLevel": "Species",
+    "avalon": "False",
+    "nModColumns": "3",
+    "ibaqLogFit": "False",
+    "ibaqChargeNormalization": "False",
+    "razorProteinFdr": "True",
+    "deNovoSequencing": "False",
+    "deNovoVarMods": "False",
+    "deNovoCompleteSequence": "False",
+    "deNovoCalibratedMasses": "False",
+    "deNovoMaxIterations": "0",
+    "deNovoProteaseReward": "0",
+    "deNovoProteaseRewardTof": "0",
+    "deNovoAgPenalty": "0",
+    "deNovoGgPenalty": "0",
+    "deNovoUseComplementScore": "True",
+    "deNovoUseProteaseScore": "True",
+    "deNovoUseWaterLossScore": "True",
+    "deNovoUseAmmoniaLossScore": "True",
+    "deNovoUseA2Score": "True",
+    "deNovoMassClusterTolDa": "0",
+    "deNovoScalingFactor": "0",
+    "massDifferenceSearch": "False",
+    "isotopeCalc": "False",
+    "minPeptideLength": "7",
+    "psmFdrCrosslink": "0.01",
+    "peptideFdr": "0.01",
+    "proteinFdr": "0.01",
+    "siteFdr": "0.01",
+    "minPeptideLengthForUnspecificSearch": "8",
+    "maxPeptideLengthForUnspecificSearch": "25",
+    "useNormRatiosForOccupancy": "True",
+    "minPeptides": "1",
+    "minRazorPeptides": "1",
+    "minUniquePeptides": "0",
+    "useCounterparts": "False",
+    "advancedSiteIntensities": "True",
+    "customProteinQuantification": "False",
+    "customProteinQuantificationFile": null,
+    "minRatioCount": "2",
+    "restrictProteinQuantification": "True",
+    "restrictMods": [
+        {
+            "string": "Oxidation (M)"
+        },
+        {
+            "string": "Acetyl (Protein N-term)"
+        }
+    ],
+    "matchingTimeWindow": "0.4",
+    "matchingIonMobilityWindow": "0.05",
+    "alignmentTimeWindow": "20",
+    "alignmentIonMobilityWindow": "1",
+    "numberOfCandidatesMsms": "15",
+    "compositionPrediction": "0",
+    "quantMode": "1",
+    "massDifferenceMods": null,
+    "mainSearchMaxCombinations": "200",
+    "writeMsScansTable": "False",
+    "writeMsmsScansTable": "True",
+    "writePasefMsmsScansTable": "True",
+    "writeAccumulatedMsmsScansTable": "True",
+    "writeMs3ScansTable": "True",
+    "writeAllPeptidesTable": "False",
+    "writeMzRangeTable": "True",
+    "writeDiaFragmentTable": "False",
+    "writeDiaFragmentQuantTable": "False",
+    "writeMzTab": "False",
+    "writeSdrf": "False",
+    "disableMd5": "False",
+    "cacheBinInds": "True",
+    "etdIncludeB": "False",
+    "ms2PrecursorShift": "0",
+    "complementaryIonPpm": "20",
+    "variationParseRule": null,
+    "variationMode": "none",
+    "useSeriesReporters": "False",
+    "name": "session1",
+    "maxQuantVersion": "2.6.2.0",
+    "pluginFolder": null,
+    "numThreads": "4",
+    "emailAddress": null,
+    "smtpHost": null,
+    "emailFromAddress": null,
+    "fullMinMz": "-1.7976931348623157E+308",
+    "fullMaxMz": "1.7976931348623157E+308",
+    "sendEmail": "False",
+    "ionCountIntensities": "False",
+    "verboseColumnHeaders": "False",
+    "calcPeakProperties": "False",
+    "showCentroidMassDifferences": "False",
+    "showIsotopeMassDifferences": "False",
+    "profilePerformance": "False",
+    "filePaths": [
+        {
+            "string": "\\\\unicph.domain\\users\\abc123\\proteobench_202407\\mq2.6.2.0_1mc_MBR\\LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw"
+        },
+        {
+            "string": "\\\\unicph.domain\\users\\abc123\\proteobench_202407\\mq2.6.2.0_1mc_MBR\\LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw"
+        },
+        {
+            "string": "\\\\unicph.domain\\users\\abc123\\proteobench_202407\\mq2.6.2.0_1mc_MBR\\LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw"
+        },
+        {
+            "string": "\\\\unicph.domain\\users\\abc123\\proteobench_202407\\mq2.6.2.0_1mc_MBR\\LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw"
+        },
+        {
+            "string": "\\\\unicph.domain\\users\\abc123\\proteobench_202407\\mq2.6.2.0_1mc_MBR\\LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw"
+        },
+        {
+            "string": "\\\\unicph.domain\\users\\abc123\\proteobench_202407\\mq2.6.2.0_1mc_MBR\\LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw"
+        }
+    ],
+    "experiments": [
+        {
+            "string": "A_Sample_Alpha_01"
+        },
+        {
+            "string": "A_Sample_Alpha_02"
+        },
+        {
+            "string": "A_Sample_Alpha_03"
+        },
+        {
+            "string": "B_Sample_Alpha_01"
+        },
+        {
+            "string": "B_Sample_Alpha_02"
+        },
+        {
+            "string": "B_Sample_Alpha_03"
+        }
+    ],
+    "fractions": [
+        {
+            "short": "32767"
+        },
+        {
+            "short": "32767"
+        },
+        {
+            "short": "32767"
+        },
+        {
+            "short": "32767"
+        },
+        {
+            "short": "32767"
+        },
+        {
+            "short": "32767"
+        }
+    ],
+    "ptms": [
+        {
+            "boolean": "False"
+        },
+        {
+            "boolean": "False"
+        },
+        {
+            "boolean": "False"
+        },
+        {
+            "boolean": "False"
+        },
+        {
+            "boolean": "False"
+        },
+        {
+            "boolean": "False"
+        }
+    ],
+    "paramGroupIndices": [
+        {
+            "int": "0"
+        },
+        {
+            "int": "0"
+        },
+        {
+            "int": "0"
+        },
+        {
+            "int": "0"
+        },
+        {
+            "int": "0"
+        },
+        {
+            "int": "0"
+        }
+    ],
+    "referenceChannel": [
+        {
+            "string": null
+        },
+        {
+            "string": null
+        },
+        {
+            "string": null
+        },
+        {
+            "string": null
+        },
+        {
+            "string": null
+        },
+        {
+            "string": null
+        }
+    ],
+    "lfqTopNPeptides": "0",
+    "diaJoinPrecChargesForLfq": "False",
+    "diaFragChargesForQuant": "1",
+    "gridSpacing": "0.7",
+    "proteinGroupingFile": null,
+    "simplePepCalculation": "False",
+    "useAndromeda20": "False",
+    "useAndromeda20DefaultModel": "False",
+    "andromeda20AltModelPath": null,
+    "intensityPredictionFolder": null,
+    "encoding": "0",
+    "parameterGroups": {
+        "parameterGroup": [
+            {
+                "andromeda20AltModelPath": null
+            },
+            {
+                "andromeda20DefaultModel": "False"
+            },
+            {
+                "useAndromeda20": "False"
+            },
+            {
+                "msInstrument": "0"
+            },
+            {
+                "maxCharge": "7"
+            },
+            {
+                "minPeakLen": "2"
+            },
+            {
+                "diaMinPeakLen": "1"
+            },
+            {
+                "useMs1Centroids": "False"
+            },
+            {
+                "useMs2Centroids": "False"
+            },
+            {
+                "cutPeaks": "True"
+            },
+            {
+                "gapScans": "1"
+            },
+            {
+                "minTime": "NaN"
+            },
+            {
+                "maxTime": "NaN"
+            },
+            {
+                "matchType": "MatchFromAndTo"
+            },
+            {
+                "intensityDetermination": "0"
+            },
+            {
+                "centroidMatchTol": "8"
+            },
+            {
+                "centroidMatchTolInPpm": "True"
+            },
+            {
+                "centroidHalfWidth": "35"
+            },
+            {
+                "centroidHalfWidthInPpm": "True"
+            },
+            {
+                "valleyFactor": "1.4"
+            },
+            {
+                "isotopeValleyFactor": "1.2"
+            },
+            {
+                "advancedPeakSplitting": "False"
+            },
+            {
+                "intensityThresholdMs1Dda": "0"
+            },
+            {
+                "intensityThresholdMs1Dia": "0"
+            },
+            {
+                "intensityThresholdMs2": "0"
+            },
+            {
+                "labelMods": {
+                    "string": null
+                }
+            },
+            {
+                "lcmsRunType": "Standard"
+            },
+            {
+                "reQuantify": "False"
+            },
+            {
+                "lfqMode": "0"
+            },
+            {
+                "lfqNormClusterSize": "80"
+            },
+            {
+                "lfqMinEdgesPerNode": "3"
+            },
+            {
+                "lfqAvEdgesPerNode": "6"
+            },
+            {
+                "lfqMaxFeatures": "100000"
+            },
+            {
+                "neucodeMaxPpm": "0"
+            },
+            {
+                "neucodeResolution": "0"
+            },
+            {
+                "neucodeResolutionInMda": "False"
+            },
+            {
+                "neucodeInSilicoLowRes": "False"
+            },
+            {
+                "fastLfq": "True"
+            },
+            {
+                "lfqRestrictFeatures": "False"
+            },
+            {
+                "lfqMinRatioCount": "2"
+            },
+            {
+                "lfqMinRatioCountDia": "2"
+            },
+            {
+                "lfqPrioritizeMs1Dia": "True"
+            },
+            {
+                "maxLabeledAa": "0"
+            },
+            {
+                "maxNmods": "5"
+            },
+            {
+                "maxMissedCleavages": "1"
+            },
+            {
+                "maxMissedCleavagesDia": "1"
+            },
+            {
+                "multiplicity": "1"
+            },
+            {
+                "enzymeMode": "0"
+            },
+            {
+                "complementaryReporterType": "0"
+            },
+            {
+                "reporterNormalization": "0"
+            },
+            {
+                "neucodeIntensityMode": "0"
+            },
+            {
+                "fixedModifications": {
+                    "string": "Carbamidomethyl (C)"
+                }
+            },
+            {
+                "enzymes": {
+                    "string": "Trypsin/P"
+                }
+            },
+            {
+                "enzymesFirstSearch": null
+            },
+            {
+                "enzymeModeFirstSearch": "0"
+            },
+            {
+                "useEnzymeFirstSearch": "False"
+            },
+            {
+                "useVariableModificationsFirstSearch": "False"
+            },
+            {
+                "variableModifications": {
+                    "string": [
+                        "Oxidation (M)",
+                        "Acetyl (Protein N-term)"
+                    ]
+                }
+            },
+            {
+                "useMultiModification": "False"
+            },
+            {
+                "multiModifications": null
+            },
+            {
+                "isobaricLabels": null
+            },
+            {
+                "neucodeLabels": null
+            },
+            {
+                "variableModificationsFirstSearch": null
+            },
+            {
+                "hasAdditionalVariableModifications": "False"
+            },
+            {
+                "additionalVariableModifications": null
+            },
+            {
+                "additionalVariableModificationProteins": null
+            },
+            {
+                "doMassFiltering": "True"
+            },
+            {
+                "firstSearchTol": "20"
+            },
+            {
+                "mainSearchTol": "4.5"
+            },
+            {
+                "searchTolInPpm": "True"
+            },
+            {
+                "isotopeMatchTol": "2"
+            },
+            {
+                "isotopeMatchTolInPpm": "True"
+            },
+            {
+                "isotopeTimeCorrelation": "0.6"
+            },
+            {
+                "theorIsotopeCorrelation": "0.6"
+            },
+            {
+                "checkMassDeficit": "True"
+            },
+            {
+                "recalibrationInPpm": "True"
+            },
+            {
+                "intensityDependentCalibration": "False"
+            },
+            {
+                "minScoreForCalibration": "70"
+            },
+            {
+                "matchLibraryFile": "False"
+            },
+            {
+                "libraryFile": null
+            },
+            {
+                "matchLibraryMassTolPpm": "0"
+            },
+            {
+                "matchLibraryTimeTolMin": "0"
+            },
+            {
+                "matchLabelTimeTolMin": "0"
+            },
+            {
+                "reporterMassTolerance": "NaN"
+            },
+            {
+                "reporterPif": "NaN"
+            },
+            {
+                "filterPif": "False"
+            },
+            {
+                "reporterFraction": "NaN"
+            },
+            {
+                "reporterBasePeakRatio": "NaN"
+            },
+            {
+                "timsHalfWidth": "0"
+            },
+            {
+                "timsStep": "0"
+            },
+            {
+                "timsResolution": "0"
+            },
+            {
+                "timsMinMsmsIntensity": "0"
+            },
+            {
+                "timsRemovePrecursor": "True"
+            },
+            {
+                "timsIsobaricLabels": "False"
+            },
+            {
+                "timsCollapseMsms": "True"
+            },
+            {
+                "crossLinkingType": "0"
+            },
+            {
+                "crossLinker": null
+            },
+            {
+                "minMatchXl": "3"
+            },
+            {
+                "minPairedPepLenXl": "6"
+            },
+            {
+                "minScoreDipeptide": "40"
+            },
+            {
+                "minScoreMonopeptide": "0"
+            },
+            {
+                "minScorePartialCross": "10"
+            },
+            {
+                "crosslinkOnlyIntraProtein": "False"
+            },
+            {
+                "crosslinkIntensityBasedPrecursor": "True"
+            },
+            {
+                "isHybridPrecDetermination": "False"
+            },
+            {
+                "topXcross": "3"
+            },
+            {
+                "doesSeparateInterIntraProteinCross": "False"
+            },
+            {
+                "crosslinkMaxMonoUnsaturated": "0"
+            },
+            {
+                "crosslinkMaxMonoSaturated": "0"
+            },
+            {
+                "crosslinkMaxDiUnsaturated": "0"
+            },
+            {
+                "crosslinkMaxDiSaturated": "0"
+            },
+            {
+                "crosslinkModifications": null
+            },
+            {
+                "crosslinkFastaFiles": null
+            },
+            {
+                "crosslinkSites": null
+            },
+            {
+                "crosslinkNetworkFiles": null
+            },
+            {
+                "crosslinkMode": null
+            },
+            {
+                "peakRefinement": "False"
+            },
+            {
+                "peakRefinementCrosslinking": "False"
+            },
+            {
+                "isobaricSumOverWindow": "True"
+            },
+            {
+                "isobaricWeightExponent": "0.75"
+            },
+            {
+                "collapseMsmsOnIsotopePatterns": "False"
+            },
+            {
+                "diaLibraryType": "0"
+            },
+            {
+                "diaLibraryPaths": null
+            },
+            {
+                "diaEvidencePaths": null
+            },
+            {
+                "diaMsmsPaths": null
+            },
+            {
+                "diaLabelIndsForLibraryMatch": null
+            },
+            {
+                "diaInitialPrecMassTolPpm": "20"
+            },
+            {
+                "diaInitialFragMassTolPpm": "20"
+            },
+            {
+                "diaCorrThresholdFeatureClustering": "0.85"
+            },
+            {
+                "diaPrecTolPpmFeatureClustering": "2"
+            },
+            {
+                "diaFragTolPpmFeatureClustering": "2"
+            },
+            {
+                "diaScoreN": "12"
+            },
+            {
+                "diaScoreNAdditional": "5"
+            },
+            {
+                "diaMinScore": "1.99"
+            },
+            {
+                "diaXgBoostBaseScore": "0.4"
+            },
+            {
+                "diaXgBoostSubSample": "0.9"
+            },
+            {
+                "centroidPosition": "0"
+            },
+            {
+                "diaQuantMethod": "7"
+            },
+            {
+                "diaFeatureQuantMethod": "2"
+            },
+            {
+                "lfqNormType": "1"
+            },
+            {
+                "diaTopNForQuant": "12"
+            },
+            {
+                "diaTopNCorrelatingFragmentsForQuant": "7"
+            },
+            {
+                "diaFragmentCorrelationForQuant": "0.78"
+            },
+            {
+                "lfqUsePeptideCorrelation": "True"
+            },
+            {
+                "lfqTopNCorrelatingPeptides": "3"
+            },
+            {
+                "lfqPeptideCorrelation": "3"
+            },
+            {
+                "diaMinMsmsIntensityForQuant": "0"
+            },
+            {
+                "diaTopMsmsIntensityQuantileForQuant": "0.85"
+            },
+            {
+                "diaMinFragmentOverlapScore": "0"
+            },
+            {
+                "diaMinPrecursorScore": "0"
+            },
+            {
+                "diaUseProfileCorrelation": "False"
+            },
+            {
+                "diaMinPrecProfileCorrelation": "0"
+            },
+            {
+                "diaMinFragProfileCorrelation": "0"
+            },
+            {
+                "diaXgBoostMinChildWeight": "9"
+            },
+            {
+                "diaXgBoostMaximumTreeDepth": "12"
+            },
+            {
+                "diaXgBoostEstimators": "580"
+            },
+            {
+                "diaXgBoostGamma": "0.9"
+            },
+            {
+                "diaXgBoostMaxDeltaStep": "3"
+            },
+            {
+                "diaGlobalMl": "True"
+            },
+            {
+                "diaAdaptiveMassAccuracy": "False"
+            },
+            {
+                "diaMassWindowFactor": "3.3"
+            },
+            {
+                "diaNoMl": "False"
+            },
+            {
+                "diaPermuteRt": "False"
+            },
+            {
+                "diaPermuteCcs": "False"
+            },
+            {
+                "diaBackgroundSubtraction": "False"
+            },
+            {
+                "diaBackgroundSubtractionQuantile": "0.5"
+            },
+            {
+                "diaBackgroundSubtractionFactor": "4"
+            },
+            {
+                "diaLfqRatioType": "0"
+            },
+            {
+                "diaTransferQvalue": "0.3"
+            },
+            {
+                "diaTransferQvalueBetweenLabels": "0.01"
+            },
+            {
+                "diaTransferQvalueBetweenFractions": "0.01"
+            },
+            {
+                "diaTransferQvalueBetweenFaims": "0.01"
+            },
+            {
+                "diaOnlyIsosForRecal": "True"
+            },
+            {
+                "diaMinPeaks": "5"
+            },
+            {
+                "diaUseFragIntensForMl": "False"
+            },
+            {
+                "diaUseFragMassesForMl": "False"
+            },
+            {
+                "diaMaxTrainInstances": "500000"
+            },
+            {
+                "diaMaxFragmentCharge": "3"
+            },
+            {
+                "diaAdaptiveMlScoring": "False"
+            },
+            {
+                "diaDynamicScoringMaxInstances": "25000"
+            },
+            {
+                "diaMaxPrecursorMz": "0"
+            },
+            {
+                "diaHardRtFilter": "True"
+            },
+            {
+                "diaConvertLibraryCharge2Fragments": "False"
+            },
+            {
+                "diaChargeNormalizationLibrary": "True"
+            },
+            {
+                "diaChargeNormalizationSample": "True"
+            },
+            {
+                "diaDeleteIntermediateResults": "True"
+            },
+            {
+                "diaScoreWeightScanIndex": "-1"
+            },
+            {
+                "diaScoreWeightScanValue": "1"
+            },
+            {
+                "diaNumNonleadingMatches": "0"
+            },
+            {
+                "diaFragmentModelType": "0"
+            },
+            {
+                "diaAltFragmentModelPath": null
+            },
+            {
+                "diaUseDefaultRtModel": "True"
+            },
+            {
+                "diaAltRtModelPath": null
+            },
+            {
+                "diaUseDefaultCcsModel": "True"
+            },
+            {
+                "diaAltCcsModelPath": null
+            },
+            {
+                "diaBatchProcessing": "True"
+            },
+            {
+                "diaBatchSize": "25"
+            },
+            {
+                "diaFirstBatch": "-1"
+            },
+            {
+                "diaLastBatch": "-1"
+            },
+            {
+                "diaOnlyPreprocess": "False"
+            },
+            {
+                "diaMultiplexQuantMethod": "1"
+            },
+            {
+                "diaOnlyPostprocess": "False"
+            },
+            {
+                "diaRequirePrecursor": "False"
+            },
+            {
+                "diaFuturePeptides": "False"
+            },
+            {
+                "diaOverrideRtWithPrediction": "False"
+            },
+            {
+                "diaMaxModifications": "0"
+            },
+            {
+                "diaMaxPositionings": "0"
+            },
+            {
+                "diaPredictCharges": "False"
+            },
+            {
+                "diaUseProbScore": "False"
+            },
+            {
+                "diaProbScoreP": "0.055"
+            },
+            {
+                "diaProbScoreG": "1.2"
+            },
+            {
+                "diaProbScoreStep": "0.1"
+            },
+            {
+                "isM2FragTypeOverride": "False"
+            },
+            {
+                "ms2FragTypeOverride": "0"
+            },
+            {
+                "classicLfqForSingleShots": "True"
+            },
+            {
+                "sequenceBasedModifier": "False"
+            },
+            {
+                "diaRtFromSamplesForExport": "True"
+            },
+            {
+                "diaCcsFromSamplesForExport": "True"
+            },
+            {
+                "diaLibraryExport": "0"
+            },
+            {
+                "diaUseApexWeightsForPtmLoc": "False"
+            },
+            {
+                "diaSecondScoreForMultiplex": "True"
+            },
+            {
+                "diaBestPrecursorChargeForQuant": "False"
+            },
+            {
+                "diaBestPrecursorMassRangeForQuant": "False"
+            },
+            {
+                "diaBestPrecursorIntensityForQuant": "False"
+            },
+            {
+                "diaPtmLocMethod": "0"
+            },
+            {
+                "diaIndexedSearch": "True"
+            },
+            {
+                "diaIncreaseSequenceCoverage": "True"
+            },
+            {
+                "diaSequenceCoverageFdr": "0.03"
+            }
+        ]
+    },
+    "msmsParamsArray": [
+        {
+            "msmsParams": {
+                "Name": "FTMS",
+                "MatchTolerance": "20",
+                "MatchToleranceInPpm": "True",
+                "DeisotopeTolerance": "7",
+                "DeisotopeToleranceInPpm": "True",
+                "DeNovoTolerance": "25",
+                "DeNovoToleranceInPpm": "True",
+                "Deisotope": "True",
+                "Topx": "12",
+                "TopxInterval": "100",
+                "HigherCharges": "True",
+                "IncludeWater": "True",
+                "IncludeAmmonia": "True",
+                "IncludeWaterCross": "False",
+                "IncludeAmmoniaCross": "False",
+                "DependentLosses": "True",
+                "Recalibration": "False"
+            }
+        },
+        {
+            "msmsParams": {
+                "Name": "ITMS",
+                "MatchTolerance": "0.5",
+                "MatchToleranceInPpm": "False",
+                "DeisotopeTolerance": "0.15",
+                "DeisotopeToleranceInPpm": "False",
+                "DeNovoTolerance": "0.5",
+                "DeNovoToleranceInPpm": "False",
+                "Deisotope": "False",
+                "Topx": "8",
+                "TopxInterval": "100",
+                "HigherCharges": "True",
+                "IncludeWater": "True",
+                "IncludeAmmonia": "True",
+                "IncludeWaterCross": "False",
+                "IncludeAmmoniaCross": "False",
+                "DependentLosses": "True",
+                "Recalibration": "False"
+            }
+        },
+        {
+            "msmsParams": {
+                "Name": "TOF",
+                "MatchTolerance": "25",
+                "MatchToleranceInPpm": "True",
+                "DeisotopeTolerance": "0.01",
+                "DeisotopeToleranceInPpm": "False",
+                "DeNovoTolerance": "25",
+                "DeNovoToleranceInPpm": "True",
+                "Deisotope": "True",
+                "Topx": "16",
+                "TopxInterval": "100",
+                "HigherCharges": "True",
+                "IncludeWater": "True",
+                "IncludeAmmonia": "True",
+                "IncludeWaterCross": "False",
+                "IncludeAmmoniaCross": "False",
+                "DependentLosses": "True",
+                "Recalibration": "False"
+            }
+        },
+        {
+            "msmsParams": {
+                "Name": "UNKNOWN",
+                "MatchTolerance": "20",
+                "MatchToleranceInPpm": "True",
+                "DeisotopeTolerance": "7",
+                "DeisotopeToleranceInPpm": "True",
+                "DeNovoTolerance": "25",
+                "DeNovoToleranceInPpm": "True",
+                "Deisotope": "True",
+                "Topx": "12",
+                "TopxInterval": "100",
+                "HigherCharges": "True",
+                "IncludeWater": "True",
+                "IncludeAmmonia": "True",
+                "IncludeWaterCross": "False",
+                "IncludeAmmoniaCross": "False",
+                "DependentLosses": "True",
+                "Recalibration": "False"
+            }
+        }
+    ],
+    "fragmentationParamsArray": [
+        {
+            "fragmentationParams": {
+                "Name": "HCD",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        },
+        {
+            "fragmentationParams": {
+                "Name": "CID",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        },
+        {
+            "fragmentationParams": {
+                "Name": "ETD",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        },
+        {
+            "fragmentationParams": {
+                "Name": "PQD",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        },
+        {
+            "fragmentationParams": {
+                "Name": "ETHCD",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        },
+        {
+            "fragmentationParams": {
+                "Name": "ETCID",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        },
+        {
+            "fragmentationParams": {
+                "Name": "UVPD",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        },
+        {
+            "fragmentationParams": {
+                "Name": "Unknown",
+                "UseIntensityPrediction": "False",
+                "UseSequenceBasedModifier": "False",
+                "InternalFragments": "False",
+                "InternalFragmentWeight": "1",
+                "InternalFragmentAas": "KRH"
+            }
+        }
+    ]
+}

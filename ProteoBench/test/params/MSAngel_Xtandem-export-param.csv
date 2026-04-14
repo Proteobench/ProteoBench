@@ -1,0 +1,24 @@
+,0
+software_name,MSAngel
+software_version,2.2.10
+search_engine,X!Tandem
+search_engine_version,
+ident_fdr_psm,0.01
+ident_fdr_peptide,
+ident_fdr_protein,
+enable_match_between_runs,True
+precursor_mass_tolerance,"[-10.0 PPM, +10.0 PPM]"
+fragment_mass_tolerance,"[-0.02 DA, +0.02 DA]"
+enzyme,Trypsin
+semi_enzymatic,False
+allowed_miscleavages,2
+min_peptide_length,
+max_peptide_length,
+fixed_mods,Carbamidomethylation of C
+variable_mods,"Oxidation of M, Acetylation of protein N-term;Acetyl(N-term);Pyrolidone(N-term)"
+max_mods,
+min_precursor_charge,
+max_precursor_charge,
+quantification_method,
+protein_inference,
+abundance_normalization_ions,

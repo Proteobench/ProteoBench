@@ -1,0 +1,246 @@
+Contributors
+=============
+
+People who contributed to ProteoBench, in alphabetical order:
+
+.. line-block::
+    **Holda A. Anagho-Mattanovich**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Matthias Anagho-Mattanovich**
+    *Novo Nordisk Foundation Center for Basic Metabolic Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Wout Bittremieux**
+    *Department of Computer Science, University of Antwerp, Antwerp, Belgium*
+
+.. line-block::
+    **Robbin Bouwmeester**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Hector Mauricio Castaneda Cortes**
+    *The James Hutton Institute, ICS Department, Invergowrie, DD2 5DA, United Kingdom*
+
+.. line-block::
+    **Karima Chaoui**
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
+
+.. line-block::
+    **Tine Claeys**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Maarten Dhaenens**
+    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent, Belgium*
+
+.. line-block::
+    **Cristina Chiva**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Simon Devos**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Robbe Devreese**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Nadezhda T. Doncheva**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Viktoria Dorfer**
+    *Bioinformatics Research Group, University of Applied Sciences Upper Austria, Hagenberg, Austria*
+
+.. line-block::
+    **Martin Eisenacher**
+    *Medical Faculty, Medizinisches Proteom-Center, Ruhr University Bochum, Bochum, Germany*
+    *Medical Faculty, Center for Protein Diagnostics (PRODI), Medical Proteome Analysis, Ruhr-University Bochum, Bochum, Germany*
+    *CUBiMed.RUB, Core Unit Bioinformatics, Medical Faculty, Ruhr University Bochum, Bochum, Germany*
+
+.. line-block::
+    **Ralf Gabriels**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Quentin Giai Gianetto**
+    *Institut Pasteur, Université Paris Cité, Bioinformatics and Biostatistics HUB*
+    *Institut Pasteur, Université Paris Cité, Proteomics Platform, Mass Spectrometry for Biology Unit, UAR CNRS 2024*
+
+.. line-block::
+    **David M. Hollenstein**
+    *Mass Spectrometry Facility, Max Perutz Labs, Vienna Biocenter Campus (VBC), Vienna, Austria*
+
+.. line-block::
+    **Caroline Jachmann**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Lars Juhl Jensen**
+    *ZS Discovery, Lottenborgvej 26, 2800 Kgs. Lyngby, Denmark*
+
+.. line-block::
+    **Vedran Kasalica**
+    *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
+
+.. line-block::
+    **Ville Koskinen**
+    *Matrix Science Ltd, London, United Kingdom*
+
+.. line-block::
+    **Olivier Langella**
+    *Université Paris-Saclay, INRAE, CNRS, AgroParisTech, GQE - Le Moulon, PAPPSO, 91190, Gif-Sur-Yvette, France*
+    *PAPPSO - Plateforme d'Analyse Protéomique de Paris Sud Ouest (France)*
+
+.. line-block::
+    **Caroline Lennartsson**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Marie Locard-Paulet**
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
+
+.. line-block::
+    **Dominik Lux**
+    *Ruhr University Bochum, Medical Faculty, Medizinisches Proteom-Center, Gesundheitscampus 4, 44801 Bochum, Germany*
+    *Ruhr University Bochum, Medical Faculty, Center for Protein Diagnostics (PRODI), Gesundheitscampus 4, 44801 Bochum , Germany*
+
+.. line-block::
+    **Teresa Mendes Maia**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Lennart Martens**
+    *VIB Center for Medical Biotechnology, VIB, Ghent, 9052, Belgium*
+    *Department of Biomolecular Medicine, Faculty of Medicine and Health Sciences, Ghent University, Ghent, 9052, Belgium*
+    *BioOrganic Mass Spectrometry Laboratory (LSMBO), IPHC UMR 7178, University of Strasbourg, CNRS, Strasbourg 67000, France*
+    *Infrastructure Nationale de Protéomique ProFI, UAR2048, Strasbourg 67087, France*
+
+.. line-block::
+    **Mariette Matondo**
+    *Proteomics Core facility, Mass Spectrometry for Biology, Institut Pasteur, CNRS UAR 2024, Université Paris*
+
+.. line-block::
+    **Emmanuelle Mouton-Barbosa**
+    *Institut de Pharmacologie et de Biologie Structurale (IPBS), Université de Toulouse, CNRS, Université de Toulouse (UT), Toulouse, 31077, France*
+    *Infrastructure Nationale de Protéomique, ProFI, UAR 2048, Toulouse, France*
+
+.. line-block::
+    **Alireza Nameni**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Michael Lund Nielsen**
+    *Novo Nordisk Foundation Center for Protein Research, Proteomics Program, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Jesper Velgaard Olsen**
+    *Novo Nordisk Foundation Center for Protein Research, Department of Cellular and Molecular Medicine, Faculty of Health and Medical Sciences, University of Copenhagen, Denmark*
+
+.. line-block::
+    **Magnus Palmblad**
+    *Center for Proteomics and Metabolomics, Leiden University Medical Center, Leiden, The Netherlands*
+
+.. line-block::
+    **Yasset Perez-Riverol**
+    *European Molecular Biology Laboratory, European Bioinformatics Institute, Wellcome Genome Campus, Cambridge, UK*
+
+.. line-block::
+    **Christian Panse**
+    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
+    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Marina Pominova**
+    *Department of Computer Science, University of Antwerp, Antwerp, Belgium*
+
+.. line-block::
+    **Martin Rykær**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Julia Schessner**
+    *Department of Proteomics and Signaltransduction, Max-Planck-Institute of Biochemistry, Martinsried, Germany*
+
+.. line-block::
+    **Julian Uszkoreit**
+    *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
+
+.. line-block::
+    **Tim Van Den Bossche**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+
+.. line-block::
+    **Sam Van Puyenbroeck**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Bart Van Puyvelde**
+    *ProGenTomics, Laboratory of Pharmaceutical Biotechnology, Ghent University, Belgium*
+
+.. line-block::
+    **Kevin Velghe**
+    *VIB-UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *Department of Biomolecular Medicine, UGent, Ghent, Belgium*
+
+.. line-block::
+    **Eduard Sabidó**
+    *Centre for Genomic Regulation, The Barcelona Institute of Science and Technology (BIST), Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Univeristat Pompeu Fabra, Dr. Aiguader 88, Barcelona 08003, Spain*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Martin Schneider**
+    *German Cancer Research Center (DKFZ), Foundation under Public Law, Im Neuenheimer Feld 580, 69120 Heidelberg, Germany*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Veit Schwämmle**
+    *Department of Biochemistry and Molecular Biology, University of Southern Denmark, Odense, Denmark*
+
+.. line-block::
+    **An Staes**
+    *Department of Biomolecular Medicine, Ghent University, Ghent, Belgium*
+    *VIB - UGent Center for Medical Biotechnology, VIB, Ghent, Belgium*
+    *VIB-Proteomics Core facility*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Maximilian T. Strauss**
+    *Novo Nordisk Foundation Center for Protein Research, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
+
+.. line-block::
+    **Henry Webel**
+    *Novo Nordisk Foundation Center for Biosustainability, Technical University of Denmark, Kongens Lyngby, Denmark*
+
+.. line-block::
+    **Witold E. Wolski**
+    *Functional Genomics Center Zurich (FGCZ)−University of Zurich/ETH Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland*
+    *Swiss Institute of Bioinformatics (SIB) Quartier Sorge−Batiment Amphipole, 1015 Lausanne, Switzerland*
+    *Core for Life (C4L)*
+
+.. line-block::
+    **Runxuan Zhang**
+    *The James Hutton Institute, Errol Road, Invergowrie, DD2 5DA, United Kingdom*

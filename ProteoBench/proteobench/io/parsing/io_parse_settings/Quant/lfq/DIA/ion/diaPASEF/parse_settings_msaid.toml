@@ -1,0 +1,39 @@
+[mapper]
+"MODIFIED_SEQUENCE" = "Sequence"
+"RAW_FILE_NAME" = "Raw file"
+"PRECURSOR_CHARGE" = "Charge"
+"QUANTIFICATION" = "Intensity"
+"FASTA_HEADERS" = "Proteins"
+
+[condition_mapper]
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d" = "A"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d" = "B"
+
+[run_mapper]
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d" = "Condition_A_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d" = "Condition_A_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506.d" = "Condition_A_Sample_Alpha_03"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d" = "Condition_B_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d" = "Condition_B_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\[(.*?)\\]"
+"modification_dict" = {"[unimod:4]" = "Carbamidomethyl", "[unimod:1]" = "Acetyl", "[unimod:35]" = "Oxidation"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = false

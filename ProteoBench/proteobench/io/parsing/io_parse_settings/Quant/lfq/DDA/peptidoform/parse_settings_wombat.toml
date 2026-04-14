@@ -1,0 +1,38 @@
+[mapper]
+"protein_group" = "Proteins"
+"modified_peptide" = "Sequence"
+
+[condition_mapper]
+"abundance_A_1" = "A"
+"abundance_A_2" = "A"
+"abundance_A_3" = "A"
+"abundance_B_1" = "B"
+"abundance_B_2" = "B"
+"abundance_B_3" = "B"
+
+[run_mapper]
+"abundance_A_1" = "Condition_A_Sample_Alpha_01"
+"abundance_A_2" = "Condition_A_Sample_Alpha_02"
+"abundance_A_3" = "Condition_A_Sample_Alpha_03"
+"abundance_B_1" = "Condition_B_Sample_Alpha_01"
+"abundance_B_2" = "Condition_B_Sample_Alpha_02"
+"abundance_B_3" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern"="(?<=\\[).+?(?=\\])"
+"modification_dict" = {"160" = "Carbamidomethyl", "147" = "Oxidation", "80" = "Phospho", "111" = "Glu->pyro-Glu", "43" = "Acetyl"}
+
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true
+

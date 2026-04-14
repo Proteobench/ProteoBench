@@ -1,0 +1,24 @@
+,0
+software_name,AlphaPept
+software_version,0.4.9
+search_engine,AlphaPept
+search_engine_version,0.4.9
+ident_fdr_psm,0.01
+ident_fdr_peptide,
+ident_fdr_protein,0.01
+enable_match_between_runs,False
+precursor_mass_tolerance,"[-20 ppm, 20 ppm]"
+fragment_mass_tolerance,"[-50 ppm, 50 ppm]"
+enzyme,Trypsin
+semi_enzymatic,False
+allowed_miscleavages,2
+min_peptide_length,7
+max_peptide_length,27
+fixed_mods,cC
+variable_mods,"oxM,a<^"
+max_mods,3
+min_precursor_charge,1
+max_precursor_charge,6
+quantification_method,
+protein_inference,
+abundance_normalization_ions,

@@ -1,0 +1,112 @@
+{
+    "software_name": {
+        "type": "text_input",
+        "label": "Software name",
+        "placeholder": "None"
+    },
+	"software_version": {
+        "type": "text_input",
+        "label": "Software tool version",
+        "placeholder": "1.0"
+    },
+    "search_engine": {
+        "type": "text_input",
+        "label": "Search engine name",
+        "placeholder": "None"
+    },
+    "search_engine_version": {
+        "type": "text_input",
+        "label": "Search engine version",
+        "placeholder": "None"
+    },
+    "ident_fdr_psm": {
+        "type": "text_input",
+        "label": "FDR psm",
+        "placeholder": "None"
+    },
+    "ident_fdr_peptide": {
+        "type": "text_input",
+        "label": "FDR peptide",
+        "placeholder": "None"
+    },
+    "ident_fdr_protein": {
+        "type": "text_input",
+        "label": "FDR protein",
+        "placeholder": "None"
+    },
+	"enable_match_between_runs": {
+        "type": "checkbox",
+        "label": "Quantified with MBR",
+        "value": false
+    },
+    "precursor_mass_tolerance": {
+        "type": "text_input",
+        "label": "Precursor mass tolerance (including unit ppm, PPM or Da)",
+        "placeholder": "None"
+    },
+    "fragment_mass_tolerance": {
+        "type": "text_input",
+        "label": "Fragment mass tolerance (including unit ppm, PPM or Da)",
+        "placeholder": "None"
+    },
+    "enzyme": {
+        "type": "text_input",
+        "label": "Proteolytic Enzyme",
+        "placeholder": "None"
+    },
+    "allowed_miscleavages": {
+        "type": "text_input",
+        "label": "Maximum allowed number of missed cleavage",
+        "placeholder": "None"
+    },
+	"min_peptide_length": {
+        "type": "text_input",
+        "label": "Minimum peptide length",
+        "placeholder": "None"
+    },
+    "max_peptide_length": {
+        "type": "text_input",
+        "label": "Maximum peptide length",
+        "placeholder": "None"
+    },
+    "fixed_mods": {
+        "type": "text_input",
+        "label": "Specify the fixed mods that were set",
+        "placeholder": "None"
+    },
+    "variable_mods": {
+        "type": "text_input",
+        "label": "Specify the variable mods that were set (separated by a comma)",
+        "placeholder": "None"
+    },
+	"max_mods": {
+        "type": "text_input",
+        "label": "Maximum number of modifications",
+        "placeholder": "None"
+    },
+    "min_precursor_charge": {
+        "type": "text_input",
+        "label": "Minimum precursor charge allowed",
+        "placeholder": "None"
+    },
+    "max_precursor_charge": {
+        "type": "text_input",
+        "label": "Maximum precursor charge allowed",
+        "placeholder": "None"
+    },
+    "quantification_method": {
+        "type": "text_input",
+        "label": "Quantification method",
+        "placeholder": "None"
+    },
+	"protein_inference": {
+        "type": "text_input",
+        "label": "Protein inference method",
+        "placeholder": "None"
+    },
+	"abundance_normalization_ions": {
+        "type": "text_input",
+        "label": "Abundance normalization method",
+        "placeholder": "None"
+    }
+}

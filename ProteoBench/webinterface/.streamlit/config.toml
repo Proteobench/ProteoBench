@@ -1,0 +1,15 @@
+[theme]
+base="light"
+#FFFFFF
+
+[global]
+disableWidgetStateDuplicationWarning = true
+
+[server]
+maxUploadSize = 1000
+
+[client]
+showSidebarNavigation = false
+
+[browser]
+gatherUsageStats = false

@@ -1,0 +1,25 @@
+,0
+software_name,MetaMorpheus
+software_version,1.1.1
+search_engine,MetaMorpheus
+search_engine_version,
+ident_fdr_psm,0.01
+ident_fdr_peptide,
+ident_fdr_protein,
+enable_match_between_runs,False
+precursor_mass_tolerance,"[-10.00 PPM, 10.00 PPM]"
+fragment_mass_tolerance,"[-20.00 PPM, 20.00 PPM]"
+enzyme,trypsin
+semi_enzymatic,False
+allowed_miscleavages,2
+min_peptide_length,7
+max_peptide_length,2147483647
+fixed_mods,Carbamidomethyl on C;Carbamidomethyl on U
+variable_mods,Oxidation on M;Acetylation on X
+max_mods,2
+min_precursor_charge,1
+max_precursor_charge,12
+quantification_method,FlashLFQ
+protein_inference,Parsimony
+abundance_normalization_ions,False
+semi_specific,False

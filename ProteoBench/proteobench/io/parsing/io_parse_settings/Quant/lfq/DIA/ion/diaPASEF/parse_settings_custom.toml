@@ -1,0 +1,31 @@
+[mapper]
+"Proteins" = "Proteins"
+"Sequence" = "Sequence"
+"Charge" = "Charge"
+"Modified sequence" = "Modified sequence"
+
+
+[condition_mapper]
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500" = "A"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506" = "A"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502" = "B"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508" = "B"
+
+[run_mapper]
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494" = "Condition_A_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500" = "Condition_A_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506" = "Condition_A_Sample_Alpha_03"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496" = "Condition_B_Sample_Alpha_01"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502" = "Condition_B_Sample_Alpha_02"
+"ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true

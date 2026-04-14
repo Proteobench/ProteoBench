@@ -1,0 +1,28 @@
+CONSENSUSID:
+  ConsensusID: 3.2.0-pre-exported-20240919
+FDRCONSENSUSID:
+  FalseDiscoveryRate: 3.2.0-pre-exported-20240919
+IDFILTER:
+  IDFilter: 3.2.0-pre-exported-20240919
+IDPEP:
+  IDPosteriorErrorProbability: 3.2.0-pre-exported-20240919
+MSSTATS:
+  r-base: 4.3.2
+  bioconductor-msstats: 4.10.0
+MZMLINDEXING:
+  FileConverter: 3.2.0-pre-exported-20240919
+MZMLSTATISTICS:
+  quantms-utils: 0.0.11
+PROTEOMICSLFQ:
+  ProteomicsLFQ: 3.2.0-pre-exported-20240919
+SAMPLESHEET_CHECK:
+  quantms-utils: 0.0.11
+SEARCHENGINECOMET:
+  CometAdapter: 3.2.0-pre-exported-20240919
+  Comet: 2023.01 rev. 2
+SEARCHENGINEMSGF:
+  MSGFPlusAdapter: 3.2.0-pre-exported-20240919
+  msgf_plus: MS-GF+ Release (v2023.01.12) (12 January 2023)
+Workflow:
+    nf-core/quantms: v1.3.1dev-gb7c9b6a
+    Nextflow: 24.10.2

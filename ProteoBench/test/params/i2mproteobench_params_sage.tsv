@@ -1,0 +1,63 @@
+i2MassChroQ_VERSION	1.0.18
+AnalysisSoftware_name	Sage
+AnalysisSoftware_version	0.14.7
+sage_chimera	false
+sage_database_bucket_size	8192
+sage_database_decoy_tag	rev_
+sage_database_enzyme_c_terminal	true
+sage_database_enzyme_cleave_at	KR
+sage_database_enzyme_max_len	50
+sage_database_enzyme_min_len	5
+sage_database_enzyme_missed_cleavages	2
+sage_database_enzyme_restrict	P
+sage_database_fasta	/gorgone/pappso/moulon/users/Olivier/20240131_proteobench/database/ProteoBenchFASTA_DDAQuantification.fasta
+sage_database_fragment_max_mz	2000
+sage_database_fragment_min_mz	200
+sage_database_generate_decoys	true
+sage_database_ion_kinds	b y
+sage_database_max_variable_mods	2
+sage_database_min_ion_index	2
+sage_database_peptide_max_mass	5000
+sage_database_peptide_min_mass	500
+sage_database_static_mods	C:57.021465
+sage_database_variable_mods	M:15.994915 ^E:-18.010565 ^Q:-17.026548
+sage_deisotope	true
+sage_fragment_tol	-0.02 0.02 da
+sage_isotope_errors	-1 3
+sage_max_fragment_charge	1
+sage_max_peaks	150
+sage_min_matched_peaks	6
+sage_min_peaks	15
+sage_mzml_paths	/gorgone/pappso/moulon/raw/20240131_proteobench/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML /gorgone/pappso/moulon/raw/20240131_proteobench/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mzML /gorgone/pappso/moulon/raw/20240131_proteobench/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.mzML /gorgone/pappso/moulon/raw/20240131_proteobench/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.mzML /gorgone/pappso/moulon/raw/20240131_proteobench/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.mzML /gorgone/pappso/moulon/raw/20240131_proteobench/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mzML
+sage_output_paths	/gorgone/pappso/moulon/users/Olivier/20240131_proteobench/sage/LFQ_Orbitrap_DDA/results.sage.tsv /gorgone/pappso/moulon/users/Olivier/20240131_proteobench/sage/LFQ_Orbitrap_DDA/results.json
+sage_precursor_charge	2 4
+sage_precursor_tol	-10 10 ppm
+sage_predict_rt	true
+sage_report_psms	1
+sage_version	0.14.7
+sage_wide_window	false
+i2m_count_peptides_per_protein_accross_msruns	true
+i2m_minimum_peptides_per_protein	2
+i2m_minimum_protein_log10_evalue	-2
+i2m_pep_repro	1
+i2m_psm_fdr_threshold_target	0.006
+peptide_fdr	0.008561447245
+protein_fdr	0.009234643907
+psm_fdr	0.005999419143
+mcq_alignment_ms1_smoothing_halfwindow	0
+mcq_alignment_ms2_smoothing_halfwindow	15
+mcq_alignment_ms2_tendency_halfwindow	10
+mcq_alignment_msrun_reference_for_rt_alignment	LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mzML
+mcq_detection_detection_threshold_on_max	200000
+mcq_detection_detection_threshold_on_min	150000
+mcq_detection_maxmin_half_edge	6
+mcq_detection_mean_filter_half_edge	1
+mcq_detection_minmax_half_edge	7
+mcq_filter_anti_spike_half	5
+mcq_mbr	T
+mcq_version	2.4.29
+mcq_xic_extraction_type	max
+mcq_xic_ppm_range_max	10
+mcq_xic_ppm_range_min	10
+mcqr_normalization_method	median.RT
+mcqr_version	0.6.15

@@ -1,0 +1,66 @@
+Project:
+* Name: Proteobench_Module4_Orbitrap_DIA
+* Description: 
+* Created at: 2024-12-23 21:19:32
++ Proteobench_Module4_Orbitrap
+  Description: 
+  Created at: 2024-12-23 21:19:32
+
+  DIA Db Search Parameters:
+    Precursor Mass Error Tolerance: Auto Detected
+    Fragment Mass Error Tolerance: Auto Detected
+    Match Between Run: Yes
+    Enzyme: Trypsin
+    Max Missed Cleavage: 1
+    Digest Mode: Specific
+    Max Variable PTM per Peptide: 1
+    Fixed Modifications: 
+    - Carbamidomethylation (+57.02)
+    Variable Modifications: 
+    - Oxidation (M) (+15.99)
+    - Acetylation (Protein N-term) (+42.01)
+    Database: 
+    - ProteobenchModule2
+      - Taxonomy: all species
+      - Searched Entries: 31887
+     Peptide Length between: 7,30
+     Precursor M/Z between: 300,1400
+     Fragment M/Z between: 50,2000
+     Precursor Charge between: 1,4
+    Report Filter: 
+      Peptide FDR: 1.0%
+      Proteins -10LgP >= 15.0
+      Proteins Unique Peptides >= 1
+
+  LFQ Parameters:
+    Quantification Type: Label Free Quantification
+    LFQ Method: Identification Directed Quantification
+    DIA quantification preference: Increased Sensitivity
+    Retention Time Range: [0.0 - Max]
+    Base Sample: LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw
+    Peptide Feature Filter:
+      Avg Area >= 0.0
+      Quality >= 0.0
+      Charge between: [1 - 5]
+      Detected in at least 0 samples per group
+      Use in Group Coefficient of Variation Filter: No
+    Protein:
+      Significance Method: ANOVA
+      Modified Form Exclusion: Yes
+      Significance >= 0.0
+      Fold Change between: [1.0 - 64.0]
+      Has at least 1 Used Peptide
+    Samples: 6 Samples in 6 Groups
+      Group 1: 
+        LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw;
+      Group 2: 
+        LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw;
+      Group 3: 
+        LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw;
+      Group 4: 
+        LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw;
+      Group 5: 
+        LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw;
+      Group 6: 
+        LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw;
+    Normalization Method: Use TIC

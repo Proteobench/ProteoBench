@@ -1,0 +1,29 @@
+	0
+software_name	MSAID
+software_version	
+search_engine	Chimerys
+search_engine_version	4.1.1
+ident_fdr_psm	0.01
+ident_fdr_peptide	0.01
+ident_fdr_protein	0.01
+enable_match_between_runs	True
+precursor_mass_tolerance	None
+fragment_mass_tolerance	[-20 ppm, 20 ppm]
+enzyme	Trypsin/P
+allowed_miscleavages	1
+min_peptide_length	7
+max_peptide_length	30
+fixed_mods	Carbamidomethyl (C)
+variable_mods	Oxidation (M), Acetylation (N-term)
+max_mods	1
+min_precursor_charge	1
+max_precursor_charge	4
+min_precursor_mz	
+max_precursor_mz	
+min_fragment_mz	
+max_fragment_mz	
+quantification_method	MS2 Area (Quan in all files)
+protein_inference	None
+abundance_normalization_ions	None
+predictors_library	None
+scan_window	None

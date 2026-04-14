@@ -1,0 +1,225 @@
+{
+  "operations" : [ {
+    "overwriteOutputFile" : true,
+    "useProlineRule" : false,
+    "outputFileFormat" : "MZDB",
+    "outputDirectory" : "",
+    "config" : {
+      "tool" : "mzDB tools Thermo converter",
+      "params" : [ {
+        "name" : "Split FAIMS CV channels",
+        "description" : "Enables the creation of one mzDB file per FAIMS CV channel (required for Proline quantification)",
+        "default" : false,
+        "paramTypeAsStr" : "BOOLEAN",
+        "cmdFlag" : "--split-faims",
+        "value" : false
+      } ],
+      "filters" : [ ]
+    },
+    "type" : "FileConversion",
+    "inputFileFormat" : "RAW"
+  }, {
+    "instrumentId" : 3,
+    "type" : "MzdbRegistration"
+  }, {
+    "overwriteOutputFile" : true,
+    "useProlineRule" : false,
+    "outputFileFormat" : "MGF",
+    "outputDirectory" : "",
+    "config" : {
+      "tool" : "mzDB tools MGF creator",
+      "params" : [ ],
+      "filters" : [ ]
+    },
+    "type" : "FileConversion",
+    "inputFileFormat" : "MZDB"
+  }, {
+    "type" : "PeaklistIdentification",
+    "searchEnginesWithForms" : [ [ "Mascot", {
+      "name" : "MLP - ProteoBench DDA - Z 2 to 4 - HCD frag - 20240718",
+      "isTemplate" : true,
+      "searchSubmitter" : "MASCOT_SERVER",
+      "creationDate" : "2024-07-18T16:38:40.170+0200",
+      "paramMap" : {
+        "SEARCH" : "MIS",
+        "ERRORTOLERANT" : "0",
+        "IT_MODS" : "Oxidation (M),Acetyl (Protein N-term)",
+        "ITOL" : "0.02",
+        "ITOLU" : "Da",
+        "MODS" : "Carbamidomethyl (C)",
+        "COM" : "MLP - ProteoBench DDA quan Mascot 20230918",
+        "INSTRUMENT" : "ESI FTMS HCD",
+        "PFA" : "2",
+        "TOLU" : "ppm",
+        "MASS" : "Monoisotopic",
+        "PEP_ISOTOPE_ERROR" : "0",
+        "QUANTITATION" : "None",
+        "FORMVER" : "1.01",
+        "FORMAT" : "Mascot generic",
+        "CHARGE" : "2+, 3+ and 4+",
+        "USERNAME" : "mloca",
+        "REPORT" : "AUTO",
+        "TOL" : "10",
+        "DB" : "Benchmark_proteobenchFASTAModule2_DDA",
+        "DECOY" : "1",
+        "TAXONOMY" : "All entries",
+        "CLE" : "Trypsin/P"
+      }
+    } ] ]
+  }, {
+    "instrumentId" : 16,
+    "type" : "MzdbRegistration"
+  }, {
+    "format" : "mascot.dat",
+    "rescoreUsingRtPrediction" : false,
+    "rescoreUsingSpectraPrediction" : false,
+    "peaklistSoftwareId" : 13,
+    "registerMzDbFiles" : true,
+    "instrumentConfigId" : 20,
+    "importerProperties" : { },
+    "updatePepMatchScores" : false,
+    "type" : "ProlineImport",
+    "decoyStrategy" : "Software Decoy",
+    "autoMapRawFiles" : true
+  }, {
+    "experimentalDesignConfig" : {
+      "inputType" : "TEXT",
+      "rows" : [ {
+        "values" : [ "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw", " A" ]
+      }, {
+        "values" : [ "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw", " A" ]
+      }, {
+        "values" : [ "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw", " A" ]
+      }, {
+        "values" : [ "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.raw", " B" ]
+      }, {
+        "values" : [ "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw", " B" ]
+      }, {
+        "values" : [ "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw", " B" ]
+      } ]
+    },
+    "quantitationConfig" : {
+      "name" : "EMB Proteobench module DDA quant ion",
+      "description" : "Automatically created by MS-Angel",
+      "lfqConfig" : {
+        "signalProcessingConfig" : {
+          "minPeakelDuration" : 15,
+          "featureExtractionStrategy" : {
+            "prettyString" : "Raw MS signal analysis-based",
+            "value" : 0
+          },
+          "mozTolUnit" : "ppm",
+          "useLastPeakelDetection" : false,
+          "mozTol" : 5,
+          "deisotopingMode" : {
+            "prettyString" : "Identification-based",
+            "value" : true
+          }
+        },
+        "clusteringConfig" : {
+          "timeTol" : 15,
+          "intensityComputationMethod" : {
+            "prettyString" : "Most Intense",
+            "value" : "MOST_INTENSE"
+          },
+          "timeComputationMethod" : {
+            "prettyString" : "Most Intense",
+            "value" : "MOST_INTENSE"
+          },
+          "mozTolUnit" : "ppm",
+          "mozTol" : 5
+        },
+        "alignmentConfig" : {
+          "method" : {
+            "prettyString" : "Iterative",
+            "value" : "ITERATIVE"
+          },
+          "timeTol" : 600,
+          "smoothingConfig" : {
+            "method" : {
+              "prettyString" : "Landmark Range",
+              "value" : "LANDMARK_RANGE"
+            },
+            "minWinLandmarks" : 50,
+            "timeInterval" : 50,
+            "slidingWinOverlap" : 50
+          },
+          "massInterval" : 20000,
+          "maxIterations" : 3,
+          "mozTolUnit" : "ppm",
+          "ignoreErrors" : false,
+          "mozTol" : 5,
+          "ftAlignmentMethod" : {
+            "prettyString" : "Peptide identity",
+            "value" : "PEPTIDE_IDENTITY"
+          }
+        },
+        "masterMapCreationConfig" : {
+          "timeTol" : 30,
+          "filterType" : {
+            "prettyString" : "Intensity",
+            "value" : "INTENSITY"
+          },
+          "normalizationMethod" : {
+            "prettyString" : "None",
+            "value" : "NONE"
+          },
+          "restrainXAlignmentToReliableFeatures" : true,
+          "intensityThreshold" : 0,
+          "mozTolUnit" : "ppm",
+          "mozTol" : 5,
+          "performXAlignmentInsideGroupOnly" : false
+        }
+      },
+      "quantMethod" : {
+        "id" : 1,
+        "readable_name" : "Label free based on the extraction of feature abundance",
+        "type" : "label_free"
+      },
+      "quantMethodType" : "label_free"
+    },
+    "validationConfig" : {
+      "minSpecificPepCount" : 1,
+      "psmFilters" : [ {
+        "name" : "Pretty Rank",
+        "parameter" : "PRETTY_RANK",
+        "threshold" : 1,
+        "type" : "int",
+        "postValidation" : false
+      }, {
+        "name" : "Peptide Seq Length",
+        "parameter" : "PEP_SEQ_LENGTH",
+        "threshold" : 7,
+        "type" : "int",
+        "postValidation" : false
+      } ],
+      "dsChildrenNamingProp" : {
+        "value" : "sample_name",
+        "prettyName" : "Sample name"
+      },
+      "isFaimsDataset" : false,
+      "dsDescription" : "Automatically created by MS-Angel",
+      "enableProtSetFdrValidation" : false,
+      "datasetMergingMode" : {
+        "name" : "After validation (recommended for protein fractionation or no fractionation)",
+        "value" : false
+      },
+      "pepSetScoring" : {
+        "name" : "Mascot Modified MudPIT",
+        "value" : "mascot:modified mudpit score"
+      },
+      "psmFdrCriterium" : {
+        "name" : "Mascot Adjusted E-Value",
+        "parameter" : "MASCOT_ADJUSTED_EVALUE",
+        "type" : "double"
+      },
+      "protSetExpectedFdr" : 1,
+      "dsName" : "EMB Proteobench module DDA quant ion",
+      "psmExpectedFdr" : 1
+    },
+    "status" : "pending",
+    "type" : "ResultSetProcessing"
+  } ],
+  "isTemplate" : false,
+  "msAngelVersion" : "2.2.10"
+}

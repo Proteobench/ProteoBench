@@ -1,0 +1,32 @@
+# You can copy and paste this email after filling out the module-specific information.
+# Please don't forget to send a copy of all exchanges to proteobench@eubic-ms.org
+
+
+Dear [NAME OF THE EXPERT],
+
+I am [YOUR NAME], and I contact you to request your help with the design of a new module for the ProteoBench platform. 
+
+ProteoBench is a standalone platform that brings together developers and software users to provide an ever-evolving comparison of state-of-the-art proteomics data processing tools, workflows or analysis steps. This open resource is structured in independent benchmark modules proposed and openly discussed by the community. Each module is designed to cover a specific aspect of proteomics data analysis performed on the same input data. 
+You can find ProteoBench here: https://proteobench.cubimed.rub.de/
+
+I proposed a new module that is fully described here: [LINK TO PROPOSAL]
+Its aim is to [EXPLAIN IDEA OF THE MODULE, OBJECTIVES AND PRINCIPLE]
+
+Would you be willing to give your expert opinion on this new module? We believe that your expertise would be of great help. 
+All your comments will be publicly available, together with the discussion that follows. And you would be listed as contributor on the website, and in communications about the module. 
+
+More precisely, we would be interested in your answers to the following questions:
+
+  * Would some specific metrics be better tailored to the module objective?
+  * Are there some biases that are not accounted for in the module?
+  * Is the proposed data well suited for the aim of the module?
+  * Is the main figure of the module clear and understandable?
+  * Is the documentation of the module clear and exhaustive?
+  * Are the limitations of the module clearly explained?
+  * What workflow runs (tools, parameters) should be included in the comparison when we release the module?  
+
+We would be happy to organise a meeting if you would like to discuss this further. Let us know when would be best for you.
+Please let us know if you are interested within the next two weeks. If you decide to decline this offer, could you please suggest somebody from your group, or someone else with similar expertise?
+
+Thank you for your help, 
+[YOUR NAME]

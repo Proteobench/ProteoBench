@@ -1,0 +1,40 @@
+[mapper]
+"sequence" = "Sequence"
+"rawfile" = "Raw file"
+"proteins" = "Proteins"
+"ProForma" = "Modified sequence"
+"charge" = "Charge"
+"area" = "Intensity"
+
+[condition_mapper]
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mzML" = "A"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.mzML" = "A"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.mzML" = "A"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.mzML" = "B"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.mzML" = "B"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.mzML" = "B"
+
+[run_mapper]
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mzML" = "Condition_A_Sample_Alpha_01"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.mzML" = "Condition_A_Sample_Alpha_02"
+"LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.mzML" = "Condition_A_Sample_Alpha_03"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.mzML" = "Condition_B_Sample_Alpha_01"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.mzML" = "Condition_B_Sample_Alpha_02"
+"LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.mzML" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true
+
+[modifications_parser]
+"parse_column" = "proforma"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern"="(?<=\\[).+?(?=\\])"
+"modification_dict" = {"mod:00397" = "Carbamidomethyl", "mod:01160" = "Ammonia-loss", "mod:00394" = "Acetyl", "mod:00425" = "Oxidation", "mod:00704" = "Dehydrated", "mod:00719" = "Oxidation"}

@@ -1,0 +1,30 @@
+,0
+software_name,PEAKS
+software_version,
+search_engine,PEAKS
+search_engine_version,
+ident_fdr_psm,
+ident_fdr_peptide,
+ident_fdr_protein,
+enable_match_between_runs,False
+precursor_mass_tolerance,10.00ppm
+fragment_mass_tolerance,0.02Da
+enzyme,Trypsin
+semi_enzymatic,False
+allowed_miscleavages,2
+min_peptide_length,7
+max_peptide_length,50
+fixed_mods,Carbamidomethylation (+57.02)
+variable_mods,"Acetylation (Protein N-term) (+42.01) ,Oxidation (M) (+15.99)"
+max_mods,2
+min_precursor_charge,1
+max_precursor_charge,5
+quantification_method,Identification Directed Quantification
+protein_inference,
+abundance_normalization_ions,Use TIC
+min_precursor_mz,
+max_precursor_mz,
+min_fragment_mz,
+max_fragment_mz,
+scan_window,
+predictors_library,

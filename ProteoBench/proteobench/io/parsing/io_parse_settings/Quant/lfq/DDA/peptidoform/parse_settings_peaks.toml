@@ -1,0 +1,36 @@
+[mapper]
+"Accession" = "Proteins"
+"Peptide" = "Sequence"
+
+[condition_mapper]
+"Area Sample 1" = "A"
+"Area Sample 2" = "A"
+"Area Sample 3" = "A"
+"Area Sample 4" = "B"
+"Area Sample 5" = "B"
+"Area Sample 6" = "B"
+
+[run_mapper]
+"Area Sample 1" = "Condition_A_Sample_Alpha_01"
+"Area Sample 2" = "Condition_A_Sample_Alpha_02"
+"Area Sample 3" = "Condition_A_Sample_Alpha_03"
+"Area Sample 4" = "Condition_B_Sample_Alpha_01"
+"Area Sample 5" = "Condition_B_Sample_Alpha_02"
+"Area Sample 6" = "Condition_B_Sample_Alpha_03"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern"="(?<=\\().+?(?=\\))"
+"modification_dict" = {"+57.02" = "Carbamidomethyl", "+15.99" = "Oxidation", "-17.026548" = "Gln->pyro-Glu", "-18.010565" = "Glu->pyro-Glu", "+42.01" = "Acetyl"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = false

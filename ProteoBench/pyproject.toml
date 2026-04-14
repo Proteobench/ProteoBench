@@ -1,0 +1,94 @@
+[project]
+authors = [
+  { name = "Robbin Bouwmeester", email = "robbin.bouwmeester@ugent.be" },
+  { name = "Henry Webel", email = "heweb@dtu.dk" },
+  { name = 'Witold Wolski', email = 'witold.wolski@fgcz.uzh.ch' }
+] # TODO: Add others
+description = "ProteoBench compares the outputs of mass spectrometry-based proteomics data analysis pipelines"
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Development Status :: 4 - Beta",
+]
+
+keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
+requires-python = ">=3.11"
+dynamic = ["version"]
+dependencies = [
+  "pandas[excel]",
+  "openpyxl",
+  "numpy>1.24.4",
+  "plotly>=6.0.0",
+  "upsetplot",
+  "seaborn",
+  "streamlit>=1.31",
+  "streamlit-aggrid>=1.1.7",
+  "streamlit_extras",
+  "streamlit-plotly-events",
+  "scipy",
+  "matplotlib",
+  "toml",
+  "PyGithub",
+  "GitPython",
+  "psm-utils",
+  "pmultiqc>=0.0.33",
+]
+license = { file = "LICENSE" }
+name = "proteobench"
+readme = "README.md"
+
+[project.optional-dependencies]
+dev = ["black~=23.0", "jupyterlab", "ipywidgets", "notebook", "tqdm", "wget", "nox", "pytest"]
+docs = [
+  "sphinx",
+  "sphinx-design",
+  "sphinx-rtd-theme",
+  "sphinx-autobuild",
+  "myst-parser>=0.3.0",
+  "pydata-sphinx-theme",
+  "sphinx_new_tab_link",
+  "sphinx_copybutton",
+]
+web = ["streamlit>1.27", "scipy"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/ProteoBench/ProteoBench/issues/"
+"Homepage" = "https://github.com/ProteoBench"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+# https://setuptools-scm.readthedocs.io/
+# used to pick up the version from the git tags or the latest commit.
+
+[tool.setuptools.packages.find]
+include = ["proteobench"]
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.numpydoc_validation]
+checks = [
+    "all",   # report on all checks, except the below
+    "EX01",
+    "SA01",
+    "ES01",
+    "RT03",
+    "SS06",
+]
+
+exclude = [
+'^test/.*',
+]

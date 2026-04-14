@@ -364,10 +364,14 @@ class ParseSettingsQuant:
         # Clean run names in the "Raw file" column (strip extensions, paths, suffixes)
         # so they match the condition_mapper keys (see #827, #876)
         df_melted["Raw file"] = df_melted["Raw file"].apply(self._clean_run_name)
+        # and normalize condition-mapper keys the same way so replicate assignment
+        # stays stable for long-format inputs containing paths/extensions.
+        df_melted["Raw file"] = df_melted["Raw file"].apply(self._clean_run_name)
+        cleaned_condition_mapper = {
+            self._clean_run_name(k): v for k, v in self.condition_mapper.items()
+        }
 
-        df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
-        return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)
-
+        df_melted["replicate"] = df_melted["Raw file"].map(cleaned_condition_mapper)
     def _process_modifications(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Generate modified sequences using the modification parser.

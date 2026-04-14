@@ -22,6 +22,7 @@
 "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP3.wiff" = "Condition_B_Sample_Alpha_03"
 
 
+# TODO: remove [species_mapper] — moved to module_settings.toml
 [species_mapper]
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"

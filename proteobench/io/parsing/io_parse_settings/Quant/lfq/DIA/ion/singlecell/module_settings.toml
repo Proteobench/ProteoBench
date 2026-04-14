@@ -7,6 +7,10 @@
 "A_vs_B" = 1.2
 "color" = "#ddcc77"
 
+[species_mapper]
+"_YEAST" = "YEAST"
+"_HUMAN" = "HUMAN"
+
 [general]
 "min_count_multispec" = 1
 "level" = "ion"

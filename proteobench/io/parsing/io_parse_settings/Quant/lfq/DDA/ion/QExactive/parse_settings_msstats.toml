@@ -22,6 +22,7 @@
 "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mzML" = "Condition_B_Sample_Alpha_03"
 
 
+# TODO: remove [species_mapper] — moved to module_settings.toml
 [species_mapper]
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"

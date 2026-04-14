@@ -11,6 +11,11 @@
 "A_vs_B" = 1.0
 "color" = "green"
 
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
 [general]
 "min_count_multispec" = 1
 "level" = "ion"

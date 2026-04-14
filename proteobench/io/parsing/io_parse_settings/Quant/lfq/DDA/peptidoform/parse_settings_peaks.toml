@@ -18,6 +18,7 @@
 "Area Sample 5" = "Condition_B_Sample_Alpha_02"
 "Area Sample 6" = "Condition_B_Sample_Alpha_03"
 
+# TODO: remove [species_mapper] — moved to module_settings.toml
 [species_mapper]
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"

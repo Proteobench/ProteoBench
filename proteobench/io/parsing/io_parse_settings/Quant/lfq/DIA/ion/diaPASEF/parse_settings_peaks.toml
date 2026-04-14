@@ -19,6 +19,7 @@
 "LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_02 Normalized Area" = "Condition_B_Sample_Alpha_02"
 "LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_03 Normalized Area" = "Condition_B_Sample_Alpha_03"
 
+# TODO: remove [species_mapper] — moved to module_settings.toml
 [species_mapper]
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"

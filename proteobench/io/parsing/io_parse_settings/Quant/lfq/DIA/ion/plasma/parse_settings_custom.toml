@@ -33,6 +33,7 @@
 "LFQ_Plasma_Condition_B_Sample_Alpha_05" = "Condition_B_Sample_Alpha_05"
 "LFQ_Plasma_Condition_B_Sample_Alpha_06" = "Condition_B_Sample_Alpha_06"
 
+# TODO: remove [species_mapper] — moved to module_settings.toml
 [species_mapper]
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"

@@ -20,6 +20,7 @@
 "LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02" = "Condition_B_Sample_Alpha_02"
 "LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" = "Condition_B_Sample_Alpha_03"
 
+# TODO: remove [species_mapper] — moved to module_settings.toml
 [species_mapper]
 "_YEAST" = "YEAST"
 "_ECOLI" = "ECOLI"

@@ -32,6 +32,7 @@ from proteobench.io.params.fragger import extract_params as extract_params_fragg
 from proteobench.io.params.i2masschroq import (
     extract_params as extract_params_i2masschroq,
 )
+from proteobench.io.params.maxdia import extract_params as extract_params_maxdia
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.metamorpheus import (
     extract_params as extract_params_metamorpheus,
@@ -73,6 +74,7 @@ class QuantModule:
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
+        "MaxDIA": extract_params_maxdia,
         "ProlineStudio": extract_params_proline,
         "MSAngel": extract_params_msangel,
         "AlphaPept": extract_params_alphapept,

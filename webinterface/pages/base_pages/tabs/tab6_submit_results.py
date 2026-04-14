@@ -107,6 +107,29 @@ def generate_additional_parameters_fields_submission(
                 )
 
 
+def generate_submitter_identity(user_input) -> None:
+    """
+    Display submitter identity status and inject identity into user_input.
+
+    If the user is signed in via OAuth, their identity is automatically
+    attached to the submission. If not, the submission is anonymous.
+    """
+    from ..utils.auth import get_current_user
+
+    user = get_current_user()
+    if user:
+        provider_label = "GitHub" if user["provider"] == "github" else "ORCID"
+        st.info(f"Submitting as **{user['name']}** ({provider_label}: `{user['id']}`)", icon=":material/person:")
+        user_input["submitter_id"] = user["id"]
+        user_input["submitter_name"] = user["name"]
+        user_input["submitter_provider"] = user["provider"]
+    else:
+        st.caption("Submitting anonymously. Sign in (top-right) to identify your submissions.")
+        user_input["submitter_id"] = ""
+        user_input["submitter_name"] = ""
+        user_input["submitter_provider"] = ""
+
+
 def generate_comments_section(variables, user_input) -> None:
     """
     Create the text area for submission comments.
@@ -361,6 +384,13 @@ def create_pull_request(
         The URL of the pull request.
     """
     user_comments = user_input["comments_for_submission"]
+
+    # Append submitter identity to PR body if signed in
+    submitter_id = user_input.get("submitter_id", "")
+    submitter_name = user_input.get("submitter_name", "")
+    submitter_provider = user_input.get("submitter_provider", "")
+    if submitter_id:
+        user_comments += f"\n\nSubmitter: {submitter_name} ({submitter_provider}: {submitter_id})"
 
     changed_params_str = compare_dictionaries(params_from_file, params.__dict__)
 

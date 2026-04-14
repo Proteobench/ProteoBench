@@ -22,7 +22,16 @@ class StreamlitPage(ABC):
         pbb.proteobench_page_config(page_layout="centered")
         pbb.proteobench_sidebar(current_page="/")
 
+        # Auth: handle callback, show sign-in button in top-right
+        from pages.base_pages.utils.auth import render_auth_home, render_signin_banner
+
+        render_auth_home()
+
         self._preface()
+
+        # Sign-in banner below welcome message (only when not signed in)
+        render_signin_banner()
+
         self._main_page()
         self._logos()
 

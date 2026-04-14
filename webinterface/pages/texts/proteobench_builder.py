@@ -26,7 +26,7 @@ def proteobench_page_config(page_layout="wide"):
             initial_sidebar_state="expanded",
         )
     except Exception:
-        return "Set already"
+        pass
 
 
 def render_links(modules):
@@ -75,7 +75,12 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
     proteobench_logo : str, optional
         Path to the ProteoBench logo image file.
     """
+    from pages.base_pages.utils.auth import render_auth_status
     from pages.utils.module_registry import filter_modules, get_all_modules
+
+    # Show signed-in user indicator on module pages (not Home — Home has its own)
+    if current_page != "/":
+        render_auth_status()
 
     texts = WebpageTexts
     all_modules = get_all_modules()

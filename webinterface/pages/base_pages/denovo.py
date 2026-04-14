@@ -440,6 +440,9 @@ class DeNovoUIObjects(BaseUIModule):
                 variables=self.variables,
                 user_input=self.user_input,
             )
+            tab5_quant.generate_submitter_identity(
+                user_input=self.user_input,
+            )
             tab5_quant.generate_comments_section(
                 variables=self.variables,
                 user_input=self.user_input,

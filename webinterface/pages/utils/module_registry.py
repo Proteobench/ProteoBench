@@ -129,6 +129,39 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
     return modules_by_category
 
 
+@st.cache_resource
+def get_all_data_repo_urls() -> list[str]:
+    """
+    Discover all unique data repository URLs from module variables.
+
+    Returns
+    -------
+    list[str]
+        Deduplicated list of ``github_link_pr`` values from all registered modules.
+    """
+    pages_variables_dir = Path(__file__).parent.parent / "pages_variables"
+    urls = set()
+
+    for variable_file in sorted(pages_variables_dir.rglob("*_variables.py")):
+        if variable_file.name.startswith("_"):
+            continue
+        relative_path = variable_file.relative_to(pages_variables_dir)
+        module_parts = list(relative_path.parts[:-1]) + [relative_path.stem]
+        module_path = ".".join(module_parts)
+        try:
+            module = importlib.import_module(f"pages.pages_variables.{module_path}")
+            for _name, obj in inspect.getmembers(module, inspect.isclass):
+                if is_dataclass(obj) and hasattr(obj, "github_link_pr"):
+                    instance = obj()
+                    if instance.github_link_pr:
+                        urls.add(instance.github_link_pr)
+                    break
+        except Exception:
+            continue
+
+    return list(urls)
+
+
 def filter_modules(
     modules_by_category: Dict[str, List[ModuleMetadata]], search_query: str
 ) -> Dict[str, List[ModuleMetadata]]:

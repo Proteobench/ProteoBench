@@ -208,6 +208,9 @@ class QuantUIObjects(BaseUIModule):
                 variables=self.variables,
                 user_input=self.user_input,
             )
+            tab6_submit_results.generate_submitter_identity(
+                user_input=self.user_input,
+            )
             tab6_submit_results.generate_comments_section(
                 variables=self.variables,
                 user_input=self.user_input,

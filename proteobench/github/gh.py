@@ -249,7 +249,46 @@ class GithubProteobotRepo:
             except FileNotFoundError:
                 data = []
 
-        return pd.DataFrame(data)
+        df = pd.DataFrame(data)
+
+        # Remove identity columns from the working DataFrame — identity is
+        # stored in JSON for attribution but not exposed in the public results.
+        df = df.drop(columns=["submitter_id", "submitter_name", "submitter_provider"], errors="ignore")
+
+        return df
+
+    def read_submitter_stats(self) -> pd.DataFrame:
+        """
+        Read submitter identity from all JSON files for the leaderboard.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns: submitter_id, submitter_name, submitter_provider.
+            Only includes rows where submitter_id is non-empty.
+        """
+        import json
+
+        records = []
+        if not os.path.exists(self.clone_dir):
+            return pd.DataFrame(columns=["submitter_id", "submitter_name", "submitter_provider"])
+
+        for file in os.listdir(self.clone_dir):
+            if file.endswith(".json") and file != "results.json":
+                file_path = os.path.join(self.clone_dir, file)
+                with open(file_path, "r") as f:
+                    data = json.load(f)
+                sid = data.get("submitter_id", "")
+                if sid:
+                    records.append(
+                        {
+                            "submitter_id": sid,
+                            "submitter_name": data.get("submitter_name", sid),
+                            "submitter_provider": data.get("submitter_provider", ""),
+                        }
+                    )
+
+        return pd.DataFrame(records, columns=["submitter_id", "submitter_name", "submitter_provider"])
 
     def clone_repo(self) -> Repo:
         """

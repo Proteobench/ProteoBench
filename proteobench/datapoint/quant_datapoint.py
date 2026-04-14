@@ -318,6 +318,9 @@ class QuantDatapointHYE(DatapointBase):
     nr_prec: int = 0
     comments: str = ""
     proteobench_version: str = ""
+    submitter_id: str = ""
+    submitter_name: str = ""
+    submitter_provider: str = ""
 
     def generate_id(self) -> None:
         """
@@ -391,6 +394,9 @@ class QuantDatapointHYE(DatapointBase):
             intermediate_hash=str(hashlib.sha1(intermediate.to_string().encode("utf-8")).hexdigest()),
             comments=user_input["comments_for_plotting"],
             proteobench_version=proteobench.__version__,
+            submitter_id=user_input.get("submitter_id", ""),
+            submitter_name=user_input.get("submitter_name", ""),
+            submitter_provider=user_input.get("submitter_provider", ""),
         )
 
         result_datapoint.generate_id()

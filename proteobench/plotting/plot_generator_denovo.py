@@ -314,15 +314,8 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 "N-term Ammonia-loss",
             ],
         )
-        features = kwargs.get(
-            "features",
-            [
-                "Missing Fragmentation Sites",
-                "Peptide Length",
-                "% Explained Intensity"
-            ]
-        )
-        evaluation_types = kwargs.get("evaluation_type", ['mass', 'exact'])
+        features = kwargs.get("features", ["Missing Fragmentation Sites", "Peptide Length", "% Explained Intensity"])
+        evaluation_types = kwargs.get("evaluation_type", ["mass", "exact"])
         software_colors = kwargs.get(
             "software_colors",
             {
@@ -341,16 +334,16 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             performance_data, mod_labels=mod_labels, software_colors=software_colors
         )
         
-        plots['ptm_specific'] = {}
+        plots["ptm_specific"] = {}
         for mod_label in mod_labels:
             plots["ptm_specific"][mod_label] = self.plot_ptm_specific(
                 performance_data, mod_label=mod_label, software_colors=software_colors
             )
 
         # Generate spectrum feature plot
-        plots['spectrum_feature'] = {}
+        plots["spectrum_feature"] = {}
         for feature in features:
-            plots['spectrum_feature'][feature] = {}
+            plots["spectrum_feature"][feature] = {}
             for evaluation_type in evaluation_types:
                 plots["spectrum_feature"][feature][evaluation_type] = self.plot_spectrum_feature(
                     performance_data, feature=feature, evaluation_type=evaluation_type, software_colors=software_colors

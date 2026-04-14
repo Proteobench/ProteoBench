@@ -2,6 +2,7 @@
 DIA-NN parameter parsing.
 """
 
+import os
 import pathlib
 import re
 from typing import Any, List, Optional
@@ -21,6 +22,10 @@ min_pep_len_regex = r"Min peptide length set to (\d+)"
 max_pep_len_regex = r"Max peptide length set to (\d+)"
 min_z_regex = r"Min precursor charge set to (\d+)"
 max_z_regex = r"Max precursor charge set to (\d+)"
+min_mz_prec_regex = r"Min precursor m/z set to (\d+)"
+max_mz_prec_regex = r"Max precursor m/z set to (\d+)"
+min_mz_frag_regex = r"Min fragment m/z set to (\d+)"
+max_mz_frag_regex = r"Max fragment m/z set to (\d+)"
 cleavage_regex = r"In silico digest will involve cuts at (.*)"
 cleavage_exc_regex = r"But excluding cuts at (.*)"
 missed_cleavages_regex = r"Maximum number of missed cleavages set to (\d+)"
@@ -30,9 +35,10 @@ fixed_mods_regex_2 = r"Modification (.*) with mass delta \d+\.*\d* at .+ will be
 var_mods_regex = r"Modification (.*) with mass delta \d+\.*\d* at .+ will be considered as variable"
 quant_mode_regex = r"(.*?) quantification mode"
 protein_inference_regex = r"Implicit protein grouping: (.*);"
+normalisation_disabled_regex = r"(Normalisation disabled)"
 
 # Flags
-enable_match_between_runs_regex = "MBR enabled"  # If present, MBR is enabled
+enable_match_between_runs_regex = r"(MBR enabled)|(reanalyse them)"  # If present, MBR is enabled
 
 PARAM_REGEX_DICT = {
     "ident_fdr_psm": fdr_regex,
@@ -62,6 +68,10 @@ PARAM_CMD_DICT = {
     "allowed_miscleavages": "missed-cleavages",
     "min_peptide_length": "min-pep-len",
     "max_peptide_length": "max-pep-len",
+    "min_fragment_mz": "min-fr-mz",
+    "max_fragment_mz": "max-fr-mz",
+    "min_precursor_mz": "min-pr-mz",
+    "max_precursor_mz": "max-pr-mz",
     "fixed_mods": "mod",
     "variable_mods": "var-mod",
     "max_mods": "var-mods",
@@ -218,7 +228,7 @@ def parse_setting(setting_name: str, setting_list: list) -> Any:
     return "".join(setting_list)
 
 
-def extract_with_regex(lines: List[str], regex) -> str:
+def extract_with_regex(lines: List[str], regex, search_all=False) -> str:
     """
     If no mass accuracy was specified in the cmd string, extract it from the log-file.
 
@@ -234,11 +244,16 @@ def extract_with_regex(lines: List[str], regex) -> str:
     str:
         The MS1 and MS2 mass accuracy specified in ppm.
     """
+    if search_all:
+        container = []
     for line in lines:
         regex_match = re.search(regex, line)
-        if regex_match:
-            match_str = regex_match.group(1)
-            return match_str
+        if search_all and regex_match:
+            container.append(regex_match.group(1))
+        if not search_all and regex_match:
+            return regex_match.group(1)
+    if search_all and container:
+        return container[-1]  # Return the last match if multiple matches are found
     return None
 
 
@@ -336,9 +351,9 @@ def parse_predictors_library(cmdline_dict: dict):
             return {"RT": "User defined speclib", "IM": "User defined speclib", "MS2_int": "User defined speclib"}
 
 
-def extract_cfg_parameter(lines: List[str], regex: str, cast_type: type = str, default=None):
+def extract_cfg_parameter(lines: List[str], regex: str, cast_type: type = str, default=None, search_all=False) -> Any:
     """Extract and cast a parameter using a regex pattern."""
-    match = extract_with_regex(lines, regex)
+    match = extract_with_regex(lines, regex, search_all=search_all)
     if match is None:
         return default
     try:
@@ -358,7 +373,9 @@ def extract_modifications(lines: List[str], regexes: List[str]) -> Optional[str]
     return ",".join(modifications).replace("\n", "") if modifications else None
 
 
-def extract_params(fname: str) -> ProteoBenchParameters:
+def extract_params(
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse DIA-NN log file and extract relevant parameters.
 
@@ -381,6 +398,8 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     ProteoBenchParameters
         The parsed ProteoBenchParameters object.
     """
+    print("JSON file used for DIA-NN parameters:", json_file)
+    print("\n" * 5)
     cfg_used = False
     # Some default and flag settings
     parameters = {
@@ -389,6 +408,14 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "enable_match_between_runs": False,
         "quantification_method": "QuantUMS high-precision",
         "protein_inference": "Genes",  # Default value, if not specified in the command line
+        "min_precursor_charge": 1,
+        "max_precursor_charge": 4,
+        "min_peptide_length": 7,
+        "max_peptide_length": 30,
+        "min_fragment_mz": 200,
+        "max_fragment_mz": 1800,
+        "min_precursor_mz": 300,
+        "max_precursor_mz": 1800,
     }
 
     try:
@@ -458,10 +485,12 @@ def extract_params(fname: str) -> ProteoBenchParameters:
             + str(parameters["precursor_mass_tolerance"])
             + " ppm]"
         )
-
     # If scan window is not customely set, extract it from the log file
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
-    parameters["abundance_normalization_ions"] = None
+    if "no-norm" in cmdline_dict:
+        parameters["abundance_normalization_ions"] = "None"
+    else:
+        parameters["abundance_normalization_ions"] = "Cross-run normalization"
 
     # If cfg file is used, extract the parameters from the free text below the cmd line.
     if cfg_used:
@@ -469,7 +498,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         parameters.update(
             {
                 "ident_fdr_psm": extract_cfg_parameter(lines, fdr_regex, float),
-                "ident_fdr_protein": extract_cfg_parameter(lines, fdr_regex, float),
+                "ident_fdr_protein": None,
                 "enable_match_between_runs": bool(re.search(enable_match_between_runs_regex, "".join(lines))),
                 "enzyme": (
                     f"{extract_cfg_parameter(lines, cleavage_regex) or ''},!{extract_cfg_parameter(lines, cleavage_exc_regex) or ''}"
@@ -480,16 +509,25 @@ def extract_params(fname: str) -> ProteoBenchParameters:
                 "min_precursor_charge": extract_cfg_parameter(lines, min_z_regex, int),
                 "max_precursor_charge": extract_cfg_parameter(lines, max_z_regex, int),
                 "max_mods": extract_cfg_parameter(lines, max_mods_regex, int),
-                "quantification_method": extract_cfg_parameter(lines, quant_mode_regex, str, "QuantUMS high-precision"),
+                "quantification_method": extract_cfg_parameter(
+                    lines, quant_mode_regex, str, "QuantUMS high-precision", search_all=True
+                ),
                 "fixed_mods": extract_modifications(lines, PARAM_REGEX_DICT["fixed_mods"]),
                 "variable_mods": extract_modifications(lines, [PARAM_REGEX_DICT["variable_mods"]]),
+                "min_fragment_mz": extract_cfg_parameter(lines, min_mz_frag_regex, int),
+                "max_fragment_mz": extract_cfg_parameter(lines, max_mz_frag_regex, int),
+                "min_precursor_mz": extract_cfg_parameter(lines, min_mz_prec_regex, int),
+                "max_precursor_mz": extract_cfg_parameter(lines, max_mz_prec_regex, int),
             }
         )
+
+        if re.search(normalisation_disabled_regex, "".join(lines)):
+            parameters["abundance_normalization_ions"] = "None"
 
         protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
         parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")
 
-    return ProteoBenchParameters(**parameters)
+    return ProteoBenchParameters(**parameters, filename=json_file)
 
 
 if __name__ == "__main__":
@@ -499,6 +537,8 @@ if __name__ == "__main__":
         "../../../test/params/DIANN_WU304578_report.log.txt",
         "../../../test/params/DIANN_1.7.16.log.txt",
         "../../../test/params/DIANN_cfg_settings.txt",
+        "../../../test/params/DIANN_cfg_MBR.txt",
+        "../../../test/params/DIA-NN_cfg_directq.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

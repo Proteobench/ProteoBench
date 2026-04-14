@@ -18,6 +18,12 @@ variable_mods,Oxidation@M;Acetyl@Protein N-term
 max_mods,2
 min_precursor_charge,2
 max_precursor_charge,4
+min_precursor_mz,380
+max_precursor_mz,980
+min_fragment_mz,200
+max_fragment_mz,2000
 quantification_method,DirectLFQ
 protein_inference,heuristic
 abundance_normalization_ions,None
+predictors_library,AlphaPeptDeep
+scan_window,None

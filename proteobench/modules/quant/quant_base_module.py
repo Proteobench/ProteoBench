@@ -19,7 +19,7 @@ import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
-    QuantDatapoint,
+    QuantDatapointHYE,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
 )
@@ -33,9 +33,12 @@ from proteobench.io.params.i2masschroq import (
     extract_params as extract_params_i2masschroq,
 )
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
+from proteobench.io.params.metamorpheus import (
+    extract_params as extract_params_metamorpheus,
+)
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.msangel import extract_params as extract_params_msangel
-from proteobench.io.params.peaks import read_peaks_settings as extract_params_peaks
+from proteobench.io.params.peaks import extract_params as extract_params_peaks
 from proteobench.io.params.proline import extract_params as extract_params_proline
 from proteobench.io.params.quantms import extract_params as extract_params_quantms
 from proteobench.io.params.sage import extract_params as extract_params_sage
@@ -45,7 +48,9 @@ from proteobench.io.params.spectronaut import (
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class QuantModule:
@@ -84,6 +89,7 @@ class QuantModule:
         # TODO needs to be replace with parameter extraction function
         "Proteome Discoverer": extract_params_spectronaut,
         "quantms": extract_params_quantms,
+        "MetaMorpheus": extract_params_metamorpheus,
     }
 
     def __init__(
@@ -93,6 +99,7 @@ class QuantModule:
         proteobot_repo_name: str,
         parse_settings_dir: str,
         module_id: str,
+        branch: Optional[str] = None,
     ):
         """
         Initialize the QuantModule with GitHub repo and settings.
@@ -109,8 +116,12 @@ class QuantModule:
             The directory containing parse settings.
         module_id : str
             The module identifier for configuration.
+        branch : Optional[str]
+            If set, check out this branch of the Proteobench repo after cloning.
+            Useful for previewing a PR branch without merging.
         """
         self.t_dir = TemporaryDirectory().name
+        print(f"Cloning GitHub repo to temporary directory: {self.t_dir}")
         self.t_dir_pr = TemporaryDirectory().name
         self.github_repo = GithubProteobotRepo(
             token,
@@ -118,6 +129,7 @@ class QuantModule:
             proteobench_repo_name=proteobench_repo_name,
             clone_dir=self.t_dir,
             clone_dir_pr=self.t_dir_pr,
+            branch=branch,
         )
         self.github_repo.clone_repo()
         self.parse_settings_dir = parse_settings_dir
@@ -214,12 +226,36 @@ class QuantModule:
         if len(all_datapoints) == 0:
             return all_datapoints
 
+        # Add new metric columns with mode suffixes
+        all_datapoints["median_abs_epsilon_global"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["mean_abs_epsilon_global"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="global")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["median_abs_epsilon_eq_species"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="eq_species")
+            for v in all_datapoints["results"]
+        ]
+
+        all_datapoints["mean_abs_epsilon_eq_species"] = [
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="eq_species")
+            for v in all_datapoints["results"]
+        ]
+
+        # Also maintain legacy column names for backwards compatibility with old datapoints
+        # These will be used as fallback when new metrics don't exist
         all_datapoints["median_abs_epsilon"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
+            for v in all_datapoints["results"]
         ]
 
         all_datapoints["mean_abs_epsilon"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean")
+            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="global")
             for v in all_datapoints["results"]
         ]
 
@@ -236,6 +272,8 @@ class QuantModule:
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -252,6 +290,10 @@ class QuantModule:
             DataFrame containing all datapoints from the ProteoBench repo.
         default_cutoff_min_prec : int, optional
             Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
+        max_nr_observed : int, optional
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 6).
 
         Returns
         -------
@@ -259,20 +301,24 @@ class QuantModule:
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
         # Parse user config
-        input_df = load_input_file(input_file, input_format)
+        input_df = load_input_file(input_file, input_format, input_file_secondary)
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-
-        # Get quantification data
-        quant_score = QuantScores(
+        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(
+            input_df
+        )  # Get quantification data
+        quant_score = QuantScoresHYE(
             self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
         )
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 
-        current_datapoint = QuantDatapoint.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        current_datapoint = QuantDatapointHYE.generate_datapoint(
+            intermediate_metric_structure,
+            input_format,
+            user_input,
+            default_cutoff_min_prec=default_cutoff_min_prec,
+            max_nr_observed=max_nr_observed,
         )
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
@@ -315,6 +361,7 @@ class QuantModule:
         datapoint_params: Any,
         remote_git: str,
         submission_comments: str = "no comments",
+        submission_source: str = "unknown",
     ) -> str:
         """
         Clone the repo and open a pull request with the new data points.
@@ -329,6 +376,9 @@ class QuantModule:
             Remote Git repository URL.
         submission_comments : str, optional
             Comments to be included in the pull request. Defaults to "no comments".
+        submission_source : str, optional
+            Origin of the submission: 'web-server', 'local', or 'resubmission-script'.
+            Defaults to 'unknown'.
 
         Returns
         -------
@@ -349,7 +399,6 @@ class QuantModule:
         # Append the URL to the user comments
         submission_comments += f"\n\nDataset URL: {dataset_url}"
         current_datapoint["submission_comments"] = submission_comments
-
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
 
         if not self.check_new_unique_hash(all_datapoints):
@@ -366,8 +415,11 @@ class QuantModule:
 
         path_write_individual_point = os.path.join(self.t_dir_pr, current_datapoint["intermediate_hash"] + ".json")
         logging.info(f"Writing the json (single point) to: {path_write_individual_point}")
+        datapoint_dict = current_datapoint.to_dict()
+        for key in ("color", "hover_text", "scatter_size", "marker"):
+            datapoint_dict.pop(key, None)
         with open(path_write_individual_point, "w") as f:
-            json.dump(current_datapoint.to_dict(), f, indent=2)
+            json.dump(datapoint_dict, f, indent=2)
 
         commit_name = f"Added new run with id {branch_name}"
         commit_message = f"User comments: {submission_comments}"
@@ -375,7 +427,9 @@ class QuantModule:
         try:
             self.github_repo.create_branch(branch_name)
             self.github_repo.commit(commit_name, commit_message)
-            pr_id = self.github_repo.create_pull_request(commit_name, commit_message)
+            pr_id = self.github_repo.create_pull_request(
+                commit_name, commit_message, submission_source=submission_source
+            )
         except Exception as e:
             logging.error(f"Error in PR: {e}")
             return "Unable to create PR. Please check the logs."
@@ -415,15 +469,18 @@ class QuantModule:
         fname = os.path.join(self.t_dir_pr, "results.json")
         logging.info(f"Writing the json to: {fname}")
 
+        cols_to_drop = [c for c in ("color", "hover_text", "scatter_size", "marker") if c in all_datapoints.columns]
+        all_datapoints_clean = all_datapoints.drop(columns=cols_to_drop)
+
         f = open(os.path.join(self.t_dir_pr, "results.json"), "w")
 
-        all_datapoints.to_json(f, orient="records", indent=2)
+        all_datapoints_clean.to_json(f, orient="records", indent=2)
 
         return os.path.join(self.t_dir_pr, "results.json")
 
     def write_intermediate_raw(
         self,
-        dir: str,
+        directory: str,
         ident: str,
         input_file_obj: Any,
         result_performance: pd.DataFrame,
@@ -431,27 +488,30 @@ class QuantModule:
         comment: str,
         extension_input_file: str = ".txt",
         extension_input_parameter_file: str = ".txt",
+        input_file_secondary_obj: Any = None,
     ) -> None:
         """
         Write intermediate and raw data to a directory in zipped form.
 
         Parameters
         ----------
-        dir : str
+        directory : str
             Directory to write to.
         ident : str
             Identifier to create a subdirectory for this submission.
         input_file_obj : Any
             File-like object representing the raw input file.
         result_performance : pd.DataFrame
-            The result performance DataFrame.
+            The result performance DataFrame (intermediate data).
         param_loc : List[Any]
             List of paths to parameter files that need to be copied.
         comment : str
             User comment for the submission.
+        input_file_secondary_obj : Any, optional
+            File-like object representing a secondary input file (e.g., for AlphaDIA).
         """
         # Create the target directory
-        path_write = os.path.join(dir, ident)
+        path_write = os.path.join(directory, ident)
         try:
             os.makedirs(path_write, exist_ok=True)
         except OSError as e:
@@ -466,6 +526,11 @@ class QuantModule:
                 input_file_obj.seek(0)
                 zf.writestr(f"input_file{extension_input_file}", input_file_obj.read())
 
+                # Save the secondary input file if provided
+                if input_file_secondary_obj is not None:
+                    input_file_secondary_obj.seek(0)
+                    zf.writestr(f"input_file_secondary{extension_input_file}", input_file_secondary_obj.read())
+
                 # Save the result performance DataFrame as a CSV in the zip file
                 result_csv = result_performance.to_csv(index=False)
                 zf.writestr("result_performance.csv", result_csv)
@@ -479,15 +544,11 @@ class QuantModule:
                 # Save the user comment in the zip file
                 zf.writestr("comment.txt", comment)
 
-            # save intermediate performance file unzipped as well
-            result_csv_path = os.path.join(path_write, "result_performance.csv")
-            result_csv.to_csv(result_csv_path, index=False)
-
             logging.info(f"Data saved to {zip_file_path}")
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 
-    def load_params_file(self, input_file: List[str], input_format: str) -> ProteoBenchParameters:
+    def load_params_file(self, input_file: List[str], input_format: str, json_file: str) -> ProteoBenchParameters:
         """
         Load parameters from a metadata file depending on its format.
 
@@ -497,12 +558,28 @@ class QuantModule:
             Path to the metadata file.
         input_format : str
             Format of the metadata file.
+        json_file : str
+            Path to the JSON file containing additional module specific parameters.
 
         Returns
         -------
         ProteoBenchParameters
             The parameters for the module.
         """
-        params = self.EXTRACT_PARAMS_DICT[input_format](*input_file)
+        params = self.EXTRACT_PARAMS_DICT[input_format](
+            *input_file,
+            json_file=json_file,
+        )
         params.software_name = input_format
         return params
+
+    def get_plot_generator(self) -> PlotGeneratorBase:
+        """
+        Get the plot generator for LFQ Ion plots.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance.
+        """
+        return LFQHYEPlotGenerator()

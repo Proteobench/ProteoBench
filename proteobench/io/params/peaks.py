@@ -2,6 +2,7 @@
 Peaks parameter parsing.
 """
 
+import os
 import re
 from pathlib import Path
 from typing import List, Optional
@@ -145,7 +146,9 @@ def get_items_between(lines: list, start: str, end: str, only_last: bool = False
     return items
 
 
-def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
+def extract_params(
+    file_path: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Read a PEAKS settings file, extract parameters, and return them as a `ProteoBenchParameters` object.
 
@@ -170,7 +173,7 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
 
     lines = [line.strip() for line in lines]
 
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json_file)
 
     params.software_name = "PEAKS"
     params.software_version = extract_value(lines, "PEAKS Version:")
@@ -179,16 +182,19 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
 
     psm_fdr = extract_value(lines, "Precursor FDR:")
     # Its either "Precursor FDR:" (DIA) or "PSM FDR:" (DDA)
-    psm_fdr = extract_value(lines, "PSM FDR:")
+    if not psm_fdr:
+        psm_fdr = extract_value(lines, "PSM FDR:")
     peptide_fdr = extract_value(lines, "Peptide FDR:")
     params.ident_fdr_peptide = peptide_fdr
     params.ident_fdr_psm = psm_fdr
     # peaks uses  Proteins -10LgP >= 15.0  instead of FDR
-    params.ident_fdr_protein = None
+    protein_fdr = extract_value(lines, "Protein Group FDR:")
+    params.ident_fdr_protein = protein_fdr
     params.enable_match_between_runs = True if extract_value(lines, "Match Between Run:") == "Yes" else False
     params.precursor_mass_tolerance = extract_mass_tolerance(lines, "Precursor Mass Error Tolerance:")
     params.fragment_mass_tolerance = extract_mass_tolerance(lines, "Fragment Mass Error Tolerance:")
     params.enzyme = extract_value(lines, "Enzyme:")
+    params.semi_enzymatic = extract_value(lines, "Digest Mode:") != "Specific"
     params.allowed_miscleavages = int(extract_value(lines, "Max Missed Cleavage:"))
     try:
         peptide_length_range = extract_value(lines, "Peptide Length between:").split(",")
@@ -210,6 +216,19 @@ def read_peaks_settings(file_path: str) -> ProteoBenchParameters:
     params.min_precursor_charge = int(precursor_charge_between[0])
     params.max_precursor_charge = int(precursor_charge_between[1])
 
+    try:
+        precursor_mz_between = extract_value(lines, "Precursor M/Z between:").split(",")
+        params.min_precursor_mz = int(precursor_mz_between[0])
+        params.max_precursor_mz = int(precursor_mz_between[1])
+        fragment_mz_between = extract_value(lines, "Fragment M/Z between:").split(",")
+        params.min_fragment_mz = int(fragment_mz_between[0])
+        params.max_fragment_mz = int(fragment_mz_between[1])
+    except AttributeError:  # DDA
+        params.min_precursor_mz = None
+        params.max_precursor_mz = None
+        params.min_fragment_mz = None
+        params.max_fragment_mz = None
+
     params.scan_window = None
 
     params.quantification_method = extract_value(
@@ -230,11 +249,12 @@ if __name__ == "__main__":
         "../../../test/params/PEAKS_parameters_DDA.txt",
         "../../../test/params/PEAKS_parameters_DIA.txt",
         "../../../test/params/PEAKS_parameters_DDA_new.txt",
+        "../../../test/params/PEAKS_diaPASEF.txt",
     ]
 
     for file in fnames:
         # Extract parameters from the settings file
-        parameters = read_peaks_settings(file)
+        parameters = extract_params(file)
 
         # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)

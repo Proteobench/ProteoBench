@@ -4,20 +4,20 @@
 "z" = "Charge"
 
 [condition_mapper]
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw Normalized Area" = "A"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw Normalized Area" = "A"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw Normalized Area" = "A"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw Normalized Area" = "B"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw Normalized Area" = "B"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw Normalized Area" = "B"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01 Normalized Area" = "A"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02 Normalized Area" = "A"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03 Normalized Area" = "A"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01 Normalized Area" = "B"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02 Normalized Area" = "B"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03 Normalized Area" = "B"
 
 [run_mapper]
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01.raw Normalized Area" = "Condition_A_Sample_Alpha_01"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02.raw Normalized Area" = "Condition_A_Sample_Alpha_02"
-"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03.raw Normalized Area" = "Condition_A_Sample_Alpha_03"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01.raw Normalized Area" = "Condition_B_Sample_Alpha_01"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw Normalized Area" = "Condition_B_Sample_Alpha_02"
-"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw Normalized Area" = "Condition_B_Sample_Alpha_03"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01 Normalized Area" = "Condition_A_Sample_Alpha_01"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02 Normalized Area" = "Condition_A_Sample_Alpha_02"
+"LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03 Normalized Area" = "Condition_A_Sample_Alpha_03"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01 Normalized Area" = "Condition_B_Sample_Alpha_01"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02 Normalized Area" = "Condition_B_Sample_Alpha_02"
+"LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03 Normalized Area" = "Condition_B_Sample_Alpha_03"
 
 [species_mapper]
 "_YEAST" = "YEAST"

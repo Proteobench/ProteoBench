@@ -10,6 +10,7 @@ enable_match_between_runs,True
 precursor_mass_tolerance,"[-20 ppm, 20 ppm]"
 fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
 enzyme,Trypsin/P
+semi_enzymatic,False
 allowed_miscleavages,2
 min_peptide_length,7
 max_peptide_length,50
@@ -21,3 +22,7 @@ max_precursor_charge,
 quantification_method,
 protein_inference,ProteinProphet: --maxppmdiff 2000000
 abundance_normalization_ions,
+min_precursor_mz,
+max_precursor_mz,5000.0
+min_fragment_mz,
+max_fragment_mz,

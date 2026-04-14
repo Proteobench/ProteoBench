@@ -285,7 +285,7 @@ def get_proforma_bracketed(
     isupper : bool, optional
         Whether to include uppercase characters. Defaults to True.
     pattern : str, optional
-        The regular expression pattern for matching modifications. Defaults to `r"\[([^]]+)\]"`.
+        The regular expression pattern for matching modifications. Defaults to `r"\\[([^]]+)\\]"`.
     modification_dict : dict, optional
         A dictionary of modifications and their names.
 
@@ -363,7 +363,6 @@ def _load_wombat(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    print(input_csv)
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
     mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
@@ -414,6 +413,8 @@ def _load_peaks(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep=",")
+    # Strip .raw or .mzML suffixes that PEAKS may add to sample names (e.g. "Sample.raw Normalized Area")
+    input_data_frame.columns = [re.sub(r"\.(raw|mzML)(\s)", r"\2", c) for c in input_data_frame.columns]
     return input_data_frame
 
 

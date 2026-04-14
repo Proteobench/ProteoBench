@@ -10,6 +10,7 @@
     "precursor_mass_tolerance": "[-4.5 ppm, 4.5 ppm]",
     "fragment_mass_tolerance": "[-20 ppm, 20 ppm]",
     "enzyme": "Trypsin/P",
+    "semi_enzymatic": false,
     "allowed_miscleavages": 1,
     "min_peptide_length": 7,
     "max_peptide_length": null,

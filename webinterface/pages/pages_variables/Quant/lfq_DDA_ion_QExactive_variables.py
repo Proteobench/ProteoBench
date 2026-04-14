@@ -16,13 +16,14 @@ class VariablesDDAQuant:
 
     all_datapoints: str = "all_datapoints"
     all_datapoints_submission: str = "all_datapoints_submission"
-    input_df_submission: str = "input_df_submission"
-    result_performance_submission: str = "result_performance_submission"
+    input_df_submission: str = "input_df_submission"  # DataFrame
+    result_performance_submission: str = "result_performance_submission"  # DataFrame
     submit: str = "submit"
     fig_logfc: str = "fig_logfc"
     fig_metric: str = "fig_metric"
     fig_cv: str = "fig_CV_violinplot"
     fig_ma_plot: str = "fig_ma_plot"
+    fig_prefix: str = "fig_dda_quant_QExactive_"
     result_perf: str = "result_perf"
     meta_data: str = "meta_data"
     input_df: str = "input_df"
@@ -41,10 +42,38 @@ class VariablesDDAQuant:
     highlight_list_submitted: List[str] = field(default_factory=list)
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted"
     selectbox_id_uuid: str = "selectbox_id"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth"
     slider_id_submitted_uuid: str = "slider_id_submitted"
     slider_id_uuid: str = "slider_id"
+    slider_id_indepth_uuid: str = "slider_id_indepth"
     download_selector_id_uuid: str = "download_selector_id"
     table_id_uuid: str = "table_id"
+    table_new_results_uuid: str = "table_new_results_uuid"
+    result_plot_uuid: str = "result_figure_uuid"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid"
+    metric_selector_uuid: str = "metric_selector_uuid"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid"
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid"
+
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "precursor_mass_tolerance",
+            "fragment_mass_tolerance",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+        ]
+    )
 
     placeholder_table: str = "placeholder_table"
     placeholder_slider: str = "placeholder_slider"
@@ -56,8 +85,19 @@ class VariablesDDAQuant:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    max_nr_observed: int = 6
+    alpha_warning: bool = False
     beta_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DDA ion QExactive"
+    sidebar_path: str = "/Quant_LFQ_DDA_ion_QExactive"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "quantification", "QExactive", "orbitrap", "precursor", "ion", "LFQ"]
+    )
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/QExactive/introduction_DDA_quan_ions.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/QExactive/file_description.md"
@@ -70,7 +110,7 @@ class VariablesDDAQuant:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/QExactive"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/2-quant-lfq-ion-dda/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/2-quant-lfq-ion-dda/"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Precursor quantification (QExactive)"

@@ -21,4 +21,11 @@
     "flake8.args": [
         "--max-line-length=120",
     ],
+    "python-envs.pythonProjects": [
+        {
+            "path": "",
+            "envManager": "ms-python.python:system",
+            "packageManager": "ms-python.python:pip"
+        }
+    ],
 }

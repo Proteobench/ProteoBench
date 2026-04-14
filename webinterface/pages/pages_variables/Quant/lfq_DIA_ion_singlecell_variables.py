@@ -23,6 +23,7 @@ class VariablesDIAQuantSC:
     fig_metric: str = "fig_metric_dia_quant_singlecell"
     fig_cv: str = "fig_CV_violinplot_dia_quant_singlecell"
     fig_ma_plot: str = "fig_ma_plot_dia_quant_singlecell"
+    fig_prefix: str = "fig_dia_quant_singlecell_"
     result_perf: str = "result_perf_dia_quant_singlecell"
     meta_data: str = "meta_data_dia_quant_singlecell"
     input_df: str = "input_df_dia_quant_singlecell"
@@ -40,14 +41,63 @@ class VariablesDIAQuantSC:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
-    beta_warning: bool = True
-    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA.git_singlecell"
+    max_nr_observed: int = 6
+    alpha_warning: bool = True
+    beta_warning: bool = False
+    archived_warning: bool = False
+    github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_singlecell.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion Single Cell"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_singlecell"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: [
+            "DIA",
+            "quantification",
+            "single cell",
+            "Astral",
+            "precursor",
+            "ion",
+            "LFQ",
+            "single-cell",
+        ]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_singlecell"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_singlecell"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dia_quant_singlecell"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_singlecell"
     slider_id_uuid: str = "slider_id_dia_quant_singlecell"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dia_quant_singlecell"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dia_quant_singlecell"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dia_quant_singlecell"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dia_quant_singlecell"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_singlecell"
     table_id_uuid: str = "table_id_dia_quant_singlecell"
+    table_new_results_uuid: str = "table_new_results_uuid_dia_quant_singlecell"
+    result_plot_uuid: str = "result_figure_uuid_dia_quant_singlecell"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_singlecell"
+    metric_selector_uuid: str = "metric_selector_uuid_dia_quant_singlecell"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_singlecell"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dia_quant_singlecell"
+    metric_calc_approach_selector_submitted_uuid: str = (
+        "metric_calc_approach_selector_submitted_uuid_dia_quant_singlecell"
+    )
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_singlecell"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dia_quant_singlecell"
+
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+            "quantification_method",
+        ]
+    )
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/singlecell/file_description.md"
@@ -68,9 +118,11 @@ class VariablesDIAQuantSC:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/singlecell"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/6-quant-lfq-ion-dia-singlecell/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-singlecell/"
+    )
 
-    title: str = "DIA Precursor quantification - singlecell"
+    title: str = "DIA Precursor quantification - Single Cell"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_singlecell_quant_"

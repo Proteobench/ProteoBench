@@ -149,3 +149,8 @@ build.sh
 
 # temp results
 jupyter_notebooks/analysis/temp_results/*
+.claude
+uv.lock
+
+# Large files
+*.gz

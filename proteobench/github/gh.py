@@ -3,12 +3,34 @@ This module provides the `GithubProteobotRepo` class to interact with GitHub rep
 It allows cloning repositories, reading JSON result files, creating branches, committing changes, and creating pull requests.
 """
 
+import logging
 import os
 from typing import Optional
 
 import pandas as pd
 from git import Repo, exc
 from github import Github
+
+logger = logging.getLogger(__name__)
+
+
+def is_official_server() -> bool:
+    """Check if running on the official ProteoBench server.
+
+    Uses the presence of storage configuration in Streamlit secrets
+    as the signal - only the production server has this configured.
+    """
+    try:
+        import streamlit as st
+
+        return "storage" in st.secrets.keys()
+    except (ImportError, FileNotFoundError):
+        return False
+
+
+def get_submission_source() -> str:
+    """Return the submission source: 'web-server' or 'local'."""
+    return "web-server" if is_official_server() else "local"
 
 
 class GithubProteobotRepo:
@@ -40,6 +62,7 @@ class GithubProteobotRepo:
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
         username: str = "Proteobot",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the GithubProteobotRepo class with required parameters for cloning and managing repositories.
@@ -65,6 +88,7 @@ class GithubProteobotRepo:
         self.proteobot_repo_name = proteobot_repo_name
         self.proteobench_repo_name = proteobench_repo_name
         self.username = username
+        self.branch = branch
         self.repo = None
 
     def get_remote_url_anon(self) -> str:
@@ -144,13 +168,44 @@ class GithubProteobotRepo:
         """
         Clone the Proteobench repository anonymously with a shallow clone (without authentication).
 
+        If ``self.branch`` is set, the repository is cloned from the **Proteobot** repository
+        (not Proteobench) and the specified branch is checked out. This allows reading JSON files
+        from a PR branch that has not yet been merged into Proteobench (for testing purposes). When the clone directory
+        already exists, the method fetches and checks out the requested branch to ensure the
+        correct revision is used.
+
         Returns
         -------
         Repo
             The cloned repository object.
         """
-        remote_url = self.get_remote_url_anon()
-        self.repo = self.shallow_clone(remote_url, self.clone_dir)
+        if self.branch is not None:
+            # Branch is on the Proteobot repo (PR not yet merged into Proteobench)
+            branch_remote_url = f"https://github.com/{self.proteobot_repo_name}.git"
+            if os.path.exists(self.clone_dir):
+                print(f"Repository already exists in {self.clone_dir}. Verifying branch...")
+                try:
+                    self.repo = Repo(self.clone_dir)
+                    # Fetch the requested branch and check it out to ensure we're on the correct revision
+                    remote = self.repo.remote("origin")
+                    remote.fetch(self.branch, depth=1)
+                    self.repo.git.checkout(self.branch)
+                    print(f"Checked out branch '{self.branch}' in existing repository.")
+                    return self.repo
+                except exc.InvalidGitRepositoryError:
+                    print("Repository invalid, will clone again.")
+                except Exception as e:
+                    print(f"Failed to fetch/checkout branch '{self.branch}': {e}. Recloning...")
+                    # If fetch/checkout fails, remove the directory and reclone
+                    import shutil
+
+                    shutil.rmtree(self.clone_dir)
+            self.repo = Repo.clone_from(branch_remote_url.rstrip("/"), self.clone_dir, depth=1, branch=self.branch)
+            print(f"Cloned branch '{self.branch}' from {self.proteobot_repo_name}")
+        else:
+            remote_url = self.get_remote_url_anon()
+            self.repo = self.shallow_clone(remote_url, self.clone_dir)
+            print(f"Shallow cloned repository from {remote_url} to {self.clone_dir}")
         return self.repo
 
     def read_results_json_repo_single_file(self) -> pd.DataFrame:
@@ -202,6 +257,10 @@ class GithubProteobotRepo:
 
         If `token` is provided, it will use authenticated access; otherwise, it will clone anonymously.
 
+        When ``self.branch`` is set, the repository is cloned from the **Proteobot** repository
+        and the specified branch is checked out. If the directory already exists, the method
+        fetches and checks out the requested branch to ensure the correct revision is used.
+
         Returns
         -------
         Repo
@@ -210,8 +269,31 @@ class GithubProteobotRepo:
         if self.token is None or self.token == "":
             self.repo = self.clone_repo_anonymous()
         else:
-            remote = f"https://{self.username}:{self.token}@github.com/{self.proteobench_repo_name}.git"
-            self.repo = self.clone(remote, self.clone_dir)
+            if self.branch is not None:
+                # Branch is on the Proteobot repo (PR not yet merged into Proteobench)
+                remote = f"https://{self.username}:{self.token}@github.com/{self.proteobot_repo_name}.git"
+                if os.path.exists(self.clone_dir):
+                    print(f"Repository already exists in {self.clone_dir}. Verifying branch...")
+                    try:
+                        self.repo = Repo(self.clone_dir)
+                        # Fetch the requested branch and check it out
+                        remote_obj = self.repo.remote("origin")
+                        remote_obj.fetch(self.branch, depth=1)
+                        self.repo.git.checkout(self.branch)
+                        print(f"Checked out branch '{self.branch}' in existing repository.")
+                        return self.repo
+                    except exc.InvalidGitRepositoryError:
+                        print("Repository invalid, will clone again.")
+                    except Exception as e:
+                        print(f"Failed to fetch/checkout branch '{self.branch}': {e}. Recloning...")
+                        import shutil
+
+                        shutil.rmtree(self.clone_dir)
+                self.repo = Repo.clone_from(remote.rstrip("/"), self.clone_dir, depth=1, branch=self.branch)
+                print(f"Cloned branch '{self.branch}' from {self.proteobot_repo_name} with authentication")
+            else:
+                remote = f"https://{self.username}:{self.token}@github.com/{self.proteobench_repo_name}.git"
+                self.repo = self.clone(remote, self.clone_dir)
         return self.repo
 
     def clone_repo_pr(self) -> Repo:
@@ -271,7 +353,7 @@ class GithubProteobotRepo:
         self.repo.index.commit("\n".join([commit_name, commit_message]))
         self.repo.git.push("--set-upstream", "origin", self.repo.active_branch)
 
-    def create_pull_request(self, commit_name: str, commit_message: str) -> int:
+    def create_pull_request(self, commit_name: str, commit_message: str, submission_source: str = "unknown") -> int:
         """
         Create a pull request on GitHub using the PyGithub API.
 
@@ -281,6 +363,9 @@ class GithubProteobotRepo:
             The title of the pull request.
         commit_message : str
             The body of the pull request.
+        submission_source : str, optional
+            Origin of the submission: 'web-server', 'local', or 'resubmission-script'.
+            Defaults to 'unknown'.
 
         Returns
         -------
@@ -292,6 +377,9 @@ class GithubProteobotRepo:
         base = repo.get_branch("master")
         head = f"{self.username}:{self.repo.active_branch.name}"
 
+        if submission_source == "local":
+            commit_name = f"[LOCAL - DO NOT MERGE] {commit_name}"
+
         pr = repo.create_pull(
             title=commit_name,
             body=commit_message,
@@ -299,5 +387,16 @@ class GithubProteobotRepo:
             head=head,
         )
 
-        pr_number = pr.number
-        return pr_number
+        try:
+            if submission_source == "local":
+                pr.set_labels("local-submission", "do-not-merge")
+            elif submission_source == "web-server":
+                pr.set_labels("server-submission")
+            elif submission_source == "resubmission-script":
+                pr.set_labels("batch-resubmission")
+        except Exception as e:
+            logger.warning(f"Failed to set labels on PR #{pr.number}: {e}")
+
+        logger.info(f"Created PR #{pr.number} with submission_source='{submission_source}'")
+
+        return pr.number

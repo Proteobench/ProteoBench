@@ -11,6 +11,7 @@ Relevant information in file:
 """
 
 import json
+import os
 import pathlib
 from typing import Union
 
@@ -157,7 +158,10 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
     return input_params
 
 
-def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
+def extract_params(
+    fname: Union[str, pathlib.Path],
+    json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"),
+) -> ProteoBenchParameters:
     """
     Parse MSAangel quantification tool JSON parameter file and extract relevant parameters.
 
@@ -171,7 +175,7 @@ def extract_params(fname: Union[str, pathlib.Path]) -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters as a `ProteoBenchParameters` object.
     """
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json_file)
 
     try:
         # If the input is a file-like object (e.g., StringIO), decode it
@@ -207,14 +211,18 @@ if __name__ == "__main__":
     """
     from pathlib import Path
 
-    file = Path("../../../test/params/MSAngel_Xtandem-export-param.json")
+    files = [
+        Path("../../../test/params/MSAngel_Xtandem-export-param.json"),
+        Path("../../../test/params/MSAngel_fromRAWtoQUANT-Mascot-export-param.json"),
+    ]
 
-    # Extract parameters from the file
-    params = extract_params(file)
+    for file in files:
+        # Extract parameters from the file
+        params = extract_params(file)
 
-    # Convert the extracted parameters to a dictionary and then to a pandas Series
-    data_dict = params.__dict__
-    series = pd.Series(data_dict)
+        # Convert the extracted parameters to a dictionary and then to a pandas Series
+        data_dict = params.__dict__
+        series = pd.Series(data_dict)
 
-    # Write the Series to a CSV file
-    series.to_csv(file.with_suffix(".csv"))
+        # Write the Series to a CSV file
+        series.to_csv(file.with_suffix(".csv"))

@@ -1,5 +1,6 @@
 """Parser for Alphapept yaml configuration files."""
 
+import os
 import pathlib
 from typing import Optional
 
@@ -9,7 +10,9 @@ import yaml
 from proteobench.io.params import ProteoBenchParameters
 
 
-def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
+def extract_params(
+    fname: pathlib.Path, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Extract parameters from an AlphaPept YAML configuration file.
 
@@ -32,7 +35,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
 
     # Extracting the summary data
     summary = record["summary"]
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json_file)
 
     # Set software details
     params.software_name = "AlphaPept"
@@ -54,7 +57,7 @@ def extract_params(fname: pathlib.Path) -> ProteoBenchParameters:
 
     mods_variable = fasta["mods_variable"]
     mods_variable.extend(fasta["mods_variable_terminal"])
-    mods_variable.extend(fasta["mods_variable_terminal"])
+    mods_variable.extend(fasta["mods_variable_terminal_prot"])
     params.variable_mods = ",".join(mods_variable)
 
     params.max_mods = fasta["n_modifications_max"]

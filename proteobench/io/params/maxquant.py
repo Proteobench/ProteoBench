@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import collections
 import logging
+import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -213,7 +214,9 @@ def build_Series_from_records(records, index_length=4):
     return pd.Series((v for (k, v) in records), index=idx)
 
 
-def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
+def extract_params(
+    fname, ms2frac="FTMS", json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     """
     Extract parameters from a MaxQuant XML file.
 
@@ -229,7 +232,7 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     ProteoBenchParameters
         The extracted parameters.
     """
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json_file)
 
     record = read_file(fname)
     # select ms2 fragmentation method specified by parameter
@@ -256,6 +259,19 @@ def extract_params(fname, ms2frac="FTMS") -> ProteoBenchParameters:
     fragment_mass_tolerance = f"[-{fragment_mass_tolerance}, {fragment_mass_tolerance}]"
     params.fragment_mass_tolerance = fragment_mass_tolerance
     params.enzyme = record.loc[("parameterGroups", "parameterGroup", "enzymes", "string")].squeeze()
+    semi_enzymatic = int(record.loc[("parameterGroups", "parameterGroup", "enzymeMode")].squeeze())
+
+    # enzyme mode 0: Fully specific
+    # enzyme mode 1: Semi specific free N terminus
+    # enzyme mode 2: Semi specific free C terminus
+    # enzyme mode 3: Semi specific
+    # enzyme mode 4: Unspecific
+    # enzyme mode 5: No digestion
+    if semi_enzymatic == 0:
+        params.semi_enzymatic = False
+    else:
+        params.semi_enzymatic = True
+
     params.allowed_miscleavages = int(
         record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "maxMissedCleavages", :]].squeeze()
     )

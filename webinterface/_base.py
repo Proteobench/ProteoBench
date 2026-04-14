@@ -20,10 +20,11 @@ class StreamlitPage(ABC):
         self.state = st.session_state
 
         pbb.proteobench_page_config(page_layout="centered")
-        pbb.proteobench_sidebar()
+        pbb.proteobench_sidebar(current_page="/")
 
         self._preface()
         self._main_page()
+        self._logos()
 
     def _preface(self):
         """
@@ -38,18 +39,16 @@ class StreamlitPage(ABC):
             [proteobench.readthedocs.io](https://proteobench.readthedocs.io/)**<br>
             **💻 Find the source code on
             [github.com](https://github.com/Proteobench/Proteobench)**<br>
+            **📄 Find the manuscript on [biorXiv](https://doi.org/10.64898/2025.12.09.692895)**<br>
 
             **ProteoBench is a project initiated and maintained by [EuBIC-MS](https://eubic-ms.org/). Please [join us](https://eubic-ms.org/become-a-member/) and contribute!**<br>
 
             **If you still have questions, you can email us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query)**
 
             Using proteobench version: {}
-            """.format(
-                proteobench.__version__
-            ),
+            """.format(proteobench.__version__),
             unsafe_allow_html=True,
         )
-        st.image("logos/logo_participants/proteobench-contributing-institutes.png")
 
         # add hosting information if provided
         try:
@@ -66,3 +65,11 @@ class StreamlitPage(ABC):
         Set up the main page layout for the Streamlit application.
         """
         raise NotImplementedError()
+
+    def _logos(self):
+        """
+        Set up the logos for the Streamlit application.
+        """
+        # Add newline
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.image("logos/logo_participants/proteobench-contributing-institutes.png")

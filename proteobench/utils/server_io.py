@@ -8,10 +8,11 @@ import pandas as pd
 import requests
 import toml
 from bs4 import BeautifulSoup
-from tqdm import tqdm
 
-from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
-from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
+from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
+    DDAQuantIonModuleQExactive,
+)
+from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
@@ -28,14 +29,90 @@ from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
-    "DDAQuantIonModule": DDAQuantIonModule,
-    "DIAQuantIonModule": DIAQuantIonModule,
+    "DDAQuantIonModuleQExactive": DDAQuantIonModuleQExactive,
+    "DIAQuantIonModuleAIF": DIAQuantIonModuleAIF,
     "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
     "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
     "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,
     "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
     "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
 }
+
+DATASETS_BASE_URL = "https://proteobench.cubimed.rub.de/datasets/"
+
+
+def download_file(url: str, local_path: str, chunk_size: int = 8192) -> str:
+    """
+    Download a file from URL to local path.
+
+    Parameters
+    ----------
+    url : str
+        URL to download from
+    local_path : str
+        Local path to save file
+    chunk_size : int
+        Size of chunks for streaming download (default: 8192)
+
+    Returns
+    -------
+    str
+        Path to downloaded file
+    """
+    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+
+    print(f"Downloading file from {url}...")
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+
+    with open(local_path, "wb") as f:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            if chunk:
+                f.write(chunk)
+
+    print(f"File downloaded to {local_path}")
+    return local_path
+
+
+def dataset_folder_exists(intermediate_hash: str, base_url: str = DATASETS_BASE_URL) -> bool:
+    """
+    Check if a dataset folder already exists on the public server for a given intermediate hash.
+    First tries a direct HEAD to the folder URL, then falls back to parsing the index page.
+
+    Args:
+        intermediate_hash: The hash to check for
+        base_url: Base URL of the datasets server
+
+    Returns:
+        True if the dataset folder exists, False otherwise
+    """
+    if not intermediate_hash:
+        return False
+
+    folder_url = f"{base_url.rstrip('/')}/{intermediate_hash.strip('/')}/"
+    try:
+        resp = requests.head(folder_url, allow_redirects=True, timeout=5)
+        if resp.status_code == 200:
+            return True
+        # Some servers may redirect. If it ends in the folder, treat as exists.
+        if resp.status_code in (301, 302, 303, 307, 308) and resp.headers.get("Location", "").rstrip("/").endswith(
+            f"/{intermediate_hash.strip('/')}"
+        ):
+            return True
+    except Exception:
+        pass
+
+    # Fallback: parse directory listing
+    try:
+        resp = requests.get(base_url, timeout=10)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+        folder_links = {
+            a.get("href", "").strip("/").split("/")[0] for a in soup.find_all("a") if a.get("href", "").endswith("/")
+        }
+        return intermediate_hash.strip("/") in folder_links
+    except Exception:
+        return False
 
 
 def get_merged_json(
@@ -49,10 +126,10 @@ def get_merged_json(
 
     # Extract ZIP contents to a local folder
     with zipfile.ZipFile(zip_bytes) as zip_ref:
-        zip_ref.extractall("Results_quant_ion_DDA")
+        zip_ref.extractall(repo_url.split("/")[-5])
 
     # Prepare base directory
-    base_path = "Results_quant_ion_DDA/Results_quant_ion_DDA-main"
+    base_path = f"{repo_url.split('/')[-5]}/{repo_url.split('/')[-5]}-main"
 
     # Initialize combined JSON container
     combined_json = []
@@ -98,6 +175,12 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", ou
 
     # Download and extract zip files from matching folders
     for folder in matching_folders:
+        extract_dir = f"{output_directory}/{folder}"
+        if os.path.exists(extract_dir) and os.listdir(extract_dir):
+            print(f"Folder already exists and is not empty, skipping download: {extract_dir}")
+            hash_vis_dir[folder] = extract_dir
+            continue
+
         folder_url = f"{base_url}{folder}/"
         print(f"Processing folder: {folder_url}")
 
@@ -122,23 +205,11 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", ou
             block_size = 1024  # 1 KB
 
             # Save the zip file
-            with (
-                open(zip_filename, "wb") as f,
-                tqdm(
-                    desc=f"Downloading {zip_filename}",
-                    total=total_size,
-                    unit="B",
-                    unit_scale=True,
-                    unit_divisor=1024,
-                ) as progress,
-            ):
+            with open(zip_filename, "wb") as f:
                 for data in zip_response.iter_content(block_size):
                     f.write(data)
-                    progress.update(len(data))
 
             # Extract the zip file
-            extract_dir = f"{output_directory}/{folder}"
-
             os.makedirs(extract_dir, exist_ok=True)
             with zipfile.ZipFile(zip_filename, "r") as zip_ref:
                 zip_ref.extractall(extract_dir)

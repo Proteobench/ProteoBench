@@ -8,5 +8,8 @@ disableWidgetStateDuplicationWarning = true
 [server]
 maxUploadSize = 1000
 
+[client]
+showSidebarNavigation = false
+
 [browser]
 gatherUsageStats = false

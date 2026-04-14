@@ -1,9 +1,9 @@
 [mapper]
 "Modified.Sequence" = "Sequence"
 "Run" = "Raw file"
-"Protein.Names" = "Proteins"
+"Protein.Ids" = "Proteins"
 "Precursor.Charge" = "Charge"
-"Precursor.Quantity" = "Intensity"
+"Precursor.Normalised" = "Intensity"
 
 [condition_mapper]
 "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01" = "A"

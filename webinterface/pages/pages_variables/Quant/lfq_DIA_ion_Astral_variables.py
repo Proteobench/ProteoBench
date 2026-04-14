@@ -24,6 +24,7 @@ class VariablesDIAQuantAstral:
     fig_metric: str = "fig_metric_dia_quant_Astral"
     fig_cv: str = "fig_CV_violinplot_dia_quant_Astral"
     fig_ma_plot: str = "fig_ma_plot_dia_quant_Astral"
+    fig_prefix: str = "fig_dia_quant_Astral_"
     result_perf: str = "result_perf_dia_quant_Astral"
     meta_data: str = "meta_data_dia_quant_Astral"
     input_df: str = "input_df_dia_quant_Astral"
@@ -41,14 +42,52 @@ class VariablesDIAQuantAstral:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    max_nr_observed: int = 6
+    alpha_warning: bool = False
     beta_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_Astral.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DIA ion Astral"
+    sidebar_path: str = "/Quant_LFQ_DIA_ion_Astral"
+    sidebar_category: str = "DIA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DIA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+    )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_Astral"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_Astral"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dia_quant_Astral"
     slider_id_submitted_uuid: str = "slider_id_submitted_dia_quant_Astral"
     slider_id_uuid: str = "slider_id_dia_quant_Astral"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dia_quant_Astral"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dia_quant_Astral"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dia_quant_Astral"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dia_quant_Astral"
     download_selector_id_uuid: str = "download_selector_id_dia_quant_Astral"
     table_id_uuid: str = "table_id_dia_quant_Astral"
+    table_new_results_uuid: str = "table_new_results_uuid_dia_quant_Astral"
+    result_plot_uuid: str = "result_figure_uuid_dia_quant_Astral"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dia_quant_Astral"
+    metric_selector_uuid: str = "metric_selector_uuid_dia_quant_Astral"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dia_quant_Astral"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dia_quant_Astral"
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dia_quant_Astral"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_Astral"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dia_quant_Astral"
+
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+            "quantification_method",
+        ]
+    )
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/Astral/introduction.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DIA/ion/Astral/file_description.md"
@@ -71,12 +110,12 @@ class VariablesDIAQuantAstral:
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/7-quant-lfq-precursor-dia-Astral_2Th/"
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/"
     )
 
     title: str = "DIA Precursor ion quantification - Astral 2 Th"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_Astral_quant_"
-    params_json_dict: str = "params_json_dict_lfq_ion_dda_Astral_quant"
+    params_json_dict: str = "params_json_dict_lfq_ion_dia_Astral_quant"
     params_file_dict: str = "params_file_dict_lfq_ion_dia_Astral_quant"

@@ -2,6 +2,7 @@
 MSAID parameter parsing.
 """
 
+import os
 import pathlib
 from typing import Dict
 
@@ -10,7 +11,9 @@ import pandas as pd
 from proteobench.io.params import ProteoBenchParameters
 
 
-def extract_params(fname: str) -> ProteoBenchParameters:
+def extract_params(
+    fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+) -> ProteoBenchParameters:
     """
     Parse the MSAID parameter file and extract relevant parameters.
 
@@ -27,8 +30,8 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     # Default and flag settings
     parameters = {
         "software_name": "MSAID",
+        "software_version": None,
         "search_engine": "Chimerys",
-        "search_engine_version": "4.1.1",
         "quantification_method": "MS2 Area",
         "ident_fdr_psm": 0.01,
         "ident_fdr_peptide": 0.01,
@@ -49,6 +52,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
         "[-" + params_dict["Fragment Mass Tolerance"] + ", " + params_dict["Fragment Mass Tolerance"] + "]"
     )
     parameters["enzyme"] = params_dict["Enzyme"]
+    parameters["semi_enzymatic"] = params_dict["Enzyme Specificity"] != "full"
     parameters["allowed_miscleavages"] = int(params_dict["Max. Missed Cleavage Sites"])
     parameters["min_peptide_length"] = int(params_dict["Min. Peptide Length"])
     parameters["max_peptide_length"] = int(params_dict["Max. Peptide Length"])
@@ -58,6 +62,10 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     parameters["min_precursor_charge"] = int(params_dict["Min. Peptide Charge"])
     parameters["max_precursor_charge"] = int(params_dict["Max. Peptide Charge"])
     parameters["quantification_method"] = params_dict["Quantification Type"]
+    parameters["max_precursor_mz"] = None
+    parameters["min_precursor_mz"] = None
+    parameters["max_fragment_mz"] = None
+    parameters["min_fragment_mz"] = None
 
     # Set flag for enabling match between runs based on quantification method
     if "Quan in all file" in parameters["quantification_method"] or "MBR" in parameters["quantification_method"]:
@@ -65,7 +73,7 @@ def extract_params(fname: str) -> ProteoBenchParameters:
     else:
         parameters["enable_match_between_runs"] = False
 
-    return ProteoBenchParameters(**parameters)
+    return ProteoBenchParameters(**parameters, filename=json_file)
 
 
 if __name__ == "__main__":

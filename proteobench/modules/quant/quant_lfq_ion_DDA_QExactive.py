@@ -4,22 +4,14 @@ DDA Quantification Module for precursor level Quantification.
 
 from __future__ import annotations
 
+from typing import Dict, Optional, Tuple
+
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
-from proteobench.exceptions import (
-    ConvertStandardFormatError,
-    IntermediateFormatGenerationError,
-    ParseError,
-    ParseSettingsError,
-    QuantificationError,
-)
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
+from proteobench.modules.quant.benchmarking import run_benchmarking
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScores
 
 
 class DDAQuantIonModuleQExactive(QuantModule):
@@ -50,6 +42,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DDA",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DDA",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DDA Quantification Module for precursor level Quantification.
@@ -70,6 +63,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            branch=branch,
         )
         self.precursor_column_name = "precursor ion"
 
@@ -91,6 +85,8 @@ class DDAQuantIonModuleQExactive(QuantModule):
         user_input: dict,
         all_datapoints: pd.DataFrame,
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -107,77 +103,27 @@ class DDAQuantIonModuleQExactive(QuantModule):
             DataFrame containing all datapoints from the proteobench repo.
         default_cutoff_min_prec : int
             Minimum number of runs a precursor ion has to be identified in.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
 
         Returns
         -------
         tuple[DataFrame, DataFrame, DataFrame]
             Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
         """
-
-        # Parse workflow output file
-
-        try:
-            input_df = load_input_file(input_file_loc, input_format)
-        except pd.errors.ParserError as e:
-            raise ParseError(
-                f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
-            ) from e
-        except Exception as e:
-            raise ParseSettingsError("Error parsing the input file.") from e
-
-        msg = f"Folder: {self.parse_settings_dir}, Module: {self.module_id}"
-        # Parse settings file
-        try:
-            parse_settings = ParseSettingsBuilder(
-                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
-            ).build_parser(input_format)
-        except KeyError as e:
-            raise ParseSettingsError(
-                f"Error parsing settings file for parsing, settings seem to be missing: {msg}"
-            ) from e
-        except FileNotFoundError as e:
-            raise ParseSettingsError(f"Could not find the parsing settings file: {msg}") from e
-        except Exception as e:
-            raise ParseSettingsError(f"Error parsing settings file for parsing: {msg}") from e
-
-        try:
-            standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
-        except KeyError as e:
-            raise ConvertStandardFormatError("Error converting to standard format, key missing.") from e
-        except Exception as e:
-            raise ConvertStandardFormatError("Error converting to standard format.") from e
-
-        # instantiate quantification scores
-        try:
-            quant_score = QuantScores(
-                self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
-            )
-        except Exception as e:
-            raise QuantificationError("Error generating quantification scores.") from e
-
-        # generate intermediate data structure
-        try:
-            intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
-        except Exception as e:
-            raise IntermediateFormatGenerationError("Error generating intermediate data structure.") from e
-
-        # try:
-        current_datapoint = QuantDatapoint.generate_datapoint(
-            intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+        return run_benchmarking(
+            input_file=input_file_loc,
+            input_format=input_format,
+            user_input=user_input,
+            all_datapoints=all_datapoints,
+            parse_settings_dir=self.parse_settings_dir,
+            module_id=self.module_id,
+            precursor_column_name=self.precursor_column_name,
+            default_cutoff_min_prec=default_cutoff_min_prec,
+            add_datapoint_func=self.add_current_data_point,
+            input_file_secondary=input_file_secondary,
+            max_nr_observed=max_nr_observed,
         )
-        # except Exception as e:
-        #    raise DatapointGenerationError(f"Error generating datapoint: {e}")
 
-        # add current data point to all datapoints
-        # try:
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
-        # except Exception as e:
-        #    raise DatapointAppendError(f"Error adding current data point: {e}")
-
-        # return intermediate data structure, all datapoints, and input DataFrame
-        # TODO check why there are NA and inf/-inf values
-        return (
-            intermediate_metric_structure,
-            all_datapoints,
-            input_df,
-        )
+    def get_plot_generator(self):
+        return super().get_plot_generator()

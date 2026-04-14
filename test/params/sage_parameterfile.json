@@ -1,0 +1,96 @@
+{
+  "version": "0.14.6",
+  "database": {
+    "bucket_size": 8192,
+    "enzyme": {
+      "missed_cleavages": 1,
+      "min_len": 7,
+      "max_len": 50,
+      "cleave_at": "KR",
+      "restrict": null,
+      "c_terminal": true,
+      "semi_enzymatic": null
+    },
+    "fragment_min_mz": 150.0,
+    "fragment_max_mz": 2000.0,
+    "peptide_min_mass": 500.0,
+    "peptide_max_mass": 5000.0,
+    "ion_kinds": [
+      "b",
+      "y"
+    ],
+    "min_ion_index": 2,
+    "static_mods": {
+      "C": 57.02146
+    },
+    "variable_mods": {
+      "[": [
+        42.0106
+      ],
+      "M": [
+        15.9949
+      ]
+    },
+    "max_variable_mods": 3,
+    "decoy_tag": "rev_",
+    "generate_decoys": false,
+    "fasta": "G:\\dev\\sage\\PXD028735_ProteoBench\\ProteoBenchFASTA_DDAQuantification_TD.fasta"
+  },
+  "quant": {
+    "tmt": null,
+    "tmt_settings": {
+      "level": 3,
+      "sn": false
+    },
+    "lfq": true,
+    "lfq_settings": {
+      "peak_scoring": "Hybrid",
+      "integration": "Sum",
+      "spectral_angle": 0.7,
+      "ppm_tolerance": 10.0,
+      "combine_charge_states": true
+    }
+  },
+  "precursor_tol": {
+    "ppm": [
+      -20.0,
+      20.0
+    ]
+  },
+  "fragment_tol": {
+    "ppm": [
+      -20.0,
+      20.0
+    ]
+  },
+  "precursor_charge": [
+    1,
+    7
+  ],
+  "isotope_errors": [
+    0,
+    2
+  ],
+  "deisotope": false,
+  "chimera": false,
+  "wide_window": false,
+  "min_peaks": 15,
+  "max_peaks": 150,
+  "max_fragment_charge": 2,
+  "min_matched_peaks": 4,
+  "report_psms": 1,
+  "predict_rt": true,
+  "mzml_paths": [
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\mzml\\LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.mzML",
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\mzml\\LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.mzML",
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\mzml\\LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.mzML",
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\mzml\\LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01.mzML",
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\mzml\\LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.mzML",
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\mzml\\LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.mzML"
+  ],
+  "output_paths": [
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\02\\results.sage.tsv",
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\02\\lfq.tsv",
+    "G:\\dev\\sage\\PXD028735_ProteoBench\\02\\results.json"
+  ]
+}

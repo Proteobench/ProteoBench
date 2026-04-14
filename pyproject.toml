@@ -18,40 +18,30 @@ keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
 requires-python = ">=3.11"
 dynamic = ["version"]
 dependencies = [
-  "pandas",
+  "pandas[excel]",
   "openpyxl",
   "numpy>1.24.4",
-  "plotly==5.24.0",
+  "plotly>=6.0.0",
   "upsetplot",
   "seaborn",
   "streamlit>=1.31",
+  "streamlit-aggrid>=1.1.7",
   "streamlit_extras",
   "streamlit-plotly-events",
+  "scipy",
   "matplotlib",
   "toml",
   "PyGithub",
   "GitPython",
   "psm-utils",
+  "pmultiqc>=0.0.33",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = [
-  "black~=23.0",
-  "jupyterlab",
-  "notebook",
-  "tqdm",
-  "wget",
-  "nox",
-  "pytest",
-  "flake8",
-  "flake8-bugbear",
-  "flake8-comprehensions",
-  "flake8-docstrings",
-  "flake8-import-order",
-]
+dev = ["black~=23.0", "jupyterlab", "ipywidgets", "notebook", "tqdm", "wget", "nox", "pytest"]
 docs = [
   "sphinx",
   "sphinx-design",

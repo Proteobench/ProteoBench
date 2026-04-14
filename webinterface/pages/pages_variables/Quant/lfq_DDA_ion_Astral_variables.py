@@ -23,6 +23,7 @@ class VariablesDDAQuantAstral:
     fig_metric: str = "fig_metric_dda_quant_Astral"
     fig_cv: str = "fig_CV_violinplot_dda_quant_Astral"
     fig_ma_plot: str = "fig_ma_plot_dda_quant_Astral"
+    fig_prefix: str = "fig_dda_quant_Astral_"
     result_perf: str = "result_perf_dda_quant_Astral"
     meta_data: str = "meta_data_dda_quant_Astral"
     input_df: str = "input_df_dda_quant_Astral"
@@ -41,10 +42,37 @@ class VariablesDDAQuantAstral:
     highlight_list_submitted: List[str] = field(default_factory=list)
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dda_quant_Astral"
     selectbox_id_uuid: str = "selectbox_id_dda_quant_Astral"
+    selectbox_id_indepth_uuid: str = "selectbox_id_indepth_dda_quant_Astral"
+    colorblind_mode_selector_uuid: str = "colorblind_mode_selector_dda_quant_Astral"
+    colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_quant_Astral"
+    colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dda_quant_Astral"
     slider_id_submitted_uuid: str = "slider_id_submitted_dda_quant_Astral"
     slider_id_uuid: str = "slider_id_dda_quant_Astral"
+    slider_id_indepth_uuid: str = "slider_id_indepth_dda_quant_Astral"
     download_selector_id_uuid: str = "download_selector_id_dda_quant_Astral"
     table_id_uuid: str = "table_id_dda_quant_Astral"
+    table_new_results_uuid: str = "table_new_results_uuid_dda_quant_Astral"
+    result_plot_uuid: str = "result_figure_uuid_dda_quant_Astral"
+    result_submitted_plot_uuid: str = "result_submitted_figure_uuid_dda_quant_Astral"
+    metric_selector_uuid: str = "metric_selector_uuid_dda_quant_Astral"
+    metric_selector_submitted_uuid: str = "metric_selector_submitted_uuid_dda_quant_Astral"
+    metric_selector_indepth_uuid: str = "metric_selector_indepth_uuid_dda_quant_Astral"
+    metric_calc_approach_selector_submitted_uuid: str = "metric_calc_approach_selector_submitted_uuid_dda_quant_Astral"
+    metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dda_quant_Astral"
+    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dda_quant_Astral"
+    metric_plot_labels: List[str] = field(
+        default_factory=lambda: [
+            "None",
+            "precursor_mass_tolerance",
+            "fragment_mass_tolerance",
+            "enable_match_between_runs",
+            "max_mods",
+            "enzyme",
+            "ident_fdr_psm",
+            "ident_fdr_peptide",
+            "allowed_miscleavages",
+        ]
+    )
 
     placeholder_table: str = "placeholder_table_dda_quant_Astral"
     placeholder_slider: str = "placeholder_slider_dda_quant_Astral"
@@ -56,8 +84,19 @@ class VariablesDDAQuantAstral:
     highlight_list: List[str] = field(default_factory=list)
     first_new_plot: bool = True
     default_val_slider: int = 3
+    max_nr_observed: int = 6
+    alpha_warning: bool = False
     beta_warning: bool = True
+    archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DDA_Astral.git"
+
+    # Sidebar metadata
+    sidebar_label: str = "Quant LFQ DDA ion Astral"
+    sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
+    sidebar_category: str = "DDA"
+    keywords: List[str] = field(
+        default_factory=lambda: ["DDA", "quantification", "Astral", "orbitrap", "precursor", "ion", "LFQ"]
+    )
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/introduction_DDA_quan_ions.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/file_description.md"
@@ -70,7 +109,9 @@ class VariablesDDAQuantAstral:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/8-quant-lfq-precursor-dda-Astral/"
+    doc_url: str = (
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/"
+    )
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Ion quantification (Astral)"

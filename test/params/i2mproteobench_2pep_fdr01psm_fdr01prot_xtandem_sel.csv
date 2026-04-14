@@ -10,6 +10,7 @@ enable_match_between_runs,True
 precursor_mass_tolerance,"[-10 ppm, 10 ppm]"
 fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
 enzyme,[RK]|{P}
+semi_enzymatic,False
 allowed_miscleavages,3
 min_peptide_length,
 max_peptide_length,

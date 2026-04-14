@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 import pandas as pd
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import QuantDatapoint
+from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
 from proteobench.exceptions import (
     ConvertStandardFormatError,
     DatapointAppendError,
@@ -23,7 +23,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.score.quant.quantscores import QuantScores
+from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class DIAQuantIonModulediaPASEF(QuantModule):
@@ -54,6 +54,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_diaPASEF",
         proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_diaPASEF",
+        branch: Optional[str] = None,
     ):
         """
         Initialize the DIA Quantification Module for precursor level Quantification for diaPASEF.
@@ -73,6 +74,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            branch=branch,
         )
         self.precursor_column_name = "precursor ion"
 
@@ -94,6 +96,8 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
         default_cutoff_min_prec: int = 3,
+        input_file_secondary: str = None,
+        max_nr_observed: int = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module for benchmarking workflow results.
@@ -110,6 +114,8 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             DataFrame containing all data points from the repo.
         default_cutoff_min_prec : int, optional
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
 
         Returns
         -------
@@ -118,7 +124,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
         """
         # Parse workflow output file
         try:
-            input_df = load_input_file(input_file, input_format)
+            input_df = load_input_file(input_file, input_format, input_file_secondary)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
@@ -147,7 +153,7 @@ class DIAQuantIonModulediaPASEF(QuantModule):
 
         # Calculate quantification scores
         try:
-            quant_score = QuantScores(
+            quant_score = QuantScoresHYE(
                 self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
@@ -161,8 +167,12 @@ class DIAQuantIonModulediaPASEF(QuantModule):
 
         # Generate current data point
         try:
-            current_datapoint = QuantDatapoint.generate_datapoint(
-                intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec=default_cutoff_min_prec
+            current_datapoint = QuantDatapointHYE.generate_datapoint(
+                intermediate_metric_structure,
+                input_format,
+                user_input,
+                default_cutoff_min_prec=default_cutoff_min_prec,
+                max_nr_observed=max_nr_observed,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")
@@ -179,3 +189,14 @@ class DIAQuantIonModulediaPASEF(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    def get_plot_generator(self):
+        """
+        Get the plot generator for this module.
+
+        Returns
+        -------
+        PlotGeneratorBase
+            The plot generator instance.
+        """
+        return super().get_plot_generator()

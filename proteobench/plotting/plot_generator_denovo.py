@@ -333,7 +333,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         plots["ptm_overview"] = self.plot_ptm_overview(
             performance_data, mod_labels=mod_labels, software_colors=software_colors
         )
-        
+
         plots["ptm_specific"] = {}
         for mod_label in mod_labels:
             plots["ptm_specific"][mod_label] = self.plot_ptm_specific(

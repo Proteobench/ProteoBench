@@ -287,7 +287,7 @@ class DeNovoUIObjects(BaseUIModule):
                                 plot_name=plot_name,
                                 figs=plots[plot_name]
                             )
-                            # st.plotly_chart(plots[plot_name], use_container_width=True)
+                            # st.plotly_chart(plots[plot_name], width='stretch')
                                 
                                 
             except Exception as e:
@@ -306,7 +306,7 @@ class DeNovoUIObjects(BaseUIModule):
         
         st.plotly_chart(
             figs,
-            use_container_width=True
+            width='stretch'
         )
         
     def _display_ptm_specific(self, figs) -> None:
@@ -326,7 +326,7 @@ class DeNovoUIObjects(BaseUIModule):
                 st.header(mod_label)
                 st.plotly_chart(
                     figs[mod_label],
-                    use_container_width=True,
+                    width='stretch',
                 )
     
     def _display_spectrum_features(self, figs) -> None:
@@ -351,7 +351,7 @@ class DeNovoUIObjects(BaseUIModule):
                 st.header(feature_name)
                 st.plotly_chart(
                     figs[feature_name][evaluation_type],
-                    use_container_width=True
+                    width='stretch'
                 )
     
     def _display_species_overview(self, figs) -> None:
@@ -370,7 +370,7 @@ class DeNovoUIObjects(BaseUIModule):
 
         st.plotly_chart(
             figs[evaluation_type],
-            use_container_width=True,
+            width='stretch',
             key=self.variables.fig_species_overview
         )
 

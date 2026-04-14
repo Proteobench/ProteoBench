@@ -148,8 +148,7 @@ results.json
 build.sh
 
 # temp results
-jupyter_notebooks/analysis/temp_results/*CLAUDE.md
-CLAUDE.md
+jupyter_notebooks/analysis/temp_results/*
 .claude
 uv.lock
 

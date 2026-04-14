@@ -1342,9 +1342,6 @@ def reprocess_datapoint(
                 _PRESERVE_FIELDS = (
                     "id",  # contains original submission timestamp
                     "intermediate_hash",  # keeps JSON filename stable for clean PR diffs
-                    "color",
-                    "hover_text",
-                    "scatter_size",
                     "submission_comments",
                 )
                 for _field in _PRESERVE_FIELDS:
@@ -1355,7 +1352,10 @@ def reprocess_datapoint(
 
                 new_dp_hash = intermediate_hash
                 result["new_hash"] = new_dp_hash
-                result["json_data"] = new_datapoint.to_dict()
+                datapoint_dict = new_datapoint.to_dict()
+                for _key in ("color", "hover_text", "scatter_size", "marker"):
+                    datapoint_dict.pop(_key, None)
+                result["json_data"] = datapoint_dict
                 result["repo_suffix"] = repo_suffix
 
             except Exception as e:

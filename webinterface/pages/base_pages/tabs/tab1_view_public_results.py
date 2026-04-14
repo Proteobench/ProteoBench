@@ -145,7 +145,7 @@ def display_metric_calc_approach_selector(variables) -> str:
     help_text = getattr(variables.texts.Help, "radio_mode", None) if hasattr(variables, "texts") else None
     mode = st.radio(
         "Select metric calculation approach",
-        ["Global", "Species-weighted"],
+        ["Species-weighted", "Global"],
         help=help_text,
         horizontal=True,
     )

@@ -345,8 +345,11 @@ class DeNovoModule:
 
         path_write_individual_point = os.path.join(self.t_dir_pr, current_datapoint["intermediate_hash"] + ".json")
         logging.info(f"Writing the json (single point) to: {path_write_individual_point}")
+        datapoint_dict = current_datapoint.to_dict()
+        for key in ("color", "hover_text", "scatter_size", "marker"):
+            datapoint_dict.pop(key, None)
         with open(path_write_individual_point, "w") as f:
-            json.dump(current_datapoint.to_dict(), f, indent=2)
+            json.dump(datapoint_dict, f, indent=2)
 
         commit_name = f"Added new run with id {branch_name}"
         commit_message = f"User comments: {submission_comments}"

@@ -142,6 +142,27 @@ class ParseSettingsQuant:
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
         self.modification_parser = None
 
+        # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
+        # Can be overridden per-tool in the TOML [general] section
+        cleanup_pattern = parse_settings["general"].get("run_name_cleanup", "")
+        if cleanup_pattern:
+            try:
+                self._run_name_cleanup = re.compile(cleanup_pattern)
+            except re.error as exc:
+                raise ValueError(
+                    f"Invalid regex in [general].run_name_cleanup: {cleanup_pattern!r}. "
+                    f"Please fix the pattern in the TOML configuration. Details: {exc}"
+                ) from exc
+        else:
+            # Default: strip common MS file extensions and known suffixes
+            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
+
+        # Normalize the condition_mapper and run_mapper keys using the same cleanup
+        # so that keys like "file.mzML" and column names like "file.mzML" both
+        # resolve to "file" after cleaning (see #827, #876)
+        self.condition_mapper = {self._clean_run_name(k): v for k, v in self.condition_mapper.items()}
+        self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
+
     def species_dict(self) -> Dict[str, str]:
         """
         Get the species dictionary.
@@ -195,9 +216,41 @@ class ParseSettingsQuant:
             df_filtered = df.copy()
         return df_filtered
 
+    def _clean_run_name(self, name: str) -> str:
+        """
+        Clean a run/file name by removing extensions and known suffixes.
+
+        Strips path prefixes (e.g., ``/path/to/file.mzML`` -> ``file``)
+        and applies the run_name_cleanup regex to remove extensions like
+        ``.raw``, ``.mzML``, ``.mzML.gz``, ``.d``, ``.wiff``, and
+        tool-specific suffixes like ``_uncalibrated`` (FragPipe DIA-NN, see #827).
+
+        Parameters
+        ----------
+        name : str
+            The raw file name or column name to clean.
+
+        Returns
+        -------
+        str
+            The cleaned name.
+        """
+        if not isinstance(name, str):
+            return name
+        # Strip path prefix (some tools include full paths)
+        name = name.replace("\\", "/")
+        if "/" in name:
+            name = name.rsplit("/", 1)[-1]
+        # Apply the cleanup regex
+        name = self._run_name_cleanup.sub("", name)
+        return name
+
     def _fix_colnames(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Fix column names in the DataFrame according to the mapper.
+        Fix column names in the DataFrame by cleaning run names.
+
+        Applies run name cleanup (extension stripping, path removal) to all
+        column names so they match the keys in condition_mapper.
 
         Parameters
         ----------
@@ -209,7 +262,7 @@ class ParseSettingsQuant:
         pd.DataFrame
             DataFrame with standardized column names.
         """
-        df.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
+        df.columns = [self._clean_run_name(c) for c in df.columns]
         return df
 
     def _mark_contaminants(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -313,6 +366,10 @@ class ParseSettingsQuant:
             )
         else:
             df_melted = df.copy()
+
+        # Clean run names in the "Raw file" column (strip extensions, paths, suffixes)
+        # so they match the condition_mapper keys (see #827, #876)
+        df_melted["Raw file"] = df_melted["Raw file"].apply(self._clean_run_name)
 
         df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
         return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)

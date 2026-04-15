@@ -4,7 +4,7 @@ Benchmarking functionality for quantification modules.
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial, wraps
-from typing import Callable, Dict, List, Optional, Tuple, Type
+from typing import Callable, Optional, Tuple, Type
 
 import pandas as pd
 from pandas import DataFrame
@@ -73,9 +73,9 @@ def _convert_format(parse_settings, input_df: DataFrame):
 
 
 @handle_benchmarking_error(QuantificationError, "Error generating quantification scores")
-def _create_quant_scores(precursor_column_name: str, module_settings):
+def _create_quant_scores(precursor_column_name: str, module_settings, quant_score_class=QuantScoresHYE):
     """Create quantification scores."""
-    return QuantScoresHYE(
+    return quant_score_class(
         precursor_column_name, module_settings.species_expected_ratio, module_settings.species_dict
     )
 
@@ -88,10 +88,15 @@ def _generate_intermediate(quant_score, standard_format, replicate_to_raw):
 
 @handle_benchmarking_error(DatapointGenerationError, "Error generating datapoint")
 def _generate_datapoint(
-    intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec, max_nr_observed=None
+    intermediate_metric_structure,
+    input_format,
+    user_input,
+    default_cutoff_min_prec,
+    max_nr_observed=None,
+    datapoint_class=QuantDatapointHYE,
 ):
     """Generate datapoint."""
-    return QuantDatapointHYE.generate_datapoint(
+    return datapoint_class.generate_datapoint(
         intermediate_metric_structure,
         input_format,
         user_input,
@@ -118,6 +123,8 @@ def run_benchmarking(
     add_datapoint_func=None,
     input_file_secondary: str = None,
     max_nr_observed: int = None,
+    quant_score_class=QuantScoresHYE,
+    datapoint_class=QuantDatapointHYE,
 ) -> Tuple[DataFrame, DataFrame, DataFrame]:
     """
     Run the benchmarking workflow.
@@ -144,6 +151,12 @@ def run_benchmarking(
         Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
     input_file_secondary : str, optional
         Path to a secondary input file (used for some formats like AlphaDIA).
+    max_nr_observed : int, optional
+        Maximum number of observed values for datapoint generation.
+    quant_score_class : type, optional
+        Score class to use. Defaults to QuantScoresHYE.
+    datapoint_class : type, optional
+        Datapoint class to use. Defaults to QuantDatapointHYE.
 
     Returns
     -------
@@ -164,7 +177,7 @@ def run_benchmarking(
     standard_format = process_species(standard_format, module_settings)
 
     # Create quantification scores
-    quant_score = _create_quant_scores(precursor_column_name, module_settings)
+    quant_score = _create_quant_scores(precursor_column_name, module_settings, quant_score_class)
 
     # Generate intermediate structure
     intermediate_metric_structure = _generate_intermediate(quant_score, standard_format, replicate_to_raw)
@@ -176,6 +189,7 @@ def run_benchmarking(
         user_input,
         default_cutoff_min_prec,
         max_nr_observed=max_nr_observed,
+        datapoint_class=datapoint_class,
     )
 
     # Add datapoint if function provided
@@ -186,105 +200,4 @@ def run_benchmarking(
         intermediate_metric_structure,
         all_datapoints,
         input_df,
-    )
-
-
-def run_benchmarking_with_timing(
-    input_file: str,
-    input_format: str,
-    user_input: dict,
-    all_datapoints: Optional[pd.DataFrame],
-    parse_settings_dir: str,
-    module_id: str,
-    precursor_column_name: str,
-    default_cutoff_min_prec: int = 3,
-    add_datapoint_func=None,
-    input_file_secondary: str = None,
-    max_nr_observed: int = None,
-) -> Tuple[DataFrame, DataFrame, DataFrame, Dict[str, float]]:
-    """
-    Run the benchmarking workflow with timing information.
-
-    Parameters
-    ----------
-    input_file : str
-        Path to the workflow output file.
-    input_format : str
-        Format of the workflow output file.
-    user_input : dict
-        User-provided parameters for plotting.
-    all_datapoints : Optional[pd.DataFrame]
-        DataFrame containing all data points from the repo.
-    parse_settings_dir : str
-        Directory containing parse settings.
-    module_id : str
-        Module identifier for configuration.
-    precursor_column_name : str
-        Name of the precursor column.
-    default_cutoff_min_prec : int, optional
-        Minimum number of runs a precursor ion must be identified in. Defaults to 3.
-    add_datapoint_func : callable, optional
-        Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
-    input_file_secondary : str, optional
-        Path to a secondary input file (used for some formats like AlphaDIA).
-
-    Returns
-    -------
-    Tuple[DataFrame, DataFrame, DataFrame, Dict[str, float]]
-        A tuple containing the intermediate data structure, all data points, the input DataFrame,
-        and a dictionary of timing information.
-    """
-    import time
-    from contextlib import contextmanager
-
-    timings: Dict[str, float] = {}
-
-    @contextmanager
-    def time_block(label: str):
-        t0 = time.perf_counter()
-        yield
-        timings[label] = time.perf_counter() - t0
-
-    with time_block("load_input_file"):
-        input_df = load_input_file(input_file, input_format, input_file_secondary)
-
-    with time_block("parse_settings"):
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(
-            input_format
-        )
-
-    with time_block("convert_to_standard_format"):
-        standard_format = parse_settings.convert_to_standard_format(input_df)
-        replicate_to_raw = parse_settings.create_replicate_mapping()
-
-    with time_block("process_species"):
-        module_settings = load_module_settings(parse_settings_dir)
-        standard_format = process_species(standard_format, module_settings)
-
-    with time_block("instantiate_quant_scores"):
-        quant_score = QuantScoresHYE(
-            precursor_column_name, module_settings.species_expected_ratio, module_settings.species_dict
-        )
-
-    with time_block("generate_intermediate"):
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
-
-    with time_block("generate_datapoint"):
-        current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure,
-            input_format,
-            user_input,
-            default_cutoff_min_prec=default_cutoff_min_prec,
-            max_nr_observed=max_nr_observed,
-        )
-
-    if add_datapoint_func is not None:
-        with time_block("append_datapoint"):
-            all_datapoints = add_datapoint_func(current_datapoint, all_datapoints=all_datapoints)
-
-    return (
-        intermediate_metric_structure,
-        all_datapoints,
-        input_df,
-        timings,
     )

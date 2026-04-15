@@ -46,9 +46,7 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
-from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.quant.benchmarking import run_benchmarking
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
 from proteobench.score.quantscoresHYE import QuantScoresHYE
@@ -71,6 +69,9 @@ class QuantModule:
     module_id : str
         The module identifier for configuration.
     """
+
+    quant_score_class = QuantScoresHYE
+    datapoint_class = QuantDatapointHYE
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
@@ -301,34 +302,21 @@ class QuantModule:
         tuple[DataFrame, DataFrame, DataFrame]
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
-        # Parse user config
-        input_df = load_input_file(input_file, input_format, input_file_secondary)
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
-        ).build_parser(input_format)
-        standard_format = parse_settings.convert_to_standard_format(input_df)
-        replicate_to_raw = parse_settings.create_replicate_mapping()
-
-        # Process species information
-        module_settings = load_module_settings(self.parse_settings_dir)
-        standard_format = process_species(standard_format, module_settings)
-
-        quant_score = QuantScoresHYE(
-            self.precursor_column_name, module_settings.species_expected_ratio, module_settings.species_dict
-        )
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
-
-        current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure,
-            input_format,
-            user_input,
+        return run_benchmarking(
+            input_file=input_file,
+            input_format=input_format,
+            user_input=user_input,
+            all_datapoints=all_datapoints,
+            parse_settings_dir=self.parse_settings_dir,
+            module_id=self.module_id,
+            precursor_column_name=self.precursor_column_name,
             default_cutoff_min_prec=default_cutoff_min_prec,
+            add_datapoint_func=self.add_current_data_point,
+            input_file_secondary=input_file_secondary,
             max_nr_observed=max_nr_observed,
+            quant_score_class=self.quant_score_class,
+            datapoint_class=self.datapoint_class,
         )
-
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
-
-        return intermediate_metric_structure, all_datapoints, input_df
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """

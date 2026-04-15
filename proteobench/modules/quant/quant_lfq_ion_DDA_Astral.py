@@ -4,13 +4,9 @@ DDA Quantification Module for Ion level Quantification.
 
 from __future__ import annotations
 
-from typing import Dict, Optional, Tuple
-
-import pandas as pd
-from pandas import DataFrame
+from typing import Optional
 
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
-from proteobench.modules.quant.benchmarking import run_benchmarking_with_timing
 from proteobench.modules.quant.quant_base_module import QuantModule
 
 
@@ -78,100 +74,5 @@ class DDAQuantIonAstralModule(QuantModule):
         """
         return True
 
-    def benchmarking(
-        self,
-        input_file_loc: any,
-        input_format: str,
-        user_input: dict,
-        all_datapoints: pd.DataFrame,
-        default_cutoff_min_prec: int = 3,
-        input_file_secondary: str = None,
-        max_nr_observed: int = None,
-    ) -> tuple[DataFrame, DataFrame, DataFrame]:
-        """
-        Main workflow of the module. Used to benchmark workflow results.
-
-        Parameters
-        ----------
-        input_file_loc : any
-            Path to the workflow output file.
-        input_format : str
-            Format of the workflow output file.
-        user_input : dict
-            User provided parameters for plotting.
-        all_datapoints : pd.DataFrame
-            DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec : int
-            Minimum number of runs an ion has to be identified in.
-        input_file_secondary : str, optional
-            Path to a secondary input file (used for some formats like AlphaDIA).
-
-        Returns
-        -------
-        tuple[DataFrame, DataFrame, DataFrame]
-            Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
-        """
-        result = run_benchmarking_with_timing(
-            input_file=input_file_loc,
-            input_format=input_format,
-            user_input=user_input,
-            all_datapoints=all_datapoints,
-            parse_settings_dir=self.parse_settings_dir,
-            module_id=self.module_id,
-            precursor_column_name=self.precursor_column_name,
-            default_cutoff_min_prec=default_cutoff_min_prec,
-            add_datapoint_func=self.add_current_data_point,
-            input_file_secondary=input_file_secondary,
-            max_nr_observed=max_nr_observed,
-        )
-        # Return only the first three elements (without timings)
-        return result[:3]
-
-    def benchmarking_2(
-        self,
-        input_file_loc: str,
-        input_format: str,
-        user_input: dict[str, object],
-        all_datapoints: pd.DataFrame,
-        default_cutoff_min_prec: int = 3,
-    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, float]]:
-        """
-        Main workflow of the module with timing information. Used to benchmark workflow results.
-
-        Parameters
-        ----------
-        input_file_loc : str
-            Path to the workflow output file.
-        input_format : str
-            Format of the workflow output file.
-        user_input : dict[str, object]
-            User provided parameters for plotting.
-        all_datapoints : pd.DataFrame
-            DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec : int, optional
-            Minimum number of runs an ion has to be identified in (default is 3).
-
-        Returns
-        -------
-        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, float]]
-            A 4-tuple containing:
-              - intermediate_metric_structure (pd.DataFrame)
-              - all_datapoints (pd.DataFrame)
-              - input_df (pd.DataFrame)
-              - timings (dict of step names to elapsed seconds)
-        """
-        return run_benchmarking_with_timing(
-            input_file=input_file_loc,
-            input_format=input_format,
-            user_input=user_input,
-            all_datapoints=all_datapoints,
-            parse_settings_dir=self.parse_settings_dir,
-            module_id=self.module_id,
-            precursor_column_name=self.precursor_column_name,
-            default_cutoff_min_prec=default_cutoff_min_prec,
-            add_datapoint_func=self.add_current_data_point,
-        )
-
     def get_plot_generator(self):
-        return super().get_plot_generator()
         return super().get_plot_generator()

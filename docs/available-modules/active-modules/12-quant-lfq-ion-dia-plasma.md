@@ -80,14 +80,14 @@ Contaminant sequences flagged with the prefix "Cont_" in the FASTA file are remo
 
 Quantification values are log2-transformed, and the mean signal per condition is calculated with standard deviation and coefficient of variation (CV). For each precursor ion, the difference between the mean(log2) in condition A and condition B is compared to its expected value (epsilon).
 
-### Main plot dimensions:
+### Main plot dimensions
 
 - **X-axis**: absolute log2 fold-change error for spike-ins (YEAST + ECOLI), displayed as Median or Mean
 - **Y-axis**: number of quantified spike-in precursor ions
 - **Dot size**: dynamic range of HUMAN plasma precursors (mean of condition-wise log10 90th-10th percentile spread)
 - **Dot opacity**: HUMAN plasma quantification accuracy (absolute epsilon; darker coloring = better accuracy)
 
-### Calculation modes:
+### Calculation modes
 
 Two error calculation modes are available:
 - **Global**: globally calculated error across all spike-in precursors
@@ -101,7 +101,7 @@ A cutoff slider allows filtering of precursors by the minimum number of runs in 
 
 Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma) if you want to submit your results or when you want to explore the plasma quantification module.
 
-### Input data for private visualization
+### Input data for private visualisation of your benchmark run(s)
 
 The module supports multiple data formats to maximize flexibility. Users can process the data with their preferred DIA analysis tool, as long as one of the supported formats is generated.
 
@@ -113,9 +113,9 @@ The module supports multiple data formats to maximize flexibility. Users can pro
 - FragPipe (DIA-NN Quant)
 - Custom (tab-delimited format)
 
-### Suggested parameters
+#### Suggested parameters
 
-To ensure fair comparison between different processing workflows, we suggest using the parameters listed below:
+To ensure fair comparison between different processing workflows, we suggest using the parameters listed in Table 1:
 
 | Parameter | Value |
 |-----------|-------|
@@ -128,71 +128,6 @@ To ensure fair comparison between different processing workflows, we suggest usi
 | Minimum peptide length | 6-7 residues |
 
 These parameters represent a standardized configuration to evaluate the intrinsic performance of different analysis tools without the confounding effects of non-standard parameter choices.
-
-### Important Tool-specific settings
-
-Detailed instructions and optimal settings for each supported tool are provided below.
-
-#### [DIA-NN](https://github.com/vdemichev/DiaNN)
-
-1. Use the provided FASTA file to generate a spectral library using DIA-NN's library generation mode
-2. Process the raw files using the standard DIA-NN workflow with the recommended DIA settings
-3. Export the results as either `*_report.tsv` or `*_report.parquet` format
-4. The parameter log file `*_report.log.txt` should be collected for public submissions
-
-#### [AlphaDIA](https://github.com/MannLabs/alphadia)
-
-1. Process your DIA raw files with AlphaDIA following the standard workflow
-2. AlphaDIA generates two important output files that must both be uploaded:
-   - `precursors.tsv` - contains precursor-level quantification data in long format
-   - `precursor.matrix.tsv` - contains the quantification matrix
-3. Both files are required for proper parsing
-4. If your AlphaDIA version outputs a different format, you may need to preprocess the files using the [ProteoBench_input_conversion.ipynb](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/ProteoBench_input_conversion.ipynb) Jupyter Notebook
-5. Upload the `log.txt` file for public submissions
-
-#### [Spectronaut](https://biognosys.com/software/spectronaut)
-
-1. Create a spectral library from the provided FASTA using Spectronaut's library generation tools
-2. Process your DIA raw files using DirectDIA or standard Spectronaut DIA analysis workflow
-3. Export results in the BGS Factory Report format: `*_Report.tsv`
-4. Use the Spectronaut setup file `*_Report.setup.txt` for public submission, which contains all analysis parameters
-5. Ensure that your export includes precursor-level quantification data with columns for: modified peptide sequence, charge state, protein IDs, and intensity values
-
-#### [FragPipe (DIA-NN Quant)](https://fragpipe.nesvilab.org/)
-
-1. Load the DIA_SpecLib_Quant workflow
-2. Import your DIA raw files into FragPipe
-3. Assign experimental group information to raw files
-4. Generate or use a spectral library from the provided FASTA
-5. **Important:** Make sure contaminants are not added when you add decoys to the database
-6. Run the analysis and export DIA-NN output `*_report.tsv` file containing precursor-level quantification
-7. For public submissions, provide the `fragpipe.workflow` parameter file that corresponds to your search
-
-**Note:** FragPipe output files concatenate protein identifiers from "Proteins" and "Mapped Proteins" columns to create protein groups.
-
-#### [PEAKS](https://www.bioinfor.com/)
-
-1. Create a new PEAKS project and import your DIA raw files
-2. Configure sample grouping to match your experimental design (Condition A vs. Condition B)
-3. Set up the DIA quantification method with appropriate parameters
-4. Use label-free quantification (LFQ) with Identification Directed Quantification (IDQ) mode
-5. Export results as a text report (`.txt` format) containing precursor-level quantification data
-6. For public submission, upload the settings text file (`.txt`) containing all analysis parameters
-
-#### Custom format
-
-If you do not use a tool that is compatible with ProteoBench, you can upload a tab-delimited table format containing the following columns:
-
-| Column | Description |
-|--------|-------------|
-| Sequence | Peptide sequence without modifications |
-| Modified sequence | Sequence with localised modifications in [ProForma standard](https://www.psidev.info/proforma) format |
-| Proteins | Protein identifiers separated by ";"; must contain species flags (e.g., "_HUMAN", "_YEAST", "_ECOLI") |
-| Charge | Charge state of the precursor ion |
-| A9_G_DIA_nLC_tTOF_R1 ... R6 | Quantitative intensity values for condition A replicates |
-| B9_G_DIA_nLC_tTOF_R1 ... R6 | Quantitative intensity values for condition B replicates |
-
-The table should contain only validated ions and must not include contaminant sequences or non-specific peptides.
 
 ### Submit your run for public usage
 
@@ -208,7 +143,9 @@ To submit your benchmark run publicly:
 
 Once submitted, a GitHub pull request will be automatically generated for tracking and community review. Your workflow output, parameters, and calculated metrics will be stored and made publicly available.
 
-## Tool-specific input files
+Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
+
+Table 2. Overview of input files required for metric calculation and public submission
 
 | Tool | Quantification input | Metadata / parameter file |
 |---|---|---|
@@ -218,6 +155,73 @@ Once submitted, a GitHub pull request will be automatically generated for tracki
 | FragPipe (DIA-NN Quant) | `*_report.tsv` | `fragpipe.workflow` |
 | PEAKS | PEAKS DIA output file (`.txt` format - export as text report) | Settings text file (`.txt`) |
 | Custom | Tab-separated values (`.tsv` or `.csv`) following standard format | Not required |
+
+## Important Tool-specific settings
+
+Detailed instructions and optimal settings for each supported tool are provided below.
+
+### [DIA-NN](https://github.com/vdemichev/DiaNN)
+
+1. Use the provided FASTA file to generate a spectral library using DIA-NN's library generation mode
+2. Process the raw files using the standard DIA-NN workflow with the recommended DIA settings
+3. Export the results as either `*_report.tsv` or `*_report.parquet` format
+4. The parameter log file `*_report.log.txt` should be collected for public submissions
+
+### [AlphaDIA](https://github.com/MannLabs/alphadia)
+
+1. Process your DIA raw files with AlphaDIA following the standard workflow
+2. AlphaDIA generates two important output files that must both be uploaded:
+   - `precursors.tsv` - contains precursor-level quantification data in long format
+   - `precursor.matrix.tsv` - contains the quantification matrix
+3. Both files are required for proper parsing
+4. If your AlphaDIA version outputs a different format, you may need to preprocess the files using the [ProteoBench_input_conversion.ipynb](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/ProteoBench_input_conversion.ipynb) Jupyter Notebook
+5. Upload the `log.txt` file for public submissions
+
+### [Spectronaut](https://biognosys.com/software/spectronaut)
+
+1. Create a spectral library from the provided FASTA using Spectronaut's library generation tools
+2. Process your DIA raw files using DirectDIA or standard Spectronaut DIA analysis workflow
+3. Export results in the BGS Factory Report format: `*_Report.tsv`
+4. Use the Spectronaut setup file `*_Report.setup.txt` for public submission, which contains all analysis parameters
+5. Ensure that your export includes precursor-level quantification data with columns for: modified peptide sequence, charge state, protein IDs, and intensity values
+
+### [FragPipe (DIA-NN Quant)](https://fragpipe.nesvilab.org/)
+
+1. Load the DIA_SpecLib_Quant workflow
+2. Import your DIA raw files into FragPipe
+3. Assign experimental group information to raw files
+4. Generate or use a spectral library from the provided FASTA
+5. **Important:** Make sure contaminants are not added when you add decoys to the database
+6. Run the analysis and export DIA-NN output `*_report.tsv` file containing precursor-level quantification
+7. For public submissions, provide the `fragpipe.workflow` parameter file that corresponds to your search
+
+**Note:** FragPipe output files concatenate protein identifiers from "Proteins" and "Mapped Proteins" columns to create protein groups.
+
+### [PEAKS](https://www.bioinfor.com/)
+
+1. Create a new PEAKS project and import your DIA raw files
+2. Configure sample grouping to match your experimental design (Condition A vs. Condition B)
+3. Set up the DIA quantification method with appropriate parameters
+4. Use label-free quantification (LFQ) with Identification Directed Quantification (IDQ) mode
+5. Export results as a text report (`.txt` format) containing precursor-level quantification data
+6. For public submission, upload the settings text file (`.txt`) containing all analysis parameters
+
+### Custom format
+
+If you do not use a tool that is compatible with ProteoBench, you can upload a tab-delimited table format containing the following columns:
+
+| Column | Description |
+|--------|-------------|
+| Sequence | Peptide sequence without modifications |
+| Modified sequence | Sequence with localised modifications in [ProForma standard](https://www.psidev.info/proforma) format |
+| Proteins | Protein identifiers separated by ";"; must contain species flags (e.g., "_HUMAN", "_YEAST", "_ECOLI") |
+| Charge | Charge state of the precursor ion |
+| A9_G_DIA_nLC_tTOF_R1 ... R6 | Quantitative intensity values for condition A replicates |
+| B9_G_DIA_nLC_tTOF_R1 ... R6 | Quantitative intensity values for condition B replicates |
+
+The table should contain only validated ions and must not include contaminant sequences or non-specific peptides.
+
+## toml file description (work in progress)
 
 ## Result description
 

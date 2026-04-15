@@ -5,7 +5,7 @@ Users can load their data and inspect the results privately. They can also make 
 
 For bulk sample analyses, see [the DIA Astral module](#8-quant-lfq-ion-dia-Astral_2Th).
 
-**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
+**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publicly upload data without replacement of missing values and without manual filtering.**  
 
 ## Data set
 A subset of the Astral (Thermo Fisher) data independent acquisition (DIA) data described by [Bubis et al., 2024](https://www.biorxiv.org/content/10.1101/2024.02.01.578358v2.abstract) was used as a benchmark dataset. Here, only the series containing 240:10 (condition 'A') and 200:50 (condition 'B') ratios were used, encompassing three replicates each.

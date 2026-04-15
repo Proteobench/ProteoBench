@@ -46,6 +46,7 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
+from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
@@ -305,11 +306,15 @@ class QuantModule:
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
         ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(
-            input_df
-        )  # Get quantification data
+        standard_format = parse_settings.convert_to_standard_format(input_df)
+        replicate_to_raw = parse_settings.create_replicate_mapping()
+
+        # Process species information
+        module_settings = load_module_settings(self.parse_settings_dir)
+        standard_format = process_species(standard_format, module_settings)
+
         quant_score = QuantScoresHYE(
-            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            self.precursor_column_name, module_settings.species_expected_ratio, module_settings.species_dict
         )
         intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
 

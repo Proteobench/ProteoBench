@@ -31,12 +31,6 @@
 "B9_G_DIA_nLC_tTOF_R5 Normalized Area" = "Condition_B_Sample_Alpha_05"
 "B9_G_DIA_nLC_tTOF_R6 Normalized Area" = "Condition_B_Sample_Alpha_06"
 
-# TODO: remove [species_mapper] — moved to module_settings.toml
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Sequence"
 "before_aa" = false

@@ -21,6 +21,8 @@ import streamlit as st
 import streamlit_utils
 from plotly import graph_objects as go
 
+from proteobench.io.parsing.new_parse_input import load_module_settings
+
 from ..utils.general import clean_dataframe_for_export
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -87,14 +89,14 @@ def generate_indepth_plots(
         if performance_data is None:
             return None
 
-    # Generate parse settings
-    parse_settings = parsesettingsbuilder.build_parser(user_input["input_format"])
+    # Load module settings for species expected ratios
+    module_settings = load_module_settings(module.parse_settings_dir)
 
     # Generate plots using module's plot generator
     try:
         plots = plot_generator.generate_in_depth_plots(
             performance_data,
-            parse_settings=parse_settings,
+            species_expected_ratio=module_settings.species_expected_ratio,
             metric=metric,
             mode=mode,
             colorblind_mode=colorblind_mode,

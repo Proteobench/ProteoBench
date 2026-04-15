@@ -21,12 +21,6 @@
 "LFQ_Astral_DDA_15min_50ng_Condition_B_REP2" = "Condition_B_Sample_Alpha_02"
 "LFQ_Astral_DDA_15min_50ng_Condition_B_REP3" = "Condition_B_Sample_Alpha_03"
 
-# TODO: remove [species_mapper] — moved to module_settings.toml
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Modified sequence"
 "before_aa" = false

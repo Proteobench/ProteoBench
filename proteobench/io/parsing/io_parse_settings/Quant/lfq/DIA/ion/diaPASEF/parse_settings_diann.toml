@@ -21,12 +21,6 @@
 "ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502" = "Condition_B_Sample_Alpha_02"
 "ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508" = "Condition_B_Sample_Alpha_03"
 
-# TODO: remove [species_mapper] — moved to module_settings.toml
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Sequence"
 "before_aa" = false

@@ -4,6 +4,7 @@ from collections import defaultdict
 import pandas as pd
 import plotly.express as px
 
+from proteobench.io.parsing.new_parse_input import load_module_settings
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
@@ -86,13 +87,12 @@ def make_indepth_plots(hash_vis_dirs, intermediate_hash, filtered_df, module_nam
 
     fig1 = plot_quant.PlotDataPoint.plot_CV_violinplot(results_performance)
 
-    parse_settings = ParseSettingsBuilder(
-        parse_settings_dir="../../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/",
-        module_id="quant_lfq_DDA_ion",
-    ).build_parser(software_name)
+    module_settings = load_module_settings(
+        "../../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/"
+    )
 
     fig2 = plot_quant.PlotDataPoint.plot_fold_change_histogram(
-        results_performance, parse_settings.species_expected_ratio()
+        results_performance, module_settings.species_expected_ratio
     )
 
     return fig1, fig2, matching_file_params, result_df
@@ -130,7 +130,8 @@ def get_plot_dict(hash_vis_dirs, intermediate_hash, df, module_name="DDAQuantIon
         parse_settings = ParseSettingsBuilder(
             parse_settings_dir=MODULE_SETTINGS_DIRS["quant_lfq_DDA_ion"], module_id="quant_lfq_DDA_ion"
         ).build_parser(software_name)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        standard_format = parse_settings.convert_to_standard_format(input_df)
+        replicate_to_raw = parse_settings.create_replicate_mapping()
         runs = replicate_to_raw["A"]
         runs.extend(replicate_to_raw["B"])
 

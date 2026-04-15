@@ -19,6 +19,7 @@ from proteobench.exceptions import (
     ParseSettingsError,
     QuantificationError,
 )
+from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.score.quantscoresHYE import QuantScoresHYE
@@ -66,13 +67,17 @@ def _load_settings(parse_settings_dir: str, module_id: str, input_format: str):
 @handle_benchmarking_error(ConvertStandardFormatError, "Error converting to standard format")
 def _convert_format(parse_settings, input_df: DataFrame):
     """Convert input to standard format."""
-    return parse_settings.convert_to_standard_format(input_df)
+    standard_format = parse_settings.convert_to_standard_format(input_df)
+    replicate_to_raw = parse_settings.create_replicate_mapping()
+    return standard_format, replicate_to_raw
 
 
 @handle_benchmarking_error(QuantificationError, "Error generating quantification scores")
-def _create_quant_scores(precursor_column_name: str, parse_settings):
+def _create_quant_scores(precursor_column_name: str, module_settings):
     """Create quantification scores."""
-    return QuantScoresHYE(precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict())
+    return QuantScoresHYE(
+        precursor_column_name, module_settings.species_expected_ratio, module_settings.species_dict
+    )
 
 
 @handle_benchmarking_error(IntermediateFormatGenerationError, "Error generating intermediate data structure")
@@ -154,8 +159,12 @@ def run_benchmarking(
     # Convert to standard format
     standard_format, replicate_to_raw = _convert_format(parse_settings, input_df)
 
+    # Load module settings and process species
+    module_settings = load_module_settings(parse_settings_dir)
+    standard_format = process_species(standard_format, module_settings)
+
     # Create quantification scores
-    quant_score = _create_quant_scores(precursor_column_name, parse_settings)
+    quant_score = _create_quant_scores(precursor_column_name, module_settings)
 
     # Generate intermediate structure
     intermediate_metric_structure = _generate_intermediate(quant_score, standard_format, replicate_to_raw)
@@ -245,11 +254,16 @@ def run_benchmarking_with_timing(
         )
 
     with time_block("convert_to_standard_format"):
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        standard_format = parse_settings.convert_to_standard_format(input_df)
+        replicate_to_raw = parse_settings.create_replicate_mapping()
+
+    with time_block("process_species"):
+        module_settings = load_module_settings(parse_settings_dir)
+        standard_format = process_species(standard_format, module_settings)
 
     with time_block("instantiate_quant_scores"):
         quant_score = QuantScoresHYE(
-            precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            precursor_column_name, module_settings.species_expected_ratio, module_settings.species_dict
         )
 
     with time_block("generate_intermediate"):

@@ -16,21 +16,25 @@ Central entry point for parsing. Contains:
 
 ## Step-by-step plan
 
-### Phase 1: Create new interfaces (DONE)
+### Phase 1: Create new interfaces -- DONE (commit 9b7cbe39)
 
 - [x] Create `new_parse_input.py` with `ParsedInput`, `parse_input()`
 - [x] Add `ModuleSettings`, `load_module_settings()`, `process_species()`
 - [x] Add `[species_mapper]` to all 9 `module_settings.toml` files
-- [x] Mark `[species_mapper]` in 77 per-tool TOMLs for deletion
+- [x] Mark `[species_mapper]` in 77 per-tool TOMLs with `# TODO: remove` comment
 
-### Phase 2: Remove species processing from `ParseSettingsQuant`
+### Phase 2: Remove species processing from `ParseSettingsQuant` -- DONE
 
-- [ ] Remove `_process_species_information()` call from `convert_to_standard_format()` (step 6)
-- [ ] Remove `_species_dict` and `min_count_multispec` from `ParseSettingsQuant.__init__`
-- [ ] Remove `species_dict()` and `species_expected_ratio()` accessor methods
-- [ ] Update callers of `convert_to_standard_format()` to call `process_species()` separately after
-- [ ] Remove `[species_mapper]` from all 77 per-tool TOMLs
-- [ ] Update tests
+- [x] Remove `_process_species_information()` from `ParseSettingsQuant` and `convert_to_standard_format()`
+- [x] Remove `_species_dict`, `min_count_multispec`, `_species_expected_ratio` from `ParseSettingsQuant.__init__`
+- [x] Remove `species_dict()` and `species_expected_ratio()` accessor methods
+- [x] Reorder pipeline: `_handle_data_format` moved up right after `_fix_colnames`
+- [x] `convert_to_standard_format()` now returns `pd.DataFrame` (not tuple)
+- [x] Renamed `_create_replicate_mapping` to public `create_replicate_mapping`
+- [x] Updated all 11 callers to unpack separately + call `process_species()` + use `ModuleSettings`
+- [x] Updated plot generators to accept `species_expected_ratio` directly (not via `parse_settings`)
+- [x] Removed `[species_mapper]` from all 77 per-tool TOMLs
+- [x] Updated all tests
 
 ### Phase 3: Migrate `run_benchmarking()` to accept `ParsedInput`
 

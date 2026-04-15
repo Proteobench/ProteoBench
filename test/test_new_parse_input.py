@@ -15,7 +15,9 @@ from proteobench.io.parsing.new_parse_input import (
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/quant/quant_lfq_ion_DDA_QExactive")
 PARSE_SETTINGS_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/QExactive")
+    os.path.join(
+        os.path.dirname(__file__), "..", "proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/QExactive"
+    )
 )
 
 

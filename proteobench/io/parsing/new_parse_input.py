@@ -125,9 +125,9 @@ def parse_input(
         Dataclass with standard_format DataFrame and replicate_to_raw mapping.
     """
     input_df = load_input_file(input_file, input_format, input_file_secondary)
-    parse_settings = ParseSettingsBuilder(
-        parse_settings_dir=parse_settings_dir, module_id=module_id
-    ).build_parser(input_format)
+    parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(
+        input_format
+    )
     standard_format = parse_settings.convert_to_standard_format(input_df)
     replicate_to_raw = parse_settings.create_replicate_mapping()
     return ParsedInput(standard_format=standard_format, replicate_to_raw=replicate_to_raw)

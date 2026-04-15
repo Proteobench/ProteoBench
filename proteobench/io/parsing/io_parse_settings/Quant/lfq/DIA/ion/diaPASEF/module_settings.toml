@@ -19,3 +19,34 @@
 [general]
 "min_count_multispec" = 1
 "level" = "ion"
+
+[[samples]]
+raw_file = "ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494"
+sample_name = "Condition_A_Sample_Alpha_01"
+condition = "A"
+
+[[samples]]
+raw_file = "ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500"
+sample_name = "Condition_A_Sample_Alpha_02"
+condition = "A"
+
+[[samples]]
+raw_file = "ttSCP_diaPASEF_Condition_A_Sample_Alpha_03_11506"
+sample_name = "Condition_A_Sample_Alpha_03"
+condition = "A"
+
+[[samples]]
+raw_file = "ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496"
+sample_name = "Condition_B_Sample_Alpha_01"
+condition = "B"
+
+[[samples]]
+raw_file = "ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502"
+sample_name = "Condition_B_Sample_Alpha_02"
+condition = "B"
+
+[[samples]]
+raw_file = "ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508"
+sample_name = "Condition_B_Sample_Alpha_03"
+condition = "B"
+

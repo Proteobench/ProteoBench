@@ -14,3 +14,34 @@
 [general]
 "min_count_multispec" = 1
 "level" = "ion"
+
+[[samples]]
+raw_file = "20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1"
+sample_name = "Condition_A_Sample_1"
+condition = "A"
+
+[[samples]]
+raw_file = "20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2"
+sample_name = "Condition_A_Sample_2"
+condition = "A"
+
+[[samples]]
+raw_file = "20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3"
+sample_name = "Condition_A_Sample_3"
+condition = "A"
+
+[[samples]]
+raw_file = "20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1"
+sample_name = "Condition_B_Sample_1"
+condition = "B"
+
+[[samples]]
+raw_file = "20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2"
+sample_name = "Condition_B_Sample_2"
+condition = "B"
+
+[[samples]]
+raw_file = "20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3"
+sample_name = "Condition_B_Sample_3"
+condition = "B"
+

@@ -19,3 +19,34 @@
 [general]
 "min_count_multispec" = 1
 "level" = "ion"
+
+[[samples]]
+raw_file = "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP1"
+sample_name = "Condition_A_Sample_Alpha_01"
+condition = "A"
+
+[[samples]]
+raw_file = "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP2"
+sample_name = "Condition_A_Sample_Alpha_02"
+condition = "A"
+
+[[samples]]
+raw_file = "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP3"
+sample_name = "Condition_A_Sample_Alpha_03"
+condition = "A"
+
+[[samples]]
+raw_file = "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP1"
+sample_name = "Condition_B_Sample_Alpha_01"
+condition = "B"
+
+[[samples]]
+raw_file = "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP2"
+sample_name = "Condition_B_Sample_Alpha_02"
+condition = "B"
+
+[[samples]]
+raw_file = "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP3"
+sample_name = "Condition_B_Sample_Alpha_03"
+condition = "B"
+

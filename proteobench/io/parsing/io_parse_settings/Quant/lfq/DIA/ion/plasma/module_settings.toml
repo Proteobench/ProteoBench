@@ -19,3 +19,64 @@
 [general]
 "min_count_multispec" = 1
 "level" = "ion"
+
+[[samples]]
+raw_file = "A9_G_DIA_nLC_tTOF_R1"
+sample_name = "Condition_A_Sample_1"
+condition = "A"
+
+[[samples]]
+raw_file = "A9_G_DIA_nLC_tTOF_R2"
+sample_name = "Condition_A_Sample_2"
+condition = "A"
+
+[[samples]]
+raw_file = "A9_G_DIA_nLC_tTOF_R3"
+sample_name = "Condition_A_Sample_3"
+condition = "A"
+
+[[samples]]
+raw_file = "A9_G_DIA_nLC_tTOF_R4"
+sample_name = "Condition_A_Sample_4"
+condition = "A"
+
+[[samples]]
+raw_file = "A9_G_DIA_nLC_tTOF_R5"
+sample_name = "Condition_A_Sample_5"
+condition = "A"
+
+[[samples]]
+raw_file = "A9_G_DIA_nLC_tTOF_R6"
+sample_name = "Condition_A_Sample_6"
+condition = "A"
+
+[[samples]]
+raw_file = "B9_G_DIA_nLC_tTOF_R1"
+sample_name = "Condition_B_Sample_1"
+condition = "B"
+
+[[samples]]
+raw_file = "B9_G_DIA_nLC_tTOF_R2"
+sample_name = "Condition_B_Sample_2"
+condition = "B"
+
+[[samples]]
+raw_file = "B9_G_DIA_nLC_tTOF_R3"
+sample_name = "Condition_B_Sample_3"
+condition = "B"
+
+[[samples]]
+raw_file = "B9_G_DIA_nLC_tTOF_R4"
+sample_name = "Condition_B_Sample_4"
+condition = "B"
+
+[[samples]]
+raw_file = "B9_G_DIA_nLC_tTOF_R5"
+sample_name = "Condition_B_Sample_5"
+condition = "B"
+
+[[samples]]
+raw_file = "B9_G_DIA_nLC_tTOF_R6"
+sample_name = "Condition_B_Sample_6"
+condition = "B"
+

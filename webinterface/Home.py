@@ -139,7 +139,10 @@ class StreamlitPageHome(StreamlitPage):
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Leaderboard section
+        # Sign-in banner + leaderboard section
+        from pages.base_pages.utils.auth import render_signin_banner
+
+        render_signin_banner()
         _render_leaderboard()
 
 

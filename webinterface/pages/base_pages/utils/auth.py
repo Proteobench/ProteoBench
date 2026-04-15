@@ -7,8 +7,8 @@ secrets.toml) and the user chooses to sign in, their identity is stored in
 a cookie and automatically attached to public submissions.
 
 Sign-in is only available on the Home page. Other pages show the signed-in
-user but do not offer sign-in buttons, to avoid redirecting away from work
-in progress.
+user in the Streamlit header bar. Module upload tabs show a reminder banner
+for non-signed-in users.
 """
 
 import logging
@@ -303,32 +303,17 @@ def handle_oauth_callback() -> None:
 # ---------------------------------------------------------------------------
 
 
-def render_auth_status() -> None:
-    """Render the signed-in user indicator in the top-right corner.
-
-    Shows the user's initials/avatar if signed in, or nothing if not.
-    This is displayed on all pages **except** the Home page. It does NOT
-    offer sign-in buttons — sign-in only happens on the Home page.
-    """
-    if not is_auth_configured():
-        return
-
-    _restore_user_from_cookie()
-
-    user = get_current_user()
-    if not user:
-        return
+def _render_user_topright(user: dict, key_suffix: str = "") -> None:
+    """Render the signed-in user popover in the top-right corner."""
+    initials = "".join(w[0].upper() for w in user["name"].split() if w)[:2] or "?"
+    popover_label = f":material/person: {initials}"
 
     _, right_col = st.columns([6, 1])
     with right_col:
-        initials = "".join(w[0].upper() for w in user["name"].split() if w)[:2] or "?"
-        popover_label = f":material/person: {initials}"
-
         with st.popover(popover_label):
             if user["avatar_url"]:
                 st.image(user["avatar_url"], width=48)
             else:
-                initials = "".join(w[0].upper() for w in user["name"].split() if w)[:2] or "?"
                 st.markdown(
                     f'<div style="width:48px;height:48px;border-radius:50%;background:#4169E1;color:white;'
                     f'display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">'
@@ -339,17 +324,46 @@ def render_auth_status() -> None:
             provider_label = "GitHub" if user["provider"] == "github" else "ORCID"
             st.caption(f"Signed in via {provider_label}")
             st.caption(f"ID: `{user['id']}`")
-            if st.button("Sign out", key="auth_sign_out"):
+            if st.button("Sign out", key=f"auth_sign_out{key_suffix}"):
                 sign_out()
                 st.rerun()
 
 
-def render_auth_home() -> None:
-    """Render the sign-in section on the Home page.
+def _render_signin_topright() -> None:
+    """Render a sign-in popover in the top-right corner (Home page only)."""
+    _, right_col = st.columns([6, 1])
+    with right_col:
+        with st.popover("Sign in"):
+            if _is_github_configured():
+                st.link_button("Sign in with GitHub", _github_auth_url())
+            if _is_orcid_configured():
+                st.link_button("Sign in with ORCID", _orcid_auth_url())
 
-    This is the only place where sign-in buttons are shown. After OAuth
-    redirect, the user lands back on the Home page and the callback is
-    handled here.
+
+def render_auth_status() -> None:
+    """Show the signed-in user badge in the Streamlit header bar.
+
+    Displayed on all pages except the Home page. Does not offer sign-in
+    buttons — sign-in only happens on the Home page.
+    """
+    if not is_auth_configured():
+        return
+
+    _restore_user_from_cookie()
+
+    user = get_current_user()
+    if not user:
+        return
+
+    _render_user_topright(user, key_suffix="_module")
+
+
+def render_auth_home() -> None:
+    """Render sign-in handling on the Home page.
+
+    Handles OAuth callbacks and shows the user badge if signed in.
+    Sets a flag for ``render_signin_banner`` if not signed in.
+    Sign-in buttons are shown in the banner above the leaderboard.
     """
     if not is_auth_configured():
         return
@@ -360,46 +374,16 @@ def render_auth_home() -> None:
     user = get_current_user()
 
     if user:
-        _, right_col = st.columns([6, 1])
-        with right_col:
-            initials = "".join(w[0].upper() for w in user["name"].split() if w)[:2] or "?"
-            popover_label = f":material/person: {initials}"
-
-            with st.popover(popover_label):
-                if user["avatar_url"]:
-                    st.image(user["avatar_url"], width=48)
-                else:
-                    initials = "".join(w[0].upper() for w in user["name"].split() if w)[:2] or "?"
-                    st.markdown(
-                        f'<div style="width:48px;height:48px;border-radius:50%;background:#4169E1;color:white;'
-                        f'display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">'
-                        f"{initials}</div>",
-                        unsafe_allow_html=True,
-                    )
-                st.markdown(f"**{user['name']}**")
-                provider_label = "GitHub" if user["provider"] == "github" else "ORCID"
-                st.caption(f"Signed in via {provider_label}")
-                st.caption(f"ID: `{user['id']}`")
-                if st.button("Sign out", key="auth_sign_out_home"):
-                    sign_out()
-                    st.rerun()
+        _render_user_topright(user, key_suffix="_home")
     else:
-        # Sign-in button in the top-right corner
-        _, right_col = st.columns([6, 1])
-        with right_col:
-            with st.popover("Sign in"):
-                if _is_github_configured():
-                    st.link_button("Sign in with GitHub", _github_auth_url())
-                if _is_orcid_configured():
-                    st.link_button("Sign in with ORCID", _orcid_auth_url())
-        # Flag to render encouragement banner after the welcome message
+        _render_signin_topright()
         st.session_state["_auth_show_signin_banner"] = True
 
 
 def render_signin_banner() -> None:
-    """Render the sign-in encouragement banner below the welcome message.
+    """Render the sign-in encouragement banner above the leaderboard.
 
-    Call this after the welcome/preface section on the Home page.
+    Call this right before the leaderboard section on the Home page.
     Only renders if the user is not signed in.
     """
     if not st.session_state.pop("_auth_show_signin_banner", False):
@@ -412,9 +396,29 @@ def render_signin_banner() -> None:
         "\U0001f3c6 Get recognized for your benchmark contributions!</span><br>"
         '<span style="font-size:0.85rem;color:#444;">'
         "Sign in with your GitHub or ORCID account to have your name appear on the "
-        "leaderboard (see below) when you submit benchmark runs. It's optional, but helps "
+        "leaderboard when you submit benchmark runs. It's optional, but helps "
         "the community identify contributors and allows maintainers to direct questions. "
         "Use the <b>Sign in</b> button in the top-right corner to get started."
         "</span></div>",
         unsafe_allow_html=True,
+    )
+
+
+def render_upload_tab_signin_reminder() -> None:
+    """Show a reminder on the upload/submit tab for non-signed-in users.
+
+    Call this at the top of the upload tab (tab 2) in each module.
+    """
+    if not is_auth_configured():
+        return
+
+    _restore_user_from_cookie()
+
+    if get_current_user() is not None:
+        return
+
+    st.info(
+        "You are not signed in. Optionally sign in on the **Home page** using "
+        "GitHub or ORCID to get on the leaderboard!",
+        icon=":material/person_add:",
     )

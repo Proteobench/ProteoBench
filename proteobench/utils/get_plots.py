@@ -4,9 +4,7 @@ from collections import defaultdict
 import pandas as pd
 import plotly.express as px
 
-from proteobench.io.parsing.new_parse_input import load_module_settings
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.new_parse_input import load_module_settings, parse_input
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_lfq_ion_DDA import DDAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModule
@@ -87,9 +85,7 @@ def make_indepth_plots(hash_vis_dirs, intermediate_hash, filtered_df, module_nam
 
     fig1 = plot_quant.PlotDataPoint.plot_CV_violinplot(results_performance)
 
-    module_settings = load_module_settings(
-        "../../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/"
-    )
+    module_settings = load_module_settings("../../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/")
 
     fig2 = plot_quant.PlotDataPoint.plot_fold_change_histogram(
         results_performance, module_settings.species_expected_ratio
@@ -125,15 +121,14 @@ def get_plot_dict(hash_vis_dirs, intermediate_hash, df, module_name="DDAQuantIon
         module_obj = DDAQuantIonModule(token="")
         results_df = module_obj.obtain_all_data_points(all_datapoints=None)
 
-        input_df = load_input_file(matching_file, software_name)
-
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=MODULE_SETTINGS_DIRS["quant_lfq_DDA_ion"], module_id="quant_lfq_DDA_ion"
-        ).build_parser(software_name)
-        standard_format = parse_settings.convert_to_standard_format(input_df)
-        replicate_to_raw = parse_settings.create_replicate_mapping()
-        runs = replicate_to_raw["A"]
-        runs.extend(replicate_to_raw["B"])
+        parsed = parse_input(
+            input_file=matching_file,
+            input_format=software_name,
+            module_id="quant_lfq_DDA_ion",
+            parse_settings_dir=MODULE_SETTINGS_DIRS["quant_lfq_DDA_ion"],
+        )
+        runs = parsed.replicate_to_raw["A"]
+        runs.extend(parsed.replicate_to_raw["B"])
 
         results_performance, all_datapoints, result_df = module_obj.benchmarking(
             matching_file, software_name, user_input=user_config, all_datapoints=[]

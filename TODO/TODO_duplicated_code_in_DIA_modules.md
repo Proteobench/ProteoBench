@@ -56,7 +56,11 @@ class DIAQuantIonModulePlasma(QuantModule):
     datapoint_class = QuantDatapointPYE
 ```
 
-### Step 3: Composition — pipeline logic stays in `benchmarking.py`, base class delegates -- DONE
+### Step 3: Composition — pipeline logic stays in `benchmarking.py`, base class delegates -- PARTIALLY DONE
+
+**Done:** Base class delegates to `run_benchmarking()` with `quant_score_class`/`datapoint_class` params. All subclass overrides deleted.
+
+**Not done:** `run_benchmarking()` still takes `input_file, parse_settings_dir, module_id` and does parsing internally. The target signature (accepting `ParsedInput` + `ModuleSettings` directly) is Phase 3 of `TODO_separate_parsing_benchmarking.md`.
 
 **Design principle**: The pipeline implementation lives in `benchmarking.py` (composition), not in the base class (inheritance). The base class `QuantModule.benchmarking()` is a thin delegation method — it wires up module attributes (`self.parse_settings_dir`, `self.module_id`, etc.) and passes them to `run_benchmarking()`.
 
@@ -127,11 +131,14 @@ All 8 subclass `benchmarking()` overrides are deleted.
 Deleted `benchmarking()` from all 10 subclass files (8 DIA/peptidoform + 2 DDA).
 Also deleted `run_benchmarking_with_timing()` and `benchmarking_2()` (unused).
 
-### Step 5: Drop `input_df` from return value
-Currently `run_benchmarking()` returns `(intermediate, all_datapoints, input_df)`. No caller uses `input_df` — all unpack it as `_`. Remove it:
-```python
-return (intermediate_metric_structure, all_datapoints)
-```
+### Step 5: Drop `input_df` from return value -- NOT DONE
+
+Currently `run_benchmarking()` returns `(intermediate, all_datapoints, input_df)`.
+**Cannot simply remove** — webinterface uses `input_df`:
+- `tab2_upload_results.py:169` stores it in `st.session_state[variables.input_df]`
+- `tab6_submit_results.py:251` copies it for submission
+
+Needs a webinterface migration plan before this can happen.
 
 ## Files to modify
 

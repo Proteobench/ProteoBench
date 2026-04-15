@@ -1,9 +1,12 @@
 """
 Benchmarking functionality for quantification modules.
+
+This module owns the scoring/datapoint pipeline. It receives already-parsed data
+(standard_format + replicate_to_raw) and module settings — it knows nothing about
+file formats, TOML configs, or parse settings.
 """
 
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from functools import partial, wraps
+from functools import wraps
 from typing import Callable, Optional, Tuple, Type
 
 import pandas as pd
@@ -11,17 +14,12 @@ from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
 from proteobench.exceptions import (
-    ConvertStandardFormatError,
     DatapointAppendError,
     DatapointGenerationError,
     IntermediateFormatGenerationError,
-    ParseError,
-    ParseSettingsError,
     QuantificationError,
 )
-from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.new_parse_input import ModuleSettings, process_species
 from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
@@ -50,26 +48,6 @@ def handle_benchmarking_error(error_type: Type[Exception], error_message: str):
         return wrapper
 
     return decorator
-
-
-@handle_benchmarking_error(ParseError, "Error parsing input file")
-def _load_input(input_file: str, input_format: str, input_file_secondary: str = None) -> DataFrame:
-    """Load and parse the input file."""
-    return load_input_file(input_file, input_format, input_file_secondary)
-
-
-@handle_benchmarking_error(ParseSettingsError, "Error parsing settings")
-def _load_settings(parse_settings_dir: str, module_id: str, input_format: str):
-    """Load and parse the settings file."""
-    return ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(input_format)
-
-
-@handle_benchmarking_error(ConvertStandardFormatError, "Error converting to standard format")
-def _convert_format(parse_settings, input_df: DataFrame):
-    """Convert input to standard format."""
-    standard_format = parse_settings.convert_to_standard_format(input_df)
-    replicate_to_raw = parse_settings.create_replicate_mapping()
-    return standard_format, replicate_to_raw
 
 
 @handle_benchmarking_error(QuantificationError, "Error generating quantification scores")
@@ -112,45 +90,42 @@ def _append_datapoint(add_datapoint_func, current_datapoint, all_datapoints):
 
 
 def run_benchmarking(
-    input_file: str,
+    standard_format: pd.DataFrame,
+    replicate_to_raw: dict,
+    module_settings: ModuleSettings,
     input_format: str,
     user_input: dict,
-    all_datapoints: Optional[pd.DataFrame],
-    parse_settings_dir: str,
-    module_id: str,
     precursor_column_name: str,
+    all_datapoints: Optional[pd.DataFrame] = None,
     default_cutoff_min_prec: int = 3,
     add_datapoint_func=None,
-    input_file_secondary: str = None,
     max_nr_observed: int = None,
     quant_score_class=QuantScoresHYE,
     datapoint_class=QuantDatapointHYE,
-) -> Tuple[DataFrame, DataFrame, DataFrame]:
+) -> Tuple[DataFrame, DataFrame]:
     """
-    Run the benchmarking workflow.
+    Run the benchmarking workflow on already-parsed data.
 
     Parameters
     ----------
-    input_file : str
-        Path to the workflow output file.
+    standard_format : pd.DataFrame
+        Parsed and standardized input data (from parse_input()).
+    replicate_to_raw : dict
+        Mapping from conditions to raw file names (from parse_input()).
+    module_settings : ModuleSettings
+        Module-level configuration (species, ratios, thresholds).
     input_format : str
-        Format of the workflow output file.
+        Format of the workflow output file (e.g., "MaxQuant").
     user_input : dict
         User-provided parameters for plotting.
-    all_datapoints : Optional[pd.DataFrame]
-        DataFrame containing all data points from the repo.
-    parse_settings_dir : str
-        Directory containing parse settings.
-    module_id : str
-        Module identifier for configuration.
     precursor_column_name : str
         Name of the precursor column.
+    all_datapoints : Optional[pd.DataFrame]
+        DataFrame containing all data points from the repo.
     default_cutoff_min_prec : int, optional
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
-        Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
-    input_file_secondary : str, optional
-        Path to a secondary input file (used for some formats like AlphaDIA).
+        Function to add the current datapoint to all datapoints.
     max_nr_observed : int, optional
         Maximum number of observed values for datapoint generation.
     quant_score_class : type, optional
@@ -160,20 +135,10 @@ def run_benchmarking(
 
     Returns
     -------
-    Tuple[DataFrame, DataFrame, DataFrame]
-        A tuple containing the intermediate data structure, all data points, and the input DataFrame.
+    Tuple[DataFrame, DataFrame]
+        A tuple containing the intermediate data structure and all data points.
     """
-    # Load and parse input file
-    input_df = _load_input(input_file, input_format, input_file_secondary)
-
-    # Load and parse settings
-    parse_settings = _load_settings(parse_settings_dir, module_id, input_format)
-
-    # Convert to standard format
-    standard_format, replicate_to_raw = _convert_format(parse_settings, input_df)
-
-    # Load module settings and process species
-    module_settings = load_module_settings(parse_settings_dir)
+    # Process species
     standard_format = process_species(standard_format, module_settings)
 
     # Create quantification scores
@@ -199,5 +164,4 @@ def run_benchmarking(
     return (
         intermediate_metric_structure,
         all_datapoints,
-        input_df,
     )

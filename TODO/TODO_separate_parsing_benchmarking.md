@@ -36,20 +36,25 @@ Central entry point for parsing. Contains:
 - [x] Removed `[species_mapper]` from all 77 per-tool TOMLs
 - [x] Updated all tests
 
-### Phase 3: Migrate `run_benchmarking()` to accept `ParsedInput`
+### Phase 3+4: Collapse module overrides + generalize run_benchmarking -- PARTIALLY DONE
 
-- [ ] Change `run_benchmarking()` signature to accept `ParsedInput` + `ModuleSettings` instead of raw file paths, format strings, settings dirs
-- [ ] Have `run_benchmarking()` call `process_species()` and read species config from `ModuleSettings`
-- [ ] Remove `_load_input`, `_load_settings`, `_convert_format` helper functions from `benchmarking.py`
-- [ ] Remove `input_df` from `run_benchmarking()` return value (no caller uses it)
-- [ ] Update `run_benchmarking_with_timing()` similarly
+See `TODO_duplicated_code_in_DIA_modules.md` for details.
 
-### Phase 4: Migrate module classes to use `parse_input()`
+**Done:**
+- [x] Collapsed all 10 `benchmarking()` overrides into base class delegation
+- [x] `run_benchmarking()` accepts `quant_score_class` and `datapoint_class` parameters
+- [x] Base class `QuantModule.benchmarking()` delegates to `run_benchmarking()`
+- [x] Plasma uses class attribute overrides (`QuantScoresPYE`, `QuantDatapointPYE`)
+- [x] Deleted `run_benchmarking_with_timing()` and `benchmarking_2()` (unused)
+- [x] Added 6 direct tests for `run_benchmarking()`
+- [x] Net -964 lines of duplicated code
 
-- [ ] Update `QuantModule.benchmarking()` in `quant_base_module.py` to call `parse_input()` then pass result to `run_benchmarking()`
-- [ ] Collapse the 6 DIA module `benchmarking()` overrides — they duplicate the same pipeline and should delegate to the base class or `run_benchmarking()`
+**Not done:**
+- [ ] Change `run_benchmarking()` signature to accept `ParsedInput` + `ModuleSettings` instead of raw file paths — currently still does parsing internally
+- [ ] Have base class call `parse_input()` then pass result to `run_benchmarking()`
+- [ ] Remove `_load_input`, `_load_settings`, `_convert_format` helpers from `benchmarking.py`
+- [ ] Remove `input_df` from return value — **blocked** by webinterface dependency (`tab2:169`, `tab6:251`)
 - [ ] Update `utils/get_plots.py` to use `parse_input()`
-- [ ] Update tests
 
 ### Phase 5: Cleanup
 

@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 
 from proteobench.datapoint.quant_datapoint import QuantDatapointHYE
+from proteobench.io.parsing.new_parse_input import load_module_settings, parse_input
 from proteobench.modules.quant.benchmarking import run_benchmarking
 from proteobench.score.quantscoresHYE import QuantScoresHYE
 
@@ -35,106 +36,110 @@ USER_INPUT = {
 }
 
 
+@pytest.fixture
+def parsed_input():
+    """Parse MaxQuant test data into standard format."""
+    return parse_input(
+        input_file=os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+        input_format="MaxQuant",
+        module_id="quant_lfq_DDA_ion_QExactive",
+        parse_settings_dir=PARSE_SETTINGS_DIR,
+    )
+
+
+@pytest.fixture
+def module_settings():
+    """Load module settings for QExactive."""
+    return load_module_settings(PARSE_SETTINGS_DIR)
+
+
 class TestRunBenchmarking:
-    def test_returns_three_tuple(self):
-        """Test that run_benchmarking returns (intermediate, all_datapoints, input_df)."""
+    def test_returns_two_tuple(self, parsed_input, module_settings):
+        """Test that run_benchmarking returns (intermediate, all_datapoints)."""
         result = run_benchmarking(
-            input_file=os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+            standard_format=parsed_input.standard_format,
+            replicate_to_raw=parsed_input.replicate_to_raw,
+            module_settings=module_settings,
             input_format="MaxQuant",
             user_input=USER_INPUT,
-            all_datapoints=None,
-            parse_settings_dir=PARSE_SETTINGS_DIR,
-            module_id="quant_lfq_DDA_ion_QExactive",
             precursor_column_name="precursor ion",
         )
-        assert len(result) == 3
-        intermediate, all_datapoints, input_df = result
+        assert len(result) == 2
+        intermediate, all_datapoints = result
         assert isinstance(intermediate, pd.DataFrame)
         assert not intermediate.empty
-        assert isinstance(input_df, pd.DataFrame)
 
-    def test_default_classes_are_hye(self):
+    def test_default_classes_are_hye(self, parsed_input, module_settings):
         """Test that default score/datapoint classes are HYE."""
         result = run_benchmarking(
-            input_file=os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+            standard_format=parsed_input.standard_format,
+            replicate_to_raw=parsed_input.replicate_to_raw,
+            module_settings=module_settings,
             input_format="MaxQuant",
             user_input=USER_INPUT,
-            all_datapoints=None,
-            parse_settings_dir=PARSE_SETTINGS_DIR,
-            module_id="quant_lfq_DDA_ion_QExactive",
             precursor_column_name="precursor ion",
         )
-        # If it returns without error using defaults, HYE classes work
         assert result[0] is not None
 
-    def test_custom_score_class_is_used(self):
+    def test_custom_score_class_is_used(self, parsed_input, module_settings):
         """Test that a custom quant_score_class is actually instantiated."""
         mock_score_class = MagicMock(spec=QuantScoresHYE)
         mock_instance = MagicMock()
         mock_instance.generate_intermediate.return_value = pd.DataFrame({"col": [1]})
         mock_score_class.return_value = mock_instance
 
-        # This should use the mock instead of QuantScoresHYE
         with pytest.raises(Exception):
-            # Will fail at datapoint generation because intermediate is mocked,
-            # but the mock should have been called
             run_benchmarking(
-                input_file=os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+                standard_format=parsed_input.standard_format,
+                replicate_to_raw=parsed_input.replicate_to_raw,
+                module_settings=module_settings,
                 input_format="MaxQuant",
                 user_input=USER_INPUT,
-                all_datapoints=None,
-                parse_settings_dir=PARSE_SETTINGS_DIR,
-                module_id="quant_lfq_DDA_ion_QExactive",
                 precursor_column_name="precursor ion",
                 quant_score_class=mock_score_class,
             )
-        # Verify the custom class was instantiated
         mock_score_class.assert_called_once()
 
-    def test_custom_datapoint_class_is_used(self):
+    def test_custom_datapoint_class_is_used(self, parsed_input, module_settings):
         """Test that a custom datapoint_class is actually called."""
         mock_datapoint_class = MagicMock(spec=QuantDatapointHYE)
         mock_datapoint_class.generate_datapoint.return_value = pd.Series({"test": 1})
 
-        result = run_benchmarking(
-            input_file=os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+        run_benchmarking(
+            standard_format=parsed_input.standard_format,
+            replicate_to_raw=parsed_input.replicate_to_raw,
+            module_settings=module_settings,
             input_format="MaxQuant",
             user_input=USER_INPUT,
-            all_datapoints=None,
-            parse_settings_dir=PARSE_SETTINGS_DIR,
-            module_id="quant_lfq_DDA_ion_QExactive",
             precursor_column_name="precursor ion",
             datapoint_class=mock_datapoint_class,
         )
         mock_datapoint_class.generate_datapoint.assert_called_once()
 
-    def test_add_datapoint_func_called_when_provided(self):
+    def test_add_datapoint_func_called_when_provided(self, parsed_input, module_settings):
         """Test that add_datapoint_func is called when provided."""
         mock_add_func = MagicMock(return_value=pd.DataFrame({"result": [1]}))
 
-        result = run_benchmarking(
-            input_file=os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+        run_benchmarking(
+            standard_format=parsed_input.standard_format,
+            replicate_to_raw=parsed_input.replicate_to_raw,
+            module_settings=module_settings,
             input_format="MaxQuant",
             user_input=USER_INPUT,
-            all_datapoints=None,
-            parse_settings_dir=PARSE_SETTINGS_DIR,
-            module_id="quant_lfq_DDA_ion_QExactive",
             precursor_column_name="precursor ion",
             add_datapoint_func=mock_add_func,
         )
         mock_add_func.assert_called_once()
 
-    def test_add_datapoint_func_not_called_when_none(self):
+    def test_add_datapoint_func_not_called_when_none(self, parsed_input, module_settings):
         """Test that no datapoint append happens when add_datapoint_func is None."""
         result = run_benchmarking(
-            input_file=os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt"),
+            standard_format=parsed_input.standard_format,
+            replicate_to_raw=parsed_input.replicate_to_raw,
+            module_settings=module_settings,
             input_format="MaxQuant",
             user_input=USER_INPUT,
-            all_datapoints=None,
-            parse_settings_dir=PARSE_SETTINGS_DIR,
-            module_id="quant_lfq_DDA_ion_QExactive",
             precursor_column_name="precursor ion",
             add_datapoint_func=None,
         )
-        # all_datapoints should remain None when no add function provided
         assert result[1] is None

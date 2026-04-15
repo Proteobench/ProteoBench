@@ -56,11 +56,7 @@ class DIAQuantIonModulePlasma(QuantModule):
     datapoint_class = QuantDatapointPYE
 ```
 
-### Step 3: Composition — pipeline logic stays in `benchmarking.py`, base class delegates -- PARTIALLY DONE
-
-**Done:** Base class delegates to `run_benchmarking()` with `quant_score_class`/`datapoint_class` params. All subclass overrides deleted.
-
-**Not done:** `run_benchmarking()` still takes `input_file, parse_settings_dir, module_id` and does parsing internally. The target signature (accepting `ParsedInput` + `ModuleSettings` directly) is Phase 3 of `TODO_separate_parsing_benchmarking.md`.
+### Step 3: Composition — pipeline logic stays in `benchmarking.py`, base class delegates -- DONE
 
 **Design principle**: The pipeline implementation lives in `benchmarking.py` (composition), not in the base class (inheritance). The base class `QuantModule.benchmarking()` is a thin delegation method — it wires up module attributes (`self.parse_settings_dir`, `self.module_id`, etc.) and passes them to `run_benchmarking()`.
 
@@ -69,9 +65,9 @@ Generalize `run_benchmarking()` in `benchmarking.py` to accept `ParsedInput`, `M
 New `run_benchmarking()` signature:
 ```python
 def run_benchmarking(
-    standard_format: pd.DataFrame,       # from ParsedInput
-    replicate_to_raw: dict,              # from ParsedInput
-    module_settings: ModuleSettings,     # species config, from load_module_settings()
+    standard_format: pd.DataFrame,  # from ParsedInput
+    replicate_to_raw: dict,  # from ParsedInput
+    module_settings: ModuleSettings,  # species config, from load_module_settings()
     input_format: str,
     user_input: dict,
     precursor_column_name: str,
@@ -105,14 +101,17 @@ class QuantModule:
     quant_score_class = QuantScoresHYE
     datapoint_class = QuantDatapointHYE
 
-    def benchmarking(self, input_file, input_format, ...):
-        parsed = parse_input(input_file, input_format, self.module_id, self.parse_settings_dir, ...)
+    def benchmarking(
+        self, input_file, input_format, user_input, all_datapoints, **kwargs
+    ):
+        parsed = parse_input(
+            input_file, input_format, self.module_id, self.parse_settings_dir
+        )
         module_settings = load_module_settings(self.parse_settings_dir)
         return run_benchmarking(
             standard_format=parsed.standard_format,
             replicate_to_raw=parsed.replicate_to_raw,
             module_settings=module_settings,
-            ...,
             quant_score_class=self.quant_score_class,
             datapoint_class=self.datapoint_class,
         )

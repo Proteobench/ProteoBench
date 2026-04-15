@@ -36,30 +36,28 @@ Central entry point for parsing. Contains:
 - [x] Removed `[species_mapper]` from all 77 per-tool TOMLs
 - [x] Updated all tests
 
-### Phase 3+4: Collapse module overrides + generalize run_benchmarking -- PARTIALLY DONE
+### Phase 3+4: Collapse module overrides + generalize run_benchmarking -- DONE
 
 See `TODO_duplicated_code_in_DIA_modules.md` for details.
 
-**Done:**
 - [x] Collapsed all 10 `benchmarking()` overrides into base class delegation
+- [x] `run_benchmarking()` accepts `standard_format`, `replicate_to_raw`, `ModuleSettings` (no file paths)
 - [x] `run_benchmarking()` accepts `quant_score_class` and `datapoint_class` parameters
-- [x] Base class `QuantModule.benchmarking()` delegates to `run_benchmarking()`
+- [x] Base class `QuantModule.benchmarking()` calls `parse_input()` then delegates to `run_benchmarking()`
 - [x] Plasma uses class attribute overrides (`QuantScoresPYE`, `QuantDatapointPYE`)
 - [x] Deleted `run_benchmarking_with_timing()` and `benchmarking_2()` (unused)
-- [x] Added 6 direct tests for `run_benchmarking()`
+- [x] Removed `_load_input`, `_load_settings`, `_convert_format` parsing helpers from `benchmarking.py`
+- [x] Updated `utils/get_plots.py` to use `parse_input()`
+- [x] Added 6 direct tests for `run_benchmarking()` + 8 tests for `new_parse_input.py`
 - [x] Net -964 lines of duplicated code
 
-**Not done:**
-- [ ] Change `run_benchmarking()` signature to accept `ParsedInput` + `ModuleSettings` instead of raw file paths — currently still does parsing internally
-- [ ] Have base class call `parse_input()` then pass result to `run_benchmarking()`
-- [ ] Remove `_load_input`, `_load_settings`, `_convert_format` helpers from `benchmarking.py`
-- [ ] Remove `input_df` from return value — **blocked** by webinterface dependency (`tab2:169`, `tab6:251`)
-- [ ] Update `utils/get_plots.py` to use `parse_input()`
+**Not done (deferred):**
+- [ ] Remove `input_df` from `benchmarking()` return value — **blocked** by webinterface dependency (`tab2:169`, `tab6:251`). Currently handled with a local `load_input_file` call in the base class with a TODO comment.
 
 ### Phase 5: Cleanup
 
 - [ ] Rename `new_parse_input.py` to `parse_input.py`
-- [ ] Remove unused imports of `load_input_file` and `ParseSettingsBuilder` from module files
+- [ ] Remove `input_df` from `benchmarking()` return — requires webinterface migration
 - [ ] Consider moving `parse_ion.py` sequence utilities (ProForma functions) to their own module
 
 ## Architecture after completion

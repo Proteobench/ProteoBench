@@ -46,6 +46,10 @@ dev = [
   "wget",
   "nox",
   "pytest",
+  "flake8",
+  "flake8-bugbear",
+  "flake8-comprehensions",
+
 ]
 docs = [
   "sphinx",

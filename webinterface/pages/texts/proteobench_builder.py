@@ -1,5 +1,6 @@
 """Streamlit-wide page settings and tools for ProteoBench."""
 
+import functools
 from pathlib import Path
 
 import streamlit as st
@@ -7,6 +8,12 @@ import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
 
 _CSS_PATH = Path(__file__).parent.parent.parent / ".streamlit" / "proteobench.css"
+
+
+@functools.lru_cache(maxsize=1)
+def _read_global_css() -> str:
+    """Read and cache the global CSS file content."""
+    return _CSS_PATH.read_text(encoding="utf-8")
 
 
 def load_global_css():
@@ -18,8 +25,7 @@ def load_global_css():
     this function multiple times per page rerun is safe because Streamlit
     deduplicates identical ``st.markdown`` calls.
     """
-    css = _CSS_PATH.read_text(encoding="utf-8")
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    st.markdown(f"<style>{_read_global_css()}</style>", unsafe_allow_html=True)
 
 
 def proteobench_page_config(page_layout="wide"):
@@ -43,6 +49,9 @@ def proteobench_page_config(page_layout="wide"):
             initial_sidebar_state="expanded",
         )
     except Exception:
+        # st.set_page_config raises an exception when called more than once per
+        # page (e.g. after a hot-reload or when the function is invoked from
+        # both a base class and a page module).  This is expected; ignore it.
         pass
     load_global_css()
 

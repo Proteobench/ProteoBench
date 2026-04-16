@@ -1,5 +1,8 @@
 """
-Module for parsing precursor ion data from various formats.
+Load vendor tool output files into raw DataFrames.
+
+Each ``_load_*`` function handles one tool's output format.
+``load_input_file()`` dispatches to the correct loader based on the format string.
 """
 
 import os
@@ -620,6 +623,29 @@ def _load_quantms(input_csv: str) -> pd.DataFrame:
     return input_data_frame
 
 
+def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Proteome Discoverer output file.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the Proteome Discoverer output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    input_data_frame["Modifications"].fillna("", inplace=True)
+    input_data_frame["proforma"] = input_data_frame.apply(
+        lambda x: aggregate_modification_column(x["Sequence"], x["Modifications"]),
+        axis=1,
+    )
+    return input_data_frame
+
+
 _LOAD_FUNCTIONS = {
     "MaxQuant": _load_maxquant,
     "AlphaPept": _load_alphapept,
@@ -638,4 +664,5 @@ _LOAD_FUNCTIONS = {
     "PEAKS": _load_peaks,
     "quantms": _load_quantms,
     "MetaMorpheus": _load_metamorpheus,
+    "Proteome Discoverer": _load_proteome_discoverer,
 }

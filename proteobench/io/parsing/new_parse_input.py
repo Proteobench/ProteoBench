@@ -13,7 +13,7 @@ from typing import Any, Dict, List
 import pandas as pd
 import toml
 
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.load_input import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
 

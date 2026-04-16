@@ -5,7 +5,7 @@ import pytest
 
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.load_input import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.score.quantscoresHYE import QuantScoresHYE

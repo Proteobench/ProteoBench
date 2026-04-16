@@ -69,6 +69,8 @@ class QuantModule:
         The directory containing parse settings.
     module_id : str
         The module identifier for configuration.
+    branch : str, optional
+        The branch to use for the repository.
     """
 
     quant_score_class = QuantScoresHYE
@@ -331,7 +333,7 @@ class QuantModule:
 
         # TODO: input_df is kept for webinterface compatibility (tab2:169, tab6:251).
         # Remove once webinterface is migrated.
-        from proteobench.io.parsing.parse_ion import load_input_file
+        from proteobench.io.parsing.load_input import load_input_file
 
         input_df = load_input_file(input_file, input_format, input_file_secondary)
         return intermediate, all_datapoints, input_df
@@ -518,6 +520,10 @@ class QuantModule:
             List of paths to parameter files that need to be copied.
         comment : str
             User comment for the submission.
+        extension_input_file : str, optional
+            File extension for the input file, by default ".txt".
+        extension_input_parameter_file : str, optional
+            File extension for the parameter file, by default ".txt".
         input_file_secondary_obj : Any, optional
             File-like object representing a secondary input file (e.g., for AlphaDIA).
         """

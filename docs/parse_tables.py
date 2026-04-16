@@ -1,4 +1,3 @@
-# TODO: Make hook so that this file is automatically updated if the markdown file is updated.
 import re
 
 import pandas as pd

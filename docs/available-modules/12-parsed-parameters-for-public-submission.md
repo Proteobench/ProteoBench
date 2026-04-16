@@ -44,7 +44,9 @@ The parameters that are retrieved from the parameter files are the following:
 | quantification_method    | Quantification method. This applies to software tools that offer different strategies for quantification.                                                                                                                     |
 | protein_inference        | Protein inference method.                                                                                                                                                                                                    |
 | predictors_library       | Library used for the analysis in DIA. With the current module, we do not support experimentally generated libraries, but some software tools allow use of different in-silico-generated libraries.                            |
+| semi_enzymatic           | TRUE if semi-enzymatic digestion is enabled.                                                                                                                                                                                 |
 | scan_window              | Scan window settings.                                                                                                                                                                                                        |
+
 
 ## Tool-specific information
 ### AlphaDIA
@@ -242,6 +244,36 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | scan_window              |      Not parsed       |
 
 \*This may seem incorrect. However, when the setting **PSM FDR** is changed in the GUI, this affects the peptideFdr setting in the mqpar.xml.<br>There does not seem to be a peptide FDR setting in the GUI.
+
+### MetaMorpheus
+*Parsed parameter files: Search task config TOML + version result text file.
+Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/metamorpheus_search_task_config.toml).*
+
+| Parameter                | Parsed value |
+|--------------------------|-------------|
+| software_name            |      MetaMorpheus (fixed)       |
+| software_version         |      Parsed from version result file       |
+| search_engine            |      MetaMorpheus (fixed)       |
+| search_engine_version    |      Not parsed       |
+| ident_fdr_psm            |      Parsed from **QValueThreshold** in CommonParameters       |
+| ident_fdr_peptide        |      Not parsed       |
+| ident_fdr_protein        |      Not parsed       |
+| enable_match_between_runs|      Parsed from **MatchBetweenRuns** in SearchParameters       |
+| precursor_mass_tolerance |      Parsed from **PrecursorMassTolerance** in CommonParameters       |
+| fragment_mass_tolerance  |      Parsed from **ProductMassTolerance** in CommonParameters       |
+| enzyme                   |      Parsed from **Protease** in DigestionParams       |
+| allowed_miscleavages     |      Parsed from **MaxMissedCleavages** in DigestionParams       |
+| min_peptide_length       |      Parsed from **MinPeptideLength** in DigestionParams       |
+| max_peptide_length       |      Parsed from **MaxPeptideLength** in DigestionParams       |
+| fixed_mods               |      Parsed from **ListOfModsFixed**; homogenized from `{name} on {residue}` format       |
+| variable_mods            |      Parsed from **ListOfModsVariable**; homogenized from `{name} on {residue}` format       |
+| max_mods                 |      Parsed from **MaxModsForPeptide** in DigestionParams       |
+| min_precursor_charge     |      Parsed from **MinAssumedChargeState**       |
+| max_precursor_charge     |      Parsed from **MaxAssumedChargeState**       |
+| quantification_method    |      FlashLFQ (fixed)       |
+| protein_inference        |      Parsimony if **DoParsimony** is true       |
+| predictors_library       |      Not parsed       |
+| scan_window              |      Not parsed       |
 
 ### MSAID*
 *Parsed parameter file: experiment_details.csv

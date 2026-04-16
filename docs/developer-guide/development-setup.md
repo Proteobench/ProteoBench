@@ -1,13 +1,40 @@
 ## Development setup
 
-### Local installation
-Install the package aber cloning it locally.
+### Prerequisites
 
-```
+- **Python >= 3.11** is required.
+- Using a **virtual environment** is highly recommended.
+
+### Local installation
+
+Create a virtual environment and install the package after cloning it locally:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install --editable '.[dev]'
 ```
 
-Using a virtual environment is highly recommended.
+### Pre-commit hooks
+
+The repository uses [pre-commit](https://pre-commit.com/) for automated code quality checks. Install the hooks after cloning:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+The following hooks run automatically on each commit:
+- **black** - code formatting
+- **flake8** - linting (checks E9, F63, F7, F82)
+- **numpydoc-validation** - docstring format validation
+- **pre-commit-hooks** - general checks (large files, merge conflicts, YAML validation, etc.)
+
+### Code style
+
+- Code is formatted with [black](https://github.com/psf/black).
+- Docstrings follow the [numpydoc style](https://numpydoc.readthedocs.io/en/latest/format.html).
+- Linting uses flake8 with selective error checks configured in `setup.cfg`.
 
 
 ### Unit tests
@@ -76,6 +103,15 @@ Then browse to http://localhost:8000 to watch the live preview.
   automatically run by
   [GitHub Actions](https://github.com/proteobench/proteobench/actions).
 
+---
+
+> **DOCUMENTATION GAPS**
+>
+> - **Python version requirements**: No minimum Python version is documented. Consider adding supported versions (e.g. Python 3.10+).
+> - **Virtual environment setup**: The page mentions "Using a virtual environment is highly recommended" but does not show how to create one (e.g. `python -m venv .venv` or conda instructions).
+> - **Pre-commit hooks**: The repository has `.pre-commit-config.yaml` but there is no documentation on setting up pre-commit hooks (`pre-commit install`).
+> - **Common development issues**: No guidance on troubleshooting development setup problems (e.g. dependency conflicts, platform-specific issues on Windows/WSL).
+> - **Code style / linting**: No documentation on code formatting expectations (black, flake8, etc.) despite `setup.cfg` containing flake8 configuration.
 
 
 ## Release workflow

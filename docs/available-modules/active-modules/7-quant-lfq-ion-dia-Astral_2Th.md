@@ -3,7 +3,7 @@
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Narrow-window 2 Th, on an Orbitrap Astral (Thermo Fisher Scientific).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
-**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
+**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publicly upload data without replacement of missing values and without manual filtering.**  
 
 We think that this module is more suited to evaluate the impact of (non exhaustive list):
 - search engine identification
@@ -74,7 +74,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from AlphaDIA, DIA-NN, FragPipe, MaxDIA, PEAKS and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from AlphaDIA, DIA-NN, FragPipe, MaxDIA, PEAKS and Spectronaut (see below for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
 `I really want to upload it` will appear to trigger the submission.
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.

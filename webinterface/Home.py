@@ -19,7 +19,7 @@ from UI_utils import (
 @st.dialog("Tool Breakdown", width="large")
 def _show_tool_breakdown(module_title, tool_counts):
     pie_fig = build_tool_pie_chart(module_title, tool_counts)
-    st.plotly_chart(pie_fig, width='stretch')
+    st.plotly_chart(pie_fig, use_container_width=True)
 
 # Path to the index.rst file
 file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
@@ -154,7 +154,7 @@ class StreamlitPageHome(StreamlitPage):
         if bar_fig is not None:
             event = st.plotly_chart(
                 bar_fig,
-                width='stretch',
+                use_container_width=True,
                 on_select="rerun",
                 selection_mode="points",
                 key="submissions_chart",

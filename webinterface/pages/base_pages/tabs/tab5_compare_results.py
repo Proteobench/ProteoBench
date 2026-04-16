@@ -128,7 +128,7 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
     # Display plot with selection enabled
     event_dict = st.plotly_chart(
         fig_metric,
-        width='stretch',
+        use_container_width=True,
         on_select="rerun",
         selection_mode="points",
         key=st.session_state[plot_key],
@@ -363,7 +363,7 @@ def _display_precursor_overlap(
         yaxis_title="Number of Precursors",
         showlegend=True,
     )
-    st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig, use_container_width=True)
 
     # create a merged table for download
     merged_precursors = pd.merge(
@@ -482,7 +482,7 @@ def _display_parameter_differences(
     else:
         if not show_all:
             st.markdown(f"**{len(comparison_df)} parameter(s) differ:**")
-        st.dataframe(comparison_df, width='stretch', hide_index=True)
+        st.dataframe(comparison_df, use_container_width=True, hide_index=True)
 
     # Performance metrics comparison
     st.markdown("#### Performance Metrics Comparison")
@@ -520,7 +520,7 @@ def _display_metrics_comparison(
 
     if metrics_comparison:
         metrics_df = pd.DataFrame(metrics_comparison)
-        st.dataframe(metrics_df, width='stretch', hide_index=True)
+        st.dataframe(metrics_df, use_container_width=True, hide_index=True)
     else:
         st.info("Metrics data not available for comparison.")
 

@@ -1,0 +1,176 @@
+/* ============================================================
+   ProteoBench Global Stylesheet
+   Loaded once per page via proteobench_builder.load_global_css()
+   ============================================================ */
+
+/* ---- Design tokens ---------------------------------------- */
+:root {
+  --pb-primary:        #37475E;
+  --pb-accent:         #4169E1;
+  --pb-accent-warm:    #FF8C00;
+  --pb-bg:             #FFFFFF;
+  --pb-bg-subtle:      #F7F9FC;
+  --pb-border:         rgba(0, 0, 0, 0.08);
+  --pb-shadow-sm:      0 2px 8px rgba(0, 0, 0, 0.06);
+  --pb-shadow-md:      0 4px 16px rgba(0, 0, 0, 0.10);
+  --pb-radius-sm:      6px;
+  --pb-radius-md:      10px;
+  --pb-radius-lg:      14px;
+  --pb-space-xs:       4px;
+  --pb-space-sm:       8px;
+  --pb-space-md:       16px;
+  --pb-space-lg:       24px;
+  --pb-font-sm:        0.85rem;
+  --pb-font-base:      1rem;
+  --pb-font-lg:        1.25rem;
+}
+
+/* ---- Hide built-in Streamlit sidebar nav ------------------ */
+[data-testid="stSidebarNav"] {
+  display: none;
+}
+
+/* ---- Sidebar layout & text wrapping ----------------------- */
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal !important;
+}
+
+[data-testid="stSidebar"] a {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal !important;
+  line-height: 1.4 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="column"] {
+  overflow: visible !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stExpander"] {
+  overflow-wrap: break-word;
+}
+
+/* ---- Stat cards (Home page) ------------------------------- */
+.pb-stat-card {
+  background: #fff;
+  border-radius: var(--pb-radius-md);
+  box-shadow: var(--pb-shadow-md);
+  padding: var(--pb-space-md);
+  text-align: center;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pb-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.pb-stat-card__icon {
+  margin-bottom: var(--pb-space-sm);
+}
+
+.pb-stat-card__icon img {
+  width: 36px;
+  height: 36px;
+}
+
+.pb-stat-card__title {
+  color: var(--pb-primary);
+  font-weight: 600;
+  font-size: var(--pb-font-base);
+  text-align: center;
+}
+
+.pb-stat-card__value {
+  font-size: var(--pb-font-lg);
+  font-weight: 700;
+  margin-top: var(--pb-space-sm);
+  color: var(--pb-primary);
+}
+
+/* ---- Release-stage badges (sidebar) ----------------------- */
+.pb-badge {
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-block;
+  color: white;
+}
+
+.pb-badge--alpha { background-color: #FF8C00; }
+.pb-badge--beta  { background-color: #4169E1; }
+.pb-badge--arch  { background-color: #808080; }
+
+/* ---- Buttons ---------------------------------------------- */
+.stButton > button {
+  border-radius: var(--pb-radius-sm);
+  font-weight: 500;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.stButton > button:hover {
+  box-shadow: var(--pb-shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* ---- Text inputs ------------------------------------------ */
+.stTextInput input,
+.stNumberInput input,
+.stTextArea textarea {
+  border-radius: var(--pb-radius-sm) !important;
+  border-color: var(--pb-border) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stTextInput input:focus,
+.stNumberInput input:focus,
+.stTextArea textarea:focus {
+  border-color: var(--pb-accent) !important;
+  box-shadow: 0 0 0 2px rgba(65, 105, 225, 0.15) !important;
+}
+
+/* ---- Selectbox -------------------------------------------- */
+[data-baseweb="select"] > div:first-child {
+  border-radius: var(--pb-radius-sm) !important;
+  border-color: var(--pb-border) !important;
+}
+
+/* ---- Expanders -------------------------------------------- */
+[data-testid="stExpander"] {
+  border-radius: var(--pb-radius-md) !important;
+  border-color: var(--pb-border) !important;
+}
+
+/* ---- Tabs ------------------------------------------------- */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+  gap: var(--pb-space-xs);
+}
+
+[data-testid="stTabs"] [data-baseweb="tab"] {
+  border-radius: var(--pb-radius-sm) var(--pb-radius-sm) 0 0;
+  font-weight: 500;
+}
+
+/* ---- Plot containers -------------------------------------- */
+[data-testid="stPlotlyChart"] {
+  border-radius: var(--pb-radius-md);
+  overflow: hidden;
+}
+
+/* ---- Links ------------------------------------------------ */
+a {
+  color: var(--pb-accent);
+}
+
+a:hover {
+  text-decoration: underline;
+}

@@ -1,8 +1,25 @@
 """Streamlit-wide page settings and tools for ProteoBench."""
 
+from pathlib import Path
+
 import streamlit as st
 import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
+
+_CSS_PATH = Path(__file__).parent.parent.parent / ".streamlit" / "proteobench.css"
+
+
+def load_global_css():
+    """
+    Inject the ProteoBench global stylesheet into the current page.
+
+    The stylesheet is read from ``.streamlit/proteobench.css`` once and
+    injected as a ``<style>`` block via :func:`streamlit.markdown`.  Calling
+    this function multiple times per page rerun is safe because Streamlit
+    deduplicates identical ``st.markdown`` calls.
+    """
+    css = _CSS_PATH.read_text(encoding="utf-8")
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
 def proteobench_page_config(page_layout="wide"):
@@ -26,7 +43,8 @@ def proteobench_page_config(page_layout="wide"):
             initial_sidebar_state="expanded",
         )
     except Exception:
-        return "Set already"
+        pass
+    load_global_css()
 
 
 def render_links(modules):
@@ -49,17 +67,17 @@ def render_links(modules):
             # Add styled badge based on release stage
             if module.release_stage == "alpha":
                 st.markdown(
-                    '<span style="background-color: #FF8C00; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ALPHA</span>',
+                    '<span class="pb-badge pb-badge--alpha">ALPHA</span>',
                     unsafe_allow_html=True,
                 )
             elif module.release_stage == "beta":
                 st.markdown(
-                    '<span style="background-color: #4169E1; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">BETA</span>',
+                    '<span class="pb-badge pb-badge--beta">BETA</span>',
                     unsafe_allow_html=True,
                 )
             elif module.release_stage == "archived":
                 st.markdown(
-                    '<span style="background-color: #808080; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ARCH</span>',
+                    '<span class="pb-badge pb-badge--arch">ARCH</span>',
                     unsafe_allow_html=True,
                 )
 
@@ -79,39 +97,6 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
 
     texts = WebpageTexts
     all_modules = get_all_modules()
-
-    # Add CSS to prevent sidebar text cutoff
-    st.markdown(
-        """
-        <style>
-        /* Prevent text cutoff in sidebar */
-        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal !important;
-        }
-        
-        /* Ensure sidebar links wrap properly */
-        [data-testid="stSidebar"] a {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal !important;
-            line-height: 1.4 !important;
-        }
-        
-        /* Allow columns in sidebar to wrap content */
-        [data-testid="stSidebar"] [data-testid="column"] {
-            overflow: visible !important;
-        }
-        
-        /* Ensure expander content wraps */
-        [data-testid="stSidebar"] [data-testid="stExpander"] {
-            overflow-wrap: break-word;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
     # Sidebar layout
     with st.sidebar:

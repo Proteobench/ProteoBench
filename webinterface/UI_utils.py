@@ -24,24 +24,12 @@ def get_base64_image(path):
 def stat_box(title, value, icon_path, url=None):
     img_data = get_base64_image(icon_path)
     content = f"""
-    <div style="
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-        padding: 12px;
-        text-align: center;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.2s ease;
-    ">
-        <div style="margin-bottom: 8px;">
-            <img src="data:image/png;base64,{img_data}" alt="icon" style="width: 36px; height: 36px;" />
+    <div class="pb-stat-card">
+        <div class="pb-stat-card__icon">
+            <img src="data:image/png;base64,{img_data}" alt="icon" />
         </div>
-        <div style="color: #37475E; font-weight: 600; font-size: 0.95rem; text-align: center;">{title}</div>
-        <div style="font-size: 1.5rem; font-weight: 700; margin-top: 6px; color: #37475E;">{value}</div>
+        <div class="pb-stat-card__title">{title}</div>
+        <div class="pb-stat-card__value">{value}</div>
     </div>
     """
     if url:

@@ -57,41 +57,6 @@ class StreamlitPageHome(StreamlitPage):
             monthly_uniq_visitors = "not configured"
 
         st.header("ProteoBench Overview")
-        st.markdown(
-            """
-    <style>
-    .stat-card-glass {
-        backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 12px;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        text-align: center;
-    }
-    .stat-card-glass h3 {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-    .stat-card-glass .metric {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin: 0;
-    }
-    .stat-card-glass .icon {
-        font-size: 1.8rem;
-        margin-bottom: 8px;
-    }
-    </style>
-    """,
-            unsafe_allow_html=True,
-        )
-
         # First row
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:

@@ -20,17 +20,6 @@ class BaseUIModule(ABC):
 
         pbb.proteobench_page_config()
 
-        st.markdown(
-            """
-            <style>
-            [data-testid="stSidebarNav"] {
-                display: none;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
         pbb.proteobench_sidebar(current_page=self.page_name)
 
         if self.variables.params_file_dict not in st.session_state.keys():

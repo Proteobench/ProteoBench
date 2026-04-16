@@ -3,12 +3,7 @@ Streamlit UI for the DDA quantification - precursor ions module.
 """
 
 import logging
-import uuid
-from typing import Any, Dict, Type
 
-import pages.texts.proteobench_builder as pbb
-import pandas as pd
-import streamlit as st
 from pages.base import BaseStreamlitUI
 from pages.base_pages.denovo import DeNovoUIObjects
 from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo

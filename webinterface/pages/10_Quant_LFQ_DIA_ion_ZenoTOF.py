@@ -3,10 +3,7 @@ Streamlit UI for the DIA quantification - precursor ions module - ZenoTOF.
 """
 
 import logging
-from typing import Any, Dict, Type
 
-import pages.texts.proteobench_builder as pbb
-import streamlit as st
 from pages.base import BaseStreamlitUI
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DIA_ion_ZenoTOF_variables import (

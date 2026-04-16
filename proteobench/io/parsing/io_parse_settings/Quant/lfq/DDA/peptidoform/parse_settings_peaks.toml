@@ -2,14 +2,6 @@
 "Accession" = "Proteins"
 "Peptide" = "Sequence"
 
-[condition_mapper]
-"Area Sample 1" = "A"
-"Area Sample 2" = "A"
-"Area Sample 3" = "A"
-"Area Sample 4" = "B"
-"Area Sample 5" = "B"
-"Area Sample 6" = "B"
-
 [run_mapper]
 "Area Sample 1" = "Condition_A_Sample_Alpha_01"
 "Area Sample 2" = "Condition_A_Sample_Alpha_02"

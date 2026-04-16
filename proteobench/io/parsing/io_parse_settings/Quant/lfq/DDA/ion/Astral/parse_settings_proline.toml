@@ -4,23 +4,7 @@
 "modifications" = "Modifications"
 "master_quant_peptide_ion_charge" = "Charge"
 
-
-[condition_mapper]
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mgf" = "A"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.mgf" = "A"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.mgf" = "A"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.mgf" = "B"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.mgf" = "B"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.mgf" = "B"
-
-[run_mapper]
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mgf" = "Condition_A_Sample_Alpha_01"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.mgf" = "Condition_A_Sample_Alpha_02"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.mgf" = "Condition_A_Sample_Alpha_03"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.mgf" = "Condition_B_Sample_Alpha_01"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.mgf" = "Condition_B_Sample_Alpha_02"
-"abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.mgf" = "Condition_B_Sample_Alpha_03"
-
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+"run_name_cleanup" = "^abundance_|\\.mgf$"

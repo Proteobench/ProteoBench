@@ -340,3 +340,108 @@ class TestConverterBuilder:
         builder = ConverterBuilder(parse_settings_dir=self.PARSE_SETTINGS_DIR, module_id="quant_lfq_DDA_ion_QExactive")
         assert "MaxQuant" in builder.INPUT_FORMATS
         assert "Sage" in builder.INPUT_FORMATS
+
+
+class TestCleanRunNameExtended:
+    """Tests for extended _clean_run_name() regex."""
+
+    @pytest.fixture
+    def converter(self):
+        """Converter using default regex (no per-tool override)."""
+        settings = {
+            "mapper": {},
+            "condition_mapper": {"file1": "A"},
+            "general": {"decoy_flag": False, "contaminant_flag": "Cont_"},
+        }
+        module = {"general": {"level": "ion"}}
+        return IntermediateFormatConverter(settings, module)
+
+    def test_strips_intensity_suffix(self, converter):
+        """Default regex strips ' Intensity' suffix (FragPipe columns)."""
+        assert (
+            converter._clean_run_name("LFQ_Orbitrap_DDA_Condition_A_01 Intensity") == "LFQ_Orbitrap_DDA_Condition_A_01"
+        )
+
+    def test_strips_normalized_area_suffix(self, converter):
+        """Default regex strips ' Normalized Area' suffix (PEAKS columns)."""
+        assert (
+            converter._clean_run_name("LFQ_Orbitrap_DDA_Condition_A_01 Normalized Area")
+            == "LFQ_Orbitrap_DDA_Condition_A_01"
+        )
+
+    def test_strips_mgf_suffix(self, converter):
+        """Default regex strips '.mgf' suffix (ProlineStudio columns)."""
+        assert converter._clean_run_name("LFQ_Orbitrap_DDA_Condition_A_01.mgf") == "LFQ_Orbitrap_DDA_Condition_A_01"
+
+    def test_strips_mzml_suffix(self, converter):
+        """Default regex still strips '.mzML' suffix (Sage columns)."""
+        assert converter._clean_run_name("LFQ_Orbitrap_DDA_Condition_A_01.mzML") == "LFQ_Orbitrap_DDA_Condition_A_01"
+
+    def test_no_strip_on_plain_name(self, converter):
+        """Plain file names are not changed."""
+        assert converter._clean_run_name("LFQ_Orbitrap_DDA_Condition_A_01") == "LFQ_Orbitrap_DDA_Condition_A_01"
+
+
+class TestTier3ConditionMapper:
+    """Tests for run_mapper + [[samples]] two-step condition_mapper resolution (Tier 3)."""
+
+    MOCK_MODULE_WITH_SAMPLES = {
+        "general": {"level": "ion"},
+        "samples": [
+            {"raw_file": "LFQ_file_A_01", "sample_name": "Condition_A_Sample_01", "condition": "A"},
+            {"raw_file": "LFQ_file_A_02", "sample_name": "Condition_A_Sample_02", "condition": "A"},
+            {"raw_file": "LFQ_file_B_01", "sample_name": "Condition_B_Sample_01", "condition": "B"},
+        ],
+    }
+
+    def test_wombat_style_run_mapper_builds_condition_mapper(self):
+        """When condition_mapper absent but run_mapper present, two-step lookup builds it."""
+        settings = {
+            "mapper": {"protein_group": "Proteins", "modified_peptide": "Sequence"},
+            "run_mapper": {
+                "abundance_A_1": "Condition_A_Sample_01",
+                "abundance_A_2": "Condition_A_Sample_02",
+                "abundance_B_1": "Condition_B_Sample_01",
+            },
+            "general": {"decoy_flag": True, "contaminant_flag": "Cont_"},
+        }
+        converter = IntermediateFormatConverter(settings, self.MOCK_MODULE_WITH_SAMPLES)
+        assert converter.condition_mapper["abundance_A_1"] == "A"
+        assert converter.condition_mapper["abundance_A_2"] == "A"
+        assert converter.condition_mapper["abundance_B_1"] == "B"
+
+    def test_proteome_discoverer_style_run_mapper(self):
+        """Proteome Discoverer long column names map to conditions via run_mapper."""
+        settings = {
+            "mapper": {"Protein Accessions": "Proteins"},
+            "run_mapper": {
+                "Abundances (Normalized): F1: Sample, ConditionA": "Condition_A_Sample_01",
+                "Abundances (Normalized): F4: Sample, ConditionB": "Condition_B_Sample_01",
+            },
+            "general": {"decoy_flag": True, "contaminant_flag": "Cont_"},
+        }
+        converter = IntermediateFormatConverter(settings, self.MOCK_MODULE_WITH_SAMPLES)
+        assert converter.condition_mapper["Abundances (Normalized): F1: Sample, ConditionA"] == "A"
+        assert converter.condition_mapper["Abundances (Normalized): F4: Sample, ConditionB"] == "B"
+
+    def test_condition_mapper_in_toml_takes_priority_over_run_mapper(self):
+        """If both condition_mapper and run_mapper are present, condition_mapper wins."""
+        settings = {
+            "mapper": {},
+            "condition_mapper": {"col_A": "A", "col_B": "B"},
+            "run_mapper": {"col_A": "WrongSample", "col_B": "WrongSample"},
+            "general": {"decoy_flag": False, "contaminant_flag": "Cont_"},
+        }
+        converter = IntermediateFormatConverter(settings, self.MOCK_MODULE_WITH_SAMPLES)
+        assert converter.condition_mapper["col_A"] == "A"
+        assert converter.condition_mapper["col_B"] == "B"
+
+    def test_samples_fallback_when_no_run_mapper(self):
+        """[[samples]] is used directly when neither condition_mapper nor run_mapper present."""
+        settings = {
+            "mapper": {},
+            "general": {"decoy_flag": False, "contaminant_flag": "Cont_"},
+        }
+        converter = IntermediateFormatConverter(settings, self.MOCK_MODULE_WITH_SAMPLES)
+        assert converter.condition_mapper["LFQ_file_A_01"] == "A"
+        assert converter.condition_mapper["LFQ_file_B_01"] == "B"

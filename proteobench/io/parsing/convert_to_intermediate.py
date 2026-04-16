@@ -131,8 +131,16 @@ class IntermediateFormatConverter:
         Initialize the converter with parameters from the TOML files.
 
         The condition_mapper is resolved in this order:
-        1. Per-tool TOML ``[condition_mapper]`` (if present — wide-format tools need this)
-        2. Module-level ``[[samples]]`` from module_settings.toml (long-format tools)
+
+        1. Per-tool TOML ``[condition_mapper]`` (if present — takes priority).
+        2. Per-tool TOML ``[run_mapper]`` + ``[[samples]]`` from module_settings.toml:
+           column_name → sample_name (via run_mapper) → condition (via [[samples]]).
+           Used for tools with completely tool-specific column names (WOMBAT, Proteome
+           Discoverer, PEAKS peptidoform) whose column names cannot be matched to raw
+           file names via regex cleanup alone.
+        3. ``[[samples]]`` from module_settings.toml directly: raw_file → condition.
+           Used for long-format tools and wide-format tools whose column names match
+           bare raw file names (after extension stripping by ``_clean_run_name()``).
 
         Parameters
         ----------
@@ -144,6 +152,15 @@ class IntermediateFormatConverter:
         self.mapper = parse_settings["mapper"]
         if "condition_mapper" in parse_settings:
             self.condition_mapper = parse_settings["condition_mapper"]
+        elif "run_mapper" in parse_settings and "samples" in parse_settings_module:
+            # Tier 3: tool-specific column names → sample_name (run_mapper) → condition ([[samples]])
+            # Used when column names bear no resemblance to raw file names (WOMBAT, Proteome Discoverer, etc.)
+            name_to_condition = {s["sample_name"]: s["condition"] for s in parse_settings_module["samples"]}
+            self.condition_mapper = {
+                col: name_to_condition[name]
+                for col, name in parse_settings["run_mapper"].items()
+                if name in name_to_condition
+            }
         elif "samples" in parse_settings_module:
             self.condition_mapper = {s["raw_file"]: s["condition"] for s in parse_settings_module["samples"]}
         else:
@@ -165,8 +182,12 @@ class IntermediateFormatConverter:
                     f"Please fix the pattern in the TOML configuration. Details: {exc}"
                 ) from exc
         else:
-            # Default: strip common MS file extensions and known suffixes
-            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
+            # Default: strip common MS file extensions and tool-added column suffixes.
+            # Covers: standard MS extensions, FragPipe ` Intensity`, PEAKS ` Normalized Area`,
+            # Proline `.mgf`, and FragPipe DIA-NN `_uncalibrated` (see #827).
+            self._run_name_cleanup = re.compile(
+                r"(?:\.mzML\.gz|\.mzML|\.mgf|\.raw|\.RAW|\.d|\.wiff|_uncalibrated| Intensity| Normalized Area)$"
+            )
 
         # Normalize the condition_mapper keys using the same cleanup
         # so that keys like "file.mzML" and column names like "file.mzML" both

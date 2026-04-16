@@ -3,22 +3,6 @@
 "Protein" = "Proteins" # For FragPipe outputs, we combine the values in "Proteins" and "Mapped Proteins"
 "Charge" = "Charge"
 
-[condition_mapper]
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 Intensity" = "A"
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 Intensity" = "A"
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 Intensity" = "A"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 Intensity" = "B"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 Intensity" = "B"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 Intensity" = "B"
-
-[run_mapper]
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 Intensity" = "Condition_A_Sample_Alpha_01"
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 Intensity" = "Condition_A_Sample_Alpha_02"
-"LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 Intensity" = "Condition_A_Sample_Alpha_03"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 Intensity" = "Condition_B_Sample_Alpha_01"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 Intensity" = "Condition_B_Sample_Alpha_02"
-"LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 Intensity" = "Condition_B_Sample_Alpha_03"
-
 [modifications_parser]
 "parse_column" = "Modified Sequence"
 "before_aa" = false

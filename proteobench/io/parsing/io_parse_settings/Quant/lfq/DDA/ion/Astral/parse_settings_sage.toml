@@ -3,22 +3,6 @@
 "peptide" = "Sequence"
 "charge" = "Charge"
 
-[condition_mapper]
-"LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mzML" = "A"
-"LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.mzML" = "A"
-"LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.mzML" = "A"
-"LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.mzML" = "B"
-"LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.mzML" = "B"
-"LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.mzML" = "B"
-
-[run_mapper]
-"LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.mzML" = "Condition_A_Sample_Alpha_01"
-"LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.mzML" = "Condition_A_Sample_Alpha_02"
-"LFQ_Astral_DDA_15min_50ng_Condition_A_REP3.mzML" = "Condition_A_Sample_Alpha_03"
-"LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.mzML" = "Condition_B_Sample_Alpha_01"
-"LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.mzML" = "Condition_B_Sample_Alpha_02"
-"LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.mzML" = "Condition_B_Sample_Alpha_03"
-
 [modifications_parser]
 "parse_column" = "Sequence"
 "before_aa" = false

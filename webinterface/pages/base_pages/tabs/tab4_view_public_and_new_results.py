@@ -162,9 +162,9 @@ def render_submitted_results_table(
             AgGrid(data, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
         except ImportError:
             st.warning("AgGrid not available, falling back to dataframe", icon="⚠️")
-            st.dataframe(data, width='stretch', hide_index=True, column_config=column_config)
+            st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
     else:
-        st.dataframe(data, width='stretch', hide_index=True, column_config=column_config)
+        st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
 
     # Add download button for the results table
     random_uuid = uuid.uuid4()
@@ -227,7 +227,7 @@ def display_submitted_results(
             hide_annot=plot_params.get("hide_annot", False),
             **plot_params,
         )
-        st.plotly_chart(fig, width='stretch', key=plot_uuid)
+        st.plotly_chart(fig, width="stretch", key=plot_uuid)
     except Exception as e:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
         import traceback

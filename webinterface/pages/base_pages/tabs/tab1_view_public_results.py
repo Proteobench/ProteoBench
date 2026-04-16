@@ -59,10 +59,12 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None
     initialize_uuid_state(slider_id_uuid, default_val_slider)
 
 
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6) -> None:
+def generate_main_slider(
+    slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6
+) -> None:
     """
     Create a slider input.
-    
+
     Parameters
     ----------
     slider_id_uuid : str
@@ -80,10 +82,10 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     slider_key = st.session_state[slider_id_uuid]
 
     default_value = st.session_state.get(slider_key, default_val_slider)
-    
+
     # Generate slider options based on max_nr_observed
     slider_options = list(range(1, max_nr_observed + 1))
-    
+
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
         options=slider_options,
@@ -150,20 +152,22 @@ def display_metric_calc_approach_selector(variables) -> str:
 
 def display_colorblindmode_selector(variables, use_submitted: bool = False) -> str:
     """Display colorblind mode selector toggle.
-    
+
     Parameters
     ----------
     variables : VariablesClass
         Variables object containing selector UUIDs
     use_submitted : bool, optional
         If True, use the submitted selector UUID, by default False
-    
+
     Returns
     -------
     bool
         Current state of the colorblind mode toggle
     """
-    key = variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    key = (
+        variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    )
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
@@ -236,12 +240,9 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
 
     try:
         fig = plot_generator.plot_main_metric(
-            result_df=data, 
-            hide_annot=plot_params.get("hide_annot", False),
-            annotation=annotation,
-            **plot_params
+            result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
         )
-        st.plotly_chart(fig, width='stretch', key=plot_uuid)
+        st.plotly_chart(fig, width="stretch", key=plot_uuid)
     except Exception as e:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
         import traceback
@@ -287,10 +288,10 @@ def render_results_table(
             AgGrid(data, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
         except ImportError:
             st.warning("AgGrid not available, falling back to dataframe", icon="⚠️")
-            st.dataframe(data, width='stretch', hide_index=True, column_config=column_config)
+            st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
     else:
         # Standard dataframe display
-        st.dataframe(data, width='stretch', hide_index=True, column_config=column_config)
+        st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
 
 
 def display_download_section(variables, sort_by: str = "id") -> None:
@@ -368,7 +369,9 @@ def display_download_section(variables, sort_by: str = "id") -> None:
                 icon="⚠️",
             )
     elif selected_hash is not None:
-        st.info("Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️")
+        st.info(
+            "Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️"
+        )
 
 
 def display_existing_results(

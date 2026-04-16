@@ -1,6 +1,9 @@
 [theme]
 base="light"
-#FFFFFF
+primaryColor="#007A78"
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#EEF2F7"
+textColor="#1B2A4A"
 
 [global]
 disableWidgetStateDuplicationWarning = true

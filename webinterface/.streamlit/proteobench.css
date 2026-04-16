@@ -1,33 +1,75 @@
 /* ============================================================
    ProteoBench Global Stylesheet
    Loaded once per page via proteobench_builder.load_global_css()
+
+   Scientific colour theme — inspired by Nature / Cell / PLOS:
+     Navy   (#1B2A4A): authoritative headings & primary text
+     Teal   (#007A78): interactive accent (WCAG AA on white ✓)
+     Slate  (#4A5568): secondary body text
+     Amber  (#D4780A): warm highlight / alpha badge
+     Blue   (#3A6EA5): links / beta badge
    ============================================================ */
 
 /* ---- Design tokens ---------------------------------------- */
 /*
  * Colour contrast notes (WCAG 2.1):
- *   --pb-primary (#37475E) on white:  ~7.2:1  → AAA ✓
- *   --pb-accent  (#4169E1) on white:  ~4.6:1  → AA ✓
+ *   --pb-navy  (#1B2A4A) on white:  ~13.0:1  → AAA ✓
+ *   --pb-teal  (#007A78) on white:  ~4.8:1   → AA  ✓
+ *   --pb-blue  (#3A6EA5) on white:  ~4.6:1   → AA  ✓
  */
 :root {
-  --pb-primary:        #37475E;
-  --pb-accent:         #4169E1;
-  --pb-accent-warm:    #FF8C00;
+  /* Core palette */
+  --pb-navy:           #1B2A4A;   /* headings, primary text        */
+  --pb-teal:           #007A78;   /* primary interactive accent    */
+  --pb-teal-light:     #E0F2F1;   /* teal tint for hover/focus bg  */
+  --pb-blue:           #3A6EA5;   /* links, beta badge             */
+  --pb-blue-light:     #EBF2FA;   /* link hover bg                 */
+  --pb-amber:          #D4780A;   /* warm accent, alpha badge      */
+  --pb-slate:          #4A5568;   /* body text, secondary          */
+  --pb-muted:          #718096;   /* captions, placeholders        */
+
+  /* Surfaces */
   --pb-bg:             #FFFFFF;
-  --pb-bg-subtle:      #F7F9FC;
-  --pb-border:         rgba(0, 0, 0, 0.08);
-  --pb-shadow-sm:      0 2px 8px rgba(0, 0, 0, 0.06);
-  --pb-shadow-md:      0 4px 16px rgba(0, 0, 0, 0.10);
-  --pb-radius-sm:      6px;
-  --pb-radius-md:      10px;
-  --pb-radius-lg:      14px;
+  --pb-bg-subtle:      #F4F7F9;   /* light content panels          */
+  --pb-bg-sidebar:     #EEF2F7;   /* sidebar background            */
+
+  /* Borders */
+  --pb-border:         rgba(27, 42, 74, 0.10);
+  --pb-border-accent:  rgba(0, 122, 120, 0.35);
+
+  /* Shadows */
+  --pb-shadow-sm:      0 1px 4px rgba(27, 42, 74, 0.08);
+  --pb-shadow-md:      0 3px 12px rgba(27, 42, 74, 0.12);
+  --pb-shadow-lg:      0 6px 24px rgba(27, 42, 74, 0.16);
+
+  /* Shape */
+  --pb-radius-sm:      4px;
+  --pb-radius-md:      8px;
+  --pb-radius-lg:      12px;
+
+  /* Spacing */
   --pb-space-xs:       4px;
   --pb-space-sm:       8px;
   --pb-space-md:       16px;
   --pb-space-lg:       24px;
-  --pb-font-sm:        0.85rem;
+
+  /* Typography */
+  --pb-font-sm:        0.82rem;
   --pb-font-base:      1rem;
-  --pb-font-lg:        1.25rem;
+  --pb-font-lg:        1.2rem;
+  --pb-font-heading:   1.05rem;
+  --pb-letter-wide:    0.02em;
+}
+
+/* ---- Global typography ------------------------------------ */
+body,
+[data-testid="stAppViewContainer"] {
+  color: var(--pb-slate);
+}
+
+h1, h2, h3, h4 {
+  color: var(--pb-navy);
+  letter-spacing: var(--pb-letter-wide);
 }
 
 /* ---- Hide built-in Streamlit sidebar nav ------------------ */
@@ -35,11 +77,22 @@
   display: none;
 }
 
-/* ---- Sidebar layout & text wrapping ----------------------- */
+/* ---- Sidebar background & text wrapping ------------------- */
+[data-testid="stSidebar"] {
+  background-color: var(--pb-bg-sidebar) !important;
+}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+  color: var(--pb-navy);
+}
+
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal !important;
+  color: var(--pb-slate);
 }
 
 [data-testid="stSidebar"] a {
@@ -47,6 +100,11 @@
   overflow-wrap: break-word;
   white-space: normal !important;
   line-height: 1.4 !important;
+  color: var(--pb-teal);
+}
+
+[data-testid="stSidebar"] a:hover {
+  color: var(--pb-navy);
 }
 
 [data-testid="stSidebar"] [data-testid="column"] {
@@ -57,11 +115,18 @@
   overflow-wrap: break-word;
 }
 
+/* Search input in sidebar */
+[data-testid="stSidebar"] .stTextInput input {
+  background-color: var(--pb-bg) !important;
+}
+
 /* ---- Stat cards (Home page) ------------------------------- */
 .pb-stat-card {
-  background: #fff;
+  background: var(--pb-bg);
   border-radius: var(--pb-radius-md);
-  box-shadow: var(--pb-shadow-md);
+  border: 1px solid var(--pb-border);
+  border-top: 3px solid var(--pb-teal);
+  box-shadow: var(--pb-shadow-sm);
   padding: var(--pb-space-md);
   text-align: center;
   min-height: 120px;
@@ -69,12 +134,13 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .pb-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--pb-shadow-md);
+  border-top-color: var(--pb-navy);
 }
 
 .pb-stat-card__icon {
@@ -82,44 +148,50 @@
 }
 
 .pb-stat-card__icon img {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
+  opacity: 0.85;
 }
 
 .pb-stat-card__title {
-  color: var(--pb-primary);
+  color: var(--pb-slate);
   font-weight: 600;
-  font-size: var(--pb-font-base);
+  font-size: var(--pb-font-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   text-align: center;
 }
 
 .pb-stat-card__value {
   font-size: var(--pb-font-lg);
   font-weight: 700;
-  margin-top: var(--pb-space-sm);
-  color: var(--pb-primary);
+  margin-top: var(--pb-space-xs);
+  color: var(--pb-teal);
 }
 
 /* ---- Release-stage badges (sidebar) ----------------------- */
 .pb-badge {
-  padding: 2px 5px;
+  padding: 2px 6px;
   border-radius: 3px;
-  font-size: 0.6rem;
-  font-weight: 600;
+  font-size: 0.58rem;
+  font-weight: 700;
   white-space: nowrap;
   display: inline-block;
   color: white;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.pb-badge--alpha { background-color: #FF8C00; }
-.pb-badge--beta  { background-color: #4169E1; }
-.pb-badge--arch  { background-color: #808080; }
+.pb-badge--alpha { background-color: var(--pb-amber); }
+.pb-badge--beta  { background-color: var(--pb-blue);  }
+.pb-badge--arch  { background-color: var(--pb-muted); }
 
 /* ---- Buttons ---------------------------------------------- */
 .stButton > button {
   border-radius: var(--pb-radius-sm);
   font-weight: 500;
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  letter-spacing: 0.01em;
+  transition: box-shadow 0.15s ease, transform 0.1s ease, background-color 0.15s ease;
 }
 
 .stButton > button:hover {
@@ -139,8 +211,8 @@
 .stTextInput input:focus,
 .stNumberInput input:focus,
 .stTextArea textarea:focus {
-  border-color: var(--pb-accent) !important;
-  box-shadow: 0 0 0 2px rgba(65, 105, 225, 0.15) !important;
+  border-color: var(--pb-teal) !important;
+  box-shadow: 0 0 0 2px rgba(0, 122, 120, 0.18) !important;
 }
 
 /* ---- Selectbox -------------------------------------------- */
@@ -155,27 +227,82 @@
   border-color: var(--pb-border) !important;
 }
 
+[data-testid="stExpander"]:hover {
+  border-color: var(--pb-border-accent) !important;
+}
+
 /* ---- Tabs ------------------------------------------------- */
 [data-testid="stTabs"] [data-baseweb="tab-list"] {
   gap: var(--pb-space-xs);
+  border-bottom: 2px solid var(--pb-border);
 }
 
 [data-testid="stTabs"] [data-baseweb="tab"] {
   border-radius: var(--pb-radius-sm) var(--pb-radius-sm) 0 0;
   font-weight: 500;
+  color: var(--pb-slate);
+  letter-spacing: var(--pb-letter-wide);
+}
+
+[data-testid="stTabs"] [aria-selected="true"] {
+  color: var(--pb-teal) !important;
+  font-weight: 600;
+}
+
+/* ---- Data tables ------------------------------------------ */
+[data-testid="stDataFrame"] table,
+[data-testid="stTable"] table {
+  border-collapse: collapse;
+}
+
+[data-testid="stDataFrame"] th,
+[data-testid="stTable"] th {
+  background-color: var(--pb-bg-subtle) !important;
+  color: var(--pb-navy) !important;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-size: var(--pb-font-sm);
 }
 
 /* ---- Plot containers -------------------------------------- */
 [data-testid="stPlotlyChart"] {
   border-radius: var(--pb-radius-md);
   overflow: hidden;
+  border: 1px solid var(--pb-border);
+}
+
+/* ---- Info / warning / success / error boxes --------------- */
+[data-testid="stAlert"] {
+  border-radius: var(--pb-radius-md) !important;
+}
+
+/* ---- Metric widgets --------------------------------------- */
+[data-testid="stMetric"] {
+  background: var(--pb-bg-subtle);
+  border-radius: var(--pb-radius-md);
+  padding: var(--pb-space-sm) var(--pb-space-md);
+  border-left: 3px solid var(--pb-teal);
+}
+
+[data-testid="stMetricLabel"] {
+  color: var(--pb-slate) !important;
+  font-size: var(--pb-font-sm) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[data-testid="stMetricValue"] {
+  color: var(--pb-navy) !important;
+  font-weight: 700;
 }
 
 /* ---- Links ------------------------------------------------ */
 a {
-  color: var(--pb-accent);
+  color: var(--pb-blue);
 }
 
 a:hover {
+  color: var(--pb-teal);
   text-decoration: underline;
 }
+

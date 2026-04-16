@@ -14,7 +14,7 @@ from pages.base_pages.denovo import DeNovoUIObjects
 from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
 from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule
 
 

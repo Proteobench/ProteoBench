@@ -1,4 +1,10 @@
-"""All formats available for the module."""
+"""
+Converters that transform raw vendor DataFrames into the intermediate format.
+
+Contains IntermediateFormatConverter (quant), ModificationConverter, ConverterBuilder,
+and ParseSettingsDeNovo (de novo). The ConverterBuilder reads per-tool TOML configs
+and instantiates the appropriate converter.
+"""
 
 from __future__ import annotations
 
@@ -32,7 +38,7 @@ GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
 GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
 
-class ParseSettingsBuilder:
+class ConverterBuilder:
     """
     Class to build the parser settings for a given input format.
 
@@ -46,7 +52,7 @@ class ParseSettingsBuilder:
 
     def __init__(self, parse_settings_dir: str, module_id: str):
         """
-        Initialize the ParseSettingsBuilder object.
+        Initialize the ConverterBuilder object.
 
         Parameters
         ----------
@@ -102,12 +108,12 @@ class ParseSettingsBuilder:
 
         parser = MODULE_TO_CLASS[self.MODULE_ID](parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
-            parser.add_modification_parser(ParseModificationSettings(parse_settings))
+            parser.add_modification_parser(ModificationConverter(parse_settings))
 
         return parser
 
 
-class ParseSettingsQuant:
+class IntermediateFormatConverter:
     """
     Structure that contains all the parameters used to parse
     the given benchmark run output depending on the software tool used.
@@ -160,7 +166,7 @@ class ParseSettingsQuant:
         self.condition_mapper = {self._clean_run_name(k): v for k, v in self.condition_mapper.items()}
         self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
 
-    def add_modification_parser(self, parser: ParseModificationSettings):
+    def add_modification_parser(self, parser: ModificationConverter):
         """
         Add a modification parser to the settings.
 
@@ -423,7 +429,7 @@ class ParseSettingsQuant:
         return self._format_by_analysis_level(df)
 
 
-class ParseModificationSettings:
+class ModificationConverter:
     """
     Settings for parsing modifications in protein data.
 
@@ -435,7 +441,7 @@ class ParseModificationSettings:
 
     def __init__(self, parse_settings: Dict[str, Any]):
         """
-        Initialize ParseModificationSettings.
+        Initialize ModificationConverter.
 
         Parameters
         ----------
@@ -593,13 +599,13 @@ class ParseSettingsDeNovo:
             # aa_scores = [float(score) for score in aa_scores]
         return aa_scores
 
-    def add_modification_parser(self, parser: ParseModificationSettings):
+    def add_modification_parser(self, parser: ModificationConverter):
         """
         Add a modification parser to the settings.
 
         Parameters
         ----------
-        parser : ParseModificationSettings
+        parser : ModificationConverter
             The modification parser to add.
         """
         self.modification_parser = parser
@@ -795,15 +801,20 @@ class ParseSettingsDeNovo:
 
 
 MODULE_TO_CLASS = {
-    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
-    "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
-    "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
-    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_Astral": IntermediateFormatConverter,
+    "quant_lfq_DDA_ion_QExactive": IntermediateFormatConverter,
+    "quant_lfq_DDA_peptidoform": IntermediateFormatConverter,
+    "quant_lfq_DDA_ion_Astral": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_AIF": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_diaPASEF": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_singlecell": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_Astral": IntermediateFormatConverter,
     "denovo_DDA_HCD": ParseSettingsDeNovo,
-    "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_plasma": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_ZenoTOF": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_plasma": IntermediateFormatConverter,
 }
+
+# Deprecated aliases for backward compatibility during transition
+ParseSettingsQuant = IntermediateFormatConverter
+ParseModificationSettings = ModificationConverter
+ParseSettingsBuilder = ConverterBuilder

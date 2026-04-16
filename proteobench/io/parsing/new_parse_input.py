@@ -14,7 +14,7 @@ import pandas as pd
 import toml
 
 from proteobench.io.parsing.load_input import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
 
 
 @dataclass

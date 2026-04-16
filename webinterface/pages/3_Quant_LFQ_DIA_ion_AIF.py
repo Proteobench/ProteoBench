@@ -12,7 +12,7 @@ from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DIA_ion_AIF_variables import VariablesDIAQuant
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 
 if __name__ == "__main__":

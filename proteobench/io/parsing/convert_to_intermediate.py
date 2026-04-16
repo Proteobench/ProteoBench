@@ -99,7 +99,7 @@ class ConverterBuilder:
 
         Returns
         -------
-        ParseSettings
+        IntermediateFormatConverter
             The parser for the specified input format.
         """
         toml_file = self.PARSE_SETTINGS_FILES[input_format]
@@ -128,7 +128,11 @@ class IntermediateFormatConverter:
 
     def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
         """
-        Initialize the ParseSettings object with the parameters from the TOML files.
+        Initialize the converter with parameters from the TOML files.
+
+        The condition_mapper is resolved in this order:
+        1. Per-tool TOML ``[condition_mapper]`` (if present — wide-format tools need this)
+        2. Module-level ``[[samples]]`` from module_settings.toml (long-format tools)
 
         Parameters
         ----------
@@ -138,8 +142,12 @@ class IntermediateFormatConverter:
             Module-specific settings, typically loaded from a TOML file.
         """
         self.mapper = parse_settings["mapper"]
-        self.condition_mapper = parse_settings["condition_mapper"]
-        self.run_mapper = parse_settings["run_mapper"]
+        if "condition_mapper" in parse_settings:
+            self.condition_mapper = parse_settings["condition_mapper"]
+        elif "samples" in parse_settings_module:
+            self.condition_mapper = {s["raw_file"]: s["condition"] for s in parse_settings_module["samples"]}
+        else:
+            raise ValueError("No condition_mapper found in per-tool TOML or [[samples]] in module_settings.toml")
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
         self.analysis_level = parse_settings_module["general"]["level"]
@@ -160,11 +168,10 @@ class IntermediateFormatConverter:
             # Default: strip common MS file extensions and known suffixes
             self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
 
-        # Normalize the condition_mapper and run_mapper keys using the same cleanup
+        # Normalize the condition_mapper keys using the same cleanup
         # so that keys like "file.mzML" and column names like "file.mzML" both
         # resolve to "file" after cleaning (see #827, #876)
         self.condition_mapper = {self._clean_run_name(k): v for k, v in self.condition_mapper.items()}
-        self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
 
     def add_modification_parser(self, parser: ModificationConverter):
         """

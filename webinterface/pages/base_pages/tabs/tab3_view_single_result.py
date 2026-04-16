@@ -207,7 +207,7 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
                         st.caption(f"Data source: {public_id}")
 
                 # Display plot
-                st.plotly_chart(plots[plot_name], use_container_width=True)
+                st.plotly_chart(plots[plot_name], width='stretch')
 
         # Add separator after each section (except last)
         if section != layout_config[-1] and len(section["plots"]) > 0:

@@ -241,7 +241,7 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
             annotation=annotation,
             **plot_params
         )
-        st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+        st.plotly_chart(fig, width='stretch', key=plot_uuid)
     except Exception as e:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
         import traceback
@@ -287,10 +287,10 @@ def render_results_table(
             AgGrid(data, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
         except ImportError:
             st.warning("AgGrid not available, falling back to dataframe", icon="⚠️")
-            st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
+            st.dataframe(data, width='stretch', hide_index=True, column_config=column_config)
     else:
         # Standard dataframe display
-        st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
+        st.dataframe(data, width='stretch', hide_index=True, column_config=column_config)
 
 
 def display_download_section(variables, sort_by: str = "id") -> None:

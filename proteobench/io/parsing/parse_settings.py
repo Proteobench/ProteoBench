@@ -13,7 +13,7 @@ import pandas as pd
 import toml
 from psm_utils import Peptidoform
 
-from .parse_ion import get_proforma_bracketed
+from .proforma import get_proforma_bracketed
 
 # IMPORTANT: it is defined here, but filled in after defining the classes
 # new classes need to be filled in there too!!!
@@ -493,7 +493,19 @@ class ParseModificationSettings:
 
 
 class ParseSettingsDeNovo:
-    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+    """
+    Parse settings and converter for de novo sequencing tool outputs.
+
+    Parameters
+    ----------
+    parse_settings : Dict[str, Any]
+        Tool-specific settings loaded from TOML.
+    parse_settings_module : Dict[str, Any]
+        Module-level settings loaded from TOML.
+    """
+
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):  # numpydoc ignore=PR01
+        """Initialize with tool-specific and module-level settings."""
         self.mapper = parse_settings["mapper"]
         self.spectrum_id_mapper = parse_settings["spectrum_id_mapper"]
         self.sequence_mapper = parse_settings["sequence_mapper"]
@@ -546,14 +558,18 @@ class ParseSettingsDeNovo:
                 sequence = sequence.replace(key, value)
         return sequence
 
-    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length=False) -> List[float]:
+    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length: bool = False) -> List[float]:
         """
         Format the amino acid scores into a list of float numbers.
 
         Parameters
         ----------
-        aa_scores : List[float]
+        aa_scores : Any
             The input list of scores.
+        peptidoform : Peptidoform
+            The peptidoform object for length correction.
+        fix_aa_length : bool, optional
+            Whether to fix AA score length for collapsed N-term modifications.
 
         Returns
         -------
@@ -578,14 +594,48 @@ class ParseSettingsDeNovo:
         return aa_scores
 
     def add_modification_parser(self, parser: ParseModificationSettings):
+        """
+        Add a modification parser to the settings.
+
+        Parameters
+        ----------
+        parser : ParseModificationSettings
+            The modification parser to add.
+        """
         self.modification_parser = parser
 
     def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
+        """
+        Get peptidoform length including N-terminal modifications.
+
+        Parameters
+        ----------
+        peptidoform : Peptidoform
+            The peptidoform object.
+
+        Returns
+        -------
+        int
+            Length of peptidoform including N-terminal modifications.
+        """
         if peptidoform.properties["n_term"] is None:
             return len(peptidoform)
         return len(peptidoform) + len(peptidoform.properties["n_term"])
 
     def add_features(self, df: pd.DataFrame):
+        """
+        Add PTM and peptide length features to the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with peptidoform columns.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with added feature columns.
+        """
         columns_to_keep_gt = [
             "spectrum_id",
             "peptidoform",
@@ -702,10 +752,10 @@ class ParseSettingsDeNovo:
         else:
             df["proforma"] = df["sequence"]
 
-        def convert_to_peptidoform(proforma):
+        def convert_to_peptidoform(proforma):  # numpydoc ignore=GL08
             try:
                 return Peptidoform(proforma)
-            except:
+            except:  # noqa: E722
                 return None
 
         if "proforma" in df.columns:

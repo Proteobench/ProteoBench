@@ -8,6 +8,7 @@ import pytest
 from proteobench.io.parsing.new_parse_input import (
     ModuleSettings,
     ParsedInput,
+    SampleAnnotation,
     load_module_settings,
     parse_input,
     process_species,
@@ -30,6 +31,36 @@ class TestLoadModuleSettings:
         assert "_YEAST" in ms.species_dict
         assert ms.species_dict["_YEAST"] == "YEAST"
         assert "YEAST" in ms.species_expected_ratio
+
+    def test_loads_samples(self):
+        ms = load_module_settings(PARSE_SETTINGS_DIR)
+        assert len(ms.samples) == 6
+        assert all(isinstance(s, SampleAnnotation) for s in ms.samples)
+        assert ms.samples[0].raw_file == "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"
+        assert ms.samples[0].sample_name == "Condition_A_Sample_Alpha_01"
+        assert ms.samples[0].condition == "A"
+
+    def test_condition_mapper_property(self):
+        ms = load_module_settings(PARSE_SETTINGS_DIR)
+        cm = ms.condition_mapper
+        assert isinstance(cm, dict)
+        assert len(cm) == 6
+        assert cm["LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"] == "A"
+        assert cm["LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"] == "B"
+
+    def test_run_mapper_property(self):
+        ms = load_module_settings(PARSE_SETTINGS_DIR)
+        rm = ms.run_mapper
+        assert isinstance(rm, dict)
+        assert rm["LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"] == "Condition_A_Sample_Alpha_01"
+
+    def test_replicate_to_raw_property(self):
+        ms = load_module_settings(PARSE_SETTINGS_DIR)
+        r2r = ms.replicate_to_raw
+        assert "A" in r2r
+        assert "B" in r2r
+        assert len(r2r["A"]) == 3
+        assert len(r2r["B"]) == 3
 
     def test_loads_singlecell_settings(self):
         singlecell_dir = os.path.abspath(

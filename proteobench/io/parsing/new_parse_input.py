@@ -6,7 +6,8 @@ Provides module-level settings loading and species processing as standalone func
 """
 
 import os
-from dataclasses import dataclass
+from collections import defaultdict
+from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 import pandas as pd
@@ -25,10 +26,31 @@ class ParsedInput:
 
 
 @dataclass
-class ModuleSettings:
-    """Module-level configuration from module_settings.toml.
+class SampleAnnotation:
+    """
+    Single sample in the experimental design.
 
-    Parameters
+    Attributes
+    ----------
+    raw_file : str
+        Raw file name (without tool-specific suffixes or extensions).
+    sample_name : str
+        Human-readable sample name.
+    condition : str
+        Experimental condition (e.g., "A", "B").
+    """
+
+    raw_file: str
+    sample_name: str
+    condition: str
+
+
+@dataclass
+class ModuleSettings:
+    """
+    Module-level configuration from module_settings.toml.
+
+    Attributes
     ----------
     species_dict : Dict[str, str]
         Mapping from protein ID flags to species names (e.g., {"_YEAST": "YEAST"}).
@@ -38,12 +60,54 @@ class ModuleSettings:
         Maximum number of species a protein can match before being filtered.
     analysis_level : str
         Analysis level: "ion" or "peptidoform".
+    samples : List[SampleAnnotation]
+        Experimental design: one entry per sample.
     """
 
     species_dict: Dict[str, str]
     species_expected_ratio: Dict[str, Any]
     min_count_multispec: int
     analysis_level: str
+    samples: List[SampleAnnotation] = field(default_factory=list)
+
+    @property
+    def condition_mapper(self) -> Dict[str, str]:
+        """
+        Map raw file names to conditions.
+
+        Returns
+        -------
+        Dict[str, str]
+            Mapping from raw file name to condition (e.g., {"file1": "A"}).
+        """
+        return {s.raw_file: s.condition for s in self.samples}
+
+    @property
+    def run_mapper(self) -> Dict[str, str]:
+        """
+        Map raw file names to sample names.
+
+        Returns
+        -------
+        Dict[str, str]
+            Mapping from raw file name to sample name.
+        """
+        return {s.raw_file: s.sample_name for s in self.samples}
+
+    @property
+    def replicate_to_raw(self) -> Dict[str, List[str]]:
+        """
+        Map conditions to lists of raw file names.
+
+        Returns
+        -------
+        Dict[str, List[str]]
+            Mapping from condition to list of raw file names.
+        """
+        result = defaultdict(list)
+        for s in self.samples:
+            result[s.condition].append(s.raw_file)
+        return dict(result)
 
 
 def load_module_settings(parse_settings_dir: str) -> ModuleSettings:
@@ -62,11 +126,20 @@ def load_module_settings(parse_settings_dir: str) -> ModuleSettings:
     """
     module_toml_path = os.path.join(parse_settings_dir, "module_settings.toml")
     settings = toml.load(module_toml_path)
+    samples = [
+        SampleAnnotation(
+            raw_file=s["raw_file"],
+            sample_name=s["sample_name"],
+            condition=s["condition"],
+        )
+        for s in settings.get("samples", [])
+    ]
     return ModuleSettings(
         species_dict=settings["species_mapper"],
         species_expected_ratio=settings["species_expected_ratio"],
         min_count_multispec=settings["general"]["min_count_multispec"],
         analysis_level=settings["general"]["level"],
+        samples=samples,
     )
 
 

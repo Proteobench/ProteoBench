@@ -239,7 +239,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 if value is not None:
                     all_metric_values.append(value)
 
-        all_nr_prec = [v2["nr_prec"] for v in result_df["results"] for v2 in v.values()]
+        all_nr_feature = [v2.get("nr_feature", v2.get("nr_prec", 0)) for v in result_df["results"] for v2 in v.values()]
 
         # Add hover text with detailed information for each data point
         hover_texts = []
@@ -317,10 +317,10 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         else:
             layout_xaxis_range = [0, 1]
 
-        if all_nr_prec:
+        if all_nr_feature:
             layout_yaxis_range = [
-                min(all_nr_prec) - min(max(all_nr_prec) * 0.05, 2000),
-                max(all_nr_prec) + min(max(all_nr_prec) * 0.05, 2000),
+                min(all_nr_feature) - min(max(all_nr_feature) * 0.05, 2000),
+                max(all_nr_feature) + min(max(all_nr_feature) * 0.05, 2000),
             ]
         else:
             layout_yaxis_range = [0, 1000]
@@ -359,7 +359,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             fig.add_trace(
                 go.Scatter(
                     x=x_values,
-                    y=tmp_df["nr_prec"].tolist(),
+                    y=tmp_df["nr_feature"].tolist(),
                     mode="markers" if label == "None" else "markers+text",
                     hovertext=tmp_df["hover_text"].tolist(),
                     text=tmp_df[label].tolist() if label != "None" else None,

@@ -84,7 +84,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: pd.DataFrame,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
         max_nr_observed: int = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
@@ -101,7 +101,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
             User provided parameters for plotting.
         all_datapoints : pd.DataFrame
             DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_prec : int
+        default_cutoff_min_feature : int
             Minimum number of runs a precursor ion has to be identified in.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
@@ -119,7 +119,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
             parse_settings_dir=self.parse_settings_dir,
             module_id=self.module_id,
             precursor_column_name=self.precursor_column_name,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
             input_file_secondary=input_file_secondary,
             max_nr_observed=max_nr_observed,

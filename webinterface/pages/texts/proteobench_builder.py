@@ -3,6 +3,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
+from pages.utils.module_registry import MODULE_CATEGORIES
 
 
 def proteobench_page_config(page_layout="wide"):
@@ -131,7 +132,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
         if search_query:
             st.markdown("### Search Results")
             all_filtered = []
-            for category in ["DDA", "DIA", "Archived"]:
+            for category in MODULE_CATEGORIES:
                 all_filtered.extend(filtered_modules[category])
 
             if all_filtered:
@@ -140,14 +141,10 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
                 st.markdown("*No modules match your search.*")
         else:
             # Show normal categorized expanders
-            with st.expander("DDA", expanded=(current_page in [m.label for m in all_modules["DDA"]])):
-                render_links(filtered_modules["DDA"])
-
-            with st.expander("DIA", expanded=(current_page in [m.label for m in all_modules["DIA"]])):
-                render_links(filtered_modules["DIA"])
-
-            with st.expander("Archived", expanded=(current_page in [m.label for m in all_modules["Archived"]])):
-                render_links(filtered_modules["Archived"])
+            # Replace
+            for category in MODULE_CATEGORIES:
+                with st.expander(category, expanded=(current_page in [m.label for m in all_modules[category]])):
+                    render_links(filtered_modules[category])
 
         st.image(proteobench_logo, width=300)
         st.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")

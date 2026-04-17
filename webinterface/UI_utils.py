@@ -192,16 +192,16 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optiona
     Returns
     -------
     Optional[int]
-        The number of monthly visitors (nb_uniq_visitors of last 30 days), or
+        The number of monthly visitors (nb_visits of last 30 days), or
         ``None`` if retrieval/parsing failed.
     """
 
     # data to be sent to api
     data = {
         "module": "API",
-        "method": "VisitsSummary.get",
+        "method": "Actions.getPageTitles",
         "idSite": id_site,
-        "period": "range",
+        "period": "day",
         "date": "last30",
         "format": "json",
         "token_auth": token,
@@ -209,17 +209,17 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optiona
 
     try:
         r = requests.post(url=api_endpoint, data=data)
-        r.raise_for_status()
-        response_data = r.json()
+        json_visits = json.loads(r.text)
+        visits_count = 0
 
-        return int(response_data.get("nb_uniq_visitors", 0))
+        for _, visits in json_visits.items():
+            if len(visits) > 0:
+                for page in visits:
+                    visits_count += page.get("nb_visits", 0)
+        return visits_count
 
-    except requests.RequestException:
-        print("Failed to retrieve monthly visitors from Matomo API")
-        return None
-
-    except (ValueError, KeyError):
-        print("Error parsing Matomo API response")
+    except (requests.RequestException, json.JSONDecodeError, KeyError) as e:
+        logger.warning("Failed to retrieve or parse monthly visitors from Matomo API", exc_info=True)
         return None
 
 

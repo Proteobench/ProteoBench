@@ -21,11 +21,6 @@
 "LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw" = "Condition_B_Sample_Alpha_02"
 "LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw" = "Condition_B_Sample_Alpha_03"
 
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Sequence"
 "before_aa" = false

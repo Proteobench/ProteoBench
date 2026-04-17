@@ -22,11 +22,6 @@
 "LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_B_REP3" = "Condition_B_Sample_Alpha_03"
 
 
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Modified sequence"
 "before_aa" = false

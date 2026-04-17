@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from proteobench.exceptions import DatapointGenerationError
+from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
@@ -77,7 +78,8 @@ class TestSoftwareToolOutputParsing:
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         input_df = load_file(software_tool)
-        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        prepared_df = parse_settings.convert_to_standard_format(input_df)
+        replicate_to_raw = parse_settings.create_replicate_mapping()
 
         assert not prepared_df.empty
         assert replicate_to_raw != {}
@@ -92,11 +94,14 @@ class TestQuantScores:
         parse_settings = parse_settings_builder.build_parser(software_tool)
 
         input_df = load_file(software_tool)
-        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        prepared_df = parse_settings.convert_to_standard_format(input_df)
+        replicate_to_raw = parse_settings.create_replicate_mapping()
 
-        # Get quantification data
+        # Process species and get quantification data
+        module_settings = load_module_settings(PARSE_SETTINGS_DIR)
+        prepared_df = process_species(prepared_df, module_settings)
         quant_score = QuantScoresHYE(
-            "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            "precursor ion", module_settings.species_expected_ratio, module_settings.species_dict
         )
         intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
 

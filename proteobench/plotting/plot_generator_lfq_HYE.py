@@ -16,7 +16,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
     """
 
     def generate_in_depth_plots(
-        self, performance_data: pd.DataFrame, parse_settings: any, **kwargs
+        self, performance_data: pd.DataFrame, species_expected_ratio: dict = None, **kwargs
     ) -> Dict[str, go.Figure]:
         """
         Generate standard LFQ HYE plots.
@@ -25,10 +25,8 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         ----------
         performance_data : pd.DataFrame
             The performance data to plot
-        parse_settings : ParseSettings
-            The parse settings for the module
-        recalculate : bool
-            Whether to recalculate or use cached plots
+        species_expected_ratio : dict
+            Expected ratios per species from module_settings.toml.
         **kwargs : dict
             Additional module-specific parameters
 
@@ -38,9 +36,6 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             Dictionary mapping plot names to plotly figures
         """
         plots = {}
-
-        # Get expected ratios from parse settings
-        species_expected_ratio = parse_settings.species_expected_ratio()
 
         # Generate fold change histogram
         plots["logfc"] = self._plot_fold_change_histogram(performance_data, species_expected_ratio)

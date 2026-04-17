@@ -1,6 +1,7 @@
 import os
 import pytest
 import pandas as pd
+from proteobench.io.parsing.new_parse_input import ModuleSettings, process_species
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder, ParseSettingsQuant
 
 # Test data
@@ -111,7 +112,7 @@ class TestParseSettingsQuant:
             parse_settings_long._validate_and_rename_columns(df_missing)
 
     def test_create_replicate_mapping(self, parse_settings_long, parse_settings_short):
-        replicate_to_raw = parse_settings_long._create_replicate_mapping()
+        replicate_to_raw = parse_settings_long.create_replicate_mapping()
         assert replicate_to_raw == {"A": ["file1"], "B": ["file2"]}
 
     def test_filter_decoys(self, parse_settings_long, parse_settings_short):
@@ -140,7 +141,13 @@ class TestParseSettingsQuant:
 
     def test_process_species_information(self, parse_settings_long, parse_settings_short):
         df = TEST_DATA["long_format"].copy()
-        result = parse_settings_long._process_species_information(df)
+        module_settings = ModuleSettings(
+            species_dict={"_YEAST": "YEAST", "_ECOLI": "ECOLI", "_HUMAN": "HUMAN"},
+            species_expected_ratio={},
+            min_count_multispec=1,
+            analysis_level="ion",
+        )
+        result = process_species(df, module_settings)
         # Should add species columns and filter multi-species
         assert all(species in result.columns for species in EXPECTED_COLUMNS["species"])
         assert "MULTI_SPEC" in result.columns
@@ -190,7 +197,8 @@ class TestParseSettingsQuant:
     def test_convert_to_standard_format_integration(self, parse_settings_long, parse_settings_short):
         # Test with long format
         df_long = TEST_DATA["long_format"].copy()
-        result_df_long, replicate_to_raw = parse_settings_long.convert_to_standard_format(df_long)
+        result_df_long = parse_settings_long.convert_to_standard_format(df_long)
+        replicate_to_raw = parse_settings_long.create_replicate_mapping()
 
         # Test final output structure
         assert isinstance(result_df_long, pd.DataFrame)
@@ -201,8 +209,8 @@ class TestParseSettingsQuant:
         # Test required columns
         assert all(col in result_df_long.columns for col in EXPECTED_COLUMNS["required"])
 
-        # Test species columns
-        assert all(species in result_df_long.columns for species in EXPECTED_COLUMNS["species"])
+        # Species columns are no longer added by convert_to_standard_format
+        # (moved to process_species in new_parse_input.py)
 
         # Test analysis level columns - only if we have the required columns
         if "proforma" in result_df_long.columns and "Charge" in result_df_long.columns:
@@ -215,7 +223,7 @@ class TestParseSettingsQuant:
 
         # Test with short format
         df_short = TEST_DATA["short_format"].copy()
-        result_df_short, _ = parse_settings_short.convert_to_standard_format(df_short)
+        result_df_short = parse_settings_short.convert_to_standard_format(df_short)
 
         # Verify both formats produce the same structure (excluding analysis-specific columns)
         analysis_cols = EXPECTED_COLUMNS["analysis"][MOCK_MODULE_SETTINGS["general"]["level"]]

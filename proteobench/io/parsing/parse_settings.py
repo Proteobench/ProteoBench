@@ -135,11 +135,8 @@ class ParseSettingsQuant:
         self.condition_mapper = parse_settings["condition_mapper"]
         self.run_mapper = parse_settings["run_mapper"]
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
-        self._species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
-        self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
         self.analysis_level = parse_settings_module["general"]["level"]
-        self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
         self.modification_parser = None
 
         # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
@@ -162,28 +159,6 @@ class ParseSettingsQuant:
         # resolve to "file" after cleaning (see #827, #876)
         self.condition_mapper = {self._clean_run_name(k): v for k, v in self.condition_mapper.items()}
         self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
-
-    def species_dict(self) -> Dict[str, str]:
-        """
-        Get the species dictionary.
-
-        Returns
-        -------
-        Dict[str, str]
-            A dictionary of species mappings.
-        """
-        return self._species_dict
-
-    def species_expected_ratio(self) -> float:
-        """
-        Get the expected species ratio.
-
-        Returns
-        -------
-        float
-            The expected ratio of species.
-        """
-        return self._species_expected_ratio
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         """
@@ -283,28 +258,6 @@ class ParseSettingsQuant:
         df_no_contaminants = df[df["contaminant"] == False].copy()
         return df_no_contaminants
 
-    def _process_species_information(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Generate species information from the DataFrame.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Input DataFrame containing protein data.
-
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame with processed species information.
-        """
-        # Process species flags
-        for flag, species in self._species_dict.items():
-            df[species] = df["Proteins"].str.contains(flag)
-
-        # Filter multi-species
-        df["MULTI_SPEC"] = df[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
-        return df[df["MULTI_SPEC"] == False]
-
     def _validate_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Validate and rename columns according to the mapper.
@@ -327,7 +280,7 @@ class ParseSettingsQuant:
         df.rename(columns=self.mapper, inplace=True)
         return df
 
-    def _create_replicate_mapping(self) -> Dict[int, List[str]]:
+    def create_replicate_mapping(self) -> Dict[int, List[str]]:
         """
         Create replicate mapping for the DataFrame.
 
@@ -436,21 +389,19 @@ class ParseSettingsQuant:
         else:
             raise ValueError(f"Analysis level '{self.analysis_level}' not supported.")
 
-    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+    def convert_to_standard_format(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Convert a software tool output into a generic format supported by the module.
 
         Steps:
         1. Validate and rename columns
-        2. Create replicate mapping
-        3. Filter decoys
-        4. Fix column names
+        2. Fix column names (clean run names)
+        3. Handle data format (melt wide to long if needed)
+        4. Filter decoys
         5. Mark contaminants
-        6. Process species information
-        7. Handle data format (long vs short)
-        8. Process modifications if needed
-        9. Filter zero intensities
-        10. Format based on analysis level
+        6. Process modifications if needed
+        7. Filter zero intensities
+        8. Format based on analysis level
 
         Parameters
         ----------
@@ -459,19 +410,17 @@ class ParseSettingsQuant:
 
         Returns
         -------
-        tuple[pd.DataFrame, Dict[int, List[str]]]
-            The converted DataFrame and a dictionary mapping replicates to raw data.
+        pd.DataFrame
+            The converted DataFrame in standard format.
         """
         df = self._validate_and_rename_columns(df)
-        replicate_to_raw = self._create_replicate_mapping()
-        df = self._filter_decoys(df)
         df = self._fix_colnames(df)
+        df = self._handle_data_format(df)
+        df = self._filter_decoys(df)
         df = self._mark_contaminants(df)
-        df = self._process_species_information(df)
         df = self._process_modifications(df)
-        df_melted = self._handle_data_format(df)
-        df_melted = self._filter_zero_intensities(df_melted)
-        return self._format_by_analysis_level(df_melted), replicate_to_raw
+        df = self._filter_zero_intensities(df)
+        return self._format_by_analysis_level(df)
 
 
 class ParseModificationSettings:

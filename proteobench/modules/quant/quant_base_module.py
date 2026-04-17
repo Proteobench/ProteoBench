@@ -46,8 +46,8 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.new_parse_input import load_module_settings, parse_input
+from proteobench.modules.quant.benchmarking import run_benchmarking
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
 from proteobench.score.quantscoresHYE import QuantScoresHYE
@@ -70,6 +70,9 @@ class QuantModule:
     module_id : str
         The module identifier for configuration.
     """
+
+    quant_score_class = QuantScoresHYE
+    datapoint_class = QuantDatapointHYE
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
@@ -300,30 +303,38 @@ class QuantModule:
         tuple[DataFrame, DataFrame, DataFrame]
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
-        # Parse user config
-        input_df = load_input_file(input_file, input_format, input_file_secondary)
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
-        ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(
-            input_df
-        )  # Get quantification data
-        quant_score = QuantScoresHYE(
-            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+        # Parse input file into standard format
+        parsed = parse_input(
+            input_file=input_file,
+            input_format=input_format,
+            module_id=self.module_id,
+            parse_settings_dir=self.parse_settings_dir,
+            input_file_secondary=input_file_secondary,
         )
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        module_settings = load_module_settings(self.parse_settings_dir)
 
-        current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure,
-            input_format,
-            user_input,
+        # Run benchmarking on parsed data
+        intermediate, all_datapoints = run_benchmarking(
+            standard_format=parsed.standard_format,
+            replicate_to_raw=parsed.replicate_to_raw,
+            module_settings=module_settings,
+            input_format=input_format,
+            user_input=user_input,
+            precursor_column_name=self.precursor_column_name,
+            all_datapoints=all_datapoints,
             default_cutoff_min_prec=default_cutoff_min_prec,
+            add_datapoint_func=self.add_current_data_point,
             max_nr_observed=max_nr_observed,
+            quant_score_class=self.quant_score_class,
+            datapoint_class=self.datapoint_class,
         )
 
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
+        # TODO: input_df is kept for webinterface compatibility (tab2:169, tab6:251).
+        # Remove once webinterface is migrated.
+        from proteobench.io.parsing.parse_ion import load_input_file
 
-        return intermediate_metric_structure, all_datapoints, input_df
+        input_df = load_input_file(input_file, input_format, input_file_secondary)
+        return intermediate, all_datapoints, input_df
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """

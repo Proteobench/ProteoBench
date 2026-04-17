@@ -21,11 +21,6 @@
 "abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.mgf" = "Condition_B_Sample_Alpha_02"
 "abundance_LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.mgf" = "Condition_B_Sample_Alpha_03"
 
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true

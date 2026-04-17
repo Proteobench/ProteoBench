@@ -21,6 +21,7 @@ def _show_tool_breakdown(module_title, tool_counts):
     pie_fig = build_tool_pie_chart(module_title, tool_counts)
     st.plotly_chart(pie_fig, use_container_width=True)
 
+
 # Path to the index.rst file
 file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
 fig_path = Path(__file__).resolve().parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
@@ -31,6 +32,8 @@ class StreamlitPageHome(StreamlitPage):
     This class sets up the main page layout for the Streamlit application.
     """
 
+    # overwrites _main_page from StreamlitPage
+    # is called by initializer along sidebar and other setup
     def _main_page(self):
         """
         Set up the main page layout for the Streamlit application.

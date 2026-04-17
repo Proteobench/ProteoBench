@@ -8,6 +8,7 @@ import streamlit as st
 import proteobench
 
 
+# Why does it exist? We only have one Page defined
 class StreamlitPage(ABC):
     """
     Base class for Proteobench online Streamlit web server.

@@ -21,7 +21,7 @@ def summarize_value(val):
 # ── Overview table ─────────────────────────────────────────────────────────────
 st.subheader("Overview")
 
-st.write(st.session_state)
+# st.write(st.session_state)
 
 rows = []
 for key, val in st.session_state.items():

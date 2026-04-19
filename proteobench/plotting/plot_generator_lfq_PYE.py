@@ -857,7 +857,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Group by software to create separate traces (allows colorblind markers)
         software_data = {}
         for idx, row in result_df.iterrows():
-            if default_cutoff_min_prec not in row["results"]:
+            metrics = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            if metrics is None:
                 continue
 
             software = row["software_name"]
@@ -871,8 +872,6 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                     "markers": [],
                     "hover_texts": [],
                 }
-
-            metrics = row["results"][default_cutoff_min_prec]
 
             # Try new mode-specific key first, fall back to legacy key
             x_val = metrics.get(x_metric_key)
@@ -992,6 +991,21 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         fig.update_layout(clickmode="event+select")
 
         return fig
+
+    @staticmethod
+    def _get_metrics_at_cutoff(results: dict, cutoff: int) -> dict | None:
+        """Get metrics for a given cutoff level from results with int or string keys."""
+        if not isinstance(results, dict):
+            return None
+
+        if cutoff in results and isinstance(results[cutoff], dict):
+            return results[cutoff]
+
+        cutoff_str = str(cutoff)
+        if cutoff_str in results and isinstance(results[cutoff_str], dict):
+            return results[cutoff_str]
+
+        return None
 
     def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
         """

@@ -176,9 +176,9 @@ def get_n_modules_proposed(rst_text: str) -> int:
     return status_counts.get("in discussion", 0) + status_counts.get("in development", 0)
 
 
-def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optional[int]:
+def get_monthly_visits(api_endpoint: str, token: str, id_site: int) -> Optional[int]:
     """
-    Gets the monthly visitors count from the Matomo API.
+    Gets the monthly visits count from the Matomo API.
 
     Parameters
     ----------
@@ -192,7 +192,7 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optiona
     Returns
     -------
     Optional[int]
-        The number of monthly visitors (nb_visits of last 30 days), or
+        The number of monthly visits (nb_visits of last 30 days), or
         ``None`` if retrieval/parsing failed.
     """
 
@@ -220,7 +220,7 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optiona
         return visits_count
 
     except (requests.RequestException, json.JSONDecodeError, KeyError):
-        logger.warning("Failed to retrieve or parse monthly visitors from Matomo API", exc_info=True)
+        logger.warning("Failed to retrieve or parse monthly visits from Matomo API", exc_info=True)
         return None
 
 
@@ -254,7 +254,6 @@ def get_module_submission_data() -> Dict[str, Dict[str, int]]:
     ]
 
     def _fetch_tool_breakdown(repo_name: str) -> tuple:
-
         try:
             url = f"https://api.github.com/repos/Proteobench/{repo_name}/tarball/main"
             resp = requests.get(url, headers=headers, timeout=30)

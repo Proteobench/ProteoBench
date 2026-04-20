@@ -19,4 +19,5 @@ MODULE_SETTINGS_DIRS = {
     "denovo_DDA_HCD": (DENOVO_SETTINGS_DIR / "DDA" / "HCD").as_posix(),
     "quant_lfq_DIA_ion_ZenoTOF": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "ZenoTOF").as_posix(),
     "quant_lfq_DIA_ion_plasma": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "plasma").as_posix(),
+    "quant_lfq_DIA_proteingroup_Astral": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "proteingroup" / "Astral").as_posix(),
 }

@@ -14,3 +14,4 @@
 [general]
 "min_count_multispec" = 1
 "level" = "peptidoform"
+"y_axis_title" = "Total number of peptidoforms quantified in the selected number of raw files"

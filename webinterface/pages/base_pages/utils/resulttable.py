@@ -121,7 +121,7 @@ def configure_aggrid(df: pd.DataFrame):
         "abundance_normalization_ions",
         "submission_comments",
     ]
-    result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
+    result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results"]
     technical_cols = [
         "proteobench_version",
         "intermediate_hash",
@@ -148,7 +148,9 @@ def configure_aggrid(df: pd.DataFrame):
     return gb.build()
 
 
-def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.DataFrame:
+def prepare_display_dataframe(
+    df: pd.DataFrame, highlight_id: str | None, feature_name: str = "nr_feature"
+) -> pd.DataFrame:
     """
     Prepares the DataFrame for display, including column filtering, ordering,
     row highlighting, and numeric formatting.
@@ -160,6 +162,9 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
 
     highlight_id : str or None
         The ProteoBench ID to highlight (adds a marker in the 'selected' column).
+
+    feature_name : str, optional
+        The name of the feature count column. Defaults to "nr_feature".
 
     Returns
     -------
@@ -199,7 +204,7 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
             "abundance_normalization_ions",
             "submission_comments",
         ]
-        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
+        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", feature_name, "results"]
         technical_cols = [
             "proteobench_version",
             "intermediate_hash",

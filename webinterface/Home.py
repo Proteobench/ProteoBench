@@ -144,7 +144,7 @@ class StreamlitPageHome(StreamlitPage):
         row3 = st.columns(1)
         with row3[0]:
             st.markdown(
-                stat_box("Monthly unique visitors", monthly_visitors, fig_path / "user.png"),
+                stat_box("Monthly visits", monthly_visitors, fig_path / "user.png"),
                 unsafe_allow_html=True,
             )
 

@@ -208,7 +208,8 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optiona
     }
 
     try:
-        r = requests.post(url=api_endpoint, data=data)
+        r = requests.post(url=api_endpoint, data=data, timeout=10)
+        r.raise_for_status()
         json_visits = json.loads(r.text)
         visits_count = 0
 

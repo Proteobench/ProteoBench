@@ -219,7 +219,7 @@ def get_monthly_visitors(api_endpoint: str, token: str, id_site: int) -> Optiona
                     visits_count += page.get("nb_visits", 0)
         return visits_count
 
-    except (requests.RequestException, json.JSONDecodeError, KeyError) as e:
+    except (requests.RequestException, json.JSONDecodeError, KeyError):
         logger.warning("Failed to retrieve or parse monthly visitors from Matomo API", exc_info=True)
         return None
 

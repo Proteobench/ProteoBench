@@ -3,6 +3,19 @@
 "Peptide" = "Sequence"
 "z" = "Charge"
 
+# PEAKS wide-format columns carry an ``LFQ_`` prefix and three sub-columns per
+# sample. After ``_clean_run_name`` strips the trailing `` Normalized Area``,
+# the cleaned column name still differs from [[samples]].raw_file (which
+# encodes the server-side numeric suffix). This run_mapper bridges the two
+# via sample_name (Tier 2 resolution in IntermediateFormatConverter.__init__).
+[run_mapper]
+"LFQ_ttSCP_diaPASEF_Condition_A_Sample_Alpha_01" = "Condition_A_Sample_Alpha_01"
+"LFQ_ttSCP_diaPASEF_Condition_A_Sample_Alpha_02" = "Condition_A_Sample_Alpha_02"
+"LFQ_ttSCP_diaPASEF_Condition_A_Sample_Alpha_03" = "Condition_A_Sample_Alpha_03"
+"LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_01" = "Condition_B_Sample_Alpha_01"
+"LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_02" = "Condition_B_Sample_Alpha_02"
+"LFQ_ttSCP_diaPASEF_Condition_B_Sample_Alpha_03" = "Condition_B_Sample_Alpha_03"
+
 [modifications_parser]
 "parse_column" = "Sequence"
 "before_aa" = false

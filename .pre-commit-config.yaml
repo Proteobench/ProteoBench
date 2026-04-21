@@ -69,4 +69,4 @@ repos:
     rev: "v1.8.0"
     hooks:
       - id: numpydoc-validation
-        exclude: "test/.*|exceptions.py|noxfile.py|jupyter_notebooks/.*|docs/parse_tables.py|webinterface/.*|modules/denovo/.*"
+        exclude: "test/.*|exceptions.py|noxfile.py|jupyter_notebooks/.*|docs/parse_tables.py|webinterface/.*|modules/denovo/.*|test_data_download/.*"

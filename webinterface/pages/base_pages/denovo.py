@@ -285,7 +285,6 @@ class DeNovoUIObjects(BaseUIModule):
                                 st.caption(descriptions[plot_name])
                             self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
                             # st.plotly_chart(plots[plot_name], use_container_width=True)
-
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
                 import traceback
@@ -315,7 +314,7 @@ class DeNovoUIObjects(BaseUIModule):
                 st.header(mod_label)
                 st.plotly_chart(
                     figs[mod_label],
-                    use_container_width=True,
+                    width="stretch",
                 )
 
     def _display_spectrum_features(self, figs) -> None:

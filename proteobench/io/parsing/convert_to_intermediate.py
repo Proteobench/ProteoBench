@@ -225,19 +225,22 @@ class IntermediateFormatConverter:
             df_filtered = df.copy()
         return df_filtered
 
-    def _clean_run_name(self, name: str) -> str:
+    def _clean_run_name(self, name: str, strip_path: bool = True) -> str:
         """
         Clean a run/file name by removing extensions and known suffixes.
 
-        Strips path prefixes (e.g., ``/path/to/file.mzML`` -> ``file``)
-        and applies the run_name_cleanup regex to remove extensions like
-        ``.raw``, ``.mzML``, ``.mzML.gz``, ``.d``, ``.wiff``, and
-        tool-specific suffixes like ``_uncalibrated`` (FragPipe DIA-NN, see #827).
+        When ``strip_path`` is True, also strips path prefixes
+        (e.g., ``/path/to/file.mzML`` -> ``file``). Path stripping is
+        appropriate for raw-file values and condition_mapper keys, but must
+        be disabled when cleaning DataFrame column names, where ``/`` can
+        appear as part of legitimate metadata (e.g. PEAKS' ``m/z`` column).
 
         Parameters
         ----------
         name : str
             The raw file name or column name to clean.
+        strip_path : bool, optional
+            Whether to apply path-prefix stripping (default True).
 
         Returns
         -------
@@ -246,20 +249,24 @@ class IntermediateFormatConverter:
         """
         if not isinstance(name, str):
             return name
-        # Strip path prefix (some tools include full paths)
-        name = name.replace("\\", "/")
-        if "/" in name:
-            name = name.rsplit("/", 1)[-1]
+        if strip_path:
+            # Strip path prefix (some tools include full paths)
+            name = name.replace("\\", "/")
+            if "/" in name:
+                name = name.rsplit("/", 1)[-1]
         # Apply the cleanup regex
         name = self._run_name_cleanup.sub("", name)
         return name
 
     def _fix_colnames(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Fix column names in the DataFrame by cleaning run names.
+        Fix column names in the DataFrame by applying the cleanup regex.
 
-        Applies run name cleanup (extension stripping, path removal) to all
-        column names so they match the keys in condition_mapper.
+        Strips tool-specific column suffixes (e.g. `` Intensity`` for FragPipe,
+        `` Normalized Area`` for PEAKS) and MS file extensions so that wide-
+        format column names line up with ``condition_mapper`` keys for the
+        subsequent melt. Does not apply path-prefix stripping, which would
+        break metadata column names containing ``/`` (e.g. PEAKS' ``m/z``).
 
         Parameters
         ----------
@@ -271,7 +278,7 @@ class IntermediateFormatConverter:
         pd.DataFrame
             DataFrame with standardized column names.
         """
-        df.columns = [self._clean_run_name(c) for c in df.columns]
+        df.columns = [self._clean_run_name(c, strip_path=False) for c in df.columns]
         return df
 
     def _mark_contaminants(self, df: pd.DataFrame) -> pd.DataFrame:

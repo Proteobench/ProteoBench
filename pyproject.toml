@@ -81,6 +81,11 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["proteobench"]
 
+[tool.pytest.ini_options]
+markers = [
+    "regression: catalog-backed regression harness (opt-in; requires test_data_download/)",
+]
+
 [tool.isort]
 profile = "black"
 

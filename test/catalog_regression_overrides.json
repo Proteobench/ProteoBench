@@ -1,0 +1,52 @@
+{
+  "_doc": "Per-hash baseline overrides for test_catalog_regression.py. When a hash appears here, the harness compares the regenerated metrics against the `metrics` block below instead of the upstream Results_* JSON. Use this to accept deliberate drift caused by pipeline refactors until the upstream Results JSONs are resubmitted. When a submission is resubmitted upstream with fresh metrics, delete its entry here.",
+
+  "0b5a0c9b8387b98db6f1c287c516fa6ddf2a74ee": {
+    "module": "dia_singlecell",
+    "software": "FragPipe (DIA-NN quant) 23.1",
+    "reason": "proteobench 0.13.2 -> 0.15.x parsing pipeline refactor (species_mapper move, pipeline reorder). Consistent ~1% nr_prec drop across all FragPipe (DIA-NN quant) cases. Accepted 2026-04-23.",
+    "metrics": {
+      "nr_prec": 2781,
+      "roc_auc": 0.9751451536390302,
+      "median_abs_epsilon_global": 0.31140234272863354,
+      "mean_abs_epsilon_global": 0.40782140948797985,
+      "CV_median": 0.12960411513815978
+    }
+  },
+  "ea205928dc445b7f3cf38fcab93c1e1c121b9291": {
+    "module": "dia_aif",
+    "software": "FragPipe (DIA-NN quant) 23.0",
+    "reason": "proteobench 0.13.2 -> 0.15.x parsing pipeline refactor. Accepted 2026-04-23.",
+    "metrics": {
+      "nr_prec": 70577,
+      "roc_auc": 0.7942420305283832,
+      "median_abs_epsilon_global": 0.15280523210515007,
+      "mean_abs_epsilon_global": 0.5850187325159328,
+      "CV_median": 0.13344806514947166
+    }
+  },
+  "fdad2a4d2e6fe409bbbb0ed2d6644ee100e288ba": {
+    "module": "dia_diapasef",
+    "software": "FragPipe (DIA-NN quant) 23.0",
+    "reason": "proteobench 0.13.2 -> 0.15.x parsing pipeline refactor. Accepted 2026-04-23.",
+    "metrics": {
+      "nr_prec": 85855,
+      "roc_auc": 0.9641791026176376,
+      "median_abs_epsilon_global": 0.12841132278685485,
+      "mean_abs_epsilon_global": 0.20377597673572181,
+      "CV_median": 0.09370715782682927
+    }
+  },
+  "fae9b73eb9ac763f4b7f6f2f0dfb60b62e209b13": {
+    "module": "dia_astral",
+    "software": "FragPipe (DIA-NN quant) 23.0",
+    "reason": "proteobench 0.13.2 -> 0.15.x parsing pipeline refactor. Accepted 2026-04-23.",
+    "metrics": {
+      "nr_prec": 91344,
+      "roc_auc": 0.9030218020496535,
+      "median_abs_epsilon_global": 0.19132195674813168,
+      "mean_abs_epsilon_global": 0.3137829157455742,
+      "CV_median": 0.13427137909926484
+    }
+  }
+}

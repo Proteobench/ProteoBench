@@ -332,9 +332,7 @@ def _load_maxquant(input_csv: str) -> pd.DataFrame:
     data = pd.read_csv(input_csv, sep="\t", low_memory=False)
     # If Proteins is NaN for some entries, fill with "Leading proteins" column if it exists (TODO: Why are some entries Nan and then leading proteins not?)
     if "Proteins" in data.columns and "Leading proteins" in data.columns:
-        data["Proteins"] = data.apply(
-            lambda row: row["Leading proteins"] if pd.isna(row["Proteins"]) else row["Proteins"], axis=1
-        )
+        data["Proteins"] = data["Proteins"].fillna(data["Leading proteins"])
     # If NaN remain, remove those rows because they cannot be used for precursor ion benchmarking:
     if "Proteins" in data.columns:
         data = data.dropna(subset=["Proteins"])

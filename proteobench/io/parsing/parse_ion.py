@@ -330,9 +330,17 @@ def _load_maxquant(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     data = pd.read_csv(input_csv, sep="\t", low_memory=False)
+    # If Proteins is NaN for some entries, fill with "Leading proteins" column if it exists (TODO: Why are some entries Nan and then leading proteins not?)
+    if "Proteins" in data.columns and "Leading proteins" in data.columns:
+        data["Proteins"] = data.apply(
+            lambda row: row["Leading proteins"] if pd.isna(row["Proteins"]) else row["Proteins"], axis=1
+        )
+    # If NaN remain, remove those rows because they cannot be used for precursor ion benchmarking:
+    if "Proteins" in data.columns:
+        data = data.dropna(subset=["Proteins"])
     # Check if Proteins column contains species information
     if "Proteins" in data.columns and not any(
-        data["Proteins"].str.contains("|", regex=False)
+        data["Proteins"].str.contains("|", regex=False, na=False)
     ):  # Not sure if this is best way to check for species information, problems is that we do not want to hardcode species names.
         # Map gene names to descriptions using the mapper.csv file
         mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")

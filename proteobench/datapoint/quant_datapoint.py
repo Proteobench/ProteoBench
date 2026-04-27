@@ -61,9 +61,12 @@ def filter_df_numquant_epsilon(
     return None
 
 
-def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None:
+def filter_df_numquant_nr_feature(row: pd.Series, min_quant: int = 3) -> int | None:
     """
-    Extract the 'nr_prec' value from a row (assumed to be a dictionary).
+    Extract the 'nr_feature' value from a row (assumed to be a dictionary).
+
+    Falls back to legacy key 'nr_prec' for backwards compatibility with
+    datapoints serialized before the rename.
 
     Parameters
     ----------
@@ -75,12 +78,12 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
     Returns
     -------
     int, None
-        The 'nr_prec' value if found, otherwise None.
+        The 'nr_feature' value if found, otherwise None.
     """
     if isinstance(list(row.keys())[0], str):
         min_quant = str(min_quant)
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
-        return row[min_quant].get("nr_prec")
+        return row[min_quant].get("nr_feature", row[min_quant].get("nr_prec"))
     return None
 
 
@@ -284,7 +287,7 @@ class QuantDatapointHYE(DatapointBase):
         mean_abs_epsilon_precision_global (float): Mean absolute precision epsilon (deviation from empirical center).
         median_abs_epsilon_precision_eq_species (float): Median absolute precision epsilon for equivalently weighted species.
         mean_abs_epsilon_precision_eq_species (float): Mean absolute precision epsilon for equivalently weighted species.
-        nr_prec (int): Number of precursors identified.
+        nr_feature (int): Number of features (precursor ions, peptidoforms, etc.) identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
     """
@@ -315,7 +318,7 @@ class QuantDatapointHYE(DatapointBase):
     mean_abs_epsilon_precision_global: float = 0
     median_abs_epsilon_precision_eq_species: float = 0
     mean_abs_epsilon_precision_eq_species: float = 0
-    nr_prec: int = 0
+    nr_feature: int = 0
     comments: str = ""
     proteobench_version: str = ""
 
@@ -334,7 +337,7 @@ class QuantDatapointHYE(DatapointBase):
         intermediate: pd.DataFrame,
         input_format: str,
         user_input: dict,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         max_nr_observed: int = None,
     ) -> pd.Series:
         """
@@ -348,7 +351,7 @@ class QuantDatapointHYE(DatapointBase):
             The format of the input data (e.g., file format).
         user_input : dict
             User-defined input values for the benchmark.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             The default minimum precursor cutoff value. Defaults to 3.
         max_nr_observed : int, optional
             Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
@@ -408,31 +411,33 @@ class QuantDatapointHYE(DatapointBase):
             )
         )
         result_datapoint.results = results
-        result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_feature][
             "median_abs_epsilon_global"
         ]
-        result_datapoint.mean_abs_epsilon_global = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.mean_abs_epsilon_global = result_datapoint.results[default_cutoff_min_feature][
             "mean_abs_epsilon_global"
         ]
-        result_datapoint.median_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.median_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_feature][
             "median_abs_epsilon_eq_species"
         ]
-        result_datapoint.mean_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.mean_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_feature][
             "mean_abs_epsilon_eq_species"
         ]
-        result_datapoint.median_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.median_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_feature][
             "median_abs_epsilon_precision_global"
         ]
-        result_datapoint.mean_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.mean_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_feature][
             "mean_abs_epsilon_precision_global"
         ]
-        result_datapoint.median_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.median_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_feature][
             "median_abs_epsilon_precision_eq_species"
         ]
-        result_datapoint.mean_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_prec][
+        result_datapoint.mean_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_feature][
             "mean_abs_epsilon_precision_eq_species"
         ]
-        result_datapoint.nr_prec = result_datapoint.results[default_cutoff_min_prec]["nr_prec"]
+        result_datapoint.nr_feature = result_datapoint.results[default_cutoff_min_feature].get(
+            "nr_feature", result_datapoint.results[default_cutoff_min_feature].get("nr_prec", 0)
+        )
 
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 
@@ -551,7 +556,7 @@ class QuantDatapointHYE(DatapointBase):
             Dictionary mapping quantification cutoffs to their computed metrics.
         """
         df_slice = df[df["nr_observed"] >= min_nr_observed]
-        nr_prec = len(df_slice)
+        nr_feature = len(df_slice)
 
         # Combine all metrics
         metrics = {
@@ -561,7 +566,7 @@ class QuantDatapointHYE(DatapointBase):
             **QuantDatapointHYE.get_precision_metrics(df, min_nr_observed, "mean"),
             **QuantDatapointHYE.get_cv_metrics(df, min_nr_observed),
             "variance_epsilon_global": df_slice["epsilon"].var() if len(df_slice) > 0 else 0.0,
-            "nr_prec": nr_prec,
+            "nr_feature": nr_feature,
             "roc_auc": compute_roc_auc(df_slice),
         }
 
@@ -596,7 +601,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
         intermediate: pd.DataFrame,
         input_format: str,
         user_input: dict,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         max_nr_observed: int = None,
     ) -> pd.Series:
         """
@@ -616,7 +621,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
             The format of the input data (e.g., file format).
         user_input : dict
             User-defined input values for the benchmark.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             The default minimum precursor cutoff value. Defaults to 3.
         max_nr_observed : int, optional
             Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
@@ -628,7 +633,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
         """
         # Call parent class implementation to get base datapoint
         result_series = QuantDatapointHYE.generate_datapoint(
-            intermediate, input_format, user_input, default_cutoff_min_prec, max_nr_observed
+            intermediate, input_format, user_input, default_cutoff_min_feature, max_nr_observed
         )
 
         # Convert to mutable dict for plasma-specific metrics
@@ -645,17 +650,17 @@ class QuantDatapointPYE(QuantDatapointHYE):
                 result_dict["results"][min_nr_obs].update(metrics)
 
         # Assign default cutoff metrics to top-level fields for backward compatibility
-        if default_cutoff_min_prec in plasma_metrics:
-            result_dict["median_abs_log2_fc_error_spike_ins"] = plasma_metrics[default_cutoff_min_prec].get(
+        if default_cutoff_min_feature in plasma_metrics:
+            result_dict["median_abs_log2_fc_error_spike_ins"] = plasma_metrics[default_cutoff_min_feature].get(
                 "median_abs_log2_fc_error_spike_ins", 0.0
             )
-            result_dict["nr_quantified_spike_ins"] = plasma_metrics[default_cutoff_min_prec].get(
+            result_dict["nr_quantified_spike_ins"] = plasma_metrics[default_cutoff_min_feature].get(
                 "nr_quantified_spike_ins", 0
             )
-            result_dict["dynamic_range_human_plasma"] = plasma_metrics[default_cutoff_min_prec].get(
+            result_dict["dynamic_range_human_plasma"] = plasma_metrics[default_cutoff_min_feature].get(
                 "dynamic_range_human_plasma_mean", 0.0
             )
-            result_dict["median_abs_epsilon_human_plasma"] = plasma_metrics[default_cutoff_min_prec].get(
+            result_dict["median_abs_epsilon_human_plasma"] = plasma_metrics[default_cutoff_min_feature].get(
                 "median_abs_epsilon_human_plasma", 0.0
             )
 

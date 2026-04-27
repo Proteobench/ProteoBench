@@ -121,7 +121,7 @@ def configure_aggrid(df: pd.DataFrame):
         "abundance_normalization_ions",
         "submission_comments",
     ]
-    result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
+    result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results"]
     technical_cols = [
         "proteobench_version",
         "intermediate_hash",
@@ -199,7 +199,7 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
             "abundance_normalization_ions",
             "submission_comments",
         ]
-        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
+        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results"]
         technical_cols = [
             "proteobench_version",
             "intermediate_hash",

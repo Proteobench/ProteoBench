@@ -329,7 +329,19 @@ def _load_maxquant(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+    data = pd.read_csv(input_csv, sep="\t", low_memory=False)
+    # Check if Proteins column contains species information
+    if "Proteins" in data.columns and not any(
+        data["Proteins"].str.contains("|", regex=False)
+    ):  # Not sure if this is best way to check for species information, problems is that we do not want to hardcode species names.
+        # Map gene names to descriptions using the mapper.csv file
+        mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+        mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+        mapper = mapper_df["description"].to_dict()
+        data["Proteins"] = data["Proteins"].map(
+            lambda x: ";".join([mapper[protein] if protein in mapper.keys() else protein for protein in x.split(";")])
+        )
+    return data
 
 
 def _load_alphapept(input_csv: str) -> pd.DataFrame:

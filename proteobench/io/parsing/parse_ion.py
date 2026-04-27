@@ -333,7 +333,7 @@ def _load_maxquant(input_csv: str) -> pd.DataFrame:
     # If Proteins is NaN for some entries, fill with "Leading proteins" column if it exists (TODO: Why are some entries Nan and then leading proteins not?)
     if "Proteins" in data.columns and "Leading proteins" in data.columns:
         data["Proteins"] = data["Proteins"].fillna(data["Leading proteins"])
-    # If NaN remain, remove those rows because they cannot be used for precursor ion benchmarking:
+    # If NaN remain, remove those rows because they cannot be used for benchmarking:
     if "Proteins" in data.columns:
         data = data.dropna(subset=["Proteins"])
     # Check if Proteins column contains species information

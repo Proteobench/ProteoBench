@@ -11,7 +11,6 @@ from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
@@ -31,8 +30,6 @@ from proteobench.io.params.piprimenovo import (
     extract_params as extract_params_piprimenovo,
 )
 from proteobench.io.params.pointnovo import extract_params as extract_params_pointnovo
-from proteobench.io.parsing.parse_denovo import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
 
@@ -253,6 +250,7 @@ class DeNovoModule:
         """
         return
 
+    # ! Does not seem to be used in webinterface
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """
         Check if the new data point has a unique hash.
@@ -276,10 +274,11 @@ class DeNovoModule:
         overlap = set_current_datapoint.intersection(set_all_datapoints_old)
 
         if len(overlap) > 0:
-            overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
-            st.error(
-                f"The run you want to submit has been previously submitted under the identifier: {str(overlap_name)}"
-            )
+            # ! is it needed?
+            # overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
+            # st.error(
+            #     f"The run you want to submit has been previously submitted under the identifier: {str(overlap_name)}"
+            # )
             return False
         return True
 

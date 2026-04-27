@@ -7,23 +7,23 @@ ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,
 enable_match_between_runs,True
-precursor_mass_tolerance,"[-2.3 ppm, 2.3 ppm]"
-fragment_mass_tolerance,"[-6 ppm, 6 ppm]"
-enzyme,Trypsin
-allowed_miscleavages,2
-min_peptide_length,6
+precursor_mass_tolerance,"[-29 ppm, 29 ppm]"
+fragment_mass_tolerance,"[-17 ppm, 17 ppm]"
+enzyme,
+allowed_miscleavages,
+min_peptide_length,7
 max_peptide_length,30
-fixed_mods,"C[Carbamidomethyl], N-term[Acetyl]"
+fixed_mods,C[Carbamidomethyl]
 variable_mods,"M[Oxidation], N-term[Acetyl]"
-max_mods,3
-min_precursor_charge,2
+max_mods,1
+min_precursor_charge,1
 max_precursor_charge,4
-min_precursor_mz,380
-max_precursor_mz,980
+min_precursor_mz,300
+max_precursor_mz,1800
 min_fragment_mz,200
 max_fragment_mz,1800
-quantification_method,Legacy (direct)
+quantification_method,QuantUMS high-precision
 protein_inference,Genes
-abundance_normalization_ions,Cross-run normalization
+abundance_normalization_ions,
 predictors_library,"{'RT': 'User defined speclib', 'IM': 'User defined speclib', 'MS2_int': 'User defined speclib'}"
 scan_window,5

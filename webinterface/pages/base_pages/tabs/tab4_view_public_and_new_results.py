@@ -211,6 +211,7 @@ def display_submitted_results(
     # Filter data using slider if applicable
     filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
 
+
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()
 

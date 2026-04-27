@@ -7,10 +7,12 @@ across all ProteoBench module types (Quant, De Novo, etc.).
 
 import os
 import uuid
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import pandas as pd
 import streamlit as st
+
+from ..utils.parameter_filters import apply_parameter_filters, generate_parameter_filters  # noqa: F401
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -59,10 +61,12 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None
     initialize_uuid_state(slider_id_uuid, default_val_slider)
 
 
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6) -> None:
+def generate_main_slider(
+    slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6
+) -> None:
     """
     Create a slider input.
-    
+
     Parameters
     ----------
     slider_id_uuid : str
@@ -80,10 +84,10 @@ def generate_main_slider(slider_id_uuid: str, description_slider_md: str, defaul
     slider_key = st.session_state[slider_id_uuid]
 
     default_value = st.session_state.get(slider_key, default_val_slider)
-    
+
     # Generate slider options based on max_nr_observed
     slider_options = list(range(1, max_nr_observed + 1))
-    
+
     st.select_slider(
         label="Minimal precursor quantifications (# samples)",
         options=slider_options,
@@ -150,20 +154,22 @@ def display_metric_calc_approach_selector(variables) -> str:
 
 def display_colorblindmode_selector(variables, use_submitted: bool = False) -> str:
     """Display colorblind mode selector toggle.
-    
+
     Parameters
     ----------
     variables : VariablesClass
         Variables object containing selector UUIDs
     use_submitted : bool, optional
         If True, use the submitted selector UUID, by default False
-    
+
     Returns
     -------
     bool
         Current state of the colorblind mode toggle
     """
-    key = variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    key = (
+        variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    )
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
@@ -236,10 +242,7 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
 
     try:
         fig = plot_generator.plot_main_metric(
-            result_df=data, 
-            hide_annot=plot_params.get("hide_annot", False),
-            annotation=annotation,
-            **plot_params
+            result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
         )
         st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
     except Exception as e:
@@ -368,7 +371,9 @@ def display_download_section(variables, sort_by: str = "id") -> None:
                 icon="⚠️",
             )
     elif selected_hash is not None:
-        st.info("Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️")
+        st.info(
+            "Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️"
+        )
 
 
 def display_existing_results(
@@ -402,6 +407,9 @@ def display_existing_results(
     # Initialize and filter data
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
+
+    # Apply parameter-based filters (key_prefix must be unique per module page)
+    filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()

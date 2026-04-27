@@ -853,6 +853,20 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Human plasma metrics don't have mode variants (single species)
         opacity_metric_key = f"{metric_lower}_abs_epsilon_human_plasma"
 
+        # Pre-pass: collect raw dynamic-range values for data-driven size normalization.
+        # This ensures the full [8, 40] marker-size range is used regardless of where
+        # values cluster, maximising visual separation for small differences.
+        raw_size_vals = []
+        for _, row in result_df.iterrows():
+            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            if m is not None:
+                sv = m.get("dynamic_range_human_plasma_mean", 0.0)
+                if sv > 0:
+                    raw_size_vals.append(sv)
+        size_min = min(raw_size_vals) if raw_size_vals else 0.0
+        size_max = max(raw_size_vals) if raw_size_vals else 1.0
+        size_data_range = size_max - size_min if size_max > size_min else 1.0
+
         # Create scatter plot with all four visual dimensions
         # Group by software to create separate traces (allows colorblind markers)
         software_data = {}
@@ -885,12 +899,13 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             software_data[software]["x"].append(x_val)
             software_data[software]["y"].append(y_val)
 
-            # Size scaling: normalize dynamic range to reasonable marker sizes (5-30)
+            # Size scaling: min-max normalise across the loaded data so the full
+            # [8, 40] range is always used, making even small differences visible.
             if size_val > 0:
-                normalized_size = 5 + (size_val / 3) * 25
+                normalized_size = 8 + ((size_val - size_min) / size_data_range) * 10
             else:
                 normalized_size = 8
-            software_data[software]["sizes"].append(min(normalized_size, 30))
+            software_data[software]["sizes"].append(normalized_size)
 
             # Opacity: lower error = higher opacity (higher alpha)
             opacity = max(0.2, 0.9 - (opacity_val * 0.7))

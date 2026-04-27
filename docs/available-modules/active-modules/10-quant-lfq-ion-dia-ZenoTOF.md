@@ -22,7 +22,9 @@ Peptide separations were done using an IonOpticks Aurora® XS Ultimate column (2
 An OptiFlow Pro Nano ion source was used with a NanoCal probe (<1 µL electrode), with source parameters as following: GS1: 10 psi, Nano cel temperature: 250 °C and Nano spray voltage: 2500V.
 
 The 15-min Zeno SWATH DIA experiments used 85 variable windows spanning the TOF MS mass range 400-900 Da and MS/MS mass range 140-1750 Da, with Zeno trap pulsing turned on, with MS/MS accumulation times of 16 ms. Before each Zeno SWATH MS DIA cycle an additional MS1 survey scan from 400-1500 Da was recorded for 50 ms.
-The files have been uploaded to the ProteomeXchange repository, with PXD accession number (PXD070049). Since the corresponding manuscript is still under review, the data can be accessed as following: Log in to the PRIDE website using the following details: Project accession: PXD070049 - Token: hcXc5dENPPrf. Alternatively, reviewer can access the dataset by logging in to the PRIDE website using the following account details: Username: reviewer_pxd070049@ebi.ac.uk - Password: LF0Bpyt0gt1g
+The files have been uploaded to the ProteomeXchange repository, with PXD accession number (PXD070049). 
+
+All files can be downloaded here [proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/)
 
 **It is imperative not to rename the files once downloaded!**
 

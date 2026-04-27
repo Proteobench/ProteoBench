@@ -315,6 +315,9 @@ def set_highlight_column_in_submitted_data(variables) -> None:
     elif "Highlight" in df.columns:
         # Not sure how 'Highlight' column became object dtype
         df["Highlight"] = df["Highlight"].astype(bool).fillna(False)
+    # Mark newly submitted data points so they appear in highlight_color in Tab 4
+    if "old_new" in df.columns:
+        df.loc[df["old_new"] == "new", "Highlight"] = True
     # only needed for last elif, but to be sure apply always:
     st.session_state[variables.all_datapoints_submitted] = df
 

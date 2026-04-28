@@ -63,6 +63,7 @@ class BaseStreamlitUI:
         """
         # Get tab configuration
         tab_config = self.get_tab_config()
+        # ? could also go here: if debug state is set, show debug tab
         tab_names = [name for name, _ in tab_config]
 
         # Create tabs dynamically

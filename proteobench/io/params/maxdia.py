@@ -48,12 +48,22 @@ def extract_params(
         if parameters.min_precursor_charge
         else None
     )
+    fragment_mass_tolerance_value = float(series.loc[series["level_2"] == "diaInitialPrecMassTolPpm", 0].values[0])
+    parameters.fragment_mass_tolerance = [
+        "-{:.2f} ppm".format(fragment_mass_tolerance_value),
+        "+{:.2f} ppm".format(fragment_mass_tolerance_value),
+    ]
     parameters.min_precursor_mz = None
     parameters.max_fragment_mz = None
     parameters.min_fragment_mz = None
+    parameters.allowed_miscleavages = int(series.loc[series["level_2"] == "maxMissedCleavagesDia", 0].values[0])
 
     # Set search engine version from software version
     parameters.search_engine_version = parameters.__dict__["software_version"]
+    parameters.quantification_method = int(series.loc[series["level_2"] == "diaQuantMethod", 0].values[0])
+    parameters.max_mods = int(series.loc[series["level_2"] == "diaMaxModifications", 0].values[0])
+    parameters.min_precursor_charge = int(series.loc[series["level_2"] == "diaMinCharge", 0].values[0])
+    parameters.max_precursor_charge = int(series.loc[series["level_2"] == "diaMaxCharge", 0].values[0])
 
     return parameters
 

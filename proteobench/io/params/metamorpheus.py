@@ -200,7 +200,7 @@ def format_tolerances(tolerance: str) -> str:
 def extract_params(
     file_path_1, file_path_2, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
-    params = ProteoBenchParameters()
+    params = ProteoBenchParameters(filename=json_file)
 
     versions_line, settings = load_files(file_path_1, file_path_2)
 

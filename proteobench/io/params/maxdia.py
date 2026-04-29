@@ -62,15 +62,13 @@ def extract_params(
     parameters.max_mods = int(series.loc[series["level_2"] == "diaMaxModifications", 0].values[0])
 
     fragment_mass_tolerance_value = float(series.loc[series["level_2"] == "diaInitialFragMassTolPpm", 0].values[0])
-    parameters.fragment_mass_tolerance = [
-        "-{:.2f} ppm".format(fragment_mass_tolerance_value),
-        "{:.2f} ppm".format(fragment_mass_tolerance_value),
-    ]
+    parameters.fragment_mass_tolerance = (
+        f"[-{fragment_mass_tolerance_value:g} ppm, {fragment_mass_tolerance_value:g} ppm]"
+    )
     precursor_mass_tolerance_value = float(series.loc[series["level_2"] == "diaInitialPrecMassTolPpm", 0].values[0])
-    parameters.precursor_mass_tolerance = [
-        "-{:.2f} ppm".format(precursor_mass_tolerance_value),
-        "{:.2f} ppm".format(precursor_mass_tolerance_value),
-    ]
+    parameters.precursor_mass_tolerance = (
+        f"[-{precursor_mass_tolerance_value:g} ppm, {precursor_mass_tolerance_value:g} ppm]"
+    )
 
     return parameters
 

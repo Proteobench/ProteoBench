@@ -13,6 +13,72 @@ import pandas as pd
 from proteobench.io.params import ProteoBenchParameters
 
 
+def identify_file_type(file: Union[str, IO]) -> str:
+    """
+    Identify whether a single MetaMorpheus file is the TOML settings file or the version text file.
+
+    Parameters
+    ----------
+    file : Union[str, IO]
+        Path string or file-like object to inspect.
+
+    Returns
+    -------
+    str
+        ``"toml"`` if the file parses as a TOML settings file, ``"version"`` otherwise.
+    """
+    if isinstance(file, (str, PosixPath, Path)):
+        try:
+            with open(file, "rb") as f:
+                toml.load(f)
+            return "toml"
+        except Exception:
+            return "version"
+    elif hasattr(file, "read"):
+        try:
+            file.seek(0)
+            content = file.read()
+            if isinstance(content, str):
+                content = content.encode("utf-8")
+            toml.loads(content.decode("utf-8"))
+            return "toml"
+        except Exception:
+            return "version"
+        finally:
+            try:
+                file.seek(0)
+            except Exception:
+                pass
+    return "version"
+
+
+def get_incomplete_upload_warning(files: list) -> str:
+    """
+    Return a user-facing warning string when fewer than two MetaMorpheus files are uploaded.
+
+    Parameters
+    ----------
+    files : list
+        List of uploaded file objects (expected to contain exactly one element).
+
+    Returns
+    -------
+    str
+        Warning message describing which file is missing.
+    """
+    file_type = identify_file_type(files[0]) if files else None
+    if file_type == "toml":
+        return (
+            "You uploaded the MetaMorpheus search task settings file (.toml). "
+            "Please also upload the version file (the plain-text file containing "
+            "the MetaMorpheus version, typically named 'allResults.txt' or similar)."
+        )
+    return (
+        "You uploaded the MetaMorpheus version file. "
+        "Please also upload the search task settings file (.toml)."
+    )
+
+
 def load_files(file1: Union[str, IO], file2: Union[str, IO]) -> Tuple[Union[str, None], Union[dict, None]]:
     """
     Load two files (IO objects or file paths), returning:
@@ -134,7 +200,9 @@ def format_tolerances(tolerance: str) -> str:
     return formatted_tolerance
 
 
-def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
+def extract_params(
+    file_path_1, file_path_2, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
     params = ProteoBenchParameters()
 
     versions_line, settings = load_files(file_path_1, file_path_2)

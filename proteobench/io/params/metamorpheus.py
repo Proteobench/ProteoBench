@@ -73,10 +73,7 @@ def get_incomplete_upload_warning(files: list) -> str:
             "Please also upload the version file (the plain-text file containing "
             "the MetaMorpheus version, typically named 'allResults.txt' or similar)."
         )
-    return (
-        "You uploaded the MetaMorpheus version file. "
-        "Please also upload the search task settings file (.toml)."
-    )
+    return "You uploaded the MetaMorpheus version file. " "Please also upload the search task settings file (.toml)."
 
 
 def load_files(file1: Union[str, IO], file2: Union[str, IO]) -> Tuple[Union[str, None], Union[dict, None]]:

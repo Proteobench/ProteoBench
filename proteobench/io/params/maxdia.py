@@ -51,7 +51,7 @@ def extract_params(
     fragment_mass_tolerance_value = float(series.loc[series["level_2"] == "diaInitialPrecMassTolPpm", 0].values[0])
     parameters.fragment_mass_tolerance = [
         "-{:.2f} ppm".format(fragment_mass_tolerance_value),
-        "+{:.2f} ppm".format(fragment_mass_tolerance_value),
+        "{:.2f} ppm".format(fragment_mass_tolerance_value),
     ]
     parameters.min_precursor_mz = None
     parameters.max_fragment_mz = None

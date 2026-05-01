@@ -314,7 +314,7 @@ class DeNovoUIObjects(BaseUIModule):
                 st.header(mod_label)
                 st.plotly_chart(
                     figs[mod_label],
-                    width="stretch",
+                    use_container_width=True,
                 )
 
     def _display_spectrum_features(self, figs) -> None:

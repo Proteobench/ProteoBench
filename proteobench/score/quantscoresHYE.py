@@ -69,7 +69,6 @@ class QuantScoresHYE(ScoreBase):
         # TODO, this should be handled different, probably in the parse settings
         relevant_columns_df = filtered_df[["Raw file", self.precursor_column_name, "Intensity"]].copy()
         replicate_to_raw_df = QuantScoresHYE.convert_replicate_to_raw(replicate_to_raw)
-
         all_present = all(
             item in list(filtered_df.columns) for sublist in replicate_to_raw.values() for item in sublist
         )
@@ -212,18 +211,28 @@ class QuantScoresHYE(ScoreBase):
         """
         # for all columns named parse_settings.species_dict.values() compute the sum over the rows and add it to a new column "unique"
         withspecies["unique"] = withspecies[species_expected_ratio.keys()].sum(axis=1)
-
         # now remove all rows with withspecies["unique"] > 1
         withspecies_unique = withspecies[withspecies["unique"] == 1].copy()
+
+        # If no rows remain after unique-species filtering, return a well-formed empty dataframe
+        # with expected output columns to keep downstream processing robust.
+        if withspecies_unique.empty:
+            withspecies_unique["species"] = pd.Series(dtype="object")
+            withspecies_unique["log2_expectedRatio"] = pd.Series(dtype="float64")
+            withspecies_unique["epsilon"] = pd.Series(dtype="float64")
+            withspecies_unique["log2_empirical_median"] = pd.Series(dtype="float64")
+            withspecies_unique["log2_empirical_mean"] = pd.Series(dtype="float64")
+            withspecies_unique["epsilon_precision_median"] = pd.Series(dtype="float64")
+            withspecies_unique["epsilon_precision_mean"] = pd.Series(dtype="float64")
+            return withspecies_unique
+
         # for species in parse_settings.species_dict.values(), set all values in new column "species" to species if withe species is True
         for species in species_expected_ratio.keys():
             withspecies_unique.loc[withspecies_unique[species] == True, "species"] = species
             withspecies_unique.loc[withspecies_unique[species] == True, "log2_expectedRatio"] = np.log2(
                 species_expected_ratio[species]["A_vs_B"]
             )
-
         withspecies_unique["epsilon"] = withspecies_unique["log2_A_vs_B"] - withspecies_unique["log2_expectedRatio"]
-
         # Compute per-species empirical centers for precision metrics
         withspecies_unique["log2_empirical_median"] = withspecies_unique.groupby("species")["log2_A_vs_B"].transform(
             "median"
@@ -239,5 +248,4 @@ class QuantScoresHYE(ScoreBase):
         withspecies_unique["epsilon_precision_mean"] = (
             withspecies_unique["log2_A_vs_B"] - withspecies_unique["log2_empirical_mean"]
         )
-
         return withspecies_unique

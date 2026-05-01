@@ -13,7 +13,7 @@ from proteobench.io.params import ProteoBenchParameters
 
 # Regular expression to clean up lines from ANSI escape codes
 ANSI_REGEX = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
-TIMESTAMP_REGEX = re.compile(r"(\d+ day,)|(\d+):\d{2}:\d{2}\.?\d*")
+TIMESTAMP_REGEX = re.compile(r"(\d+ days?,\s*)?(\d+):\d{2}:\d{2}\.?\d*")
 DEBUG_LEVEL_REGEX = re.compile(r"(PROGRESS|INFO|WARNING|ERROR|CRITICAL|DEBUG):")
 TREE_REGEX = re.compile(r"^\s*(├──|└──|\│)\s*|\s*(├──|└──|\│)\s*")
 USER_DEFINED_REGEX = re.compile(r"(\[|\()?user defined(\]|\))?")
@@ -385,6 +385,7 @@ if __name__ == "__main__":
         "../../../test/params/log_alphadia_1.10.txt",
         "../../../test/params/log_alphadia_1.12.txt",
         "../../../test/params/log_alphadia_1.12MBR.txt",
+        "../../../test/params/alphadia_weird_lengths.txt",
     ]:
         file = pathlib.Path(fname)
         pb_params = extract_params(file)

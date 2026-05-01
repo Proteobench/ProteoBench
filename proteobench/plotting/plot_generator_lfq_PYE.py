@@ -28,16 +28,16 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Parameters
         ----------
         performance_data : pd.DataFrame
-            The intermediate performance data to plot
+            The intermediate performance data to plot.
         species_expected_ratio : dict, optional
             Expected ratios per species from module_settings.toml.
         **kwargs : dict
-            Additional module-specific parameters
+            Additional module-specific parameters.
 
         Returns
         -------
         Dict[str, go.Figure]
-            Dictionary mapping plot names to plotly figures
+            Dictionary mapping plot names to plotly figures.
         """
         plots = {}
 
@@ -65,7 +65,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Returns
         -------
         list
-            List of in-depth plot configurations defining how plots should be displayed
+            List of in-depth plot configurations defining how plots should be displayed.
         """
         return [
             {
@@ -100,7 +100,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Returns
         -------
         Dict[str, str]
-            Dictionary mapping plot names to their descriptions
+            Dictionary mapping plot names to their descriptions.
         """
         return {
             "logfc": "log2 fold changes calculated from the intermediate data",
@@ -120,14 +120,14 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Parameters
         ----------
         performance_data : pd.DataFrame
-            Intermediate data containing log2_A_vs_B column
+            Intermediate data containing log2_A_vs_B column.
         species_expected_ratio : Dict[str, Dict[str, Union[float, str]]]
-            Dictionary with expected ratios for each species, and colors
+            Dictionary with expected ratios for each species, and colors.
 
         Returns
         -------
         go.Figure
-            Plotly figure with fold change distributions
+            Plotly figure with fold change distributions.
         """
         species_list = list(species_expected_ratio.keys())
 
@@ -227,12 +227,12 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Parameters
         ----------
         performance_data : pd.DataFrame
-            Intermediate data containing CV_A and CV_B columns
+            Intermediate data containing CV_A and CV_B columns.
 
         Returns
         -------
         go.Figure
-            Plotly figure with CV violin plots
+            Plotly figure with CV violin plots.
         """
         # Prepare data for violin plot
         cv_data = []
@@ -278,14 +278,14 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Parameters
         ----------
         performance_data : pd.DataFrame
-            Performance data containing log2_A_vs_B and mean abundance columns
+            Performance data containing log2_A_vs_B and mean abundance columns.
         species_expected_ratio : Dict[str, Dict[str, Union[float, str]]]
-            Expected ratios for each species and their colors
+            Expected ratios for each species and their colors.
 
         Returns
         -------
         go.Figure
-            Plotly figure with MA plot (M on x, A on y)
+            Plotly figure with MA plot (M on x, A on y).
         """
         fig = go.Figure()
 
@@ -339,12 +339,14 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Parameters
         ----------
         performance_data : pd.DataFrame
-            Performance data containing dynamic range information
+            Performance data containing dynamic range information.
+        species_expected_ratio : any
+            Expected ratios per species and optional plot colors.
 
         Returns
         -------
         go.Figure
-            Plotly figure with dynamic range plots for both conditions
+            Plotly figure with dynamic range plots for both conditions.
         """
         fig = go.Figure()
 
@@ -529,14 +531,14 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         Parameters
         ----------
         performance_data : pd.DataFrame
-            Performance data containing missing values information
+            Performance data containing missing values information.
         max_observations : int
-            Maximum number of observations possible (default 12)
+            Maximum number of observations possible (default 12).
 
         Returns
         -------
         go.Figure
-            Plotly figure with missing values plot, trend line, and reference lines
+            Plotly figure with missing values plot, trend line, and reference lines.
         """
         fig = go.Figure()
 
@@ -695,6 +697,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             use the same metrics for plasma. Defaults to "Species-weighted".
         software_colors : Dict[str, str]
             Mapping of software names to colors.
+        software_markers : Dict[str, str]
+            Mapping of software names to marker symbols.
         mapping : Dict[str, str]
             Mapping for marker sizes.
         highlight_color : str
@@ -705,6 +709,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Mapping for legend names.
         hide_annot : bool
             Whether to hide annotations on the plot.
+        colorblind_mode : bool
+            Whether to use software-specific marker symbols.
         default_cutoff_min_prec : int
             Default min precursor threshold for extracting metrics.
         min_nr_observed : int, optional
@@ -814,6 +820,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             use the same metrics for plasma. Defaults to "Species-weighted".
         software_colors : Dict[str, str]
             Mapping of software names to colors.
+        software_markers : Dict[str, str]
+            Mapping of software names to marker symbols.
         mapping : Dict[str, str]
             Mapping for marker sizes.
         highlight_color : str
@@ -824,6 +832,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Mapping for legend names.
         hide_annot : bool
             Whether to hide annotations on the plot.
+        colorblind_mode : bool
+            Whether to use software-specific marker symbols.
         default_cutoff_min_prec : int
             Default min precursor threshold for extracting metrics.
         annotation : str, optional
@@ -849,6 +859,20 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
         # Human plasma metrics don't have mode variants (single species)
         opacity_metric_key = f"{metric_lower}_abs_epsilon_human_plasma"
+
+        # Pre-pass: collect raw dynamic-range values for data-driven size normalization.
+        # This ensures the full [8, 40] marker-size range is used regardless of where
+        # values cluster, maximising visual separation for small differences.
+        raw_size_vals = []
+        for _, row in result_df.iterrows():
+            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            if m is not None:
+                sv = m.get("dynamic_range_human_plasma_mean", 0.0)
+                if sv > 0:
+                    raw_size_vals.append(sv)
+        size_min = min(raw_size_vals) if raw_size_vals else 0.0
+        size_max = max(raw_size_vals) if raw_size_vals else 1.0
+        size_data_range = size_max - size_min if size_max > size_min else 1.0
 
         # Create scatter plot with all four visual dimensions
         # Group by software to create separate traces (allows colorblind markers)
@@ -882,12 +906,13 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             software_data[software]["x"].append(x_val)
             software_data[software]["y"].append(y_val)
 
-            # Size scaling: normalize dynamic range to reasonable marker sizes (5-30)
+            # Size scaling: min-max normalise across the loaded data so the full
+            # [8, 40] range is always used, making even small differences visible.
             if size_val > 0:
-                normalized_size = 5 + (size_val / 3) * 25
+                normalized_size = 8 + ((size_val - size_min) / size_data_range) * 10
             else:
                 normalized_size = 8
-            software_data[software]["sizes"].append(min(normalized_size, 30))
+            software_data[software]["sizes"].append(normalized_size)
 
             # Opacity: lower error = higher opacity (higher alpha)
             opacity = max(0.2, 0.9 - (opacity_val * 0.7))
@@ -991,7 +1016,21 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
     @staticmethod
     def _get_metrics_at_cutoff(results: dict, cutoff: int) -> dict | None:
-        """Get metrics for a given cutoff level from results with int or string keys."""
+        """
+        Get metrics for a given cutoff level from results with int or string keys.
+
+        Parameters
+        ----------
+        results : dict
+            Metrics dictionary keyed by numeric or string cutoff values.
+        cutoff : int
+            Cutoff level to retrieve.
+
+        Returns
+        -------
+        dict | None
+            Metrics for the cutoff level, if present.
+        """
         if not isinstance(results, dict):
             return None
 
@@ -1057,7 +1096,19 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         """
 
         def has_metric(results_dict):
-            """Check if the results dictionary contains the specified metric."""
+            """
+            Check if the results dictionary contains the specified metric.
+
+            Parameters
+            ----------
+            results_dict : dict
+                Results dictionary to inspect.
+
+            Returns
+            -------
+            bool
+                True if the requested metric is present.
+            """
             try:
                 for threshold_dict in results_dict.values():
                     if metric_col_name in threshold_dict:

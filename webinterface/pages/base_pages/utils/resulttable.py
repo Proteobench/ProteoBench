@@ -1,5 +1,5 @@
 import pandas as pd
-from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
 
 # this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
 
@@ -38,7 +38,7 @@ def _get_style_js(bg_color: str) -> JsCode:
     )
 
 
-def render_aggrid(df: pd.DataFrame, grid_options, key):
+def render_aggrid(df: pd.DataFrame, grid_options, key, enable_selection: bool = False):
     """
     Renders a DataFrame using AgGrid with specified grid options and a unique key.
 
@@ -50,11 +50,14 @@ def render_aggrid(df: pd.DataFrame, grid_options, key):
         Configuration options for AgGrid.
     key : Any
         Unique identifier for the grid instance (AgGrid does not work with UUID keys).
+    enable_selection : bool, optional
+        If True, configure the grid for single-row selection and return the grid response
+        so callers can inspect selected rows.
 
     Returns
     -------
-    None
-        This function renders the grid in the Streamlit interface and does not return a value.
+    AgGridReturn
+        The AgGrid return object; callers can read `.selected_rows` when selection is enabled.
     """
     # Calculate dynamic height based on number of rows
     # Row height ~50px + header ~40px + padding
@@ -69,18 +72,21 @@ def render_aggrid(df: pd.DataFrame, grid_options, key):
     max_height = 800
     dynamic_height = max(min_height, min(calculated_height, max_height))
 
-    AgGrid(
+    update_mode = GridUpdateMode.SELECTION_CHANGED if enable_selection else GridUpdateMode.NO_UPDATE
+
+    return AgGrid(
         df,
         gridOptions=grid_options,
         theme="alpine",
         fit_columns_on_grid_load=False,
         height=dynamic_height,
         allow_unsafe_jscode=True,
+        update_mode=update_mode,
         key=f"aggrid::{str(key)}",  # AgGrid does not work with UUID keys
     )
 
 
-def configure_aggrid(df: pd.DataFrame):
+def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
     """
     Configures the styling and options for AgGrid based on column category.
 
@@ -88,6 +94,8 @@ def configure_aggrid(df: pd.DataFrame):
     ----------
     df : pd.DataFrame
         The display-ready DataFrame.
+    enable_selection : bool, optional
+        If True, configure single-row selection without checkboxes.
 
     Returns
     -------
@@ -95,6 +103,8 @@ def configure_aggrid(df: pd.DataFrame):
         AgGrid gridOptions dictionary.
     """
     gb = GridOptionsBuilder.from_dataframe(df)
+    if enable_selection:
+        gb.configure_selection(selection_mode="single", use_checkbox=False)
     identifier_cols = ["selected", "id"]
     parameter_cols = [
         "software_name",

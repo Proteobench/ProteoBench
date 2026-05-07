@@ -4,38 +4,47 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
 # this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
 
 # === Table Color Constants ===
-COLOR_IDENTIFIER = "#F0F2F6"
-COLOR_PARAMETER = "#FFFFFF"
-COLOR_RESULT = "#F0F2F6"
-COLOR_TECHNICAL = "#FFFFFF"
-COLOR_ADDITIONAL = "#F0F2F6"
+COLOR_IDENTIFIER = "#EEF2FF"  # soft indigo tint  – id / selected columns
+COLOR_PARAMETER = "#FFFFFF"  # clean white         – search / quant parameters
+COLOR_RESULT = "#F0FDF4"  # soft green tint     – performance metrics
+COLOR_ADDITIONAL = "#FAFAFA"  # near-white gray     – extra / unknown columns
+
+# Row-level highlight applied to every cell when the row is selected
+COLOR_ROW_SELECTED = "#FFF3CD"
 
 
-def _get_style_js(bg_color: str) -> JsCode:
+def _get_cell_style_js(bg_color_normal: str, align: str = "left") -> JsCode:
     """
-    Generates JavaScript for styling cells with a background color.
+    Returns a JsCode cellStyle function that applies a normal background colour
+    per column category, and switches the entire row to a warm amber highlight
+    whenever the 'selected' indicator column is non-empty.
 
     Parameters
     ----------
-    bg_color : str
-        Hex color string to use as the background.
-
-    Returns
-    -------
-    JsCode
-        A JavaScript code block that defines the style.
+    bg_color_normal : str
+        Background colour used for non-selected rows.
+    align : str, optional
+        CSS text-align value ('left', 'center', or 'right').
     """
-    return JsCode(
-        f"""
+    return JsCode(f"""
     function(params) {{
-        return {{
-            'backgroundColor': '{bg_color}',
-            'color': 'black',
-            'fontWeight': 'normal'
+        var isSelected = params.data && params.data['selected'] && params.data['selected'] !== '';
+        if (isSelected) {{
+            return {{
+                'backgroundColor': '{COLOR_ROW_SELECTED}',
+                'color': '#1a1a1a',
+                'fontWeight': '600',
+                'textAlign': '{align}'
+            }};
         }}
+        return {{
+            'backgroundColor': '{bg_color_normal}',
+            'color': '#333333',
+            'fontWeight': 'normal',
+            'textAlign': '{align}'
+        }};
     }}
-    """
-    )
+    """)
 
 
 def render_aggrid(df: pd.DataFrame, grid_options, key, enable_selection: bool = False):
@@ -103,10 +112,21 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
         AgGrid gridOptions dictionary.
     """
     gb = GridOptionsBuilder.from_dataframe(df)
+
+    # Defaults: sortable, filterable, resizable, wrapped headers
+    gb.configure_default_column(
+        sortable=True,
+        filterable=True,
+        resizable=True,
+        wrapHeaderText=True,
+        autoHeaderHeight=True,
+        minWidth=80,
+    )
+
     if enable_selection:
         gb.configure_selection(selection_mode="single", use_checkbox=False)
-    identifier_cols = ["selected", "id"]
-    parameter_cols = [
+
+    parameter_cols = {
         "software_name",
         "software_version",
         "search_engine",
@@ -130,30 +150,50 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
         "protein_inference",
         "abundance_normalization_ions",
         "submission_comments",
-    ]
-    result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
-    technical_cols = [
-        "proteobench_version",
-        "intermediate_hash",
-        "hover_text",
-        "color",
-        "old_new",
-        "is_temporary",
-        "comments",
-        "scatter_size",
-    ]
+        "checkpoint",
+        "n_beams",
+        "n_peaks",
+        "min_mz",
+        "max_mz",
+        "min_intensity",
+        "max_intensity",
+        "tokens",
+        "remove_precursor_tol",
+        "isotope_error_range",
+        "decoding_strategy",
+    }
+    result_cols = {"median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results", "precision", "recall"}
 
     for col in df.columns:
-        if col in identifier_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_IDENTIFIER))
+        if col == "selected":
+            # Narrow indicator column, pinned, no sort/filter, centred
+            gb.configure_column(
+                col,
+                header_name="",
+                width=40,
+                minWidth=40,
+                maxWidth=40,
+                pinned="left",
+                sortable=False,
+                filterable=False,
+                resizable=False,
+                cellStyle=_get_cell_style_js(COLOR_IDENTIFIER, align="center"),
+            )
+        elif col == "id":
+            gb.configure_column(
+                col,
+                header_name="ProteoBench ID",
+                minWidth=160,
+                pinned="left",
+                cellStyle=_get_cell_style_js(COLOR_IDENTIFIER),
+            )
         elif col in parameter_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_PARAMETER))
+            gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_PARAMETER))
         elif col in result_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_RESULT))
-        elif col in technical_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_TECHNICAL))
+            # Right-align metrics so decimal points line up
+            gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_RESULT, align="right"), minWidth=130)
         else:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_ADDITIONAL))
+            gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_ADDITIONAL))
 
     return gb.build()
 
@@ -208,8 +248,19 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
             "protein_inference",
             "abundance_normalization_ions",
             "submission_comments",
+            "checkpoint",
+            "n_beams",
+            "n_peaks",
+            "min_mz",
+            "max_mz",
+            "min_intensity",
+            "max_intensity",
+            "tokens",
+            "remove_precursor_tol",
+            "isotope_error_range",
+            "decoding_strategy",
         ]
-        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
+        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results", "precision", "recall"]
         technical_cols = [
             "proteobench_version",
             "intermediate_hash",

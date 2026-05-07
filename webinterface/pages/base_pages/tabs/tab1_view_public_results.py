@@ -332,7 +332,7 @@ def display_existing_results(
     elif plot_params.get("alpha_warning"):
         annotation = "-Alpha-"
 
-    consumed_keys = {"alpha_warning", "beta_warning", "min_nr_observed", "metric", "mode", "label", "colorblind_mode"}
+    consumed_keys = {"alpha_warning", "beta_warning", "metric", "mode", "label", "colorblind_mode"}
     extra_plot_kwargs = {k: v for k, v in plot_params.items() if k not in consumed_keys}
 
     # --- Render plot via the shared utility; get the clicked point ID ---

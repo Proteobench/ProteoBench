@@ -349,14 +349,14 @@ def display_existing_results(
         **extra_plot_kwargs,
     )
 
-    # Plot click → update highlight and reset the AgGrid so its stale client-side
-    # selection does not immediately re-override the new state on the next rerun.
-    highlight_id_updated_by_plot = False
+    # Plot click → update state and immediately re-render so the Highlight column
+    # is stamped correctly on the next pass.  st.rerun(scope="fragment") stops
+    # execution here; the AgGrid key reset prevents a stale table selection from
+    # overriding the new highlight on the subsequent rerun.
     if plot_clicked_id is not None and plot_clicked_id != highlight_id:
         st.session_state[highlight_key] = plot_clicked_id
         st.session_state[agrid_key_id] = uuid.uuid4()
-        highlight_id = plot_clicked_id
-        highlight_id_updated_by_plot = True
+        st.rerun(scope="fragment")
 
     # --- Render table via shared utilities ---
     st.subheader("Benchmark Results")
@@ -378,10 +378,9 @@ def display_existing_results(
         icon=":material/download:",
     )
 
-    # Table row click → update highlight and reset the Plotly widget so its native
-    # selection ring is cleared.  Only process when the plot was not already clicked
-    # in this same rerun (otherwise the stale AgGrid selection would override it).
-    if not highlight_id_updated_by_plot and grid_response is not None:
+    # Table row click → update state and immediately re-render so the plot shows
+    # the new highlight.  Regenerating the Plotly key clears its native selection ring.
+    if grid_response is not None:
         selected_rows = grid_response.selected_rows
         selected_id = None
         if selected_rows is not None:
@@ -393,6 +392,6 @@ def display_existing_results(
         if selected_id and selected_id != highlight_id:
             st.session_state[highlight_key] = selected_id
             st.session_state[plot_key_id] = uuid.uuid4()
-            st.rerun()
+            st.rerun(scope="fragment")
 
     display_download_section(variables)

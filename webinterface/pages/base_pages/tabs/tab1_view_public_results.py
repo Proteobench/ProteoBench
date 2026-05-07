@@ -332,8 +332,7 @@ def display_existing_results(
     elif plot_params.get("alpha_warning"):
         annotation = "-Alpha-"
 
-    consumed_keys = {"alpha_warning", "beta_warning", "min_nr_observed",
-                     "metric", "mode", "label", "colorblind_mode"}
+    consumed_keys = {"alpha_warning", "beta_warning", "min_nr_observed", "metric", "mode", "label", "colorblind_mode"}
     extra_plot_kwargs = {k: v for k, v in plot_params.items() if k not in consumed_keys}
 
     # --- Render plot via the shared utility; get the clicked point ID ---
@@ -349,10 +348,6 @@ def display_existing_results(
         **extra_plot_kwargs,
     )
 
-    # Plot click → update state and immediately re-render so the Highlight column
-    # is stamped correctly on the next pass.  st.rerun(scope="fragment") stops
-    # execution here; the AgGrid key reset prevents a stale table selection from
-    # overriding the new highlight on the subsequent rerun.
     if plot_clicked_id is not None and plot_clicked_id != highlight_id:
         st.session_state[highlight_key] = plot_clicked_id
         st.session_state[agrid_key_id] = uuid.uuid4()
@@ -378,8 +373,6 @@ def display_existing_results(
         icon=":material/download:",
     )
 
-    # Table row click → update state and immediately re-render so the plot shows
-    # the new highlight.  Regenerating the Plotly key clears its native selection ring.
     if grid_response is not None:
         selected_rows = grid_response.selected_rows
         selected_id = None

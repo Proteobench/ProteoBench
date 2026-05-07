@@ -104,7 +104,7 @@ def render_metric_plot(
             else None
         )
         if selected_point:
-            hover = selected_point.get("hovertext", "")
+            hover = selected_point.get("hovertext", "") or selected_point.get("text", "")
             match = re.search(r"ProteoBench ID: ([^<]+)", hover)
             if match:
                 highlight_point_id = match.group(1)

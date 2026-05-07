@@ -929,7 +929,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 f"Quantified spike-ins: {y_val}<br>"
                 f"Plasma dynamic range: {size_val:.2f}<br>"
                 f"Plasma accuracy error ({metric_lower}): {opacity_val:.3f}<br>"
-                f"ID: {row['id']}"
+                f"ProteoBench ID: {row['id']}"
             )
             software_data[software]["hover_texts"].append(hover_text)
 

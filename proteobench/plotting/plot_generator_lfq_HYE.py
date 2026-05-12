@@ -380,7 +380,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 linecolor="black",
             ),
             yaxis=dict(
-                title="Total number of precursor ions quantified in the selected number of raw files",
+                title="Total number of features quantified in the selected number of raw files",
                 gridcolor="white",
                 gridwidth=2,
                 linecolor="black",

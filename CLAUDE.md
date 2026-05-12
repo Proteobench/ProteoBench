@@ -177,7 +177,7 @@ Each benchmarking step wraps its errors into the appropriate type via `@handle_b
 `PlotGeneratorBase` (abstract) defines the interface. Two concrete implementations exist:
 
 **`LFQHYEPlotGenerator`** (HYE = Human-Yeast-Ecoli mixed-species benchmarks):
-- **Main metric plot** (`plot_main_metric()`): Scatter of metric value (x) vs nr_prec (y), one trace per software tool. Supports `metric="Median"/"Mean"/"ROC-AUC"`, `mode="Global"/"Species-weighted"`, and `colorblind_mode=True` (uses marker shapes instead of colors only). The `software_colors` dict maps 19 tools to hex colors; `software_markers` maps to plotly marker symbols.
+- **Main metric plot** (`plot_main_metric()`): Scatter of metric value (x) vs nr_feature (y), one trace per software tool. Supports `metric="Median"/"Mean"/"ROC-AUC"`, `mode="Global"/"Species-weighted"`, and `colorblind_mode=True` (uses marker shapes instead of colors only). The `software_colors` dict maps 19 tools to hex colors; `software_markers` maps to plotly marker symbols.
 - **In-depth plots** (`generate_in_depth_plots()`):
   - `logfc`: Log2 fold change distribution curves per species with expected ratio vertical lines
   - `cv`: CV violin plot for Condition A and B

@@ -119,6 +119,7 @@ class VariablesDDAQuant:
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/3-quant-lfq-peptidoform-dda/"
     )
     title: str = "DDA peptidoform quantification"
+    y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_peptidoform.json"
     prefix_params: str = "lfq_peptidoform_dda_quant_"

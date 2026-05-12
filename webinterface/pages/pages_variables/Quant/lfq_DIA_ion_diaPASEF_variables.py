@@ -116,6 +116,7 @@ class VariablesDIAQuantdiaPASEF:
     )
 
     title: str = "DIA Precursor quantification - diaPASEF"
+    y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_diapasef_quant_"

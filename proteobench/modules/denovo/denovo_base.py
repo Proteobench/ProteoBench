@@ -114,7 +114,7 @@ class DeNovoModule:
         """
         return False
 
-    def get_plot_generator(self) -> PlotGeneratorBase:
+    def get_plot_generator(self, **kwargs) -> PlotGeneratorBase:
         """
         Get the plot generator for this module.
 

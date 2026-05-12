@@ -404,7 +404,7 @@ def display_existing_results(
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
 
     # Get plot generator from module
-    plot_generator = ionmodule.get_plot_generator()
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # Render main plot
     render_main_plot(plot_generator, filtered_data, variables, plot_params)

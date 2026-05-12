@@ -19,6 +19,9 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
     Used by plasma benchmarking modules that use human plasma, yeast, and E. coli species.
     """
 
+    def __init__(self, y_axis_title: str = "Number of quantified spike-in precursors"):
+        self.y_axis_title = y_axis_title
+
     def generate_in_depth_plots(
         self, performance_data: pd.DataFrame, parse_settings: any, **kwargs
     ) -> Dict[str, go.Figure]:
@@ -858,7 +861,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # values cluster, maximising visual separation for small differences.
         raw_size_vals = []
         for _, row in result_df.iterrows():
-            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_feature)
             if m is not None:
                 sv = m.get("dynamic_range_human_plasma_mean", 0.0)
                 if sv > 0:
@@ -969,7 +972,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 showgrid=True,
             ),
             yaxis=dict(
-                title="Number of quantified spike-in precursors",
+                title=self.y_axis_title,
                 gridcolor="lightgray",
                 gridwidth=1,
                 linecolor="black",

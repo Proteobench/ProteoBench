@@ -192,7 +192,7 @@ class DIAQuantIonModuleAIF(QuantModule):
             input_df,
         )
 
-    def get_plot_generator(self):
+    def get_plot_generator(self, y_axis_title: str = None):
         """
         Get the plot generator for this module.
 
@@ -201,4 +201,4 @@ class DIAQuantIonModuleAIF(QuantModule):
         PlotGeneratorBase
             The plot generator instance.
         """
-        return super().get_plot_generator()
+        return super().get_plot_generator(y_axis_title=y_axis_title)

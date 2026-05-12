@@ -71,6 +71,8 @@ class QuantModule:
         The module identifier for configuration.
     """
 
+    y_axis_title: str = "Total number of features quantified in the selected number of raw files"
+
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
         "ProlineStudio": extract_params_proline,
@@ -573,13 +575,19 @@ class QuantModule:
         params.software_name = input_format
         return params
 
-    def get_plot_generator(self) -> PlotGeneratorBase:
+    def get_plot_generator(self, y_axis_title: str = None) -> PlotGeneratorBase:
         """
         Get the plot generator for LFQ Ion plots.
+
+        Parameters
+        ----------
+        y_axis_title : str, optional
+            Override the default y-axis title. If None, the class default is used.
 
         Returns
         -------
         PlotGeneratorBase
             The plot generator instance.
         """
-        return LFQHYEPlotGenerator()
+        title = y_axis_title if y_axis_title is not None else self.y_axis_title
+        return LFQHYEPlotGenerator(y_axis_title=title)

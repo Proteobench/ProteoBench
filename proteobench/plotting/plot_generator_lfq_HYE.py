@@ -15,6 +15,9 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
     Used by DIA/DDA ion modules that use the HYE benchmark dataset.
     """
 
+    def __init__(self, y_axis_title: str = "Total number of features quantified in the selected number of raw files"):
+        self.y_axis_title = y_axis_title
+
     def generate_in_depth_plots(
         self, performance_data: pd.DataFrame, parse_settings: any, **kwargs
     ) -> Dict[str, go.Figure]:
@@ -380,7 +383,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 linecolor="black",
             ),
             yaxis=dict(
-                title="Total number of features quantified in the selected number of raw files",
+                title=self.y_axis_title,
                 gridcolor="white",
                 gridwidth=2,
                 linecolor="black",

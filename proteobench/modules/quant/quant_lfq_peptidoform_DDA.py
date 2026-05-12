@@ -48,6 +48,7 @@ class DDAQuantPeptidoformModule(QuantModule):
     """
 
     module_id: str = "quant_lfq_DDA_peptidoform"
+    y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
 
     def __init__(
         self,
@@ -185,5 +186,5 @@ class DDAQuantPeptidoformModule(QuantModule):
 
         return intermediate_metric_structure, all_datapoints, input_df
 
-    def get_plot_generator(self):
-        return super().get_plot_generator()
+    def get_plot_generator(self, y_axis_title: str = None):
+        return super().get_plot_generator(y_axis_title=y_axis_title)

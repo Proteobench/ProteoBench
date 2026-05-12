@@ -49,6 +49,7 @@ class DIAQuantIonModulePlasma(QuantModule):
     """
 
     module_id: str = "quant_lfq_DIA_ion_plasma"
+    y_axis_title: str = "Number of quantified spike-in precursors"
 
     def __init__(
         self,
@@ -191,13 +192,18 @@ class DIAQuantIonModulePlasma(QuantModule):
             input_df,
         )
 
-    def get_plot_generator(self):
+    def get_plot_generator(self, y_axis_title: str = None):
         """Return the plot generator for the module.
+
+        Parameters
+        ----------
+        y_axis_title : str, optional
+            Override the default y-axis title. If None, the class default is used.
 
         Returns
         -------
         PlotGenerator
             The plot generator for the module.
         """
-
-        return LFQPYEPlotGenerator()
+        title = y_axis_title if y_axis_title is not None else self.y_axis_title
+        return LFQPYEPlotGenerator(y_axis_title=title)

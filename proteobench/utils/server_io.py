@@ -9,11 +9,14 @@ import requests
 import toml
 from bs4 import BeautifulSoup
 
+from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
     DDAQuantIonModuleQExactive,
 )
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
+from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
+from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
@@ -30,10 +33,13 @@ from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
     "DDAQuantIonModuleQExactive": DDAQuantIonModuleQExactive,
+    "DDAQuantIonAstralModule": DDAQuantIonAstralModule,
     "DIAQuantIonModuleAIF": DIAQuantIonModuleAIF,
     "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
     "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
+    "DIAQuantIonModuleZenoTOF": DIAQuantIonModuleZenoTOF,
     "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,
+    "DIAQuantIonModulePlasma": DIAQuantIonModulePlasma,
     "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
     "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
 }

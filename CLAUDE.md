@@ -415,7 +415,7 @@ De novo `EXTRACT_PARAMS_DICT`: AdaNovo, Casanovo, DeepNovo, InstaNovo, Pi-HelixN
 | `2_Quant_LFQ_DDA_ion_QExactive.py` | `VariablesDDAQuant` | `DDAQuantIonModuleQExactive` | `QuantUIObjects` | `BaseStreamlitUI` |
 | `3_Quant_LFQ_DIA_ion_AIF.py` | `VariablesDIAQuant` | `DIAQuantIonModuleAIF` | `QuantUIObjects` | `BaseStreamlitUI` |
 | `4_Quant_LFQ_DIA_ion_diaPASEF.py` | `VariablesDIAQuantdiaPASEF` | `DIAQuantIonModulediaPASEF` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `5_Quant_LFQ_DDA_peptidoform.py` | `VariablesDDAQuantPeptidoform` | `DDAQuantPeptidoformModule` | `QuantUIObjects` | `BaseStreamlitUI` |
+| `5_Quant_LFQ_DDA_peptidoform.py` | `VariablesDDAQuant` | `DDAQuantPeptidoformModule` | `QuantUIObjects` | `BaseStreamlitUI` |
 | `6_Quant_LFQ_DIA_ion_Astral.py` | `VariablesDIAQuantAstral` | `DIAQuantIonModuleAstral` | `QuantUIObjects` | `BaseStreamlitUI` |
 | `7_denovo_DDA_HCD.py` | `VariablesDDADeNovo` | `DDAHCDDeNovoModule` | `DeNovoUIObjects` | Custom (5 tabs) |
 | `8_Quant_LFQ_DDA_ion_Astral.py` | `VariablesDDAQuantAstral` | `DDAQuantIonAstralModule` | `QuantUIObjects` | `BaseStreamlitUI` |

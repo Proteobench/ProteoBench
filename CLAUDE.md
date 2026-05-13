@@ -53,6 +53,9 @@ nox --session "docs" -- -b linkcheck
 # Update parameter documentation (CI checks this is up-to-date)
 cd docs && python parse_tables.py
 
+# Update module grid on docs homepage (CI checks this is up-to-date)
+python docs/generate_module_grid.py
+
 # Pre-commit hooks
 pre-commit install
 pre-commit run --all-files
@@ -326,6 +329,7 @@ Every PR to main:
 2. Flake8 lint on 3 Python versions (3.11, 3.12, 3.13)
 3. Full pytest suite on 3 Python versions
 4. Parameter documentation check: runs `docs/parse_tables.py` and fails if `docs/parsing_overview.tsv` has a git diff
+5. Module grid check: runs `docs/generate_module_grid.py` and fails if `docs/module_grid_generated.rst` has a git diff
 
 Separate workflow for webinterface:
 1. Black formatting check on `webinterface/`
@@ -352,10 +356,13 @@ Separate workflow for webinterface:
 4. Create TOML configs: `module_settings.toml` + per-tool parse settings in new directory
 5. Add module class to `MODULE_CLASSES` in `utils/server_io.py`
 6. Create a Streamlit page in `webinterface/pages/`
-7. Create a `Variables*` dataclass in `webinterface/pages/pages_variables/Quant/`
+7. Create a `Variables*` dataclass in `webinterface/pages/pages_variables/Quant/` — the dataclass **must** include `sidebar_label`, `sidebar_path`, `sidebar_category`, `doc_url`, `documentation_description`, and the appropriate release-stage flag (`alpha_warning`/`beta_warning`/`archived_warning`) for the documentation homepage grid to be generated correctly
 8. Add module markdown files in `webinterface/pages/markdown_files/`
 9. The module will be auto-discovered by `module_registry.py` if the Variables dataclass has `sidebar_label`, `sidebar_path`, and `sidebar_category` fields
-10. Add test file and test data
+10. Run `python docs/generate_module_grid.py` from the repo root and commit `docs/module_grid_generated.rst` — CI will fail if this file is stale
+11. Add test file and test data
+
+For modules that are **only in discussion** (no Streamlit page yet), add an entry to `docs/module_in_discussion_grid_extra.yaml` instead (with `label`, `url`, `description`), then regenerate and commit `docs/module_grid_generated.rst`.
 
 ### Adding a new parameter JSON for submission forms
 
@@ -440,6 +447,8 @@ Built with Sphinx using the `pydata_sphinx_theme`. Extensions: myst_parser (Mark
 ### Auto-Generated Documentation
 
 `docs/parse_tables.py` extracts parameter tables from `12-parsed-parameters-for-public-submission.md`, combines them into a pivot table, and exports to `docs/parsing_overview.tsv`. CI validates this is up-to-date. ReadTheDocs runs `sphinx-apidoc` automatically for API docs.
+
+`docs/generate_module_grid.py` AST-parses all `*_variables.py` files (no Streamlit import) to generate `docs/module_grid_generated.rst`, which is included by `docs/index.rst` as the homepage module card grid. CI validates this is up-to-date. Discussion-only modules (no Variables dataclass yet) are listed in `docs/module_in_discussion_grid_extra.yaml`.
 
 ## CI/CD Workflows (`.github/workflows/`)
 

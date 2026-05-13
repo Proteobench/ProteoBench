@@ -759,6 +759,74 @@ based on warning flags in your variables file. The badge is determined by this p
   - ``title`` (full title)
   - ``keywords`` (all keyword strings)
 
+Documentation Homepage Module Grid
+...................................
+
+The documentation homepage (``docs/index.rst``) displays a card grid of all ProteoBench modules.
+This grid is **auto-generated** from the Variables dataclasses — you do not edit ``index.rst`` manually.
+
+**For implemented modules (Variables dataclass exists)**
+
+Add a ``documentation_description`` field to your Variables dataclass alongside the other
+``sidebar_*`` fields. This one-liner appears as the card body on the documentation homepage:
+
+.. code-block:: python
+
+    @dataclass
+    class VariablesDDAQuantAstral:
+        # ... other fields ...
+
+        # Sidebar metadata
+        sidebar_label: str = "Quant LFQ DDA ion Astral"
+        documentation_description: str = (
+            "Benchmark ion-level label-free quantification accuracy of DDA workflows "
+            "using a multi-species (HYE) sample on an Orbitrap Astral instrument."
+        )
+        sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
+        sidebar_category: str = "DDA"
+        # ...
+
+The release-stage badge on the card is derived automatically from the same ``alpha_warning`` /
+``beta_warning`` / ``archived_warning`` flags used by the sidebar. No additional work is needed
+for the badge.
+
+After adding or modifying the ``documentation_description`` field, regenerate the committed RST
+file and commit it:
+
+.. code-block:: bash
+
+    cd <repo-root>
+    python docs/generate_module_grid.py
+    git add docs/module_grid_generated.rst
+    git commit -m "docs: update module grid"
+
+CI will fail if ``module_grid_generated.rst`` is out of sync with the Variables dataclasses.
+
+**For modules only in discussion (no Variables dataclass yet)**
+
+Modules that exist only as a GitHub discussion and have no Streamlit page yet are listed
+separately below the card grid as a bullet list. They are defined in
+`docs/module_in_discussion_grid_extra.yaml <https://github.com/Proteobench/ProteoBench/blob/main/docs/module_in_discussion_grid_extra.yaml>`_.
+
+Add an entry to that file when a new module discussion is opened:
+
+.. code-block:: yaml
+
+    modules:
+      - label: "My new module proposal"
+        url: "https://github.com/orgs/Proteobench/discussions/999"
+        description: "One-sentence description of the proposed benchmark."
+
+Remove the entry (or promote it to a proper Variables dataclass) once the module is implemented.
+After editing the YAML, regenerate and commit:
+
+.. code-block:: bash
+
+    cd <repo-root>
+    python docs/generate_module_grid.py
+    git add docs/module_grid_generated.rst
+    git commit -m "docs: update module grid"
+
 Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObjects`
 ...................................................................................
 
@@ -775,10 +843,10 @@ Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObject
   displays the metric plot if a new results were added to the module.
 - Tab 3: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_submitted`
 - Tab 4: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_public_submission_ui`
-creates  the input fields for the metadata and the
-input file format and type. They are given in the
-`proteobench/modules/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/io/io_parse_settings>`_ folder,
-same as for the backend of the module.
+  creates  the input fields for the metadata and the
+  input file format and type. They are given in the
+  `proteobench/modules/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/io/io_parse_settings>`_ folder,
+  same as for the backend of the module.
 
 :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_results` gathers the data from the backend
 and displays them in several figures. Here you will need to edit and adapt the code

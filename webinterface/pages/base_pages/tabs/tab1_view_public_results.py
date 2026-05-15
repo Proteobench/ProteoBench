@@ -12,6 +12,8 @@ from typing import Any, Callable, Dict, Optional
 import pandas as pd
 import streamlit as st
 
+from ..utils.resulttable import add_open_source_column
+
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
     """
@@ -268,6 +270,8 @@ def render_results_table(
     if len(data) == 0:
         st.info("No datapoints available to display.", icon="ℹ️")
         return
+
+    data = add_open_source_column(data)
 
     st.subheader("Benchmark Results")
 

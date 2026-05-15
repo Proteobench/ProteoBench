@@ -56,8 +56,9 @@ The backend is organized into six main components that you can extend or customi
    - :file:`proteobench/io/parsing/parse_settings.py` handles format conversion
    - Settings defined in TOML files in :file:`proteobench/io/parsing/io_parse_settings/`
    - For new software tools, extend :func:`~proteobench.io.parsing.parse_ion.load_input_file`
-   - If the new tool is open source, add its ``software_name`` to the ``[open_source].tools``
-     list in :file:`proteobench/io/parsing/io_parse_settings/tool_metadata.toml` so it is
+   - If the new tool is :ref:`open source <open-source-software>`, add its ``software_name``
+     to the ``[open_source].tools`` list in
+     :file:`proteobench/io/parsing/io_parse_settings/tool_metadata.toml` so it is
      marked with ✅ in the Benchmark Results table
 
 **3. Score calculation** - Compute benchmarking metrics

@@ -92,6 +92,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 "AdaNovo": "#88ccef",
                 "Casanovo": "#cc6777",
                 "DeepNovo": "#ddcc77",
+                "InstaNovo": "#44aa99",
                 "PepNet": "#147733",
                 "Pi-HelixNovo": "#342288",
                 "Pi-PrimeNovo": "#aa4599",
@@ -104,6 +105,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 "AdaNovo": "circle",
                 "Casanovo": "square",
                 "DeepNovo": "diamond",
+                "InstaNovo": "hexagon",
                 "PepNet": "cross",
                 "Pi-HelixNovo": "x",
                 "Pi-PrimeNovo": "triangle-up",
@@ -177,7 +179,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             ]
 
         # Color plot based on software tool
-        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
+        colors = [software_colors.get(software, "gray") for software in benchmark_metrics_df["software_name"]]
         if "Highlight" in benchmark_metrics_df.columns:
             colors = [
                 highlight_color if highlight else item
@@ -322,6 +324,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 "AdaNovo": "#88ccef",
                 "Casanovo": "#cc6777",
                 "DeepNovo": "#ddcc77",
+                "InstaNovo": "#44aa99",
                 "PepNet": "#147733",
                 "Pi-HelixNovo": "#342288",
                 "Pi-PrimeNovo": "#aa4599",
@@ -400,6 +403,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             "AdaNovo": "#8b26ff",
             "Casanovo": "#8bc6fd",
             "DeepNovo": "#108E2E",
+            "InstaNovo": "#44aa99",
             "PepNet": "#F89008",
             "Pi-HelixNovo": "#E43924",
             "Pi-PrimeNovo": "#663200",
@@ -412,7 +416,9 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             tool = row["software_name"]
 
             fig.add_trace(
-                go.Scatter(x=x, y=y, mode="lines+markers", name=tool, marker=dict(color=software_colors[tool]))
+                go.Scatter(
+                    x=x, y=y, mode="lines+markers", name=tool, marker=dict(color=software_colors.get(tool, "gray"))
+                )
             )
 
         fig.update_layout(
@@ -434,6 +440,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             "AdaNovo": "#8b26ff",
             "Casanovo": "#8bc6fd",
             "DeepNovo": "#108E2E",
+            "InstaNovo": "#44aa99",
             "PepNet": "#F89008",
             "Pi-HelixNovo": "#E43924",
             "Pi-PrimeNovo": "#663200",
@@ -449,7 +456,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             x = ptm_data[mod_label]["correct_gt"] / (ptm_data[mod_label]["counts_gt"] + EPSILON)
             y = ptm_data[mod_label]["correct_dn"] / (ptm_data[mod_label]["counts_dn"] + EPSILON)
             tool = row["software_name"]
-            fig.add_trace(go.Scatter(x=[x], y=[y], name=tool, marker=dict(color=software_colors[tool])))
+            fig.add_trace(go.Scatter(x=[x], y=[y], name=tool, marker=dict(color=software_colors.get(tool, "gray"))))
 
         fig.update_layout(
             width=500,
@@ -479,6 +486,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             "AdaNovo": "#8b26ff",
             "Casanovo": "#8bc6fd",
             "DeepNovo": "#108E2E",
+            "InstaNovo": "#44aa99",
             "PepNet": "#F89008",
             "Pi-HelixNovo": "#E43924",
             "Pi-PrimeNovo": "#663200",
@@ -597,6 +605,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             "AdaNovo": "#8b26ff",
             "Casanovo": "#8bc6fd",
             "DeepNovo": "#108E2E",
+            "InstaNovo": "#44aa99",
             "PepNet": "#F89008",
             "Pi-HelixNovo": "#E43924",
             "Pi-PrimeNovo": "#663200",

@@ -291,7 +291,7 @@ class QuantModule:
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all datapoints from the ProteoBench repo.
         default_cutoff_min_feature : int, optional
-            Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
+            Minimum number of runs a feature has to be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
         max_nr_observed : int, optional

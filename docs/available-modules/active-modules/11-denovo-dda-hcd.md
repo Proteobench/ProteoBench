@@ -176,7 +176,20 @@ Once uploaded to ProteoBench, the following columns from `results.mztab` are con
 - search_engine_score[1]: The peptide confidence score. Used for precision-recall curve construction (*Currently not implemented*).
 - opt_ms_run[1]_aa_scores: Amino acid-level confidence scores. Used for precision-recall curve construction (*Currently not implemented*).
 
-### [InstaNovo](https://instanovo.ai/) (coming soon)
+### [InstaNovo](https://github.com/instadeepai/InstaNovo)
+
+To generate data compatible with ProteoBench:
+
+1. Set up InstaNovo v1.2.2 according to the developers instructions and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+2. Save predictions as CSV with an InstaNovo command such as `instanovo predict --data-path spectra.mgf --output-path results.csv --denovo`.
+3. Upload `results.csv` for metric calculation in the ProteoBench platform. For public submission, also provide the InstaNovo inference `config.yaml`.
+
+Once uploaded to ProteoBench, the following columns from `results.csv` are considered:
+
+- spectrum_id: Contains the spectrum identifier used to map the ground-truth identifications. ProteoBench extracts the trailing scan number from this field.
+- predictions: The predicted *de novo* sequence in InstaNovo's ProForma-compatible string format.
+- log_probs: The peptide confidence score.
+- token_log_probs: Amino acid-level confidence scores.
 
 ### [PepNet](https://denovo.predfull.com/)
 

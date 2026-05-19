@@ -17,4 +17,5 @@ tools = [
     "Pi-PrimeNovo",
     "PointNovo",
     "Sage",
+    "ProlineStudio",
 ]

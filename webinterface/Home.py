@@ -7,7 +7,7 @@ from _base import StreamlitPage
 from UI_utils import (
     build_submissions_figure,
     build_tool_pie_chart,
-    get_monthly_visitors,
+    get_monthly_visits,
     get_n_modules,
     get_n_modules_proposed,
     get_n_submitted_points,
@@ -20,6 +20,7 @@ from UI_utils import (
 def _show_tool_breakdown(module_title, tool_counts):
     pie_fig = build_tool_pie_chart(module_title, tool_counts)
     st.plotly_chart(pie_fig, use_container_width=True)
+
 
 # Path to the index.rst file
 file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
@@ -48,13 +49,13 @@ class StreamlitPageHome(StreamlitPage):
             and "matomo_idsite" in st.secrets["tracking"]
             and "matomo_token" in st.secrets["tracking"]
         ):
-            monthly_uniq_visitors = get_monthly_visitors(
+            monthly_visits = get_monthly_visits(
                 st.secrets["tracking"]["matomo_endpoint"],
                 st.secrets["tracking"]["matomo_token"],
                 st.secrets["tracking"]["matomo_idsite"],
             )
         else:
-            monthly_uniq_visitors = "not configured"
+            monthly_visits = "not configured"
 
         st.header("ProteoBench Overview")
         st.markdown(
@@ -143,7 +144,7 @@ class StreamlitPageHome(StreamlitPage):
         row3 = st.columns(1)
         with row3[0]:
             st.markdown(
-                stat_box("Monthly unique visitors", monthly_uniq_visitors, fig_path / "user.png"),
+                stat_box("Monthly visits", monthly_visits, fig_path / "user.png"),
                 unsafe_allow_html=True,
             )
 

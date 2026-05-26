@@ -853,11 +853,26 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Human plasma metrics don't have mode variants (single species)
         opacity_metric_key = f"{metric_lower}_abs_epsilon_human_plasma"
 
+        # Pre-pass: collect raw dynamic-range values for data-driven size normalization.
+        # This ensures the full [8, 40] marker-size range is used regardless of where
+        # values cluster, maximising visual separation for small differences.
+        raw_size_vals = []
+        for _, row in result_df.iterrows():
+            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            if m is not None:
+                sv = m.get("dynamic_range_human_plasma_mean", 0.0)
+                if sv > 0:
+                    raw_size_vals.append(sv)
+        size_min = min(raw_size_vals) if raw_size_vals else 0.0
+        size_max = max(raw_size_vals) if raw_size_vals else 1.0
+        size_data_range = size_max - size_min if size_max > size_min else 1.0
+
         # Create scatter plot with all four visual dimensions
         # Group by software to create separate traces (allows colorblind markers)
         software_data = {}
         for idx, row in result_df.iterrows():
-            if default_cutoff_min_prec not in row["results"]:
+            metrics = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            if metrics is None:
                 continue
 
             software = row["software_name"]
@@ -872,8 +887,6 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                     "hover_texts": [],
                 }
 
-            metrics = row["results"][default_cutoff_min_prec]
-
             # Try new mode-specific key first, fall back to legacy key
             x_val = metrics.get(x_metric_key)
             if x_val is None:
@@ -886,12 +899,13 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             software_data[software]["x"].append(x_val)
             software_data[software]["y"].append(y_val)
 
-            # Size scaling: normalize dynamic range to reasonable marker sizes (5-30)
+            # Size scaling: min-max normalise across the loaded data so the full
+            # [8, 40] range is always used, making even small differences visible.
             if size_val > 0:
-                normalized_size = 5 + (size_val / 3) * 25
+                normalized_size = 8 + ((size_val - size_min) / size_data_range) * 10
             else:
                 normalized_size = 8
-            software_data[software]["sizes"].append(min(normalized_size, 30))
+            software_data[software]["sizes"].append(normalized_size)
 
             # Opacity: lower error = higher opacity (higher alpha)
             opacity = max(0.2, 0.9 - (opacity_val * 0.7))
@@ -992,6 +1006,21 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         fig.update_layout(clickmode="event+select")
 
         return fig
+
+    @staticmethod
+    def _get_metrics_at_cutoff(results: dict, cutoff: int) -> dict | None:
+        """Get metrics for a given cutoff level from results with int or string keys."""
+        if not isinstance(results, dict):
+            return None
+
+        if cutoff in results and isinstance(results[cutoff], dict):
+            return results[cutoff]
+
+        cutoff_str = str(cutoff)
+        if cutoff_str in results and isinstance(results[cutoff_str], dict):
+            return results[cutoff_str]
+
+        return None
 
     def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
         """

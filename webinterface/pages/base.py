@@ -66,6 +66,19 @@ class BaseStreamlitUI:
         if "_tour_opted_in" not in st.session_state:
             st.session_state["_tour_opted_in"] = False
 
+        # Driver.js sets pointer-events:none on ALL elements (.driver-active *) to lock the page.
+        # This prevents Streamlit selectbox dropdowns from working because they render as body-level
+        # portals outside the highlighted element. We re-enable pointer events on everything, but
+        # keep the SVG overlay itself non-interactive so overlay clicks don't close the tour.
+        if st.session_state.get("_module_tour_in_progress", False):
+            st.markdown(
+                "<style>"
+                ".driver-active * { pointer-events: auto !important; }"
+                ".driver-active .driver-overlay { pointer-events: none !important; }"
+                "</style>",
+                unsafe_allow_html=True,
+            )
+
         if st.sidebar.button("Take a Tour", key="module_tour_trigger"):
             st.session_state["start_module_tour"] = True
 

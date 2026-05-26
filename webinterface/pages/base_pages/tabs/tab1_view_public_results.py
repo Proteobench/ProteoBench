@@ -234,20 +234,21 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
     elif plot_params.get("alpha_warning", False):
         annotation = "-Alpha-"
 
-    try:
-        fig = plot_generator.plot_main_metric(
-            result_df=data, 
-            hide_annot=plot_params.get("hide_annot", False),
-            annotation=annotation,
-            **plot_params
-        )
-        st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
-    except Exception as e:
-        st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-        import traceback
+    with st.container(key="tour_metric_plot"):
+        try:
+            fig = plot_generator.plot_main_metric(
+                result_df=data,
+                hide_annot=plot_params.get("hide_annot", False),
+                annotation=annotation,
+                **plot_params
+            )
+            st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            import traceback
 
-        with st.expander("Error details"):
-            st.code(traceback.format_exc())
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
 
 
 def render_results_table(

@@ -77,6 +77,12 @@ class QuantUIObjects(BaseUIModule):
         st.session_state[self.variables.submit] = False
         self.stop_duplicating = False
 
+    def get_tour_steps(self) -> list:
+        """Return tour steps for this quantification module."""
+        from pages.base_pages.tour_steps import get_quant_tour_steps
+
+        return get_quant_tour_steps(module_name=getattr(self.variables, "title", "this module"))
+
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
         # Display software selector and AlphaDIA info outside the form so it updates immediately

@@ -1,6 +1,7 @@
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
+from streamlit_tour import Tour
 
 
 class BaseStreamlitUI:
@@ -61,6 +62,13 @@ class BaseStreamlitUI:
         """
         Set up the main page layout for the Streamlit application.
         """
+        # User navigated away from the homepage without answering: treat as opted out.
+        if "_tour_opted_in" not in st.session_state:
+            st.session_state["_tour_opted_in"] = False
+
+        if st.sidebar.button("Take a Tour", key="module_tour_trigger"):
+            st.session_state["start_module_tour"] = True
+
         # Get tab configuration
         tab_config = self.get_tab_config()
         tab_names = [name for name, _ in tab_config]
@@ -74,3 +82,42 @@ class BaseStreamlitUI:
                 self._render_tab_header()
                 # Call the appropriate method on uiobjects
                 getattr(self.uiobjects, method_name)()
+
+        tour_steps = self.uiobjects.get_tour_steps()
+        if tour_steps:
+            module_id = getattr(self.ionmodule, "module_id", "module")
+            tour_key = f"onboarding_{module_id}"
+            tour_active_key = f"stTour--{tour_key}-active"
+            tour_in_progress_key = "_module_tour_in_progress"
+
+            # Detect tour completion: was in progress last render, now inactive.
+            if st.session_state.get(tour_in_progress_key, False) and not st.session_state.get(
+                tour_active_key, False
+            ):
+                st.session_state.pop(tour_in_progress_key, None)
+                st.session_state["_module_tour_completed"] = True
+
+            tour = Tour(
+                tour_steps,
+                key=tour_key,
+                show_progress=True,
+                animate=True,
+                overlay_opacity=0.75,
+                one_time_tour=False,
+            )
+            auto_key = f"_tour_auto_{tour_key}"
+            if st.session_state.pop("start_module_tour", False):
+                # Manual button: always start regardless of opt-in.
+                st.session_state[tour_in_progress_key] = True
+                tour.start()
+            elif (
+                "_tour_opted_in" in st.session_state
+                and auto_key not in st.session_state
+                and not st.session_state.get("_module_tour_completed", False)
+            ):
+                # User has made a decision and auto-start has not been handled yet.
+                st.session_state[auto_key] = True
+                if st.session_state["_tour_opted_in"] is True:
+                    st.session_state[tour_in_progress_key] = True
+                    tour.start()
+                # Opted out: mark handled, do not start.

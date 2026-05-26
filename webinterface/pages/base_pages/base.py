@@ -104,6 +104,10 @@ class BaseUIModule(ABC):
 
         return results
 
+    def get_tour_steps(self) -> list | None:
+        """Return tour steps for this module, or None if no tour is defined."""
+        return None
+
     @abstractmethod
     def display_all_data_results_main(self) -> None:
         """Tab 1 - Display results for all data (overview)."""

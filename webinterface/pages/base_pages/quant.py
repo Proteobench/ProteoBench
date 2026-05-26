@@ -77,6 +77,17 @@ class QuantUIObjects(BaseUIModule):
         st.session_state[self.variables.submit] = False
         self.stop_duplicating = False
 
+        if self.variables.params_file_dict not in st.session_state.keys():
+            st.session_state[self.variables.params_file_dict] = {}
+
+        # # Initialize empty dataframe for plotting if not exists -- for dev
+        # if self.variables.all_datapoints not in st.session_state.keys():
+        #     import pandas as pd
+
+        #     st.session_state[self.variables.all_datapoints] = pd.DataFrame(
+        #         columns=["id", "intermediate_hash", "old_new"]
+        #     )
+
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
         # Display software selector and AlphaDIA info outside the form so it updates immediately
@@ -84,10 +95,12 @@ class QuantUIObjects(BaseUIModule):
             variables=self.variables,
             parsesettingsbuilder=self.parsesettingsbuilder,
             user_input=self.user_input,
+            ionmodule=self.ionmodule,
         )
         with st.form(key="main_form"):
             tab2_upload_results.generate_input_fields(
                 user_input=self.user_input,
+                ionmodule=self.ionmodule,
             )
             # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
             tab2_upload_results.generate_additional_parameters_fields(

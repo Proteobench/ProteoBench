@@ -41,7 +41,7 @@ class DIAQuantPeptidoformModule(QuantModule):
     ----------
     module_id : str
         Module identifier for configuration.
-    precursor_column_name: str
+    feature_column_name: str
         Level of quantification.
     """
 
@@ -52,6 +52,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         token: str,
         proteobot_repo_name: str = "Proteobot/Results_quant_peptidoform_DIA",
         proteobench_repo_name: str = "Proteobench/Results_quant_peptidoform_DIA",
+        use_github: bool = True,
         branch: Optional[str] = None,
     ):
         """
@@ -65,6 +66,8 @@ class DIAQuantPeptidoformModule(QuantModule):
             Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_peptidoform_DIA".
         proteobench_repo_name : str, optional
             Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_peptidoform_DIA".
+        use_github : bool, optional
+            Whether to clone the GitHub repository. Defaults to True.
         """
         raise NotImplementedError(
             "This module is not be implemented properly, no parse settings .toml files exist. After .toml files have "
@@ -76,9 +79,9 @@ class DIAQuantPeptidoformModule(QuantModule):
             proteobench_repo_name=proteobench_repo_name,
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
+            use_github=use_github,
             branch=branch,
         )
-        self.precursor_column_name = "peptidoform"
 
     def is_implemented(self) -> bool:
         """
@@ -97,7 +100,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
         max_nr_observed: int = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
@@ -114,8 +117,8 @@ class DIAQuantPeptidoformModule(QuantModule):
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all data points from the repo.
-        default_cutoff_min_prec : int, optional
-            Minimum number of runs a precursor ion must be identified in. Defaults to 3.
+        default_cutoff_min_feature : int, optional
+            Minimum number of runs a feature must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
 
@@ -156,7 +159,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         # Calculate quantification scores
         try:
             quant_score = QuantScoresHYE(
-                self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+                parse_settings.analysis_level, parse_settings.species_expected_ratio(), parse_settings.species_dict()
             )
         except Exception as e:
             raise QuantificationError(f"Error generating quantification scores: {e}")
@@ -171,9 +174,12 @@ class DIAQuantPeptidoformModule(QuantModule):
         try:
             current_datapoint = QuantDatapointHYE.generate_datapoint(
                 intermediate_metric_structure,
+               
                 input_format,
+               
                 user_input,
-                default_cutoff_min_prec=default_cutoff_min_prec,
+               
+                default_cutoff_min_feature=default_cutoff_min_feature,
                 max_nr_observed=max_nr_observed,
             )
         except Exception as e:

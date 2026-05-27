@@ -57,8 +57,9 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
         Tour.info(
             title=f"Welcome to {module_name}",
             desc=(
-                "This module benchmarks quantification depth and accuracy. "
-                "Here is a detailed walkthrough of all six tabs. "
+                "This specific module benchmarks quantification depth and accuracy. "
+                "We will guide you through a detailed walkthrough of the module. All other modules follow a similar structure, "
+                "so you can apply what you learn here to any module you choose to explore."
                 "Click each highlighted tab to navigate, then press Next."
             ),
         ),
@@ -66,26 +67,28 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
         _tab_step(
             1,
             "Tab 1: View Public Results",
-            "This tab shows all community-submitted benchmark results. It is the default view.",
-        ),
-        Tour.bind(
-            "tour_plot_options",
-            title="Filter and Display Options",
-            desc=(
-                "Use these controls to set the minimum number of quantified precursors (slider), "
-                "select the metric to display (Median, Mean, or ROC-AUC), "
-                "and toggle between Global and Species-weighted calculation modes."
-            ),
-            side="bottom",
+            "All ProteoBench modules center around a single figure."
+            "This figure shows all community-submitted benchmark results. It is the default view.",
         ),
         Tour.bind(
             "tour_metric_plot",
             title="Benchmark Overview Plot",
             desc=(
                 "Each point is one workflow submission. "
-                "The X-axis shows the accuracy or precision score; "
+                "In this case, the X-axis shows the accuracy or precision score; "
                 "the Y-axis shows the number of quantified precursor ions. "
-                "Hover over points for tool and parameter details."
+                "While exploring the plot, you can hover over points for tool and parameter details."
+            ),
+            side="top",
+        ),
+        Tour.bind(
+            "tour_plot_options",
+            title="Filter and Display Options",
+            desc=(
+                "You can change the plot settings to customize the visualization. "
+                "For instance, in this module, use these controls to set the minimum number of quantified precursors (slider), "
+                "select the metric to display (Median or Mean), "
+                "and toggle between Global and Species-weighted calculation modes."
             ),
             side="top",
         ),
@@ -99,7 +102,8 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             title="Select Your Software Tool",
             desc=(
                 "Use the 'Software tool' dropdown to select the tool you used. "
-                "Select one now — the file uploader below adapts to the expected output format."
+                "ProteoBench supports the output of many popular tools, and we are adding more all the time. "
+                "If your tool is not supported yet, select 'Custom' and upload a standardized parameter file to extract settings (see Documentation)."
             ),
         ),
         Tour.bind(
@@ -132,10 +136,9 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             "tour_indepth_plots",
             title="In-Depth Plots",
             desc=(
-                "After selecting a dataset, three plots appear here: "
-                "a log2 fold-change distribution per species with expected ratio lines, "
-                "a coefficient of variation (CV) violin plot for both conditions, "
-                "and an MA plot coloured by species."
+                "After selecting a dataset, a set of detailed plots appears here to show various aspects of the benchmark result. "
+                "These plots are designed to help you understand the strengths and weaknesses of the selected workflow, "
+                "and to compare it to other submissions. "
             ),
             side="top",
         ),
@@ -158,15 +161,15 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
         _tab_step(
             5,
             "Tab 5: Compare Two Results",
-            "Click this tab to compare any two workflows side by side. Press Next after clicking.",
+            "This tab lets you compare any two workflows side by side.",
         ),
         Tour.bind(
             "tour_compare_plot",
-            title="Select Two Workflows",
+            title="Workflow Selection Plot",
             desc=(
-                "Click on any two points in this scatter plot to select workflows for comparison. "
-                "Selected IDs are shown below the plot. "
-                "Click 'Clear' to reset the selection."
+                "This scatter plot shows all benchmark submissions. "
+                "Outside the tour, you can click any two points to select workflows for comparison. "
+                "The selected IDs are shown below the plot, and a Clear button resets the selection."
             ),
             side="top",
         ),
@@ -174,7 +177,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             "tour_compare_results",
             title="Comparison Results",
             desc=(
-                "Once two workflows are selected, two views appear here: "
+                "After selecting two workflows, two views appear here: "
                 "a precursor overlap bar chart showing shared and unique identifications, "
                 "and a parameter difference table highlighting what differs between the two workflows."
             ),
@@ -190,7 +193,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             "tour_meta_uploader",
             title="Upload Parameter File",
             desc=(
-                "Upload the native parameter or log file from your software tool "
+                "Here you can upload the native parameter or log file from your software tool "
                 "(for example: MaxQuant mqpar.xml, DIA-NN report.log.txt, Spectronaut .txt export). "
                 "ProteoBench extracts analysis settings automatically."
             ),
@@ -212,7 +215,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             desc=(
                 "You have seen all six tabs. "
                 "Start by exploring public results in Tab 1, or upload your own data in Tab 2. "
-                "Submit your results to contribute to the community benchmarks!"
+                "Submit your results to contribute to the community benchmarks! Happy benchmarking! "
             ),
         ),
     ]

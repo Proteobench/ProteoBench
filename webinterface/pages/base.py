@@ -74,7 +74,9 @@ class BaseStreamlitUI:
             st.markdown(
                 "<style>"
                 ".driver-active * { pointer-events: auto !important; }"
-                ".driver-active .driver-overlay { pointer-events: none !important; }"
+                ".driver-active svg * { pointer-events: all !important; }"
+                ".driver-active .driver-overlay,"
+                ".driver-active .driver-overlay * { pointer-events: none !important; }"
                 "</style>",
                 unsafe_allow_html=True,
             )

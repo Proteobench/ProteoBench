@@ -296,47 +296,7 @@ class QuantUIObjects(BaseUIModule):
             default_value="None",
         )
 
-        # Module-scoped session state keys for metric/mode so they can be read before
-        # the widgets are rendered (plot appears above the options expander).
-        metric_key = f"_tab1_metric_{self.variables.sidebar_path}"
-        mode_key = f"_tab1_mode_{self.variables.sidebar_path}"
-        if metric_key not in st.session_state:
-            st.session_state[metric_key] = "Median"
-        if mode_key not in st.session_state:
-            st.session_state[mode_key] = "Species-weighted"
-
-        # Read all current filter values from session state.
-        metric = st.session_state[metric_key]
-        mode = st.session_state[mode_key]
-
-        # Colorblind uses UUID indirection — read value via the stored UUID key.
-        if self.variables.colorblind_mode_selector_uuid not in st.session_state:
-            st.session_state[self.variables.colorblind_mode_selector_uuid] = uuid.uuid4()
-        colorblind_uuid = st.session_state[self.variables.colorblind_mode_selector_uuid]
-        colorblind_mode = st.session_state.get(colorblind_uuid, False)
-
-        min_nr_observed = None
-        if self.variables.slider_id_uuid in st.session_state:
-            slider_key = st.session_state[self.variables.slider_id_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
-
-        # --- PLOT FIRST ---
-        tab1_view_public_results.display_existing_results(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
-            plot_params={
-                "metric": metric,
-                "mode": mode,
-                "colorblind_mode": colorblind_mode,
-                "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
-                "min_nr_observed": min_nr_observed,
-                "alpha_warning": getattr(self.variables, "alpha_warning", False),
-                "beta_warning": getattr(self.variables, "beta_warning", False),
-            },
-        )
-
-        # --- OPTIONS EXPANDER BELOW PLOT ---
+        # --- OPTIONS EXPANDER FIRST ---
         def render_slider():
             max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
             tab1_view_public_results.generate_main_slider(
@@ -350,6 +310,13 @@ class QuantUIObjects(BaseUIModule):
             tab1_view_public_results.generate_main_selectbox(
                 self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid
             )
+
+        metric_key = f"_tab1_metric_{self.variables.sidebar_path}"
+        mode_key = f"_tab1_mode_{self.variables.sidebar_path}"
+        if metric_key not in st.session_state:
+            st.session_state[metric_key] = "Median"
+        if mode_key not in st.session_state:
+            st.session_state[mode_key] = "Species-weighted"
 
         def render_metric_selector():
             help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
@@ -376,6 +343,35 @@ class QuantUIObjects(BaseUIModule):
             filter_cols_spec=2,
             selector_cols_spec=[1, 1, 1, 1],
             expander_key="tour_plot_options",
+        )
+
+        # --- PLOT, TABLE, DOWNLOAD BELOW ---
+        metric = st.session_state[metric_key]
+        mode = st.session_state[mode_key]
+
+        if self.variables.colorblind_mode_selector_uuid not in st.session_state:
+            st.session_state[self.variables.colorblind_mode_selector_uuid] = uuid.uuid4()
+        colorblind_uuid = st.session_state[self.variables.colorblind_mode_selector_uuid]
+        colorblind_mode = st.session_state.get(colorblind_uuid, False)
+
+        min_nr_observed = None
+        if self.variables.slider_id_uuid in st.session_state:
+            slider_key = st.session_state[self.variables.slider_id_uuid]
+            if slider_key in st.session_state:
+                min_nr_observed = st.session_state[slider_key]
+
+        tab1_view_public_results.display_existing_results(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+            plot_params={
+                "metric": metric,
+                "mode": mode,
+                "colorblind_mode": colorblind_mode,
+                "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+                "min_nr_observed": min_nr_observed,
+                "alpha_warning": getattr(self.variables, "alpha_warning", False),
+                "beta_warning": getattr(self.variables, "beta_warning", False),
+            },
         )
 
     @st.fragment

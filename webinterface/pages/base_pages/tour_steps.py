@@ -90,6 +90,24 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
                 "select the metric to display (Median or Mean), "
                 "and toggle between Global and Species-weighted calculation modes."
             ),
+            side="bottom",
+        ),
+        Tour.bind(
+            "tour_results_table",
+            title="Benchmark Results Table",
+            desc=(
+                "Below the plot, a table lists all submitted benchmark results with their key parameters. "
+                "You can sort and filter columns to find specific tools or configurations."
+            ),
+            side="top",
+        ),
+        Tour.bind(
+            "tour_download_section",
+            title="Download Raw Datasets",
+            desc=(
+                "Use this section to download the raw intermediate data for any submission. "
+                "Select a dataset from the dropdown to access the files associated with that benchmark run."
+            ),
             side="top",
         ),
         # Tab 2
@@ -98,13 +116,15 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             "Tab 2: Upload New Results",
             "Click this tab to upload your own tool output and run a private benchmark. Press Next after clicking.",
         ),
-        Tour.info(
+        Tour.bind(
+            "software_tool_selector",
             title="Select Your Software Tool",
             desc=(
-                "Use the 'Software tool' dropdown to select the tool you used. "
+                "Use this dropdown to select the tool you used. "
                 "ProteoBench supports the output of many popular tools, and we are adding more all the time. "
                 "If your tool is not supported yet, select 'Custom' and upload a standardized parameter file to extract settings (see Documentation)."
             ),
+            side="bottom",
         ),
         Tour.bind(
             "tour_upload_form",

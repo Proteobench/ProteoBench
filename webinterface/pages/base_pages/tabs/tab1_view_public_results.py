@@ -411,7 +411,9 @@ def display_existing_results(
     render_main_plot(plot_generator, filtered_data, variables, plot_params)
 
     # Render results table
-    render_results_table(filtered_data, table_style, column_config)
+    with st.container(key="tour_results_table"):
+        render_results_table(filtered_data, table_style, column_config)
 
     # Display download section
-    display_download_section(variables)
+    with st.container(key="tour_download_section"):
+        display_download_section(variables)

@@ -1,5 +1,7 @@
 # *De Novo* - DDA - HCD 
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the peptide sequencing accuracy of *de novo* models and algorithms for data acquired with data-dependent acquisition (DDA) on orbitrap instruments. Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
 **Beware, deep learning models can be trained (and thus overfit) on the provided test data, which will result in a biased performance comparison. Therefore, if you retrained any of the models compatible with ProteoBench, we advise to explicitly describe the training data and training procedure used in the `Comments for submission` field before uploading the datapoint.**

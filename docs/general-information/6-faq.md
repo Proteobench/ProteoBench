@@ -37,7 +37,7 @@ For modules where database choice affects the benchmark outcome, the recommended
 
 ## Can I benchmark commercial software?
 
-Yes. ProteoBench can include results from commercial software when the software output can be parsed or converted into one of the supported submission formats. Commercial software results serve as reference points that can be compared with workflows generated using accessible open-source tools.
+Yes. ProteoBench can include results from commercial software when the software output can be parsed or converted into one of the supported submission formats. 
 
 ## What should I do if my software is not directly supported?
 

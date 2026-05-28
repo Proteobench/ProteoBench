@@ -81,9 +81,6 @@ class BaseStreamlitUI:
                 unsafe_allow_html=True,
             )
 
-        if st.sidebar.button("Take a Tour", key="module_tour_trigger"):
-            st.session_state["start_module_tour"] = True
-
         # Get tab configuration
         tab_config = self.get_tab_config()
         tab_names = [name for name, _ in tab_config]
@@ -99,6 +96,14 @@ class BaseStreamlitUI:
                 getattr(self.uiobjects, method_name)()
 
         tour_steps = self.uiobjects.get_tour_steps()
+        if tour_steps:
+            if st.sidebar.button("Take a Tour", key="module_tour_trigger"):
+                st.session_state["start_module_tour"] = True
+        else:
+            # No tour for this module — discard any stale trigger so it doesn't
+            # fire unexpectedly when the user navigates to a module that has a tour.
+            st.session_state.pop("start_module_tour", None)
+
         if tour_steps:
             module_id = getattr(self.ionmodule, "module_id", "module")
             tour_key = f"onboarding_{module_id}"

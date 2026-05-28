@@ -31,6 +31,18 @@ GROUND_TRUTH_DIR_LOCAL_DENOVO = os.path.join(
 GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
 GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
+_TOOL_METADATA_PATH = os.path.join(
+    Path(__file__).resolve().parent,
+    "io_parse_settings",
+    "tool_metadata.toml",
+)
+
+
+def get_open_source_tools() -> set:
+    """Return the set of open-source tool names (lower-cased) from tool_metadata.toml."""
+    metadata = toml.load(_TOOL_METADATA_PATH)
+    return {name.lower() for name in metadata.get("open_source", {}).get("tools", [])}
+
 
 class ParseSettingsBuilder:
     """

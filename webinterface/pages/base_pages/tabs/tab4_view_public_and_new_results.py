@@ -13,6 +13,7 @@ import streamlit as st
 import streamlit_utils
 
 from ..utils.general import clean_dataframe_for_export
+from ..utils.resulttable import add_open_source_column
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -144,6 +145,8 @@ def render_submitted_results_table(
     if len(data) == 0:
         st.info("No submitted datapoints available to display.", icon="ℹ️")
         return
+
+    data = add_open_source_column(data)
 
     st.subheader("Submitted Benchmark Results")
 

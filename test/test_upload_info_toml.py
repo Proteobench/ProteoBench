@@ -1,7 +1,9 @@
 """Tests that every non-custom tool parse settings TOML contains a valid [upload_info] section."""
 
 import os
+import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 import toml
@@ -65,7 +67,13 @@ def test_get_upload_info_custom_contains_docs_link():
     builder = ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id)
     result = builder.get_upload_info("Custom")
     assert "datapoint_file_description" in result
-    assert "proteobench.readthedocs.io" in result["datapoint_file_description"]
+
+    description = result["datapoint_file_description"]
+    url_candidates = re.findall(r"https?://[^\s)]+", description)
+    assert any(
+        urlparse(candidate).hostname == "proteobench.readthedocs.io"
+        for candidate in url_candidates
+    ), "Expected datapoint_file_description to contain a docs URL hosted on proteobench.readthedocs.io"
 
 
 def test_get_upload_info_fragpipe_diann_quant_overrides_params():

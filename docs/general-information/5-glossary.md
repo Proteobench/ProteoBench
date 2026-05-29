@@ -12,6 +12,7 @@ A single number resulting from an aggregated calculation of the workflow output 
 ## Workflow
 A combination of data analysis tools with associated parameters that takes workflow input files (provided by a benchmark module) and generates workflow output files. Based on the workflow output files, metrics can be calculated describing the workflow performance.
 
+(benchmark-run)=
 ## Benchmark run
 The result of running a workflow with specific parameter values and calculating the benchmark metrics based on the workflow output. 
 

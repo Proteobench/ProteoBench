@@ -27,6 +27,12 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     # Store selection in user_input for use in form
     user_input["input_format"] = selected_format
 
+    # Show per-tool upload guidance from [upload_info] in the parse settings TOML.
+    upload_info = parsesettingsbuilder.get_upload_info(selected_format)
+    datapoint_desc = upload_info.get("datapoint_file_description", "")
+    if datapoint_desc:
+        st.info(datapoint_desc)
+
     # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
     if selected_format == "AlphaDIA":
         st.info(

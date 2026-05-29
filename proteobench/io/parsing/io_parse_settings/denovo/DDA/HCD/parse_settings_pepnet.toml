@@ -18,3 +18,8 @@
 "isupper" = true
 "pattern" = "\\(([^)]+)\\)"
 "modification_dict" = {"(+57.02)" = "UNIMOD:4"}
+[upload_info]
+"datapoint_file" = "PepNet_output.tsv"
+"datapoint_file_description" = "Upload the PepNet de novo sequencing output TSV file."
+"params_file" = ""
+"params_file_description" = ""

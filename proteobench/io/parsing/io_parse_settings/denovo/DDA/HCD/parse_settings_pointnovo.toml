@@ -1,0 +1,6 @@
+
+[upload_info]
+"datapoint_file" = "PointNovo_output.tsv"
+"datapoint_file_description" = "Upload the PointNovo de novo sequencing output TSV file."
+"params_file" = ""
+"params_file_description" = ""

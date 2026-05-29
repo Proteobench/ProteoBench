@@ -13,7 +13,7 @@ from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from ..utils.inputs import generate_input_widget
 
 
-def generate_submission_ui_elements(variables, user_input) -> bool:
+def generate_submission_ui_elements(variables, user_input, parsesettingsbuilder=None) -> bool:
     """
     Create the UI elements necessary for data submission,
     including metadata uploader and comments section.
@@ -24,7 +24,7 @@ def generate_submission_ui_elements(variables, user_input) -> bool:
         submission_ready = True
     except Exception:
         st.error(":x: Please provide a result file", icon="🚨")
-    generate_metadata_uploader(variables, user_input)
+    generate_metadata_uploader(variables, user_input, parsesettingsbuilder)
     return submission_ready
 
 
@@ -92,19 +92,13 @@ def generate_additional_parameters_fields_submission(
 
         if idx < input_param_len:
             with st_col1:
-                user_input[key] = generate_input_widget(
-                    variables, user_input["input_format"], value, key, editable=editable
-                )
+                user_input[key] = generate_input_widget(variables, user_input["input_format"], value, key, editable=editable)
         elif idx < input_param_len * 2:
             with st_col2:
-                user_input[key] = generate_input_widget(
-                    variables, user_input["input_format"], value, key, editable=editable
-                )
+                user_input[key] = generate_input_widget(variables, user_input["input_format"], value, key, editable=editable)
         else:
             with st_col3:
-                user_input[key] = generate_input_widget(
-                    variables, user_input["input_format"], value, key, editable=editable
-                )
+                user_input[key] = generate_input_widget(variables, user_input["input_format"], value, key, editable=editable)
 
 
 def generate_comments_section(variables, user_input) -> None:
@@ -245,19 +239,23 @@ def copy_dataframes_for_submission(variables) -> None:
     Create copies of the dataframes before submission.
     """
     if st.session_state[variables.all_datapoints_submitted] is not None:
-        st.session_state[variables.all_datapoints_submission] = st.session_state[
-            variables.all_datapoints_submitted
-        ].copy()
+        st.session_state[variables.all_datapoints_submission] = st.session_state[variables.all_datapoints_submitted].copy()
     if st.session_state[variables.input_df] is not None:
         st.session_state[variables.input_df_submission] = st.session_state[variables.input_df].copy()
     if st.session_state[variables.result_perf] is not None:
         st.session_state[variables.result_performance_submission] = st.session_state[variables.result_perf].copy()
 
 
-def generate_metadata_uploader(variables, user_input) -> None:
+def generate_metadata_uploader(variables, user_input, parsesettingsbuilder=None) -> None:
     """
     Create the file uploader for meta data.
     """
+    if parsesettingsbuilder is not None:
+        upload_info = parsesettingsbuilder.get_upload_info(user_input.get("input_format", ""))
+        params_desc = upload_info.get("params_file_description", "")
+        if params_desc:
+            st.info(params_desc)
+
     user_input[variables.meta_data] = st.file_uploader(
         "Meta data for searches",
         help=variables.texts.Help.meta_data_file,

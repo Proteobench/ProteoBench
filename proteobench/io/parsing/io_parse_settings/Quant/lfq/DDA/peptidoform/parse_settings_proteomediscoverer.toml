@@ -27,3 +27,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+
+[upload_info]
+"datapoint_file" = "ProteomeDiscoverer_peptides.tsv"
+"datapoint_file_description" = "Upload the Proteome Discoverer peptide export file."
+"params_file" = "ProteomeDiscoverer_settings.txt"
+"params_file_description" = "Upload the Proteome Discoverer settings export file (`.txt`)."

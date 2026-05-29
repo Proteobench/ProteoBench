@@ -2,7 +2,7 @@
 
 Adding your own results for benchmarking is easy:
 
-1. Pick a module that matches your experimental design from the [Benchmarking modules](../available-modules/index.rst)
+1. Pick the module that is best suited to your benchmarking question and corresponds to your data type from the [Benchmarking modules](../available-modules/index.rst)
 
 2. Download the input data and supporting files from the module documentation (e.g. [DIA Astral LFQ](https://proteobench.readthedocs.io/en/stable/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/#data-set]))
 

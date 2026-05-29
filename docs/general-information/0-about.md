@@ -15,8 +15,6 @@ applications. The goal is not to select a single best one-fits-all data analysis
 2. **developers** to identify the specific strengths and weaknesses in their workflows, guiding the development process
 3. **the field** to easily position a newly published workflow within the context of the existing state-of-the-art
 
-## Workflow
-
 Participants (both end-users and developers) can download a set of input files (e.g., raw MS files,
 search databases, or spectral libraries) tailored to specific benchmark metrics. They can then analyze
 the data with any workflow, and upload the results in a homogenized format. A set of metrics will be

@@ -139,7 +139,7 @@ class StreamlitPageHome(StreamlitPage):
             with row1_col2:
                 st.markdown(
                     stat_box(
-                        "Proposed and in-development modules",
+                        "Modules in discussion or in development",
                         n_modules_proposed,
                         fig_path / "module-construction.png",
                         url="https://github.com/orgs/Proteobench/discussions",

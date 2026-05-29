@@ -25,7 +25,7 @@
 "pattern" = "([\\d+-.]+)"
 "modification_dict" = {"+57.021" = "UNIMOD:4", "+15.995" = "UNIMOD:35", "+0.984" = "UNIMOD:7", "+42.011" = "UNIMOD:1", "+43.006" = "UNIMOD:5", "-17.027" = "UNIMOD:385", "+43.006-17.027" = "Formula:H-2C1O1", "43.006-17.027" = "Formula:H-2C1O1", "42.011" = "UNIMOD:1", "17.027" = "UNIMOD:385", "43.006" = "UNIMOD:5"}
 [upload_info]
-"datapoint_file" = "Pi-PrimeNovo_output.tsv"
+"datapoint_file" = "*.tsv"
 "datapoint_file_description" = "Upload the Pi-PrimeNovo de novo sequencing output TSV file."
 "params_file" = ""
 "params_file_description" = ""

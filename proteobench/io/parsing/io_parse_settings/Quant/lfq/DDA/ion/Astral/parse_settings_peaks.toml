@@ -37,7 +37,7 @@
 "decoy_flag" = false
 
 [upload_info]
-"datapoint_file" = "PEAKS_lfq_features.csv"
+"datapoint_file" = "lfq.features.csv"
 "datapoint_file_description" = "Upload the PEAKS LFQ feature output CSV file."
-"params_file" = "PEAKS_parameters.txt"
+"params_file" = "*.txt"
 "params_file_description" = "Upload the PEAKS parameter export file (`.txt`)."

@@ -76,9 +76,17 @@ def test_get_upload_info_custom_contains_docs_link():
     ), "Expected datapoint_file_description to contain a docs URL hosted on proteobench.readthedocs.io"
 
 
-def test_get_upload_info_fragpipe_diann_quant_overrides_params():
-    """FragPipe (DIA-NN quant) shares parse_settings_diann.toml but must report the FragPipe .workflow as params file."""
-    module_id = "quant_lfq_DIA_ion_AIF"
+_DIA_MODULES_WITH_FRAGPIPE_DIANN_QUANT = [
+    module_id
+    for module_id, parse_dir in MODULE_SETTINGS_DIRS.items()
+    if "FragPipe (DIA-NN quant)"
+    in ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id).INPUT_FORMATS
+]
+
+
+@pytest.mark.parametrize("module_id", _DIA_MODULES_WITH_FRAGPIPE_DIANN_QUANT)
+def test_get_upload_info_fragpipe_diann_quant_overrides_params(module_id):
+    """FragPipe (DIA-NN quant) shares parse_settings_diann.toml but must report the FragPipe .workflow as params file in every DIA module that includes it."""
     parse_dir = MODULE_SETTINGS_DIRS[module_id]
     builder = ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id)
 

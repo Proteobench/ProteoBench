@@ -33,6 +33,23 @@ present in the samples **and contaminant proteins**
 
 For search specific instructions, metric definitions, troubleshooting, and result descriptions, see [the DIA Astral bulk module](#8-quant-lfq-ion-dia-Astral_2Th).
 
+## Important Tool-specific settings
+
+Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
+
+**Table 2. Overview of input files required for metric calculation and public submission**
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaDIA | precursors.parquet or precursor.matrix.tsv + precursors.tsv | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| MSAID | MSAID_output.tsv | MSAID_params.csv |
+| MaxQuant | evidence.txt | mqpar.xml |
+| PEAKS | lfq.features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
+
 ### Custom format
 
 If you do not use a tool that is compatible with ProteoBench, you can upload a tab-delimited table format containing the following columns:

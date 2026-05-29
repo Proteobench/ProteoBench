@@ -40,7 +40,7 @@
 "modification_dict" = {"mod:00397" = "Carbamidomethyl", "mod:01160" = "Ammonia-loss", "mod:00394" = "Acetyl", "mod:00425" = "Oxidation", "mod:00704" = "Dehydrated", "mod:00719" = "Oxidation"}
 
 [upload_info]
-"datapoint_file" = "i2MassChroQ_output.tsv"
+"datapoint_file" = "*.tsv"
 "datapoint_file_description" = "In I2MassChroQ, a ProteoBench-compatible format is available through the button “ProteoBench export”.\nUpload the i2MassChroQ output TSV file containing ProForma peptide notation and the 'area' column."
-"params_file" = "i2MassChroQ_params.tsv"
+"params_file" = "*.tsv"
 "params_file_description" = "Upload the i2MassChroQ parameter TSV file."

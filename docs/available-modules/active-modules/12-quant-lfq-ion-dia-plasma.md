@@ -212,12 +212,12 @@ Once submitted, a GitHub pull request will be automatically generated for tracki
 
 | Tool | Quantification input | Metadata / parameter file |
 |---|---|---|
-| DIA-NN | `*_report.tsv` or `*_report.parquet` | `*_report.log.txt` |
-| AlphaDIA | `precursors.tsv` + `precursor.matrix.tsv` (both required; see Jupyter Notebook for preprocessing) | `log.txt` |
-| Spectronaut | `*_Report.tsv` (BGS factory report format) | `*_Report.setup.txt` |
-| FragPipe (DIA-NN Quant) | `*_report.tsv` | `fragpipe.workflow` |
-| PEAKS | PEAKS DIA output file (`.txt` format - export as text report) | Settings text file (`.txt`) |
-| Custom | Tab-separated values (`.tsv` or `.csv`) following standard format | Not required |
+| AlphaDIA | precursors.parquet or precursor.matrix.tsv + precursors.tsv | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| PEAKS | lfq.features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
 
 ## Notes
 

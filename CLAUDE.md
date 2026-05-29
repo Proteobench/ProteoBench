@@ -124,6 +124,8 @@ Each software tool + module combination has a TOML file in `proteobench/io/parsi
 - `[species_mapper]`: protein ID flag -> species (e.g., `"_YEAST" = "YEAST"`)
 - `[general]`: `contaminant_flag`, `decoy_flag`, and optionally `run_name_cleanup` (regex to override the default extension-stripping pattern)
 - `[modifications_parser]` (optional): `parse_column`, `before_aa`, `isalpha`, `isupper`, `pattern` (regex), `modification_dict` (mass -> name)
+- `[upload_info]`: human-readable guidance shown in the web UI when the tool is selected. Keys: `datapoint_file` (filename), `datapoint_file_description` (shown above the result-file uploader in Tab 2), `params_file` (filename), `params_file_description` (shown above the metadata uploader in Tab 6). Markdown is supported in description strings. The Custom format uses `datapoint_file_description` to embed a module-specific link to the documentation. Missing `[upload_info]` is handled gracefully — no message is shown.
+- `[upload_info_overrides.<tool_name>]` (optional): per-tool overrides applied on top of `[upload_info]` when `ParseSettingsBuilder.get_upload_info(tool_name)` is called. Used when multiple tool names share the same TOML file but require different upload guidance. Example: `parse_settings_diann.toml` is shared by "DIA-NN" and "FragPipe (DIA-NN quant)"; the override supplies the correct `.workflow` params description for the latter.
 
 ### Run Name Cleanup (`_clean_run_name`)
 
@@ -344,9 +346,10 @@ Separate workflow for webinterface:
 4. Register it in `QuantModule.EXTRACT_PARAMS_DICT` in `modules/quant/quant_base_module.py`
 5. Add a color entry in `LFQHYEPlotGenerator.plot_main_metric()` `software_colors` dict
 6. If the tool is open source, add its `software_name` to the `[open_source].tools` list in `io/parsing/io_parse_settings/tool_metadata.toml`
-7. Add test data file to `test/data/quant/<module>/` and parameter files to `test/params/`
-8. Add the tool to test parametrization in the relevant `test_module_quant_*.py`
-9. Run `cd docs && python parse_tables.py` to update parameter documentation
+7. Add an `[upload_info]` section to the TOML with `datapoint_file`, `datapoint_file_description`, `params_file`, and `params_file_description`. If the new tool reuses an existing TOML (e.g., shares the DIA-NN report format), add an `[upload_info_overrides."New Tool Name"]` table to that TOML instead of creating a new one.
+8. Add test data file to `test/data/quant/<module>/` and parameter files to `test/params/`
+9. Add the tool to test parametrization in the relevant `test_module_quant_*.py`
+10. Run `cd docs && python parse_tables.py` to update parameter documentation
 
 ### Adding a new benchmark module
 

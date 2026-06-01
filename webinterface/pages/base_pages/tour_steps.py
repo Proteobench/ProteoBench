@@ -21,7 +21,7 @@ def get_homepage_tour_steps() -> list:
         Tour.info(
             title="Welcome to ProteoBench!",
             desc=(
-                "This platform lets you benchmark proteomics data analysis pipelines "
+                "Benchmark your proteomics data analysis pipelines "
                 "across tools, instruments, datasets and tasks."
             ),
         ),

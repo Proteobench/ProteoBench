@@ -122,6 +122,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
                 "Use this dropdown menu to select the tool you used. "
                 "ProteoBench supports the output of many popular tools. "
                 "If your tool is not supported yet, select 'Custom' and upload a standardized results file described in the module documentation."
+                "A custom results file cannot be submitted publicly, but it allows you to run a private benchmark and compare your results to public submissions."
                 "Don't hesitate to contact us to add your tool to our list of supported software!"
             ),
             side="bottom",

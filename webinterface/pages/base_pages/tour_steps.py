@@ -21,8 +21,7 @@ def get_homepage_tour_steps() -> list:
         Tour.info(
             title="Welcome to ProteoBench!",
             desc=(
-                "Benchmark your proteomics data analysis pipelines "
-                "across tools, instruments, datasets and tasks."
+                "Benchmark your proteomics data analysis pipelines " "across tools, instruments, datasets and tasks."
             ),
         ),
         Tour.bind(
@@ -122,7 +121,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             desc=(
                 "Use this dropdown menu to select the tool you used. "
                 "ProteoBench supports the output of many popular tools. "
-                "If your tool is not supported yet, select 'Custom' and upload a standardized parameter file described in the module documentation."
+                "If your tool is not supported yet, select 'Custom' and upload a standardized results file described in the module documentation."
                 "Don't hesitate to contact us to add your tool to our list of supported software!"
             ),
             side="bottom",

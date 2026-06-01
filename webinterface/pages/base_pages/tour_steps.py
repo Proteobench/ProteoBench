@@ -58,7 +58,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             desc=(
                 "This specific module benchmarks quantification depth and accuracy on data generated using DIA on an Orbitrap Astral. "
                 "We will guide you through a detailed walkthrough of the module. All other modules follow a similar structure, "
-                "so you can apply what you learn here to any module you choose to explore."
+                "so you can apply what you learn here to any module you choose to explore. "
                 "Click each highlighted tab to navigate, then press Next."
             ),
         ),
@@ -75,7 +75,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
                 "Each point is one workflow output. "
                 "In this case, the horizontal axis shows the quantification accuracy; "
                 "the vertical axis shows the number of quantified precursor ions. "
-                "After the tour, you can explore the plot by hovering over the points to see details on the corresponding workflow run"
+                "After the tour, you can explore the plot by hovering over the points to see details on the corresponding workflow run."
             ),
             side="top",
         ),
@@ -121,8 +121,8 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             desc=(
                 "Use this dropdown menu to select the tool you used. "
                 "ProteoBench supports the output of many popular tools. "
-                "If your tool is not supported yet, select 'Custom' and upload a standardized results file described in the module documentation."
-                "A custom results file cannot be submitted publicly, but it allows you to run a private benchmark and compare your results to public submissions."
+                "If your tool is not supported yet, select 'Custom' and upload a standardized results file described in the module documentation. "
+                "A custom results file cannot be submitted publicly, but it allows you to run a private benchmark and compare your results to public submissions. "
                 "Don't hesitate to contact us to add your tool to our list of supported software!"
             ),
             side="bottom",
@@ -131,7 +131,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             "tour_upload_form",
             title="Upload File and Run Benchmark",
             desc=(
-                "Upload the output of your workflow here (all compatible files are described in the module documentation)."
+                "Upload the output of your workflow here (all compatible files are described in the module documentation). "
                 "Add an optional keyword to help identify this run, "
                 "then click 'Parse and bench' to compute benchmark metrics locally — "
                 "no data leaves your browser at this step."
@@ -142,8 +142,8 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
         _tab_step(
             3,
             "Tab 3: View Single Result",
-            "Click this tab to get benchmark plots for the workflow you just uploaded or any benhcmark run publicly available in this module."
-            "Press Next after clicking to continue the tour.",
+            "Click this tab to get benchmark plots for the workflow you just uploaded or any benhcmark run publicly available in this module. "
+            "Press Next after clicking to continue the tour. ",
         ),
         Tour.bind(
             "tour_dataset_selector",
@@ -217,7 +217,7 @@ def get_quant_tour_steps(module_name: str = "this module") -> list:
             title="Upload Parameter File",
             desc=(
                 "Here you can upload the native parameter or log file from your software tool "
-                "(for example: MaxQuant mqpar.xml, DIA-NN report.log.txt, Spectronaut .txt export).  Check the module documentation for more details."
+                "(for example: MaxQuant mqpar.xml, DIA-NN report.log.txt, Spectronaut .txt export).  Check the module documentation for more details. "
                 "ProteoBench extracts analysis settings automatically, and keeps the parameter file for full transparency."
             ),
             side="bottom",

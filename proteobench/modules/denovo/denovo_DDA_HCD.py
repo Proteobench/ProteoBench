@@ -150,8 +150,8 @@ class DDAHCDDeNovoModule(DeNovoModule):
         )
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 
-        return (
+        return 
             intermediate_metric_structure,
             all_datapoints,
             input_df,
-        )
+        

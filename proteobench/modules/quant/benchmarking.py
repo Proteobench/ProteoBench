@@ -173,11 +173,11 @@ def run_benchmarking(
     if add_datapoint_func is not None:
         all_datapoints = _append_datapoint(add_datapoint_func, current_datapoint, all_datapoints)
 
-    return (
+    return 
         intermediate_metric_structure,
         all_datapoints,
         input_df,
-    )
+    
 
 
 def run_benchmarking_with_timing(
@@ -268,9 +268,9 @@ def run_benchmarking_with_timing(
         with time_block("append_datapoint"):
             all_datapoints = add_datapoint_func(current_datapoint, all_datapoints=all_datapoints)
 
-    return (
+    return 
         intermediate_metric_structure,
         all_datapoints,
         input_df,
         timings,
-    )
+    

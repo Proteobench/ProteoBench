@@ -553,7 +553,7 @@ def _merge_alphadia_files(
     Merge two AlphaDIA files (precursor.matrix.tsv and precursors.tsv).
 
     This function automatically detects which file is the matrix (wide format) and which is
-    the long format based on the presence of required metadata columns.
+    the int format based on the presence of required metadata columns.
 
     Parameters
     ----------
@@ -587,7 +587,7 @@ def _merge_alphadia_files(
         "mod_seq_charge_hash",
     ]
 
-    # Detect which file is the matrix (wide format) and which is long format
+    # Detect which file is the matrix (wide format) and which is int format
     file1_cols = set(file1_sample.columns)
     file2_cols = set(file2_sample.columns)
 
@@ -595,9 +595,9 @@ def _merge_alphadia_files(
     file1_has_required = all(col in file1_cols for col in required_merge_columns)
     file2_has_required = all(col in file2_cols for col in required_merge_columns)
 
-    # Determine which file is the long format
+    # Determine which file is the int format
     if file1_has_required and not file2_has_required:
-        # file1 is long format (precursors.tsv), file2 is matrix
+        # file1 is int format (precursors.tsv), file2 is matrix
         precursors_long = pd.read_csv(
             input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
         )
@@ -605,7 +605,7 @@ def _merge_alphadia_files(
             input_csv_secondary, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
         )
     elif file2_has_required:
-        # file2 is long format (precursors.tsv), file1 is matrix
+        # file2 is int format (precursors.tsv), file1 is matrix
         precursor_matrix = pd.read_csv(
             input_csv, low_memory=False, sep="\t", dtype={"mod_seq_charge_hash": str}, header=0
         )
@@ -627,10 +627,10 @@ def _merge_alphadia_files(
 
     if not available_merge_columns or "mod_seq_charge_hash" not in available_merge_columns:
         raise ValueError(
-            f"Cannot merge AlphaDIA files. The long format file is missing required columns. "
+            f"Cannot merge AlphaDIA files. The int format file is missing required columns. "
             f"Required: {', '.join(required_merge_columns)}. "
-            f"Available in long format: {', '.join(available_merge_columns)}. "
-            f"All columns in long format: {', '.join(list(precursors_long.columns)[:20])}. "
+            f"Available in int format: {', '.join(available_merge_columns)}. "
+            f"All columns in int format: {', '.join(list(precursors_long.columns)[:20])}. "
             f"Please ensure you are uploading the correct precursors.tsv file."
         )
 
@@ -655,7 +655,7 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
     input_csv_secondary : str, optional
         The path to the second AlphaDIA output file.
         If provided, the system will automatically detect which file is the precursor.matrix.tsv
-        and which is the precursors.tsv (long format), then merge them.
+        and which is the precursors.tsv (int format), then merge them.
 
     Returns
     -------
@@ -726,12 +726,12 @@ def _load_alphadia(input_csv: str, input_csv_secondary: str = None) -> pd.DataFr
         )
         input_data_frame = input_data_frame.dropna(subset=["Intensity"])
 
-        # If data is in long format (has raw.name column), convert to wide format
+        # If data is in int format (has raw.name column), convert to wide format
         if "raw.name" in input_data_frame.columns:
             # Define columns to keep as identifiers (not pivot)
             id_columns = ["sequence", "mods", "mod_sites", "charge", "genes"]
 
-            # Pivot from long to wide format
+            # Pivot from int to wide format
             input_data_frame = input_data_frame.pivot_table(
                 index=id_columns,
                 columns="raw.name",

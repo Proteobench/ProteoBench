@@ -185,11 +185,11 @@ class DIAQuantPeptidoformModule(QuantModule):
         except Exception as e:
             raise DatapointAppendError(f"Error adding current data point: {e}")
 
-        return (
+        return 
             intermediate_metric_structure,
             all_datapoints,
             input_df,
-        )
+        
 
     def get_plot_generator(self):
         """

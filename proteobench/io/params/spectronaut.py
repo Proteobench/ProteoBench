@@ -150,10 +150,10 @@ def extract_mass_tolerance(lines: List[str], system="Thermo Orbitrap") -> Option
                         # Extract the tolerances for the identified calibration method
                         MS1_tol, MS2_tol = extract_tolerances(line, calibration_method, MS1_tol, MS2_tol)
                         if MS1_tol is not None and MS2_tol is not None:
-                            return (
+                            return 
                                 f"[-{MS1_tol} {unit}, {MS1_tol} {unit}]",
                                 f"[-{MS2_tol} {unit}, {MS2_tol} {unit}]",
-                            )
+                            
 
     return None
 

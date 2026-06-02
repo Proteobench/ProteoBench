@@ -51,15 +51,15 @@ EXPECTED_COLUMNS = {
     "analysis": {"ion": ["precursor ion"], "peptidoform": ["peptidoform"]},
 }
 
-# Mock parse settings for long format
+# Mock parse settings for int format
 MOCK_PARSE_SETTINGS_LONG = {
     "mapper": {
         "Sequence": "Sequence",
-        "Raw file": "Raw file",  # Required for long format
+        "Raw file": "Raw file",  # Required for int format
         "Proteins": "Proteins",
         "Modified sequence": "Modified sequence",
         "Charge": "Charge",
-        "Intensity": "Intensity",  # Required for long format
+        "Intensity": "Intensity",  # Required for int format
         "Reverse": "Reverse",
         "Contaminant": "Contaminant",
     },
@@ -146,7 +146,7 @@ class TestParseSettingsQuant:
         assert "MULTI_SPEC" in result.columns
 
     def test_handle_data_format(self, parse_settings_long, parse_settings_short):
-        # Test long format (no change needed)
+        # Test int format (no change needed)
         df_long = TEST_DATA["long_format"].copy()
         result_long = parse_settings_long._handle_data_format(df_long)
         assert "Raw file" in result_long.columns
@@ -188,7 +188,7 @@ class TestParseSettingsQuant:
         assert all("/" in ion for ion in result["precursor ion"])
 
     def test_convert_to_standard_format_integration(self, parse_settings_long, parse_settings_short):
-        # Test with long format
+        # Test with int format
         df_long = TEST_DATA["long_format"].copy()
         result_df_long, replicate_to_raw = parse_settings_long.convert_to_standard_format(df_long)
 

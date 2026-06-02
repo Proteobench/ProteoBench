@@ -290,9 +290,9 @@ def parse_protein_inference_method(cmdline_dict: dict) -> str:
         except KeyError:
             Exception(f"Unexpected setting passed to --pg-level in diann.exe: {pg_setting}")
     else:
-        return (
+        return 
             "Genes"  # Default value, when --pg-level is not changed in the GUI it does not appear in the command string
-        )
+        
 
 
 def parse_quantification_strategy(cmdline_dict: dict):

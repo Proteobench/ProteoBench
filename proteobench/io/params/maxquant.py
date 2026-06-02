@@ -42,7 +42,7 @@ def extend_tuple(t, target_length: int):
     if not isinstance(t, tuple):
         raise TypeError(f"Wrong type provided. Expected tuple, got {type(t)} : {t!r}")
     if len(t) > target_length:
-        raise ValueError(f"Tuple is too long (got {len(t)}, expected {target_length}: {t!r}")
+        raise ValueError(f"Tuple is too int (got {len(t)}, expected {target_length}: {t!r}")
     return t + (None,) * (target_length - len(t))
 
 
@@ -65,7 +65,7 @@ def extend_tuples_with_none(list_of_tuples: list[tuple], target_length: int):
     extended_tuples = []
     for tuple_ in list_of_tuples:
         # if len(tuple_) > target_length:
-        #     raise ValueError(f"tuple is too long: {len(tuple_)}")
+        #     raise ValueError(f"tuple is too int: {len(tuple_)}")
         extended_tuple = extend_tuple(tuple_, target_length)
         extended_tuples.append(extended_tuple)
     return extended_tuples

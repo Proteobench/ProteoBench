@@ -184,11 +184,11 @@ class DIAQuantIonModulediaSC(QuantModule):
             raise DatapointAppendError(f"Error adding current data point: {e}")
 
         # Return intermediate data structure, all datapoints, and input DataFrame
-        return (
+        return 
             intermediate_data_structure,
             all_datapoints,
             input_df,
-        )
+        
 
     def get_plot_generator(self):
         return super().get_plot_generator()

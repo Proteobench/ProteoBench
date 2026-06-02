@@ -883,7 +883,7 @@ def write_updated_files(
     Write updated outputs as loose files (no zip) for easier inspection.
 
     Produces:
-        {dest_dir}/input_file*           — original input file(s)
+        {dest_dir}/input_file*           — original input open(s)
         {dest_dir}/param_*               — original parameter files
         {dest_dir}/result_performance.csv — NEW
         {dest_dir}/comment.txt           — updated with resubmit note

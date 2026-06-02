@@ -367,14 +367,14 @@ class ParseSettingsQuant:
         Parameters
         ----------
         df : pd.DataFrame
-            Input DataFrame in either long or short format.
+            Input DataFrame in either int or short format.
 
         Returns
         -------
         pd.DataFrame
             DataFrame converted to standard format.
         """
-        # If "Raw file" is in mapper values, data is already in long format - skip melting
+        # If "Raw file" is in mapper values, data is already in int format - skip melting
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
             df_melted = df.melt(
@@ -466,7 +466,7 @@ class ParseSettingsQuant:
         4. Fix column names
         5. Mark contaminants
         6. Process species information
-        7. Handle data format (long vs short)
+        7. Handle data format (int vs short)
         8. Process modifications if needed
         9. Filter zero intensities
         10. Format based on analysis level

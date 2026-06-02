@@ -81,24 +81,31 @@ def generate_additional_parameters_fields_submission(
     # Check if parsed values exist in session state
     _ = st.session_state.get(variables.params_json_dict, {})
 
-    st_col1, st_col2, st_col3 = st.columns(3)
-    input_param_len = int(len(config.items()) / 3)
+    with st.container(key="tour_param_fields"):
+        st_col1, st_col2, st_col3 = st.columns(3)
+        input_param_len = int(len(config.items()) / 3)
 
-    for idx, (key, value) in enumerate(config.items()):
-        if key.lower() == "software_name":
-            editable = False
-        else:
-            editable = True
+        for idx, (key, value) in enumerate(config.items()):
+            if key.lower() == "software_name":
+                editable = False
+            else:
+                editable = True
 
-        if idx < input_param_len:
-            with st_col1:
-                user_input[key] = generate_input_widget(variables, user_input["input_format"], value, key, editable=editable)
-        elif idx < input_param_len * 2:
-            with st_col2:
-                user_input[key] = generate_input_widget(variables, user_input["input_format"], value, key, editable=editable)
-        else:
-            with st_col3:
-                user_input[key] = generate_input_widget(variables, user_input["input_format"], value, key, editable=editable)
+            if idx < input_param_len:
+                with st_col1:
+                    user_input[key] = generate_input_widget(
+                        variables, user_input["input_format"], value, key, editable=editable
+                    )
+            elif idx < input_param_len * 2:
+                with st_col2:
+                    user_input[key] = generate_input_widget(
+                        variables, user_input["input_format"], value, key, editable=editable
+                    )
+            else:
+                with st_col3:
+                    user_input[key] = generate_input_widget(
+                        variables, user_input["input_format"], value, key, editable=editable
+                    )
 
 
 def generate_comments_section(variables, user_input) -> None:
@@ -255,12 +262,13 @@ def generate_metadata_uploader(variables, user_input, parsesettingsbuilder=None)
         params_desc = upload_info.get("params_file_description", "")
         if params_desc:
             st.info(params_desc)
+    with st.container(key="tour_meta_uploader"):
+        user_input[variables.meta_data] = st.file_uploader(
+            "Meta data for searches",
+            help=variables.texts.Help.meta_data_file,
+            accept_multiple_files=True,
+        )
 
-    user_input[variables.meta_data] = st.file_uploader(
-        "Meta data for searches",
-        help=variables.texts.Help.meta_data_file,
-        accept_multiple_files=True,
-    )
 
 
 # submit_to_repository

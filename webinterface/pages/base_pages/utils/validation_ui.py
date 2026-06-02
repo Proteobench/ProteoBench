@@ -1,0 +1,240 @@
+"""
+Streamlit glue for the submission-validation layer.
+
+This module bridges the framework-agnostic core validator
+(:mod:`proteobench.validation`) and the Streamlit submission flow. It:
+
+* re-derives the standardized result DataFrame from the already-parsed input
+  DataFrame by reusing the existing parser (no duplicated tool logic);
+* downloads and caches the module reference FASTA;
+* runs :func:`proteobench.validation.validate_submission`;
+* renders the resulting report in a curator- and user-friendly way.
+
+All network access and Streamlit calls live here, keeping the core validation
+library free of UI and I/O dependencies.
+"""
+
+from __future__ import annotations
+
+from typing import Any, Optional
+
+import pandas as pd
+import streamlit as st
+
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.validation import (
+    FastaReference,
+    ModuleValidationConfig,
+    Severity,
+    ValidationReport,
+    validate_submission,
+)
+
+
+@st.cache_data(show_spinner="Downloading reference FASTA for validation ...")
+def _load_fasta_reference(fasta_url: str, fasta_filename: Optional[str]) -> FastaReference:
+    """
+    Download and parse the module reference FASTA (cached).
+
+    Parameters
+    ----------
+    fasta_url : str
+        URL of the reference FASTA / zip / gzip resource.
+    fasta_filename : str, optional
+        Preferred FASTA member name when the resource is an archive.
+
+    Returns
+    -------
+    FastaReference
+        Reference protein identifiers.
+    """
+    return FastaReference.from_url(fasta_url, member_filename=fasta_filename)
+
+
+def _build_standard_dataframe(ionmodule: Any, input_format: str, input_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Re-derive the standardized result DataFrame by reusing the module parser.
+
+    Parameters
+    ----------
+    ionmodule : Any
+        The benchmarking module instance (provides ``parse_settings_dir`` and ``module_id``).
+    input_format : str
+        The selected software tool.
+    input_df : pandas.DataFrame
+        The raw parsed tool output (as stored in session state).
+
+    Returns
+    -------
+    pandas.DataFrame
+        The standardized result DataFrame.
+    """
+    parser = ParseSettingsBuilder(
+        parse_settings_dir=ionmodule.parse_settings_dir,
+        module_id=ionmodule.module_id,
+    ).build_parser(input_format)
+    standard_df, _ = parser.convert_to_standard_format(input_df)
+    return standard_df
+
+
+def run_submission_validation(variables, ionmodule, user_input, params) -> ValidationReport:
+    """
+    Validate a submission and return the structured report.
+
+    Designed to be fault-tolerant: any infrastructure problem (missing input,
+    parser failure, FASTA download failure) is converted into a warning so that
+    validation never crashes the submission flow. Only genuine consistency
+    problems produce errors.
+
+    Parameters
+    ----------
+    variables : Any
+        The module's ``Variables`` dataclass instance (session-state keys).
+    ionmodule : Any
+        The benchmarking module instance.
+    user_input : dict
+        The submission's user input (provides ``"input_format"``).
+    params : Any
+        The parsed/edited :class:`ProteoBenchParameters` to be submitted.
+
+    Returns
+    -------
+    ValidationReport
+        The aggregated validation report.
+    """
+    report = ValidationReport()
+    input_format = user_input.get("input_format")
+
+    input_df = st.session_state.get(variables.input_df_submission)
+    if input_df is None:
+        input_df = st.session_state.get(variables.input_df)
+
+    if input_df is None:
+        report.add_warning(
+            "no_input_dataframe",
+            "Could not run submission validation because the parsed result data was not available " "in the session.",
+            "input",
+        )
+        return report
+
+    # Re-derive the standardized DataFrame (reuses existing parsing; no duplication).
+    try:
+        standard_df = _build_standard_dataframe(ionmodule, input_format, input_df)
+    except Exception as exc:  # noqa: BLE001 - never block submission on a validation infra error
+        report.add_warning(
+            "standardization_failed",
+            f"Could not re-standardize the results for validation ({type(exc).__name__}: {exc}); "
+            "protein/charge/length checks were skipped.",
+            "input",
+        )
+        return report
+
+    # Build the module validation config (contaminant flag, species, FASTA location).
+    try:
+        config = ModuleValidationConfig.from_parse_settings(
+            parse_settings_dir=ionmodule.parse_settings_dir,
+            module_id=ionmodule.module_id,
+            input_format=input_format,
+        )
+    except Exception:
+        config = ModuleValidationConfig()
+
+    # Obtain the reference FASTA (best effort; a failure degrades to a warning).
+    fasta = None
+    if config.fasta_url:
+        try:
+            fasta = _load_fasta_reference(config.fasta_url, config.fasta_filename)
+        except Exception as exc:  # noqa: BLE001
+            report.add_warning(
+                "fasta_unavailable",
+                f"Could not download or parse the reference FASTA ({type(exc).__name__}: {exc}); "
+                "protein-identifier validation was skipped.",
+                "protein_ids",
+                field=config.fasta_url,
+            )
+    else:
+        report.add_info(
+            "no_fasta_configured",
+            "No reference FASTA is configured for this module ([reference_database] in "
+            "module_settings.toml); protein-identifier validation was skipped.",
+            "protein_ids",
+        )
+
+    core_report = validate_submission(
+        standard_df,
+        parameters=params,
+        fasta=fasta,
+        config=config,
+        input_format=input_format,
+    )
+    report.extend(core_report.issues)
+    return report
+
+
+def _render_issue(issue) -> None:
+    """
+    Render a single validation issue with its details.
+
+    Parameters
+    ----------
+    issue : ValidationIssue
+        The issue to render.
+    """
+    header = f"**{issue.message}**"
+    if issue.severity == Severity.ERROR:
+        st.error(header, icon="🚫")
+    elif issue.severity == Severity.WARNING:
+        st.warning(header, icon="⚠️")
+    else:
+        st.info(header, icon="ℹ️")
+
+    details = []
+    if issue.field:
+        details.append(f"- **Field/check:** `{issue.check}` / `{issue.field}`")
+    else:
+        details.append(f"- **Check:** `{issue.check}`")
+    details.append(f"- **Code:** `{issue.code}`")
+    if issue.observed is not None:
+        details.append(f"- **Observed:** `{issue.observed}`")
+    if issue.expected is not None:
+        details.append(f"- **Expected:** `{issue.expected}`")
+    if issue.examples:
+        shown = ", ".join(f"`{e}`" for e in issue.examples)
+        details.append(f"- **Examples:** {shown}")
+    st.markdown("\n".join(details))
+
+
+def render_validation_report(report: ValidationReport) -> None:
+    """
+    Render a full validation report in the Streamlit UI.
+
+    Parameters
+    ----------
+    report : ValidationReport
+        The report to display.
+    """
+    n_err, n_warn, n_info = len(report.errors), len(report.warnings), len(report.infos)
+
+    st.subheader("Submission validation")
+    if report.has_errors:
+        st.error(
+            f"Validation failed: {n_err} error(s), {n_warn} warning(s). " "Resolve the errors below before submitting.",
+            icon="🚫",
+        )
+    elif n_warn:
+        st.warning(
+            f"Validation passed with {n_warn} warning(s). Review them, then you may proceed.",
+            icon="⚠️",
+        )
+    else:
+        st.success("Validation passed with no issues.", icon="✅")
+
+    for issue in report.errors:
+        _render_issue(issue)
+    for issue in report.warnings:
+        _render_issue(issue)
+
+    if report.infos:
+        with st.expander(f"Validation details ({n_info} info)"):
+            for issue in report.infos:
+                _render_issue(issue)

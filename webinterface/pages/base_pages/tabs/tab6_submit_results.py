@@ -11,6 +11,7 @@ from streamlit_extras.let_it_rain import rain
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 
 from ..utils.inputs import generate_input_widget
+from ..utils.validation_ui import render_validation_report, run_submission_validation
 
 
 def generate_submission_ui_elements(variables, user_input) -> bool:
@@ -182,6 +183,26 @@ def submit_to_repository(
     if not button_pressed:  # if button_pressed is None
         return None
 
+    # Validate the submission (results vs parameters vs reference FASTA) before
+    # creating the public datapoint. Errors block submission; warnings do not.
+    validation_report = run_submission_validation(
+        variables=variables,
+        ionmodule=ionmodule,
+        user_input=user_input,
+        params=params,
+    )
+    render_validation_report(validation_report)
+    if validation_report.has_errors:
+        if variables.submit in st.session_state:
+            del st.session_state[variables.submit]
+        st.error(
+            "Submission blocked: resolve the validation errors above, then upload again.",
+            icon="🚫",
+        )
+        return None
+
+    validation_summary = validation_report.summary()
+
     # MaxQuant fixed modification handling
     if user_input["input_format"] == "MaxQuant":
         st.session_state[variables.result_perf] = add_maxquant_fixed_modifications(
@@ -202,6 +223,7 @@ def submit_to_repository(
         params_from_file=params_from_file,
         params=params,
         submission_source=submission_source,
+        validation_summary=validation_summary,
     )
 
     if pr_url:
@@ -348,6 +370,7 @@ def create_pull_request(
     params_from_file: dict[str, Any],
     params: dataclass,
     submission_source: str = "unknown",
+    validation_summary: str = "",
 ) -> Optional[str]:
     """
     Submit the pull request with the benchmark results and returns the PR URL.
@@ -356,6 +379,9 @@ def create_pull_request(
     ----------
     params : Any
         The parameters object.
+    validation_summary : str, optional
+        A Markdown summary of the submission-validation report (warnings/info),
+        appended to the PR description for curator visibility.
 
     Returns
     -------
@@ -366,12 +392,16 @@ def create_pull_request(
 
     changed_params_str = compare_dictionaries(params_from_file, params.__dict__)
 
+    submission_comments = user_comments + "\n" + changed_params_str
+    if validation_summary:
+        submission_comments += "\n\n" + validation_summary
+
     try:
         pr_url = ionmodule.clone_pr(
             st.session_state[variables.all_datapoints_submission],
             params,
             remote_git=variables.github_link_pr,
-            submission_comments=user_comments + "\n" + changed_params_str,
+            submission_comments=submission_comments,
             submission_source=submission_source,
         )
     except Exception as e:

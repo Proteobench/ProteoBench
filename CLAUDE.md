@@ -117,6 +117,9 @@ Old datapoints have `{metric}_abs_epsilon` without mode suffix. New datapoints h
 
 Each software tool + module combination has a TOML file in `proteobench/io/parsing/io_parse_settings/Quant/lfq/<DDA|DIA>/<ion|peptidoform>/<instrument>/`. The master mapping is in `io_parse_settings/parse_settings_files.toml` (maps module_id sections to TOML filenames). Each directory also has a `module_settings.toml`.
 
+`io_parse_settings/tool_metadata.toml` is a platform-wide metadata file. Currently it contains one section:
+- `[open_source].tools`: list of tool names whose source code is publicly available. Used by `get_open_source_tools()` in `parse_settings.py` to populate the `open_source` (✅) column in the Benchmark Results table. Names must match the `software_name` values set in `io/params/*.py`.
+
 **Software-specific TOML structure:**
 - `[mapper]`: column renames (e.g., `"Sequence" = "Sequence"`)
 - `[condition_mapper]`: raw file name -> condition ("A"/"B"). Keys are normalized at init via `_clean_run_name()` — extensions like `.mzML`, `.raw` are stripped automatically.
@@ -237,7 +240,7 @@ Streamlit multi-page app. Entry point: `Home.py` (inherits from `StreamlitPage` 
 **UI utilities** in `webinterface/pages/base_pages/utils/`:
 - `inputs.py`: `generate_input_widget()` — dynamic form field factory from JSON config (5 widget types: text_input, text_area, number_input, selectbox, checkbox)
 - `metricplot.py`: `render_metric_plot()` — interactive Plotly scatter with click-to-select (extracts ProteoBench ID from hovertext)
-- `resulttable.py`: `render_aggrid()` — ag-grid table with column-level color coding
+- `resulttable.py`: `render_aggrid()` — ag-grid table with column-level color coding; `add_open_source_column()` — inserts an `open_source` (✅) column after `software_name` for tools listed in `tool_metadata.toml`; `OPEN_SOURCE_TOOLS` — lowercase set loaded at import time via `get_open_source_tools()`
 - `general.py`: `clean_dataframe_for_export()` — CSV export cleanup
 
 **Session state management:** All keys defined in `pages_variables/` dataclasses with module-specific prefixes (e.g., `"lfq_ion_dda_quant"`, `"_dia_quant"`). Categories: data DataFrames, UI element UUIDs, form parameters, metadata.
@@ -344,9 +347,10 @@ Separate workflow for webinterface:
 3. Add an `extract_params` function in `io/params/newtool.py`
 4. Register it in `QuantModule.EXTRACT_PARAMS_DICT` in `modules/quant/quant_base_module.py`
 5. Add a color entry in `LFQHYEPlotGenerator.plot_main_metric()` `software_colors` dict
-6. Add test data file to `test/data/quant/<module>/` and parameter files to `test/params/`
-7. Add the tool to test parametrization in the relevant `test_module_quant_*.py`
-8. Run `cd docs && python parse_tables.py` to update parameter documentation
+6. If the tool is open source, add its `software_name` to the `[open_source].tools` list in `io/parsing/io_parse_settings/tool_metadata.toml`
+7. Add test data file to `test/data/quant/<module>/` and parameter files to `test/params/`
+8. Add the tool to test parametrization in the relevant `test_module_quant_*.py`
+9. Run `cd docs && python parse_tables.py` to update parameter documentation
 
 ### Adding a new benchmark module
 

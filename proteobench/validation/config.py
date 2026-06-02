@@ -40,7 +40,7 @@ class ModuleValidationConfig:
     """
     Per-module configuration for submission validation.
 
-    Parameters
+    Attributes
     ----------
     protein_column : str, optional
         Column holding protein identifiers in the standardized DataFrame.
@@ -65,6 +65,9 @@ class ModuleValidationConfig:
         URL of the reference FASTA / zip / gzip for the module.
     fasta_filename : str, optional
         Preferred FASTA member name when the resource is an archive.
+    species_flags : tuple of str, optional
+        Species names configured for the module (e.g. ``("YEAST", "ECOLI", "HUMAN")``),
+        derived from the tool's species mapper. Currently informational.
     """
 
     protein_column: str = "Proteins"

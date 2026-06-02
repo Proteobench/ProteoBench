@@ -12,8 +12,8 @@ attributes, never tool-specific result columns. Missing or unparsed parameters
 yield warnings rather than errors, so a submission is never blocked merely
 because a value could not be parsed.
 
-Documented limitations / skipped checks
-----------------------------------------
+Documented limitations and intentionally skipped checks:
+
 * **Enzyme specificity**: only a trypsin-family missed-cleavage heuristic is
   implemented, and only as a *warning*. Full specificity validation would need
   the reference protein sequences (to resolve protein N-/C-termini and ragged

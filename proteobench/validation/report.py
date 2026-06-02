@@ -6,14 +6,9 @@ This module defines the data model returned by the validation layer
 plain, framework-agnostic container so that it can be produced in the core
 library and rendered by any front end (Streamlit, notebooks, CLI).
 
-Classes
--------
-Severity
-    Enumeration of issue severities (error, warning, info).
-ValidationIssue
-    A single machine- and human-readable validation finding.
-ValidationReport
-    A collection of issues with overall pass/fail helpers.
+It exposes three objects: ``Severity`` (the issue severity enumeration),
+``ValidationIssue`` (a single machine- and human-readable finding), and
+``ValidationReport`` (a collection of issues with overall pass/fail helpers).
 """
 
 from __future__ import annotations
@@ -42,7 +37,7 @@ class ValidationIssue:
     """
     A single validation finding.
 
-    Parameters
+    Attributes
     ----------
     code : str
         Machine-readable issue code (stable identifier, e.g. ``"protein_not_in_fasta"``).
@@ -97,9 +92,9 @@ class ValidationReport:
     """
     Collection of validation issues with overall status helpers.
 
-    Parameters
+    Attributes
     ----------
-    issues : list of ValidationIssue, optional
+    issues : list of ValidationIssue
         Issues collected during validation.
     """
 

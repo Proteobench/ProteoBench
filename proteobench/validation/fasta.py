@@ -126,6 +126,14 @@ class FastaReference:
     """
 
     def __init__(self, identifiers: Optional[Iterable[str]] = None):
+        """
+        Initialize the reference from an optional iterable of identifiers.
+
+        Parameters
+        ----------
+        identifiers : iterable of str, optional
+            Pre-computed identifiers to seed the reference with.
+        """
         self._ids: Set[str] = set()
         if identifiers:
             for identifier in identifiers:

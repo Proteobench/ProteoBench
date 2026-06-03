@@ -56,7 +56,8 @@ This design allows ProteoBench to support a wide range of tools, including comme
 
 ## How do I find the input data associated with a benchmark module?
 
-Each module should provide a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
+Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
+If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
 
 ## What does “depth” mean in ProteoBench?

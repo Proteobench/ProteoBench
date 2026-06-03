@@ -63,7 +63,7 @@ If you do not find the information that you need to run your workflow, don't hes
 
 QuantError is a module-specific metric used to assess quantitative accuracy when the expected abundance ratios are known. It compares observed quantitative values against expected values and summarizes how far a workflow deviates from the known experimental design.
 
-QuantError should be interpreted together with identification depth and other module-specific metrics. A workflow that reports many quantified features is not necessarily optimal if the quantitative error is high.
+QuantError should be interpreted together with the other module-specific metrics. A workflow that reports many quantified features is not necessarily optimal if the quantitative error is high.
 
 ## Does ProteoBench perform normalization or missing-value imputation?
 

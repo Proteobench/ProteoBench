@@ -104,7 +104,7 @@ ProteoBench development and discussion are community-oriented. Users can follow 
 
 GitHub users can follow ProteoBench development through the main [ProteoBench GitHub repository](https://github.com/Proteobench/ProteoBench). This repository contains the source code, contribution information, issue tracking, and release history. Users who want to receive updates can watch or star the repository. If you are interested in a specific module, you can also watch the corresponding result repository listed [here](https://github.com/Proteobench).
 
-Questions, proposals, and module-specific discussions can be followed through the [ProteoBench GitHub Discussions](https://github.com/Proteobench/ProteoBench/discussions) forum. This is the preferred route for users who want to participate in technical discussions, suggest new benchmark modules, discuss parser development, or contribute to the platform.
+Questions, proposals, and module-specific discussions can be followed through the [ProteoBench GitHub Discussions](https://github.com/Proteobench/ProteoBench/discussions) forum. This is the preferred route for users who want to participate in technical discussions, suggest new benchmark modules, discuss parser development, or contribute to the platform. Through this route, users can also register for discussion updates.
 
 ### For non-GitHub users
 

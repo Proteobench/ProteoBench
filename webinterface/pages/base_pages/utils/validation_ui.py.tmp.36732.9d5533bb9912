@@ -77,89 +77,6 @@ def _build_standard_dataframe(ionmodule: Any, input_format: str, input_df: pd.Da
     return standard_df
 
 
-def _resolve_input_df(variables):
-    """
-    Fetch the parsed input DataFrame from session state for validation.
-
-    Parameters
-    ----------
-    variables : Any
-        The module's ``Variables`` dataclass instance (session-state keys).
-
-    Returns
-    -------
-    pandas.DataFrame or None
-        The submission input DataFrame, or ``None`` if unavailable.
-    """
-    input_df = st.session_state.get(variables.input_df_submission)
-    if input_df is None:
-        input_df = st.session_state.get(variables.input_df)
-    return input_df
-
-
-def _build_config(ionmodule, input_format: str) -> ModuleValidationConfig:
-    """
-    Build the module validation config, falling back to defaults on failure.
-
-    Parameters
-    ----------
-    ionmodule : Any
-        The benchmarking module instance.
-    input_format : str
-        The selected software tool.
-
-    Returns
-    -------
-    ModuleValidationConfig
-        The resolved configuration (never raises).
-    """
-    try:
-        return ModuleValidationConfig.from_parse_settings(
-            parse_settings_dir=ionmodule.parse_settings_dir,
-            module_id=ionmodule.module_id,
-            input_format=input_format,
-        )
-    except Exception:  # noqa: BLE001
-        return ModuleValidationConfig()
-
-
-def _acquire_fasta(config: ModuleValidationConfig, report: ValidationReport):
-    """
-    Obtain the reference FASTA, degrading to a report message on any problem.
-
-    Parameters
-    ----------
-    config : ModuleValidationConfig
-        The module configuration (provides ``fasta_url`` / ``fasta_filename``).
-    report : ValidationReport
-        Report to which a warning/info is added when no FASTA is available.
-
-    Returns
-    -------
-    FastaReference or None
-        The reference, or ``None`` when not configured or not downloadable.
-    """
-    if not config.fasta_url:
-        report.add_info(
-            "no_fasta_configured",
-            "No reference FASTA is configured for this module ([reference_database] in "
-            "module_settings.toml); protein-identifier validation was skipped.",
-            "protein_ids",
-        )
-        return None
-    try:
-        return _load_fasta_reference(config.fasta_url, config.fasta_filename)
-    except Exception as exc:  # noqa: BLE001
-        report.add_warning(
-            "fasta_unavailable",
-            f"Could not download or parse the reference FASTA ({type(exc).__name__}: {exc}); "
-            "protein-identifier validation was skipped.",
-            "protein_ids",
-            field=config.fasta_url,
-        )
-        return None
-
-
 def run_submission_validation(variables, ionmodule, user_input, params) -> ValidationReport:
     """
     Validate a submission and return the structured report.
@@ -188,11 +105,14 @@ def run_submission_validation(variables, ionmodule, user_input, params) -> Valid
     report = ValidationReport()
     input_format = user_input.get("input_format")
 
-    input_df = _resolve_input_df(variables)
+    input_df = st.session_state.get(variables.input_df_submission)
+    if input_df is None:
+        input_df = st.session_state.get(variables.input_df)
+
     if input_df is None:
         report.add_warning(
             "no_input_dataframe",
-            "Could not run submission validation because the parsed result data was not available in the session.",
+            "Could not run submission validation because the parsed result data was not available " "in the session.",
             "input",
         )
         return report
@@ -209,8 +129,36 @@ def run_submission_validation(variables, ionmodule, user_input, params) -> Valid
         )
         return report
 
-    config = _build_config(ionmodule, input_format)
-    fasta = _acquire_fasta(config, report)
+    # Build the module validation config (contaminant flag, species, FASTA location).
+    try:
+        config = ModuleValidationConfig.from_parse_settings(
+            parse_settings_dir=ionmodule.parse_settings_dir,
+            module_id=ionmodule.module_id,
+            input_format=input_format,
+        )
+    except Exception:
+        config = ModuleValidationConfig()
+
+    # Obtain the reference FASTA (best effort; a failure degrades to a warning).
+    fasta = None
+    if config.fasta_url:
+        try:
+            fasta = _load_fasta_reference(config.fasta_url, config.fasta_filename)
+        except Exception as exc:  # noqa: BLE001
+            report.add_warning(
+                "fasta_unavailable",
+                f"Could not download or parse the reference FASTA ({type(exc).__name__}: {exc}); "
+                "protein-identifier validation was skipped.",
+                "protein_ids",
+                field=config.fasta_url,
+            )
+    else:
+        report.add_info(
+            "no_fasta_configured",
+            "No reference FASTA is configured for this module ([reference_database] in "
+            "module_settings.toml); protein-identifier validation was skipped.",
+            "protein_ids",
+        )
 
     try:
         core_report = validate_submission(

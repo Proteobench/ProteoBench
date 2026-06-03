@@ -7,16 +7,32 @@ DataFrame or the parsed parameters: the standardized column names, the
 protein-group separators, the contaminant flag and decoy prefixes used to skip
 non-target identifiers, and the reference FASTA location.
 
-The reference FASTA is read from an optional ``[reference_database]`` section in
-the module's ``module_settings.toml`` (the same per-module settings file that
-already holds ``[species_expected_ratio]`` and ``[general]``). This keeps the
-reference next to the species composition that defines each module, and avoids
-hard-coding paths inside the validator.
+The ``validation_profile`` field selects which set of checks the orchestrator
+runs. It is the name of a profile registered in
+:mod:`proteobench.validation.profiles`. It is resolved (in order of precedence):
 
-Example ``module_settings.toml`` section::
+1. an explicit ``[validation].profile`` key in the module's ``module_settings.toml``
+   (the declarative path: adding a new module of an existing category is config-only);
+2. inferred from the module's parser class via the existing ``MODULE_TO_CLASS``
+   registry (``ParseSettingsQuant`` -> ``"quant_lfq"``, ``ParseSettingsDeNovo`` -> ``"denovo"``);
+3. the :data:`DEFAULT_VALIDATION_PROFILE` fallback.
+
+A genuinely new category of module is supported by registering a new profile
+in ``profiles.py`` (or from third-party code) and pointing the module at it via
+the TOML key; the orchestrator itself never changes.
+
+The reference FASTA is read from an optional ``[reference_database]`` section in
+the module's ``module_settings.toml`` (beside ``[species_expected_ratio]`` and
+``[general]``). Module types whose reference is not a FASTA (e.g. de novo, which
+compares against a ground-truth table) simply omit ``fasta_url``.
+
+Example ``module_settings.toml`` sections::
 
     [reference_database]
     "fasta_url" = "https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip"
+
+    [validation]
+    "profile" = "quant_lfq"
 """
 
 from __future__ import annotations
@@ -29,10 +45,58 @@ import toml
 
 from proteobench.validation.protein_ids import DEFAULT_GROUP_SEPARATORS
 
+#: Profile used when none can be resolved from config or the parser class.
+DEFAULT_VALIDATION_PROFILE = "quant_lfq"
+
+#: Maps a parser class name to the default validation profile for that family.
+#: Resolution falls back to this when no ``[validation].profile`` is declared.
+_PROFILE_BY_PARSER_CLASS = {
+    "ParseSettingsQuant": "quant_lfq",
+    "ParseSettingsDeNovo": "denovo",
+}
+
 #: Common decoy-identifier prefixes. The ParseSettings configuration marks
 #: decoys via a boolean ``Reverse`` column rather than an accession prefix, so
 #: these defaults provide a tool-agnostic fallback for skipping decoy proteins.
 DEFAULT_DECOY_PREFIXES = ("rev_", "rev__", "decoy_", "decoy", "reverse_", "##")
+
+
+def _resolve_profile(module_id: str, declared_profile: Optional[str]) -> str:
+    """
+    Resolve the validation profile name for a module.
+
+    Resolution order: an explicit profile declared in ``module_settings.toml``
+    wins; otherwise the profile is inferred from the module's parser class via
+    the existing ``MODULE_TO_CLASS`` registry; otherwise
+    :data:`DEFAULT_VALIDATION_PROFILE` is used.
+
+    Parameters
+    ----------
+    module_id : str
+        The module identifier.
+    declared_profile : str or None
+        The profile name declared in ``[validation].profile``, if any.
+
+    Returns
+    -------
+    str
+        The resolved profile name.
+    """
+    if isinstance(declared_profile, str) and declared_profile:
+        return declared_profile
+
+    try:
+        from proteobench.io.parsing.parse_settings import MODULE_TO_CLASS
+
+        parser_cls = MODULE_TO_CLASS.get(module_id)
+        if parser_cls is not None:
+            inferred = _PROFILE_BY_PARSER_CLASS.get(parser_cls.__name__)
+            if inferred:
+                return inferred
+    except Exception:
+        pass
+
+    return DEFAULT_VALIDATION_PROFILE
 
 
 @dataclass
@@ -68,6 +132,11 @@ class ModuleValidationConfig:
     species_flags : tuple of str, optional
         Species names configured for the module (e.g. ``("YEAST", "ECOLI", "HUMAN")``),
         derived from the tool's species mapper. Currently informational.
+    validation_profile : str, optional
+        Name of the registered profile whose checks the orchestrator runs. Set
+        automatically by :meth:`from_parse_settings`; defaults to
+        :data:`DEFAULT_VALIDATION_PROFILE` for direct construction so that the
+        existing quant behaviour is preserved.
     """
 
     protein_column: str = "Proteins"
@@ -81,6 +150,7 @@ class ModuleValidationConfig:
     fasta_url: Optional[str] = None
     fasta_filename: Optional[str] = None
     species_flags: Tuple[str, ...] = field(default_factory=tuple)
+    validation_profile: str = DEFAULT_VALIDATION_PROFILE
 
     @classmethod
     def from_parse_settings(
@@ -94,8 +164,9 @@ class ModuleValidationConfig:
 
         This reuses :class:`~proteobench.io.parsing.parse_settings.ParseSettingsBuilder`
         to read the contaminant flag and species flags for the selected tool,
-        and reads the optional ``[reference_database]`` section from the
-        module's ``module_settings.toml``.
+        reads the optional ``[reference_database]`` and ``[validation]`` sections
+        from the module's ``module_settings.toml``, and resolves the validation
+        profile.
 
         Parameters
         ----------
@@ -113,32 +184,35 @@ class ModuleValidationConfig:
             Configuration populated from the parse settings. Falls back to the
             defaults for any value that cannot be read.
         """
-        # Imported here to avoid a heavy import at module load time.
-        from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-
         config = cls()
 
-        builder = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id)
-
+        # Best effort: read the contaminant flag and species from the tool parser.
+        # Wrapped defensively so validation never crashes on a parser issue.
         try:
+            from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+
+            builder = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id)
             parser = builder.build_parser(input_format)
             config.contaminant_flag = getattr(parser, "contaminant_flag", None)
             species = parser.species_dict() if hasattr(parser, "species_dict") else {}
             config.species_flags = tuple(species.values())
         except Exception:
-            # Validation must never crash because of a parser-construction issue;
-            # fall back to defaults (contaminant rows are already filtered upstream).
             pass
 
-        reference = {}
+        # Read the module settings directly from disk (independent of the parser)
+        # so the reference and profile resolve even if the parser cannot be built.
+        module_settings = {}
         try:
-            module_settings = toml.load(builder.PARSE_SETTINGS_FILES_MODULE)
-            reference = module_settings.get("reference_database", {}) or {}
+            module_settings = toml.load(os.path.join(parse_settings_dir, "module_settings.toml"))
         except Exception:
-            reference = {}
+            module_settings = {}
 
+        reference = module_settings.get("reference_database", {}) or {}
         config.fasta_url = reference.get("fasta_url")
         config.fasta_filename = reference.get("fasta_filename")
+
+        declared_profile = (module_settings.get("validation", {}) or {}).get("profile")
+        config.validation_profile = _resolve_profile(module_id, declared_profile)
 
         return config
 

@@ -14,11 +14,18 @@ import pytest
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.validation import (
+    Check,
     FastaReference,
     ModuleValidationConfig,
     Severity,
     SubmissionValidationError,
+    ValidationContext,
+    ValidationProfile,
     ValidationReport,
+    available_profiles,
+    get_profile,
+    register_profile,
+    unregister_profile,
     validate_submission,
 )
 from proteobench.validation.checks import (
@@ -29,6 +36,7 @@ from proteobench.validation.checks import (
     check_protein_ids,
     check_run_consistency,
 )
+from proteobench.validation.config import _resolve_profile
 from proteobench.validation.fasta import parse_fasta_header
 from proteobench.validation.protein_ids import (
     extract_identifiers,
@@ -321,7 +329,9 @@ def test_validate_submission_without_fasta_skips_protein_check():
 def test_validate_submission_without_params_warns():
     report = validate_submission(make_standard_df(), parameters=None, fasta=None)
     assert report.passed
-    assert any(i.code == "no_parameters" and i.severity == Severity.WARNING for i in report.issues)
+    assert not report.has_errors
+    # Each parameter-dependent check self-reports that its constraint was not parsed.
+    assert any(i.code == "charge_range_not_parsed" and i.severity == Severity.WARNING for i in report.warnings)
 
 
 def test_validate_submission_empty_df_errors():
@@ -347,6 +357,111 @@ def test_raise_if_errors():
         report.raise_if_errors()
     # No error -> no raise.
     ValidationReport().raise_if_errors()
+
+
+# --------------------------------------------------------------------------- #
+# profile registry / generic routing
+# --------------------------------------------------------------------------- #
+
+
+def test_builtin_profiles_registered():
+    profiles = available_profiles()
+    assert "quant_lfq" in profiles
+    assert "denovo" in profiles
+    assert get_profile("quant_lfq") is not None
+    assert "protein_ids" in get_profile("quant_lfq").check_names
+
+
+def test_default_config_uses_quant_profile():
+    assert ModuleValidationConfig().validation_profile == "quant_lfq"
+
+
+def test_denovo_profile_skips_quant_checks():
+    # A de novo standard df has none of the quant columns.
+    df = pd.DataFrame({"spectrum_id": [1, 2], "peptide_str": ["PEPTIDEK", "ELVISLIVESR"]})
+    config = ModuleValidationConfig(validation_profile="denovo")
+    # software_name matches input_format so the shared run_consistency check passes.
+    report = validate_submission(
+        df, parameters=make_params(software_name="Casanovo"), config=config, input_format="Casanovo"
+    )
+    assert report.passed
+    assert any(i.code == "denovo_validation_pending" for i in report.infos)
+    # No quant-specific errors were produced.
+    assert not any(i.code in {"protein_not_in_fasta", "charge_out_of_range"} for i in report.issues)
+
+
+def test_unknown_profile_warns_and_runs_nothing():
+    config = ModuleValidationConfig(validation_profile="does_not_exist")
+    report = validate_submission(make_standard_df(), parameters=make_params(), config=config)
+    assert report.passed  # nothing ran, so no errors
+    assert any(i.code == "unknown_validation_profile" and i.severity == Severity.WARNING for i in report.issues)
+
+
+def test_explicit_profile_overrides_config():
+    # Config says quant_lfq, but the explicit profile arg wins.
+    report = validate_submission(
+        make_standard_df(), parameters=make_params(), config=ModuleValidationConfig(), profile="denovo"
+    )
+    assert any(i.code == "denovo_validation_pending" for i in report.infos)
+
+
+def test_register_and_run_custom_profile():
+    def my_check(ctx: ValidationContext):
+        r = ValidationReport()
+        if "MyColumn" not in ctx.standard_df.columns:
+            r.add_error("missing_my_column", "MyColumn is required", "my_check", field="MyColumn")
+        return r.issues
+
+    profile = ValidationProfile(name="custom_test_profile", checks=[Check("my_check", my_check)])
+    register_profile(profile)
+    try:
+        report = validate_submission(make_standard_df(), profile="custom_test_profile")
+        assert report.has_errors
+        assert any(i.code == "missing_my_column" for i in report.errors)
+    finally:
+        unregister_profile("custom_test_profile")
+    assert get_profile("custom_test_profile") is None
+
+
+def test_register_duplicate_profile_raises():
+    profile = ValidationProfile(name="dup_test_profile", checks=[])
+    register_profile(profile)
+    try:
+        with pytest.raises(ValueError):
+            register_profile(ValidationProfile(name="dup_test_profile", checks=[]))
+        # overwrite=True succeeds.
+        register_profile(ValidationProfile(name="dup_test_profile", checks=[]), overwrite=True)
+    finally:
+        unregister_profile("dup_test_profile")
+
+
+def test_profile_resolution_from_parse_settings():
+    quant_cfg = ModuleValidationConfig.from_parse_settings(QEXACTIVE_SETTINGS_DIR, QEXACTIVE_MODULE_ID, "MaxQuant")
+    assert quant_cfg.validation_profile == "quant_lfq"
+
+    denovo_dir = os.path.abspath(
+        os.path.join(HERE, "..", "proteobench", "io", "parsing", "io_parse_settings", "denovo", "DDA", "HCD")
+    )
+    denovo_cfg = ModuleValidationConfig.from_parse_settings(denovo_dir, "denovo_DDA_HCD", "Casanovo")
+    assert denovo_cfg.validation_profile == "denovo"
+
+
+def test_resolve_profile_infers_from_parser_class():
+    # With no declared profile, resolution falls back to MODULE_TO_CLASS inference.
+    assert _resolve_profile("quant_lfq_DDA_ion_QExactive", None) == "quant_lfq"
+    assert _resolve_profile("denovo_DDA_HCD", None) == "denovo"
+    # Unknown module_id falls back to the default profile.
+    assert _resolve_profile("does_not_exist", None) == "quant_lfq"
+    # An explicit declared profile always wins.
+    assert _resolve_profile("denovo_DDA_HCD", "custom_xyz") == "custom_xyz"
+
+
+def test_non_string_profile_does_not_crash():
+    # A malformed validation_profile must degrade gracefully, never raise.
+    config = ModuleValidationConfig(validation_profile=["not", "a", "string"])
+    report = validate_submission(make_standard_df(), parameters=make_params(), config=config)
+    assert report.passed
+    assert any(i.code == "unknown_validation_profile" for i in report.issues)
 
 
 # --------------------------------------------------------------------------- #

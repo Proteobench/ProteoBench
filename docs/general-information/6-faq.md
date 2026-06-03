@@ -54,7 +54,7 @@ ProteoBench evaluates submitted workflow outputs rather than executing every wor
 
 This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. 
 
-## How do I find the raw data for a benchmark module?
+## How do I find the input data associated with a benchmark module?
 
 Each module should provide a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
 

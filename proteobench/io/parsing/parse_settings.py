@@ -795,6 +795,156 @@ class ParseSettingsDeNovo:
         return df
 
 
+class ParseSettingsEntrapment:
+    """
+    Structure that contains all the parameters used to parse
+    the given benchmark run output depending on the software tool used.
+
+    Parameters
+    ----------
+    parse_settings : Dict[str, Any]
+        The settings for parsing, typically loaded from a TOML file.
+    parse_settings_module : Dict[str, Any]
+        Module-specific settings, typically loaded from a TOML file.
+    """
+
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+        """
+        Initialize the ParseSettings object with the parameters from the TOML files.
+
+        Parameters
+        ----------
+        parse_settings : Dict[str, Any]
+            The settings for parsing, typically loaded from a TOML file.
+        parse_settings_module : Dict[str, Any]
+            Module-specific settings, typically loaded from a TOML file.
+        """
+        self.mapper = parse_settings["mapper"]
+        self.run_mapper = parse_settings["run_mapper"]
+        self.decoy_flag = parse_settings["general"]["decoy_flag"]
+        self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
+        self.modification_parser = None
+
+        # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
+        # Can be overridden per-tool in the TOML [general] section
+        cleanup_pattern = parse_settings["general"].get("run_name_cleanup", "")
+        if cleanup_pattern:
+            try:
+                self._run_name_cleanup = re.compile(cleanup_pattern)
+            except re.error as exc:
+                raise ValueError(
+                    f"Invalid regex in [general].run_name_cleanup: {cleanup_pattern!r}. "
+                    f"Please fix the pattern in the TOML configuration. Details: {exc}"
+                ) from exc
+        else:
+            # Default: strip common MS file extensions and known suffixes
+            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
+
+        # Normalize the condition_mapper and run_mapper keys using the same cleanup
+        # so that keys like "file.mzML" and column names like "file.mzML" both
+        # resolve to "file" after cleaning (see #827, #876)
+        self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
+
+    def _clean_run_name(self, name: str) -> str:
+        """
+        Clean a run/file name by removing extensions and known suffixes.
+
+        Strips path prefixes (e.g., ``/path/to/file.mzML`` -> ``file``)
+        and applies the run_name_cleanup regex to remove extensions like
+        ``.raw``, ``.mzML``, ``.mzML.gz``, ``.d``, ``.wiff``, and
+        tool-specific suffixes like ``_uncalibrated`` (FragPipe DIA-NN, see #827).
+
+        Parameters
+        ----------
+        name : str
+            The raw file name or column name to clean.
+
+        Returns
+        -------
+        str
+            The cleaned name.
+        """
+        if not isinstance(name, str):
+            return name
+        # Strip path prefix (some tools include full paths)
+        name = name.replace("\\", "/")
+        if "/" in name:
+            name = name.rsplit("/", 1)[-1]
+        # Apply the cleanup regex
+        name = self._run_name_cleanup.sub("", name)
+        return name
+
+    def _validate_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Validate and rename columns according to the mapper.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame with original column names.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with validated and renamed columns.
+        """
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected software tool."
+            )
+        df.rename(columns=self.mapper, inplace=True)
+        return df
+
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        """
+        Add a modification parser to the settings.
+
+        Parameters
+        ----------
+        parser : object
+            The modification parser to add.
+        """
+        self.modification_parser = parser
+
+    def convert_to_standard_format(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert a software tool output into a generic format supported by the module.
+
+        Steps:
+        1. Validate and rename columns
+        2. Create replicate mapping
+        3. Filter decoys
+        4. Fix column names
+        5. Mark contaminants
+        6. Process species information
+        7. Handle data format (long vs short)
+        8. Process modifications if needed
+        9. Format based on analysis level
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
+
+        Returns
+        -------
+        pd.DataFrame
+            The converted DataFrame.
+        """
+        df = self._validate_and_rename_columns(df)
+        # replicate_to_raw = self._create_replicate_mapping()
+        # df = self._filter_decoys(df)
+        # df = self._fix_colnames(df)
+        # df = self._mark_contaminants(df)
+        # df = self._process_species_information(df)
+        # df = self._process_modifications(df)
+        # df_melted = self._handle_data_format(df)
+        # df_melted = self._filter_zero_intensities(df_melted)
+        return df  # self._format_by_analysis_level(df_melted), replicate_to_raw
+
+
 MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
@@ -807,4 +957,5 @@ MODULE_TO_CLASS = {
     "denovo_DDA_HCD": ParseSettingsDeNovo,
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_plasma": ParseSettingsQuant,
+    "entrapment_DIA_ion_Astral": ParseSettingsEntrapment,
 }

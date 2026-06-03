@@ -106,3 +106,6 @@
 "Pi-HelixNovo" = "parse_settings_pihelixnovo.toml"
 "Pi-PrimeNovo" = "parse_settings_piprimenovo.toml"
 "PepNet" = "parse_settings_pepnet.toml"
+
+[entrapment_DIA_ion_Astral]
+"DIA-NN" = "parse_settings_diann.toml"

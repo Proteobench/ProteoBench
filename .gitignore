@@ -154,3 +154,5 @@ uv.lock
 
 # Large files
 *.gz
+jupyter_notebooks/
+testfolder/

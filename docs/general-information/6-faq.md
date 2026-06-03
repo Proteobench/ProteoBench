@@ -16,7 +16,7 @@ For **software and method developers**, ProteoBench provides a framework to iden
 
 For the **wider proteomics community**, ProteoBench makes it easier to position newly published workflows within the context of the existing state of the art. It can therefore support reviewers, editors, and readers who require transparent evidence for claims about workflow performance.
 
-## Do I need to use a predefined dataset?
+## Do I need to run my workflow on a predefined data set?
 
 Yes. To compare results meaningfully within a ProteoBench module, all submitted workflows must be evaluated on the benchmark dataset defined for that module. This ensures that differences between submitted results reflect differences in data analysis workflows rather than differences in sample composition, instrument configuration, acquisition design, or data quality.
 

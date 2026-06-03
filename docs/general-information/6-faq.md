@@ -57,8 +57,6 @@ This design allows ProteoBench to support a wide range of tools, including comme
 Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
 If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
-
-
 ## What is QuantError?
 
 QuantError is a module-specific metric used to assess quantitative accuracy when the expected abundance ratios are known. It compares observed quantitative values against expected values and summarizes how far a workflow deviates from the known experimental design.
@@ -81,7 +79,7 @@ ProteoBench results should therefore be interpreted as workflow-level comparison
 
 False discovery rate control is a central concern in proteomics benchmarking. ProteoBench modules can incorporate FDR-related analyses when appropriate datasets and metrics are available. Independent validation strategies, including entrapment-based approaches, are especially relevant for workflows where reported identifications and quantification accuracy depend strongly on tool-specific error-control procedures.
 
-## How should I interpret rankings or leaderboard-style plots?
+## How should I interpret the main plots in each module?
 
 ProteoBench comparison plots should not be interpreted as universal rankings of software tools. A tool that performs well in one module, dataset, or metric may not be optimal for another biological question, instrument type, acquisition method, or analysis goal.
 

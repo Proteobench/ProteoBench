@@ -19,7 +19,7 @@ ProteoBench is intended for several user groups:
 
 Although ProteoBench is useful for software developers, it is also designed for experimental laboratories and core facilities that use established open-source or commercial software.
 
-## Do I need to use a predefined dataset?
+## Do I need to run my workflow on a predefined data set?
 
 Yes. To compare results meaningfully within a ProteoBench module, all submitted workflows must be evaluated on the benchmark dataset defined for that module. This ensures that differences between submitted results reflect differences in data analysis workflows rather than differences in sample composition, instrument configuration, acquisition design, or data quality.
 

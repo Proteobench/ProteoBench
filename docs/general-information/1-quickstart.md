@@ -11,7 +11,7 @@ Adding your own results for benchmarking is easy:
 4. Open the "Upload New Results" tab on the module page (e.g. for [DIA Astral LFQ](https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral)) on the WebApp and follow the instructions.
 
 5. After uploading, the web app runs the ProteoBench scoring pipeline and shows
-    interactive plots and tables comparing your run to public benchmarks.
+    interactive plots and tables comparing your run to public benchmark runs.
 
 We strongly recommend publishing your results to the public collection! Use the "Submit New Results" tab for that. All you have to add is the parameter file created by the workflow.
 

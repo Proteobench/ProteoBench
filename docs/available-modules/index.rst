@@ -122,7 +122,7 @@ Are you looking for...
       :padding: 1
       :class-card: sd-mb-4
 
-      :bdg-info:`beta`
+      :bdg-sucdess:`alpha`
       ^^^
       +++
       `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · `Documentation <active-modules/11-denovo-dda-hcd.html>`__

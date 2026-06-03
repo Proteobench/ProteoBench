@@ -96,7 +96,22 @@ ProteoBench is best used as a transparent decision-support resource rather than 
 
 ## How can I follow updates or community discussions?
 
+## How can I follow ProteoBench development and community discussions?
+
 ProteoBench development and discussion are community-oriented. Users can follow the relevant repository, documentation pages, discussion forum, or community channels to receive updates about new modules, software parsers, benchmark datasets, documentation improvements, and public releases.
+
+### For GitHub users
+
+GitHub users can follow ProteoBench development through the main [ProteoBench GitHub repository](https://github.com/Proteobench/ProteoBench). This repository contains the source code, contribution information, issue tracking, and release history. Users who want to receive updates can watch or star the repository. If you are interested in a specific module, you can also watch the corresponding result repository listed [here](https://github.com/Proteobench).
+
+Questions, proposals, and module-specific discussions can be followed through the [ProteoBench GitHub Discussions](https://github.com/Proteobench/ProteoBench/discussions) forum. This is the preferred route for users who want to participate in technical discussions, suggest new benchmark modules, discuss parser development, or contribute to the platform.
+
+### For non-GitHub users
+
+Users who do not use GitHub can follow ProteoBench through the [ProteoBench web application](https://proteobench.cubimed.rub.de/) and the [ProteoBench documentation](https://proteobench.readthedocs.io/en/stable/). These resources provide access to the public benchmark modules, available datasets, workflow comparison results, and user-facing documentation.
+
+Community discussion also takes place through the [EuBIC-MS Slack workspace](https://eubic.slack.com/). Users can join the relevant ProteoBench channel there to ask questions, follow community updates, and discuss benchmark modules or workflow comparisons without requiring a GitHub account. More information about the EuBIC-MS community is available on the [EuBIC-MS website](https://eubic-ms.org/).
+
 
 ## How can I contribute to ProteoBench?
 

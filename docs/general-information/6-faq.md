@@ -46,8 +46,6 @@ Users and developers are encouraged to contact the ProteoBench community if they
 
 Manual review is used as a quality-control step to keep public benchmark results interpretable and reliable. The review process helps detect incomplete submissions, incorrect file types, incompatible module choices, missing metadata, or results that cannot be meaningfully compared with existing entries.
 
-This step is not intended to restrict participation. Rather, it protects the benchmark from accidental or automated uploads that could make the public comparison plots misleading.
-
 ## Does ProteoBench run my workflow automatically?
 
 At present, ProteoBench primarily evaluates submitted workflow outputs rather than executing every workflow centrally. Users usually download the benchmark data, process it with their local software or pipeline, and upload the relevant output files.

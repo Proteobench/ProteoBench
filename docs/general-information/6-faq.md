@@ -61,15 +61,15 @@ If you do not find the information that you need to run your workflow, don't hes
 
 QuantError is a module-specific metric used to assess quantitative accuracy when the expected abundance ratios are known. It compares observed quantitative values against expected values and summarizes how far a workflow deviates from the known experimental design.
 
-QuantError should be interpreted together with identification depth and other module-specific metrics. A workflow that reports many quantified features is not necessarily optimal if the quantitative error is high.
+QuantError should be interpreted together with the other module-specific metrics. A workflow that reports many quantified features is not necessarily optimal if the quantitative error is high.
 
 ## Does ProteoBench perform normalization or missing-value imputation?
 
-ProteoBench generally evaluates the outputs provided by the submitted workflow. It does not aim to impose a uniform post-processing workflow across all tools, because normalization, missing-value handling, transfer steps, protein inference, and quantification strategies are often integral parts of the software being benchmarked.
+ProteoBench does not apply post-processing steps that may affect the benchmark metrics. We consider normalization, missing-value handling, transfer steps, protein inference, and quantification strategies as integral parts of benchmarked workflows. They should be reported in the parameter files submitted alongside the workflow results upon public submission.
 
-Where relevant, module documentation should specify which processing steps are performed by ProteoBench itself and which are expected to have been performed by the submitted workflow.
+Where relevant, module documentation specifies which processing steps are performed by ProteoBench itself and which are expected to have been performed by the submitted workflow.
 
-## How are differences between software tools interpreted?
+## How can I interpret differences between :ref:`benchmark runs<benchmark-run>`?
 
 ProteoBench provides standardized metrics and visualizations that make differences between workflows visible. These differences may arise from many factors, including feature detection, spectral library generation, identification scoring, false discovery rate control, match-transfer strategies, normalization, missing-value handling, quantification algorithms, and software-specific defaults.
 

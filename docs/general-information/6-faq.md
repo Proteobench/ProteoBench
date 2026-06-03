@@ -26,7 +26,7 @@ Users who want to benchmark a different experimental design can contribute or re
 
 No. ProteoBench does not require all users to run identical workflow parameters. In many modules, suggested parameters are provided to help users get started and to support comparable baseline analyses, but users may submit results generated with their own parameter choices.
 
-Parameter information is collected with submissions whenever possible so that users can interpret differences in performance in the context of software versions, workflow settings, search databases, quantification options, and other relevant configuration details. If you 'limit test' a specific parameter, we recommend documenting that in the comment field.
+The parameter used for all the public :ref:`benchmark runs<benchmark-run>` is collected upon submission and fully available to download so that users can interpret differences in performance in the context of software versions, workflow settings, search databases, quantification options, and other relevant configuration details. If you 'limit test' a specific parameter, we recommend documenting that in the comment field.
 
 ## Do I need to use a specific FASTA database?
 

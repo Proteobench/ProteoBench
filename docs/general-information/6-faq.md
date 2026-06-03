@@ -52,7 +52,7 @@ This step is not intended to restrict participation. Rather, it protects the ben
 
 ProteoBench evaluates submitted workflow outputs rather than executing every workflow centrally. Users download the benchmark data provided for their module of interest, process it with their local software or pipeline, and upload the relevant output files.
 
-This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. Centralized execution of all supported tools would be difficult to maintain because software licenses, operating-system requirements, hardware needs, and workflow customization differ substantially across proteomics software ecosystems.
+This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. 
 
 ## How do I find the raw data for a benchmark module?
 

@@ -57,11 +57,6 @@ This design allows ProteoBench to support a wide range of tools, including comme
 Each module should provide a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
 
 
-## What does “depth” mean in ProteoBench?
-
-In ProteoBench, “depth” refers to the number of identifications or quantified features reported by a workflow within a given benchmark module. The exact unit depends on the module and may refer, for example, to precursor ions, peptides, peptide groups, proteins, or other analyte classes.
-
-Because “depth” can mean different things in different proteomics contexts, users should consult the metric definitions in each module before comparing results.
 
 ## What is QuantError?
 

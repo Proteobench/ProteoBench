@@ -71,7 +71,7 @@ ProteoBench does not apply post-processing steps that may affect the benchmark m
 
 Where relevant, module documentation specifies which processing steps are performed by ProteoBench itself and which are expected to have been performed by the submitted workflow.
 
-## How are differences between software tools interpreted?
+## How can I interpret differences between :ref:`benchmark runs<benchmark-run>`?
 
 ProteoBench provides standardized metrics and visualizations that make differences between workflows visible. These differences may arise from many factors, including feature detection, spectral library generation, identification scoring, false discovery rate control, match-transfer strategies, normalization, missing-value handling, quantification algorithms, and software-specific defaults.
 

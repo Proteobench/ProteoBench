@@ -22,7 +22,7 @@ Yes. To compare results meaningfully within a ProteoBench module, all submitted 
 
 Users who want to benchmark a different experimental design can contribute or request a new module. ProteoBench is modular by design, so new datasets, metrics, and use cases can be added as the community’s needs evolve.
 
-## Do I need to use the exact same search parameters as other users?
+## Do I need to use the exact same workflow parameters as other users?
 
 No. ProteoBench does not require all users to run identical search parameters. In many modules, suggested parameters are provided to help users get started and to support comparable baseline analyses, but users may submit results generated with their own parameter choices.
 

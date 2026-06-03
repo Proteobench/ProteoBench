@@ -31,11 +31,15 @@ from proteobench.validation import (
 from proteobench.validation.checks import (
     check_charge_range,
     check_enzyme,
+    check_fdr_psm,
+    check_mass_tolerances,
+    check_max_modifications,
     check_modifications,
     check_peptide_length,
     check_protein_ids,
     check_run_consistency,
 )
+from proteobench.validation.checks import _parse_tolerance
 from proteobench.validation.config import _resolve_profile
 from proteobench.validation.fasta import parse_fasta_header
 from proteobench.validation.protein_ids import (
@@ -71,6 +75,10 @@ def make_params(**overrides):
         allowed_miscleavages=2,
         fixed_mods="Carbamidomethyl (C)",
         variable_mods="Oxidation (M),Acetyl (Protein N-term)",
+        max_mods=3,
+        precursor_mass_tolerance="[-20.0 ppm, 20.0 ppm]",
+        fragment_mass_tolerance="[-20.0 ppm, 20.0 ppm]",
+        ident_fdr_psm=0.01,
     )
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
@@ -248,9 +256,10 @@ def test_enzyme_missed_cleavages_warning_only():
     assert any(i.code == "missed_cleavages_exceeded" and i.severity == Severity.WARNING for i in issues)
 
 
-def test_enzyme_non_trypsin_skipped_as_info():
+def test_enzyme_chymotrypsin_is_supported():
+    # Chymotrypsin is now a supported enzyme, so it is NOT skipped as unsupported.
     issues = check_enzyme(make_standard_df(), make_params(enzyme="Chymotrypsin"), ModuleValidationConfig())
-    assert any(i.code == "enzyme_check_unsupported" and i.severity == Severity.INFO for i in issues)
+    assert not any(i.code == "enzyme_check_unsupported" for i in issues)
 
 
 def test_enzyme_missing_warns():
@@ -288,6 +297,177 @@ def test_run_consistency_software_mismatch_error():
 def test_run_consistency_match_no_error():
     issues = check_run_consistency(make_standard_df(), make_params(), "MaxQuant", ModuleValidationConfig())
     assert not any(i.severity == Severity.ERROR for i in issues)
+
+
+# --------------------------------------------------------------------------- #
+# enzyme: multiple proteolytic enzymes
+# --------------------------------------------------------------------------- #
+
+
+def test_enzyme_trypsin_proline_rule():
+    # "PEPKPTIDER": K at index 3 is followed by P -> not a missed cleavage for Trypsin,
+    # but IS one for Trypsin/P.
+    df = make_standard_df(Sequence=["PEPKPTIDER", "PEPKPTIDER", "PEPKPTIDER", "PEPKPTIDER"])
+    trypsin = check_enzyme(df, make_params(enzyme="Trypsin", allowed_miscleavages=0), ModuleValidationConfig())
+    assert not any(i.code == "missed_cleavages_exceeded" for i in trypsin)
+    trypsin_p = check_enzyme(df, make_params(enzyme="Trypsin/P", allowed_miscleavages=0), ModuleValidationConfig())
+    assert any(i.code == "missed_cleavages_exceeded" for i in trypsin_p)
+
+
+def test_enzyme_lysc_supported():
+    # Lys-C cleaves after K only. "PEPKTIDER" has one internal K -> 1 missed cleavage.
+    df = make_standard_df(Sequence=["PEPKTIDER", "SAMPLEK", "PEPTIDEK", "ELVISK"])
+    issues = check_enzyme(df, make_params(enzyme="Lys-C", allowed_miscleavages=0), ModuleValidationConfig())
+    assert any(i.code == "missed_cleavages_exceeded" and i.severity == Severity.WARNING for i in issues)
+
+
+def test_enzyme_gluc_supported():
+    # Glu-C cleaves after D/E. "PEPDTIDEK" has 4 internal D/E residues
+    # (E1, D3, D6, E7; the C-terminal K is not a cleavage site) -> 4 missed cleavages.
+    df = make_standard_df(Sequence=["PEPDTIDEK", "SAMPLEE", "PEPTIDE", "AAAAD"])
+    issues = check_enzyme(df, make_params(enzyme="Glu-C", allowed_miscleavages=0), ModuleValidationConfig())
+    exceeded = [i for i in issues if i.code == "missed_cleavages_exceeded"]
+    assert exceeded
+    assert any("PEPDTIDEK (4 MC)" in e for e in exceeded[0].examples)
+
+
+def test_enzyme_aspn_skipped_as_info():
+    # Asp-N is an N-terminal cleaver; the heuristic does not apply.
+    issues = check_enzyme(make_standard_df(), make_params(enzyme="Asp-N"), ModuleValidationConfig())
+    assert any(i.code == "enzyme_check_unsupported" and i.severity == Severity.INFO for i in issues)
+
+
+def test_enzyme_unknown_skipped_as_info():
+    issues = check_enzyme(make_standard_df(), make_params(enzyme="ProteinaseK"), ModuleValidationConfig())
+    assert any(i.code == "enzyme_check_unsupported" and i.severity == Severity.INFO for i in issues)
+
+
+# --------------------------------------------------------------------------- #
+# maximum number of modifications
+# --------------------------------------------------------------------------- #
+
+
+def test_max_modifications_exceeded_warns():
+    df = make_standard_df()
+    df["proforma"] = [
+        "PEP[Acetyl]T[Oxidation]IDE[Phospho]K",  # 3 mods
+        "ELVISLIVESR",  # 0
+        "SAM[Oxidation]PLERPEPK",  # 1
+        "VFR[Oxidation]RDTHK",  # 1
+    ]
+    issues = check_max_modifications(df, make_params(max_mods=2), ModuleValidationConfig())
+    warnings = [i for i in issues if i.severity == Severity.WARNING]
+    assert any(i.code == "max_modifications_exceeded" for i in warnings)
+    assert any("3 mods" in str(e) for i in warnings for e in i.examples)
+
+
+def test_max_modifications_within_limit_passes():
+    issues = check_max_modifications(make_standard_df(), make_params(max_mods=3), ModuleValidationConfig())
+    assert not any(i.code == "max_modifications_exceeded" for i in issues)
+
+
+def test_max_modifications_missing_param_warns():
+    issues = check_max_modifications(make_standard_df(), make_params(max_mods=None), ModuleValidationConfig())
+    assert not any(i.severity == Severity.ERROR for i in issues)
+    assert any(i.code == "max_mods_not_parsed" and i.severity == Severity.WARNING for i in issues)
+
+
+# --------------------------------------------------------------------------- #
+# precursor / fragment mass tolerances
+# --------------------------------------------------------------------------- #
+
+
+def test_mass_tolerances_valid_passes():
+    issues = check_mass_tolerances(make_standard_df(), make_params(), ModuleValidationConfig())
+    assert issues == []
+
+
+def test_mass_tolerance_non_positive_warns():
+    params = make_params(precursor_mass_tolerance="[0.0 ppm, 0.0 ppm]")
+    issues = check_mass_tolerances(make_standard_df(), params, ModuleValidationConfig())
+    assert any(i.code == "precursor_mass_tolerance_non_positive" and i.severity == Severity.WARNING for i in issues)
+
+
+def test_mass_tolerance_implausible_warns():
+    params = make_params(fragment_mass_tolerance="[-5000.0 ppm, 5000.0 ppm]")
+    issues = check_mass_tolerances(make_standard_df(), params, ModuleValidationConfig())
+    assert any(i.code == "fragment_mass_tolerance_implausible" for i in issues)
+
+
+def test_mass_tolerance_missing_warns():
+    params = make_params(precursor_mass_tolerance=None, fragment_mass_tolerance="None")
+    issues = check_mass_tolerances(make_standard_df(), params, ModuleValidationConfig())
+    codes = {i.code for i in issues}
+    assert "precursor_mass_tolerance_not_parsed" in codes
+    assert "fragment_mass_tolerance_not_parsed" in codes
+    assert not any(i.severity == Severity.ERROR for i in issues)
+
+
+def test_mass_tolerance_dalton_units():
+    # Plausible Dalton tolerance: no issue.
+    ok = check_mass_tolerances(
+        make_standard_df(), make_params(fragment_mass_tolerance="[-0.5 Da, 0.5 Da]"), ModuleValidationConfig()
+    )
+    assert not any(i.code == "fragment_mass_tolerance_implausible" for i in ok)
+    # Implausible Dalton tolerance: warns.
+    bad = check_mass_tolerances(
+        make_standard_df(), make_params(fragment_mass_tolerance="[-50.0 Da, 50.0 Da]"), ModuleValidationConfig()
+    )
+    assert any(i.code == "fragment_mass_tolerance_implausible" for i in bad)
+
+
+def test_mass_tolerance_mmu_units():
+    # 5000 mmu = 5 Da: plausible (ceiling is 10000 mmu).
+    ok = check_mass_tolerances(
+        make_standard_df(), make_params(fragment_mass_tolerance="[-5000 mmu, 5000 mmu]"), ModuleValidationConfig()
+    )
+    assert not any(i.code == "fragment_mass_tolerance_implausible" for i in ok)
+    # 50000 mmu = 50 Da: implausible.
+    bad = check_mass_tolerances(
+        make_standard_df(), make_params(fragment_mass_tolerance="[-50000 mmu, 50000 mmu]"), ModuleValidationConfig()
+    )
+    assert any(i.code == "fragment_mass_tolerance_implausible" for i in bad)
+
+
+def test_mass_tolerance_scientific_notation():
+    # "2e-3 Da" must parse as 0.002 Da, not 3 Da (regression guard for the number regex).
+    magnitude, unit = _parse_tolerance("2e-3 Da")
+    assert magnitude == pytest.approx(0.002)
+    assert unit == "da"
+    # And a normal bracketed range still parses as before.
+    assert _parse_tolerance("[-20.0 ppm, 20.0 ppm]") == (pytest.approx(20.0), "ppm")
+
+
+# --------------------------------------------------------------------------- #
+# PSM FDR
+# --------------------------------------------------------------------------- #
+
+
+def test_fdr_psm_valid_passes():
+    issues = check_fdr_psm(make_standard_df(), make_params(ident_fdr_psm=0.01), ModuleValidationConfig())
+    assert issues == []
+
+
+def test_fdr_psm_above_recommended_warns():
+    issues = check_fdr_psm(make_standard_df(), make_params(ident_fdr_psm=0.05), ModuleValidationConfig())
+    assert any(i.code == "fdr_psm_above_recommended" and i.severity == Severity.WARNING for i in issues)
+
+
+def test_fdr_psm_out_of_range_warns():
+    issues = check_fdr_psm(make_standard_df(), make_params(ident_fdr_psm=1.5), ModuleValidationConfig())
+    assert any(i.code == "fdr_psm_out_of_range" for i in issues)
+
+
+def test_fdr_psm_missing_warns():
+    issues = check_fdr_psm(make_standard_df(), make_params(ident_fdr_psm="None"), ModuleValidationConfig())
+    assert any(i.code == "fdr_psm_not_parsed" and i.severity == Severity.WARNING for i in issues)
+
+
+def test_fdr_psm_recommendation_configurable():
+    # Disabling the recommendation removes the above-recommended warning.
+    config = ModuleValidationConfig(recommended_max_fdr_psm=None)
+    issues = check_fdr_psm(make_standard_df(), make_params(ident_fdr_psm=0.05), config)
+    assert not any(i.code == "fdr_psm_above_recommended" for i in issues)
 
 
 # --------------------------------------------------------------------------- #
@@ -347,7 +527,17 @@ def test_report_serialization_and_summary():
     as_dict = report.to_dict()
     assert as_dict["passed"] is False
     assert as_dict["n_errors"] == 1 and as_dict["n_warnings"] == 1
-    assert "FAILED" in report.summary()
+    summary = report.summary()
+    assert "Automated submission checks" in summary
+    assert "an error" in summary and "a warning" in summary
+    # Wording must stay neutral (validation does not block submission).
+    assert "PASSED" not in summary and "FAILED" not in summary
+
+
+def test_summary_passed_when_clean():
+    report = ValidationReport()
+    report.add_info("i", "just info", "check_a")
+    assert "All automated checks passed." in report.summary()
 
 
 def test_raise_if_errors():

@@ -328,6 +328,8 @@ Session state serves 4 purposes: widget state (via UUID keys), data cache (DataF
 
 A framework-agnostic, **registry-driven** validation package that checks uploaded submissions for internal consistency before the public datapoint is created. It returns a structured `ValidationReport` instead of raising generic exceptions. Which checks run is determined by a *validation profile*, so the orchestrator is generic: adding a module of an existing category is config-only, and adding a new category only requires registering a new profile.
 
+**Validation does not block submission.** All findings (including `error`-severity ones) are surfaced in the UI and embedded in the pull-request description via `ValidationReport.summary()` so reviewers see them, but submission always proceeds. The `error`/`warning`/`info` severities only control display prominence and PR inclusion, not gating. (The earlier blocking behavior in `submit_to_repository` was removed.)
+
 **Package layout:**
 
 | File | Contents |
@@ -338,7 +340,7 @@ A framework-agnostic, **registry-driven** validation package that checks uploade
 | `protein_ids.py` | `split_protein_groups()` (`;`/`,` separators), `extract_identifiers()`, `is_decoy_or_contaminant()` |
 | `context.py` | `ValidationContext` — bundles all inputs a check might need (`standard_df`, `parameters`, `config`, `fasta`, `input_format`, generic `reference`, `extras`) so every check has the uniform signature `ctx -> list[ValidationIssue]` |
 | `config.py` | `ModuleValidationConfig` — column names, contaminant flag, decoy prefixes, FASTA URL, and the resolved `validation_profile`; built via `from_parse_settings(parse_settings_dir, module_id, input_format)` |
-| `checks.py` | Pure check functions: `check_protein_ids`, `check_charge_range`, `check_peptide_length`, `check_enzyme`, `check_modifications`, `check_run_consistency` (kept individually unit-testable) |
+| `checks.py` | Pure check functions: `check_protein_ids`, `check_charge_range`, `check_peptide_length`, `check_enzyme`, `check_modifications`, `check_max_modifications`, `check_mass_tolerances`, `check_fdr_psm`, `check_run_consistency` (kept individually unit-testable) |
 | `profiles.py` | `Check` (named `ctx`-callable), `ValidationProfile` (ordered list of checks), the profile **registry** (`register_profile`/`unregister_profile`/`get_profile`/`available_profiles`), and the built-in `quant_lfq` and `denovo` profiles |
 | `validator.py` | `validate_submission(standard_df, parameters, fasta, config, input_format, profile)` — resolves the profile, builds the context, runs the profile's checks; each check is fault-tolerant (unexpected exceptions become warnings) |
 
@@ -353,17 +355,20 @@ An unregistered profile name produces a single `unknown_validation_profile` warn
 
 **`ValidationIssue` fields:** `code` (machine-readable), `severity`, `message`, `check`, `field`, `observed`, `expected`, `examples` (up to 20 offending protein identifiers via `MAX_PROTEIN_EXAMPLES`, or up to 10 example rows for the other checks via `MAX_ROW_EXAMPLES`).
 
-**`quant_lfq` profile checks and their severity:**
+**`quant_lfq` profile checks and their default severity** (severity affects display/PR prominence only; nothing blocks):
 
-| Check | Blocks submission? | Notes |
-|-------|--------------------|-------|
-| Protein IDs vs FASTA | ERROR | Skips decoys and contaminants; splits groups; case-insensitive |
-| Precursor charge range | ERROR | Uses `min_precursor_charge` / `max_precursor_charge` from params |
-| Peptide length range | ERROR | Uses `min_peptide_length` / `max_peptide_length`; counts alpha chars |
-| Trypsin missed cleavages | WARNING only | Heuristic; ignores ragged termini and protein ends |
-| Modification names | WARNING only | Compares human-readable names in `proforma` column vs declared mods; mass/UniMod tokens skipped |
-| Software identity (`run_consistency`) | ERROR | Blocks if `params.software_name` != `input_format` |
-| Absent parameter | WARNING | Each param-dependent check self-reports when its constraint was not parsed; never crashes |
+| Check | Default severity | Notes |
+|-------|------------------|-------|
+| `protein_ids` (vs FASTA) | ERROR | Skips decoys and contaminants; splits groups; case-insensitive |
+| `charge_range` | ERROR | Uses `min_precursor_charge` / `max_precursor_charge` from params |
+| `peptide_length` | ERROR | Uses `min_peptide_length` / `max_peptide_length`; counts alpha chars |
+| `enzyme` (missed cleavages) | WARNING | Supports trypsin, trypsin/P, Lys-C, Arg-C, Glu-C, chymotrypsin via `_ENZYME_CLEAVAGE_RULES`; N-terminal cleavers (Asp-N/Lys-N) and unknown enzymes skipped as info; heuristic, ignores ragged termini |
+| `modifications` (names) | WARNING | Human-readable names in `proforma` vs declared mods; mass/UniMod tokens skipped |
+| `max_modifications` | WARNING | Counts bracketed mods per peptidoform vs `max_mods`; upper bound (includes fixed mods written into the sequence) |
+| `mass_tolerances` | WARNING | Sanity check of `precursor_mass_tolerance`/`fragment_mass_tolerance` (parseable, positive, plausible ppm/Da); no per-result comparison exists |
+| `fdr_psm` | WARNING | `ident_fdr_psm` within `[0,1]` and ≤ `config.recommended_max_fdr_psm` (default 0.01) |
+| `run_consistency` (software identity) | ERROR | `params.software_name` vs `input_format` |
+| (absent parameter) | WARNING | Each param-dependent check self-reports when its constraint was not parsed; never crashes |
 
 The `denovo` profile currently runs only `run_consistency` plus a `denovo_pending` info placeholder (de novo uses a different standardized schema — `spectrum_id`/`peptide_str`/`aa_scores` — and a ground-truth table rather than a FASTA; content checks are a documented TODO in `profiles.py`).
 
@@ -379,7 +384,7 @@ The `denovo` profile currently runs only `run_consistency` plus a `denovo_pendin
 
 `[reference_database]` is populated for all 9 quant modules (HYE modules share the HYE FASTA; single-cell uses HY; Plasma uses Distler-PYE). The de novo `module_settings.toml` declares `[validation] profile = "denovo"`. If `[reference_database]` is absent the FASTA check is skipped with an info message.
 
-**Integration point.** Validation runs inside `submit_to_repository()` in `webinterface/pages/base_pages/tabs/tab6_submit_results.py`, after the "I really want to upload it" button press and before `create_pull_request()`. The standardized DataFrame is re-derived by rerunning the existing parser on the `input_df` already in session state (no duplicated tool-specific parsing logic). Errors block the PR; warnings render in the UI and are appended to the PR description for curator visibility. The local Tab 2 upload path is unaffected.
+**Integration point.** Validation runs inside `submit_to_repository()` in `webinterface/pages/base_pages/tabs/tab6_submit_results.py`, after the "I really want to upload it" button press and before `create_pull_request()`. The standardized DataFrame is re-derived by rerunning the existing parser on the `input_df` already in session state (no duplicated tool-specific parsing logic). All findings (errors and warnings) are rendered in the UI and appended to the PR description via `ValidationReport.summary()`; none of them block the PR. The local Tab 2 upload path is unaffected.
 
 **Streamlit glue.** `webinterface/pages/base_pages/utils/validation_ui.py` provides:
 - `run_submission_validation(variables, ionmodule, user_input, params)` — orchestrates the full flow (re-parse, load FASTA from cache, run checks), returns a `ValidationReport`.
@@ -441,7 +446,7 @@ Only two module-level test files exist: `test_module_quant_ion_DDA_QExactive.py`
 - `test_plot_quant.py` - `TestPlotDataPoint`
 - `test_modules_constants.py` - parametrized check that every `MODULE_SETTINGS_DIRS` entry resolves to an existing directory
 - `test_github_repo.py` - tests for `GithubProteobotRepo`
-- `test_validation.py` - 42 tests for the submission-validation layer; covers FASTA parsing, protein-ID matching/groups/decoy-contaminant skipping, charge/length violations, missing-parameter warnings, enzyme/modification heuristics, the profile registry (resolution, custom-profile registration, unknown-profile handling, de novo routing), report serialization, and lightweight integration through the real MaxQuant and Sage parsers
+- `test_validation.py` - 63 tests for the submission-validation layer; covers FASTA parsing, protein-ID matching/groups/decoy-contaminant skipping, charge/length violations, missing-parameter warnings, multi-enzyme missed-cleavage checks, modification/max-modification checks, mass-tolerance and PSM-FDR sanity checks, the profile registry (resolution, custom-profile registration, unknown-profile handling, de novo routing), report serialization, and lightweight integration through the real MaxQuant and Sage parsers
 
 ### What CI Validates
 

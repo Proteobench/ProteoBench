@@ -132,6 +132,10 @@ class ModuleValidationConfig:
     species_flags : tuple of str, optional
         Species names configured for the module (e.g. ``("YEAST", "ECOLI", "HUMAN")``),
         derived from the tool's species mapper. Currently informational.
+    recommended_max_fdr_psm : float, optional
+        Recommended maximum PSM-level FDR for the benchmark. A parsed FDR above
+        this value produces a warning. Default ``0.01`` (1%). Set to ``None`` to
+        disable the recommendation check.
     validation_profile : str, optional
         Name of the registered profile whose checks the orchestrator runs. Set
         automatically by :meth:`from_parse_settings`; defaults to
@@ -150,6 +154,7 @@ class ModuleValidationConfig:
     fasta_url: Optional[str] = None
     fasta_filename: Optional[str] = None
     species_flags: Tuple[str, ...] = field(default_factory=tuple)
+    recommended_max_fdr_psm: Optional[float] = 0.01
     validation_profile: str = DEFAULT_VALIDATION_PROFILE
 
     @classmethod

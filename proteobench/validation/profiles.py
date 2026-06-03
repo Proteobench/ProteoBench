@@ -29,6 +29,9 @@ from typing import Callable, Dict, List, Optional
 from proteobench.validation.checks import (
     check_charge_range,
     check_enzyme,
+    check_fdr_psm,
+    check_mass_tolerances,
+    check_max_modifications,
     check_modifications,
     check_peptide_length,
     check_protein_ids,
@@ -274,6 +277,21 @@ QUANT_LFQ_PROFILE = ValidationProfile(
             "modifications",
             lambda ctx: check_modifications(ctx.standard_df, ctx.parameters, ctx.config),
             "Observed modifications declared in the parameter file (warning only).",
+        ),
+        Check(
+            "max_modifications",
+            lambda ctx: check_max_modifications(ctx.standard_df, ctx.parameters, ctx.config),
+            "Number of modifications per peptidoform within max_mods (warning only).",
+        ),
+        Check(
+            "mass_tolerances",
+            lambda ctx: check_mass_tolerances(ctx.standard_df, ctx.parameters, ctx.config),
+            "Precursor/fragment mass tolerances are present and plausible (warning only).",
+        ),
+        Check(
+            "fdr_psm",
+            lambda ctx: check_fdr_psm(ctx.standard_df, ctx.parameters, ctx.config),
+            "PSM-level FDR within the valid range and recommended maximum (warning only).",
         ),
         Check(
             "run_consistency",

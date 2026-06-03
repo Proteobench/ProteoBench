@@ -183,8 +183,9 @@ def submit_to_repository(
     if not button_pressed:  # if button_pressed is None
         return None
 
-    # Validate the submission (results vs parameters vs reference FASTA) before
-    # creating the public datapoint. Errors block submission; warnings do not.
+    # Run automated submission checks (results vs parameters vs reference FASTA).
+    # These never block submission: the findings are shown to the submitter and
+    # included in the pull-request description for the reviewers.
     validation_report = run_submission_validation(
         variables=variables,
         ionmodule=ionmodule,
@@ -192,15 +193,6 @@ def submit_to_repository(
         params=params,
     )
     render_validation_report(validation_report)
-    if validation_report.has_errors:
-        if variables.submit in st.session_state:
-            del st.session_state[variables.submit]
-        st.error(
-            "Submission blocked: resolve the validation errors above, then upload again.",
-            icon="🚫",
-        )
-        return None
-
     validation_summary = validation_report.summary()
 
     # MaxQuant fixed modification handling

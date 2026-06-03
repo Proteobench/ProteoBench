@@ -23,8 +23,10 @@ class Severity(str, Enum):
     """
     Severity level of a validation issue.
 
-    ``ERROR`` issues block public submission; ``WARNING`` and ``INFO`` issues
-    do not.
+    Severity controls only display prominence and inclusion in the pull-request
+    summary; it does not gate the Streamlit submission flow (no severity blocks
+    submission). It also drives the optional programmatic
+    :meth:`ValidationReport.raise_if_errors` path.
     """
 
     ERROR = "error"
@@ -288,10 +290,14 @@ class ValidationReport:
         """
         Overall pass status (no ``ERROR`` issues).
 
+        This is informational only: the Streamlit submission flow does not gate
+        on it (submission is never blocked). It is used for display and by the
+        optional :meth:`raise_if_errors` path.
+
         Returns
         -------
         bool
-            ``True`` when the submission may proceed (warnings allowed).
+            ``True`` when there are no ``ERROR`` issues (warnings allowed).
         """
         return not self.has_errors
 
@@ -316,7 +322,9 @@ class ValidationReport:
         """
         Build a compact Markdown summary of the report.
 
-        Useful for embedding warnings into pull-request text or logs.
+        Useful for embedding the findings into pull-request text or logs. The
+        wording is neutral: submission validation does not block submission, it
+        only surfaces points for the submitter and reviewers to consider.
 
         Parameters
         ----------
@@ -328,18 +336,23 @@ class ValidationReport:
         str
             Markdown-formatted summary.
         """
-        status = "PASSED" if self.passed else "FAILED"
-        lines = [
-            f"### Submission validation: {status}",
-            f"- Errors: {len(self.errors)}, Warnings: {len(self.warnings)}, Info: {len(self.infos)}",
-        ]
+        lines = ["### Automated submission checks"]
+
+        n_flagged = len(self.errors) + len(self.warnings)
+        if n_flagged == 0:
+            lines.append("All automated checks passed.")
+        else:
+            lines.append(
+                f"{len(self.errors)} item(s) to review and {len(self.warnings)} note(s) were flagged "
+                "for reviewer attention (these do not block submission)."
+            )
 
         selected = list(self.errors) + list(self.warnings)
         if include_info:
             selected += list(self.infos)
 
         for issue in selected:
-            line = f"- **[{issue.severity.value}]** ({issue.code}) {issue.message}"
+            line = f"- {issue.message}"
             if issue.examples:
                 shown = ", ".join(str(e) for e in issue.examples[:5])
                 line += f" Examples: {shown}"

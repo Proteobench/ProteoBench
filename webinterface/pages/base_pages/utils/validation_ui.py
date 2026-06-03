@@ -249,45 +249,41 @@ def _render_issue(issue) -> None:
         st.info(header, icon="ℹ️")
 
     details = []
-    if issue.field:
-        details.append(f"- **Field/check:** `{issue.check}` / `{issue.field}`")
-    else:
-        details.append(f"- **Check:** `{issue.check}`")
-    details.append(f"- **Code:** `{issue.code}`")
-    if issue.observed is not None:
-        details.append(f"- **Observed:** `{issue.observed}`")
     if issue.expected is not None:
-        details.append(f"- **Expected:** `{issue.expected}`")
+        details.append(f"- Expected: `{issue.expected}`")
+    if issue.observed is not None:
+        details.append(f"- Observed: `{issue.observed}`")
     if issue.examples:
         shown = ", ".join(f"`{e}`" for e in issue.examples)
-        details.append(f"- **Examples:** {shown}")
-    st.markdown("\n".join(details))
+        details.append(f"- Examples: {shown}")
+    if details:
+        st.markdown("\n".join(details))
 
 
 def render_validation_report(report: ValidationReport) -> None:
     """
     Render a full validation report in the Streamlit UI.
 
+    The checks never block submission; the report is shown so the submitter can
+    review the findings, which are also included in the pull-request description.
+
     Parameters
     ----------
     report : ValidationReport
         The report to display.
     """
-    n_err, n_warn, n_info = len(report.errors), len(report.warnings), len(report.infos)
+    n_flagged = len(report.errors) + len(report.warnings)
+    n_info = len(report.infos)
 
-    st.subheader("Submission validation")
-    if report.has_errors:
-        st.error(
-            f"Validation failed: {n_err} error(s), {n_warn} warning(s). " "Resolve the errors below before submitting.",
-            icon="🚫",
-        )
-    elif n_warn:
-        st.warning(
-            f"Validation passed with {n_warn} warning(s). Review them, then you may proceed.",
-            icon="⚠️",
-        )
+    st.subheader("Submission checks")
+    if n_flagged == 0:
+        st.success("All automated submission checks passed.", icon="✅")
     else:
-        st.success("Validation passed with no issues.", icon="✅")
+        st.info(
+            f"We flagged {n_flagged} point(s) to review below. You can still submit your results, and "
+            "these notes will be included in the pull request for the reviewers.",
+            icon="📝",
+        )
 
     for issue in report.errors:
         _render_issue(issue)
@@ -295,6 +291,6 @@ def render_validation_report(report: ValidationReport) -> None:
         _render_issue(issue)
 
     if report.infos:
-        with st.expander(f"Validation details ({n_info} info)"):
+        with st.expander(f"More details ({n_info})"):
             for issue in report.infos:
                 _render_issue(issue)

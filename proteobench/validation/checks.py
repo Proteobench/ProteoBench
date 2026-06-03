@@ -14,14 +14,22 @@ because a value could not be parsed.
 
 Documented limitations and intentionally skipped checks:
 
-* **Enzyme specificity**: only a trypsin-family missed-cleavage heuristic is
-  implemented, and only as a *warning*. Full specificity validation would need
-  the reference protein sequences (to resolve protein N-/C-termini and ragged
-  ends) and per-enzyme cleavage rules, which are out of scope here.
+* **Enzyme specificity**: a missed-cleavage heuristic is implemented for common
+  C-terminal cleaving enzymes (trypsin, trypsin/P, Lys-C, Arg-C, Glu-C,
+  chymotrypsin) and only as a *warning*. It ignores protein N-/C-termini and
+  ragged ends (resolving those would need the reference protein sequences), and
+  N-terminal cleavers (Asp-N, Lys-N) are skipped.
 * **Modifications**: cross-tool modification representations are not normalized
   (human-readable names, UniMod accessions, and raw masses all occur). Only
   human-readable modification names observed in the ``proforma`` column are
-  compared, as warnings; mass-only / UniMod-only tokens are skipped.
+  compared, as warnings; mass-only / UniMod-only tokens are skipped. The
+  maximum-modifications count includes any fixed modifications written into the
+  sequence, so it is an upper bound (warning only).
+* **Mass tolerances**: there is no per-result tolerance to compare against, so
+  the precursor/fragment tolerances are only sanity-checked (present, numeric,
+  positive, within a plausible range), as warnings.
+* **PSM FDR**: validated against the valid ``[0, 1]`` range and the benchmark's
+  recommended maximum (configurable), as warnings.
 * **Run identity**: ``ProteoBenchParameters`` does not expose raw-file, sample,
   or experiment identifiers, so result-vs-parameter run matching is limited to
   software identity. This is reported as info.
@@ -48,6 +56,56 @@ MAX_ROW_EXAMPLES = 10
 
 #: Matches a bracketed modification label inside a ProForma string.
 _PROFORMA_MOD = re.compile(r"\[([^\]]+)\]")
+
+#: C-terminal cleavage rules per normalized enzyme name: a tuple of
+#: (residues the enzyme cleaves after, whether it cleaves when proline follows).
+#: A value of ``None`` marks an N-terminal cleaver, for which the simple
+#: internal-site count does not apply (skipped with an info message).
+#: The rules follow the MaxQuant built-in enzyme defaults (e.g. Glu-C cleaves
+#: after D and E). Because the missed-cleavage check is warning-only, these are
+#: convention-dependent heuristics, not authoritative cleavage definitions.
+_ENZYME_CLEAVAGE_RULES = {
+    "trypsin": ("KR", False),
+    "trypsin/p": ("KR", True),
+    "lysc": ("K", True),
+    "argc": ("R", False),
+    "gluc": ("DE", True),
+    "chymotrypsin": ("FYWL", False),
+    "lysn": None,
+    "aspn": None,
+}
+
+#: Plausibility ceilings for mass-tolerance sanity checks.
+_MAX_PLAUSIBLE_PPM = 1000.0
+_MAX_PLAUSIBLE_DALTON = 10.0
+
+#: Matches a signed number (including scientific notation) and an optional unit
+#: in a tolerance string such as ``"[-20.0 ppm, 20.0 ppm]"`` or ``"2e-3 Da"``.
+_TOLERANCE_TOKEN = re.compile(r"(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*(ppm|da|th|mmu|amu)?", re.IGNORECASE)
+
+
+def _normalize_enzyme(name: str) -> str:
+    """
+    Normalize an enzyme name for cleavage-rule lookup.
+
+    Lower-cases the name and removes spaces, underscores, and hyphens so that
+    ``"Lys-C"``, ``"lys_c"``, and ``"LysC"`` all map to ``"lysc"`` (the slash in
+    ``"Trypsin/P"`` is preserved).
+
+    Parameters
+    ----------
+    name : str
+        The raw enzyme name.
+
+    Returns
+    -------
+    str
+        The normalized enzyme key.
+    """
+    text = str(name).strip().lower()
+    for char in (" ", "_", "-"):
+        text = text.replace(char, "")
+    return text
 
 
 def _is_missing(value: Any) -> bool:
@@ -94,6 +152,28 @@ def _as_int(value: Any) -> Optional[int]:
         return None
     try:
         return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _as_float(value: Any) -> Optional[float]:
+    """
+    Coerce a value to ``float`` if possible.
+
+    Parameters
+    ----------
+    value : Any
+        The value to coerce.
+
+    Returns
+    -------
+    float or None
+        The float value, or ``None`` if it is missing or not convertible.
+    """
+    if _is_missing(value):
+        return None
+    try:
+        return float(value)
     except (TypeError, ValueError):
         return None
 
@@ -385,21 +465,22 @@ def check_peptide_length(
     return report.issues
 
 
-def _count_tryptic_missed_cleavages(sequence: str, cleave_before_proline: bool) -> int:
+def _count_missed_cleavages(sequence: str, residues: str, cleave_before_proline: bool) -> int:
     """
-    Count internal tryptic missed cleavages in a peptide sequence.
+    Count internal missed cleavages for a C-terminal cleaving enzyme.
 
-    A missed cleavage is an internal ``K``/``R`` (not the C-terminal residue).
-    For standard trypsin, a ``K``/``R`` immediately followed by ``P`` does not
-    count.
+    A missed cleavage is an internal cleavage residue (one not at the
+    C-terminus). For proline-restricted enzymes a cleavage residue immediately
+    followed by ``P`` does not count.
 
     Parameters
     ----------
     sequence : str
         Peptide sequence (plain amino-acid letters).
+    residues : str
+        Residues the enzyme cleaves C-terminal to (e.g. ``"KR"`` for trypsin).
     cleave_before_proline : bool
-        ``True`` for Trypsin/P (cleaves before proline), ``False`` for standard
-        trypsin (proline-restricted).
+        ``True`` if the enzyme still cleaves when proline follows the residue.
 
     Returns
     -------
@@ -409,11 +490,11 @@ def _count_tryptic_missed_cleavages(sequence: str, cleave_before_proline: bool) 
     seq = "".join(ch for ch in str(sequence) if ch.isalpha()).upper()
     if len(seq) < 2:
         return 0
+    residue_set = set(residues)
     count = 0
     for i in range(len(seq) - 1):
-        if seq[i] in ("K", "R"):
-            if cleave_before_proline or seq[i + 1] != "P":
-                count += 1
+        if seq[i] in residue_set and (cleave_before_proline or seq[i + 1] != "P"):
+            count += 1
     return count
 
 
@@ -423,11 +504,14 @@ def check_enzyme(
     config: ModuleValidationConfig,
 ) -> List[ValidationIssue]:
     """
-    Best-effort enzyme/specificity check (trypsin-family missed cleavages).
+    Best-effort enzyme/specificity check (missed cleavages, warning only).
 
-    Implemented only for trypsin-family enzymes and only as a warning, because
-    a strict check requires the reference protein sequences and per-enzyme
-    cleavage rules. Other enzymes are reported as an info (skipped).
+    Supports common C-terminal cleaving enzymes via :data:`_ENZYME_CLEAVAGE_RULES`
+    (trypsin, trypsin/P, Lys-C, Arg-C, Glu-C, chymotrypsin). For each unique
+    peptide it counts internal cleavage residues and warns when more peptides
+    than allowed exceed ``allowed_miscleavages``. This is a heuristic: it ignores
+    ragged termini and protein ends, so it can only be a warning. N-terminal
+    cleavers (Asp-N, Lys-N) and unknown enzymes are reported as info (skipped).
 
     Parameters
     ----------
@@ -458,9 +542,8 @@ def check_enzyme(
         )
         return report.issues
 
-    enzyme_str = str(enzyme).strip().lower()
-    # Match the trypsin family by prefix so that e.g. "Chymotrypsin" is excluded.
-    if not enzyme_str.startswith("trypsin"):
+    normalized = _normalize_enzyme(enzyme)
+    if normalized not in _ENZYME_CLEAVAGE_RULES:
         report.add_info(
             "enzyme_check_unsupported",
             f"Enzyme-specificity validation is not implemented for enzyme '{enzyme}'; check skipped.",
@@ -469,6 +552,19 @@ def check_enzyme(
             observed=enzyme,
         )
         return report.issues
+
+    rule = _ENZYME_CLEAVAGE_RULES[normalized]
+    if rule is None:
+        report.add_info(
+            "enzyme_check_unsupported",
+            f"Enzyme '{enzyme}' cleaves N-terminal to its residue; the missed-cleavage heuristic "
+            "does not apply and the check was skipped.",
+            check,
+            field="enzyme",
+            observed=enzyme,
+        )
+        return report.issues
+    residues, cleave_before_proline = rule
 
     if bool(getattr(params, "semi_enzymatic", False)) is True:
         report.add_info(
@@ -499,14 +595,13 @@ def check_enzyme(
         )
         return report.issues
 
-    cleave_before_proline = "/p" in enzyme_str
     sequences = df[config.sequence_column].astype(str)
     unique_sequences = pd.Series(sequences.unique())
-    missed = unique_sequences.apply(lambda s: _count_tryptic_missed_cleavages(s, cleave_before_proline))
+    missed = unique_sequences.apply(lambda s: _count_missed_cleavages(s, residues, cleave_before_proline))
     offending = unique_sequences[missed > allowed]
 
     if len(offending) > 0:
-        examples = [f"{seq} ({_count_tryptic_missed_cleavages(seq, cleave_before_proline)} MC)" for seq in offending][
+        examples = [f"{seq} ({_count_missed_cleavages(seq, residues, cleave_before_proline)} MC)" for seq in offending][
             :MAX_ROW_EXAMPLES
         ]
         report.add_warning(
@@ -516,7 +611,7 @@ def check_enzyme(
             "protein ends); review before submitting.",
             check,
             field="allowed_miscleavages",
-            observed=f"{len(offending)} sequences with > {allowed} internal K/R",
+            observed=f"{len(offending)} sequences with > {allowed} internal cleavage sites",
             expected=f"<= {allowed} internal missed cleavages",
             examples=examples,
         )
@@ -684,5 +779,285 @@ def check_run_consistency(
         "parsed parameters do not expose these identifiers; only software identity was checked.",
         check,
     )
+
+    return report.issues
+
+
+def check_max_modifications(
+    df: pd.DataFrame,
+    params: Any,
+    config: ModuleValidationConfig,
+) -> List[ValidationIssue]:
+    """
+    Check that no peptide carries more modifications than allowed (warning only).
+
+    Counts the bracketed modifications in each ``proforma`` string and warns
+    when more than ``max_mods`` are present. This is a heuristic: the count
+    includes any fixed modifications written into the sequence, so it is an
+    upper bound on the number of variable modifications.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The standardized result DataFrame.
+    params : Any
+        Parsed parameters (object with a ``max_mods`` attribute).
+    config : ModuleValidationConfig
+        Module validation configuration.
+
+    Returns
+    -------
+    list of ValidationIssue
+        A warning for peptides exceeding ``max_mods``, or a warning/info
+        describing why the check was skipped.
+    """
+    report = ValidationReport()
+    check = "max_modifications"
+
+    max_mods = _as_int(getattr(params, "max_mods", None))
+    if max_mods is None:
+        report.add_warning(
+            "max_mods_not_parsed",
+            "Could not validate the maximum number of modifications because 'max_mods' was not "
+            "parsed from the parameter file.",
+            check,
+            field="max_mods",
+        )
+        return report.issues
+
+    if config.proforma_column not in df.columns:
+        report.add_info(
+            "max_mods_no_proforma",
+            f"No '{config.proforma_column}' column in the results; the maximum-modifications check was skipped.",
+            check,
+            field=config.proforma_column,
+        )
+        return report.issues
+
+    proforma = df[config.proforma_column].dropna().astype(str)
+    unique_proforma = pd.Series(proforma.unique())
+    mod_counts = unique_proforma.apply(lambda s: len(_PROFORMA_MOD.findall(s)))
+    offending = unique_proforma[mod_counts > max_mods]
+
+    if len(offending) > 0:
+        examples = [f"{seq} ({len(_PROFORMA_MOD.findall(seq))} mods)" for seq in offending][:MAX_ROW_EXAMPLES]
+        report.add_warning(
+            "max_modifications_exceeded",
+            f"{len(offending)} unique peptidoform(s) carry more than the allowed {max_mods} "
+            "modification(s). The count includes any fixed modifications present in the sequence, "
+            "so it is an upper bound; review before submitting.",
+            check,
+            field="max_mods",
+            observed=f"{len(offending)} peptidoforms with > {max_mods} modifications",
+            expected=f"<= {max_mods} modifications per peptidoform",
+            examples=examples,
+        )
+
+    return report.issues
+
+
+def _parse_tolerance(text: Any) -> tuple:
+    """
+    Parse a tolerance string into a magnitude and unit.
+
+    Handles bracketed signed ranges such as ``"[-20.0 ppm, 20.0 ppm]"`` by
+    returning the largest absolute magnitude and the (lower-cased) unit.
+
+    Parameters
+    ----------
+    text : Any
+        The tolerance value (typically a formatted string).
+
+    Returns
+    -------
+    tuple
+        ``(magnitude, unit)`` where ``magnitude`` is a float (or ``None`` if no
+        number could be parsed) and ``unit`` is a lower-case string or ``None``.
+    """
+    if _is_missing(text):
+        return None, None
+    magnitudes = []
+    unit = None
+    for number, parsed_unit in _TOLERANCE_TOKEN.findall(str(text)):
+        try:
+            magnitudes.append(abs(float(number)))
+        except ValueError:
+            continue
+        if parsed_unit:
+            unit = parsed_unit.lower()
+    if not magnitudes:
+        return None, None
+    return max(magnitudes), unit
+
+
+def _check_one_tolerance(report: ValidationReport, value: Any, label: str, field: str) -> None:
+    """
+    Sanity-check a single mass-tolerance value and append any issue.
+
+    Parameters
+    ----------
+    report : ValidationReport
+        Report to append issues to.
+    value : Any
+        The tolerance value from the parameters.
+    label : str
+        Human-readable label (e.g. ``"precursor mass tolerance"``).
+    field : str
+        The parameter field name (used in the issue ``field`` and codes).
+    """
+    check = "mass_tolerance"
+    if _is_missing(value):
+        report.add_warning(
+            f"{field}_not_parsed",
+            f"Could not validate the {label} because it was not parsed from the parameter file.",
+            check,
+            field=field,
+        )
+        return
+
+    magnitude, unit = _parse_tolerance(value)
+    if magnitude is None:
+        report.add_warning(
+            f"{field}_unparsable",
+            f"The {label} ('{value}') could not be interpreted as a numeric tolerance.",
+            check,
+            field=field,
+            observed=value,
+        )
+        return
+
+    if magnitude <= 0:
+        report.add_warning(
+            f"{field}_non_positive",
+            f"The {label} ('{value}') is zero or negative, which is not a valid search tolerance.",
+            check,
+            field=field,
+            observed=value,
+        )
+        return
+
+    if unit == "ppm":
+        ceiling = _MAX_PLAUSIBLE_PPM
+    elif unit in {"da", "th", "amu"}:
+        ceiling = _MAX_PLAUSIBLE_DALTON
+    elif unit == "mmu":
+        # 1 mmu = 1e-3 Da, so the Dalton ceiling becomes 1000x larger in mmu.
+        ceiling = _MAX_PLAUSIBLE_DALTON * 1000
+    else:
+        ceiling = None
+
+    if ceiling is not None and magnitude > ceiling:
+        report.add_warning(
+            f"{field}_implausible",
+            f"The {label} ('{value}') is unusually large and may indicate a mis-parsed value; "
+            "review before submitting.",
+            check,
+            field=field,
+            observed=value,
+            expected=f"<= {ceiling:g} {unit}",
+        )
+
+
+def check_mass_tolerances(
+    df: pd.DataFrame,
+    params: Any,
+    config: ModuleValidationConfig,
+) -> List[ValidationIssue]:
+    """
+    Sanity-check the precursor and fragment mass tolerances (warning only).
+
+    There is no per-result tolerance to compare against, so this validates that
+    the parsed ``precursor_mass_tolerance`` and ``fragment_mass_tolerance`` are
+    present, numeric, positive, and within a plausible range. Mis-parsed or
+    nonsensical values are flagged as warnings.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The standardized result DataFrame (unused; kept for signature consistency).
+    params : Any
+        Parsed parameters (object with ``precursor_mass_tolerance`` /
+        ``fragment_mass_tolerance`` attributes).
+    config : ModuleValidationConfig
+        Module validation configuration.
+
+    Returns
+    -------
+    list of ValidationIssue
+        Warnings for missing, unparsable, or implausible tolerances.
+    """
+    report = ValidationReport()
+    _check_one_tolerance(
+        report,
+        getattr(params, "precursor_mass_tolerance", None),
+        "precursor mass tolerance",
+        "precursor_mass_tolerance",
+    )
+    _check_one_tolerance(
+        report, getattr(params, "fragment_mass_tolerance", None), "fragment mass tolerance", "fragment_mass_tolerance"
+    )
+    return report.issues
+
+
+def check_fdr_psm(
+    df: pd.DataFrame,
+    params: Any,
+    config: ModuleValidationConfig,
+) -> List[ValidationIssue]:
+    """
+    Sanity-check the PSM-level FDR (warning only).
+
+    Validates that ``ident_fdr_psm`` is present, within ``[0, 1]``, and not
+    above the benchmark's recommended maximum
+    (:attr:`ModuleValidationConfig.recommended_max_fdr_psm`, default 0.01).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The standardized result DataFrame (unused; kept for signature consistency).
+    params : Any
+        Parsed parameters (object with an ``ident_fdr_psm`` attribute).
+    config : ModuleValidationConfig
+        Module validation configuration (provides ``recommended_max_fdr_psm``).
+
+    Returns
+    -------
+    list of ValidationIssue
+        Warnings for a missing, out-of-range, or above-recommended PSM FDR.
+    """
+    report = ValidationReport()
+    check = "fdr"
+
+    fdr = _as_float(getattr(params, "ident_fdr_psm", None))
+    if fdr is None:
+        report.add_warning(
+            "fdr_psm_not_parsed",
+            "Could not validate the PSM FDR because 'ident_fdr_psm' was not parsed from the parameter file.",
+            check,
+            field="ident_fdr_psm",
+        )
+        return report.issues
+
+    if fdr < 0 or fdr > 1:
+        report.add_warning(
+            "fdr_psm_out_of_range",
+            f"The PSM FDR ({fdr}) is outside the valid range [0, 1]; the value may be mis-parsed.",
+            check,
+            field="ident_fdr_psm",
+            observed=fdr,
+            expected="[0, 1]",
+        )
+        return report.issues
+
+    recommended = getattr(config, "recommended_max_fdr_psm", None)
+    if recommended is not None and fdr > recommended:
+        report.add_warning(
+            "fdr_psm_above_recommended",
+            f"The PSM FDR ({fdr}) is higher than the recommended maximum of {recommended} for this benchmark.",
+            check,
+            field="ident_fdr_psm",
+            observed=fdr,
+            expected=f"<= {recommended}",
+        )
 
     return report.issues

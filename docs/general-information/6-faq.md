@@ -1,23 +1,20 @@
 # Frequently asked questions
 
 ## What is ProteoBench?
+ProteoBench is an open and collaborative platform for community-curated benchmarks for proteomics data analysis pipelines. Its goal is to enable continuous, easy, and controlled comparison of proteomics data analysis workflows.
 
-ProteoBench is a community-driven benchmarking platform for mass spectrometry-based proteomics data analysis workflows. It provides standardized benchmark datasets, transparent evaluation metrics, and public comparison plots that allow users to assess how different software tools and parameter choices perform on common reference datasets. The ability to add points and modules allows ProteoBench to grow with the proteomics field.
+ProteoBench provides a centralized web platform where developers and end-users can compare proteomics data analysis pipelines using standardized benchmark datasets, transparent evaluation metrics, and public comparison plots. This community-curated effort supports the controlled evaluation of tools developed or used by participants against other state-of-the-art pipelines for specific proteomics applications. The ability to add new benchmark points and modules allows ProteoBench to grow with the proteomics field.
 
-The goal of ProteoBench is not to prescribe a single best workflow, but to make workflow evaluation more transparent, reproducible, and comparable across tools, laboratories, and software versions. 
+The goal of ProteoBench is not to select or prescribe a single best one-size-fits-all data analysis workflow. Instead, ProteoBench aims to make workflow evaluation more transparent, reproducible, and comparable across tools, laboratories, software versions, and use cases.
 
 ## Who is ProteoBench intended for?
+ProteoBench is intended for several user groups involved in the development, evaluation, or application of proteomics data analysis workflows.
 
-ProteoBench is intended for several user groups:
+For **end-users**, ProteoBench helps identify suitable workflows for specific analytical needs by allowing comparison with public reference results and state-of-the-art pipelines. This includes proteomics researchers, experimental laboratories, and core facilities that want to evaluate, document, or monitor routine analysis pipelines.
 
-- Proteomics researchers who want to compare their local workflows against public reference results.
-- Proteomics researchers who want to find the best workflow for their use case
-- Core facilities that want to evaluate, document, or monitor routine analysis pipelines.
-- Software developers who want to test new algorithms or software versions on standardized datasets.
-- Reviewers, editors, and readers who want transparent evidence for workflow performance claims.
-- Method developers who want to contribute new benchmark modules for emerging proteomics applications.
+For **software and method developers**, ProteoBench provides a framework to identify the specific strengths and weaknesses of workflows, algorithms, software versions, or parameter choices. These insights can guide further development and support the contribution of new benchmark modules for emerging proteomics applications.
 
-Although ProteoBench is useful for software developers, it is also designed for experimental laboratories and core facilities that use established open-source or commercial software.
+For the **wider proteomics community**, ProteoBench makes it easier to position newly published workflows within the context of the existing state of the art. It can therefore support reviewers, editors, and readers who require transparent evidence for claims about workflow performance.
 
 ## Do I need to use a predefined dataset?
 

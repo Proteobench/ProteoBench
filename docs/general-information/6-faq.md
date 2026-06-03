@@ -22,11 +22,11 @@ Yes. To compare results meaningfully within a ProteoBench module, all submitted 
 
 Users who want to benchmark a different experimental design can contribute or request a new module. ProteoBench is modular by design, so new datasets, metrics, and use cases can be added as the community’s needs evolve.
 
-## Do I need to use the exact same search parameters as other users?
+## Do I need to use the exact same workflow parameters as other users?
 
-No. ProteoBench does not require all users to run identical search parameters. In many modules, suggested parameters are provided to help users get started and to support comparable baseline analyses, but users may submit results generated with their own parameter choices.
+No. ProteoBench does not require all users to run identical workflow parameters. In many modules, suggested parameters are provided to help users get started and to support comparable baseline analyses, but users may submit results generated with their own parameter choices.
 
-Parameter information is collected with submissions whenever possible so that users can interpret differences in performance in the context of software versions, workflow settings, search databases, quantification options, and other relevant configuration details. If you 'limit test' a specific parameter, we recommend documenting that in the comment field.
+The parameter used for all the public :ref:`benchmark runs<benchmark-run>` is collected upon submission and fully available to download so that users can interpret differences in performance in the context of software versions, workflow settings, search databases, quantification options, and other relevant configuration details. If you 'limit test' a specific parameter, we recommend documenting that in the comment field.
 
 ## Do I need to use a specific FASTA database?
 
@@ -48,13 +48,14 @@ Manual review is used as a quality-control step to keep public benchmark results
 
 ## Does ProteoBench run my workflow automatically?
 
-At present, ProteoBench primarily evaluates submitted workflow outputs rather than executing every workflow centrally. Users usually download the benchmark data, process it with their local software or pipeline, and upload the relevant output files.
+ProteoBench evaluates submitted workflow outputs rather than executing every workflow centrally. Users download the benchmark data provided for their module of interest, process it with their local software or pipeline, and upload the relevant output files.
 
-This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. Centralized execution of all supported tools would be difficult to maintain because software licenses, operating-system requirements, hardware needs, and workflow customization differ substantially across proteomics software ecosystems.
+This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. 
 
-## How do I find the raw data for a benchmark module?
+## How do I find the input data associated with a benchmark module?
 
-Each module should provide a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
+Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
+If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
 
 

@@ -22,6 +22,7 @@ from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
 from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
 from proteobench.io.params.casanovo import extract_params as extract_params_casanovo
+from proteobench.io.params.contranovo import extract_params as extract_params_contranovo
 from proteobench.io.params.deepnovo import extract_params as extract_params_deepnovo
 from proteobench.io.params.instanovo import extract_params as extract_params_instanovo
 from proteobench.io.params.pihelixnovo import (
@@ -57,6 +58,7 @@ class DeNovoModule:
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "AdaNovo": extract_params_adanovo,
         "Casanovo": extract_params_casanovo,
+        "ContraNovo": extract_params_contranovo,
         "DeepNovo": extract_params_deepnovo,
         "InstaNovo": extract_params_instanovo,
         "Pi-HelixNovo": extract_params_pihelixnovo,

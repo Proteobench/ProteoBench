@@ -416,6 +416,7 @@ def display_existing_results(
     # Initialize and filter data
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
+    filtered_data = add_open_source_column(filtered_data)
 
 <<<<<<< Show_latest_version_only
     # Optionally keep only the newest version of each tool

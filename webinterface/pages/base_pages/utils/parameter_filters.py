@@ -70,6 +70,7 @@ _PARAMETER_FILTERS = [
     },
     {"col": "isotope_error_range", "label": "Isotope error range", "type": "multiselect"},
     {"col": "decoding_strategy", "label": "Decoding strategy", "type": "multiselect"},
+    {"col": "open_source", "label": "Open source", "type": "radio_open_source"},
 ]
 
 
@@ -176,7 +177,13 @@ def apply_parameter_filters(
 
         selection = filter_selections[col]
 
-        if spec["type"] == "radio_bool":
+        if spec["type"] == "radio_open_source":
+            if selection == "Open source only":
+                mask &= data[col].astype(str) == "✅"
+            elif selection == "Closed source only":
+                mask &= data[col].astype(str) != "✅"
+
+        elif spec["type"] == "radio_bool":
             if selection == "Enabled":
                 mask &= data[col].astype(bool)
             elif selection == "Disabled":
@@ -251,6 +258,13 @@ def generate_parameter_filters(
             fallback_for = spec.get("fallback_for")
             if fallback_for and fallback_for in added_combined:
                 continue
+            if spec["type"] == "radio_open_source":
+                # Show only when both open- and closed-source tools are present
+                has_open = (data[col].astype(str) == "✅").any()
+                has_closed = (data[col].astype(str) != "✅").any()
+                if has_open and has_closed:
+                    applicable.append(spec)
+                continue
             n_unique = data[col].dropna().nunique()
             if n_unique < 2:
                 continue
@@ -308,6 +322,20 @@ def generate_parameter_filters(
                         key=sk,
                     )
                     filter_selections[filter_key] = selected
+
+                elif spec["type"] == "radio_open_source":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
+                    _os_opts = ["All", "Open source only", "Closed source only"]
+                    default = st.session_state.get(sk, "All")
+                    choice = st.radio(
+                        label,
+                        _os_opts,
+                        index=_os_opts.index(default) if default in _os_opts else 0,
+                        key=sk,
+                        horizontal=True,
+                    )
+                    filter_selections[col_name] = choice
 
                 elif spec["type"] == "radio_bool":
                     col_name = spec["col"]

@@ -128,7 +128,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available.
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field Meta data for searches. Currently, we accept outputs from AdaNovo, Casanovo, InstaNovo, PepNet, π-HelixNovo, and π-PrimeNovo. Please fill the Comments for submission if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button I confirm that the metadata is correct. Then the button I really want to upload it will appear to trigger the submission.
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field Meta data for searches. Currently, we accept outputs from all tools listed in Table 3. For tools marked with *, no parameter file is required; instead, ensure the `Comments for submission` field is filled in as completely as possible so that your submission is transparent to the community. Please fill the Comments for submission if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button I confirm that the metadata is correct. Then the button I really want to upload it will appear to trigger the submission.
 
 ## Important tool-specific settings
 
@@ -144,20 +144,19 @@ Table 3 provides an overview of the required input files for public submission. 
 | ContraNovo  | results.mztab | config.yaml    |
 | DeepNovo    | results.tab   | / *    |
 | InstaNovo   | results.csv   | config.yaml    |
+| NovoB       | results.csv   | / *            |
 | PepNet      | results.tsv   | / *            |
 | π-HelixNovo | results.tsv   | config.yaml    |
 | π-PrimeNovo | results.tsv   | config.yaml    |
-| PointNovo   | results.csv.some_extension | / * |
-| SMSNet      | results and results_prob (2 files) | / * |
+| PointNovo   | results.csv.* | / *            |
+| SMSNet      | results + results_prob (2 files) | / * |
 
 > Note that the input file names might differ from **results**. Nonetheless, the extension should remain the same.
 
-\* PepNet, DeepNovo, and PointNovo do not have a configuration file that's easily parsable, so no parameter file is required. When uploading a datapoint, do make sure that the parameter metadata fields are filled in as musch as possible to make your submission transparent to the community.
+\* PepNet, DeepNovo, PointNovo, NovoB, and SMSNet do not have a configuration file that is easily parsable, so no parameter file is required. When uploading a datapoint, do make sure that the parameter metadata fields are filled in as much as possible to make your submission transparent to the community.
 
 
 ### [AdaNovo](https://github.com/Westlake-OmicsAI/adanovo_v1)
-
-> **[FLAG for review]** Add AdaNovo-specific instructions and the column names parsed from `results.mztab`. Verify the GitHub/documentation URL to link the tool name.
 
 To generate data compatible with ProteoBench:
 1. Set up AdaNovo according to the developers instructions [here](https://github.com/Westlake-OmicsAI/adanovo_v1) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
@@ -167,8 +166,8 @@ Once uploaded to ProteoBench, the following columns from `results.mztab` are con
 
 - spectra_ref: Contains the spectrum identifier to map the ground-truth identifications with. The spectrum identifier is extracted as the number in `index=<number>`
 - sequence: The predicted *de novo* sequence.
-- search_engine_score[1]: The peptide confidence score. Used for precision-recall curve construction (*Currently not implemented*).
-- opt_ms_run[1]_aa_scores: Amino acid-level confidence scores. Used for precision-recall curve construction (*Currently not implemented*).
+- search_engine_score[1]: The peptide confidence score. Used for precision-recall curve construction.
+- opt_ms_run[1]_aa_scores: Amino acid-level confidence scores. Used for precision-recall curve construction.
 
 ### [Casanovo](https://casanovo.readthedocs.io/en/latest/)
 
@@ -180,15 +179,68 @@ Once uploaded to ProteoBench, the following columns from `results.mztab` are con
 
 - spectra_ref: Contains the spectrum identifier to map the ground-truth identifications with. The spectrum identifier is extracted as the number in `index=<number>`
 - sequence: The predicted *de novo* sequence.
-- search_engine_score[1]: The peptide confidence score. Used for precision-recall curve construction (*Currently not implemented*).
-- opt_ms_run[1]_aa_scores: Amino acid-level confidence scores. Used for precision-recall curve construction (*Currently not implemented*).
+- search_engine_score[1]: The peptide confidence score. Used for precision-recall curve construction.
+- opt_ms_run[1]_aa_scores: Amino acid-level confidence scores. Used for precision-recall curve construction.
 
-### [InstaNovo](https://instanovo.ai/) (coming soon)
+### [ContraNovo](https://github.com/BEAM-Labs/ContraNovo)
+
+To generate data compatible with ProteoBench:
+1. Set up ContraNovo according to the developers instructions and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+2. Upload `results.mztab` for metric calculation in the ProteoBench platform. For public submission, also provide `config.yaml`.
+
+Once uploaded to ProteoBench, the following columns from `results.mztab` are considered:
+
+- spectra_ref: Contains the spectrum identifier to map the ground-truth identifications with. The spectrum identifier is extracted as the number in `scan=<number>`.
+- sequence: The predicted *de novo* sequence.
+- search_engine_score[1]: The peptide confidence score. Used for precision-recall curve construction.
+- opt_ms_run[1]_aa_scores: Amino acid-level confidence scores. Used for precision-recall curve construction.
+
+### [DeepNovo](https://github.com/nh2tran/DeepNovo)
+
+To generate data compatible with ProteoBench:
+1. Best way is to run DeepNovo through the pipeline [here](https://github.com/denisbeslic/denovopipeline) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+2. Upload the output `.tab` file for metric calculation. No parameter file is required for DeepNovo.
+
+Once uploaded to ProteoBench, the following columns from the `.tab` file are considered:
+
+- scan: The scan number, used directly as the spectrum identifier to map the ground-truth identifications.
+- output_seq: The predicted *de novo* sequence.
+- output_score: The peptide confidence score. Used for precision-recall curve construction (*Currently not implemented*).
+- aa_score: Amino acid-level confidence scores. Used for precision-recall curve construction (*Currently not implemented*).
+
+DeepNovo uses special tokens for modified amino acids in the output sequence: `Cmod` (carbamidomethylated cysteine), `Mmod` (oxidized methionine), `Nmod` (deamidated asparagine), `Qmod` (deamidated glutamine). These tokens are automatically converted to the appropriate ProForma notation by ProteoBench.
+
+### [InstaNovo](https://github.com/instadeepai/InstaNovo)
+
+To generate data compatible with ProteoBench:
+1. Set up InstaNovo according to the developers instructions [here](https://instanovo.ai/) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+2. Upload `results.csv` for metric calculation in the ProteoBench platform. For public submission, also provide `config.yaml`.
+
+Once uploaded to ProteoBench, the following columns from `results.csv` are considered:
+
+- spectrum_id: Contains the spectrum identifier to map the ground-truth identifications with. The spectrum identifier is extracted as the trailing number after the last colon (e.g., `filename:1234` yields `1234`).
+- predictions: The predicted *de novo* sequence.
+- log_probs: The peptide-level log probability score. Used for precision-recall curve construction (*Currently not implemented*).
+- token_log_probs: Amino acid-level log probability scores. Used for precision-recall curve construction (*Currently not implemented*).
+
+### [NovoB](https://github.com/ProteomeTeam/NovoB)
+
+To generate data compatible with ProteoBench:
+1. Set up NovoB according to the developers instructions and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+2. Upload the output CSV file for metric calculation. No parameter file is required for NovoB.
+
+Once uploaded to ProteoBench, the following columns from the output CSV file are considered:
+
+- spectrum_id: Contains the spectrum identifier to map the ground-truth identifications with. The spectrum identifier is extracted as the first integer found in the identifier string.
+- sequence: The predicted *de novo* sequence.
+- score: The peptide confidence score. Used for precision-recall curve construction.
+
+NovoB uses a mixed case convention for modified amino acids: all cysteines (`C`) are treated as carbamidomethylated, while variable modifications are encoded as lowercase letters — `m` (oxidized methionine), `n` (deamidated asparagine), `q` (deamidated glutamine), `s` (phosphorylated serine), `t` (phosphorylated threonine), `y` (phosphorylated tyrosine). These are automatically converted to the appropriate ProForma notation by ProteoBench. Note that NovoB does not provide amino acid-level confidence scores.
 
 ### [PepNet](https://denovo.predfull.com/)
 
 To generate data compatible with ProteoBench:
-1. Set up PepNet according to the developers instructions [here](https://github.com/lkytal/PepNet) and run the model on the the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/) or use the [webpage](https://denovo.predfull.com/) and provide the spectra from the [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/) or use the [webpage](https://denovo.predfull.com/). **Be sure not to change the file name or the spectrum identifiers**.
+1. Set up PepNet according to the developers instructions [here](https://github.com/lkytal/PepNet) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/), or use the [PepNet web interface](https://denovo.predfull.com/) to submit the spectra directly. **Be sure not to change the file name or the spectrum identifiers**.
 2. Upload `results.tsv` for metric calculation. No parameter file is required for PepNet, as it does not have adaptable parameters.
 
 Once uploaded to ProteoBench, the following columns from `results.tsv` are considered:
@@ -223,9 +275,48 @@ Once uploaded to ProteoBench, the following columns from `results.tsv` are consi
 
 The positional scores for this model are set equal to the amino acid scores.
 
+### [PointNovo](https://github.com/irleader/PointNovo)
+
+To generate data compatible with ProteoBench:
+1. Best way is to run PointNovo through the pipeline [here](https://github.com/denisbeslic/denovopipeline) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+2. Upload the output file (typically named with a `.pointnovo_output` or similar extension appended to the input filename) for metric calculation. No parameter file is required for PointNovo.
+
+Once uploaded to ProteoBench, the following columns from the output file are considered:
+
+- feature_id: The spectrum identifier, used directly to map the ground-truth identifications.
+- predicted_sequence: The predicted *de novo* sequence.
+- predicted_score: The peptide confidence score. Used for precision-recall curve construction (*Currently not implemented*).
+- predicted_position_score: Amino acid-level confidence scores. Used for precision-recall curve construction (*Currently not implemented*).
+
+PointNovo uses spelled-out modification names: `C(Carbamidomethylation)`, `M(Oxidation)`, `N(Deamidation)`, `Q(Deamidation)`. These are automatically converted to the appropriate ProForma notation by ProteoBench.
+
+### [SMSNet](https://github.com/cmb-chula/SMSNet)
+
+To generate data compatible with ProteoBench:
+1. Best way is to run SMSNet through the pipeline [here](https://github.com/denisbeslic/denovopipeline) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+2. Upload **two** output files for metric calculation: the main predictions file and the per-amino-acid probability file (`results` and `results_prob`). No parameter file is required for SMSNet.
+
+Once uploaded to ProteoBench, the following columns from the combined output are considered:
+
+- index: The spectrum index, used directly as the spectrum identifier to map the ground-truth identifications.
+- sequence: The predicted *de novo* sequence.
+- peptide_score: The peptide confidence score. Used for precision-recall curve construction (*Currently not implemented*).
+- aa_scores: Amino acid-level confidence scores from the probability file. Used for precision-recall curve construction (*Currently not implemented*).
+
+SMSNet uses the same lowercase convention as NovoB: all cysteines (`C`) are carbamidomethylated, and lowercase letters denote variable modifications — `m` (oxidized methionine), `n` (deamidated asparagine), `q` (deamidated glutamine). These are automatically converted to the appropriate ProForma notation by ProteoBench.
+
 ### Custom format
 
+If your tool is not listed above, you can submit results using the custom format — a plain CSV or TSV file with the following columns:
 
+| Column | Required | Description |
+| ------ | -------- | ----------- |
+| `spectrum_id` | Yes | Spectrum identifier used to match predictions to the ground-truth PSMs. Must contain `scan=<number>` or be a plain integer scan number. |
+| `sequence` | Yes | Predicted peptide sequence in single-letter amino acid code. Modifications should be in ProForma notation (e.g., `C[UNIMOD:4]`) or as mass offsets in brackets (e.g., `C[+57.021]`). |
+| `score` | Yes | Per-prediction confidence score reported by the tool. |
+| `aa_scores` | No | Per-amino-acid confidence scores as a list. If omitted, the peptide-level score is used for each position. |
+
+Ensure that the spectrum identifiers in your file match the scan numbers used in the ProteoBench ground-truth dataset. No parameter file is supported for the custom format, so use the `Comments for submission` field to describe your tool and settings when submitting publicly.
 
 ## How to run these models more easily ?
 

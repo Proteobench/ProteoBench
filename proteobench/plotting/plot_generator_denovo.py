@@ -45,6 +45,7 @@ SOFTWARE_MARKERS = {
     "Custom": "circle-open",
 }
 
+
 def flatten_results_column(df):
     results = {
         "engine": [],

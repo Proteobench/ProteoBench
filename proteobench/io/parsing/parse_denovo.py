@@ -13,7 +13,7 @@ def load_input_file(input_path: str, input_format: str, input_secondary: str = N
         load_function = _LOAD_FUNCTIONS[input_format]
     except KeyError as e:
         raise ValueError(f"Invalid input format: {input_format}") from e
-    
+
     if input_format == "SMSNet" and input_secondary:
         return load_function(input_path, input_secondary)
 
@@ -126,6 +126,7 @@ def _load_piprimenovo(input_path: str) -> pd.DataFrame:
     """
     return pd.read_csv(input_path, sep="\t", low_memory=False).dropna()
 
+
 def _load_deepnovo(input_csv: str) -> pd.DataFrame:
     """
     Load a DeepNovo output file.
@@ -141,8 +142,9 @@ def _load_deepnovo(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     df = pd.read_csv(input_csv, sep="\t", header=0, low_memory=False)
-    df['scan'] = df['scan'].apply(lambda x: int(x)-1)
+    df["scan"] = df["scan"].apply(lambda x: int(x) - 1)
     return df
+
 
 def _load_pointnovo(input_csv: str) -> pd.DataFrame:
     """
@@ -159,7 +161,7 @@ def _load_pointnovo(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     df = pd.read_csv(input_csv, sep="\t", header=0, low_memory=False)
-    df['feature_id'] = df['feature_id'].apply(lambda x: int(x)-1)
+    df["feature_id"] = df["feature_id"].apply(lambda x: int(x) - 1)
     return df
 
 
@@ -184,23 +186,25 @@ def _load_smsnet(input_csv: str, input_csv_secondary: str) -> pd.DataFrame:
 
     with open(input_csv_secondary) as g:
         aa_scores = [line.rstrip().split() for line in g]
-        
+
     peptide_list, aa_score_list = [], []
     for peptide, aa_score in zip(peptides, aa_scores):
-        peptide = [i for i in peptide if i not in ['<s>']]
+        peptide = [i for i in peptide if i not in ["<s>"]]
         peptide_list.append(peptide)
-        aa_score_list.append([float(i) for i in aa_score[:len(peptide)]])
+        aa_score_list.append([float(i) for i in aa_score[: len(peptide)]])
 
-    df = pd.DataFrame({
-        "sequence_list": peptide_list,
-        "aa_scores": aa_score_list,
-    })
+    df = pd.DataFrame(
+        {
+            "sequence_list": peptide_list,
+            "aa_scores": aa_score_list,
+        }
+    )
     df.index = range(0, len(df))
     df = df.reset_index()
 
-    df = df[df['sequence_list'].apply(lambda x: '<unk>' not in x)]
-    df['sequence'] = df['sequence_list'].apply(lambda x: ''.join(x))
-    df['peptide_score'] = df['aa_scores'].apply(np.mean)
+    df = df[df["sequence_list"].apply(lambda x: "<unk>" not in x)]
+    df["sequence"] = df["sequence_list"].apply(lambda x: "".join(x))
+    df["peptide_score"] = df["aa_scores"].apply(np.mean)
     return df
 
 
@@ -221,18 +225,19 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
     """
     VALID_NTERM = {"+42.011", "+43.006", "-17.027", "+43.006-17.027"}
     VALID_DOUBLE_NTERM = {("+43.006", "-17.027"), ("-17.027", "+43.006")}
+
     def tokenize(sequence: str):
         """Tokenize sequence into N-term tokens and AA tokens."""
         sequence = str(sequence)
         nterm_tokens = []
         remaining = sequence
         while True:
-            match = re.match(r'^(\+43\.006-17\.027|[+-]\d+\.\d+)', remaining)
+            match = re.match(r"^(\+43\.006-17\.027|[+-]\d+\.\d+)", remaining)
             if not match:
                 break
             nterm_tokens.append(match.group(1))
-            remaining = remaining[match.end():]
-        aa_tokens = re.findall(r'[A-Z](?:[+-]\d+\.\d+)?', remaining)
+            remaining = remaining[match.end() :]
+        aa_tokens = re.findall(r"[A-Z](?:[+-]\d+\.\d+)?", remaining)
         return nterm_tokens, aa_tokens
 
     def _is_invalid(sequence: str) -> bool:
@@ -240,7 +245,7 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
 
         # N-term mod on non-N-terminal site
         for token in aa_tokens:
-            match = re.search(r'[+-]\d+\.\d+', token)
+            match = re.search(r"[+-]\d+\.\d+", token)
             if match and match.group() in {"+42.011", "+43.006", "-17.027"}:
                 return True
 
@@ -275,7 +280,7 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
         return scores_str
 
     df = _load_casanovo(input_mztab=input_mztab)
-    df = df[df['sequence'].apply(len) != 0]
+    df = df[df["sequence"].apply(len) != 0]
     df = df[~df["sequence"].apply(_is_invalid)]
     df["opt_ms_run[1]_aa_scores"] = df.apply(_fix_scores, axis=1)
 
@@ -314,9 +319,7 @@ def _load_novob(input_csv: str) -> pd.DataFrame:
     )
 
     # Decode spectrum_id from b'5280' to '5280'
-    df["spectrum_id"] = df["spectrum_id"].apply(
-        lambda x: eval(x).decode("utf-8") if isinstance(x, str) else x
-    )
+    df["spectrum_id"] = df["spectrum_id"].apply(lambda x: eval(x).decode("utf-8") if isinstance(x, str) else x)
 
     # Parse sequence lists
     df["sequence_forward"] = df["sequence_forward"].apply(lambda x: eval(x)[0])
@@ -333,9 +336,7 @@ def _load_novob(input_csv: str) -> pd.DataFrame:
         else:
             return row["sequence_reverse"], row["probability_reverse"]
 
-    df[["sequence", "score"]] = df.apply(
-        lambda x: pd.Series(select_best(x)), axis=1
-    )
+    df[["sequence", "score"]] = df.apply(lambda x: pd.Series(select_best(x)), axis=1)
 
     return df
 

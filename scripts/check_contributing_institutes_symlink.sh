@@ -24,10 +24,15 @@ if [ ! -L "$SYMLINK" ]; then
 fi
 
 RESOLVED=$(readlink "$SYMLINK")
-if [ "$RESOLVED" != "$EXPECTED_TARGET" ]; then
+CANONICAL="docs/_static/img/proteobench-contributing-institutes.png"
+
+ACTUAL_TARGET=$(realpath "$SYMLINK" 2>/dev/null || true)
+EXPECTED_TARGET=$(realpath "$CANONICAL" 2>/dev/null || true)
+
+if [ -z "$ACTUAL_TARGET" ] || [ "$ACTUAL_TARGET" != "$EXPECTED_TARGET" ]; then
     echo ""
-    echo "WARNING: $SYMLINK points to '$RESOLVED'"
-    echo "  Expected: $EXPECTED_TARGET"
+    echo "ERROR: $SYMLINK points to '$RESOLVED'"
+    echo "  Expected to resolve to: $CANONICAL"
     echo ""
     exit 1
 fi

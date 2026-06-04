@@ -16,7 +16,7 @@ A benchmark run accepted by the ProteoBench team to be made publicly available a
 A single number resulting from an aggregated calculation of the workflow output which allows for a comparison between different benchmark runs.
 
 ## Intermediate format
-The standardized table (that is module specific) that ProteoBench computes from a workflow output before deriving metrics. It is stored as `result_performance.csv` and identified by the `intermediate_hash`. A detailed explanation is available at the [intermediate format specification](../developer-guide/intermediate-format.md).
+The module-specific standardized table that ProteoBench computes from a workflow output before deriving metrics. It is stored as `result_performance.csv` and identified by the `intermediate_hash`. A detailed explanation is available at the [intermediate format specification](../developer-guide/intermediate-format.md).
 
 (open-source-software)=
 ## Open source software

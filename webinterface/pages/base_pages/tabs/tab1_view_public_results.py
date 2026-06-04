@@ -12,12 +12,11 @@ from typing import Any, Callable, Dict, List, Optional
 import pandas as pd
 import streamlit as st
 
-<<<<<<< Show_latest_version_only
-from proteobench.datapoint.quant_datapoint import keep_latest_version_per_tool
 
-=======
-from ..utils.parameter_filters import apply_parameter_filters, generate_parameter_filters  # noqa: F401
->>>>>>> parameter-homogenization-and-filtering
+from ..utils.parameter_filters import (  # noqa: F401
+    apply_parameter_filters,
+    generate_parameter_filters,
+)
 from ..utils.resulttable import add_open_source_column
 
 
@@ -418,14 +417,8 @@ def display_existing_results(
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
     filtered_data = add_open_source_column(filtered_data)
 
-<<<<<<< Show_latest_version_only
-    # Optionally keep only the newest version of each tool
-    if plot_params.get("latest_version_only", False):
-        filtered_data = keep_latest_version_per_tool(filtered_data)
-=======
     # Apply parameter-based filters (key_prefix must be unique per module page)
     filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
->>>>>>> parameter-homogenization-and-filtering
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()

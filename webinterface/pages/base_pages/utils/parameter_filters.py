@@ -8,10 +8,67 @@ the Streamlit UI rendering (``generate_parameter_filters``).
 import re
 from typing import Any, Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
 from proteobench.io.params import _AUTO_CALIBRATION_LABEL
+
+
+def parse_version_key(version: Any) -> tuple:
+    """Build a sortable key from a free-text software version string.
+
+    Numeric chunks are compared as integers so that ``"1.10"`` sorts after
+    ``"1.9"``. Non-numeric chunks are sorted lexicographically.
+    """
+    if version is None:
+        return ()
+    text = str(version).strip()
+    if not text or text.lower() == "nan":
+        return ()
+    key = []
+    for chunk in re.findall(r"\d+|[^\d]+", text):
+        if chunk.isdigit():
+            key.append((1, int(chunk), ""))
+        else:
+            cleaned = chunk.strip(" ._-").lower()
+            if cleaned:
+                key.append((0, 0, cleaned))
+    return tuple(key)
+
+
+def keep_latest_version_per_tool(
+    datapoints: pd.DataFrame,
+    software_col: str = "software_name",
+    version_col: str = "software_version",
+    protect_col: str = "old_new",
+    protect_value: str = "new",
+) -> pd.DataFrame:
+    """Filter *datapoints* to the newest version of each software tool.
+
+    Rows whose ``protect_col`` equals ``protect_value`` (e.g. a just-uploaded
+    datapoint) are always kept regardless of their version.
+    """
+    if datapoints is None or len(datapoints) == 0:
+        return datapoints
+    if software_col not in datapoints.columns or version_col not in datapoints.columns:
+        return datapoints
+
+    has_protect = protect_col in datapoints.columns
+    tools = list(datapoints[software_col])
+    keys = [parse_version_key(v) for v in datapoints[version_col]]
+    protected = [bool(p == protect_value) for p in datapoints[protect_col]] if has_protect else [False] * len(tools)
+
+    max_key_by_tool: Dict[Any, tuple] = {}
+    for tool, key, is_protected in zip(tools, keys, protected):
+        if is_protected:
+            continue
+        current = max_key_by_tool.get(tool)
+        if current is None or key > current:
+            max_key_by_tool[tool] = key
+
+    keep = [is_protected or key == max_key_by_tool.get(tool) for tool, key, is_protected in zip(tools, keys, protected)]
+    return datapoints[np.array(keep, dtype=bool)]
 
 _NOT_SPECIFIED = "Not specified"
 
@@ -203,7 +260,10 @@ def apply_parameter_filters(
             threshold = selection
             mask &= pd.to_numeric(data[col], errors="coerce").fillna(0) <= threshold
 
-    return data.loc[mask]
+    filtered = data.loc[mask]
+    if filter_selections.get("latest_version_only"):
+        filtered = keep_latest_version_per_tool(filtered)
+    return filtered
 
 
 def generate_parameter_filters(
@@ -276,8 +336,18 @@ def generate_parameter_filters(
     filter_selections: Dict[str, Any] = {}
 
     with st.expander("Filter by workflow parameters", expanded=False):
+        latest_version_key = f"{key_prefix}_latest_version_only"
+        latest_version_only = st.checkbox(
+            "Show only latest version per tool",
+            key=latest_version_key,
+            help="Keep only the highest software version of each tool in the plot and table.",
+        )
+        filter_selections["latest_version_only"] = latest_version_only
+
         # Reset button
         if st.button("Reset all filters", key=f"{key_prefix}_reset"):
+            if latest_version_key in st.session_state:
+                del st.session_state[latest_version_key]
             for spec in applicable:
                 if spec["type"] == "combined_range":
                     sk = f"{key_prefix}_{spec['col_min']}__{spec['col_max']}"
@@ -354,7 +424,13 @@ def generate_parameter_filters(
                     col_name = spec["col"]
                     sk = f"{key_prefix}_{col_name}"
                     all_options = _get_unique_values(data[col_name])
-                    default = st.session_state.get(sk, all_options)
+                    raw_default = st.session_state.get(sk, all_options)
+                    # Drop stale values that no longer exist in the current options
+                    # (e.g. after the latest-version filter removes certain rows).
+                    options_set = set(all_options)
+                    default = [v for v in raw_default if v in options_set] if isinstance(raw_default, list) else all_options
+                    if not default:
+                        default = all_options
                     selected = st.multiselect(
                         label,
                         options=all_options,
@@ -370,7 +446,9 @@ def generate_parameter_filters(
                     if len(all_options) < 2:
                         continue
                     full_range = (all_options[0], all_options[-1])
-                    default = st.session_state.get(sk, full_range)
+                    raw_default = st.session_state.get(sk, full_range)
+                    options_set = set(all_options)
+                    default = raw_default if (isinstance(raw_default, tuple) and raw_default[0] in options_set and raw_default[1] in options_set) else full_range
                     selected = st.select_slider(
                         label,
                         options=all_options,
@@ -387,7 +465,8 @@ def generate_parameter_filters(
                     if len(all_options) < 2:
                         continue
                     max_val = all_options[-1]
-                    default = st.session_state.get(sk, max_val)
+                    raw_default = st.session_state.get(sk, max_val)
+                    default = raw_default if raw_default in all_options else max_val
                     selected = st.select_slider(
                         f"{label} \u2264",
                         options=all_options,

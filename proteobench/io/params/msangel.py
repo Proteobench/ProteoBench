@@ -44,6 +44,23 @@ def _homogenize_mod_xtandem(mod_str: str) -> str:
     else:
         return f"{residue_part.upper()}[{name}]"
 
+# Mapping from Mascot enzyme name strings to canonical ProteoBench names.
+# Keys are lowercase to allow case-insensitive lookup.
+_ENZYME_MAP = {
+    "trypsin": "Trypsin",
+    "trypsin (kr/np)": "Trypsin",
+    "trypsin/p": "Trypsin/P",
+    "lysc": "Lys-C",
+    "lys-c": "Lys-C",
+    "argc": "Arg-C",
+    "arg-c": "Arg-C",
+    "aspn": "Asp-N",
+    "asp-n": "Asp-N",
+    "gluc": "Glu-C",
+    "glu-c": "Glu-C",
+    "chymotrypsin": "Chymotrypsin",
+}
+
 
 def extract_search_engine(search_params: list) -> dict:
     """
@@ -87,7 +104,8 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
     for each_search_params in search_params["operations"]:
         if "searchEnginesWithForms" in each_search_params:
             # params.search_engine_version =
-            input_params.enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["CLE"]
+            raw_enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["CLE"]
+            input_params.enzyme = _ENZYME_MAP.get(raw_enzyme.strip().lower(), raw_enzyme)
             # params.allowed_miscleavages =
             input_params.fixed_mods = _homogenize_mods(
                 each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["MODS"]
@@ -138,9 +156,10 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
     for each_search_params in search_params["operations"]:
         if "searchEnginesWithForms" in each_search_params:
             # params.search_engine_version =
-            input_params.enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["digestionParameters"][
+            raw_enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["digestionParameters"][
                 "enzymes"
             ][0]["name"]
+            input_params.enzyme = _ENZYME_MAP.get(raw_enzyme.strip().lower(), raw_enzyme)
             # params.allowed_miscleavages =
             input_params.fixed_mods = ", ".join(
                 _homogenize_mod_xtandem(m)
@@ -154,11 +173,11 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
                     "variableModifications"
                 ]
             )
-            ## get value of each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["digestionParameters"]["nMissedCleavages"] where key == input_params.enzyme
+            # Use the raw enzyme name for the missed cleavages lookup (dict keys are vendor names).
             n_missed_cleavages_dict = each_search_params["searchEnginesWithForms"][0][1]["paramMap"][
                 "digestionParameters"
             ]["nMissedCleavages"]
-            input_params.allowed_miscleavages = n_missed_cleavages_dict.get(input_params.enzyme, None)
+            input_params.allowed_miscleavages = n_missed_cleavages_dict.get(raw_enzyme, None)
             # get tolerance for precursors:
             tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorTolerance"]
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorAccuracyType"]

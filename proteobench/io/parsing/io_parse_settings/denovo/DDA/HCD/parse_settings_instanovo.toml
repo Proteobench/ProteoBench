@@ -1,3 +1,4 @@
+
 [mapper]
 "spectrum_id" = "spectrum_id"
 "predictions" = "sequence"
@@ -8,3 +9,9 @@
 "pattern" = ":(\\d+)$"
 
 [sequence_mapper]
+
+[upload_info]
+"datapoint_file" = "*.csv"
+"datapoint_file_description" = "Upload the InstaNovo de novo sequencing output CSV file."
+"params_file" = "*.yaml"
+"params_file_description" = ""

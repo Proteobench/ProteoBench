@@ -58,4 +58,19 @@ jobs:
             echo "Error: Parameters overview not updated, run in docs folder: python parse_tables.py"
             exit 1
           fi
+      - name: check contributing-institutes logo symlink
+        run: |
+          SYMLINK=webinterface/logos/logo_participants/proteobench-contributing-institutes.png
+          TARGET=docs/_static/img/proteobench-contributing-institutes.png
+          if [ ! -L "$SYMLINK" ]; then
+            echo "ERROR: $SYMLINK is not a symlink."
+            echo "It should point to $TARGET."
+            echo "To fix: cd webinterface/logos/logo_participants && rm proteobench-contributing-institutes.png && ln -s ../../../docs/_static/img/proteobench-contributing-institutes.png proteobench-contributing-institutes.png"
+            exit 1
+          fi
+          RESOLVED=$(readlink "$SYMLINK")
+          if [ "$RESOLVED" != "../../../docs/_static/img/proteobench-contributing-institutes.png" ]; then
+            echo "ERROR: $SYMLINK points to '$RESOLVED' instead of '../../../docs/_static/img/proteobench-contributing-institutes.png'."
+            exit 1
+          fi
 

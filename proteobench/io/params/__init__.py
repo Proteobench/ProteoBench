@@ -1,18 +1,33 @@
 """
-This module provides the `ProteoBenchParameters` dataclass for handling parameters
-related to ProteoBench. The parsing is done per data analysis software.
+Parameter handling for ProteoBench.
 
-Normalized parameters (coerced by ``normalize()``):
+``ProteoBenchParameters`` is initialized from a JSON field-definition file
+(default: ``json/Quant/quant_lfq_DDA_ion.json``) and populated by
+per-software ``extract_params`` functions in the sibling modules.
+After population, every parser calls ``fill_none()``, which coerces values
+to canonical types via ``normalize()``.
 
-- ``ident_fdr_psm``, ``ident_fdr_peptide``, ``ident_fdr_protein`` — float in [0, 1]
+``normalize_dataframe_columns`` applies the same coercion rules to a full
+DataFrame of historical datapoints loaded from the results repository.
+
+Normalization rules (applied by ``normalize()`` / ``normalize_dataframe_columns``):
+
+- Missing sentinel strings (``"None"``, ``"N/A"``, ``""``, ``"unknown"``,
+  etc.) → ``np.nan``
+- ``ident_fdr_psm``, ``ident_fdr_peptide``, ``ident_fdr_protein`` → float
+  in [0, 1]; values ≥ 1 are treated as percentages and divided by 100
 - ``allowed_miscleavages``, ``min/max_peptide_length``,
-  ``min/max_precursor_charge``, ``max_mods`` — int (shared quant/denovo)
-- ``min/max_precursor_mz``, ``min/max_fragment_mz`` — int (quant, m/z ranges)
-- ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz`` — int (de novo specific)
-- ``enable_match_between_runs`` — bool
-- ``enzyme`` — canonical capitalized name (e.g. "Trypsin", "Trypsin/P", "Lys-C")
+  ``min/max_precursor_charge``, ``max_mods``,
+  ``min/max_precursor_mz``, ``min/max_fragment_mz``,
+  ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz`` → int
+- ``enable_match_between_runs`` → bool
+- ``enzyme`` → canonical name via ``_ENZYME_MAP``
+  (e.g. ``"trypsin"`` → ``"Trypsin"``, ``"kr|p,true"`` → ``"Trypsin"``)
+- ``precursor_mass_tolerance``, ``fragment_mass_tolerance`` → mapped to
+  ``"Automatic calibration"`` when a known auto-calibration sentinel is
+  detected (e.g. ``"dynamic"``, ``"0 ppm"``)
 
-NOT normalized (kept as-is from parsers):
+NOT normalized (kept as-is from parsers, parsers should homogenize themselves):
 
 - ``precursor_mass_tolerance``, ``fragment_mass_tolerance``,
   ``remove_precursor_tol`` — string, format varies by tool
@@ -21,15 +36,20 @@ NOT normalized (kept as-is from parsers):
   ``abundance_normalization_ions`` — string
 - ``software_name``, ``software_version``, ``search_engine``,
   ``search_engine_version`` — string
-- ``min_intensity``, ``max_intensity`` — float/int, kept as-is (can be fractional)
+- ``min_intensity``, ``max_intensity`` — float/int, kept as-is
 - ``tokens`` — string, semicolon-separated amino acids/modifications
-- ``isotope_error_range`` — string representation of list (e.g. "[0, 2]")
+- ``isotope_error_range`` — string (e.g. ``"[0, 2]"``)
 - ``decoding_strategy``, ``checkpoint`` — string, tool-specific
 
 Classes
 -------
 ProteoBenchParameters
-    A dataclass for handling ProteoBench parameters.
+    Parameter container initialized from a JSON field-definition file.
+
+Functions
+---------
+normalize_dataframe_columns
+    Apply the same normalization rules to a historical-results DataFrame.
 """
 
 # Reference for parameter names
@@ -104,26 +124,31 @@ _INT_FIELDS = (
 @dataclass
 class ProteoBenchParameters:
     """
-    ProteoBench parameter dataclass.
+    Parameter container for a single ProteoBench submission.
+
+    Attributes are determined at runtime by the JSON field-definition file;
+    only fields present in that file are set as instance attributes.
 
     Parameters
     ----------
-    filename : os.path
-        Path to parameter file.
-    **kwargs : dict[str, Any]
-        Other keyword arguments.
+    filename : str or os.PathLike
+        Path to a JSON field-definition file. Defaults to
+        ``json/Quant/quant_lfq_DDA_ion.json`` (relative to this package).
+    **kwargs
+        Optional attribute overrides applied after JSON initialization.
+        A string value of ``"None"`` is coerced to ``np.nan``.
     """
 
     def __init__(self, filename=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json"), **kwargs):
         """
-        Read the JSON file and initializes only the attributes present in the file.
+        Initialize attributes from *filename* and apply any *kwargs* overrides.
 
         Parameters
         ----------
-        filename : os.path
-            Path to parameter file.
-        **kwargs : dict[str, Any]
-            Other keyword arguments.
+        filename : str or os.PathLike
+            Path to a JSON field-definition file.
+        **kwargs
+            Attribute overrides. A value of ``"None"`` is stored as ``np.nan``.
         """
         if not os.path.isfile(filename):
             print(f"Error: File '{filename}' not found.")
@@ -160,7 +185,10 @@ class ProteoBenchParameters:
 
     def fill_none(self):
         """
-        Fill all None values with np.nan and normalize parameter types.
+        Convert string ``"None"`` sentinels to ``np.nan`` and call ``normalize()``.
+
+        Every ``extract_params`` function should call this at the end of
+        parameter extraction so that normalization is applied uniformly.
         """
         for key, value in self.__dict__.items():
             if value == "None":

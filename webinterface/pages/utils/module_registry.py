@@ -13,6 +13,8 @@ from typing import Dict, List, Optional
 
 import streamlit as st
 
+MODULE_CATEGORIES = ["DDA", "DIA", "Archived", "Debug"]
+
 
 @dataclass
 class ModuleMetadata:
@@ -40,9 +42,9 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
     Returns
     -------
     Dict[str, List[ModuleMetadata]]
-        Dictionary mapping categories ("DDA", "DIA", "Archived") to lists of ModuleMetadata.
+        Dictionary mapping categories ("DDA", "DIA", "Archived", "Debug") to lists of ModuleMetadata.
     """
-    modules_by_category = {"DDA": [], "DIA": [], "Archived": []}
+    modules_by_category = {c: [] for c in MODULE_CATEGORIES}
 
     # Get the path to the pages_variables directory
     # Assuming this file is in webinterface/pages/utils/
@@ -133,7 +135,6 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             # In production, you might want to log this
             print(f"Warning: Failed to load module {module_path}: {e}")
             continue
-
     return modules_by_category
 
 
@@ -159,7 +160,7 @@ def filter_modules(
         return modules_by_category
 
     query_lower = search_query.lower()
-    filtered = {"DDA": [], "DIA": [], "Archived": []}
+    filtered = {category: [] for category in MODULE_CATEGORIES}
 
     for category, modules in modules_by_category.items():
         for module in modules:

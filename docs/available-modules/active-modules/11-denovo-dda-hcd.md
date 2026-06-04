@@ -141,19 +141,26 @@ Table 3 provides an overview of the required input files for public submission. 
 | ----------- | ------------- | -------------- |
 | AdaNovo     | results.mztab | config.yaml    |
 | Casanovo    | results.mztab | config.yaml    |
+| ContraNovo  | results.mztab | config.yaml    |
+| DeepNovo    | results.tab   | / *    |
 | InstaNovo   | results.csv   | config.yaml    |
-| PepNet      | results.tsv   | / *             |
+| PepNet      | results.tsv   | / *            |
 | π-HelixNovo | results.tsv   | config.yaml    |
 | π-PrimeNovo | results.tsv   | config.yaml    |
+| PointNovo   | results.csv.some_extension | / * |
+| SMSNet      | results and results_prob (2 files) | / * |
 
-\* PepNet does not have adaptable parameters, so no parameter file is required
+> Note that the input file names might differ from **results**. Nonetheless, the extension should remain the same.
+
+\* PepNet, DeepNovo, and PointNovo do not have a configuration file that's easily parsable, so no parameter file is required. When uploading a datapoint, do make sure that the parameter metadata fields are filled in as musch as possible to make your submission transparent to the community.
+
 
 ### [AdaNovo](https://github.com/Westlake-OmicsAI/adanovo_v1)
 
 > **[FLAG for review]** Add AdaNovo-specific instructions and the column names parsed from `results.mztab`. Verify the GitHub/documentation URL to link the tool name.
 
 To generate data compatible with ProteoBench:
-1. Set up Casanovo according to the developers instructions [here](https://github.com/Westlake-OmicsAI/adanovo_v1) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
+1. Set up AdaNovo according to the developers instructions [here](https://github.com/Westlake-OmicsAI/adanovo_v1) and run the model on the provided [MGF file](https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/). **Be sure not to change the file name or the spectrum identifiers**.
 2. Upload `results.mztab` for metric calculation in the ProteoBench platform. For public submission, also provide `config.yaml`.
 
 Once uploaded to ProteoBench, the following columns from `results.mztab` are considered:
@@ -215,6 +222,25 @@ Once uploaded to ProteoBench, the following columns from `results.tsv` are consi
 - score: The peptide confidence score. Used for precision-recall curve construction (*Currently not implemented*).
 
 The positional scores for this model are set equal to the amino acid scores.
+
+### Custom format
+
+
+
+## How to run these models more easily ?
+
+These models can be quiet tricky to set up. Therefore, some people have made efforts to streamline the execution of these tools into more easily configurable pipelines. Some examples are summarized in the table below with the models that are supported.
+
+**Table 4. Overview of public model execution pipelines**
+
+| Pipeline link  | Workflow manager | Supported tools    | 
+| ----------- | ------------- | ------------- | 
+| https://github.com/denisbeslic/denovopipeline | Python | **DeepNovo**, **PointNovo**, **SMSNet**, and **CasaNovo** (newer models might be incompatible) | 
+| https://github.com/SamvPy/DeNovo_Benchmark    | NextFlow and Python | **AdaNovo**, **Casanovo**, **ContraNovo**, **InstaNovo**, **NovoB**, **PepNet**, **π-HelixNovo**, **π-PrimeNovo**, **InstaNovo+**, **Spectralis**| 
+| https://github.com/bittremieuxlab/denovo_benchmarks  | Apptainer | **AdaNovo**, **Casanovo**, **ContraNovo**, **DePS**, **PEAKS**, **biatNovo-DDA**, **DeepNovo**, **GCNovo**, **InstaNovo**, **Novor**, **PepNet**, **π-HelixNovo**, **π-PrimeNovo**, **SMSNet**, **Spectralis**|
+
+> Note that the output of some of these pipelines might be different than is supported in ProteoBench. If you have difficulties uploading your results, you can (i) send out an email to [us](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query), (ii) create a [pull request] to support it yourself, or (iii) parse the output to the custom format specified [above](#custom-format).
+
 
 ## toml file description
 

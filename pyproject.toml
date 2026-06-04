@@ -80,7 +80,7 @@ build-backend = "setuptools.build_meta"
 # used to pick up the version from the git tags or the latest commit.
 
 [tool.setuptools.packages.find]
-include = ["proteobench"]
+include = ["proteobench*"]
 
 [tool.isort]
 profile = "black"

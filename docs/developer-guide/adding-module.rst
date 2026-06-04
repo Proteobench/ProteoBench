@@ -56,6 +56,8 @@ The backend is organized into six main components that you can extend or customi
    - :file:`proteobench/io/parsing/parse_settings.py` handles format conversion
    - Settings defined in TOML files in :file:`proteobench/io/parsing/io_parse_settings/`
    - For new software tools, extend :func:`~proteobench.io.parsing.parse_ion.load_input_file`
+   - Each tool TOML must include an ``[upload_info]`` section (see the checklist below for
+     the required keys and the override mechanism for tools that share a TOML file)
    - If the new tool is :ref:`open source <open-source-software>`, add its ``software_name``
      to the ``[open_source].tools`` list in
      :file:`proteobench/io/parsing/io_parse_settings/tool_metadata.toml` so it is
@@ -953,7 +955,34 @@ a new type of module:
    modules in the folder 
    `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_
 2. Define the input formats using toml files in a new subfolder of
-   `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_
+   `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_.
+   Each tool TOML must include an ``[upload_info]`` section with four keys:
+
+   .. code-block:: toml
+
+      [upload_info]
+      "datapoint_file" = "evidence.txt"
+      "datapoint_file_description" = "Upload the MaxQuant evidence.txt file from the txt output folder."
+      "params_file" = "mqpar.xml"
+      "params_file_description" = "Upload the MaxQuant parameter file mqpar.xml from the search output folder."
+
+   The ``datapoint_file_description`` is displayed as an info box above the result-file uploader
+   in Tab 2 (Upload New Results). The ``params_file_description`` is displayed above the metadata
+   uploader in Tab 6 (Submit New Results). Markdown links are supported in the description strings.
+
+   If multiple tool names share the same TOML (e.g., a tool that reuses the DIA-NN report format),
+   add an ``[upload_info_overrides]`` sub-table to override only the fields that differ:
+
+   .. code-block:: toml
+
+      [upload_info_overrides."FragPipe (DIA-NN quant)"]
+      "params_file" = "fragpipe.workflow"
+      "params_file_description" = "Upload the FragPipe workflow file (.workflow)."
+
+   :func:`~proteobench.io.parsing.parse_settings.ParseSettingsBuilder.get_upload_info` merges the
+   base ``[upload_info]`` with the matching override (if any) and returns the result as a dict.
+   Missing ``[upload_info]`` sections are handled gracefully — no message is shown in the UI.
+
 3. Check, modify or add a parsing procedures in
    `proteobench/io/parsing <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_
    e.g. :file:`parse_ion.py` or :file:`parse_peptidoform.py`.

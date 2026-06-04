@@ -326,6 +326,7 @@ class DeNovoUIObjects(BaseUIModule):
                 st.header(mod_label)
                 st.plotly_chart(
                     figs[mod_label],
+                    key=f"ptm_plot_{mod_label}",
                     use_container_width=True,
                 )
     

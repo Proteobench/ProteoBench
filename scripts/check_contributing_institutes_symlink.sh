@@ -8,7 +8,7 @@ EXPECTED_TARGET="../../../docs/_static/img/proteobench-contributing-institutes.p
 
 if [ ! -L "$SYMLINK" ]; then
     echo ""
-    echo "WARNING: $SYMLINK is not a symlink."
+    echo "ERROR: $SYMLINK is not a symlink."
     echo "  It should be a symlink pointing to $EXPECTED_TARGET"
     echo "  (canonical file: docs/_static/img/proteobench-contributing-institutes.png)"
     echo ""

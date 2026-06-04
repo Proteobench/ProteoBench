@@ -17,6 +17,8 @@ from ..utils.general import clean_dataframe_for_export
 from ..utils.metricplot import render_metric_plot
 from ..utils.resulttable import configure_aggrid, prepare_display_dataframe, render_aggrid
 
+from ..utils.resulttable import add_open_source_column
+
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
     """
@@ -86,6 +88,8 @@ def generate_main_slider(
     slider_key = st.session_state[slider_id_uuid]
 
     default_value = st.session_state.get(slider_key, default_val_slider)
+
+    # Generate slider options based on max_nr_observed
     slider_options = list(range(1, max_nr_observed + 1))
 
     st.select_slider(
@@ -147,8 +151,21 @@ def display_metric_calc_approach_selector(variables) -> str:
     )
 
 
-def display_colorblindmode_selector(variables, use_submitted: bool = False) -> bool:
-    """Display colorblind mode selector toggle."""
+def display_colorblindmode_selector(variables, use_submitted: bool = False) -> str:
+    """Display colorblind mode selector toggle.
+
+    Parameters
+    ----------
+    variables : VariablesClass
+        Variables object containing selector UUIDs
+    use_submitted : bool, optional
+        If True, use the submitted selector UUID, by default False
+
+    Returns
+    -------
+    bool
+        Current state of the colorblind mode toggle
+    """
     key = (
         variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
     )
@@ -192,6 +209,93 @@ def filter_data_if_applicable(variables, ionmodule, use_slider: bool = True) -> 
     return st.session_state[variables.all_datapoints]
 
 
+def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params: Dict[str, Any]) -> None:
+    """
+    Render the main metric plot using the module's plot generator.
+
+    Parameters
+    ----------
+    plot_generator : PlotGeneratorBase
+        The plot generator instance from the module.
+    data : pd.DataFrame
+        The data to plot.
+    variables : object
+        Variables object containing session state keys.
+    plot_params : Dict[str, Any]
+        Module-specific parameters for plotting (label, metric, mode, etc.).
+    """
+    # Prepare plot key
+    key = variables.fig_metric if hasattr(variables, "fig_metric") else "main_plot"
+    if key not in st.session_state:
+        st.session_state[key] = uuid.uuid4()
+    plot_uuid = st.session_state[key]
+
+    # Build annotation text based on alpha/beta warnings
+    annotation = ""
+    if plot_params.get("beta_warning", False):
+        annotation = "-Beta-"
+    elif plot_params.get("alpha_warning", False):
+        annotation = "-Alpha-"
+
+    with st.container(key="tour_metric_plot"):
+        try:
+            fig = plot_generator.plot_main_metric(
+                result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
+            )
+            st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            import traceback
+
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
+
+
+def render_results_table(
+    data: pd.DataFrame, table_style: str = "dataframe", column_config: Optional[Dict] = None
+) -> None:
+    """
+    Render the results table with configurable styling.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The data to display.
+    table_style : str, optional
+        The table rendering style ("dataframe" or "aggrid").
+    column_config : Optional[Dict], optional
+        Streamlit column configuration for enhanced display.
+    """
+    if len(data) == 0:
+        st.info("No datapoints available to display.", icon="ℹ️")
+        return
+
+    data = add_open_source_column(data)
+
+    st.subheader("Benchmark Results")
+
+    if table_style == "aggrid":
+        # Import AgGrid only if needed
+        try:
+            from st_aggrid import AgGrid, GridOptionsBuilder
+
+            gb = GridOptionsBuilder.from_dataframe(data)
+            gb.configure_default_column(
+                filterable=True,
+                groupable=False,
+                sorteable=True,
+                editable=False,
+            )
+            grid_options = gb.build()
+            AgGrid(data, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
+        except ImportError:
+            st.warning("AgGrid not available, falling back to dataframe", icon="⚠️")
+            st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
+    else:
+        # Standard dataframe display
+        st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
+
+
 def display_download_section(variables, sort_by: str = "id") -> None:
     """
     Render the download section for raw datasets.
@@ -225,7 +329,7 @@ def display_download_section(variables, sort_by: str = "id") -> None:
         if hasattr(variables, "download_selector_id_uuid"):
             st.session_state[variables.download_selector_id_uuid] = uuid.uuid4()
 
-    st.subheader("Download raw datasets")
+    st.subheader("Download all data from a submitted workflow")
 
     selector_key = st.session_state.get(
         getattr(variables, "download_selector_id_uuid", "download_selector"), "download_selector"
@@ -382,9 +486,10 @@ def display_existing_results(
             elif isinstance(selected_rows, list) and len(selected_rows) > 0:
                 selected_id = selected_rows[0].get("id")
 
-        if selected_id and selected_id != highlight_id:
-            st.session_state[highlight_key] = selected_id
-            st.session_state[plot_key_id] = uuid.uuid4()
-            st.rerun(scope="fragment")
+    # Render results table
+    with st.container(key="tour_results_table"):
+        render_results_table(filtered_data, table_style, column_config)
 
-    display_download_section(variables)
+    # Display download section
+    with st.container(key="tour_download_section"):
+        display_download_section(variables)

@@ -58,4 +58,6 @@ jobs:
             echo "Error: Parameters overview not updated, run in docs folder: python parse_tables.py"
             exit 1
           fi
+      - name: check contributing-institutes logo symlink
+        run: bash scripts/check_contributing_institutes_symlink.sh
 

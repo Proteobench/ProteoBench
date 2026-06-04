@@ -1,7 +1,42 @@
 import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
 
+from proteobench.io.parsing.parse_settings import get_open_source_tools
+
 # this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
+
+# === Open Source Tools ===
+# Loaded from proteobench/io/parsing/io_parse_settings/tool_metadata.toml
+OPEN_SOURCE_TOOLS = get_open_source_tools()
+
+
+def add_open_source_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add an 'open_source' column indicating whether the software is open source.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing a 'software_name' column.
+
+    Returns
+    -------
+    pd.DataFrame
+        Copy of the DataFrame with an 'open_source' column inserted after 'software_name'.
+        Open source tools are marked with '✅', others with an empty string.
+    """
+    if "software_name" not in df.columns:
+        return df
+    df = df.copy()
+    df["open_source"] = df["software_name"].apply(
+        lambda x: "✅" if str(x).lower() in OPEN_SOURCE_TOOLS else ""
+    )
+    cols = df.columns.tolist()
+    cols.remove("open_source")
+    idx = cols.index("software_name") + 1
+    cols.insert(idx, "open_source")
+    return df[cols]
+
 
 # === Table Color Constants ===
 COLOR_IDENTIFIER = "#EEF2FF"  # soft indigo tint  – id / selected columns
@@ -111,6 +146,8 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
     dict
         AgGrid gridOptions dictionary.
     """
+    from st_aggrid import GridOptionsBuilder
+
     gb = GridOptionsBuilder.from_dataframe(df)
 
     # Defaults: sortable, filterable, resizable, wrapped headers

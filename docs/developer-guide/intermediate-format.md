@@ -130,7 +130,7 @@ column order and row order as part of the format.
 
 ## Persistence and external resources
 
-The intermediate is written to `result_performance.csv` inside the dataset
+The intermediate format table is written to `result_performance.csv` inside the dataset
 archive on the public datasets server
 (`https://proteobench.cubimed.rub.de/datasets/`), keyed by `intermediate_hash`.
 It is reloaded for the "View Single Result" tab and for regenerating plots.

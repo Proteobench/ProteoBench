@@ -75,6 +75,6 @@ repos:
       - id: check-contributing-institutes-symlink
         name: check contributing-institutes logo is a symlink to docs/_static/img/
         language: script
-        entry: scripts/check_contributing_institutes_symlink.sh
+        entry: bash scripts/check_contributing_institutes_symlink.sh
         pass_filenames: false
         always_run: true

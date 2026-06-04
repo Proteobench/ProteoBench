@@ -237,8 +237,7 @@ class QuantUIObjects(BaseUIModule):
                 st.session_state[self.variables.params_file_dict] = {}
             self.user_input.setdefault(
                 "input_format",
-                st.session_state.get("software_tool_selector")
-                or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
+                st.session_state.get("software_tool_selector") or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
             )
             st.info(
                 "These fields are auto-filled when you upload a parameter file above. "
@@ -313,19 +312,26 @@ class QuantUIObjects(BaseUIModule):
 
         metric_key = f"_tab1_metric_{self.variables.sidebar_path}"
         mode_key = f"_tab1_mode_{self.variables.sidebar_path}"
+        latest_version_key = f"_tab1_latest_version_{self.variables.sidebar_path}"
         if metric_key not in st.session_state:
             st.session_state[metric_key] = "Median"
         if mode_key not in st.session_state:
             st.session_state[mode_key] = "Species-weighted"
+        if latest_version_key not in st.session_state:
+            st.session_state[latest_version_key] = False
 
         def render_metric_selector():
-            help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio("Select metric", ["Median", "Mean"], key=metric_key, help=help_text, horizontal=True)
 
         def render_mode_selector():
             if st.session_state.get(metric_key) == "ROC-AUC":
                 return None
-            help_text = getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio(
                 "Select metric calculation approach",
                 ["Species-weighted", "Global"],
@@ -337,9 +343,21 @@ class QuantUIObjects(BaseUIModule):
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables)
 
+        def render_latest_version_selector():
+            return st.checkbox(
+                "Show only latest version per tool",
+                key=latest_version_key,
+                help="Keep only the highest software version of each tool in the plot and table.",
+            )
+
         self.render_plot_options_expander(
             filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            selector_callbacks=[
+                render_metric_selector,
+                render_mode_selector,
+                render_colorblind_selector,
+                render_latest_version_selector,
+            ],
             filter_cols_spec=2,
             selector_cols_spec=[1, 1, 1, 1],
             expander_key="tour_plot_options",
@@ -348,6 +366,7 @@ class QuantUIObjects(BaseUIModule):
         # --- PLOT, TABLE, DOWNLOAD BELOW ---
         metric = st.session_state[metric_key]
         mode = st.session_state[mode_key]
+        latest_version_only = st.session_state.get(latest_version_key, False)
 
         if self.variables.colorblind_mode_selector_uuid not in st.session_state:
             st.session_state[self.variables.colorblind_mode_selector_uuid] = uuid.uuid4()
@@ -369,6 +388,7 @@ class QuantUIObjects(BaseUIModule):
                 "colorblind_mode": colorblind_mode,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
                 "min_nr_observed": min_nr_observed,
+                "latest_version_only": latest_version_only,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
@@ -452,10 +472,26 @@ class QuantUIObjects(BaseUIModule):
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables, use_submitted=True)
 
+        latest_version_key = f"_tab4_latest_version_{self.variables.sidebar_path}"
+        if latest_version_key not in st.session_state:
+            st.session_state[latest_version_key] = False
+
+        def render_latest_version_selector():
+            return st.checkbox(
+                "Show only latest version per tool",
+                key=latest_version_key,
+                help="Keep only the highest software version of each tool in the plot and table.",
+            )
+
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
             filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            selector_callbacks=[
+                render_metric_selector,
+                render_mode_selector,
+                render_colorblind_selector,
+                render_latest_version_selector,
+            ],
             filter_cols_spec=2,
             selector_cols_spec=[1, 1, 1, 1],
         )
@@ -464,6 +500,7 @@ class QuantUIObjects(BaseUIModule):
         metric = results[2] if len(results) > 2 else "Median"
         mode = results[3] if len(results) > 3 else "Species-weighted"
         colorblind_mode = results[4] if len(results) > 4 else False
+        latest_version_only = st.session_state.get(latest_version_key, False)
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
@@ -484,6 +521,7 @@ class QuantUIObjects(BaseUIModule):
                 "colorblind_mode": colorblind_mode,
                 "label": label,
                 "min_nr_observed": min_nr_observed,
+                "latest_version_only": latest_version_only,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },

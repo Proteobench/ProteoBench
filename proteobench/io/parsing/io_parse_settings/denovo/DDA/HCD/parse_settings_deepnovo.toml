@@ -2,9 +2,9 @@
 "scan" = "spectrum_id"
 "output_seq" = "sequence"
 "output_score" = "score"
+"aa_score" = "aa_scores"
 
 [spectrum_id_mapper]
-"pattern" = ":(\\d+)"
 
 [sequence_mapper]
 [sequence_mapper.replacement_dict]

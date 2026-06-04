@@ -106,3 +106,8 @@
 "Pi-HelixNovo" = "parse_settings_pihelixnovo.toml"
 "Pi-PrimeNovo" = "parse_settings_piprimenovo.toml"
 "PepNet" = "parse_settings_pepnet.toml"
+"ContraNovo" = "parse_settings_contranovo.toml"
+"NovoB" = "parse_settings_novob.toml"
+"PointNovo" = "parse_settings_pointnovo.toml"
+"SMSNet" = "parse_settings_smsnet.toml"
+"Custom" = "parse_settings_custom.toml"

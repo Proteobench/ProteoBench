@@ -1,5 +1,5 @@
 """
-InstaNovo parameter parsing.
+ContraNovo parameter parsing.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
     Parameters
     ----------
     file_path : str
-        The path to the InstaNovo config file.
+        The path to the ContraNovo config file.
 
     Returns
     -------
@@ -31,16 +31,20 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
         with open(file_path) as f:
             file = yaml.load(f, yaml.SafeLoader)
 
-    params.software_name = "InstaNovo"
-    params.checkpoint = file.get("instanovo_model")
-    params.n_beams = file["num_beams"]
+    params.software_name = "ContraNovo"
+    params.n_beams = file["n_beams"]
+    params.n_peaks = file["n_peaks"]
+    params.precursor_mass_tolerance = file["precursor_mass_tol"]
     params.max_peptide_length = file["max_length"]
+    params.min_mz = file["min_mz"]
+    params.max_mz = file["max_mz"]
+    params.min_intensity = file["min_intensity"]
+    params.tokens = "; ".join(list(file["residues"].keys()))
     params.max_precursor_charge = file["max_charge"]
+    params.remove_precursor_tol = file["remove_precursor_tol"]
     params.isotope_error_range = str(file["isotope_error_range"])
-    params.remove_precursor_tol = None  # not in config
-    params.tokens = "; ".join(list(file["residue_remapping"].keys()))
 
-    if file["num_beams"] == 1:
+    if file["n_beams"] == 1:
         params.decoding_strategy = "greedy search"
     else:
         params.decoding_strategy = "beam search"

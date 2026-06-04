@@ -53,7 +53,7 @@ for quantification modules; may differ for other modules!).
 
 ## Intermediate format
 
-The intermediate format is the table defined for calculating all metrics. It should contain
+The intermediate format is the table defined for calculating all metrics in a given module. It should contain
 every value needed for metric calculation in a standardized fashion. It is not limited to 
 these columns, it can contain more columns, even ones that are tool specific. However, it at
 least needs defined and "normalized" columns for metric calculation.

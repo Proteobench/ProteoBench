@@ -1,0 +1,17 @@
+[mapper]
+"spectrum_id" = "spectrum_id"
+"sequence" = "sequence"
+"score" = "score"
+
+[spectrum_id_mapper]
+"pattern" = "(\\d+)"
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"C" = "C[UNIMOD:4]"
+"m" = "M[UNIMOD:35]"
+"n" = "N[UNIMOD:7]"
+"q" = "Q[UNIMOD:7]"
+"s" = "S[UNIMOD:21]"
+"t" = "T[UNIMOD:21]"
+"y" = "Y[UNIMOD:21]"

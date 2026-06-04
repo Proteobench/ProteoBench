@@ -75,4 +75,6 @@ jobs:
             echo "Error: Input files tables not updated, run: cd docs && python generate_input_tables.py"
             exit 1
           fi
+      - name: check contributing-institutes logo symlink
+        run: bash scripts/check_contributing_institutes_symlink.sh
 

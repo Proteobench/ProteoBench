@@ -10,6 +10,8 @@ from proteobench.datapoint.quant_datapoint import (
     compute_roc_auc,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_prec,
+    keep_latest_version_per_tool,
+    parse_version_key,
 )
 from proteobench.score.quantscoresHYE import QuantScoresHYE
 
@@ -584,3 +586,144 @@ class TestQuantScoresComputeEpsilon:
             acc_mean = sp_data["epsilon"].abs().mean()
             # Precision should be smaller than accuracy due to bias
             assert prec_mean < acc_mean, f"{species}: precision {prec_mean:.3f} not < accuracy {acc_mean:.3f}"
+
+
+class TestParseVersionKey:
+    """Tests for the free-text version sort key."""
+
+    def test_numeric_components_sort_as_integers(self):
+        # "1.10" must sort after "1.9" (not lexicographically before it)
+        assert parse_version_key("1.10") > parse_version_key("1.9")
+
+    def test_different_depth_versions(self):
+        assert parse_version_key("2.4.0") > parse_version_key("1.6.0.0")
+        assert parse_version_key("1.6.1") > parse_version_key("1.6.0.0")
+
+    def test_equal_versions_are_equal(self):
+        assert parse_version_key("1.6.0.0") == parse_version_key("1.6.0.0")
+
+    @pytest.mark.parametrize("empty", [None, "", "   ", np.nan])
+    def test_missing_values_yield_empty_key(self, empty):
+        assert parse_version_key(empty) == ()
+
+    def test_numeric_input(self):
+        # software_version can be an int/float, not only a string
+        assert parse_version_key(2) > parse_version_key(1)
+
+    def test_empty_sorts_below_any_real_version(self):
+        assert parse_version_key("") < parse_version_key("0.1")
+
+
+class TestKeepLatestVersionPerTool:
+    """Tests for filtering a datapoints table to the newest version of each tool."""
+
+    def _df(self, rows):
+        return pd.DataFrame(rows)
+
+    def test_keeps_highest_version_per_tool(self):
+        df = self._df(
+            [
+                {
+                    "software_name": "DIA-NN",
+                    "software_version": "1.9",
+                    "id": "DIA-NN_20240101_000000",
+                    "old_new": "old",
+                },
+                {
+                    "software_name": "DIA-NN",
+                    "software_version": "1.10",
+                    "id": "DIA-NN_20240102_000000",
+                    "old_new": "old",
+                },
+                {
+                    "software_name": "MaxQuant",
+                    "software_version": "2.4",
+                    "id": "MaxQuant_20240103_000000",
+                    "old_new": "old",
+                },
+            ]
+        )
+        result = keep_latest_version_per_tool(df)
+        assert len(result) == 2
+        assert set(result["software_name"]) == {"DIA-NN", "MaxQuant"}
+        diann_version = result.loc[result["software_name"] == "DIA-NN", "software_version"].iloc[0]
+        assert diann_version == "1.10"
+
+    def test_keeps_all_rows_of_same_latest_version(self):
+        # Several submissions sharing the same latest version are all retained
+        df = self._df(
+            [
+                {"software_name": "Sage", "software_version": "1.0", "id": "Sage_20240101_000000", "old_new": "old"},
+                {"software_name": "Sage", "software_version": "1.0", "id": "Sage_20240105_000000", "old_new": "old"},
+            ]
+        )
+        result = keep_latest_version_per_tool(df)
+        assert len(result) == 2
+        assert set(result["id"]) == {"Sage_20240101_000000", "Sage_20240105_000000"}
+
+    def test_keeps_only_latest_version_when_multiple_versions(self):
+        # Two rows at the latest version are kept; the older version is dropped
+        df = self._df(
+            [
+                {"software_name": "DIA-NN", "software_version": "1.10", "id": "DIA-NN_a", "old_new": "old"},
+                {"software_name": "DIA-NN", "software_version": "1.10", "id": "DIA-NN_b", "old_new": "old"},
+                {"software_name": "DIA-NN", "software_version": "1.9", "id": "DIA-NN_c", "old_new": "old"},
+            ]
+        )
+        result = keep_latest_version_per_tool(df)
+        assert len(result) == 2
+        assert set(result["id"]) == {"DIA-NN_a", "DIA-NN_b"}
+        assert set(result["software_version"]) == {"1.10"}
+
+    def test_protected_new_rows_always_kept(self):
+        df = self._df(
+            [
+                {
+                    "software_name": "DIA-NN",
+                    "software_version": "2.0",
+                    "id": "DIA-NN_20240101_000000",
+                    "old_new": "old",
+                },
+                {
+                    "software_name": "DIA-NN",
+                    "software_version": "1.0",
+                    "id": "DIA-NN_20240201_000000",
+                    "old_new": "new",
+                },
+            ]
+        )
+        result = keep_latest_version_per_tool(df)
+        # The latest public version AND the user's just-uploaded (older) version
+        assert len(result) == 2
+        assert "new" in set(result["old_new"])
+
+    def test_empty_dataframe_returned_unchanged(self):
+        df = self._df([])
+        result = keep_latest_version_per_tool(df)
+        assert len(result) == 0
+
+    def test_missing_columns_returned_unchanged(self):
+        df = self._df([{"software_name": "DIA-NN"}, {"software_name": "DIA-NN"}])  # no software_version
+        result = keep_latest_version_per_tool(df)
+        assert len(result) == 2
+
+    def test_preserves_unique_index_labels_for_plot_iteration(self):
+        df = self._df(
+            [
+                {
+                    "software_name": "DIA-NN",
+                    "software_version": "1.9",
+                    "id": "DIA-NN_20240101_000000",
+                    "old_new": "old",
+                },
+                {
+                    "software_name": "DIA-NN",
+                    "software_version": "2.0",
+                    "id": "DIA-NN_20240102_000000",
+                    "old_new": "old",
+                },
+            ]
+        )
+        result = keep_latest_version_per_tool(df)
+        # Index labels must stay unique so the plot's label-based row access works
+        assert result.index.is_unique

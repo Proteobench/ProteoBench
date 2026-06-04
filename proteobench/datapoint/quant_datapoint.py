@@ -7,6 +7,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import logging
+import re
 from collections import ChainMap, defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -82,6 +83,106 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
     if isinstance(row, dict) and min_quant in row and isinstance(row[min_quant], dict):
         return row[min_quant].get("nr_prec")
     return None
+
+
+def parse_version_key(version: Any) -> tuple:
+    """
+    Build a sortable key from a free-text software version string.
+
+    The version strings stored by ProteoBench are tool-specific free text with
+    no normalized format. The string is split into numeric and non-numeric
+    chunks and the numeric chunks are compared as integers, so that "1.10" sorts
+    after "1.9" and "2.4.0" after "1.6.0.0". This is a best-effort ordering and
+    not a full semantic-version implementation: pre-release tags such as "beta"
+    or "rc" are not ordered semantically.
+
+    Parameters
+    ----------
+    version : Any
+        The version value, typically a string. Numeric values, ``None`` and NaN
+        are accepted.
+
+    Returns
+    -------
+    tuple
+        A sort key where a larger tuple means a newer version.
+    """
+    if version is None:
+        return ()
+    text = str(version).strip()
+    if not text or text.lower() == "nan":
+        return ()
+    key = []
+    for chunk in re.findall(r"\d+|[^\d]+", text):
+        if chunk.isdigit():
+            key.append((1, int(chunk), ""))
+        else:
+            cleaned = chunk.strip(" ._-").lower()
+            if cleaned:
+                key.append((0, 0, cleaned))
+    return tuple(key)
+
+
+def keep_latest_version_per_tool(
+    datapoints: pd.DataFrame,
+    software_col: str = "software_name",
+    version_col: str = "software_version",
+    protect_col: str = "old_new",
+    protect_value: str = "new",
+) -> pd.DataFrame:
+    """
+    Filter a datapoints DataFrame to the newest version of each software tool.
+
+    For each value of ``software_col`` the highest ``version_col`` is determined
+    (see :func:`parse_version_key` for how versions are compared) and every row
+    matching that version is kept, so a tool may keep several rows that share the
+    same latest version (for example multiple parameter settings). Rows whose
+    ``protect_col`` equals ``protect_value`` (for example a just-uploaded,
+    not-yet-public datapoint) are always kept regardless of their version, so a
+    user's own submission is never hidden.
+
+    Parameters
+    ----------
+    datapoints : pd.DataFrame
+        Datapoints table with one row per submission.
+    software_col : str, optional
+        Column identifying the tool. Defaults to "software_name".
+    version_col : str, optional
+        Column holding the free-text version string. Defaults to "software_version".
+    protect_col : str, optional
+        Column marking rows that must never be dropped. Defaults to "old_new".
+    protect_value : str, optional
+        Value in ``protect_col`` that marks protected rows. Defaults to "new".
+
+    Returns
+    -------
+    pd.DataFrame
+        The filtered table, preserving the original row order. The input is
+        returned unchanged when it is empty or the required columns are absent.
+    """
+    if datapoints is None or len(datapoints) == 0:
+        return datapoints
+    if software_col not in datapoints.columns or version_col not in datapoints.columns:
+        return datapoints
+
+    has_protect = protect_col in datapoints.columns
+
+    tools = list(datapoints[software_col])
+    keys = [parse_version_key(v) for v in datapoints[version_col]]
+    protected = [bool(p == protect_value) for p in datapoints[protect_col]] if has_protect else [False] * len(tools)
+
+    # Highest version per tool, considering only non-protected rows.
+    max_key_by_tool: Dict[Any, tuple] = {}
+    for tool, key, is_protected in zip(tools, keys, protected):
+        if is_protected:
+            continue
+        current = max_key_by_tool.get(tool)
+        if current is None or key > current:
+            max_key_by_tool[tool] = key
+
+    # Keep every row at its tool's latest version, plus all protected rows.
+    keep = [is_protected or key == max_key_by_tool.get(tool) for tool, key, is_protected in zip(tools, keys, protected)]
+    return datapoints[np.array(keep, dtype=bool)]
 
 
 def compute_roc_auc(df: pd.DataFrame, unchanged_species: str = None) -> float:

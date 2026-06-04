@@ -18,11 +18,6 @@ import pandas as pd
 import streamlit as st
 from pandas import DataFrame
 
-from proteobench.datapoint.quant_datapoint import (
-    QuantDatapointHYE,
-    filter_df_numquant_epsilon,
-    filter_df_numquant_nr_prec,
-)
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.alphadia import extract_params as extract_params_alphadia
@@ -203,65 +198,6 @@ class EntrapmentModule:
             all_datapoints = self.github_repo.read_results_json_repo()
 
         all_datapoints["old_new"] = "old"
-
-        return all_datapoints
-
-    @staticmethod
-    def filter_data_point(all_datapoints: pd.DataFrame, default_val_slider: int = 3) -> pd.DataFrame:
-        """
-        Filter the data points based on predefined criteria.
-
-        Parameters
-        ----------
-        all_datapoints : pd.DataFrame
-            All data points.
-        default_val_slider : int, optional
-            The minimum number of observations for filtering. Defaults to 3.
-
-        Returns
-        -------
-        pd.DataFrame
-            A DataFrame containing the filtered data points.
-        """
-        if len(all_datapoints) == 0:
-            return all_datapoints
-
-        # Add new metric columns with mode suffixes
-        all_datapoints["median_abs_epsilon_global"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
-            for v in all_datapoints["results"]
-        ]
-
-        all_datapoints["mean_abs_epsilon_global"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="global")
-            for v in all_datapoints["results"]
-        ]
-
-        all_datapoints["median_abs_epsilon_eq_species"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="eq_species")
-            for v in all_datapoints["results"]
-        ]
-
-        all_datapoints["mean_abs_epsilon_eq_species"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="eq_species")
-            for v in all_datapoints["results"]
-        ]
-
-        # Also maintain legacy column names for backwards compatibility with old datapoints
-        # These will be used as fallback when new metrics don't exist
-        all_datapoints["median_abs_epsilon"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, mode="global")
-            for v in all_datapoints["results"]
-        ]
-
-        all_datapoints["mean_abs_epsilon"] = [
-            filter_df_numquant_epsilon(v, min_quant=default_val_slider, metric="mean", mode="global")
-            for v in all_datapoints["results"]
-        ]
-
-        all_datapoints["nr_prec"] = [
-            filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
-        ]
 
         return all_datapoints
 

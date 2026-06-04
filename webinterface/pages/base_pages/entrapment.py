@@ -255,26 +255,12 @@ class EntrapmentUIObjects(BaseUIModule):
     @st.fragment
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
-        tab1_view_public_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
         tab1_view_public_results.initialize_main_selectbox(
             selectbox_id_uuid=self.variables.selectbox_id_uuid,
             default_value="None",
         )
 
         # Define callbacks for plot options
-        def render_slider():
-            # Get max_nr_observed for slider range if available
-            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
-            tab1_view_public_results.generate_main_slider(
-                slider_id_uuid=self.variables.slider_id_uuid,
-                description_slider_md=self.variables.description_slider_md,
-                default_val_slider=self.variables.default_val_slider,
-                max_nr_observed=max_nr_obs,
-            )
-
         def render_selectbox():
             tab1_view_public_results.generate_main_selectbox(
                 self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid
@@ -288,45 +274,28 @@ class EntrapmentUIObjects(BaseUIModule):
             metric_container["metric"] = metric
             return metric
 
-        def render_mode_selector():
-            # ROC-AUC has no mode variants (it's already species-aware by design)
-            if metric_container["metric"] == "ROC-AUC":
-                return None
-            else:
-                return tab1_view_public_results.display_metric_calc_approach_selector(self.variables)
-
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables)
 
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
-            filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_metric_selector, render_colorblind_selector],
             filter_cols_spec=2,
             selector_cols_spec=[1, 1, 1, 1],
         )
 
         # Extract returned values
-        metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Species-weighted"
-        colorblind_mode = results[4] if len(results) > 4 else False
-
-        # Get the min_nr_observed value from the slider if available
-        min_nr_observed = None
-        if self.variables.slider_id_uuid in st.session_state:
-            slider_key = st.session_state[self.variables.slider_id_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
+        metric = results[1] if len(results) > 2 else "Upper FDP bound - Paired method"
+        colorblind_mode = results[2] if len(results) > 4 else False
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
             plot_params={
                 "metric": metric,
-                "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
-                "min_nr_observed": min_nr_observed,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
@@ -338,26 +307,12 @@ class EntrapmentUIObjects(BaseUIModule):
         st.title("Results (All Data)")
 
         # Initialize plot options controls (same as tab 1)
-        tab1_view_public_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_submitted_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
         tab1_view_public_results.initialize_main_selectbox(
             selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
             default_value="None",
         )
 
         # Define callbacks for plot options
-        def render_slider():
-            # Get max_nr_observed for slider range if available
-            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
-            tab1_view_public_results.generate_main_slider(
-                slider_id_uuid=self.variables.slider_id_submitted_uuid,
-                description_slider_md=self.variables.description_slider_md,
-                default_val_slider=self.variables.default_val_slider,
-                max_nr_observed=max_nr_obs,
-            )
-
         def render_selectbox():
             tab1_view_public_results.generate_main_selectbox(
                 self.variables,
@@ -377,8 +332,8 @@ class EntrapmentUIObjects(BaseUIModule):
                 getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
             )
             metric = st.radio(
-                "Select metric",
-                ["Median", "Mean"],
+                "Select metric to show in x axis",
+                ["Lower FDP bound", "Upper FDP bound - Combined method", "Upper FDP bound - Paired method"],
                 help=help_text,
                 horizontal=True,
                 key=metric_uuid,
@@ -386,62 +341,31 @@ class EntrapmentUIObjects(BaseUIModule):
             metric_container["metric"] = metric
             return metric
 
-        def render_mode_selector():
-            # ROC-AUC has no mode variants (it's already species-aware by design)
-            if metric_container["metric"] == "ROC-AUC":
-                return None
-
-            key = self.variables.metric_calc_approach_selector_submitted_uuid
-            if key not in st.session_state:
-                st.session_state[key] = uuid.uuid4()
-            mode_uuid = st.session_state[key]
-
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
-            )
-            return st.radio(
-                "Select metric calculation approach",
-                ["Species-weighted", "Global"],
-                help=help_text,
-                horizontal=True,
-                key=mode_uuid,
-            )
-
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables, use_submitted=True)
 
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
-            filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_metric_selector, render_colorblind_selector],
             filter_cols_spec=2,
             selector_cols_spec=[1, 1, 1, 1],
         )
 
         # Extract returned values
-        metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Species-weighted"
-        colorblind_mode = results[4] if len(results) > 4 else False
+        metric = results[1] if len(results) > 2 else "Upper FDP bound - Paired method"
+        colorblind_mode = results[2] if len(results) > 4 else False
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
-
-        # Get the min_nr_observed value from the slider if available
-        min_nr_observed = None
-        if self.variables.slider_id_submitted_uuid in st.session_state:
-            slider_key = st.session_state[self.variables.slider_id_submitted_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
 
         tab4_view_public_and_new_results.display_submitted_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
             plot_params={
                 "metric": metric,
-                "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": label,
-                "min_nr_observed": min_nr_observed,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },

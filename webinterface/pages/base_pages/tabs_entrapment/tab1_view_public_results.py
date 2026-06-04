@@ -52,47 +52,6 @@ def initialize_main_data_points(variables, ionmodule: Callable) -> None:
 
 
 # UI Control Functions
-
-
-def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None:
-    """Initialize the slider state with UUID and default value."""
-    initialize_uuid_state(slider_id_uuid, default_val_slider)
-
-
-def generate_main_slider(slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6) -> None:
-    """
-    Create a slider input.
-    
-    Parameters
-    ----------
-    slider_id_uuid : str
-        UUID for the slider state key
-    description_slider_md : str
-        Path to markdown file with slider description
-    default_val_slider : float
-        Default value for the slider
-    max_nr_observed : int, optional
-        Maximum value for the slider range (default 6)
-    """
-    # key for slider_uuid in session state
-    if slider_id_uuid not in st.session_state:
-        st.session_state[slider_id_uuid] = uuid.uuid4()
-    slider_key = st.session_state[slider_id_uuid]
-
-    default_value = st.session_state.get(slider_key, default_val_slider)
-    
-    # Generate slider options based on max_nr_observed
-    slider_options = list(range(1, max_nr_observed + 1))
-    
-    st.select_slider(
-        label="Minimal precursor quantifications (# samples)",
-        options=slider_options,
-        value=default_value,
-        key=slider_key,
-        help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
-    )
-
-
 def initialize_radio(radio_id_uuid: str, default_value: str) -> None:
     """Initialize radio button state with UUID and default value."""
     initialize_uuid_state(radio_id_uuid, default_value)
@@ -128,8 +87,8 @@ def display_metric_selector(variables) -> str:
     """Display metric selector and return selected metric."""
     help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
     metric = st.radio(
-        "Select metric",
-        ["Median", "Mean"],
+        "Select metric to show in x axis",
+        ["Lower FDP bound", "Upper FDP bound - Combined method", "Upper FDP bound - Paired method"],
         help=help_text,
         horizontal=True,
     )
@@ -150,20 +109,22 @@ def display_metric_calc_approach_selector(variables) -> str:
 
 def display_colorblindmode_selector(variables, use_submitted: bool = False) -> str:
     """Display colorblind mode selector toggle.
-    
+
     Parameters
     ----------
     variables : VariablesClass
         Variables object containing selector UUIDs
     use_submitted : bool, optional
         If True, use the submitted selector UUID, by default False
-    
+
     Returns
     -------
     bool
         Current state of the colorblind mode toggle
     """
-    key = variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    key = (
+        variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
+    )
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
@@ -236,10 +197,7 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
 
     try:
         fig = plot_generator.plot_main_metric(
-            result_df=data, 
-            hide_annot=plot_params.get("hide_annot", False),
-            annotation=annotation,
-            **plot_params
+            result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
         )
         st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
     except Exception as e:
@@ -368,7 +326,9 @@ def display_download_section(variables, sort_by: str = "id") -> None:
                 icon="⚠️",
             )
     elif selected_hash is not None:
-        st.info("Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️")
+        st.info(
+            "Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️"
+        )
 
 
 def display_existing_results(

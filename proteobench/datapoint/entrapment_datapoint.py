@@ -48,6 +48,7 @@ class EntrapmentDatapoint(DatapointBase):
         intermediate_hash (str): Hash of the intermediate result.
         results (dict): A dictionary of metrics for the benchmark run.
         nr_id_features (int): Number of identified features.
+        lower_bound_FDP (float): estimated false discovery proportion based on entrapment IDs.
         combined_FDP (float): estimated False discovery proportion based on entrapment IDs.
         paired_FDP (float): estimated False discovery proportion based on entrapment IDs.
         comments (str): Any additional comments.
@@ -73,7 +74,10 @@ class EntrapmentDatapoint(DatapointBase):
     intermediate_hash: str = ""
     results: dict = None
     nr_id_features: int = 0
+    lower_bound_FDP: float = np.nan
     combined_FDP: float = np.nan
+    category_combined: str = ""
+    category_paired: str = ""
     paired_FDP: float = np.nan
     comments: str = ""
     proteobench_version: str = ""
@@ -151,9 +155,16 @@ class EntrapmentDatapoint(DatapointBase):
         )
 
         result_datapoint.generate_id()
-        results = EntrapmentDatapoint.get_metrics(intermediate)
+        metrics = EntrapmentDatapoint.get_metrics(intermediate)
 
-        result_datapoint.results = results
+        result_datapoint.nr_id_features = metrics["nr_id_features"]
+        result_datapoint.lower_bound_FDP = metrics["lower_bound_FDP"]
+        result_datapoint.combined_FDP = metrics["combined_FDP"]
+        result_datapoint.paired_FDP = metrics["paired_FDP"]
+        result_datapoint.category_combined = metrics["category_combined"]
+        result_datapoint.category_paired = metrics["category_paired"]
+
+        result_datapoint.results = metrics
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
 
         return results_series
@@ -161,10 +172,5 @@ class EntrapmentDatapoint(DatapointBase):
     @staticmethod
     def get_metrics(intermediate: pd.DataFrame) -> Dict[str, Any]:
 
-        metrics = {
-            "combined_FDP": EntrapmentScores.calculate_combined_fdp(intermediate),
-            "paired_FDP": EntrapmentScores.calculate_paired_fdp(intermediate),
-            "nr_id_features": len(intermediate),
-        }
-
+        metrics = EntrapmentScores.calculate_metrics(intermediate)
         return metrics

@@ -34,28 +34,6 @@ def initialize_uuid_state(key: str, default_value: Any = None) -> None:
         if uuid_key not in st.session_state:
             st.session_state[uuid_key] = default_value
 
-
-def initialize_submitted_slider(slider_id_uuid: str, default_val_slider: int) -> None:
-    """Initialize the submitted slider state with UUID and default value."""
-    initialize_uuid_state(slider_id_uuid, default_val_slider)
-
-
-def generate_submitted_slider(variables) -> None:
-    """Generate the slider for filtering submitted data."""
-    if not hasattr(variables, "slider_id_submitted_uuid"):
-        return  # Module doesn't use sliders
-
-    slider_uuid = st.session_state[variables.slider_id_submitted_uuid]
-    help_text = getattr(variables.texts.Help, "slider", None) if hasattr(variables, "texts") else None
-    st.slider(
-        "Minimum number of precursors per protein group",
-        1,
-        10,
-        key=slider_uuid,
-        help=help_text,
-    )
-
-
 def generate_submitted_selectbox(variables) -> None:
     """Generate the selectbox for submitted data label selection."""
     # Initialize if not already done

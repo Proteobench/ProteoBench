@@ -105,17 +105,34 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         )
         return fig
 
-    @staticmethod
-    def _resolve_metric_column(metric: str) -> Tuple[str, str]:
-        metric_normalized = (metric or "Combined").strip().lower()
-        if metric_normalized.startswith("pair"):
-            return "paired_FDP", "Paired false discovery proportion"
-        return "combined_FDP", "Combined false discovery proportion"
+    def _resolve_metric_column(self, metric: str) -> Tuple[str, str]:
+        """
+        Resolve the metric column name and plot title based on the selected metric.
+
+        Parameters
+        ----------
+        metric : str
+            The selected metric to plot.
+
+        Returns
+        -------
+        Tuple[str, str]
+            A tuple containing the resolved metric column name and the corresponding plot title.
+        """
+        if metric == "Lower FDP bound":
+            return "lower_bound_FDP", "Lower FDP bound"
+        elif metric == "Upper FDP bound - Combined method":
+            return "combined_FDP", "Upper FDP bound - Combined method"
+        elif metric == "Upper FDP bound - Paired method":
+            return "paired_FDP", "Upper FDP bound - Paired method"
+        else:
+            raise ValueError(f"Unsupported metric '{metric}' selected for plotting.")
 
     def plot_main_metric(
         self,
         result_df: pd.DataFrame,
-        metric: str = "Combined",
+        hide_annot: bool = False,
+        metric: str = "Upper FDP bound - Paired method",
         colorblind_mode: bool = False,
         software_colors: Dict[str, str] = {
             "MaxQuant": "#88ccef",
@@ -172,7 +189,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         result_df : pd.DataFrame
             DataFrame containing the results to plot.
         metric : str, optional
-            Metric to plot, either "Combined" or "Paired".
+            Bound to plot on the x axis, one of "Lower FDP bound", "Upper FDP bound - Combined method", or "Upper FDP bound - Paired method".
         colorblind_mode : Bool, optional
             If True, use different shapes for workflows.
         software_colors : Dict[str, str]
@@ -293,6 +310,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             clickmode="event+select",
         )
 
+        fig.update_xaxes(range=[0, 0.5])
+
         if annotation:
             fig.add_annotation(
                 x=0.5,
@@ -303,5 +322,15 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 font=dict(size=50, color="rgba(0,0,0,0.1)"),
                 showarrow=False,
             )
+
+        # add orientation line at 1% FDR
+        fig.add_shape(
+            type="line",
+            x0=0.01,
+            y0=0,
+            x1=0.01,
+            y1=plot_df["nr_id_features"].max() * 1.1,
+            line=dict(color="red", width=2, dash="dash"),
+        )
 
         return fig

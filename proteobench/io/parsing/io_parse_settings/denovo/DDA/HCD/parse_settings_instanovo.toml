@@ -1,0 +1,10 @@
+[mapper]
+"spectrum_id" = "spectrum_id"
+"predictions" = "sequence"
+"log_probs" = "score"
+"token_log_probs" = "aa_scores"
+
+[spectrum_id_mapper]
+"pattern" = ":(\\d+)$"
+
+[sequence_mapper]

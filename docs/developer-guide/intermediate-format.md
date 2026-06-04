@@ -75,7 +75,7 @@ precursors do not appear.
 | `log_Intensity_std_A`, `log_Intensity_std_B` | float | Standard deviation of log2 intensities per condition. |
 | `CV_A`, `CV_B` | float | Coefficient of variation per condition, `Intensity_std / Intensity_mean`. |
 | `log2_A_vs_B` | float | `log_Intensity_mean_A - log_Intensity_mean_B`. The observed log2 fold change. |
-| per-run intensity columns | float | One column per distinct run name (cleaned `Raw file`), holding that run's intensity for the precursor. The set of columns therefore depends on the experimental design. |
+| per-run intensity columns | float | One column per distinct run name (cleaned `Raw file`), holding that run's intensity for the quantified feature. The set of columns therefore depends on the experimental design. |
 | `nr_observed` | int | Number of runs in which the precursor was quantified. |
 | species flags | bool | One boolean per species (HYE: `YEAST`, `ECOLI`, `HUMAN`). For a retained row exactly one is `True`. |
 | `unique` | int | Sum of the species flags. Always `1` in the persisted table. |

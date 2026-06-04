@@ -1,3 +1,4 @@
+
 [mapper]
 "feature_id" = "spectrum_id"
 "predicted_sequence" = "sequence"
@@ -16,3 +17,9 @@
 "S(Phosphorylation)" = "S[UNIMOD:21]"
 "T(Phosphorylation)" = "T[UNIMOD:21]"
 "Y(Phosphorylation)" = "Y[UNIMOD:21]"
+
+[upload_info]
+"datapoint_file" = "*.csv"
+"datapoint_file_description" = "Upload the PointNovo de novo sequencing output *.csv.* file."
+"params_file" = ""
+"params_file_description" = ""

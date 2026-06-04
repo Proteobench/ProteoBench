@@ -40,7 +40,7 @@ Table 2 provides an overview of the required input files for public submission. 
 **Table 2. Overview of input files required for metric calculation and public submission**
 | Tool | Input file | Parameter File |
 |---|---|---|
-| AlphaDIA | precursors.parquet or precursor.matrix.tsv + precursors.tsv | log_alphadia.txt |
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
 | Custom | custom_input.tsv |  |
 | DIA-NN | report.tsv or report.parquet | report.log.txt |
 | FragPipe | combined_ion.tsv | fragpipe.workflow |

@@ -212,7 +212,7 @@ Once submitted, a GitHub pull request will be automatically generated for tracki
 
 | Tool | Quantification input | Metadata / parameter file |
 |---|---|---|
-| AlphaDIA | precursors.parquet or precursor.matrix.tsv + precursors.tsv | log_alphadia.txt |
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
 | Custom | custom_input.tsv |  |
 | DIA-NN | report.tsv or report.parquet | report.log.txt |
 | FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |

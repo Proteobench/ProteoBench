@@ -18,6 +18,48 @@ from typing import Union
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.maxquant import _homogenize_mods
+
+
+def _homogenize_mod_xtandem(mod_str: str) -> str:
+    """Convert MSAngel X!Tandem modification format to ProForma-like notation.
+
+    Format: ``{modname} of {residue}``, e.g. ``Oxidation of M``,
+    ``Acetylation of protein N-term``.
+    """
+    mod_str = mod_str.strip()
+    if " of " not in mod_str:
+        return mod_str
+    name, residue_part = mod_str.split(" of ", 1)
+    residue_part = residue_part.strip()
+    lower = residue_part.lower()
+    if "protein n-term" in lower:
+        return f"Protein N-term[{name}]"
+    elif "n-term" in lower:
+        return f"N-term[{name}]"
+    elif "protein c-term" in lower:
+        return f"Protein C-term[{name}]"
+    elif "c-term" in lower:
+        return f"C-term[{name}]"
+    else:
+        return f"{residue_part.upper()}[{name}]"
+
+# Mapping from Mascot enzyme name strings to canonical ProteoBench names.
+# Keys are lowercase to allow case-insensitive lookup.
+_ENZYME_MAP = {
+    "trypsin": "Trypsin",
+    "trypsin (kr/np)": "Trypsin",
+    "trypsin/p": "Trypsin/P",
+    "lysc": "Lys-C",
+    "lys-c": "Lys-C",
+    "argc": "Arg-C",
+    "arg-c": "Arg-C",
+    "aspn": "Asp-N",
+    "asp-n": "Asp-N",
+    "gluc": "Glu-C",
+    "glu-c": "Glu-C",
+    "chymotrypsin": "Chymotrypsin",
+}
 
 
 def extract_search_engine(search_params: list) -> dict:
@@ -62,10 +104,15 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
     for each_search_params in search_params["operations"]:
         if "searchEnginesWithForms" in each_search_params:
             # params.search_engine_version =
-            input_params.enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["CLE"]
+            raw_enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["CLE"]
+            input_params.enzyme = _ENZYME_MAP.get(raw_enzyme.strip().lower(), raw_enzyme)
             # params.allowed_miscleavages =
-            input_params.fixed_mods = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["MODS"]
-            input_params.variable_mods = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["IT_MODS"]
+            input_params.fixed_mods = _homogenize_mods(
+                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["MODS"]
+            )
+            input_params.variable_mods = _homogenize_mods(
+                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["IT_MODS"]
+            )
             input_params.allowed_miscleavages = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["PFA"]
             second_pass = input_params.allowed_miscleavages = each_search_params["searchEnginesWithForms"][0][1][
                 "paramMap"
@@ -109,25 +156,28 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
     for each_search_params in search_params["operations"]:
         if "searchEnginesWithForms" in each_search_params:
             # params.search_engine_version =
-            input_params.enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["digestionParameters"][
+            raw_enzyme = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["digestionParameters"][
                 "enzymes"
             ][0]["name"]
+            input_params.enzyme = _ENZYME_MAP.get(raw_enzyme.strip().lower(), raw_enzyme)
             # params.allowed_miscleavages =
             input_params.fixed_mods = ", ".join(
-                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["modificationParameters"][
+                _homogenize_mod_xtandem(m)
+                for m in each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["modificationParameters"][
                     "fixedModifications"
                 ]
             )
             input_params.variable_mods = ", ".join(
-                each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["modificationParameters"][
+                _homogenize_mod_xtandem(m)
+                for m in each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["modificationParameters"][
                     "variableModifications"
                 ]
             )
-            ## get value of each_search_params['searchEnginesWithForms'][0][1]["paramMap"]["digestionParameters"]["nMissedCleavages"] where key == input_params.enzyme
+            # Use the raw enzyme name for the missed cleavages lookup (dict keys are vendor names).
             n_missed_cleavages_dict = each_search_params["searchEnginesWithForms"][0][1]["paramMap"][
                 "digestionParameters"
             ]["nMissedCleavages"]
-            input_params.allowed_miscleavages = n_missed_cleavages_dict.get(input_params.enzyme, None)
+            input_params.allowed_miscleavages = n_missed_cleavages_dict.get(raw_enzyme, None)
             # get tolerance for precursors:
             tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorTolerance"]
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorAccuracyType"]
@@ -147,9 +197,9 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
             ].items():
                 if value["type"] == "com.compomics.util.parameters.identification.tool_specific.XtandemParameters":
                     if value["data"]["proteinQuickAcetyl"] == True:
-                        input_params.variable_mods = input_params.variable_mods + ";Acetyl(N-term)"
+                        input_params.variable_mods = input_params.variable_mods + ", N-term[Acetyl]"
                     if value["data"]["quickPyrolidone"] == True:
-                        input_params.variable_mods = input_params.variable_mods + ";Pyrolidone(N-term)"
+                        input_params.variable_mods = input_params.variable_mods + ", N-term[Pyrolidone]"
 
         if "validationConfig" in each_search_params:
             input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100
@@ -224,5 +274,6 @@ if __name__ == "__main__":
         data_dict = params.__dict__
         series = pd.Series(data_dict)
 
+        print(series)
         # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".csv"))

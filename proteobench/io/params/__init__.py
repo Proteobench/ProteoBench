@@ -2,7 +2,32 @@
 This module provides the `ProteoBenchParameters` dataclass for handling parameters
 related to ProteoBench. The parsing is done per data analysis software.
 
+Normalized parameters (coerced by ``normalize()``):
+
+- ``ident_fdr_psm``, ``ident_fdr_peptide``, ``ident_fdr_protein`` — float in [0, 1]
+- ``allowed_miscleavages``, ``min/max_peptide_length``,
+  ``min/max_precursor_charge``, ``max_mods`` — int (shared quant/denovo)
+- ``min/max_precursor_mz``, ``min/max_fragment_mz`` — int (quant, m/z ranges)
+- ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz`` — int (de novo specific)
+- ``enable_match_between_runs`` — bool
+- ``enzyme`` — canonical capitalized name (e.g. "Trypsin", "Trypsin/P", "Lys-C")
+
+NOT normalized (kept as-is from parsers):
+
+- ``precursor_mass_tolerance``, ``fragment_mass_tolerance``,
+  ``remove_precursor_tol`` — string, format varies by tool
+- ``fixed_mods``, ``variable_mods`` — string, tool-specific format
+- ``quantification_method``, ``protein_inference``,
+  ``abundance_normalization_ions`` — string
+- ``software_name``, ``software_version``, ``search_engine``,
+  ``search_engine_version`` — string
+- ``min_intensity``, ``max_intensity`` — float/int, kept as-is (can be fractional)
+- ``tokens`` — string, semicolon-separated amino acids/modifications
+- ``isotope_error_range`` — string representation of list (e.g. "[0, 2]")
+- ``decoding_strategy``, ``checkpoint`` — string, tool-specific
+
 Classes
+-------
 ProteoBenchParameters
     A dataclass for handling ProteoBench parameters.
 """
@@ -15,6 +40,65 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 import numpy as np
+import pandas as pd
+
+# Strings that should be treated as missing / unset values.
+_MISSING_SENTINELS = frozenset({"none", "n/a", "not specified", "unknown", "placeholder", "na", "nan", "", "-"})
+
+# Canonical enzyme name mapping (lowercase key → display name). Add keys here in lowercase.
+_ENZYME_MAP = {
+    "trypsin": "Trypsin",
+    "trypsin/p": "Trypsin/P",
+    "stricttrypsin": "Trypsin/P",
+    "k*,r*,!p*": "Trypsin",
+    "[rk]|{p}": "Trypsin",
+    "[rk]": "Trypsin/P",
+    "kr": "Trypsin/P",
+    "kr|p,true": "Trypsin",
+    "kr|p,t": "Trypsin",
+    "kr,true": "Trypsin/P",
+    "kr,t": "Trypsin/P",
+    "lys-c": "Lys-C",
+    "lysc": "Lys-C",
+    "arg-c": "Arg-C",
+    "argc": "Arg-C",
+    "asp-n": "Asp-N",
+    "aspn": "Asp-N",
+    "chymotrypsin": "Chymotrypsin",
+    "gluc": "Glu-C",
+    "glu-c": "Glu-C",
+}
+
+# Tolerance values (lowercase) that indicate automatic calibration.
+_AUTO_CALIBRATION_SENTINELS = frozenset({"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]"})
+_AUTO_CALIBRATION_LABEL = "Automatic calibration"
+
+# Tolerance fields to which the auto-calibration mapping applies.
+_TOLERANCE_FIELDS = ("precursor_mass_tolerance", "fragment_mass_tolerance")
+
+# Fields that must be coerced to float (FDR values, decimal 0-1).
+_FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")
+
+# Fields that must be coerced to int.
+_INT_FIELDS = (
+    # Shared quant / de novo
+    "allowed_miscleavages",
+    "min_peptide_length",
+    "max_peptide_length",
+    "min_precursor_charge",
+    "max_precursor_charge",
+    "max_mods",
+    # Quant specific (m/z ranges)
+    "min_precursor_mz",
+    "max_precursor_mz",
+    "min_fragment_mz",
+    "max_fragment_mz",
+    # De novo specific
+    "n_beams",
+    "n_peaks",
+    "min_mz",
+    "max_mz",
+)
 
 
 @dataclass
@@ -58,7 +142,6 @@ class ProteoBenchParameters:
                 setattr(self, key, None)
 
         for key, value in kwargs.items():
-            print(key, value)
             if hasattr(self, key) and value == "None":
                 setattr(self, key, np.nan)
             elif hasattr(self, key):
@@ -77,11 +160,163 @@ class ProteoBenchParameters:
 
     def fill_none(self):
         """
-        Fill all None values with np.nan.
+        Fill all None values with np.nan and normalize parameter types.
         """
         for key, value in self.__dict__.items():
             if value == "None":
                 setattr(self, key, np.nan)
+        self.normalize()
+
+    def _is_missing(self, val) -> bool:
+        """Return True if *val* represents a missing / unset value."""
+        if val is None:
+            return True
+        if isinstance(val, float) and np.isnan(val):
+            return True
+        if isinstance(val, str) and val.strip().lower() in _MISSING_SENTINELS:
+            return True
+        return False
+
+    def normalize(self):
+        """
+        Coerce parsed parameter values to their canonical types.
+
+        This method is called automatically at the end of ``fill_none()`` so
+        that every parser benefits without per-parser changes.
+
+        Normalization rules
+        -------------------
+        1. Any attribute whose value is a missing sentinel string (e.g.
+           ``"not specified"``, ``"N/A"``, ``"None"``, ``""``) is set to
+           ``np.nan``.
+        2. FDR fields are coerced to ``float`` in the range [0, 1]. Values
+           ``> 1`` are assumed to be percentages and divided by 100.
+        3. Integer fields (miscleavages, peptide length, charge, max_mods)
+           are coerced to ``int``.
+        4. ``enable_match_between_runs`` is coerced to ``bool``.
+        5. ``enzyme`` is mapped to a canonical name via ``_ENZYME_MAP``.
+        """
+        # A. Sanitize missing values across ALL attributes
+        for key, val in list(self.__dict__.items()):
+            if self._is_missing(val):
+                setattr(self, key, np.nan)
+
+        # B. Float coercion (FDR fields)
+        for fld in _FLOAT_FIELDS:
+            val = getattr(self, fld, None)
+            if val is None or (isinstance(val, float) and np.isnan(val)):
+                continue
+            try:
+                val = float(val)
+                if val >= 1:  # percentage → decimal (FDR is always < 1)
+                    val /= 100
+                setattr(self, fld, val)
+            except (ValueError, TypeError):
+                setattr(self, fld, np.nan)
+
+        # C. Integer coercion
+        for fld in _INT_FIELDS:
+            val = getattr(self, fld, None)
+            if val is None or (isinstance(val, float) and np.isnan(val)):
+                continue
+            try:
+                setattr(self, fld, int(float(val)))
+            except (ValueError, TypeError):
+                setattr(self, fld, np.nan)
+
+        # D. Boolean coercion
+        val = getattr(self, "enable_match_between_runs", None)
+        if val is not None and not (isinstance(val, float) and np.isnan(val)):
+            if isinstance(val, bool):
+                pass  # already correct
+            elif isinstance(val, str):
+                setattr(
+                    self,
+                    "enable_match_between_runs",
+                    val.strip().lower() in ("true", "1", "yes"),
+                )
+            else:
+                try:
+                    setattr(self, "enable_match_between_runs", bool(val))
+                except (ValueError, TypeError):
+                    setattr(self, "enable_match_between_runs", np.nan)
+
+        # --- E. Enzyme name normalization -----------------------------------
+        val = getattr(self, "enzyme", None)
+        if val is not None and not (isinstance(val, float) and np.isnan(val)):
+            if isinstance(val, str):
+                canonical = _ENZYME_MAP.get(val.strip().lower())
+                if canonical is not None:
+                    setattr(self, "enzyme", canonical)
+                # If not in map, keep original value as-is
+
+        # --- F. Tolerance auto-calibration mapping ----------------------------
+        for fld in _TOLERANCE_FIELDS:
+            val = getattr(self, fld, None)
+            if val is not None and not (isinstance(val, float) and np.isnan(val)):
+                check = val.strip().lower() if isinstance(val, str) else val
+                if check in _AUTO_CALIBRATION_SENTINELS:
+                    setattr(self, fld, _AUTO_CALIBRATION_LABEL)
+
+
+# Note: this should be able to be removed when we have resubmitted all points again.
+def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Apply the same coercion rules as :meth:`ProteoBenchParameters.normalize`
+    to an entire DataFrame of historical results.
+
+    Operates **in-place** on *df* and also returns it for convenience.
+    """
+    # A. Sanitize missing sentinel strings across all object/string columns
+    for col in df.columns:
+        if df[col].dtype == object or pd.api.types.is_string_dtype(df[col]):
+            mask = df[col].apply(lambda v: isinstance(v, str) and v.strip().lower() in _MISSING_SENTINELS)
+            df.loc[mask, col] = np.nan
+
+    # B. Float coercion (FDR fields — decimal in [0, 1])
+    for col in _FLOAT_FIELDS:
+        if col not in df.columns:
+            continue
+        df[col] = pd.to_numeric(df[col], errors="coerce").astype(float)
+        # Values >= 1 are assumed to be percentages
+        pct_mask = df[col] >= 1
+        df.loc[pct_mask, col] = df.loc[pct_mask, col] / 100
+
+    # C. Integer coercion (nullable Int64 so NaN is preserved)
+    for col in _INT_FIELDS:
+        if col not in df.columns:
+            continue
+        df[col] = pd.to_numeric(df[col], errors="coerce").round().astype("Int64")
+
+    # D. Boolean coercion
+    if "enable_match_between_runs" in df.columns:
+        col = "enable_match_between_runs"
+        df[col] = df[col].apply(
+            lambda v: (
+                v
+                if isinstance(v, (bool, np.bool_))
+                else (str(v).strip().lower() in ("true", "1", "yes") if pd.notna(v) else np.nan)
+            )
+        )
+
+    # E. Enzyme name normalization
+    if "enzyme" in df.columns:
+        df["enzyme"] = df["enzyme"].apply(
+            lambda v: (_ENZYME_MAP.get(v.strip().lower(), v) if isinstance(v, str) and pd.notna(v) else v)
+        )
+
+    # F. Tolerance auto-calibration mapping
+    for col in _TOLERANCE_FIELDS:
+        if col not in df.columns:
+            continue
+        df[col] = df[col].apply(
+            lambda v: (
+                _AUTO_CALIBRATION_LABEL
+                if (v.strip().lower() if isinstance(v, str) else v) in _AUTO_CALIBRATION_SENTINELS and pd.notna(v)
+                else v
+            )
+        )
+
+    return df
 
 
 # Automatically initialize from fields.json if run directly

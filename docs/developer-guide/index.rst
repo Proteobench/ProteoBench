@@ -20,6 +20,7 @@ Developer guide
 
     repo_layout
     adding-module
+    parameter-homogenization
     
     modules/index
 

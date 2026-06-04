@@ -216,9 +216,12 @@ def display_submitted_results(
     # Filter data using slider if applicable
     filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
 
+<<<<<<< Show_latest_version_only
     # Optionally keep only the newest version of each tool (just-uploaded rows are always kept)
     if plot_params.get("latest_version_only", False):
         filtered_data = keep_latest_version_per_tool(filtered_data)
+=======
+>>>>>>> parameter-homogenization-and-filtering
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()

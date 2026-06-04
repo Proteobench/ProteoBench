@@ -28,7 +28,8 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     user_input["input_format"] = selected_format
 
     # Show per-tool upload guidance from [upload_info] in the parse settings TOML.
-    upload_info = parsesettingsbuilder.get_upload_info(selected_format)
+    get_upload_info = getattr(parsesettingsbuilder, "get_upload_info", None)
+    upload_info = get_upload_info(selected_format) if get_upload_info is not None else {}
     datapoint_desc = upload_info.get("datapoint_file_description", "")
     if datapoint_desc:
         st.info(datapoint_desc)
@@ -41,12 +42,6 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
             "**Two-file upload (recommended):** Upload both **precursor.matrix.tsv** and **precursors.tsv** files below for automatic merging. "
             "You can upload them in any order - the system will automatically detect which is which.\n\n"
             "**Single-file upload (legacy):** Alternatively, upload a single pre-merged file in the main uploader above."
-        )
-
-    if selected_format == 'SMSNet':
-        st.info(
-            "ℹ️**If submitting SMSNet output please upload the sequence prediction file (with the tokens tab separated).**\n"
-            "**The second file should contain the probabilities per token. Normally, the file should end with _prob.**"
         )
 
 
@@ -70,12 +65,9 @@ def generate_input_fields(
             type=["tsv", "csv"],
             key="alphadia_secondary_file",
         )
-    
-    elif user_input.get("input_format") == 'SMSNet':
-        user_input['input_csv_secondary'] = st.file_uploader(
-            "Upload second SMSNet file",
-            key="SMSNet probability file"
-        )
+
+    elif user_input.get("input_format") == "SMSNet":
+        user_input["input_csv_secondary"] = st.file_uploader("Upload second SMSNet file", key="SMSNet probability file")
     else:
         user_input["input_csv_secondary"] = None
 

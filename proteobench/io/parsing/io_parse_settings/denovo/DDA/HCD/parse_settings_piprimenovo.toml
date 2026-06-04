@@ -27,5 +27,5 @@
 [upload_info]
 "datapoint_file" = "*.tsv"
 "datapoint_file_description" = "Upload the Pi-PrimeNovo de novo sequencing output TSV file."
-"params_file" = ""
-"params_file_description" = ""
+"params_file" = "*.yaml"
+"params_file_description" = "Upload the config .yaml file."

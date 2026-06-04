@@ -76,7 +76,7 @@ MODULE_DOC_CONFIG = {
     },
     "denovo_DDA_HCD": {
         "doc_file": "11-denovo-dda-hcd.md",
-        "table_marker": "Table 2. Overview of input files",
+        "table_marker": "Table 3. Overview of input files required for metric calculation and public submission",
         "col_input": "Input file",
         "col_params": "Parameter File",
     },

@@ -16,21 +16,6 @@ This module will also reflect which tools outperform others in specific scenario
 
 *If metadata for specific (post-processing) tools are not supported, feel free to [contact](mailto:proteobench@eubic-ms.org) the team of ProteoBench or create a [pull request](https://github.com/Proteobench/ProteoBench/pulls) to propose this feature yourself.*
 
-## Important Tool-specific settings
-
-Table 2 provides an overview of the required input files for public submission.
-
-**Table 2. Overview of input files required for metric calculation and public submission**
-| Tool | Input file | Parameter File |
-|---|---|---|
-| AdaNovo | *.csv |  |
-| Casanovo | *.mztab |  |
-| DeepNovo | *.tsv |  |
-| InstaNovo | *.csv |  |
-| PepNet | *.tsv |  |
-| Pi-HelixNovo | *.tsv |  |
-| Pi-PrimeNovo | *.tsv |  |
-
 ## Data set
 
 The widely used 'balanced' nine species dataset from [Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2) (first used here: [Li et al., 2017](https://pubmed.ncbi.nlm.nih.gov/28720701/)) was used as a benchmark dataset. This dataset is composed of nine species, generated in different research groups (see Table 1) and was searched using Tide-Percolator. The PSMs were filtered at PSM-level FDR at 1% and all peptides shared between any species were removed. Further downsampling of the data ultimatly results in 779,879 PSMs. For more detailed information on how the nine-species benchmark was developed, see [Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2).
@@ -152,23 +137,21 @@ Table 3 provides an overview of the required input files for public submission. 
 
 **Table 3. Overview of input files required for metric calculation and public submission**
 
-| Tool        | Input file    | Parameter File |
-| ----------- | ------------- | -------------- |
-| AdaNovo     | results.mztab | config.yaml    |
-| Casanovo    | results.mztab | config.yaml    |
-| ContraNovo  | results.mztab | config.yaml    |
-| DeepNovo    | results.tab   | / *    |
-| InstaNovo   | results.csv   | config.yaml    |
-| NovoB       | results.csv   | / *            |
-| PepNet      | results.tsv   | / *            |
-| π-HelixNovo | results.tsv   | config.yaml    |
-| π-PrimeNovo | results.tsv   | config.yaml    |
-| PointNovo   | results.csv.* | / *            |
-| SMSNet      | results + results_prob (2 files) | / * |
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AdaNovo | *.mzTab | *.yaml |
+| Casanovo | *.mztab | *.yaml |
+| ContraNovo | *.mztab | *.yaml |
+| DeepNovo | *.tab |  |
+| InstaNovo | *.csv | *.yaml |
+| NovoB | *.csv |  |
+| PepNet | *.tsv |  |
+| Pi-HelixNovo | *.tsv | *.yaml |
+| Pi-PrimeNovo | *.tsv | *.yaml |
+| PointNovo | *.csv |  |
+| SMSNet | results + results_prob (2 files) |  |
 
-> Note that the input file names might differ from **results**. Nonetheless, the extension should remain the same.
-
-\* PepNet, DeepNovo, PointNovo, NovoB, and SMSNet do not have a configuration file that is easily parsable, so no parameter file is required. When uploading a datapoint, do make sure that the parameter metadata fields are filled in as much as possible to make your submission transparent to the community.
+\* PepNet, DeepNovo, PointNovo, NovoB, and SMSNet do not have a configuration file that is easily parsable, so no parameter file is required. When uploading a datapoint, do please make sure that the parameter metadata fields are filled in as much as possible to make your submission transparent to the community.
 
 
 ### [AdaNovo](https://github.com/Westlake-OmicsAI/adanovo_v1)

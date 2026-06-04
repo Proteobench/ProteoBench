@@ -1,4 +1,23 @@
 
+[mapper]
+"feature_id" = "spectrum_id"
+"predicted_sequence" = "sequence"
+"predicted_score" = "score"
+"predicted_position_score" = "aa_scores"
+
+[spectrum_id_mapper]
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"," = ""
+"N(Deamidation)" = "N[UNIMOD:7]"
+"Q(Deamidation)" = "Q[UNIMOD:7]"
+"C(Carbamidomethylation)" = "C[UNIMOD:4]"
+"M(Oxidation)" = "M[UNIMOD:35]"
+"S(Phosphorylation)" = "S[UNIMOD:21]"
+"T(Phosphorylation)" = "T[UNIMOD:21]"
+"Y(Phosphorylation)" = "Y[UNIMOD:21]"
+
 [upload_info]
 "datapoint_file" = "*.tsv"
 "datapoint_file_description" = "Upload the PointNovo de novo sequencing output TSV file."

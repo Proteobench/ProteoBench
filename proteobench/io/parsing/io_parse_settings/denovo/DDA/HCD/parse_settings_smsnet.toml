@@ -1,0 +1,14 @@
+[mapper]
+"index" = "spectrum_id"
+"sequence" = "sequence"
+"peptide_score" = "score"
+"aa_scores" = "aa_scores"
+
+[spectrum_id_mapper]
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"C" = "C[UNIMOD:4]"
+"m" = "M[UNIMOD:35]"
+"n" = "N[UNIMOD:7]"
+"q" = "Q[UNIMOD:7]"

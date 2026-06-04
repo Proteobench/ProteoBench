@@ -43,6 +43,12 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
             "**Single-file upload (legacy):** Alternatively, upload a single pre-merged file in the main uploader above."
         )
 
+    if selected_format == 'SMSNet':
+        st.info(
+            "ℹ️**If submitting SMSNet output please upload the sequence prediction file (with the tokens tab separated).**\n"
+            "**The second file should contain the probabilities per token. Normally, the file should end with _prob.**"
+        )
+
 
 def generate_input_fields(
     user_input,
@@ -63,6 +69,12 @@ def generate_input_fields(
             "Upload second AlphaDIA file (optional)",
             type=["tsv", "csv"],
             key="alphadia_secondary_file",
+        )
+    
+    elif user_input.get("input_format") == 'SMSNet':
+        user_input['input_csv_secondary'] = st.file_uploader(
+            "Upload second SMSNet file",
+            key="SMSNet probability file"
         )
     else:
         user_input["input_csv_secondary"] = None

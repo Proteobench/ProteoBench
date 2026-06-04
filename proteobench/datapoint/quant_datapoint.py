@@ -85,8 +85,6 @@ def filter_df_numquant_nr_prec(row: pd.Series, min_quant: int = 3) -> int | None
     return None
 
 
-
-
 def compute_roc_auc(df: pd.DataFrame, unchanged_species: str = None) -> float:
     """
     Compute ROC-AUC for distinguishing unchanged from changed species.

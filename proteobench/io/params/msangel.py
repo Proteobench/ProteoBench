@@ -44,6 +44,7 @@ def _homogenize_mod_xtandem(mod_str: str) -> str:
     else:
         return f"{residue_part.upper()}[{name}]"
 
+
 # Mapping from Mascot enzyme name strings to canonical ProteoBench names.
 # Keys are lowercase to allow case-insensitive lookup.
 _ENZYME_MAP = {

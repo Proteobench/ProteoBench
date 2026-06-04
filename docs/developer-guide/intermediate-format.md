@@ -40,7 +40,7 @@ for quantification modules; may differ for other modules!).
 | `Proteins` | str | yes | Protein or protein-group identifier(s). Multiple proteins may be joined by `;` or `,`; UniProt-style identifiers are split on the pipe character into database, accession, and entry name. |
 | `Sequence` | str | yes | Plain (unmodified) peptide sequence. |
 | `Charge` | int | yes | Precursor charge. |
-| `proforma` | str | conditional | ProForma-encoded modified sequence. Present only when the tool TOML defines a `[modifications_parser]`. |
+| `proforma` | str | conditional | [ProForma](https://github.com/HUPO-PSI/ProForma)-encoded modified sequence. Present only when the tool TOML defines a `[modifications_parser]`. |
 | `precursor ion` | str | conditional | `proforma + "/" + Charge`. Present when `level = "ion"`. |
 | `peptidoform` | str | conditional | Equal to `proforma`. Present when `level = "peptidoform"`. |
 | `Raw file` | str | yes | Cleaned run name (extensions and known suffixes stripped by `_clean_run_name()`). |

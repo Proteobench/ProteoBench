@@ -13,6 +13,7 @@ import pandas as pd
 import streamlit as st
 
 from ..utils.parameter_filters import apply_parameter_filters, generate_parameter_filters  # noqa: F401
+from ..utils.resulttable import add_open_source_column
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -240,17 +241,18 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
     elif plot_params.get("alpha_warning", False):
         annotation = "-Alpha-"
 
-    try:
-        fig = plot_generator.plot_main_metric(
-            result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
-        )
-        st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
-    except Exception as e:
-        st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-        import traceback
+    with st.container(key="tour_metric_plot"):
+        try:
+            fig = plot_generator.plot_main_metric(
+                result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
+            )
+            st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            import traceback
 
-        with st.expander("Error details"):
-            st.code(traceback.format_exc())
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
 
 
 def render_results_table(
@@ -271,6 +273,8 @@ def render_results_table(
     if len(data) == 0:
         st.info("No datapoints available to display.", icon="ℹ️")
         return
+
+    data = add_open_source_column(data)
 
     st.subheader("Benchmark Results")
 
@@ -331,7 +335,7 @@ def display_download_section(variables, sort_by: str = "id") -> None:
         if hasattr(variables, "download_selector_id_uuid"):
             st.session_state[variables.download_selector_id_uuid] = uuid.uuid4()
 
-    st.subheader("Download raw datasets")
+    st.subheader("Download all data from a submitted workflow")
 
     # Create selectbox key
     selector_key = st.session_state.get(
@@ -418,7 +422,9 @@ def display_existing_results(
     render_main_plot(plot_generator, filtered_data, variables, plot_params)
 
     # Render results table
-    render_results_table(filtered_data, table_style, column_config)
+    with st.container(key="tour_results_table"):
+        render_results_table(filtered_data, table_style, column_config)
 
     # Display download section
-    display_download_section(variables)
+    with st.container(key="tour_download_section"):
+        display_download_section(variables)

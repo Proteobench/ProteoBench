@@ -1,7 +1,7 @@
 [mapper]
 "Modified.Sequence" = "Sequence"
 "Run" = "Raw file"
-"Protein.Names" = "Proteins"
+"Protein.Ids" = "Proteins"
 "Precursor.Charge" = "Charge"
 "Precursor.Quantity" = "Intensity"
 
@@ -49,3 +49,4 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+"run_name_cleanup" = "(?:_diatracer(?:_uncalibrated)?(?:\\.mzML\\.gz|\\.mzML|\\.raw|\\.RAW|\\.d|\\.wiff)?|_uncalibrated(?:\\.mzML\\.gz|\\.mzML|\\.raw|\\.RAW|\\.d|\\.wiff)?|\\.mzML\\.gz|\\.mzML|\\.raw|\\.RAW|\\.d|\\.wiff)$"

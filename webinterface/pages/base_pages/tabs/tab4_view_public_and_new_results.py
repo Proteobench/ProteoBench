@@ -13,6 +13,7 @@ import streamlit as st
 import streamlit_utils
 
 from ..utils.general import clean_dataframe_for_export
+from ..utils.resulttable import add_open_source_column
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -145,6 +146,8 @@ def render_submitted_results_table(
         st.info("No submitted datapoints available to display.", icon="ℹ️")
         return
 
+    data = add_open_source_column(data)
+
     st.subheader("Submitted Benchmark Results")
 
     if table_style == "aggrid":
@@ -221,20 +224,21 @@ def display_submitted_results(
         st.session_state[fig_key] = uuid.uuid4()
     plot_uuid = st.session_state[fig_key]
 
-    try:
-        # Generate plot using plot_generator interface
-        fig = plot_generator.plot_main_metric(
-            result_df=filtered_data,
-            hide_annot=plot_params.get("hide_annot", False),
-            **plot_params,
-        )
-        st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
-    except Exception as e:
-        st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-        import traceback
+    with st.container(key="tour_submitted_plot"):
+        try:
+            # Generate plot using plot_generator interface
+            fig = plot_generator.plot_main_metric(
+                result_df=filtered_data,
+                hide_annot=plot_params.get("hide_annot", False),
+                **plot_params,
+            )
+            st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            import traceback
 
-        with st.expander("Error details"):
-            st.code(traceback.format_exc())
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
 
     # Render results table
     render_submitted_results_table(filtered_data, table_style, column_config)

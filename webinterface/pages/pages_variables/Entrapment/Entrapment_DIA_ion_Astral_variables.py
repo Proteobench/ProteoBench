@@ -112,7 +112,7 @@ class VariablesDIAEntrapmentAstral:
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dia-Astral/"
+        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/"
     )
 
     additional_params_json: str = "../proteobench/io/params/json/Entrapment/entrapment_DIA_ion.json"

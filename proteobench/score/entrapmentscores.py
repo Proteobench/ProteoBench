@@ -161,6 +161,7 @@ class EntrapmentScores(ScoreBase):
     @staticmethod
     def calculate_paired_fdp(
         df: pd.DataFrame,
+        filepath_paired: str = "../proteobench/score/static_files/ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt",
     ) -> Dict[int, float]:
         """
         Compute the paired false discovery proportion (FDP) for the given DataFrame.
@@ -169,6 +170,8 @@ class EntrapmentScores(ScoreBase):
         ----------
         df : pd.DataFrame
             DataFrame containing the intermediate file for which to compute the paired FDP.
+        filepath_paired : str
+            File path to the paired mapping file for computing the paired FDP.
 
         Returns
         -------
@@ -176,9 +179,75 @@ class EntrapmentScores(ScoreBase):
             The computed paired FDP value.
         """
 
-        paired_fdp = 0.01
+        mapping_df = pd.read_csv(filepath_paired, sep="\t", index_col=False)
+        print(mapping_df.head())
+        print(mapping_df.columns)
 
-        return paired_fdp
+        # safety check: are all identified peptides in the mapping file?
+        missing_peptides = set(df["Peptide"]) - set(mapping_df["sequence"])
+        if missing_peptides:
+            # raise ValueError(f"The following peptides are missing in the mapping file: {missing_peptides}")
+            print(f"Warning: The following peptides are missing in the mapping file: {missing_peptides}")
+            # remove missing peptides from the df
+            df = df[~df["Peptide"].isin(missing_peptides)]
+
+        # add peptide pair index from the mapping file
+        df = df.merge(
+            mapping_df[["sequence", "peptide_pair_index"]],
+            how="left",
+            left_on="Peptide",
+            right_on="sequence",
+        )
+        print(df)
+        print(df.columns)
+
+        # sort by score (probably already sorted, but just to be sure)
+        df = df.sort_values("Score", ascending=True).reset_index(drop=True)  # The lower the better, so ascending order
+
+        # pre-calculate some dataframes
+        df["nr_targets"] = (df["Target or Entrapment"] == "target").cumsum()
+        df["nr_entrapments"] = (df["Target or Entrapment"] == "entrapment").cumsum()
+
+        print(df.head())
+
+        # get identification where we have targets and entrapments
+        df_targets_only = df[df["Target or Entrapment"] == "target"]
+        df_entraps_only = df[df["Target or Entrapment"] == "entrapment"]
+
+        print(df_targets_only.head())
+
+        target_entrap_ids = df_targets_only[["Peptide", "Score", "Q-Value", "peptide_pair_index"]].merge(
+            df_entraps_only[["Peptide", "Score", "Q-Value", "peptide_pair_index"]],
+            how="inner",
+            on="peptide_pair_index",
+            suffixes=("_target", "_entrap"),
+        )
+
+        print(target_entrap_ids.head())
+
+        # calculate the FDP by paired method
+
+        Nr_E = df["nr_entrapments"].iloc[-1]  # total number of entrapments
+        Nr_T = df["nr_targets"].iloc[-1]  # total number of targets
+
+        s = df["Score"].iloc[-1]  # score threshold (score of the last identified feature)
+        # EsT: number of discovered entrapment peptides whose paired target peptide has not been discovered
+        Nr_E_s_T = target_entrap_ids[
+            (target_entrap_ids["Score_entrap"] <= s) & (target_entrap_ids["Score_target"] > s)
+        ].shape[0]
+
+        # ETs: number of discovered entrapment peptides whose paired target peptide has also been discovered, but with worse score (here: higher)
+        Nr_E_T_s = target_entrap_ids[
+            (target_entrap_ids["Score_entrap"] > target_entrap_ids["Score_target"])
+            & (target_entrap_ids["Score_target"] >= s)
+        ].shape[0]
+
+        fdp_estimation = (Nr_E + Nr_E_s_T + 2 * Nr_E_T_s) / (Nr_T + Nr_E)
+
+        print(df.head())
+        print(df.columns)
+
+        return fdp_estimation
 
     @staticmethod
     def categorise_metric(

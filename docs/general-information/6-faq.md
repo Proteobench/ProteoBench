@@ -95,6 +95,9 @@ Users should consider:
 - Whether the workflow resembles their own intended use case.
 
 ProteoBench is best used as a transparent decision-support resource rather than as a single definitive ranking system.
+ProteoBench does not point to a single best one-fits-all data analysis workflow; should not be used as evidence for generalized statements about a workflow’s performance, and should not be used by developers as single performance measure of their workflow.
+
+
 
 ## How can I follow updates or community discussions?
 

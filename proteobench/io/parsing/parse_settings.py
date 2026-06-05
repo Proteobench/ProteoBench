@@ -896,7 +896,6 @@ class ParseSettingsEntrapment:
         df.rename(columns=self.mapper, inplace=True)
         return df
 
-
     def add_modification_parser(self, parser: ParseModificationSettings):
         """
         Add a modification parser to the settings.

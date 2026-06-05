@@ -283,13 +283,9 @@ class DeNovoUIObjects(BaseUIModule):
                         if plot_name in plots:
                             if plot_name in descriptions:
                                 st.caption(descriptions[plot_name])
-                            self._display_indepth_plot(
-                                plot_name=plot_name,
-                                figs=plots[plot_name]
-                            )
+                            self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
                             # st.plotly_chart(plots[plot_name], use_container_width=True)
-                                
-                                
+
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
                 import traceback
@@ -303,24 +299,17 @@ class DeNovoUIObjects(BaseUIModule):
         # Overview PTM plot
         with st.expander("Description"):
             st.markdown(self.variables.texts.Description.ptm_overview)
-        
-        st.plotly_chart(
-            figs,
-            use_container_width=True
-        )
-        
+
+        st.plotly_chart(figs, use_container_width=True)
+
     def _display_ptm_specific(self, figs) -> None:
         # Specific PTM plots
         with st.expander("Description"):
             st.markdown(self.variables.texts.Description.ptm_specific)
-        
+
         modification_labels = list(figs.keys())
-        tabs = st.tabs(
-            modification_labels
-        )
-        tab_dict = {
-            mod_label: tab for mod_label, tab in zip(modification_labels, tabs)
-        }
+        tabs = st.tabs(modification_labels)
+        tab_dict = {mod_label: tab for mod_label, tab in zip(modification_labels, tabs)}
         for mod_label, tab in tab_dict.items():
             with tab:
                 st.header(mod_label)
@@ -328,60 +317,49 @@ class DeNovoUIObjects(BaseUIModule):
                     figs[mod_label],
                     use_container_width=True,
                 )
-    
+
     def _display_spectrum_features(self, figs) -> None:
         feature_names = list(figs.keys())
         exact_mode = st.toggle(
-            label='Exact evaluation mode',
-            value=False,
-            key=self.variables.evaluation_mode_toggle_tab3_features
-        )
-        if exact_mode:
-            evaluation_type = 'exact'
-        else:
-            evaluation_type = 'mass'
-        
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.spectrum_features_overview)
-        
-        tabs = st.tabs(feature_names)
-        tab_dict = {feature_name: tab for feature_name, tab in zip(feature_names, tabs)}
-        for feature_name, tab in tab_dict.items():
-            with tab:
-                st.header(feature_name)
-                st.plotly_chart(
-                    figs[feature_name][evaluation_type],
-                    use_container_width=True
-                )
-    
-    def _display_species_overview(self, figs) -> None:
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.species)
-
-        exact_mode = st.toggle(
-            label="Exact evaluation mode",
-            value=False,
-            key=self.variables.evaluation_mode_toggle_tab3_species
+            label="Exact evaluation mode", value=False, key=self.variables.evaluation_mode_toggle_tab3_features
         )
         if exact_mode:
             evaluation_type = "exact"
         else:
             evaluation_type = "mass"
 
-        st.plotly_chart(
-            figs[evaluation_type],
-            use_container_width=True,
-            key=self.variables.fig_species_overview
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.spectrum_features_overview)
+
+        tabs = st.tabs(feature_names)
+        tab_dict = {feature_name: tab for feature_name, tab in zip(feature_names, tabs)}
+        for feature_name, tab in tab_dict.items():
+            with tab:
+                st.header(feature_name)
+                st.plotly_chart(figs[feature_name][evaluation_type], use_container_width=True)
+
+    def _display_species_overview(self, figs) -> None:
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.species)
+
+        exact_mode = st.toggle(
+            label="Exact evaluation mode", value=False, key=self.variables.evaluation_mode_toggle_tab3_species
         )
+        if exact_mode:
+            evaluation_type = "exact"
+        else:
+            evaluation_type = "mass"
+
+        st.plotly_chart(figs[evaluation_type], use_container_width=True, key=self.variables.fig_species_overview)
 
     def _display_indepth_plot(self, plot_name: str, figs) -> None:
-        if plot_name == 'ptm_overview':
+        if plot_name == "ptm_overview":
             self._display_ptm_overview(figs)
-        elif plot_name == 'ptm_specific':
+        elif plot_name == "ptm_specific":
             self._display_ptm_specific(figs)
-        elif plot_name == 'spectrum_feature':
+        elif plot_name == "spectrum_feature":
             self._display_spectrum_features(figs)
-        elif plot_name == 'species_overview':
+        elif plot_name == "species_overview":
             self._display_species_overview(figs)
         else:
             raise Exception("Cannot display non-implemented in-depth plot.")

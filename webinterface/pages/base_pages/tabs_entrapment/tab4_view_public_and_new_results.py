@@ -34,6 +34,7 @@ def initialize_uuid_state(key: str, default_value: Any = None) -> None:
         if uuid_key not in st.session_state:
             st.session_state[uuid_key] = default_value
 
+
 def generate_submitted_selectbox(variables) -> None:
     """Generate the selectbox for submitted data label selection."""
     # Initialize if not already done

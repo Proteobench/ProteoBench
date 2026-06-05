@@ -156,3 +156,4 @@ uv.lock
 *.gz
 jupyter_notebooks/
 testfolder/
+proteobench/score/static_files

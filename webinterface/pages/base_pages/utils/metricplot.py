@@ -59,7 +59,6 @@ def render_metric_plot(
 
     # Check if user selected "Species-weighted" mode but no datapoints have these metrics
     if mode == "Species-weighted":
-
         metric_lower, mode_suffix, _ = plot_generator._get_metric_column_name(metric, mode)
         metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
 

@@ -171,6 +171,5 @@ class EntrapmentDatapoint(DatapointBase):
 
     @staticmethod
     def get_metrics(intermediate: pd.DataFrame) -> Dict[str, Any]:
-
         metrics = EntrapmentScores.calculate_metrics(intermediate)
         return metrics

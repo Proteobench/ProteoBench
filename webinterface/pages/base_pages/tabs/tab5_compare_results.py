@@ -24,13 +24,15 @@ def display_workflow_comparison(variables, ionmodule) -> None:
         Module for accessing data and methods.
     """
     st.header("Workflow Comparison")
-    st.markdown("""
+    st.markdown(
+        """
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
         - **Precursor overlap**: Bar plot showing number of shared and unique precursors
         - **Parameter differences**: Table highlighting what differs between workflows
-        """)
+        """
+    )
 
     # Initialize data
     _initialize_comparison_data(variables, ionmodule)

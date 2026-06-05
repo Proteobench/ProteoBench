@@ -38,15 +38,21 @@ def display_workflow_comparison(variables, ionmodule) -> None:
     _initialize_comparison_data(variables, ionmodule)
 
     # Display the selection plot
-    selected_ids = _display_selection_plot(variables, ionmodule)
+    with st.container(key="tour_compare_plot"):
+        selected_ids = _display_selection_plot(variables, ionmodule)
 
     # Show selection status
     _display_selection_status(selected_ids)
 
-    # Perform comparison if two workflows are selected
-    if len(selected_ids) == 2:
-        st.markdown("---")
-        _compare_workflows(variables, selected_ids[0], selected_ids[1])
+    # Comparison results — always rendered so the tour can highlight this area
+    with st.container(key="tour_compare_results"):
+        if len(selected_ids) == 2:
+            st.markdown("---")
+            _compare_workflows(variables, selected_ids[0], selected_ids[1])
+        else:
+            st.markdown(
+                "_Select two workflows in the plot above to see precursor overlap and parameter differences here._"
+            )
 
 
 def _initialize_comparison_data(variables, ionmodule) -> None:

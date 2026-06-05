@@ -157,3 +157,6 @@ uv.lock
 jupyter_notebooks/
 testfolder/
 proteobench/score/static_files
+# Atomic-write / editor temp files
+*.tmp
+*.tmp.*

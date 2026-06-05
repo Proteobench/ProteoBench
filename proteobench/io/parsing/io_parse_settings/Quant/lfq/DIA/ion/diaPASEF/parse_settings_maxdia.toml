@@ -37,3 +37,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+
+[upload_info]
+"datapoint_file" = "evidence.txt"
+"datapoint_file_description" = "Upload the MaxQuant DIA `evidence.txt` file from the txt output folder."
+"params_file" = "mqpar.xml"
+"params_file_description" = "Upload the MaxQuant parameter file `mqpar.xml` from the search output folder."

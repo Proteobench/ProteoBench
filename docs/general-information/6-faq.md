@@ -81,15 +81,17 @@ False discovery rate control is a central concern in proteomics benchmarking. Pr
 
 ## How should I interpret the main plots in each module?
 
-ProteoBench comparison plots should not be interpreted as universal rankings of software tools. A tool that performs well in one module, dataset, or metric may not be optimal for another biological question, instrument type, acquisition method, or analysis goal.
+ProteoBench comparison plots should not be interpreted as universal rankings of software tools. A tool that performs well in one module, with one dataset or metric, may not be optimal for another biological question, instrument type, acquisition method, or analysis goal.
+
+
 
 Users should consider:
 
 - The benchmark module and dataset.
 - The software version.
-- The submitted parameters.
+- The submitted parameters (e.g. FDR)
 - The relevant metric definitions.
-- The trade-off between identification depth and quantitative accuracy.
+- The trade-off between sensitivity and accuracy.
 - Whether the workflow resembles their own intended use case.
 
 ProteoBench is best used as a transparent decision-support resource rather than as a single definitive ranking system.

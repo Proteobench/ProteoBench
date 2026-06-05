@@ -23,3 +23,9 @@
 "LFQ_Astral_DIA_15min_50ng_Human_01" = "LFQ_Astral_DIA_15min_50ng_Human_01"
 "LFQ_Astral_DIA_15min_50ng_Human_02" = "LFQ_Astral_DIA_15min_50ng_Human_02"
 "LFQ_Astral_DIA_15min_50ng_Human_03" = "LFQ_Astral_DIA_15min_50ng_Human_03"
+
+[upload_info]
+"datapoint_file" = "report.tsv or report.parquet"
+"datapoint_file_description" = "Upload the DIA-NN report file (`report.tsv` or `report.parquet`)."
+"params_file" = "report.log.txt"
+"params_file_description" = "Upload the DIA-NN log file (`report.log.txt`)."

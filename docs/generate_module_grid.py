@@ -89,6 +89,7 @@ def _ast_extract_defaults(filepath: Path) -> dict:
 # Badge mapping
 # ---------------------------------------------------------------------------
 
+
 def _release_stage(defaults: dict) -> tuple[str, str]:
     """Return (badge_role, badge_label) from warning flags."""
     if defaults.get("archived_warning", False):
@@ -165,6 +166,7 @@ def _discussion_list_rst(modules: list[dict]) -> str:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     # 1. Collect module metadata from Variables dataclasses

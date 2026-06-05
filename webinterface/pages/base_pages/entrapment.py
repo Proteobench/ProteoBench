@@ -8,63 +8,65 @@ from typing import Any, Dict
 import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import streamlit as st
-from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
-    VariablesDDAQuant,
+
+from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import (
+    VariablesDIAEntrapmentAstral,
 )
+from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
+    DIAEntrapmentIonModuleAstral as IonModule,
+)
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
-    DDAQuantIonModuleQExactive as IonModule,
+from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
+    DIAEntrapmentIonModuleAstral as IonModule,
 )
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
-from .tabs import (
+from .tabs_entrapment import (
     tab1_view_public_results,
     tab2_upload_results,
     tab3_view_single_result,
     tab4_view_public_and_new_results,
-    tab5_compare_results,
     tab6_submit_results,
 )
 
-logger: logging.Logger = logging.getLogger(__name__)
 
-
-class QuantUIObjects(BaseUIModule):
-    """Main class for the Streamlit interface of ProteoBench quantification.
+class EntrapmentUIObjects(BaseUIModule):
+    """Main class for the Streamlit interface of ProteoBench entrapment.
     This class handles the creation of the Streamlit UI elements, including the main page layout,
     input forms, results display, and data submission elements.
 
     Parameters
     ----------
-    variables : VariablesDDAQuant
-        The variables for the quantification module.
+    variables : VariablesDIAEntrapmentAstral
+        The variables for the entrapment module.
     ionmodule : IonModule
-        The quantification module.
+        The entrapment module.
     parsesettingsbuilder : ParseSettingsBuilder
         The parse settings builder.
     """
 
     def __init__(
         self,
-        variables: VariablesDDAQuant,
+        variables: VariablesDIAEntrapmentAstral,
         ionmodule: IonModule,
         parsesettingsbuilder: ParseSettingsBuilder,
         page_name: str = "/",
     ) -> None:
         """
-        Initialize the Streamlit UI objects for the quantification modules.
+        Initialize the Streamlit UI objects for the entrapment modules.
 
         Parameters
         ----------
-        variables : VariablesDDAQuant
-            The variables for the quantification module.
+        variables : VariablesDIAEntrapment
+            The variables for the entrapment module.
         ionmodule : IonModule
-            The quantification module.
+            The entrapment module.
         parsesettingsbuilder : ParseSettingsBuilder
             The parse settings builder.
         """
@@ -77,12 +79,6 @@ class QuantUIObjects(BaseUIModule):
         st.session_state[self.variables.submit] = False
         self.stop_duplicating = False
 
-    def get_tour_steps(self) -> list:
-        """Return tour steps for this quantification module."""
-        from pages.base_pages.tour_steps import get_quant_tour_steps
-
-        return get_quant_tour_steps(module_name=getattr(self.variables, "title", "this module"))
-
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
         # Display software selector and AlphaDIA info outside the form so it updates immediately
@@ -91,22 +87,21 @@ class QuantUIObjects(BaseUIModule):
             parsesettingsbuilder=self.parsesettingsbuilder,
             user_input=self.user_input,
         )
-        with st.container(key="tour_upload_form"):
-            with st.form(key="main_form"):
-                tab2_upload_results.generate_input_fields(
-                    user_input=self.user_input,
-                )
-                # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
-                tab2_upload_results.generate_additional_parameters_fields(
-                    variables=self.variables,
-                    user_input=self.user_input,
-                )
-                text = self.variables.texts.ShortMessages.run_instructions
-                st.markdown(text)
-                submit_button = st.form_submit_button(
-                    "Parse and bench",
-                    help=self.variables.texts.Help.parse_button,
-                )
+        with st.form(key="main_form"):
+            tab2_upload_results.generate_input_fields(
+                user_input=self.user_input,
+            )
+            # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
+            tab2_upload_results.generate_additional_parameters_fields(
+                variables=self.variables,
+                user_input=self.user_input,
+            )
+            text = self.variables.texts.ShortMessages.run_instructions
+            st.markdown(text)
+            submit_button = st.form_submit_button(
+                "Parse and bench",
+                help=self.variables.texts.Help.parse_button,
+            )
 
         if submit_button:
             self.first_point_plotted = tab2_upload_results.process_submission_form(
@@ -115,7 +110,6 @@ class QuantUIObjects(BaseUIModule):
                 user_input=self.user_input,
             )
 
-    @st.fragment
     def display_indepth_plots(self) -> None:
         """
         Display the dataset selection dropdown and plot the selected dataset (Tab 3).
@@ -148,32 +142,28 @@ class QuantUIObjects(BaseUIModule):
         else:
             dataset_options = [("Uploaded dataset", None)]
 
-        with st.container(key="tour_dataset_selector"):
-            dataset_selection = st.selectbox(
-                "Select dataset",
-                dataset_options,
-                index=0,
-                key=st.session_state[self.variables.dataset_selector_id_uuid],
-                format_func=lambda x: x[0],
-            )
+        dataset_selection = st.selectbox(
+            "Select dataset",
+            dataset_options,
+            index=0,
+            key=st.session_state[self.variables.dataset_selector_id_uuid],
+            format_func=lambda x: x[0],
+        )
 
         public_id, selected_hash = dataset_selection
-        with st.container(key="tour_indepth_plots"):
-            tab3_view_single_result.generate_indepth_plots(
-                module=self.ionmodule,
-                variables=self.variables,
-                parsesettingsbuilder=self.parsesettingsbuilder,
-                user_input=self.user_input,
-                public_id=public_id,
-                public_hash=selected_hash,
-            )
+        tab3_view_single_result.generate_indepth_plots(
+            module=self.ionmodule,
+            variables=self.variables,
+            parsesettingsbuilder=self.parsesettingsbuilder,
+            user_input=self.user_input,
+            public_id=public_id,
+            public_hash=selected_hash,
+        )
 
     def display_public_submission_ui(self) -> None:
         """
         Display the public submission section of the page in Tab 5.
         """
-        is_tour = st.session_state.get("_module_tour_in_progress", False)
-
         submission_source = get_submission_source()
         if not is_official_server():
             st.warning(
@@ -205,11 +195,7 @@ class QuantUIObjects(BaseUIModule):
             self.submission_ready = tab6_submit_results.generate_submission_ui_elements(
                 variables=self.variables,
                 user_input=self.user_input,
-                parsesettingsbuilder=self.parsesettingsbuilder,
             )
-        elif is_tour:
-            # Show the metadata uploader for tour preview even without a result file
-            tab6_submit_results.generate_metadata_uploader(self.variables, self.user_input)
 
         if self.user_input[self.variables.meta_data]:
             params = tab6_submit_results.load_user_parameters(
@@ -232,24 +218,6 @@ class QuantUIObjects(BaseUIModule):
             self.stop_duplicating = tab6_submit_results.generate_confirmation_checkbox(
                 check_submission=self.variables.check_submission
             )
-        elif is_tour:
-            # Tour preview: render parameter fields with defaults so users can see the form.
-            if self.variables.params_file_dict not in st.session_state:
-                st.session_state[self.variables.params_file_dict] = {}
-            self.user_input.setdefault(
-                "input_format",
-                st.session_state.get("software_tool_selector") or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
-            )
-            st.info(
-                "These fields are auto-filled when you upload a parameter file above. "
-                "Shown here with default values as a preview.",
-                icon="ℹ️",
-            )
-            tab6_submit_results.generate_additional_parameters_fields_submission(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
-            return
         else:
             params = None
 
@@ -287,92 +255,47 @@ class QuantUIObjects(BaseUIModule):
     @st.fragment
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
-        tab1_view_public_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
         tab1_view_public_results.initialize_main_selectbox(
             selectbox_id_uuid=self.variables.selectbox_id_uuid,
             default_value="None",
         )
 
-        # --- OPTIONS EXPANDER FIRST ---
-        def render_slider():
-            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
-            tab1_view_public_results.generate_main_slider(
-                slider_id_uuid=self.variables.slider_id_uuid,
-                description_slider_md=self.variables.description_slider_md,
-                default_val_slider=self.variables.default_val_slider,
-                max_nr_observed=max_nr_obs,
-            )
-
+        # Define callbacks for plot options
         def render_selectbox():
             tab1_view_public_results.generate_main_selectbox(
                 self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid
             )
 
-        metric_key = f"_tab1_metric_{self.variables.sidebar_path}"
-        mode_key = f"_tab1_mode_{self.variables.sidebar_path}"
-        if metric_key not in st.session_state:
-            st.session_state[metric_key] = "Median"
-        if mode_key not in st.session_state:
-            st.session_state[mode_key] = "Species-weighted"
+        # Store metric in a container to share between callbacks
+        metric_container = {"metric": None}
 
         def render_metric_selector():
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
-            )
-            return st.radio("Select metric", ["Median", "Mean"], key=metric_key, help=help_text, horizontal=True)
-
-        def render_mode_selector():
-            if st.session_state.get(metric_key) == "ROC-AUC":
-                return None
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
-            )
-            return st.radio(
-                "Select metric calculation approach",
-                ["Species-weighted", "Global"],
-                key=mode_key,
-                help=help_text,
-                horizontal=True,
-            )
+            metric = tab1_view_public_results.display_metric_selector(self.variables)
+            metric_container["metric"] = metric
+            return metric
 
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables)
 
-        self.render_plot_options_expander(
-            filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
-            filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
-            expander_key="tour_plot_options",
+        # Render plot options expander and capture return values
+        results = self.render_plot_options_expander(
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_metric_selector, render_colorblind_selector],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1],
         )
 
-        # --- PLOT, TABLE, DOWNLOAD BELOW ---
-        metric = st.session_state[metric_key]
-        mode = st.session_state[mode_key]
-
-        if self.variables.colorblind_mode_selector_uuid not in st.session_state:
-            st.session_state[self.variables.colorblind_mode_selector_uuid] = uuid.uuid4()
-        colorblind_uuid = st.session_state[self.variables.colorblind_mode_selector_uuid]
-        colorblind_mode = st.session_state.get(colorblind_uuid, False)
-
-        min_nr_observed = None
-        if self.variables.slider_id_uuid in st.session_state:
-            slider_key = st.session_state[self.variables.slider_id_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
+        # Extract returned values
+        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
+        colorblind_mode = results[2] if len(results) > 2 else False
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
             plot_params={
                 "metric": metric,
-                "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
-                "min_nr_observed": min_nr_observed,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
@@ -384,26 +307,12 @@ class QuantUIObjects(BaseUIModule):
         st.title("Results (All Data)")
 
         # Initialize plot options controls (same as tab 1)
-        tab1_view_public_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_submitted_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
         tab1_view_public_results.initialize_main_selectbox(
             selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
             default_value="None",
         )
 
         # Define callbacks for plot options
-        def render_slider():
-            # Get max_nr_observed for slider range if available
-            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
-            tab1_view_public_results.generate_main_slider(
-                slider_id_uuid=self.variables.slider_id_submitted_uuid,
-                description_slider_md=self.variables.description_slider_md,
-                default_val_slider=self.variables.default_val_slider,
-                max_nr_observed=max_nr_obs,
-            )
-
         def render_selectbox():
             tab1_view_public_results.generate_main_selectbox(
                 self.variables,
@@ -423,8 +332,8 @@ class QuantUIObjects(BaseUIModule):
                 getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
             )
             metric = st.radio(
-                "Select metric",
-                ["Median", "Mean"],
+                "Select metric to show in x axis",
+                ["Lower FDP bound", "Upper FDP bound - Combined method", "Upper FDP bound - Paired method"],
                 help=help_text,
                 horizontal=True,
                 key=metric_uuid,
@@ -432,70 +341,32 @@ class QuantUIObjects(BaseUIModule):
             metric_container["metric"] = metric
             return metric
 
-        def render_mode_selector():
-            # ROC-AUC has no mode variants (it's already species-aware by design)
-            if metric_container["metric"] == "ROC-AUC":
-                return None
-
-            key = self.variables.metric_calc_approach_selector_submitted_uuid
-            if key not in st.session_state:
-                st.session_state[key] = uuid.uuid4()
-            mode_uuid = st.session_state[key]
-
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
-            )
-            return st.radio(
-                "Select metric calculation approach",
-                ["Species-weighted", "Global"],
-                help=help_text,
-                horizontal=True,
-                key=mode_uuid,
-            )
-
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables, use_submitted=True)
 
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
-            filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
-            filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
+            filter_callbacks=[render_selectbox],
+            selector_callbacks=[render_metric_selector, render_colorblind_selector],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1],
         )
 
         # Extract returned values
-        metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Species-weighted"
-        colorblind_mode = results[4] if len(results) > 4 else False
+        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
+        colorblind_mode = results[2] if len(results) > 2 else False
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
-
-        # Get the min_nr_observed value from the slider if available
-        min_nr_observed = None
-        if self.variables.slider_id_submitted_uuid in st.session_state:
-            slider_key = st.session_state[self.variables.slider_id_submitted_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
 
         tab4_view_public_and_new_results.display_submitted_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
             plot_params={
                 "metric": metric,
-                "mode": mode,
                 "colorblind_mode": colorblind_mode,
                 "label": label,
-                "min_nr_observed": min_nr_observed,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
-        )
-
-    def display_workflow_comparison(self) -> None:
-        """Display the workflow comparison tab."""
-        tab5_compare_results.display_workflow_comparison(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
         )

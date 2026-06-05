@@ -71,8 +71,7 @@ def test_get_upload_info_custom_contains_docs_link():
     description = result["datapoint_file_description"]
     url_candidates = re.findall(r"https?://[^\s)]+", description)
     assert any(
-        urlparse(candidate).hostname == "proteobench.readthedocs.io"
-        for candidate in url_candidates
+        urlparse(candidate).hostname == "proteobench.readthedocs.io" for candidate in url_candidates
     ), "Expected datapoint_file_description to contain a docs URL hosted on proteobench.readthedocs.io"
 
 

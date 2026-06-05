@@ -154,6 +154,9 @@ uv.lock
 
 # Large files
 *.gz
+jupyter_notebooks/
+testfolder/
+proteobench/score/static_files
 # Atomic-write / editor temp files
 *.tmp
 *.tmp.*

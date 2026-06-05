@@ -281,13 +281,13 @@ class EntrapmentUIObjects(BaseUIModule):
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
             selector_callbacks=[render_metric_selector, render_colorblind_selector],
-            filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1],
         )
 
         # Extract returned values
-        metric = results[1] if len(results) > 2 else "Upper FDP bound - Paired method"
-        colorblind_mode = results[2] if len(results) > 4 else False
+        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
+        colorblind_mode = results[2] if len(results) > 2 else False
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
@@ -348,13 +348,13 @@ class EntrapmentUIObjects(BaseUIModule):
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
             selector_callbacks=[render_metric_selector, render_colorblind_selector],
-            filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
+            filter_cols_spec=1,
+            selector_cols_spec=[1, 1],
         )
 
         # Extract returned values
-        metric = results[1] if len(results) > 2 else "Upper FDP bound - Paired method"
-        colorblind_mode = results[2] if len(results) > 4 else False
+        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
+        colorblind_mode = results[2] if len(results) > 2 else False
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")

@@ -22,6 +22,8 @@ Developer guide
     adding-module
     parameter-homogenization
     
+    submission-validation
+
     modules/index
 
 .. toctree::

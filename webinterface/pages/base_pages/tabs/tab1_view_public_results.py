@@ -405,7 +405,9 @@ def display_existing_results(
     """
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
-    plot_generator = ionmodule.get_plot_generator()
+
+    # Get plot generator from module
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # --- Session state keys for bidirectional selection ---
     # highlight_key : ProteoBench ID currently highlighted in both widgets

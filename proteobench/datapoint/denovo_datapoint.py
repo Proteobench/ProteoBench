@@ -106,7 +106,7 @@ class DenovoDatapoint(DatapointBase):
         results (dict): A dictionary of metrics for the benchmark run.
         median_abs_epsilon (float): Median absolute epsilon value for the benchmark.
         mean_abs_epsilon (float): Mean absolute epsilon value for the benchmark.
-        nr_prec (int): Number of precursors identified.
+        nr_feature (int): Number of features identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
     """

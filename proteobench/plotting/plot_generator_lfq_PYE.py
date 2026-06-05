@@ -632,15 +632,15 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         metric: str = "Median",
         mode: str = "Species-weighted",
         software_colors: Dict[str, str] = {
-            "MaxQuant": "#8bc6fd",
-            "AlphaPept": "#17212b",
-            "ProlineStudio": "#8b26ff",
-            "MSAngel": "#C0FA7D",
-            "FragPipe": "#F89008",
-            "i2MassChroQ": "#108E2E",
-            "Sage": "#E43924",
-            "WOMBAT": "#663200",
-            "DIA-NN": "#d42f2f",
+            "MaxQuant": "#88ccef",
+            "AlphaPept": "#cc6777",
+            "ProlineStudio": "#ddcc77",
+            "MSAngel": "#147733",
+            "FragPipe": "#342288",
+            "i2MassChroQ": "#aa4599",
+            "Sage": "#671100",
+            "WOMBAT": "#44aa9a",
+            "DIA-NN": "#999934",
             "AlphaDIA": "#1D2732",
             "Custom": "#000000",
             "Spectronaut": "#007548",
@@ -748,15 +748,15 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         mode: str = "Species-weighted",
         # TODO: move software_colors to constants
         software_colors: Dict[str, str] = {
-            "MaxQuant": "#8bc6fd",
-            "AlphaPept": "#17212b",
-            "ProlineStudio": "#8b26ff",
-            "MSAngel": "#C0FA7D",
-            "FragPipe": "#F89008",
-            "i2MassChroQ": "#108E2E",
-            "Sage": "#E43924",
-            "WOMBAT": "#663200",
-            "DIA-NN": "#d42f2f",
+            "MaxQuant": "#88ccef",
+            "AlphaPept": "#cc6777",
+            "ProlineStudio": "#ddcc77",
+            "MSAngel": "#147733",
+            "FragPipe": "#342288",
+            "i2MassChroQ": "#aa4599",
+            "Sage": "#671100",
+            "WOMBAT": "#44aa9a",
+            "DIA-NN": "#999934",
             "AlphaDIA": "#1D2732",
             "Custom": "#000000",
             "Spectronaut": "#007548",
@@ -929,7 +929,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 f"Quantified spike-ins: {y_val}<br>"
                 f"Plasma dynamic range: {size_val:.2f}<br>"
                 f"Plasma accuracy error ({metric_lower}): {opacity_val:.3f}<br>"
-                f"ID: {row['id']}"
+                f"ProteoBench ID: {row['id']}"
             )
             software_data[software]["hover_texts"].append(hover_text)
 

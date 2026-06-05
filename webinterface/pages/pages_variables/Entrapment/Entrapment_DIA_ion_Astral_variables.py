@@ -87,8 +87,8 @@ class VariablesDIAEntrapmentAstral:
     first_new_plot: bool = True
     default_val_slider: int = 3
     max_nr_observed: int = 6
-    alpha_warning: bool = False
-    beta_warning: bool = True
+    alpha_warning: bool = True
+    beta_warning: bool = False
     archived_warning: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_entrapment_ion_DIA_Astral.git"
 

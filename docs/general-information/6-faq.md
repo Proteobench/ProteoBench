@@ -117,6 +117,6 @@ Community discussion also takes place through the [EuBIC-MS Slack workspace](htt
 
 ## How can I contribute to ProteoBench?
 
-Users can contribute by submitting benchmark results, reporting issues, improving documentation, proposing new modules, contributing parsers for additional software tools, sharing tutorial material, or participating in community discussions.
+Users can contribute by submitting their workflow outputs, reporting issues, improving documentation, proposing new modules, contributing parsers for additional software tools, sharing tutorial material, or participating in community discussions.
 
 New benchmark modules are especially valuable when they address a clear community need, provide well-documented datasets, define appropriate metrics, and include example workflows that allow other users to reproduce or compare results.

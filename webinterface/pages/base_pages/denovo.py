@@ -530,6 +530,23 @@ class DeNovoUIObjects(BaseUIModule):
             if params_from_file is not None:
                 st.session_state[self.variables.params_file_dict] = params_from_file.__dict__
                 self.params_file_dict_copy = copy.deepcopy(params_from_file.__dict__)
+                # Directly update widget session state keys so Streamlit uses the parsed values.
+                # Without this, Streamlit ignores the `value` arg on widgets whose keys already exist
+                # (registered from the pre-upload render of the always-visible fields).
+                # Values must be sanitized: ProteoBenchParameters stores np.nan for missing fields,
+                # which Streamlit cannot assign to a protobuf string field.
+                for key, val in params_from_file.__dict__.items():
+                    try:
+                        is_missing = pd.isna(val)
+                    except (TypeError, ValueError):
+                        is_missing = False
+                    if is_missing:
+                        sanitized = None
+                    elif not isinstance(val, str):
+                        sanitized = str(val)
+                    else:
+                        sanitized = val
+                    st.session_state[self.variables.prefix_params + key] = sanitized
             else:
                 self.params_file_dict_copy = {}
         else:

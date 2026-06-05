@@ -28,9 +28,7 @@ def add_open_source_column(df: pd.DataFrame) -> pd.DataFrame:
     if "software_name" not in df.columns:
         return df
     df = df.copy()
-    df["open_source"] = df["software_name"].apply(
-        lambda x: "✅" if str(x).lower() in OPEN_SOURCE_TOOLS else ""
-    )
+    df["open_source"] = df["software_name"].apply(lambda x: "✅" if str(x).lower() in OPEN_SOURCE_TOOLS else "")
     cols = df.columns.tolist()
     cols.remove("open_source")
     idx = cols.index("software_name") + 1
@@ -61,7 +59,8 @@ def _get_cell_style_js(bg_color_normal: str, align: str = "left") -> JsCode:
     align : str, optional
         CSS text-align value ('left', 'center', or 'right').
     """
-    return JsCode(f"""
+    return JsCode(
+        f"""
     function(params) {{
         var isSelected = params.data && params.data['selected'] && params.data['selected'] !== '';
         if (isSelected) {{
@@ -79,7 +78,8 @@ def _get_cell_style_js(bg_color_normal: str, align: str = "left") -> JsCode:
             'textAlign': '{align}'
         }};
     }}
-    """)
+    """
+    )
 
 
 def render_aggrid(df: pd.DataFrame, grid_options, key, enable_selection: bool = False):

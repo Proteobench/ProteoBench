@@ -142,7 +142,9 @@ class QuantUIObjects(BaseUIModule):
         st.subheader("Select dataset to plot")
 
         if not downloads_df.empty:
-            dataset_options = [("Uploaded dataset", None)] + list(zip(downloads_df["id"], downloads_df["intermediate_hash"]))
+            dataset_options = [("Uploaded dataset", None)] + list(
+                zip(downloads_df["id"], downloads_df["intermediate_hash"])
+            )
         else:
             dataset_options = [("Uploaded dataset", None)]
 
@@ -236,8 +238,7 @@ class QuantUIObjects(BaseUIModule):
                 st.session_state[self.variables.params_file_dict] = {}
             self.user_input.setdefault(
                 "input_format",
-                st.session_state.get("software_tool_selector")
-                or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
+                st.session_state.get("software_tool_selector") or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
             )
             st.info(
                 "These fields are auto-filled when you upload a parameter file above. "
@@ -318,13 +319,17 @@ class QuantUIObjects(BaseUIModule):
             st.session_state[mode_key] = "Species-weighted"
 
         def render_metric_selector():
-            help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio("Select metric", ["Median", "Mean"], key=metric_key, help=help_text, horizontal=True)
 
         def render_mode_selector():
             if st.session_state.get(metric_key) == "ROC-AUC":
                 return None
-            help_text = getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio(
                 "Select metric calculation approach",
                 ["Species-weighted", "Global"],
@@ -414,7 +419,9 @@ class QuantUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             metric_uuid = st.session_state[key]
 
-            help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
             metric = st.radio(
                 "Select metric",
                 ["Median", "Mean"],
@@ -435,7 +442,9 @@ class QuantUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             mode_uuid = st.session_state[key]
 
-            help_text = getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio(
                 "Select metric calculation approach",
                 ["Species-weighted", "Global"],

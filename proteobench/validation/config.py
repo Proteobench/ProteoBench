@@ -33,6 +33,9 @@ Example ``module_settings.toml`` sections::
 
     [validation]
     "profile" = "quant_lfq"
+    # optional mass-tolerance plausibility ceilings (no default; skipped if unset):
+    # "max_plausible_ppm" = 1000.0
+    # "max_plausible_dalton" = 10.0
 """
 
 from __future__ import annotations
@@ -136,6 +139,15 @@ class ModuleValidationConfig:
         Recommended maximum PSM-level FDR for the benchmark. A parsed FDR above
         this value produces a warning. Default ``0.01`` (1%). Set to ``None`` to
         disable the recommendation check.
+    max_plausible_ppm : float, optional
+        Plausibility ceiling for ppm mass tolerances. A parsed tolerance above
+        this value produces a warning. No default (``None``); when unset, the
+        implausible-value check is skipped. Set via ``[validation]`` in
+        ``module_settings.toml``.
+    max_plausible_dalton : float, optional
+        Plausibility ceiling for absolute (Da / Th / amu) mass tolerances, scaled
+        by 1000 for mmu. No default (``None``); when unset, the implausible-value
+        check is skipped. Set via ``[validation]`` in ``module_settings.toml``.
     validation_profile : str, optional
         Name of the registered profile whose checks the orchestrator runs. Set
         automatically by :meth:`from_parse_settings`; defaults to
@@ -155,6 +167,8 @@ class ModuleValidationConfig:
     fasta_filename: Optional[str] = None
     species_flags: Tuple[str, ...] = field(default_factory=tuple)
     recommended_max_fdr_psm: Optional[float] = 0.01
+    max_plausible_ppm: Optional[float] = None
+    max_plausible_dalton: Optional[float] = None
     validation_profile: str = DEFAULT_VALIDATION_PROFILE
 
     @classmethod
@@ -216,8 +230,11 @@ class ModuleValidationConfig:
         config.fasta_url = reference.get("fasta_url")
         config.fasta_filename = reference.get("fasta_filename")
 
-        declared_profile = (module_settings.get("validation", {}) or {}).get("profile")
+        validation_section = module_settings.get("validation", {}) or {}
+        declared_profile = validation_section.get("profile")
         config.validation_profile = _resolve_profile(module_id, declared_profile)
+        config.max_plausible_ppm = validation_section.get("max_plausible_ppm")
+        config.max_plausible_dalton = validation_section.get("max_plausible_dalton")
 
         return config
 

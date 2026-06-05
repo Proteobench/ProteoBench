@@ -388,9 +388,24 @@ def test_mass_tolerance_non_positive_warns():
     assert any(i.code == "precursor_mass_tolerance_non_positive" and i.severity == Severity.WARNING for i in issues)
 
 
-def test_mass_tolerance_implausible_warns():
+def test_mass_tolerance_ceilings_default_to_none():
+    # The plausibility ceilings have no float/int default; they default to None.
+    config = ModuleValidationConfig()
+    assert config.max_plausible_ppm is None
+    assert config.max_plausible_dalton is None
+
+
+def test_mass_tolerance_implausible_skipped_without_ceiling():
+    # With no ceiling configured (default), the implausible-value sub-check is skipped.
     params = make_params(fragment_mass_tolerance="[-5000.0 ppm, 5000.0 ppm]")
     issues = check_mass_tolerances(make_standard_df(), params, ModuleValidationConfig())
+    assert not any(i.code == "fragment_mass_tolerance_implausible" for i in issues)
+
+
+def test_mass_tolerance_implausible_warns():
+    params = make_params(fragment_mass_tolerance="[-5000.0 ppm, 5000.0 ppm]")
+    config = ModuleValidationConfig(max_plausible_ppm=1000.0, max_plausible_dalton=10.0)
+    issues = check_mass_tolerances(make_standard_df(), params, config)
     assert any(i.code == "fragment_mass_tolerance_implausible" for i in issues)
 
 
@@ -404,27 +419,23 @@ def test_mass_tolerance_missing_warns():
 
 
 def test_mass_tolerance_dalton_units():
+    config = ModuleValidationConfig(max_plausible_ppm=1000.0, max_plausible_dalton=10.0)
     # Plausible Dalton tolerance: no issue.
-    ok = check_mass_tolerances(
-        make_standard_df(), make_params(fragment_mass_tolerance="[-0.5 Da, 0.5 Da]"), ModuleValidationConfig()
-    )
+    ok = check_mass_tolerances(make_standard_df(), make_params(fragment_mass_tolerance="[-0.5 Da, 0.5 Da]"), config)
     assert not any(i.code == "fragment_mass_tolerance_implausible" for i in ok)
     # Implausible Dalton tolerance: warns.
-    bad = check_mass_tolerances(
-        make_standard_df(), make_params(fragment_mass_tolerance="[-50.0 Da, 50.0 Da]"), ModuleValidationConfig()
-    )
+    bad = check_mass_tolerances(make_standard_df(), make_params(fragment_mass_tolerance="[-50.0 Da, 50.0 Da]"), config)
     assert any(i.code == "fragment_mass_tolerance_implausible" for i in bad)
 
 
 def test_mass_tolerance_mmu_units():
+    config = ModuleValidationConfig(max_plausible_ppm=1000.0, max_plausible_dalton=10.0)
     # 5000 mmu = 5 Da: plausible (ceiling is 10000 mmu).
-    ok = check_mass_tolerances(
-        make_standard_df(), make_params(fragment_mass_tolerance="[-5000 mmu, 5000 mmu]"), ModuleValidationConfig()
-    )
+    ok = check_mass_tolerances(make_standard_df(), make_params(fragment_mass_tolerance="[-5000 mmu, 5000 mmu]"), config)
     assert not any(i.code == "fragment_mass_tolerance_implausible" for i in ok)
     # 50000 mmu = 50 Da: implausible.
     bad = check_mass_tolerances(
-        make_standard_df(), make_params(fragment_mass_tolerance="[-50000 mmu, 50000 mmu]"), ModuleValidationConfig()
+        make_standard_df(), make_params(fragment_mass_tolerance="[-50000 mmu, 50000 mmu]"), config
     )
     assert any(i.code == "fragment_mass_tolerance_implausible" for i in bad)
 

@@ -27,7 +27,9 @@ Documented limitations and intentionally skipped checks:
   sequence, so it is an upper bound (warning only).
 * **Mass tolerances**: there is no per-result tolerance to compare against, so
   the precursor/fragment tolerances are only sanity-checked (present, numeric,
-  positive, within a plausible range), as warnings.
+  positive), as warnings. An optional plausibility ceiling
+  (``max_plausible_ppm`` / ``max_plausible_dalton`` on the config) has no
+  default; the implausible-value check is skipped unless a module configures it.
 * **PSM FDR**: validated against the valid ``[0, 1]`` range and the benchmark's
   recommended maximum (configurable), as warnings.
 * **Run identity**: ``ProteoBenchParameters`` does not expose raw-file, sample,
@@ -74,10 +76,6 @@ _ENZYME_CLEAVAGE_RULES = {
     "lysn": None,
     "aspn": None,
 }
-
-#: Plausibility ceilings for mass-tolerance sanity checks.
-_MAX_PLAUSIBLE_PPM = 1000.0
-_MAX_PLAUSIBLE_DALTON = 10.0
 
 #: Matches a signed number (including scientific notation) and an optional unit
 #: in a tolerance string such as ``"[-20.0 ppm, 20.0 ppm]"`` or ``"2e-3 Da"``.
@@ -890,9 +888,16 @@ def _parse_tolerance(text: Any) -> tuple:
     return max(magnitudes), unit
 
 
-def _check_one_tolerance(report: ValidationReport, value: Any, label: str, field: str) -> None:
+def _check_one_tolerance(
+    report: ValidationReport, value: Any, label: str, field: str, config: ModuleValidationConfig
+) -> None:
     """
     Sanity-check a single mass-tolerance value and append any issue.
+
+    The "implausibly large" sub-check runs only when the relevant plausibility
+    ceiling is configured (``config.max_plausible_ppm`` /
+    ``config.max_plausible_dalton``). These have no default, so the sub-check is
+    skipped when they are unset. The present/numeric/positive checks always run.
 
     Parameters
     ----------
@@ -904,6 +909,8 @@ def _check_one_tolerance(report: ValidationReport, value: Any, label: str, field
         Human-readable label (e.g. ``"precursor mass tolerance"``).
     field : str
         The parameter field name (used in the issue ``field`` and codes).
+    config : ModuleValidationConfig
+        Module validation configuration (provides the plausibility ceilings).
     """
     check = "mass_tolerance"
     if _is_missing(value):
@@ -937,12 +944,12 @@ def _check_one_tolerance(report: ValidationReport, value: Any, label: str, field
         return
 
     if unit == "ppm":
-        ceiling = _MAX_PLAUSIBLE_PPM
+        ceiling = config.max_plausible_ppm
     elif unit in {"da", "th", "amu"}:
-        ceiling = _MAX_PLAUSIBLE_DALTON
+        ceiling = config.max_plausible_dalton
     elif unit == "mmu":
         # 1 mmu = 1e-3 Da, so the Dalton ceiling becomes 1000x larger in mmu.
-        ceiling = _MAX_PLAUSIBLE_DALTON * 1000
+        ceiling = None if config.max_plausible_dalton is None else config.max_plausible_dalton * 1000
     else:
         ceiling = None
 
@@ -968,8 +975,11 @@ def check_mass_tolerances(
 
     There is no per-result tolerance to compare against, so this validates that
     the parsed ``precursor_mass_tolerance`` and ``fragment_mass_tolerance`` are
-    present, numeric, positive, and within a plausible range. Mis-parsed or
-    nonsensical values are flagged as warnings.
+    present, numeric, and positive. When the module configures a plausibility
+    ceiling (``config.max_plausible_ppm`` / ``config.max_plausible_dalton``,
+    which have no default), tolerances above it are also flagged; otherwise that
+    sub-check is skipped. Mis-parsed or nonsensical values are flagged as
+    warnings.
 
     Parameters
     ----------
@@ -992,9 +1002,14 @@ def check_mass_tolerances(
         getattr(params, "precursor_mass_tolerance", None),
         "precursor mass tolerance",
         "precursor_mass_tolerance",
+        config,
     )
     _check_one_tolerance(
-        report, getattr(params, "fragment_mass_tolerance", None), "fragment mass tolerance", "fragment_mass_tolerance"
+        report,
+        getattr(params, "fragment_mass_tolerance", None),
+        "fragment mass tolerance",
+        "fragment_mass_tolerance",
+        config,
     )
     return report.issues
 

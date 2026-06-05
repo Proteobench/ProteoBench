@@ -286,7 +286,8 @@ QUANT_LFQ_PROFILE = ValidationProfile(
         Check(
             "mass_tolerances",
             lambda ctx: check_mass_tolerances(ctx.standard_df, ctx.parameters, ctx.config),
-            "Precursor/fragment mass tolerances are present and plausible (warning only).",
+            "Precursor/fragment mass tolerances are present and positive; the plausibility "
+            "ceiling is checked only when configured (warning only).",
         ),
         Check(
             "fdr_psm",

@@ -44,7 +44,7 @@ that allow for a more modular and portable implementation.
 Backend
 ------- 
 
-The backend is organized into six main components that you can extend or customize:
+The backend is organized into seven main components that you can extend or customize:
 
 **1. Module implementation** - Define how your benchmarking is performed
    - For quantification: Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule`
@@ -87,6 +87,17 @@ The backend is organized into six main components that you can extend or customi
 **6. Parameter parsing** - Parse tool-specific settings
    - Functions in :file:`proteobench/io/params` parse parameter setting files
    - Customize per software tool in :file:`proteobench/io/params/json/`
+
+**7. Submission validation** - Check uploaded submissions for consistency
+   - Package: :file:`proteobench/validation/` (framework-agnostic, registry-driven)
+   - A quantification module is configuration-only: add a ``[reference_database]``
+     section to its ``module_settings.toml`` and the ``quant_lfq`` profile is
+     resolved automatically from the parser class
+   - A new module category registers its own *validation profile*
+   - Validation is non-blocking: findings are shown to the submitter and added to
+     the pull-request description, but submission always proceeds
+   - See :doc:`submission-validation` for integrating, extending, and maintaining
+     the checks
 
 Architecture example
 ....................
@@ -1053,3 +1064,9 @@ a new type of module:
     ``REPO_MODULE_REGISTRY`` with the format:
     ``"Results_repo_name": ("module_id", ModuleClass, path_to_params_json)``
     This enables automatic datapoint reprocessing for your module.
+12. **Configure submission validation.** For a quantification module, add a
+    ``[reference_database]`` section (with ``fasta_url``) to the module's
+    ``module_settings.toml``; the ``quant_lfq`` profile is resolved automatically.
+    For a new module category, register a *validation profile* and point the
+    module at it via ``[validation] profile = "<name>"``.
+    See :doc:`submission-validation`.

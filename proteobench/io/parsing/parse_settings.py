@@ -31,6 +31,18 @@ GROUND_TRUTH_DIR_LOCAL_DENOVO = os.path.join(
 GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
 GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
+_TOOL_METADATA_PATH = os.path.join(
+    Path(__file__).resolve().parent,
+    "io_parse_settings",
+    "tool_metadata.toml",
+)
+
+
+def get_open_source_tools() -> set:
+    """Return the set of open-source tool names (lower-cased) from tool_metadata.toml."""
+    metadata = toml.load(_TOOL_METADATA_PATH)
+    return {name.lower() for name in metadata.get("open_source", {}).get("tools", [])}
+
 
 class ParseSettingsBuilder:
     """
@@ -105,6 +117,36 @@ class ParseSettingsBuilder:
             parser.add_modification_parser(ParseModificationSettings(parse_settings))
 
         return parser
+
+    def get_upload_info(self, input_format: str) -> Dict[str, str]:
+        """
+        Return the upload_info block for a given input format.
+
+        Reads the ``[upload_info]`` section from the tool's TOML file and returns
+        it as a plain dict.  Returns an empty dict when the section is absent
+        (e.g., for the Custom format).
+
+        Parameters
+        ----------
+        input_format : str
+            The input format to query (e.g., "MaxQuant", "DIA-NN").
+
+        Returns
+        -------
+        Dict[str, str]
+            A dict with keys ``datapoint_file``, ``datapoint_file_description``,
+            ``params_file``, and ``params_file_description``, or an empty dict
+            if ``[upload_info]`` is not present in the TOML.
+        """
+        toml_file = self.PARSE_SETTINGS_FILES.get(input_format)
+        if toml_file is None:
+            return {}
+        parse_settings = toml.load(toml_file)
+        base = parse_settings.get("upload_info", {})
+        # Apply per-tool overrides when multiple input_formats share the same TOML
+        # (e.g. "FragPipe (DIA-NN quant)" shares parse_settings_diann.toml with "DIA-NN").
+        override = parse_settings.get("upload_info_overrides", {}).get(input_format, {})
+        return {**base, **override}
 
 
 class ParseSettingsQuant:
@@ -216,19 +258,22 @@ class ParseSettingsQuant:
             df_filtered = df.copy()
         return df_filtered
 
-    def _clean_run_name(self, name: str) -> str:
+    def _clean_run_name(self, name: str, strip_path: bool = True) -> str:
         """
         Clean a run/file name by removing extensions and known suffixes.
 
-        Strips path prefixes (e.g., ``/path/to/file.mzML`` -> ``file``)
-        and applies the run_name_cleanup regex to remove extensions like
-        ``.raw``, ``.mzML``, ``.mzML.gz``, ``.d``, ``.wiff``, and
-        tool-specific suffixes like ``_uncalibrated`` (FragPipe DIA-NN, see #827).
+        When ``strip_path`` is True, also strips path prefixes
+        (e.g., ``/path/to/file.mzML`` -> ``file``). Path stripping is
+        appropriate for raw-file values and condition_mapper keys, but must
+        be disabled when cleaning DataFrame column names, where ``/`` can
+        appear as part of legitimate metadata (e.g. PEAKS' ``m/z`` column).
 
         Parameters
         ----------
         name : str
             The raw file name or column name to clean.
+        strip_path : bool, optional
+            Whether to apply path-prefix stripping (default True).
 
         Returns
         -------
@@ -237,20 +282,24 @@ class ParseSettingsQuant:
         """
         if not isinstance(name, str):
             return name
-        # Strip path prefix (some tools include full paths)
-        name = name.replace("\\", "/")
-        if "/" in name:
-            name = name.rsplit("/", 1)[-1]
+        if strip_path:
+            # Strip path prefix (some tools include full paths)
+            name = name.replace("\\", "/")
+            if "/" in name:
+                name = name.rsplit("/", 1)[-1]
         # Apply the cleanup regex
         name = self._run_name_cleanup.sub("", name)
         return name
 
     def _fix_colnames(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Fix column names in the DataFrame by cleaning run names.
+        Fix column names in the DataFrame by applying the cleanup regex.
 
-        Applies run name cleanup (extension stripping, path removal) to all
-        column names so they match the keys in condition_mapper.
+        Strips tool-specific column suffixes (e.g. `` Intensity`` for FragPipe,
+        `` Normalized Area`` for PEAKS) and MS file extensions so that wide-format
+        column names line up with ``condition_mapper`` keys. Does not apply
+        path-prefix stripping, which would break metadata column names containing
+        ``/`` (e.g. PEAKS' ``m/z`` column).
 
         Parameters
         ----------
@@ -262,7 +311,7 @@ class ParseSettingsQuant:
         pd.DataFrame
             DataFrame with standardized column names.
         """
-        df.columns = [self._clean_run_name(c) for c in df.columns]
+        df.columns = [self._clean_run_name(c, strip_path=False) for c in df.columns]
         return df
 
     def _mark_contaminants(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -949,7 +998,6 @@ MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
-    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,

@@ -156,3 +156,6 @@ uv.lock
 *.gz
 jupyter_notebooks/
 testfolder/
+# Atomic-write / editor temp files
+*.tmp
+*.tmp.*

@@ -8,14 +8,14 @@ import streamlit as st
 
 def render_metric_plot(
     data: pd.DataFrame,
-    metric: str,
-    mode: str,
-    label: str,
-    colorblind_mode: bool,
     key,
     plot_generator,
-    slider_id_uuid: str = None,
+    metric: str | None = None,
+    mode: str | None = None,
+    label: str = "None",
+    colorblind_mode: bool = False,
     annotation: str = "",
+    **extra_plot_kwargs,
 ) -> str | None:
     """
     Displays the metric plot and returns the ProteoBench ID of the selected point (if any).
@@ -24,47 +24,35 @@ def render_metric_plot(
     ----------
     data : pd.DataFrame
         The filtered dataset to plot.
-
-    metric : str
-        Metric to plot ("Median" or "Mean").
-
-    mode : str
-        Mode to plot ("Species-weighted" or "Global").
-
-    label : str
-        The label for the data points.
-
-    colorblind_mode : bool
-        Whether to use colorblind-safe colors.
-
     key : str
         Unique key for the plot in the Streamlit session state.
-
     plot_generator : PlotGeneratorBase
         The plot generator instance for the module.
-
-    slider_id_uuid : str, optional
-        The UUID for the slider to retrieve the min_nr_observed value.
-
+    metric : str or None, optional
+        Metric to plot ("Median", "Mean", "ROC-AUC"). None for modules that do not use this param.
+    mode : str or None, optional
+        Mode to plot ("Species-weighted" or "Global"). None for modules that do not use this param.
+    label : str, optional
+        The label for the data points.
+    colorblind_mode : bool, optional
+        Whether to use colorblind-safe colors.
     annotation : str, optional
         Optional annotation to display on the plot.
+    **extra_plot_kwargs
+        Additional keyword arguments forwarded to plot_main_metric (e.g. level,
+        evaluation_type for de novo modules).
 
     Returns
     -------
     str or None
         ProteoBench ID of the selected data point, if any.
     """
-
-    highlight_point_id = None
-
-    # Check if user selected "Species-weighted" mode but no datapoints have these metrics
-    if mode == "Species-weighted":
-
+    # Species-weighted pre-filter with user-visible warning (quant modules only).
+    # Only triggered when mode is explicitly "Species-weighted" and the plot generator
+    # exposes _get_metric_column_name (quant generators do, de novo generator does not).
+    if mode == "Species-weighted" and hasattr(plot_generator, "_get_metric_column_name"):
         metric_lower, mode_suffix, _ = plot_generator._get_metric_column_name(metric, mode)
         metric_col_name = f"{metric_lower}_abs_epsilon_{mode_suffix}"
-
-        # Check how many datapoints have the equal-weighted metric
-        original_count = len(data)
         filtered_data = plot_generator._filter_datapoints_with_metric(data, metric_col_name)
 
         if len(filtered_data) == 0:
@@ -80,7 +68,6 @@ def render_metric_plot(
             )
             return None
 
-        # Update data to use filtered datapoints
         data = filtered_data
 
     if len(data) == 0:
@@ -89,21 +76,21 @@ def render_metric_plot(
 
     highlight_point_id = None
     try:
-        # Get the min_nr_observed value from the slider if provided
-        min_nr_observed = None
-        if slider_id_uuid is not None and slider_id_uuid in st.session_state:
-            slider_key = st.session_state[slider_id_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
-
-        fig_metric = plot_generator.plot_main_metric(
-            data,
-            metric=metric,
-            mode=mode,
+        # Build kwargs for plot_main_metric.  Only include metric/mode when they are
+        # set so modules that don't use them are not surprised by unexpected kwargs.
+        plot_kwargs = {}
+        if metric is not None:
+            plot_kwargs["metric"] = metric
+        if mode is not None:
+            plot_kwargs["mode"] = mode
+        plot_kwargs.update(
             label=label,
             colorblind_mode=colorblind_mode,
             annotation=annotation,
+            **extra_plot_kwargs,
         )
+
+        fig_metric = plot_generator.plot_main_metric(data, **plot_kwargs)
         event_dict = st.plotly_chart(
             fig_metric,
             width="stretch",
@@ -117,7 +104,7 @@ def render_metric_plot(
             else None
         )
         if selected_point:
-            hover = selected_point.get("hovertext", "")
+            hover = selected_point.get("hovertext", "") or selected_point.get("text", "")
             match = re.search(r"ProteoBench ID: ([^<]+)", hover)
             if match:
                 highlight_point_id = match.group(1)

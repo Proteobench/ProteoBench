@@ -1,44 +1,88 @@
 import pandas as pd
-from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
+
+from proteobench.io.parsing.parse_settings import get_open_source_tools
 
 # this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
 
-# === Table Color Constants ===
-COLOR_IDENTIFIER = "#F0F2F6"
-COLOR_PARAMETER = "#FFFFFF"
-COLOR_RESULT = "#F0F2F6"
-COLOR_TECHNICAL = "#FFFFFF"
-COLOR_ADDITIONAL = "#F0F2F6"
+# === Open Source Tools ===
+# Loaded from proteobench/io/parsing/io_parse_settings/tool_metadata.toml
+OPEN_SOURCE_TOOLS = get_open_source_tools()
 
 
-def _get_style_js(bg_color: str) -> JsCode:
+def add_open_source_column(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Generates JavaScript for styling cells with a background color.
+    Add an 'open_source' column indicating whether the software is open source.
 
     Parameters
     ----------
-    bg_color : str
-        Hex color string to use as the background.
+    df : pd.DataFrame
+        DataFrame containing a 'software_name' column.
 
     Returns
     -------
-    JsCode
-        A JavaScript code block that defines the style.
+    pd.DataFrame
+        Copy of the DataFrame with an 'open_source' column inserted after 'software_name'.
+        Open source tools are marked with '✅', others with an empty string.
     """
-    return JsCode(
-        f"""
-    function(params) {{
-        return {{
-            'backgroundColor': '{bg_color}',
-            'color': 'black',
-            'fontWeight': 'normal'
-        }}
-    }}
-    """
+    if "software_name" not in df.columns:
+        return df
+    df = df.copy()
+    df["open_source"] = df["software_name"].apply(
+        lambda x: "✅" if str(x).lower() in OPEN_SOURCE_TOOLS else ""
     )
+    cols = df.columns.tolist()
+    cols.remove("open_source")
+    idx = cols.index("software_name") + 1
+    cols.insert(idx, "open_source")
+    return df[cols]
 
 
-def render_aggrid(df: pd.DataFrame, grid_options, key):
+# === Table Color Constants ===
+COLOR_IDENTIFIER = "#EEF2FF"  # soft indigo tint  – id / selected columns
+COLOR_PARAMETER = "#FFFFFF"  # clean white         – search / quant parameters
+COLOR_RESULT = "#F0FDF4"  # soft green tint     – performance metrics
+COLOR_ADDITIONAL = "#FAFAFA"  # near-white gray     – extra / unknown columns
+
+# Row-level highlight applied to every cell when the row is selected
+COLOR_ROW_SELECTED = "#FFF3CD"
+
+
+def _get_cell_style_js(bg_color_normal: str, align: str = "left") -> JsCode:
+    """
+    Returns a JsCode cellStyle function that applies a normal background colour
+    per column category, and switches the entire row to a warm amber highlight
+    whenever the 'selected' indicator column is non-empty.
+
+    Parameters
+    ----------
+    bg_color_normal : str
+        Background colour used for non-selected rows.
+    align : str, optional
+        CSS text-align value ('left', 'center', or 'right').
+    """
+    return JsCode(f"""
+    function(params) {{
+        var isSelected = params.data && params.data['selected'] && params.data['selected'] !== '';
+        if (isSelected) {{
+            return {{
+                'backgroundColor': '{COLOR_ROW_SELECTED}',
+                'color': '#1a1a1a',
+                'fontWeight': '600',
+                'textAlign': '{align}'
+            }};
+        }}
+        return {{
+            'backgroundColor': '{bg_color_normal}',
+            'color': '#333333',
+            'fontWeight': 'normal',
+            'textAlign': '{align}'
+        }};
+    }}
+    """)
+
+
+def render_aggrid(df: pd.DataFrame, grid_options, key, enable_selection: bool = False):
     """
     Renders a DataFrame using AgGrid with specified grid options and a unique key.
 
@@ -50,11 +94,14 @@ def render_aggrid(df: pd.DataFrame, grid_options, key):
         Configuration options for AgGrid.
     key : Any
         Unique identifier for the grid instance (AgGrid does not work with UUID keys).
+    enable_selection : bool, optional
+        If True, configure the grid for single-row selection and return the grid response
+        so callers can inspect selected rows.
 
     Returns
     -------
-    None
-        This function renders the grid in the Streamlit interface and does not return a value.
+    AgGridReturn
+        The AgGrid return object; callers can read `.selected_rows` when selection is enabled.
     """
     # Calculate dynamic height based on number of rows
     # Row height ~50px + header ~40px + padding
@@ -69,18 +116,21 @@ def render_aggrid(df: pd.DataFrame, grid_options, key):
     max_height = 800
     dynamic_height = max(min_height, min(calculated_height, max_height))
 
-    AgGrid(
+    update_mode = GridUpdateMode.SELECTION_CHANGED if enable_selection else GridUpdateMode.NO_UPDATE
+
+    return AgGrid(
         df,
         gridOptions=grid_options,
         theme="alpine",
         fit_columns_on_grid_load=False,
         height=dynamic_height,
         allow_unsafe_jscode=True,
+        update_mode=update_mode,
         key=f"aggrid::{str(key)}",  # AgGrid does not work with UUID keys
     )
 
 
-def configure_aggrid(df: pd.DataFrame):
+def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
     """
     Configures the styling and options for AgGrid based on column category.
 
@@ -88,15 +138,32 @@ def configure_aggrid(df: pd.DataFrame):
     ----------
     df : pd.DataFrame
         The display-ready DataFrame.
+    enable_selection : bool, optional
+        If True, configure single-row selection without checkboxes.
 
     Returns
     -------
     dict
         AgGrid gridOptions dictionary.
     """
+    from st_aggrid import GridOptionsBuilder
+
     gb = GridOptionsBuilder.from_dataframe(df)
-    identifier_cols = ["selected", "id"]
-    parameter_cols = [
+
+    # Defaults: sortable, filterable, resizable, wrapped headers
+    gb.configure_default_column(
+        sortable=True,
+        filterable=True,
+        resizable=True,
+        wrapHeaderText=True,
+        autoHeaderHeight=True,
+        minWidth=80,
+    )
+
+    if enable_selection:
+        gb.configure_selection(selection_mode="single", use_checkbox=False)
+
+    parameter_cols = {
         "software_name",
         "software_version",
         "search_engine",
@@ -120,30 +187,59 @@ def configure_aggrid(df: pd.DataFrame):
         "protein_inference",
         "abundance_normalization_ions",
         "submission_comments",
-    ]
-    result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
-    technical_cols = [
-        "proteobench_version",
-        "intermediate_hash",
-        "hover_text",
-        "color",
-        "old_new",
-        "is_temporary",
-        "comments",
-        "scatter_size",
-    ]
+        "checkpoint",
+        "n_beams",
+        "n_peaks",
+        "min_mz",
+        "max_mz",
+        "min_intensity",
+        "max_intensity",
+        "tokens",
+        "remove_precursor_tol",
+        "isotope_error_range",
+        "decoding_strategy",
+    }
+    result_cols = {"median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results", "precision", "recall"}
 
     for col in df.columns:
-        if col in identifier_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_IDENTIFIER))
+        if col == "selected":
+            # Narrow indicator column, pinned, no sort/filter, centred
+            gb.configure_column(
+                col,
+                header_name="",
+                width=40,
+                minWidth=40,
+                maxWidth=40,
+                pinned="left",
+                sortable=False,
+                filterable=False,
+                resizable=False,
+                cellStyle=_get_cell_style_js(COLOR_IDENTIFIER, align="center"),
+            )
+        elif col == "id":
+            gb.configure_column(
+                col,
+                header_name="ProteoBench ID",
+                minWidth=160,
+                pinned="left",
+                cellStyle=_get_cell_style_js(COLOR_IDENTIFIER),
+            )
+        elif col == "open_source":
+            # Narrow centred indicator for open-source tools (✅), right after software_name
+            gb.configure_column(
+                col,
+                header_name="Open source",
+                width=110,
+                minWidth=90,
+                cellStyle=_get_cell_style_js(COLOR_PARAMETER, align="center"),
+            )
         elif col in parameter_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_PARAMETER))
+            gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_PARAMETER))
         elif col in result_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_RESULT))
-        elif col in technical_cols:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_TECHNICAL))
+            # Right-align metrics so decimal points line up
+            gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_RESULT, align="right"), minWidth=130)
         else:
-            gb.configure_column(col, cellStyle=_get_style_js(COLOR_ADDITIONAL))
+            gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_ADDITIONAL))
 
     return gb.build()
 
@@ -171,11 +267,13 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
     if len(df) == 0:
         return df
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
+    df = add_open_source_column(df)
 
     try:
         identifier_cols = ["selected", "id"]
         parameter_cols = [
             "software_name",
+            "open_source",
             "software_version",
             "search_engine",
             "search_engine_version",
@@ -198,8 +296,19 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
             "protein_inference",
             "abundance_normalization_ions",
             "submission_comments",
+            "checkpoint",
+            "n_beams",
+            "n_peaks",
+            "min_mz",
+            "max_mz",
+            "min_intensity",
+            "max_intensity",
+            "tokens",
+            "remove_precursor_tol",
+            "isotope_error_range",
+            "decoding_strategy",
         ]
-        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results"]
+        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results", "precision", "recall"]
         technical_cols = [
             "proteobench_version",
             "intermediate_hash",

@@ -44,7 +44,7 @@ that allow for a more modular and portable implementation.
 Backend
 ------- 
 
-The backend is organized into six main components that you can extend or customize:
+The backend is organized into seven main components that you can extend or customize:
 
 **1. Module implementation** - Define how your benchmarking is performed
    - For quantification: Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule`
@@ -56,6 +56,12 @@ The backend is organized into six main components that you can extend or customi
    - :file:`proteobench/io/parsing/parse_settings.py` handles format conversion
    - Settings defined in TOML files in :file:`proteobench/io/parsing/io_parse_settings/`
    - For new software tools, extend :func:`~proteobench.io.parsing.parse_ion.load_input_file`
+   - Each tool TOML must include an ``[upload_info]`` section (see the checklist below for
+     the required keys and the override mechanism for tools that share a TOML file)
+   - If the new tool is :ref:`open source <open-source-software>`, add its ``software_name``
+     to the ``[open_source].tools`` list in
+     :file:`proteobench/io/parsing/io_parse_settings/tool_metadata.toml` so it is
+     marked with ✅ in the Benchmark Results table
 
 **3. Score calculation** - Compute benchmarking metrics
    - Base class: :class:`~proteobench.score.score_base.ScoreBase` (ABC)
@@ -81,6 +87,17 @@ The backend is organized into six main components that you can extend or customi
 **6. Parameter parsing** - Parse tool-specific settings
    - Functions in :file:`proteobench/io/params` parse parameter setting files
    - Customize per software tool in :file:`proteobench/io/params/json/`
+
+**7. Submission validation** - Check uploaded submissions for consistency
+   - Package: :file:`proteobench/validation/` (framework-agnostic, registry-driven)
+   - A quantification module is configuration-only: add a ``[reference_database]``
+     section to its ``module_settings.toml`` and the ``quant_lfq`` profile is
+     resolved automatically from the parser class
+   - A new module category registers its own *validation profile*
+   - Validation is non-blocking: findings are shown to the submitter and added to
+     the pull-request description, but submission always proceeds
+   - See :doc:`submission-validation` for integrating, extending, and maintaining
+     the checks
 
 Architecture example
 ....................
@@ -759,6 +776,74 @@ based on warning flags in your variables file. The badge is determined by this p
   - ``title`` (full title)
   - ``keywords`` (all keyword strings)
 
+Documentation Homepage Module Grid
+...................................
+
+The documentation homepage (``docs/index.rst``) displays a card grid of all ProteoBench modules.
+This grid is **auto-generated** from the Variables dataclasses — you do not edit ``index.rst`` manually.
+
+**For implemented modules (Variables dataclass exists)**
+
+Add a ``documentation_description`` field to your Variables dataclass alongside the other
+``sidebar_*`` fields. This one-liner appears as the card body on the documentation homepage:
+
+.. code-block:: python
+
+    @dataclass
+    class VariablesDDAQuantAstral:
+        # ... other fields ...
+
+        # Sidebar metadata
+        sidebar_label: str = "Quant LFQ DDA ion Astral"
+        documentation_description: str = (
+            "Benchmark ion-level label-free quantification accuracy of DDA workflows "
+            "using a multi-species (HYE) sample on an Orbitrap Astral instrument."
+        )
+        sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
+        sidebar_category: str = "DDA"
+        # ...
+
+The release-stage badge on the card is derived automatically from the same ``alpha_warning`` /
+``beta_warning`` / ``archived_warning`` flags used by the sidebar. No additional work is needed
+for the badge.
+
+After adding or modifying the ``documentation_description`` field, regenerate the committed RST
+file and commit it:
+
+.. code-block:: bash
+
+    cd <repo-root>
+    python docs/generate_module_grid.py
+    git add docs/module_grid_generated.rst
+    git commit -m "docs: update module grid"
+
+CI will fail if ``module_grid_generated.rst`` is out of sync with the Variables dataclasses.
+
+**For modules only in discussion (no Variables dataclass yet)**
+
+Modules that exist only as a GitHub discussion and have no Streamlit page yet are listed
+separately below the card grid as a bullet list. They are defined in
+`docs/module_in_discussion_grid_extra.yaml <https://github.com/Proteobench/ProteoBench/blob/main/docs/module_in_discussion_grid_extra.yaml>`_.
+
+Add an entry to that file when a new module discussion is opened:
+
+.. code-block:: yaml
+
+    modules:
+      - label: "My new module proposal"
+        url: "https://github.com/orgs/Proteobench/discussions/999"
+        description: "One-sentence description of the proposed benchmark."
+
+Remove the entry (or promote it to a proper Variables dataclass) once the module is implemented.
+After editing the YAML, regenerate and commit:
+
+.. code-block:: bash
+
+    cd <repo-root>
+    python docs/generate_module_grid.py
+    git add docs/module_grid_generated.rst
+    git commit -m "docs: update module grid"
+
 Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObjects`
 ...................................................................................
 
@@ -775,10 +860,10 @@ Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObject
   displays the metric plot if a new results were added to the module.
 - Tab 3: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_submitted`
 - Tab 4: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_public_submission_ui`
-creates  the input fields for the metadata and the
-input file format and type. They are given in the
-`proteobench/modules/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/io/io_parse_settings>`_ folder,
-same as for the backend of the module.
+  creates  the input fields for the metadata and the
+  input file format and type. They are given in the
+  `proteobench/modules/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/io/io_parse_settings>`_ folder,
+  same as for the backend of the module.
 
 :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_results` gathers the data from the backend
 and displays them in several figures. Here you will need to edit and adapt the code
@@ -949,7 +1034,34 @@ a new type of module:
    modules in the folder 
    `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_
 2. Define the input formats using toml files in a new subfolder of
-   `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_
+   `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_.
+   Each tool TOML must include an ``[upload_info]`` section with four keys:
+
+   .. code-block:: toml
+
+      [upload_info]
+      "datapoint_file" = "evidence.txt"
+      "datapoint_file_description" = "Upload the MaxQuant evidence.txt file from the txt output folder."
+      "params_file" = "mqpar.xml"
+      "params_file_description" = "Upload the MaxQuant parameter file mqpar.xml from the search output folder."
+
+   The ``datapoint_file_description`` is displayed as an info box above the result-file uploader
+   in Tab 2 (Upload New Results). The ``params_file_description`` is displayed above the metadata
+   uploader in Tab 6 (Submit New Results). Markdown links are supported in the description strings.
+
+   If multiple tool names share the same TOML (e.g., a tool that reuses the DIA-NN report format),
+   add an ``[upload_info_overrides]`` sub-table to override only the fields that differ:
+
+   .. code-block:: toml
+
+      [upload_info_overrides."FragPipe (DIA-NN quant)"]
+      "params_file" = "fragpipe.workflow"
+      "params_file_description" = "Upload the FragPipe workflow file (.workflow)."
+
+   :func:`~proteobench.io.parsing.parse_settings.ParseSettingsBuilder.get_upload_info` merges the
+   base ``[upload_info]`` with the matching override (if any) and returns the result as a dict.
+   Missing ``[upload_info]`` sections are handled gracefully — no message is shown in the UI.
+
 3. Check, modify or add a parsing procedures in
    `proteobench/io/parsing <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_
    e.g. :file:`parse_ion.py` or :file:`parse_peptidoform.py`.
@@ -1020,3 +1132,9 @@ a new type of module:
     ``REPO_MODULE_REGISTRY`` with the format:
     ``"Results_repo_name": ("module_id", ModuleClass, path_to_params_json)``
     This enables automatic datapoint reprocessing for your module.
+12. **Configure submission validation.** For a quantification module, add a
+    ``[reference_database]`` section (with ``fasta_url``) to the module's
+    ``module_settings.toml``; the ``quant_lfq`` profile is resolved automatically.
+    For a new module category, register a *validation profile* and point the
+    module at it via ``[validation] profile = "<name>"``.
+    See :doc:`submission-validation`.

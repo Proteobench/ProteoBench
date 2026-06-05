@@ -48,6 +48,7 @@ def extract_params(
         if parameters.min_precursor_charge
         else None
     )
+    parameters.allowed_miscleavages = int(series.loc[series["level_2"] == "maxMissedCleavagesDia", 0].values[0])
     parameters.min_precursor_mz = None
     parameters.max_fragment_mz = None
     parameters.min_fragment_mz = None
@@ -55,6 +56,7 @@ def extract_params(
     # Set search engine version from software version
     parameters.search_engine_version = parameters.__dict__["software_version"]
 
+    parameters.fill_none()
     return parameters
 
 

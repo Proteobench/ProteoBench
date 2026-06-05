@@ -7,7 +7,7 @@ across all ProteoBench module types (Quant, De Novo, etc.).
 
 import os
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import pandas as pd
 import streamlit as st
@@ -17,6 +17,11 @@ from ..utils.general import clean_dataframe_for_export
 from ..utils.metricplot import render_metric_plot
 from ..utils.resulttable import configure_aggrid, prepare_display_dataframe, render_aggrid
 
+
+from ..utils.parameter_filters import (  # noqa: F401
+    apply_parameter_filters,
+    generate_parameter_filters,
+)
 from ..utils.resulttable import add_open_source_column
 
 
@@ -405,6 +410,12 @@ def display_existing_results(
     """
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
+    filtered_data = add_open_source_column(filtered_data)
+
+    # Apply parameter-based filters (key_prefix must be unique per module page)
+    filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
+
+    # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()
 
     # --- Session state keys for bidirectional selection ---

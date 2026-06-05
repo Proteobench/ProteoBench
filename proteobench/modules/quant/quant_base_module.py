@@ -24,7 +24,7 @@ from proteobench.datapoint.quant_datapoint import (
     filter_df_numquant_nr_prec,
 )
 from proteobench.github.gh import GithubProteobotRepo
-from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
 from proteobench.io.params.alphadia import extract_params as extract_params_alphadia
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.diann import extract_params as extract_params_diann
@@ -202,6 +202,7 @@ class QuantModule:
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
+        all_datapoints = normalize_dataframe_columns(all_datapoints)
         all_datapoints["old_new"] = "old"
 
         return all_datapoints

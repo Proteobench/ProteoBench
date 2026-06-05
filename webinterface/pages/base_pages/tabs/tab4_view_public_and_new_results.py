@@ -13,6 +13,7 @@ import streamlit as st
 import streamlit_utils
 
 from ..utils.general import clean_dataframe_for_export
+from ..utils.parameter_filters import generate_parameter_filters
 from ..utils.resulttable import add_open_source_column
 
 
@@ -213,6 +214,15 @@ def display_submitted_results(
 
     # Filter data using slider if applicable
     filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
+    filtered_data = add_open_source_column(filtered_data)
+
+    # Pin the newly submitted row so it survives all filters
+    pinned = filtered_data.index[filtered_data.get("old_new", pd.Series(dtype=str)) == "new"] if "old_new" in filtered_data.columns else None
+    filtered_data = generate_parameter_filters(
+        filtered_data,
+        key_prefix=f"param_filter_{variables.all_datapoints_submitted}",
+        pinned_indices=pinned,
+    )
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator()

@@ -17,8 +17,6 @@ from ..utils.general import clean_dataframe_for_export
 from ..utils.metricplot import render_metric_plot
 from ..utils.resulttable import configure_aggrid, prepare_display_dataframe, render_aggrid
 
-from ..utils.resulttable import add_open_source_column
-
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
     """
@@ -251,51 +249,6 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
                 st.code(traceback.format_exc())
 
 
-def render_results_table(
-    data: pd.DataFrame, table_style: str = "dataframe", column_config: Optional[Dict] = None
-) -> None:
-    """
-    Render the results table with configurable styling.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        The data to display.
-    table_style : str, optional
-        The table rendering style ("dataframe" or "aggrid").
-    column_config : Optional[Dict], optional
-        Streamlit column configuration for enhanced display.
-    """
-    if len(data) == 0:
-        st.info("No datapoints available to display.", icon="ℹ️")
-        return
-
-    data = add_open_source_column(data)
-
-    st.subheader("Benchmark Results")
-
-    if table_style == "aggrid":
-        # Import AgGrid only if needed
-        try:
-            from st_aggrid import AgGrid, GridOptionsBuilder
-
-            gb = GridOptionsBuilder.from_dataframe(data)
-            gb.configure_default_column(
-                filterable=True,
-                groupable=False,
-                sorteable=True,
-                editable=False,
-            )
-            grid_options = gb.build()
-            AgGrid(data, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
-        except ImportError:
-            st.warning("AgGrid not available, falling back to dataframe", icon="⚠️")
-            st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
-    else:
-        # Standard dataframe display
-        st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
-
-
 def display_download_section(variables, sort_by: str = "id") -> None:
     """
     Render the download section for raw datasets.
@@ -458,24 +411,25 @@ def display_existing_results(
         st.rerun(scope="fragment")
 
     # --- Render table via shared utilities ---
-    st.subheader("Benchmark Results")
-    df_display = prepare_display_dataframe(filtered_data, highlight_id)
-    grid_options = configure_aggrid(df_display, enable_selection=True)
-    grid_response = render_aggrid(
-        df_display,
-        grid_options,
-        key=st.session_state[agrid_key_id],
-        enable_selection=True,
-    )
+    with st.container(key="tour_results_table"):
+        st.subheader("Benchmark Results")
+        df_display = prepare_display_dataframe(filtered_data, highlight_id)
+        grid_options = configure_aggrid(df_display, enable_selection=True)
+        grid_response = render_aggrid(
+            df_display,
+            grid_options,
+            key=st.session_state[agrid_key_id],
+            enable_selection=True,
+        )
 
-    st.download_button(
-        label="Download table",
-        data=streamlit_utils.save_dataframe(clean_dataframe_for_export(df_display)),
-        file_name="benchmark_results.csv",
-        mime="text/csv",
-        key=f"tab1_download_table_{variables.fig_metric}",
-        icon=":material/download:",
-    )
+        st.download_button(
+            label="Download table",
+            data=streamlit_utils.save_dataframe(clean_dataframe_for_export(df_display)),
+            file_name="benchmark_results.csv",
+            mime="text/csv",
+            key=f"tab1_download_table_{variables.fig_metric}",
+            icon=":material/download:",
+        )
 
     if grid_response is not None:
         selected_rows = grid_response.selected_rows
@@ -485,10 +439,6 @@ def display_existing_results(
                 selected_id = selected_rows.iloc[0].get("id")
             elif isinstance(selected_rows, list) and len(selected_rows) > 0:
                 selected_id = selected_rows[0].get("id")
-
-    # Render results table
-    with st.container(key="tour_results_table"):
-        render_results_table(filtered_data, table_style, column_config)
 
     # Display download section
     with st.container(key="tour_download_section"):

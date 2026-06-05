@@ -20,7 +20,8 @@ Developer guide
 
     repo_layout
     adding-module
-    
+    submission-validation
+
     modules/index
 
 .. toctree::

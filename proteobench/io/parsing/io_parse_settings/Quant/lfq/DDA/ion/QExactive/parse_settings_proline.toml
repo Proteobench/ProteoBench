@@ -29,3 +29,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+
+[upload_info]
+"datapoint_file" = "*.xlsx"
+"datapoint_file_description" = "Upload the ProlineStudio export Excel file (`.xlsx`) containing the 'Quantified peptide ions' sheet."
+"params_file" = "*.xlsx"
+"params_file_description" = "Upload the ProlineStudio export Excel file (`.xlsx`) containing search and quantification settings."

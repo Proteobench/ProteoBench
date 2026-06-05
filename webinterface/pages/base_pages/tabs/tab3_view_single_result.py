@@ -239,8 +239,15 @@ def display_performance_table(
     if hasattr(variables, "description_table_md") and os.path.exists(variables.description_table_md):
         st.markdown(open(variables.description_table_md, "r", encoding="utf-8").read())
 
-    # Display table
-    st.dataframe(performance_data.head(100))
+    # Hide this dataframe's built-in toolbar (including its CSV-download icon) so the
+    # explicit "Download full table" button below is the only download path. Scoped to
+    # this table via the keyed container, so dataframes elsewhere keep their toolbars.
+    st.markdown(
+        "<style>.st-key-single_result_preview_table [data-testid='stElementToolbar'] {display: none;}</style>",
+        unsafe_allow_html=True,
+    )
+    with st.container(key="single_result_preview_table"):
+        st.dataframe(performance_data.head(100))
 
     # Generate sample name (used for user-facing filenames)
     if public_id == "Uploaded dataset":
@@ -254,12 +261,12 @@ def display_performance_table(
     else:
         cache_key = public_hash or public_id
 
-    # Download button
+    # Full-table download button (exports every row, not just the preview)
     random_uuid = uuid.uuid4()
     # Clean data for CSV export (replace newlines with spaces)
     cleaned_data = clean_dataframe_for_export(performance_data)
     st.download_button(
-        label="Download table",
+        label="Download full table",
         data=streamlit_utils.save_dataframe(cleaned_data),
         file_name=f"{sample_name}.csv",
         mime="text/csv",

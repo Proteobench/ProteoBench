@@ -42,6 +42,7 @@ class BaseUIModule(ABC):
         selector_callbacks: List[Callable[[], Any]],
         filter_cols_spec: Union[int, List[int]] = 2,
         selector_cols_spec: Union[int, List[int]] = None,
+        expander_key: Optional[str] = None,
     ) -> List[Any]:
         """
         Render a standardized plot options expander with customizable content.
@@ -85,7 +86,7 @@ class BaseUIModule(ABC):
 
         results = []
 
-        with st.expander("Plot options", expanded=True):
+        with st.expander("Plot options", expanded=True, key=expander_key):
             # Render filter row if there are filter callbacks
             if filter_callbacks:
                 filter_cols = st.columns(filter_cols_spec)
@@ -103,6 +104,10 @@ class BaseUIModule(ABC):
                         results.append(result)
 
         return results
+
+    def get_tour_steps(self) -> list | None:
+        """Return tour steps for this module, or None if no tour is defined."""
+        return None
 
     @abstractmethod
     def display_all_data_results_main(self) -> None:

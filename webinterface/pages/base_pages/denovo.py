@@ -519,32 +519,39 @@ class DeNovoUIObjects(BaseUIModule):
                 user_input=self.user_input,
             )
 
+        # Parse parameter file if uploaded so parsed values pre-populate the fields below.
+        # If no file is provided the fields render with schema defaults for manual entry.
         if self.user_input[self.variables.meta_data]:
-            params = tab5_quant.load_user_parameters(
+            params_from_file = tab5_quant.load_user_parameters(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
             )
-            st.session_state[self.variables.params_file_dict] = params.__dict__
-            self.params_file_dict_copy = copy.deepcopy(params.__dict__)
-
-            tab5_quant.generate_additional_parameters_fields_submission(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
-            tab5_quant.generate_comments_section(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
-            # ? stop_duplicating is not used?
-            self.stop_duplicating = tab5_quant.generate_confirmation_checkbox(
-                check_submission=self.variables.check_submission
-            )
+            if params_from_file is not None:
+                st.session_state[self.variables.params_file_dict] = params_from_file.__dict__
+                self.params_file_dict_copy = copy.deepcopy(params_from_file.__dict__)
+            else:
+                self.params_file_dict_copy = {}
         else:
-            params = None
+            self.params_file_dict_copy = {}
 
+        # Always show parameter fields, comments, and confirmation checkbox.
+        tab5_quant.generate_additional_parameters_fields_submission(
+            variables=self.variables,
+            user_input=self.user_input,
+        )
+        tab5_quant.generate_comments_section(
+            variables=self.variables,
+            user_input=self.user_input,
+        )
+        # ? stop_duplicating is not used?
+        self.stop_duplicating = tab5_quant.generate_confirmation_checkbox(
+            check_submission=self.variables.check_submission
+        )
+
+        params = None
         pr_url = None
-        if st.session_state[self.variables.check_submission] and params is not None:
+        if st.session_state[self.variables.check_submission]:
             get_form_values = tab5_quant.get_form_values(
                 variables=self.variables,
             )

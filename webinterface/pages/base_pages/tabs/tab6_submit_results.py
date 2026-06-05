@@ -276,9 +276,12 @@ def generate_metadata_uploader(variables, user_input, parsesettingsbuilder=None)
         params_desc = upload_info.get("params_file_description", "")
         if params_desc:
             st.info(params_desc)
+    if variables.meta_file_uploader_uuid not in st.session_state:
+        st.session_state[variables.meta_file_uploader_uuid] = uuid.uuid4()
     with st.container(key="tour_meta_uploader"):
         user_input[variables.meta_data] = st.file_uploader(
             "Meta data for searches",
+            key=st.session_state[variables.meta_file_uploader_uuid],
             help=variables.texts.Help.meta_data_file,
             accept_multiple_files=True,
         )

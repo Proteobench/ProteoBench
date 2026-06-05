@@ -339,7 +339,7 @@ class DenovoDatapoint(DatapointBase):
             mod_count += peptidoform.modified_sequence.count(mod_tag)
             parsed_seq = peptidoform.parsed_sequence
             # N-term mod is seperatly tokenized and thus seperatly evaluated (aa_match list is longer than peptide length)
-            if isinstance(peptidoform.properties["n_term"], list):
+            if isinstance(peptidoform.properties["n_term"], list) and len(peptidoform.properties["n_term"]) > 0:
                 parsed_seq = [(None, None)] + parsed_seq
 
             assert len(parsed_seq) == len(match_array)

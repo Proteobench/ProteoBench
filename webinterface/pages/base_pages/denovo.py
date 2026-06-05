@@ -535,6 +535,10 @@ class DeNovoUIObjects(BaseUIModule):
         else:
             self.params_file_dict_copy = {}
 
+        # Ensure software_name is populated from the upload-tab selection when no file was parsed.
+        if "software_name" not in st.session_state[self.variables.params_file_dict]:
+            st.session_state[self.variables.params_file_dict]["software_name"] = self.user_input["input_format"]
+
         # Always show parameter fields, comments, and confirmation checkbox.
         tab5_quant.generate_additional_parameters_fields_submission(
             variables=self.variables,

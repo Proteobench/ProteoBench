@@ -35,6 +35,7 @@ from proteobench.io.params.i2masschroq import (
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.metamorpheus import (
     extract_params as extract_params_metamorpheus,
+    get_incomplete_upload_warning as validate_metamorpheus_files,
 )
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.msangel import extract_params as extract_params_msangel
@@ -70,6 +71,12 @@ class QuantModule:
     module_id : str
         The module identifier for configuration.
     """
+
+    # Maps format name to a function(files) -> str warning when the upload is incomplete.
+    # Only formats that require multiple files need an entry here.
+    VALIDATE_FILES_DICT: Dict[str, Any] = {
+        "MetaMorpheus": validate_metamorpheus_files,
+    }
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
@@ -547,6 +554,29 @@ class QuantModule:
             logging.info(f"Data saved to {zip_file_path}")
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
+
+    def validate_params_files(self, input_file: List, input_format: str) -> Optional[str]:
+        """
+        Validate the uploaded parameter files before parsing.
+
+        Parameters
+        ----------
+        input_file : List
+            List of uploaded files.
+        input_format : str
+            Format of the parameter file.
+
+        Returns
+        -------
+        Optional[str]
+            A warning message if validation fails, or None if the upload is complete.
+        """
+        validator = self.VALIDATE_FILES_DICT.get(input_format)
+        if validator is None:
+            return None
+        if len(input_file) < 2:
+            return validator(input_file)
+        return None
 
     def load_params_file(self, input_file: List[str], input_format: str, json_file: str) -> ProteoBenchParameters:
         """

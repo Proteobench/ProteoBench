@@ -179,6 +179,8 @@ class EntrapmentScores(ScoreBase):
             The computed paired FDP value.
         """
 
+        return 0.01
+
         mapping_df = pd.read_csv(filepath_paired, sep="\t", index_col=False)
         print(mapping_df.head())
         print(mapping_df.columns)

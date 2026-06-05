@@ -9,4 +9,16 @@ It is based on the DDA quantification module "ion-level" described [here](#2-qua
 
 Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform) if you want to submit your results or when you want to explore the module.
 
+## Important Tool-specific settings
+
+Table 2 provides an overview of the required input files for public submission.
+
+**Table 2. Overview of input files required for metric calculation and public submission**
+
+| Tool | Input file | Parameter File |
+|---|---|---|
+| Custom | custom_input.tsv |  |
+| PEAKS | lfq.features.csv | *.txt |
+| WOMBAT | *.csv | config.yaml |
+
 **We are working on the documentation: more information comming soon.**

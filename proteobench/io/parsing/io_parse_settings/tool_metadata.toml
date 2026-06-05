@@ -9,6 +9,8 @@ tools = [
     "AlphaDIA",
     "AlphaPept",
     "Casanovo",
+    "ContraNovo",
+    "NovoB",
     "DeepNovo",
     "i2MassChroQ",
     "InstaNovo",
@@ -18,4 +20,7 @@ tools = [
     "PointNovo",
     "Sage",
     "ProlineStudio",
+    "ContraNovo",
+    "SMSNet",
+    "PepNet"
 ]

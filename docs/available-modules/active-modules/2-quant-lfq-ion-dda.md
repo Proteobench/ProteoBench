@@ -78,15 +78,21 @@ After upload, you will get a link to a Github pull request associated with your 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
 **Table 2. Overview of input files required for metric caluclation and public submission**
-|Tool|Input file|Parameter File|
-|---------|-----|-|
-|AlphaPept|result_peptides.tsv|results.yaml|
-|FragPipe|combined_ion.tsv|fragpipe.workflow|
-|i2MassChroQ|_export.tsv|Project parameters.tsv|
-|MaxQuant|evidence.txt|mqpar.xml|
-|Proline Studio|<result file>.xlsx|<result file>.xlsx|
-|Sage|lfq.tsv|results.json|
-|PEAKS|lfq_features.csv|parameters.txt|
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaPept | *.csv | *.yaml |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| MSAngel | *.xlsx | *.json |
+| MaxQuant | evidence.txt | mqpar.xml |
+| MetaMorpheus | AllQuantifiedPeaks.tsv | search_task_config.toml + version_result.txt |
+| PEAKS | lfq.features.csv | *.txt |
+| ProlineStudio | *.xlsx | *.xlsx |
+| Sage | *.sage.tsv | *.json |
+| WOMBAT | *.csv | *.yaml |
+| i2MassChroQ | *.tsv | *.tsv |
+| quantms | *.csv | *.json |
 
 ### AlphaPept (legacy tool\*)
 

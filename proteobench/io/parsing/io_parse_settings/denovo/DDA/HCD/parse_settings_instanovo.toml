@@ -1,0 +1,17 @@
+
+[mapper]
+"spectrum_id" = "spectrum_id"
+"predictions" = "sequence"
+"log_probs" = "score"
+"token_log_probs" = "aa_scores"
+
+[spectrum_id_mapper]
+"pattern" = ":(\\d+)$"
+
+[sequence_mapper]
+
+[upload_info]
+"datapoint_file" = "*.csv"
+"datapoint_file_description" = "Upload the InstaNovo de novo sequencing output CSV file."
+"params_file" = "*.yaml"
+"params_file_description" = ""

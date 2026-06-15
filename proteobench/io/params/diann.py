@@ -12,6 +12,31 @@ from packaging.version import Version
 
 from proteobench.io.params import ProteoBenchParameters
 
+MODIFICATION_MAPPING = {
+    # Command-line short forms
+    "unimod4": "C[Carbamidomethyl]",
+    # Descriptive forms
+    "Carbamidomethyl (C)": "C[Carbamidomethyl]",
+    "Cysteine carbamidomethylation": "C[Carbamidomethyl]",
+    "Oxidation (M)": "M[Oxidation]",
+    "Acetyl": "N-term[Acetyl]",
+    # UniMod short forms (from cfg-extracted log text)
+    "UniMod:4": "C[Carbamidomethyl]",
+    "UniMod:35": "M[Oxidation]",
+    "UniMod:1": "N-term[Acetyl]",
+    "UniMod:21": "S[Phospho], T[Phospho], Y[Phospho]",
+    "UniMod:121": "K[GG]",
+    # UniMod full forms with slash separators (from command-line parsing)
+    "UniMod:35/15.994915/M": "M[Oxidation]",
+    "UniMod:1/42.010565/*n": "N-term[Acetyl]",
+    "UniMod:21/79.966331/STY": "STY[Phospho]",
+    "UniMod:121/114.042927/K": "K[GG]",
+    # UniMod full forms with comma separators (alternative notation)
+    "UniMod:1,42.010565,*n": "N-term[Acetyl]",
+    "UniMod:21,79.966331,STY": "STY[Phospho]",
+    "UniMod:121,114.042927,K": "K[GG]",
+}
+
 # Regexes
 fragment_mass_tolerance_regex = r"Optimised mass accuracy: (\d*\.?\d+) ppm"
 precursor_mass_tolerance_regex = r"Recommended MS1 mass accuracy setting: (\d*\.?\d+) ppm"
@@ -373,6 +398,16 @@ def extract_modifications(lines: List[str], regexes: List[str]) -> Optional[str]
     return ",".join(modifications).replace("\n", "") if modifications else None
 
 
+def normalize_enzyme(enzyme_str: str) -> str:
+    """Normalize enzyme string to a canonical form."""
+    if enzyme_str == "K*,R*":
+        return "Trypsin/P"
+    elif enzyme_str == "K*,R*,!P":
+        return "Trypsin"
+    else:
+        return enzyme_str
+
+
 def extract_params(
     fname: str, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
 ) -> ProteoBenchParameters:
@@ -450,11 +485,11 @@ def extract_params(
                 parameters[proteobench_setting] = parse_setting(proteobench_setting, cmdline_dict[cmd_setting])
 
     # Parse cut parameter to standard enzyme name
-    if "enzyme" not in parameters.keys():  # This happens when running fragpipe-diann
-        parameters["enzyme"] = "cut"
+    if "enzyme" not in parameters.keys():
+        parameters["enzyme"] = None
     elif parameters["enzyme"] == "K*,R*":
         parameters["enzyme"] = "Trypsin/P"
-    elif parameters["enzyme"] == "K*,R*,!*P":
+    elif parameters["enzyme"] == "K*,R*,!P":
         parameters["enzyme"] = "Trypsin"
 
     # If mass-acc flag is not present in cmdline string, extract it from the log file
@@ -501,7 +536,9 @@ def extract_params(
                 "ident_fdr_protein": None,
                 "enable_match_between_runs": bool(re.search(enable_match_between_runs_regex, "".join(lines))),
                 "enzyme": (
-                    f"{extract_cfg_parameter(lines, cleavage_regex) or ''},!{extract_cfg_parameter(lines, cleavage_exc_regex) or ''}"
+                    normalize_enzyme(
+                        f"{extract_cfg_parameter(lines, cleavage_regex) or ''},!{(extract_cfg_parameter(lines, cleavage_exc_regex) or '').strip('*')}"
+                    )
                 ),
                 "allowed_miscleavages": extract_cfg_parameter(lines, missed_cleavages_regex, int),
                 "min_peptide_length": extract_cfg_parameter(lines, min_pep_len_regex, int),
@@ -527,18 +564,32 @@ def extract_params(
         protein_inference = extract_cfg_parameter(lines, protein_inference_regex)
         parameters["protein_inference"] = PROT_INF_MAP.get(protein_inference, "Genes")
 
-    return ProteoBenchParameters(**parameters, filename=json_file)
+    # Map modification strings to ProForma-like notation
+    for mod_key in ("fixed_mods", "variable_mods"):
+        raw = parameters.get(mod_key)
+        if not raw or not isinstance(raw, str):
+            continue
+        mapped = []
+        for mod in raw.split(","):
+            mod = mod.strip()
+            mapped.append(MODIFICATION_MAPPING.get(mod, mod))
+        parameters[mod_key] = ", ".join(mapped)
+
+    params = ProteoBenchParameters(**parameters, filename=json_file)
+    params.fill_none()
+    return params
 
 
 if __name__ == "__main__":
     for fname in [
-        "../../../test/params/DIANN_output_20240229_report.log.txt",
-        "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
-        "../../../test/params/DIANN_WU304578_report.log.txt",
-        "../../../test/params/DIANN_1.7.16.log.txt",
-        "../../../test/params/DIANN_cfg_settings.txt",
-        "../../../test/params/DIANN_cfg_MBR.txt",
-        "../../../test/params/DIA-NN_cfg_directq.txt",
+        # "../../../test/params/DIANN_output_20240229_report.log.txt",
+        # "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
+        # "../../../test/params/DIANN_WU304578_report.log.txt",
+        # "../../../test/params/DIANN_1.7.16.log.txt",
+        # "../../../test/params/DIANN_cfg_settings.txt",
+        # "../../../test/params/DIANN_cfg_MBR.txt",
+        # "../../../test/params/DIA-NN_cfg_directq.txt",
+        "../../../test/params/diann_weird_enzyme.txt",
     ]:
         file = pathlib.Path(fname)
         params = extract_params(file)

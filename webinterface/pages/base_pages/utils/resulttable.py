@@ -28,9 +28,7 @@ def add_open_source_column(df: pd.DataFrame) -> pd.DataFrame:
     if "software_name" not in df.columns:
         return df
     df = df.copy()
-    df["open_source"] = df["software_name"].apply(
-        lambda x: "✅" if str(x).lower() in OPEN_SOURCE_TOOLS else ""
-    )
+    df["open_source"] = df["software_name"].apply(lambda x: "✅" if str(x).lower() in OPEN_SOURCE_TOOLS else "")
     cols = df.columns.tolist()
     cols.remove("open_source")
     idx = cols.index("software_name") + 1
@@ -199,8 +197,8 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
         "isotope_error_range",
         "decoding_strategy",
     }
-    
-    result_cols = {"median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results", , "precision", "recall"}
+
+    result_cols = {"median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results", "precision", "recall"}
     technical_cols = {
         "proteobench_version",
         "intermediate_hash",

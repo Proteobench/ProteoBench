@@ -224,6 +224,15 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
                 pinned="left",
                 cellStyle=_get_cell_style_js(COLOR_IDENTIFIER),
             )
+        elif col == "open_source":
+            # Narrow centred indicator for open-source tools (✅), right after software_name
+            gb.configure_column(
+                col,
+                header_name="Open source",
+                width=110,
+                minWidth=90,
+                cellStyle=_get_cell_style_js(COLOR_PARAMETER, align="center"),
+            )
         elif col in parameter_cols:
             gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_PARAMETER))
         elif col in result_cols:
@@ -258,11 +267,13 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
     if len(df) == 0:
         return df
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
+    df = add_open_source_column(df)
 
     try:
         identifier_cols = ["selected", "id"]
         parameter_cols = [
             "software_name",
+            "open_source",
             "software_version",
             "search_engine",
             "search_engine_version",

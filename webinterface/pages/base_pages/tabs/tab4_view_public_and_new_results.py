@@ -14,7 +14,7 @@ import streamlit_utils
 
 from ..utils.general import clean_dataframe_for_export
 from ..utils.parameter_filters import generate_parameter_filters
-from ..utils.resulttable import add_open_source_column
+from ..utils.resulttable import add_open_source_column, configure_aggrid, prepare_display_dataframe, render_aggrid
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -128,58 +128,37 @@ def filter_submitted_data_if_applicable(variables, ionmodule, use_slider: bool =
     return st.session_state[variables.all_datapoints_submitted]
 
 
-def render_submitted_results_table(
-    data: pd.DataFrame, table_style: str = "dataframe", column_config: Optional[Dict] = None
-) -> None:
+def render_submitted_results_table(data: pd.DataFrame, variables) -> None:
     """
-    Render the submitted results table with configurable styling and download button.
+    Render the submitted results table using the shared styled AgGrid grid.
+
+    Uses the same presentation as Tab 1 (column ordering, colour coding, and the
+    module-appropriate layout) so the two tabs look identical.
 
     Parameters
     ----------
     data : pd.DataFrame
         The data to display.
-    table_style : str, optional
-        The table rendering style ("dataframe" or "aggrid").
-    column_config : Optional[Dict], optional
-        Streamlit column configuration for enhanced display.
+    variables : object
+        Variables object, used to derive a stable table widget key.
     """
     if len(data) == 0:
         st.info("No submitted datapoints available to display.", icon="ℹ️")
         return
 
-    data = add_open_source_column(data)
-
     st.subheader("Submitted Benchmark Results")
 
-    if table_style == "aggrid":
-        try:
-            from st_aggrid import AgGrid, GridOptionsBuilder
+    df_display = prepare_display_dataframe(data, highlight_id=None)
+    grid_options = configure_aggrid(df_display, enable_selection=False)
+    table_key = f"tab4_table_{getattr(variables, 'fig_metric_submitted', 'submitted')}"
+    render_aggrid(df_display, grid_options, key=table_key, enable_selection=False)
 
-            gb = GridOptionsBuilder.from_dataframe(data)
-            gb.configure_default_column(
-                filterable=True,
-                groupable=False,
-                sorteable=True,
-                editable=False,
-            )
-            grid_options = gb.build()
-            AgGrid(data, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
-        except ImportError:
-            st.warning("AgGrid not available, falling back to dataframe", icon="⚠️")
-            st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
-    else:
-        st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
-
-    # Add download button for the results table
-    random_uuid = uuid.uuid4()
-    # Clean data for CSV export (replace newlines with spaces)
-    cleaned_data = clean_dataframe_for_export(data)
     st.download_button(
         label="Download table",
-        data=streamlit_utils.save_dataframe(cleaned_data),
+        data=streamlit_utils.save_dataframe(clean_dataframe_for_export(df_display)),
         file_name="submitted_benchmark_results.csv",
         mime="text/csv",
-        key=f"tab4_download_{random_uuid}",
+        key=f"tab4_download_table_{getattr(variables, 'fig_metric_submitted', 'submitted')}",
         icon=":material/download:",
     )
 
@@ -249,5 +228,5 @@ def display_submitted_results(
             with st.expander("Error details"):
                 st.code(traceback.format_exc())
 
-    # Render results table
-    render_submitted_results_table(filtered_data, table_style, column_config)
+    # Render results table (same styled grid as Tab 1)
+    render_submitted_results_table(filtered_data, variables)

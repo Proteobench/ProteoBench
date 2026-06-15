@@ -20,6 +20,8 @@ Developer guide
 
     repo_layout
     adding-module
+    parameter-homogenization
+    
     submission-validation
 
     modules/index

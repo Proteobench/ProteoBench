@@ -19,6 +19,9 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
     Used by plasma benchmarking modules that use human plasma, yeast, and E. coli species.
     """
 
+    def __init__(self, y_axis_title: str = "Number of quantified spike-in precursors"):
+        self.y_axis_title = y_axis_title
+
     def generate_in_depth_plots(
         self, performance_data: pd.DataFrame, parse_settings: any, **kwargs
     ) -> Dict[str, go.Figure]:
@@ -677,7 +680,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         hide_annot: bool = False,
         colorblind_mode: bool = False,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         min_nr_observed: int = None,
         annotation: str = "",
         **kwargs,
@@ -708,7 +711,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Mapping for legend names.
         hide_annot : bool
             Whether to hide annotations on the plot.
-        default_cutoff_min_prec : int
+        default_cutoff_min_feature : int
             Default min precursor threshold for extracting metrics.
         min_nr_observed : int, optional
             Override the cutoff level with this value if provided.
@@ -722,8 +725,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with the plasma scatterplot.
         """
-        # Use min_nr_observed if provided, otherwise use default_cutoff_min_prec
-        cutoff_level = min_nr_observed if min_nr_observed is not None else default_cutoff_min_prec
+        # Use min_nr_observed if provided, otherwise use default_cutoff_min_feature
+        cutoff_level = min_nr_observed if min_nr_observed is not None else default_cutoff_min_feature
         return self._plot_plasma_scatterplot(
             result_df,
             metric=metric,
@@ -736,7 +739,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             legend_name_map=legend_name_map,
             hide_annot=hide_annot,
             colorblind_mode=colorblind_mode,
-            default_cutoff_min_prec=cutoff_level,
+            default_cutoff_min_feature=cutoff_level,
             annotation=annotation,
             **kwargs,
         )
@@ -793,7 +796,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         hide_annot: bool = False,
         colorblind_mode: bool = False,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         annotation: str = "",
         **kwargs,
     ) -> go.Figure:
@@ -827,7 +830,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Mapping for legend names.
         hide_annot : bool
             Whether to hide annotations on the plot.
-        default_cutoff_min_prec : int
+        default_cutoff_min_feature : int
             Default min precursor threshold for extracting metrics.
         annotation : str, optional
             Text annotation to display on the plot (e.g., "-Alpha-", "-Beta-").
@@ -858,7 +861,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # values cluster, maximising visual separation for small differences.
         raw_size_vals = []
         for _, row in result_df.iterrows():
-            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_feature)
             if m is not None:
                 sv = m.get("dynamic_range_human_plasma_mean", 0.0)
                 if sv > 0:
@@ -871,7 +874,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Group by software to create separate traces (allows colorblind markers)
         software_data = {}
         for idx, row in result_df.iterrows():
-            metrics = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            metrics = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_feature)
             if metrics is None:
                 continue
 
@@ -969,7 +972,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 showgrid=True,
             ),
             yaxis=dict(
-                title="Number of quantified spike-in precursors",
+                title=self.y_axis_title,
                 gridcolor="lightgray",
                 gridwidth=1,
                 linecolor="black",

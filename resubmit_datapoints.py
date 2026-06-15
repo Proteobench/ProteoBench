@@ -1304,7 +1304,7 @@ def reprocess_datapoint(
                         default_cutoff = min(cutoffs) if cutoffs else 3
                     except (ValueError, TypeError):
                         pass
-                kwargs["default_cutoff_min_prec"] = default_cutoff
+                kwargs["default_cutoff_min_feature"] = default_cutoff
 
                 # AlphaDIA secondary file
                 if extracted["input_file_secondary"]:

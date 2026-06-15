@@ -365,13 +365,14 @@ def display_existing_results(
     """
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
+
     filtered_data = add_open_source_column(filtered_data)
 
     # Apply parameter-based filters (key_prefix must be unique per module page)
     filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
 
     # Get plot generator from module
-    plot_generator = ionmodule.get_plot_generator()
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # --- Session state keys for bidirectional selection ---
     # highlight_key : ProteoBench ID currently highlighted in both widgets

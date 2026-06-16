@@ -37,3 +37,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+
+[upload_info]
+"datapoint_file" = "AllQuantifiedPeaks.tsv"
+"datapoint_file_description" = "Upload the MetaMorpheus `AllQuantifiedPeaks.tsv` file from the task output folder."
+"params_file" = "search_task_config.toml + version_result.txt"
+"params_file_description" = "Upload the MetaMorpheus search task TOML file and the version text file (two files are required)."

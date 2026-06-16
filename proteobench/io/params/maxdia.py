@@ -50,7 +50,7 @@ def extract_params(
         if parameters.min_precursor_charge
         else None
     )
-
+    parameters.allowed_miscleavages = int(series.loc[series["level_2"] == "maxMissedCleavagesDia", 0].values[0])
     parameters.min_precursor_mz = None
     parameters.max_fragment_mz = None
     parameters.min_fragment_mz = None
@@ -70,6 +70,7 @@ def extract_params(
         f"[-{precursor_mass_tolerance_value:g} ppm, {precursor_mass_tolerance_value:g} ppm]"
     )
 
+    parameters.fill_none()
     return parameters
 
 

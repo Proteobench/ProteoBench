@@ -27,6 +27,13 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     # Store selection in user_input for use in form
     user_input["input_format"] = selected_format
 
+    # Show per-tool upload guidance from [upload_info] in the parse settings TOML.
+    get_upload_info = getattr(parsesettingsbuilder, "get_upload_info", None)
+    upload_info = get_upload_info(selected_format) if get_upload_info is not None else {}
+    datapoint_desc = upload_info.get("datapoint_file_description", "")
+    if datapoint_desc:
+        st.info(datapoint_desc)
+
     # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
     if selected_format == "AlphaDIA":
         st.info(
@@ -58,6 +65,9 @@ def generate_input_fields(
             type=["tsv", "csv"],
             key="alphadia_secondary_file",
         )
+
+    elif user_input.get("input_format") == "SMSNet":
+        user_input["input_csv_secondary"] = st.file_uploader("Upload second SMSNet file", key="SMSNet probability file")
     else:
         user_input["input_csv_secondary"] = None
 
@@ -244,7 +254,7 @@ def run_benchmarking_process(variables, ionmodule, user_input):
 
     # Only add slider/cutoff parameter if module uses it
     if set_slider_val is not None:
-        benchmark_kwargs["default_cutoff_min_prec"] = set_slider_val
+        benchmark_kwargs["default_cutoff_min_feature"] = set_slider_val
 
     # Only add secondary file if provided
     if tmp_file_secondary_name:

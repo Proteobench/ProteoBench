@@ -4,7 +4,10 @@ This document specifies the internal tabular formats that ProteoBench produces
 while processing a benchmark submission. These formats are for the internal use of:
 scoring, plotting, datapoint generation, the submission-validation layer, and the
 `intermediate_hash` that identifies a dataset all depend on the column names,
-types, and semantics defined here.
+types, and semantics defined here. It is important to note that the intermediate format
+is specific for a module. Even though models can share intermediate formats where
+applicable. If there is any explanation on this page that is module specific, this
+is purely for illustrative purposes.
 
 ```{note}
 Status: descriptive specification of the current behaviour (format version 1,
@@ -30,8 +33,8 @@ tool parser must produce.
 
 Produced by `convert_to_standard_format()` in
 `proteobench/io/parsing/parse_settings.py`. It is a long table with one row per
-(precursor, run): a precursor that was quantified in six runs yields six rows.
-The table is not projected to a fixed column set, so unmapped input columns may
+(e.g., precursor, run for the precursor quantification module): a precursor 
+that was quantified in six runs yields six rows. The table is not projected to a fixed column set, so unmapped input columns may
 also be present; only the columns below are relied upon downstream (this is quite specific
 for quantification modules; may differ for other modules!).
 
@@ -56,7 +59,7 @@ for quantification modules; may differ for other modules!).
 The intermediate format is the table defined for calculating all metrics in a given module. It should contain
 every value needed for metric calculation in a standardized fashion. It is not limited to 
 these columns, it can contain more columns, even ones that are tool specific. However, it at
-least needs defined and "normalized" columns for metric calculation.
+least needs defined (i.e., description of columns) and "normalized" (i.e., values should be comparable between submissions) columns for metric calculation.
 
 An example for quantificaiton modules; produced by `QuantScoresHYE.generate_intermediate()` in
 `proteobench/score/quantscoresHYE.py`. One row per precursor (or peptidoform).
@@ -121,7 +124,7 @@ column order and row order as part of the format.
   `QuantDatapointPYE`, not in the intermediate table. The plasma datapoint also
   uses `max_nr_observed = 12` instead of 6.
 - **De novo (`denovo_DDA_HCD`)**: a different schema entirely, produced by
-  `DenovoScores.generate_intermediate()`. It is keyed on spectrum and peptidoform
+  columns above. This modules is still in development, the full documentation of its intermediate format will be provided soon.
   and carries match-type and amino-acid-level columns (for example `match_type`,
   `aa_matches_dn`/`aa_matches_gt`, `pep_match`) rather than the quantitative
   columns above. A detailed catalogue for the de novo intermediate is out of

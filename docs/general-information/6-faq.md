@@ -11,7 +11,6 @@ The goal of ProteoBench is not to select or prescribe a single best one-size-fit
 
 ProteoBench is intended for several user groups involved in the development, evaluation, or application of proteomics data analysis workflows.
 For **end-users**, ProteoBench helps identify suitable workflows for specific analytical needs by allowing comparison with public reference results and state-of-the-art pipelines. This includes proteomics researchers, experimental laboratories, and core facilities that want to evaluate, document, or monitor routine analysis workflows.
-For **end-users**, ProteoBench helps identify suitable workflows for specific analytical needs by allowing comparison with public reference results and state-of-the-art pipelines. This includes proteomics researchers, experimental laboratories, and core facilities that want to evaluate, document, or monitor routine analysis pipelines.
 
 For **software and method developers**, ProteoBench provides a framework to identify the specific strengths and weaknesses of workflows, algorithms, software versions, or parameter choices. These insights can guide further development and support the contribution of new benchmark modules for emerging proteomics applications.
 
@@ -30,7 +29,7 @@ The parameters used for all the public {ref}`benchmark runs <benchmark-run>` are
 
 ## Do I need to use a specific FASTA database?
 For modules where database choice affects the benchmark outcome, the recommended or required FASTA database is specified in the module documentation. Using the same database ensures that submitted results are comparable.
-For modules where database choice affects the benchmark outcome, the recommended or required FASTA database is specified in the module documentation. Using the same database helps ensure that submitted results are comparable.
+
 
 ## Can I benchmark commercial software?
 Yes. ProteoBench is designed to include results from commercial software when the software outputs all the workflow parameters/metadata in a format that can be parsed or converted into one of the supported submission formats. 
@@ -54,7 +53,6 @@ This design allows ProteoBench to support a wide range of tools, including comme
 
 ## How do I find the input data associated with a benchmark module?
 Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as [ProteomeXchange](https://www.proteomexchange.org/), depending on the dataset.
-Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
 If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
 ## What is QuantError?
@@ -68,6 +66,7 @@ QuantError should be interpreted together with the other module-specific metrics
 ProteoBench does not apply post-processing steps that may affect the benchmark metrics. We consider normalization, missing-value handling, transfer steps, protein inference, and quantification strategies as integral parts of benchmarked workflows. They should be reported in the parameter files submitted alongside the workflow results upon public submission.
 
 Where relevant, module documentation specifies which processing steps are performed by ProteoBench itself and which are expected to have been performed by the submitted workflow.
+
 ## How can I interpret differences between {ref}`benchmark runs <benchmark-run>`?
 
 ProteoBench provides standardized metrics and visualizations that make differences between workflows visible. These differences may arise from many factors, including feature detection, spectral library generation, identification scoring, false discovery rate control, match-transfer strategies, normalization, missing-value handling, quantification algorithms, and software-specific defaults.
@@ -82,8 +81,6 @@ False discovery rate control is a central concern in proteomics benchmarking. Pr
 
 ProteoBench comparison plots should not be interpreted as universal rankings of software tools. A tool that performs well in one module, with one dataset or metric, may not be optimal for another biological question, instrument type, acquisition method, or analysis goal.
 
-
-
 Users should consider:
 
 - The benchmark module and dataset.
@@ -94,15 +91,13 @@ Users should consider:
 - Whether the workflow resembles their own intended use case.
 
 ProteoBench is best used as a transparent decision-support resource rather than as a single definitive ranking system.
-ProteoBench does not point to a single best one-fits-all data analysis workflow; should not be used as evidence for generalized statements about a workflow’s performance, and should not be used by developers as single performance measure of their workflow.
-
-## How can I follow updates or community discussions?
-
-Ongoing discussions can be followed on the [ProteoBench Discussions page](https://github.com/orgs/Proteobench/discussions). Please not that to take part in the discussion a GitHub account is needed.
+ProteoBench does not point to a single best one-size-fits-all data analysis workflow; it should not be used as evidence for generalized statements about a workflow’s performance, and should not be used by developers as a single performance measure of their workflow.
 
 ## How can I follow ProteoBench development and community discussions?
 
 ProteoBench development and discussion are community-oriented. Users can follow the relevant repository, documentation pages, discussion forum, or community channels to receive updates about new modules, software parsers, benchmark datasets, documentation improvements, and public releases.
+
+Ongoing discussions can be followed on the [ProteoBench Discussions page](https://github.com/orgs/Proteobench/discussions). Please note that to take part in the discussion a GitHub account is needed.
 
 ### For GitHub users
 

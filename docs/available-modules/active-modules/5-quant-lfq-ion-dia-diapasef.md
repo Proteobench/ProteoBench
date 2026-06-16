@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level - diaPASEF
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-independent acquisition (DIA) on a timsTOF (Bruker).
 It is similar to the DIA quantification module "precursor ion-level" described [here](#7-quant-lfq-precursor-dia-Astral_2Th).

@@ -24,13 +24,15 @@ def display_workflow_comparison(variables, ionmodule) -> None:
         Module for accessing data and methods.
     """
     st.header("Workflow Comparison")
-    st.markdown("""
+    st.markdown(
+        """
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
         - **Precursor overlap**: Bar plot showing number of shared and unique precursors
         - **Parameter differences**: Table highlighting what differs between workflows
-        """)
+        """
+    )
 
     # Initialize data
     _initialize_comparison_data(variables, ionmodule)
@@ -122,7 +124,7 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
         st.session_state[plot_key] = str(uuid.uuid4())
 
     # Generate the plot
-    plot_generator = ionmodule.get_plot_generator()
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
     fig_metric = plot_generator.plot_main_metric(
         filtered_data,
         metric=metric,

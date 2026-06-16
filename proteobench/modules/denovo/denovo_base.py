@@ -16,12 +16,13 @@ from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
     filter_df_numquant_epsilon,
-    filter_df_numquant_nr_prec,
+    filter_df_numquant_nr_feature,
 )
 from proteobench.github.gh import GithubProteobotRepo
-from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
 from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
 from proteobench.io.params.casanovo import extract_params as extract_params_casanovo
+from proteobench.io.params.contranovo import extract_params as extract_params_contranovo
 from proteobench.io.params.deepnovo import extract_params as extract_params_deepnovo
 from proteobench.io.params.instanovo import extract_params as extract_params_instanovo
 from proteobench.io.params.pihelixnovo import (
@@ -57,6 +58,7 @@ class DeNovoModule:
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "AdaNovo": extract_params_adanovo,
         "Casanovo": extract_params_casanovo,
+        "ContraNovo": extract_params_contranovo,
         "DeepNovo": extract_params_deepnovo,
         "InstaNovo": extract_params_instanovo,
         "Pi-HelixNovo": extract_params_pihelixnovo,
@@ -114,7 +116,7 @@ class DeNovoModule:
         """
         return False
 
-    def get_plot_generator(self) -> PlotGeneratorBase:
+    def get_plot_generator(self, **kwargs) -> PlotGeneratorBase:
         """
         Get the plot generator for this module.
 
@@ -181,6 +183,7 @@ class DeNovoModule:
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
+        all_datapoints = normalize_dataframe_columns(all_datapoints)
         all_datapoints["old_new"] = "old"
 
         return all_datapoints
@@ -216,8 +219,8 @@ class DeNovoModule:
             for v in all_datapoints["results"]
         ]
 
-        all_datapoints["nr_prec"] = [
-            filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        all_datapoints["nr_feature"] = [
+            filter_df_numquant_nr_feature(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
 
         return all_datapoints
@@ -228,7 +231,7 @@ class DeNovoModule:
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,  # TODO: remove?
+        default_cutoff_min_feature: int = 3,  # TODO: remove?
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -243,7 +246,7 @@ class DeNovoModule:
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all datapoints from the ProteoBench repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs an ion has to be identified in. Defaults to 3.
 
         Returns

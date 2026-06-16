@@ -205,6 +205,7 @@ class QuantUIObjects(BaseUIModule):
             self.submission_ready = tab6_submit_results.generate_submission_ui_elements(
                 variables=self.variables,
                 user_input=self.user_input,
+                parsesettingsbuilder=self.parsesettingsbuilder,
             )
         elif is_tour:
             # Show the metadata uploader for tour preview even without a result file
@@ -237,8 +238,7 @@ class QuantUIObjects(BaseUIModule):
                 st.session_state[self.variables.params_file_dict] = {}
             self.user_input.setdefault(
                 "input_format",
-                st.session_state.get("software_tool_selector")
-                or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
+                st.session_state.get("software_tool_selector") or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
             )
             st.info(
                 "These fields are auto-filled when you upload a parameter file above. "
@@ -319,13 +319,17 @@ class QuantUIObjects(BaseUIModule):
             st.session_state[mode_key] = "Species-weighted"
 
         def render_metric_selector():
-            help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio("Select metric", ["Median", "Mean"], key=metric_key, help=help_text, horizontal=True)
 
         def render_mode_selector():
             if st.session_state.get(metric_key) == "ROC-AUC":
                 return None
-            help_text = getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio(
                 "Select metric calculation approach",
                 ["Species-weighted", "Global"],
@@ -339,9 +343,13 @@ class QuantUIObjects(BaseUIModule):
 
         self.render_plot_options_expander(
             filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            selector_callbacks=[
+                render_metric_selector,
+                render_mode_selector,
+                render_colorblind_selector,
+            ],
             filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
+            selector_cols_spec=[1, 1, 1],
             expander_key="tour_plot_options",
         )
 
@@ -455,9 +463,13 @@ class QuantUIObjects(BaseUIModule):
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
             filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            selector_callbacks=[
+                render_metric_selector,
+                render_mode_selector,
+                render_colorblind_selector,
+            ],
             filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
+            selector_cols_spec=[1, 1, 1],
         )
 
         # Extract returned values

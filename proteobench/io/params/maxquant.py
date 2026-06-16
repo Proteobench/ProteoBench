@@ -15,6 +15,54 @@ from proteobench.io.params import ProteoBenchParameters
 
 logger = logging.getLogger()
 
+# Fallback mapping for modifications without parenthesized residue specifiers
+MODIFICATION_MAPPING = {
+    "Cys-Cys": "C[Disulfide]",
+    "Cysteinyl": "C[Cysteinyl]",
+    "Cysteinyl - carbamidomethyl": "C[Cysteinyl + Carbamidomethyl]",
+}
+
+
+def _homogenize_mod(mod_str: str) -> str:
+    """Convert MaxQuant modification format to ProForma-like notation.
+
+    MaxQuant format: ``{modname} ({residues})``
+    where residues can be single letters (``M``), multi-letter (``STY`` - one per letter),
+    or terminal qualifiers (``N-term``, ``Protein N-term``, ``C-term``, ``Protein C-term``).
+
+    Examples:
+        ``Carbamidomethyl (C)`` -> ``C[Carbamidomethyl]``
+        ``Phospho (STY)`` -> ``S[Phospho], T[Phospho], Y[Phospho]``
+        ``Acetyl (Protein N-term)`` -> ``Protein N-term[Acetyl]``
+    """
+    mod_str = mod_str.strip()
+    # Find the last parenthesized group as the residue specifier
+    idx = mod_str.rfind("(")
+    if idx == -1:
+        return MODIFICATION_MAPPING.get(mod_str, mod_str)
+    name = mod_str[:idx].strip()
+    residues = mod_str[idx + 1 :].rstrip(")").strip()
+    # Terminal qualifiers
+    lower = residues.lower()
+    if "n-term" in lower or "c-term" in lower:
+        return f"{residues}[{name}]"
+    # Amino acid residues: expand each letter
+    parts = [f"{aa}[{name}]" for aa in residues]
+    return ", ".join(parts)
+
+
+def _homogenize_mods(raw_mods: str, sep: str = ",") -> str:
+    """Parse and homogenize a separator-delimited modification string."""
+    if not raw_mods or not raw_mods.strip():
+        return ""
+    mapped = []
+    for mod in raw_mods.split(sep):
+        mod = mod.strip()
+        if not mod:
+            continue
+        mapped.append(_homogenize_mod(mod))
+    return ", ".join(mapped)
+
 
 def extend_tuple(t, target_length: int):
     """
@@ -286,21 +334,23 @@ def extract_params(
     if params.software_version > "1.6.0.0":
         fixed_mods = record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "fixedModifications", :]].squeeze()
         if isinstance(fixed_mods, str):
-            params.fixed_mods = fixed_mods
+            fixed_mods_raw = fixed_mods
         else:
-            params.fixed_mods = ",".join(fixed_mods)
+            fixed_mods_raw = ",".join(fixed_mods)
     else:
         fixed_mods = record.loc[pd.IndexSlice["fixedModifications", :]].squeeze()
         if isinstance(fixed_mods, str):
-            params.fixed_mods = fixed_mods
+            fixed_mods_raw = fixed_mods
         else:
-            params.fixed_mods = ",".join(fixed_mods)
+            fixed_mods_raw = ",".join(fixed_mods)
+    params.fixed_mods = _homogenize_mods(fixed_mods_raw)
 
     variable_mods = record.loc[pd.IndexSlice["parameterGroups", "parameterGroup", "variableModifications", :]].squeeze()
     if isinstance(variable_mods, str):
-        params.variable_mods = variable_mods
+        variable_mods_raw = variable_mods
     else:
-        params.variable_mods = ",".join(variable_mods)
+        variable_mods_raw = ",".join(variable_mods)
+    params.variable_mods = _homogenize_mods(variable_mods_raw)
     params.max_mods = int(record.loc[("parameterGroups", "parameterGroup", "maxNmods")].squeeze())
     params.min_precursor_charge = None
     params.max_precursor_charge = int(

@@ -1,11 +1,55 @@
 """Base classes for ProteoBench online Streamlit web server."""
 
+import os
 from abc import ABC, abstractmethod
 
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 
 import proteobench
+
+# 8-byte PNG file signature.
+_PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+def _resolve_asset(path: str) -> str:
+    """Resolve an asset path, materializing git symlinks checked out as text.
+
+    On Windows checkouts without symlink support (``core.symlinks=false``), git
+    writes a symlink as a small text file containing the link target instead of
+    a real symlink. Streamlit/PIL then fail to read it as an image. Detect that
+    case and return the resolved target path; otherwise return ``path``
+    unchanged.
+
+    Parameters
+    ----------
+    path : str
+        Path to the asset, relative to the current working directory.
+
+    Returns
+    -------
+    str
+        The original path, or the resolved symlink-target path when the file is
+        a text pointer to an existing target.
+    """
+    try:
+        with open(path, "rb") as handle:
+            head = handle.read(len(_PNG_SIGNATURE))
+    except OSError:
+        return path
+    # A real PNG (the symlink correctly followed) starts with the signature.
+    if head.startswith(_PNG_SIGNATURE):
+        return path
+    # Otherwise treat the file content as a (relative) symlink target.
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            target = handle.read().strip()
+    except (OSError, UnicodeDecodeError):
+        return path
+    if not target:
+        return path
+    candidate = os.path.normpath(os.path.join(os.path.dirname(path), target))
+    return candidate if os.path.isfile(candidate) else path
 
 
 # Why does it exist? We only have one Page defined
@@ -46,7 +90,7 @@ class StreamlitPage(ABC):
 
             **If you still have questions, you can email us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query)**
 
-            Using proteobench version: {proteobench.__version__}
+            Using proteobench version: {getattr(proteobench, "__version__", "unknown")}
             """,
             unsafe_allow_html=True,
         )
@@ -73,4 +117,4 @@ class StreamlitPage(ABC):
         """
         # Add newline
         st.markdown("<br>", unsafe_allow_html=True)
-        st.image("logos/logo_participants/proteobench-contributing-institutes.png")
+        st.image(_resolve_asset("logos/logo_participants/proteobench-contributing-institutes.png"))

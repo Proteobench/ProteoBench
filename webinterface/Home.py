@@ -24,7 +24,6 @@ def _show_tool_breakdown(module_title, tool_counts):
     st.plotly_chart(pie_fig, use_container_width=True)
 
 
-
 # Path to the index.rst file
 file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
 fig_path = Path(__file__).resolve().parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
@@ -44,9 +43,7 @@ class StreamlitPageHome(StreamlitPage):
         # Navigate to DIA Astral when the homepage tour ends (finish or dismiss).
         _home_tour_key = "onboarding_home"
         _home_tour_active = f"stTour--{_home_tour_key}-active"
-        if st.session_state.get("_home_tour_in_progress", False) and not st.session_state.get(
-            _home_tour_active, False
-        ):
+        if st.session_state.get("_home_tour_in_progress", False) and not st.session_state.get(_home_tour_active, False):
             st.session_state.pop("_home_tour_in_progress", None)
             st.switch_page("pages/6_Quant_LFQ_DIA_ion_Astral.py")
 
@@ -80,7 +77,9 @@ class StreamlitPageHome(StreamlitPage):
             with st.container(border=True):
                 col_text, col_yes, col_no = st.columns([7, 2, 1.5])
                 with col_text:
-                    st.markdown("**Want a quick guided tour?** We will walk you through a benchmark module step by step.")
+                    st.markdown(
+                        "**Want a quick guided tour?** We will walk you through a benchmark module step by step."
+                    )
                 with col_yes:
                     if st.button("Yes, show me!", type="primary", use_container_width=True, key="tour_opt_in_yes"):
                         st.session_state["_tour_opted_in"] = True

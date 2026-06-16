@@ -112,9 +112,7 @@ class BaseStreamlitUI:
             tour_in_progress_key = "_module_tour_in_progress"
 
             # Detect tour completion: was in progress last render, now inactive.
-            if st.session_state.get(tour_in_progress_key, False) and not st.session_state.get(
-                tour_active_key, False
-            ):
+            if st.session_state.get(tour_in_progress_key, False) and not st.session_state.get(tour_active_key, False):
                 st.session_state.pop(tour_in_progress_key, None)
                 st.session_state["_module_tour_completed"] = True
 

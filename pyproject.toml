@@ -24,11 +24,11 @@ dependencies = [
   "plotly>=6.0.0",
   "upsetplot",
   "seaborn",
-  "streamlit>=1.31",
+  "streamlit>=1.58",
   "streamlit-aggrid>=1.1.7",
   "streamlit_extras",
   "streamlit-plotly-events",
-  "streamlit-tour",
+  "streamlit-tour>=1.1.0",
   "scipy",
   "matplotlib",
   "toml",
@@ -80,7 +80,7 @@ build-backend = "setuptools.build_meta"
 # used to pick up the version from the git tags or the latest commit.
 
 [tool.setuptools.packages.find]
-include = ["proteobench"]
+include = ["proteobench*"]
 
 [tool.isort]
 profile = "black"

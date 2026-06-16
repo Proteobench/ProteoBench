@@ -58,6 +58,9 @@ nox --session "docs" -- -b linkcheck
 # Must be run from inside docs/ (uses relative input path)
 cd docs && python parse_tables.py
 
+# Update module grid on docs homepage (CI checks this is up-to-date)
+python docs/generate_module_grid.py
+
 # Pre-commit hooks
 pre-commit install
 pre-commit run --all-files
@@ -170,7 +173,9 @@ Each software tool + module combination has a TOML file in `proteobench/io/parsi
 - `[run_mapper]`: raw file name -> display name (also normalized at init)
 - `[species_mapper]`: protein ID flag -> species (e.g., `"_YEAST" = "YEAST"`)
 - `[general]`: `contaminant_flag`, `decoy_flag`, and optionally `run_name_cleanup` (regex to override the default extension-stripping pattern)
-- `[modifications_parser]` (optional): `parse_column`, `before_aa`, `isalpha`, `isupper`, `pattern` (regex), `modification_dict`. `modification_dict` maps a modification token (a residue/string marker such as `"(ox)"`, or a mass string, depending on the tool) to a modification name.
+- `[modifications_parser]` (optional): `parse_column`, `before_aa`, `isalpha`, `isupper`, `pattern` (regex), `modification_dict` (mass -> name)
+- `[upload_info]`: human-readable guidance shown in the web UI when the tool is selected. Keys: `datapoint_file` (filename), `datapoint_file_description` (shown above the result-file uploader in Tab 2), `params_file` (filename), `params_file_description` (shown above the metadata uploader in Tab 6). Markdown is supported in description strings. The Custom format uses `datapoint_file_description` to embed a module-specific link to the documentation. Missing `[upload_info]` is handled gracefully — no message is shown.
+- `[upload_info_overrides.<tool_name>]` (optional): per-tool overrides applied on top of `[upload_info]` when `ParseSettingsBuilder.get_upload_info(tool_name)` is called. Used when multiple tool names share the same TOML file but require different upload guidance. Example: `parse_settings_diann.toml` is shared by "DIA-NN" and "FragPipe (DIA-NN quant)"; the override supplies the correct `.workflow` params description for the latter.
 
 ### Run Name Cleanup (`_clean_run_name`)
 
@@ -188,7 +193,7 @@ run_name_cleanup = "(?:\\.custom_suffix|\\.raw)$"
 - `[species_expected_ratio.<SPECIES>]`: `A_vs_B` (float ratio), `color` (hex)
 - `[general]`: `min_count_multispec` (int), `level` ("ion" or "peptidoform")
 
-The `MODULE_TO_CLASS` dict at the bottom of `parse_settings.py` routes module IDs to parser classes: all `quant_lfq_*` modules use `ParseSettingsQuant`, and `denovo_DDA_HCD` uses `ParseSettingsDeNovo`. (The dict contains a benign duplicate `quant_lfq_DDA_ion_Astral` key, and has no `quant_lfq_DIA_peptidoform` entry, matching that module being an unregistered stub.)
+The `MODULE_TO_CLASS` dict at the bottom of `parse_settings.py` routes module IDs to parser classes: all `quant_lfq_*` modules use `ParseSettingsQuant`, and `denovo_DDA_HCD` uses `ParseSettingsDeNovo`. (It has no `quant_lfq_DIA_peptidoform` entry, matching that module being an unregistered stub.) The validation layer reuses this dict to infer a module's default validation profile.
 
 `io/parsing/utils.py` provides ProForma fixed-modification helpers: `add_fixed_mod(proforma, mod_name, aas)` and `add_maxquant_fixed_modifications(params, result_perf)`.
 
@@ -324,6 +329,78 @@ value = st.session_state[st.session_state[variables.slider_id_uuid]]
 
 Session state serves 4 purposes: widget state (via UUID keys), data cache (DataFrames), plot cache (Plotly figures), and flow control (submit flags, highlight lists, tour state).
 
+### Submission Validation Layer (`proteobench/validation/`)
+
+A framework-agnostic, **registry-driven** validation package that checks uploaded submissions for internal consistency before the public datapoint is created. It returns a structured `ValidationReport` instead of raising generic exceptions. Which checks run is determined by a *validation profile*, so the orchestrator is generic: adding a module of an existing category is config-only, and adding a new category only requires registering a new profile.
+
+**Validation does not block submission.** All findings (including `error`-severity ones) are surfaced in the UI and embedded in the pull-request description via `ValidationReport.summary()` so reviewers see them, but submission always proceeds. The `error`/`warning`/`info` severities only control display prominence and PR inclusion, not gating. (The earlier blocking behavior in `submit_to_repository` was removed.)
+
+**Package layout:**
+
+| File | Contents |
+|------|----------|
+| `report.py` | `Severity` enum (`error`/`warning`/`info`), `ValidationIssue` dataclass, `ValidationReport` collection |
+| `exceptions.py` | `SubmissionValidationError` — wraps a report for programmatic callers |
+| `fasta.py` | `FastaReference` — builds the expected protein set from FASTA text, path, bytes, zip/gzip, or URL; parses UniProt `sp|P49327|FAS_HUMAN`, `tr|...`, bare accessions, isoforms |
+| `protein_ids.py` | `split_protein_groups()` (`;`/`,` separators), `extract_identifiers()`, `is_decoy_or_contaminant()` |
+| `context.py` | `ValidationContext` — bundles all inputs a check might need (`standard_df`, `parameters`, `config`, `fasta`, `input_format`, generic `reference`, `extras`) so every check has the uniform signature `ctx -> list[ValidationIssue]` |
+| `config.py` | `ModuleValidationConfig` — column names, contaminant flag, decoy prefixes, FASTA URL, and the resolved `validation_profile`; built via `from_parse_settings(parse_settings_dir, module_id, input_format)` |
+| `checks.py` | Pure check functions: `check_protein_ids`, `check_charge_range`, `check_peptide_length`, `check_enzyme`, `check_modifications`, `check_max_modifications`, `check_mass_tolerances`, `check_fdr_psm`, `check_run_consistency` (kept individually unit-testable) |
+| `profiles.py` | `Check` (named `ctx`-callable), `ValidationProfile` (ordered list of checks), the profile **registry** (`register_profile`/`unregister_profile`/`get_profile`/`available_profiles`), and the built-in `quant_lfq` and `denovo` profiles |
+| `validator.py` | `validate_submission(standard_df, parameters, fasta, config, input_format, profile)` — resolves the profile, builds the context, runs the profile's checks; each check is fault-tolerant (unexpected exceptions become warnings) |
+
+**Profile registry (the extensibility surface).** A `ValidationProfile` is a named, ordered list of `Check`s; checks are reusable across profiles (e.g. `run_consistency` is shared by `quant_lfq` and `denovo`). `validate_submission` looks up `config.validation_profile` in the registry and runs only that profile's checks — there is no `if module_type == ...` branching. To support a brand-new module category: register a profile in `profiles.py` (or from third-party code via `register_profile`) and point the module at it; the orchestrator never changes.
+
+**Profile resolution** (`ModuleValidationConfig.from_parse_settings`, in precedence order):
+1. explicit `[validation].profile` in the module's `module_settings.toml` (declarative);
+2. inferred from the parser class via the existing `MODULE_TO_CLASS` registry (`ParseSettingsQuant` → `quant_lfq`, `ParseSettingsDeNovo` → `denovo`);
+3. `DEFAULT_VALIDATION_PROFILE` (`quant_lfq`).
+
+An unregistered profile name produces a single `unknown_validation_profile` warning and runs nothing (never blocks).
+
+**`ValidationIssue` fields:** `code` (machine-readable), `severity`, `message`, `check`, `field`, `observed`, `expected`, `examples` (up to 20 offending protein identifiers via `MAX_PROTEIN_EXAMPLES`, or up to 10 example rows for the other checks via `MAX_ROW_EXAMPLES`).
+
+**`quant_lfq` profile checks and their default severity** (severity affects display/PR prominence only; nothing blocks):
+
+| Check | Default severity | Notes |
+|-------|------------------|-------|
+| `protein_ids` (vs FASTA) | ERROR | Skips decoys and contaminants; splits groups; case-insensitive |
+| `charge_range` | ERROR | Uses `min_precursor_charge` / `max_precursor_charge` from params |
+| `peptide_length` | ERROR | Uses `min_peptide_length` / `max_peptide_length`; counts alpha chars |
+| `enzyme` (missed cleavages) | WARNING | Supports trypsin, trypsin/P, Lys-C, Arg-C, Glu-C, chymotrypsin via `_ENZYME_CLEAVAGE_RULES`; N-terminal cleavers (Asp-N/Lys-N) and unknown enzymes skipped as info; heuristic, ignores ragged termini |
+| `modifications` (names) | WARNING | Human-readable names in `proforma` vs declared mods; mass/UniMod tokens skipped |
+| `max_modifications` | WARNING | Counts bracketed mods per peptidoform vs `max_mods`; upper bound (includes fixed mods written into the sequence) |
+| `mass_tolerances` | WARNING | Sanity check of `precursor_mass_tolerance`/`fragment_mass_tolerance` (parseable, positive, plausible ppm/Da); no per-result comparison exists |
+| `fdr_psm` | WARNING | `ident_fdr_psm` within `[0,1]` and ≤ `config.recommended_max_fdr_psm` (default 0.01) |
+| `run_consistency` (software identity) | ERROR | `params.software_name` vs `input_format` |
+| (absent parameter) | WARNING | Each param-dependent check self-reports when its constraint was not parsed; never crashes |
+
+The `denovo` profile currently runs only `run_consistency` plus a `denovo_pending` info placeholder (de novo uses a different standardized schema — `spectrum_id`/`peptide_str`/`aa_scores` — and a ground-truth table rather than a FASTA; content checks are a documented TODO in `profiles.py`).
+
+**Reference FASTA configuration.** Each quant module's `module_settings.toml` contains an optional section:
+
+```toml
+[reference_database]
+"fasta_url" = "https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip"
+
+[validation]
+"profile" = "quant_lfq"   # optional; usually inferred from the parser class
+```
+
+`[reference_database]` is populated for all 9 quant modules (HYE modules share the HYE FASTA; single-cell uses HY; Plasma uses Distler-PYE). The de novo `module_settings.toml` declares `[validation] profile = "denovo"`. If `[reference_database]` is absent the FASTA check is skipped with an info message.
+
+**Integration point.** Validation runs inside `submit_to_repository()` in `webinterface/pages/base_pages/tabs/tab6_submit_results.py`, after the "I really want to upload it" button press and before `create_pull_request()`. The standardized DataFrame is re-derived by rerunning the existing parser on the `input_df` already in session state (no duplicated tool-specific parsing logic). All findings (errors and warnings) are rendered in the UI and appended to the PR description via `ValidationReport.summary()`; none of them block the PR. The local Tab 2 upload path is unaffected.
+
+**Streamlit glue.** `webinterface/pages/base_pages/utils/validation_ui.py` provides:
+- `run_submission_validation(variables, ionmodule, user_input, params)` — orchestrates the full flow (re-parse, load FASTA from cache, run checks), returns a `ValidationReport`.
+- `_load_fasta_reference(fasta_url, fasta_filename)` — `@st.cache_data` wrapper around `FastaReference.from_url()`.
+- `render_validation_report(report)` — renders errors as `st.error`, warnings as `st.warning`, and info items inside a collapsed `st.expander`.
+
+**Documented limitations (intentionally skipped checks):**
+- Full enzyme-specificity checks require reference protein sequences (not available); only internal K/R counting is done.
+- Cross-tool modification normalization is not implemented (MaxQuant uses human-readable names, DIA-NN UniMod accessions, Sage raw mass dicts); only matching human-readable names against declared mods is attempted.
+- Run-level matching (raw-file, sample, experiment) is not possible because `ProteoBenchParameters` does not expose those fields; only software identity is compared.
+
 ### Streamlit Coupling in Core Library
 
 Three files in `proteobench/` import Streamlit (coupling violations):
@@ -345,6 +422,7 @@ Tests in `test/` use pytest. No `conftest.py` (uses defaults). ~74 `def test_` f
 - `test/data/quant/quant_lfq_peptidoform_DDA/` - Peptidoform sample files
 - `test/data/denovo/` - de novo configs and result files (~8.5MB)
 - `test/data/intermediate_files/` - Reference intermediate results
+- `test/data/validation/ProteoBench_validation_reference.fasta` - Small 6-protein FASTA fixture for validation unit tests
 - `test/params/` - Parameter files for all tools (~124 top-level files, ~130 including `test/params/denovo/`, ~9MB)
 - `test/data/quant/quant_lfq_proteingroup_DIA_Astral/` exists but is currently empty; empty legacy dirs `test/data/dda_quant/` and `test/data/dia_quant/` remain.
 
@@ -373,6 +451,7 @@ Only two module-level test files exist: `test_module_quant_ion_DDA_QExactive.py`
 - `test_plot_quant.py` - `TestPlotDataPoint`
 - `test_modules_constants.py` - parametrized check that every `MODULE_SETTINGS_DIRS` entry resolves to an existing directory
 - `test_github_repo.py` - tests for `GithubProteobotRepo`
+- `test_validation.py` - 63 tests for the submission-validation layer; covers FASTA parsing, protein-ID matching/groups/decoy-contaminant skipping, charge/length violations, missing-parameter warnings, multi-enzyme missed-cleavage checks, modification/max-modification checks, mass-tolerance and PSM-FDR sanity checks, the profile registry (resolution, custom-profile registration, unknown-profile handling, de novo routing), report serialization, and lightweight integration through the real MaxQuant and Sage parsers
 
 ### What CI Validates
 
@@ -381,6 +460,7 @@ Every PR to main:
 2. Flake8 lint on 3 Python versions (3.11, 3.12, 3.13): hard-fail on E9,F63,F7,F82, plus non-blocking full and bugbear/comprehensions passes
 3. Full pytest suite on 3 Python versions
 4. Parameter documentation check: runs `docs/parse_tables.py` and fails if `docs/parsing_overview.tsv` has a git diff
+5. Module grid check: runs `docs/generate_module_grid.py` and fails if `docs/module_grid_generated.rst` has a git diff
 
 Separate workflow for the webinterface (`test-streamlit.yml`):
 1. `check-formatting`: Black runs on `src: proteobench` (not webinterface)
@@ -396,19 +476,21 @@ Separate workflow for the webinterface (`test-streamlit.yml`):
 4. Register it in `QuantModule.EXTRACT_PARAMS_DICT` in `modules/quant/quant_base_module.py`
 5. Add a color entry in the relevant plot generator's `software_colors` dict (`LFQHYEPlotGenerator`, and `LFQPYEPlotGenerator` for plasma, each maintains its own dict)
 6. If the tool is open source, add its `software_name` to the `[open_source].tools` list in `io/parsing/io_parse_settings/tool_metadata.toml`
-7. Add test data file to `test/data/quant/<module>/` and parameter files to `test/params/`
-8. Add the tool to the test parametrization in the relevant `test_module_quant_*.py`
-9. Run `cd docs && python parse_tables.py` to update parameter documentation
+7. Add an `[upload_info]` section to the TOML with `datapoint_file`, `datapoint_file_description`, `params_file`, and `params_file_description`. If the new tool reuses an existing TOML (e.g., shares the DIA-NN report format), add an `[upload_info_overrides."New Tool Name"]` table to that TOML instead of creating a new one.
+8. Add test data file to `test/data/quant/<module>/` and parameter files to `test/params/`
+9. Add the tool to test parametrization in the relevant `test_module_quant_*.py`
+10. Run `cd docs && python parse_tables.py` to update parameter documentation
 
 ### Adding a new benchmark module
 
 1. Create a module class in `modules/quant/` inheriting `QuantModule`, setting `module_id`, the precursor column, and repo names
+   - For submission validation (see the Submission Validation Layer section): add a `[reference_database] fasta_url = "..."` entry to the new module's `module_settings.toml` (if absent, protein-identifier validation is silently skipped). A quant module auto-resolves to the `quant_lfq` profile; a module of a new category should declare `[validation] profile = "<name>"` and register a matching profile in `proteobench/validation/profiles.py`.
 2. Add the settings directory to `MODULE_SETTINGS_DIRS` in `modules/constants.py`
 3. Register the parse settings class in `MODULE_TO_CLASS` in `parse_settings.py`
 4. Create TOML configs: `module_settings.toml` + per-tool parse settings in the new directory
 5. Add the module class to `MODULE_CLASSES` in `utils/server_io.py` (needed for programmatic submission)
 6. Create a Streamlit page in `webinterface/pages/`
-7. Create a `Variables*` dataclass in `webinterface/pages/pages_variables/Quant/`
+7. Create a `Variables*` dataclass in `webinterface/pages/pages_variables/Quant/` — the dataclass **must** include `sidebar_label`, `sidebar_path`, `sidebar_category`, `doc_url`, `documentation_description`, and the appropriate release-stage flag (`alpha_warning`/`beta_warning`/`archived_warning`) for the documentation homepage grid to be generated correctly
 8. Add module markdown files in `webinterface/pages/markdown_files/`
 9. The module is auto-discovered by `module_registry.py` if the Variables dataclass has the sidebar metadata fields
 10. Add a test file and test data
@@ -501,6 +583,8 @@ Built with Sphinx using the `pydata_sphinx_theme`. Extensions: myst_parser (Mark
 ### Auto-Generated Documentation
 
 `docs/parse_tables.py` extracts parameter tables from `available-modules/12-parsed-parameters-for-public-submission.md`, combines them into a pivot table, and writes a tab-separated file named `parsing_overview.tsv` (must be run from inside `docs/`). CI validates this is up-to-date. ReadTheDocs runs `sphinx-apidoc` automatically for API docs.
+
+`docs/generate_module_grid.py` AST-parses all `*_variables.py` files (no Streamlit import) to generate `docs/module_grid_generated.rst`, which is included by `docs/index.rst` as the homepage module card grid. CI validates this is up-to-date. Discussion-only modules (no Variables dataclass yet) are listed in `docs/module_in_discussion_grid_extra.yaml`.
 
 ## CI/CD Workflows (`.github/workflows/`)
 

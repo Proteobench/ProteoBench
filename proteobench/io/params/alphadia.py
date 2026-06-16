@@ -56,6 +56,21 @@ def clean_line(line: str) -> str:
     return line.strip()
 
 
+def homogenize_modification_string(mod_string: str) -> str:
+    """Homogenize modification strings by turning them into ProForma-like format.
+    For example, "Oxidation@M" becomes "M[Oxidation]".
+    """
+    mods = []
+    for mod in mod_string.split(";"):
+        mod = mod.strip()
+        if "@" in mod:
+            name, residue = mod.split("@", 1)
+            mods.append(f"{residue.replace('_', ' ')}[{name}]")
+        else:
+            mods.append(mod)
+    return ", ".join(mods)
+
+
 def parse_key_value(line: str) -> Tuple[str, str]:
     """
     Parse a key-value pair from a line in the log. It assumes the format 'key: value'.
@@ -353,6 +368,17 @@ def extract_params(
         ):
             process_fragment_mz(lines, i, all_parameters)
 
+        # Rewrite modifications
+        if "fixed_modifications" in cleaned_line:
+            all_parameters["fixed_mods"] = homogenize_modification_string(cleaned_line.split(":", 1)[1].strip())
+        if "variable_modifications" in cleaned_line:
+            all_parameters["variable_mods"] = homogenize_modification_string(cleaned_line.split(":", 1)[1].strip())
+
+    # Remove raw modification keys so map_keys_to_desired_format doesn't
+    # overwrite the homogenized fixed_mods / variable_mods values.
+    all_parameters.pop("fixed_modifications", None)
+    all_parameters.pop("variable_modifications", None)
+
     map_keys_to_desired_format(all_parameters)
     clean_up_parameters(all_parameters)
 
@@ -374,7 +400,9 @@ def extract_params(
     else:
         all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
 
-    return ProteoBenchParameters(**all_parameters, filename=json_file)
+    params = ProteoBenchParameters(**all_parameters, filename=json_file)
+    params.fill_none()
+    return params
 
 
 if __name__ == "__main__":
@@ -391,5 +419,6 @@ if __name__ == "__main__":
         pb_params = extract_params(file)
         params = pb_params.__dict__
         series = pd.Series(params)
+        print(series)
         series.to_csv(file.with_suffix(".csv"))
         print("\n" * 3)

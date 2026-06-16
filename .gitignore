@@ -156,3 +156,6 @@ uv.lock
 
 # Large files
 *.gz
+# Atomic-write / editor temp files
+*.tmp
+*.tmp.*

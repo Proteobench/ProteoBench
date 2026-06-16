@@ -16,6 +16,9 @@ A benchmark run accepted by the ProteoBench team to be made publicly available a
 ## Metric
 A single number resulting from an aggregated calculation of the workflow output which allows for a comparison between different benchmark runs.
 
+## Intermediate format
+The module-specific standardized table that ProteoBench computes from a workflow output before deriving metrics. It is stored as `result_performance.csv` and identified by the `intermediate_hash`. A detailed explanation is available at the [intermediate format specification](../developer-guide/intermediate-format.md).
+
 (open-source-software)=
 ## Open source software
 We consider a tool open source if the code is available in its latest version, we consider the tool open source, whatever the licence.

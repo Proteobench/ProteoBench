@@ -12,6 +12,12 @@ import yaml
 
 from proteobench.io.params import ProteoBenchParameters
 
+MODIFICATION_MAPPING = {
+    "Carbamidomethylation (+57.02)": "C[Carbamidomethyl]",
+    "Oxidation (M) (+15.99)": "M[Oxidation]",
+    "Acetylation (Protein N-term) (+42.01)": "Protein N-term[Acetylation]",
+}
+
 
 def clean_text(text: str) -> str:
     """
@@ -181,14 +187,23 @@ def extract_params(
     params.search_engine_version = params.software_version
 
     psm_fdr = extract_value(lines, "Precursor FDR:")
+
     # Its either "Precursor FDR:" (DIA) or "PSM FDR:" (DDA)
     if not psm_fdr:
         psm_fdr = extract_value(lines, "PSM FDR:")
     peptide_fdr = extract_value(lines, "Peptide FDR:")
+
+    if psm_fdr:
+        psm_fdr = psm_fdr.replace("%", "").strip()
+    if peptide_fdr:
+        peptide_fdr = peptide_fdr.replace("%", "").strip()
+
     params.ident_fdr_peptide = peptide_fdr
     params.ident_fdr_psm = psm_fdr
     # peaks uses  Proteins -10LgP >= 15.0  instead of FDR
     protein_fdr = extract_value(lines, "Protein Group FDR:")
+    if protein_fdr:
+        protein_fdr = protein_fdr.replace("%", "").strip()
     params.ident_fdr_protein = protein_fdr
     params.enable_match_between_runs = True if extract_value(lines, "Match Between Run:") == "Yes" else False
     params.precursor_mass_tolerance = extract_mass_tolerance(lines, "Precursor Mass Error Tolerance:")
@@ -203,9 +218,9 @@ def extract_params(
     params.max_peptide_length = int(peptide_length_range[1])
     params.min_peptide_length = int(peptide_length_range[0])
     fixed = get_items_between(lines, "Fixed Modifications:", "Variable Modifications:", only_last=True)
-    params.fixed_mods = " ,".join(fixed)
+    params.fixed_mods = ", ".join(MODIFICATION_MAPPING.get(m, m) for m in fixed)
     varmods = get_items_between(lines, "Variable Modifications:", "Database:", only_last=True)
-    params.variable_mods = " ,".join(varmods)
+    params.variable_mods = ", ".join(MODIFICATION_MAPPING.get(m, m) for m in varmods)
     params.max_mods = int(extract_value(lines, "Max Variable PTM per Peptide:"))
     try:
         precursor_charge_between = extract_value(lines, "Precursor Charge between:").split(",")
@@ -237,6 +252,7 @@ def extract_params(
     params.protein_inference = None
     params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Normalization Method:")
+    params.fill_none()
     return params
 
 
@@ -259,6 +275,4 @@ if __name__ == "__main__":
         # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)
         actual.to_csv(Path(file).with_suffix(".csv"))
-
-        # Optionally, print the parameters to the console
         print(parameters)

@@ -2,7 +2,7 @@
 Module registry for discovering and loading ProteoBench module metadata.
 
 This module dynamically imports all pages_variables files to extract
-module metadata for the sidebar navigation system.
+module metadata for the sidebar navigation system and documentation main page.
 """
 
 import importlib
@@ -26,6 +26,7 @@ class ModuleMetadata:
     keywords: List[str]
     title: str
     doc_url: str
+    documentation_description: str = ""  # One-liner description for the docs homepage card
     results_repo: Optional[str] = None  # e.g. "Results_quant_ion_DDA"
 
 
@@ -121,6 +122,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
                 keywords=variables.keywords,
                 title=variables.title,
                 doc_url=variables.doc_url,
+                documentation_description=getattr(variables, "documentation_description", ""),
                 results_repo=results_repo,
             )
 

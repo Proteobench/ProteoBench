@@ -33,7 +33,7 @@ extensions = [
 
 source_suffix = [".rst"]
 master_doc = "index"
-exclude_patterns = ["_build", "_autosummary", "reference", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "_autosummary", "reference", "Thumbs.db", ".DS_Store", "module_grid_generated.rst"]
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]

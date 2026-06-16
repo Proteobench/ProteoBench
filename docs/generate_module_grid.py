@@ -180,6 +180,11 @@ def main() -> None:
         if "sidebar_label" not in defaults:
             print(f"  skip {vf.name}: no sidebar_label found", file=sys.stderr)
             continue
+        # Debug modules are local-only dev tools (hidden behind PROTEOBENCH_DEBUG);
+        # they must not appear in the public documentation grid.
+        if defaults.get("sidebar_category", "") == "Debug":
+            print(f"  skip {vf.name}: Debug category (local-only)", file=sys.stderr)
+            continue
         badge_role, badge_label = _release_stage(defaults)
         modules.append(
             {

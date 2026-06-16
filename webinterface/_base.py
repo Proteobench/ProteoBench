@@ -52,6 +52,7 @@ def _resolve_asset(path: str) -> str:
     return candidate if os.path.isfile(candidate) else path
 
 
+# Why does it exist? We only have one Page defined
 class StreamlitPage(ABC):
     """
     Base class for Proteobench online Streamlit web server.
@@ -75,7 +76,7 @@ class StreamlitPage(ABC):
         Set up the preface of the Streamlit application.
         """
         st.markdown(
-            """
+            f"""
             # Welcome to ProteoBench
 
             **👈 Select a page from the sidebar to get started!**<br>
@@ -89,10 +90,8 @@ class StreamlitPage(ABC):
 
             **If you still have questions, you can email us [here](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query)**
 
-            Using proteobench version: {}
-            """.format(
-                getattr(proteobench, "__version__", "unknown")
-            ),
+            Using proteobench version: {getattr(proteobench, "__version__", "unknown")}
+            """,
             unsafe_allow_html=True,
         )
 

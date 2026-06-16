@@ -485,8 +485,8 @@ def extract_params(
                 parameters[proteobench_setting] = parse_setting(proteobench_setting, cmdline_dict[cmd_setting])
 
     # Parse cut parameter to standard enzyme name
-    if "enzyme" not in parameters.keys():
-        parameters["enzyme"] = None
+    if "enzyme" not in parameters.keys():  # This happens when running fragpipe-diann or if kept as default in the GUI
+        parameters["enzyme"] = "Trypsin/P"
     elif parameters["enzyme"] == "K*,R*":
         parameters["enzyme"] = "Trypsin/P"
     elif parameters["enzyme"] == "K*,R*,!P":
@@ -545,7 +545,7 @@ def extract_params(
                 "max_peptide_length": extract_cfg_parameter(lines, max_pep_len_regex, int),
                 "min_precursor_charge": extract_cfg_parameter(lines, min_z_regex, int),
                 "max_precursor_charge": extract_cfg_parameter(lines, max_z_regex, int),
-                "max_mods": extract_cfg_parameter(lines, max_mods_regex, int),
+                "max_mods": extract_cfg_parameter(lines, max_mods_regex, int, default=0),
                 "quantification_method": extract_cfg_parameter(
                     lines, quant_mode_regex, str, "QuantUMS high-precision", search_all=True
                 ),

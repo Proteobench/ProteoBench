@@ -59,7 +59,8 @@ def _get_cell_style_js(bg_color_normal: str, align: str = "left") -> JsCode:
     align : str, optional
         CSS text-align value ('left', 'center', or 'right').
     """
-    return JsCode(f"""
+    return JsCode(
+        f"""
     function(params) {{
         var isSelected = params.data && params.data['selected'] && params.data['selected'] !== '';
         if (isSelected) {{
@@ -77,7 +78,8 @@ def _get_cell_style_js(bg_color_normal: str, align: str = "left") -> JsCode:
             'textAlign': '{align}'
         }};
     }}
-    """)
+    """
+    )
 
 
 def render_aggrid(df: pd.DataFrame, grid_options, key, enable_selection: bool = False):

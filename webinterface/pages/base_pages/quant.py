@@ -142,7 +142,9 @@ class QuantUIObjects(BaseUIModule):
         st.subheader("Select dataset to plot")
 
         if not downloads_df.empty:
-            dataset_options = [("Uploaded dataset", None)] + list(zip(downloads_df["id"], downloads_df["intermediate_hash"]))
+            dataset_options = [("Uploaded dataset", None)] + list(
+                zip(downloads_df["id"], downloads_df["intermediate_hash"])
+            )
         else:
             dataset_options = [("Uploaded dataset", None)]
 
@@ -421,7 +423,9 @@ class QuantUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             metric_uuid = st.session_state[key]
 
-            help_text = getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
             metric = st.radio(
                 "Select metric",
                 ["Median", "Mean"],
@@ -442,7 +446,9 @@ class QuantUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             mode_uuid = st.session_state[key]
 
-            help_text = getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
             return st.radio(
                 "Select metric calculation approach",
                 ["Species-weighted", "Global"],

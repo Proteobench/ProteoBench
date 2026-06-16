@@ -43,6 +43,11 @@ def load_user_parameters(variables, ionmodule, user_input) -> Any:
     """
     params = None
 
+    warning = ionmodule.validate_params_files(user_input[variables.meta_data], user_input["input_format"])
+    if warning:
+        st.warning(warning, icon="⚠️")
+        return None
+
     try:
         params = ionmodule.load_params_file(
             user_input[variables.meta_data],
@@ -260,7 +265,9 @@ def copy_dataframes_for_submission(variables) -> None:
     Create copies of the dataframes before submission.
     """
     if st.session_state[variables.all_datapoints_submitted] is not None:
-        st.session_state[variables.all_datapoints_submission] = st.session_state[variables.all_datapoints_submitted].copy()
+        st.session_state[variables.all_datapoints_submission] = st.session_state[
+            variables.all_datapoints_submitted
+        ].copy()
     if st.session_state[variables.input_df] is not None:
         st.session_state[variables.input_df_submission] = st.session_state[variables.input_df].copy()
     if st.session_state[variables.result_perf] is not None:
@@ -285,7 +292,6 @@ def generate_metadata_uploader(variables, user_input, parsesettingsbuilder=None)
             help=variables.texts.Help.meta_data_file,
             accept_multiple_files=True,
         )
-
 
 
 # submit_to_repository

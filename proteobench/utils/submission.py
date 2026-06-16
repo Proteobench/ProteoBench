@@ -41,7 +41,7 @@ def get_submission_dict(df):
                 "input_file": input_file,
                 "param_file": parameter_file,
                 "input_type": row["software_name"],
-                "default_cutoff_min_prec": 3,
+                "default_cutoff_min_feature": 3,
                 "user_comments": comments,
             }
         )

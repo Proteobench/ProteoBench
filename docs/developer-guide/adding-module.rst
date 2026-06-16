@@ -580,7 +580,7 @@ When creating a new datapoint class, you must:
                results[min_obs] = {
                    "median_abs_epsilon": filtered["abs_epsilon"].median(),
                    "mean_abs_epsilon": filtered["abs_epsilon"].mean(),
-                   "nr_prec": len(filtered),
+                   "nr_feature": len(filtered),
                }
            
            # 2. Create datapoint object

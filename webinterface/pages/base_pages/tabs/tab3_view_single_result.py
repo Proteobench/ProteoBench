@@ -68,7 +68,7 @@ def generate_indepth_plots(
     Optional[go.Figure]
         The first generated plot or None if generation fails.
     """
-    plot_generator = module.get_plot_generator()
+    plot_generator = module.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # Validate that we have data to plot
     if variables.result_perf not in st.session_state:
@@ -318,7 +318,7 @@ def display_in_depth_plots_generic(variables, ionmodule, performance_data: pd.Da
         return
 
     # Get plot generator from module
-    plot_generator = ionmodule.get_plot_generator()
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # Generate plots
     try:

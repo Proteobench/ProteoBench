@@ -7,6 +7,7 @@ module metadata for the sidebar navigation system and documentation main page.
 
 import importlib
 import inspect
+import os
 from dataclasses import dataclass, is_dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -14,6 +15,22 @@ from typing import Dict, List, Optional
 import streamlit as st
 
 MODULE_CATEGORIES = ["DDA", "DIA", "Archived", "Debug"]
+
+
+def is_debug_enabled() -> bool:
+    """Return whether local debug pages should be shown.
+
+    Debug pages (category ``"Debug"``) are intended only for local development
+    and must never appear on the public server. They are enabled by setting the
+    environment variable ``PROTEOBENCH_DEBUG=1`` before launching Streamlit,
+    which the production server does not set.
+
+    Returns
+    -------
+    bool
+        True if ``PROTEOBENCH_DEBUG`` equals ``"1"``, otherwise False.
+    """
+    return os.environ.get("PROTEOBENCH_DEBUG") == "1"
 
 
 @dataclass
@@ -137,6 +154,11 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             # In production, you might want to log this
             print(f"Warning: Failed to load module {module_path}: {e}")
             continue
+
+    # Debug-only modules are hidden unless explicitly enabled for a local run.
+    if not is_debug_enabled():
+        modules_by_category["Debug"] = []
+
     return modules_by_category
 
 

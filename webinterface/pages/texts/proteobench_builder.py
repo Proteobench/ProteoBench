@@ -141,8 +141,10 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
                 st.markdown("*No modules match your search.*")
         else:
             # Show normal categorized expanders
-            # Replace
             for category in MODULE_CATEGORIES:
+                # Skip categories with no modules (e.g. Debug when not enabled locally)
+                if not all_modules[category]:
+                    continue
                 with st.expander(category, expanded=(current_page in [m.label for m in all_modules[category]])):
                     render_links(filtered_modules[category])
 

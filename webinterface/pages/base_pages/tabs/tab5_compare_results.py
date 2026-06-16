@@ -23,12 +23,13 @@ def display_workflow_comparison(variables, ionmodule) -> None:
     ionmodule : object
         Module for accessing data and methods.
     """
+    feature_label = getattr(variables, "feature_label", "feature")
     st.header("Workflow Comparison")
-    st.markdown("""
+    st.markdown(f"""
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
-        - **Precursor overlap**: Bar plot showing number of shared and unique precursors
+        - **{feature_label.capitalize()} overlap**: Bar plot showing number of shared and unique {feature_label}s
         - **Parameter differences**: Table highlighting what differs between workflows
         """)
 
@@ -49,7 +50,7 @@ def display_workflow_comparison(variables, ionmodule) -> None:
             _compare_workflows(variables, selected_ids[0], selected_ids[1])
         else:
             st.markdown(
-                "_Select two workflows in the plot above to see precursor overlap and parameter differences here._"
+                f"_Select two workflows in the plot above to see {feature_label} overlap and parameter differences here._"
             )
 
 
@@ -110,9 +111,10 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
     st.subheader("Select Two Workflows to Compare")
     st.markdown("Click on points in the plot below. Your selections will be highlighted.")
     default_slider = getattr(variables, "default_val_slider", 3)
+    feature_label = getattr(variables, "feature_label", "feature")
     st.info(
         f"Below plot uses default settings: **{metric}** metric, **{mode}** mode, "
-        f"min. precursor quantifications = **{min_prec if min_prec is not None else default_slider}**.",
+        f"min. {feature_label} quantifications = **{min_prec if min_prec is not None else default_slider}**.",
         icon="ℹ️",
     )
 
@@ -216,6 +218,7 @@ def _compare_workflows(variables, workflow_1_id: str, workflow_2_id: str) -> Non
         ProteoBench ID of second workflow.
     """
     st.subheader("Comparison Results")
+    feature_label = getattr(variables, "feature_label", "feature")
 
     # Load data for both workflows
     workflow_1_data = _load_workflow_data(variables, workflow_1_id)
@@ -226,10 +229,12 @@ def _compare_workflows(variables, workflow_1_id: str, workflow_2_id: str) -> Non
         return
 
     # Create comparison tabs
-    comp_tab1, comp_tab2 = st.tabs(["Precursor Overlap", "Parameter Differences"])
+    comp_tab1, comp_tab2 = st.tabs([f"{feature_label.capitalize()} Overlap", "Parameter Differences"])
 
     with comp_tab1:
-        _display_precursor_overlap(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
+        _display_precursor_overlap(
+            workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data, feature_label=feature_label
+        )
 
     with comp_tab2:
         _display_parameter_differences(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
@@ -302,24 +307,32 @@ def _load_performance_data_from_storage(intermediate_hash: str) -> Optional[pd.D
 
 
 def _display_precursor_overlap(
-    workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict
+    workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict, feature_label: str = "feature"
 ) -> None:
-    """Display precursor overlap using stacked bar chart."""
-    st.markdown("### Precursor Overlap")
-    st.markdown("Shows which precursors are shared or unique to each workflow.")
+    """Display feature overlap using stacked bar chart."""
+    st.markdown(f"### {feature_label.capitalize()} Overlap")
+    st.markdown(f"Shows which {feature_label}s are shared or unique to each workflow.")
 
     if ("MaxQuant" in workflow_1_id and workflow_1_data["metadata"]["old_new"] == "new") or (
         "MaxQuant" in workflow_2_id and workflow_2_data["metadata"]["old_new"] == "new"
     ):
         st.warning(
-            "⚠️ Precursor overlaps calculated on private MaxQuant data might be inaccurate. If you want to benchmark local MaxQuant workflows, please submit them in a public submission. Reason: Fixed modifications are not included in MaxQuant output and are parsed from the parameter file during submission."
+            f"⚠️ {feature_label.capitalize()} overlaps calculated on private MaxQuant data might be inaccurate. If you want to benchmark local MaxQuant workflows, please submit them in a public submission. Reason: Fixed modifications are not included in MaxQuant output and are parsed from the parameter file during submission."
         )
 
     perf_1 = workflow_1_data["performance_data"]
     perf_2 = workflow_2_data["performance_data"]
 
-    # Find precursor column
-    precursor_col = "precursor ion"
+    # Find the feature column (analysis level differs per module: precursor ion vs peptidoform)
+    precursor_col = next(
+        (c for c in ("precursor ion", "peptidoform") if c in perf_1.columns and c in perf_2.columns), None
+    )
+    if precursor_col is None:
+        st.warning(
+            f"Could not find a feature column ('precursor ion' or 'peptidoform') in both workflows; "
+            f"cannot compute {feature_label} overlap."
+        )
+        return
 
     precursors_1 = set(perf_1[precursor_col].dropna().unique())
     precursors_2 = set(perf_2[precursor_col].dropna().unique())
@@ -338,7 +351,7 @@ def _display_precursor_overlap(
     fig.add_trace(
         go.Bar(
             name=f"Unique to {workflow_1_id}",
-            x=["Precursor Distribution"],
+            x=[f"{feature_label.capitalize()} Distribution"],
             y=[unique_1],
             text=[unique_1],
             textposition="auto",
@@ -347,7 +360,7 @@ def _display_precursor_overlap(
     fig.add_trace(
         go.Bar(
             name="Shared",
-            x=["Precursor Distribution"],
+            x=[f"{feature_label.capitalize()} Distribution"],
             y=[overlap],
             text=[overlap],
             textposition="auto",
@@ -356,7 +369,7 @@ def _display_precursor_overlap(
     fig.add_trace(
         go.Bar(
             name=f"Unique to {workflow_2_id}",
-            x=["Precursor Distribution"],
+            x=[f"{feature_label.capitalize()} Distribution"],
             y=[unique_2],
             text=[unique_2],
             textposition="auto",
@@ -364,9 +377,9 @@ def _display_precursor_overlap(
     )
 
     fig.update_layout(
-        title="Precursor Overlap Distribution",
+        title=f"{feature_label.capitalize()} Overlap Distribution",
         barmode="group",
-        yaxis_title="Number of Precursors",
+        yaxis_title=f"Number of {feature_label}s",
         showlegend=True,
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -391,11 +404,11 @@ def _display_precursor_overlap(
     merged_precursors = merged_precursors[cols]
 
     st.download_button(
-        label="Download merged precursor table",
+        label=f"Download merged {feature_label} table",
         data=merged_precursors.to_csv(index=False).encode("utf-8"),
-        file_name=f"precursor_merge_{workflow_1_id}_{workflow_2_id}.csv",
+        file_name=f"{feature_label}_merge_{workflow_1_id}_{workflow_2_id}.csv",
         mime="text/csv",
-        key=f"download_precursor_merge_{workflow_1_id}_{workflow_2_id}",
+        key=f"download_{feature_label}_merge_{workflow_1_id}_{workflow_2_id}",
     )
 
     # Summary statistics

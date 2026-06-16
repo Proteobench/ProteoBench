@@ -121,6 +121,7 @@ class VariablesDDAQuant:
     )
     title: str = "DDA peptidoform quantification"
     y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
+    feature_label: str = "peptidoform"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_peptidoform.json"
     prefix_params: str = "lfq_peptidoform_dda_quant_"

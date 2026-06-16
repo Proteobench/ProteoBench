@@ -353,7 +353,7 @@ class QuantDatapointHYE(DatapointBase):
         user_input : dict
             User-defined input values for the benchmark.
         default_cutoff_min_feature : int, optional
-            The default minimum precursor cutoff value. Defaults to 3.
+            The default minimum feature cutoff value. Defaults to 3.
         max_nr_observed : int, optional
             Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
 
@@ -623,7 +623,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
         user_input : dict
             User-defined input values for the benchmark.
         default_cutoff_min_feature : int, optional
-            The default minimum precursor cutoff value. Defaults to 3.
+            The default minimum feature cutoff value. Defaults to 3.
         max_nr_observed : int, optional
             Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
 
@@ -698,7 +698,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
             # Filter data for this min_nr_observed threshold
             df_slice = intermediate[intermediate["nr_observed"] >= min_nr_obs]
 
-            # If no precursors meet this threshold, return zero metrics for this level
+            # If no features meet this threshold, return zero metrics for this level
             if len(df_slice) == 0:
                 plasma_metrics[min_nr_obs] = {
                     # Global metrics (legacy key names for backward compatibility)

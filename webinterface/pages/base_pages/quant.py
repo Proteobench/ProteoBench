@@ -302,6 +302,7 @@ class QuantUIObjects(BaseUIModule):
                 description_slider_md=self.variables.description_slider_md,
                 default_val_slider=self.variables.default_val_slider,
                 max_nr_observed=max_nr_obs,
+                feature_label=getattr(self.variables, "feature_label", "feature"),
             )
 
         def render_selectbox():
@@ -404,6 +405,7 @@ class QuantUIObjects(BaseUIModule):
                 description_slider_md=self.variables.description_slider_md,
                 default_val_slider=self.variables.default_val_slider,
                 max_nr_observed=max_nr_obs,
+                feature_label=getattr(self.variables, "feature_label", "feature"),
             )
 
         def render_selectbox():

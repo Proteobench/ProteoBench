@@ -49,8 +49,9 @@ def generate_submitted_slider(variables) -> None:
 
     slider_uuid = st.session_state[variables.slider_id_submitted_uuid]
     help_text = getattr(variables.texts.Help, "slider", None) if hasattr(variables, "texts") else None
+    feature_label = getattr(variables, "feature_label", "feature")
     st.slider(
-        "Minimum number of precursors per protein group",
+        f"Minimum number of {feature_label}s per protein group",
         1,
         10,
         key=slider_uuid,

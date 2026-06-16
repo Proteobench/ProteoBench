@@ -72,7 +72,11 @@ def initialize_main_slider(slider_id_uuid: str, default_val_slider: int) -> None
 
 
 def generate_main_slider(
-    slider_id_uuid: str, description_slider_md: str, default_val_slider: float, max_nr_observed: int = 6
+    slider_id_uuid: str,
+    description_slider_md: str,
+    default_val_slider: float,
+    max_nr_observed: int = 6,
+    feature_label: str = "feature",
 ) -> None:
     """
     Create a slider input.
@@ -98,11 +102,11 @@ def generate_main_slider(
     slider_options = list(range(1, max_nr_observed + 1))
 
     st.select_slider(
-        label="Minimal precursor quantifications (# samples)",
+        label=f"Minimal {feature_label} quantifications (# samples)",
         options=slider_options,
         value=default_value,
         key=slider_key,
-        help="Use the slider to set the minimum number of raw files in which a precursor must be quantified (e.g., 3 = ≥3 files).",
+        help=f"Use the slider to set the minimum number of raw files in which a {feature_label} must be quantified (e.g., 3 = ≥3 files).",
     )
 
 

@@ -74,7 +74,8 @@ def get_incomplete_upload_warning(files: list) -> str:
             "the MetaMorpheus version, typically named 'allResults.txt' or similar)."
         )
     return "You uploaded the MetaMorpheus version file. " "Please also upload the search task settings file (.toml)."
-  
+
+
 def _homogenize_mod(mod_str: str) -> str:
     """Convert MetaMorpheus modification format to ProForma-like notation.
 

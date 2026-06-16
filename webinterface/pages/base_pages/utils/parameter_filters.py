@@ -70,6 +70,7 @@ def keep_latest_version_per_tool(
     keep = [is_protected or key == max_key_by_tool.get(tool) for tool, key, is_protected in zip(tools, keys, protected)]
     return datapoints[np.array(keep, dtype=bool)]
 
+
 _NOT_SPECIFIED = "Not specified"
 
 _PARAMETER_FILTERS = [
@@ -97,7 +98,12 @@ _PARAMETER_FILTERS = [
         "label": "Precursor charge",
         "type": "combined_range",
     },
-    {"col": "max_precursor_charge", "label": "Max precursor charge", "type": "max_slider", "fallback_for": "combined_range:min_precursor_charge__max_precursor_charge"},
+    {
+        "col": "max_precursor_charge",
+        "label": "Max precursor charge",
+        "type": "max_slider",
+        "fallback_for": "combined_range:min_precursor_charge__max_precursor_charge",
+    },
     {
         "col_min": "min_precursor_mz",
         "col_max": "max_precursor_mz",
@@ -428,7 +434,9 @@ def generate_parameter_filters(
                     # Drop stale values that no longer exist in the current options
                     # (e.g. after the latest-version filter removes certain rows).
                     options_set = set(all_options)
-                    default = [v for v in raw_default if v in options_set] if isinstance(raw_default, list) else all_options
+                    default = (
+                        [v for v in raw_default if v in options_set] if isinstance(raw_default, list) else all_options
+                    )
                     if not default:
                         default = all_options
                     selected = st.multiselect(
@@ -448,7 +456,15 @@ def generate_parameter_filters(
                     full_range = (all_options[0], all_options[-1])
                     raw_default = st.session_state.get(sk, full_range)
                     options_set = set(all_options)
-                    default = raw_default if (isinstance(raw_default, tuple) and raw_default[0] in options_set and raw_default[1] in options_set) else full_range
+                    default = (
+                        raw_default
+                        if (
+                            isinstance(raw_default, tuple)
+                            and raw_default[0] in options_set
+                            and raw_default[1] in options_set
+                        )
+                        else full_range
+                    )
                     selected = st.select_slider(
                         label,
                         options=all_options,

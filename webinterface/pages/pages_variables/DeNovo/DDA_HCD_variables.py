@@ -113,7 +113,9 @@ class VariablesDDADeNovo:
 
     # Sidebar metadata
     sidebar_label: str = "De novo DDA peptidoform"
-    documentation_description: str = "Benchmark the identification sensitivity and specificity of de novo sequencing workflows using DDA-HCD data."
+    documentation_description: str = (
+        "Benchmark the identification sensitivity and specificity of de novo sequencing workflows using DDA-HCD data."
+    )
     sidebar_path: str = "/denovo_DDA_HCD"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(default_factory=lambda: ["DDA", "de novo", "orbitrap", "precursor", "identification"])

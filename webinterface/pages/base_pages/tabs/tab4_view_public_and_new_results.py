@@ -196,7 +196,11 @@ def display_submitted_results(
     filtered_data = add_open_source_column(filtered_data)
 
     # Pin the newly submitted row so it survives all filters
-    pinned = filtered_data.index[filtered_data.get("old_new", pd.Series(dtype=str)) == "new"] if "old_new" in filtered_data.columns else None
+    pinned = (
+        filtered_data.index[filtered_data.get("old_new", pd.Series(dtype=str)) == "new"]
+        if "old_new" in filtered_data.columns
+        else None
+    )
     filtered_data = generate_parameter_filters(
         filtered_data,
         key_prefix=f"param_filter_{variables.all_datapoints_submitted}",

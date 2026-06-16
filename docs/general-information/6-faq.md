@@ -1,15 +1,16 @@
 # Frequently asked questions
 
 ## What is ProteoBench?
-ProteoBench is an open and collaborative platform for community-curated benchmarks for proteomics data analysis pipelines. Its goal is to enable continuous, easy, and controlled comparison of proteomics data analysis workflows.
+ProteoBench is an open and collaborative platform for community-curated benchmarks that enables continuous, easy, and controlled comparison of proteomics data analysis workflows.
 
-ProteoBench provides a centralized web platform where developers and end-users can compare proteomics data analysis pipelines using standardized benchmark datasets, transparent evaluation metrics, and public comparison plots. This community-curated effort supports the controlled evaluation of tools developed or used by participants against other state-of-the-art pipelines for specific proteomics applications. The ability to add new benchmark points and modules allows ProteoBench to grow with the proteomics field.
+It provides a centralized web platform where developers and end-users can compare proteomics data analysis {ref}`workflows<workflow>` using standardized benchmark datasets, transparent evaluation metrics, and public comparison plots. This community-curated effort supports the controlled evaluation of tools developed or used by participants against other state-of-the-art workflows for specific proteomics applications. The ability to add new benchmark runs and modules allows ProteoBench to grow with the proteomics field. (See our goals and non-goals [here](../general-information/0-about.html#goals-and-non-goals))
 
 The goal of ProteoBench is not to select or prescribe a single best one-size-fits-all data analysis workflow. Instead, ProteoBench aims to make workflow evaluation more transparent, reproducible, and comparable across tools, laboratories, software versions, and use cases.
 
 ## Who is ProteoBench intended for?
-ProteoBench is intended for several user groups involved in the development, evaluation, or application of proteomics data analysis workflows.
 
+ProteoBench is intended for several user groups involved in the development, evaluation, or application of proteomics data analysis workflows.
+For **end-users**, ProteoBench helps identify suitable workflows for specific analytical needs by allowing comparison with public reference results and state-of-the-art pipelines. This includes proteomics researchers, experimental laboratories, and core facilities that want to evaluate, document, or monitor routine analysis workflows.
 For **end-users**, ProteoBench helps identify suitable workflows for specific analytical needs by allowing comparison with public reference results and state-of-the-art pipelines. This includes proteomics researchers, experimental laboratories, and core facilities that want to evaluate, document, or monitor routine analysis pipelines.
 
 For **software and method developers**, ProteoBench provides a framework to identify the specific strengths and weaknesses of workflows, algorithms, software versions, or parameter choices. These insights can guide further development and support the contribution of new benchmark modules for emerging proteomics applications.
@@ -25,15 +26,14 @@ Users who want to benchmark a different experimental design can contribute or re
 ## Do I need to use the exact same workflow parameters as other users?
 
 No. ProteoBench does not require all users to run identical workflow parameters. In many modules, suggested parameters are provided to help users get started and to support comparable baseline analyses, but users may submit results generated with their own parameter choices.
-
-The parameter used for all the public :ref:`benchmark runs<benchmark-run>` is collected upon submission and fully available to download so that users can interpret differences in performance in the context of software versions, workflow settings, search databases, quantification options, and other relevant configuration details. If you 'limit test' a specific parameter, we recommend documenting that in the comment field.
+The parameters used for all the public {ref}`benchmark runs <benchmark-run>` are collected upon submission and fully available to download so that users can interpret differences in performance in the context of software versions, workflow settings, search databases, quantification options, and other relevant configuration details. If you 'limit test' a specific parameter, we recommend documenting that in the comment field when you submit your benchmark run for public release.
 
 ## Do I need to use a specific FASTA database?
-
+For modules where database choice affects the benchmark outcome, the recommended or required FASTA database is specified in the module documentation. Using the same database ensures that submitted results are comparable.
 For modules where database choice affects the benchmark outcome, the recommended or required FASTA database is specified in the module documentation. Using the same database helps ensure that submitted results are comparable.
 
 ## Can I benchmark commercial software?
-
+Yes. ProteoBench is designed to include results from commercial software when the software outputs all the workflow parameters/metadata in a format that can be parsed or converted into one of the supported submission formats. 
 Yes. ProteoBench can include results from commercial software when the software output can be parsed or converted into one of the supported submission formats. 
 
 ## What should I do if my software is not directly supported?
@@ -53,7 +53,7 @@ ProteoBench evaluates submitted workflow outputs rather than executing every wor
 This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. 
 
 ## How do I find the input data associated with a benchmark module?
-
+Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as [ProteomeXchange](https://www.proteomexchange.org/), depending on the dataset.
 Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as ProteomeXchange, depending on the dataset.
 If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
@@ -68,8 +68,7 @@ QuantError should be interpreted together with the other module-specific metrics
 ProteoBench does not apply post-processing steps that may affect the benchmark metrics. We consider normalization, missing-value handling, transfer steps, protein inference, and quantification strategies as integral parts of benchmarked workflows. They should be reported in the parameter files submitted alongside the workflow results upon public submission.
 
 Where relevant, module documentation specifies which processing steps are performed by ProteoBench itself and which are expected to have been performed by the submitted workflow.
-
-## How can I interpret differences between :ref:`benchmark runs<benchmark-run>`?
+## How can I interpret differences between {ref}`benchmark runs <benchmark-run>`?
 
 ProteoBench provides standardized metrics and visualizations that make differences between workflows visible. These differences may arise from many factors, including feature detection, spectral library generation, identification scoring, false discovery rate control, match-transfer strategies, normalization, missing-value handling, quantification algorithms, and software-specific defaults.
 
@@ -97,9 +96,9 @@ Users should consider:
 ProteoBench is best used as a transparent decision-support resource rather than as a single definitive ranking system.
 ProteoBench does not point to a single best one-fits-all data analysis workflow; should not be used as evidence for generalized statements about a workflow’s performance, and should not be used by developers as single performance measure of their workflow.
 
-
-
 ## How can I follow updates or community discussions?
+
+Ongoing discussions can be followed on the [ProteoBench Discussions page](https://github.com/orgs/Proteobench/discussions). Please not that to take part in the discussion a GitHub account is needed.
 
 ## How can I follow ProteoBench development and community discussions?
 
@@ -115,7 +114,7 @@ Questions, proposals, and module-specific discussions can be followed through th
 
 Users who do not use GitHub can follow ProteoBench through the [ProteoBench web application](https://proteobench.cubimed.rub.de/) and the [ProteoBench documentation](https://proteobench.readthedocs.io/en/stable/). These resources provide access to the public benchmark modules, available datasets, workflow comparison results, and user-facing documentation.
 
-Community discussion also takes place through the [EuBIC-MS Slack workspace](https://eubic.slack.com/). Users can join the relevant ProteoBench channel there to ask questions, follow community updates, and discuss benchmark modules or workflow comparisons without requiring a GitHub account. More information about the EuBIC-MS community is available on the [EuBIC-MS website](https://eubic-ms.org/).
+Community discussion also takes place through the [EuBIC-MS Slack workspace](https://eubic.slack.com/). Users can join the relevant ProteoBench channel there to ask questions, follow community updates, and discuss benchmark modules or workflow comparisons without requiring a GitHub account. More information about the EuBIC-MS community is available on the [EuBIC-MS website](https://eubic-ms.org/). We also have a [LinkedIn page](https://www.linkedin.com/company/proteobench/) where we post updates regarding the project.
 
 
 ## How can I contribute to ProteoBench?

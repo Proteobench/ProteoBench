@@ -58,6 +58,14 @@ jobs:
             echo "Error: Parameters overview not updated, run in docs folder: python parse_tables.py"
             exit 1
           fi
+      - name: ensure module grid documentation is up-to-date
+        run: |
+          cd docs
+          python generate_module_grid.py
+          if git diff -- module_grid_generated.rst | grep .; then
+            echo "Error: Module grid not updated, run in docs folder: python generate_module_grid.py"
+            exit 1
+          fi
       - name: check if parse settings TOMLs changed
         id: toml_changed
         run: |

@@ -149,3 +149,30 @@ def test_submission_creates_pull_request(benchmarked_datapoints, tmp_path):
     # The datapoint JSON must have been written to the PR working directory.
     written = list(tmp_path.glob("*.json"))
     assert len(written) == 1, f"expected one datapoint JSON, found {written}"
+
+
+def test_tab2_file_upload_runs_benchmarking(monkeypatch):
+    """Upload a result file through the real file_uploader and run the Tab 2 benchmarking flow.
+
+    Exercises the full upload path: file_uploader -> temp-file write -> parse ->
+    ionmodule.benchmarking -> submitted datapoint, ending in the success message.
+    streamlit>=1.58's AppTest supports driving st.file_uploader directly.
+    """
+    content = Path(MAXQUANT_FILE).read_bytes()
+    with mocked_backend():
+        app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
+        app_test.run()
+
+        # The software selector is outside the form; set it before submitting.
+        app_test.selectbox(key="software_tool_selector").set_value("MaxQuant").run()
+        assert not app_test.exception
+
+        # Upload the result file to the main uploader and submit the form.
+        app_test.file_uploader[0].upload("MaxQuant_evidence_sample.txt", content)
+        submit = next(b for b in app_test.button if b.label == "Parse and bench")
+        submit.click().run()
+
+    assert not app_test.exception, f"submission run raised: {[e.message for e in app_test.exception]}"
+    assert any(
+        "submitted successfully" in str(info.value) for info in app_test.info
+    ), f"expected success message; infos seen: {[info.value for info in app_test.info]}"

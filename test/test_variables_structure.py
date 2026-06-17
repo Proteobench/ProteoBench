@@ -15,21 +15,27 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PAGES_VARS_DIR = REPO_ROOT / "webinterface" / "pages" / "pages_variables"
 
-# All fields that every Variables dataclass must define:
-#   - Registry discovery (module_registry.py)
-#   - BaseStreamlitUI.__init__ usage
-#   - BaseUIModule.__init__ usage
-#   - Resource references
-#   - Stage flags
-REQUIRED_FIELDS = frozenset(
+# Fields required of EVERY Variables dataclass, including local-only debug pages.
+# These are read directly (no getattr fallback) by module_registry.get_all_modules()
+# to populate the sidebar navigation and the documentation homepage grid.
+REGISTRY_FIELDS = frozenset(
     [
-        # Registry discovery
         "sidebar_label",
         "sidebar_path",
         "sidebar_category",
         "title",
         "doc_url",
         "keywords",
+    ]
+)
+
+# Fields required only of Variables dataclasses that back a full module page
+# (one instantiated through BaseStreamlitUI / its subclasses). These are consumed
+# by BaseStreamlitUI.__init__, BaseUIModule, the tab modules, and display_banner.
+# Debug-only pages (sidebar_category == "Debug") are standalone scripts that do not
+# go through that machinery, so they are exempt.
+FRAMEWORK_FIELDS = frozenset(
+    [
         # BaseStreamlitUI / BaseUIModule usage
         "submit",
         "parse_settings_dir",
@@ -43,6 +49,9 @@ REQUIRED_FIELDS = frozenset(
         "archived_warning",
     ]
 )
+
+# Category marking local-only development pages, exempt from FRAMEWORK_FIELDS.
+DEBUG_CATEGORY = "Debug"
 
 
 def _get_variables_files():
@@ -71,12 +80,51 @@ def _collect_class_attribute_names(filepath: Path) -> set:
     return names
 
 
+def _get_sidebar_category(filepath: Path):
+    """Return the string default of ``sidebar_category`` in the file, or None.
+
+    Used to identify local-only debug pages (``sidebar_category == "Debug"``),
+    which are exempt from the BaseStreamlitUI framework-field requirements.
+    """
+    source = filepath.read_text(encoding="utf-8")
+    tree = ast.parse(source, filename=str(filepath))
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef):
+            continue
+        for item in node.body:
+            if (
+                isinstance(item, ast.AnnAssign)
+                and isinstance(item.target, ast.Name)
+                and item.target.id == "sidebar_category"
+                and isinstance(item.value, ast.Constant)
+                and isinstance(item.value.value, str)
+            ):
+                return item.value.value
+    return None
+
+
 _variables_files = _get_variables_files()
 
 
 @pytest.mark.parametrize("variables_file", _variables_files, ids=[f.stem for f in _variables_files])
-def test_required_fields_present(variables_file):
-    """Each Variables dataclass must define every field in REQUIRED_FIELDS."""
+def test_registry_fields_present(variables_file):
+    """Every Variables dataclass must define the fields module_registry reads directly."""
     defined = _collect_class_attribute_names(variables_file)
-    missing = REQUIRED_FIELDS - defined
-    assert not missing, f"{variables_file.name} is missing required fields: {sorted(missing)}"
+    missing = REGISTRY_FIELDS - defined
+    assert not missing, f"{variables_file.name} is missing required registry fields: {sorted(missing)}"
+
+
+@pytest.mark.parametrize("variables_file", _variables_files, ids=[f.stem for f in _variables_files])
+def test_framework_fields_present(variables_file):
+    """Module-page Variables dataclasses must define the BaseStreamlitUI framework fields.
+
+    Local-only debug pages (``sidebar_category == "Debug"``) are standalone scripts
+    that never go through BaseStreamlitUI, so they are exempt from these fields.
+    """
+    if _get_sidebar_category(variables_file) == DEBUG_CATEGORY:
+        pytest.skip(f"{variables_file.name} is a {DEBUG_CATEGORY} page, exempt from framework fields")
+
+    defined = _collect_class_attribute_names(variables_file)
+    missing = FRAMEWORK_FIELDS - defined
+    assert not missing, f"{variables_file.name} is missing required framework fields: {sorted(missing)}"

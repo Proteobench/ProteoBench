@@ -5,7 +5,13 @@ from pathlib import Path
 import streamlit as st
 from _base import StreamlitPage
 from pages.base_pages.tour_steps import get_homepage_tour_steps
-from streamlit_tour import Tour
+
+# Optional guided-tour overlay; disable gracefully if streamlit_tour cannot be
+# imported (e.g. version-incompatible with the installed streamlit). See base.py.
+try:
+    from streamlit_tour import Tour
+except Exception:  # noqa: BLE001 - any import/component-registration failure
+    Tour = None
 from UI_utils import (
     build_submissions_figure,
     build_tool_pie_chart,
@@ -204,25 +210,26 @@ class StreamlitPageHome(StreamlitPage):
             else:
                 st.info("Submission data is currently unavailable.")
 
-        tour = Tour(
-            get_homepage_tour_steps(),
-            key=_home_tour_key,
-            show_progress=True,
-            animate=True,
-            overlay_opacity=0.75,
-            one_time_tour=False,
-        )
-        if st.session_state.pop("start_home_tour", False):
-            # Manual button: always start regardless of opt-in.
-            st.session_state["_home_tour_in_progress"] = True
-            tour.start()
-        elif "_tour_opted_in" in st.session_state and "_tour_auto_home" not in st.session_state:
-            # User has made a decision and auto-start has not been handled yet.
-            st.session_state["_tour_auto_home"] = True
-            if st.session_state["_tour_opted_in"] is True:
+        if Tour is not None:
+            tour = Tour(
+                get_homepage_tour_steps(),
+                key=_home_tour_key,
+                show_progress=True,
+                animate=True,
+                overlay_opacity=0.75,
+                one_time_tour=False,
+            )
+            if st.session_state.pop("start_home_tour", False):
+                # Manual button: always start regardless of opt-in.
                 st.session_state["_home_tour_in_progress"] = True
                 tour.start()
-            # Opted out: mark handled, do not start.
+            elif "_tour_opted_in" in st.session_state and "_tour_auto_home" not in st.session_state:
+                # User has made a decision and auto-start has not been handled yet.
+                st.session_state["_tour_auto_home"] = True
+                if st.session_state["_tour_opted_in"] is True:
+                    st.session_state["_home_tour_in_progress"] = True
+                    tour.start()
+                # Opted out: mark handled, do not start.
 
 
 if __name__ == "__main__":

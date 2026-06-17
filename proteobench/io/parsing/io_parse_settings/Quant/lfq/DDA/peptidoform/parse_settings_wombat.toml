@@ -23,3 +23,9 @@
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
 
+
+[upload_info]
+"datapoint_file" = "*.csv"
+"datapoint_file_description" = "Upload the WOMBAT-P output CSV file (e.g., `peptide_table.csv`).\nIt should contain an 'abundance_' column per raw file."
+"params_file" = "config.yaml"
+"params_file_description" = "Upload the WOMBAT-P configuration YAML file."

@@ -23,3 +23,9 @@ ox = "Oxidation"
 c = "Carbamidomethyl"
 a = "Acetyl"
 decoy = ""
+
+[upload_info]
+"datapoint_file" = "*.csv"
+"datapoint_file_description" = "Upload the AlphaPept results CSV file (e.g., `alphapept.csv`).\nIt should contain the column 'ms1_int_sum_apex_dn'"
+"params_file" = "*.yaml"
+"params_file_description" = "Upload the AlphaPept results YAML file (e.g., `alphapept.yaml`)."

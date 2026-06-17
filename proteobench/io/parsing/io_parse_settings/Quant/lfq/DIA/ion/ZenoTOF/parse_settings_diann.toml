@@ -20,3 +20,13 @@ decoy_flag = true
 "(unimod:35)" = "Oxidation"
 "(unimod:1)" = "Acetyl"
 "(unimod:4)" = "Carbamidomethyl"
+
+[upload_info]
+"datapoint_file" = "report.tsv or report.parquet"
+"datapoint_file_description" = "Upload the DIA-NN report file (`report.tsv` or `report.parquet`)."
+"params_file" = "report.log.txt"
+"params_file_description" = "Upload the DIA-NN log file (`report.log.txt`)."
+
+[upload_info_overrides."FragPipe (DIA-NN quant)"]
+"params_file" = "fragpipe.workflow"
+"params_file_description" = "Upload the FragPipe workflow file (.workflow)."

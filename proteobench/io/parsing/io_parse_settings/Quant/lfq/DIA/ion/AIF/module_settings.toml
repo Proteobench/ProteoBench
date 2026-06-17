@@ -50,3 +50,13 @@ raw_file = "LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03"
 sample_name = "Condition_B_Sample_Alpha_03"
 condition = "B"
 
+
+[reference_database]
+# Reference protein database used to validate uploaded protein identifiers.
+# Read by proteobench.validation (ModuleValidationConfig).
+"fasta_url" = "https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip"
+
+[validation]
+# Validation profile applied to submissions for this module.
+# Resolved by proteobench.validation (ModuleValidationConfig.from_parse_settings).
+"profile" = "quant_lfq"

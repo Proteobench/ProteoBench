@@ -14,3 +14,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = false
+
+[upload_info]
+"datapoint_file" = "combined_ion.tsv"
+"datapoint_file_description" = "Upload the FragPipe `combined_ion.tsv` file from the search output folder."
+"params_file" = "fragpipe.workflow"
+"params_file_description" = "Upload the FragPipe workflow file (`.workflow`)."

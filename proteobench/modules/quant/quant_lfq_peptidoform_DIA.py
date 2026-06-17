@@ -24,6 +24,7 @@ class DIAQuantPeptidoformModule(QuantModule):
     Attributes
     ----------
     module_id : str
+    y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
         Module identifier for configuration.
     precursor_column_name: str
         Level of quantification.
@@ -75,7 +76,7 @@ class DIAQuantPeptidoformModule(QuantModule):
         """
         return False
 
-    def get_plot_generator(self):
+    def get_plot_generator(self, y_axis_title: str = None):
         """
         Get the plot generator for this module.
 
@@ -84,4 +85,4 @@ class DIAQuantPeptidoformModule(QuantModule):
         PlotGeneratorBase
             The plot generator instance.
         """
-        return super().get_plot_generator()
+        return super().get_plot_generator(y_axis_title=y_axis_title)

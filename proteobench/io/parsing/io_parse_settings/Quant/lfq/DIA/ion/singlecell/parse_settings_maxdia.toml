@@ -21,3 +21,9 @@ decoy_flag = true
 "(ac)" = "Acetyl"
 "(oxidation (m))" = "Oxidation"
 "(acetyl (protein n-term))" = "Acetylation"
+
+[upload_info]
+"datapoint_file" = "evidence.txt"
+"datapoint_file_description" = "Upload the MaxQuant `evidence.txt` file from the txt output folder."
+"params_file" = "mqpar.xml"
+"params_file_description" = "Upload the MaxQuant parameter file `mqpar.xml` from the search output folder."

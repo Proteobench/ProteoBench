@@ -13,6 +13,97 @@ import pandas as pd
 from proteobench.io.params import ProteoBenchParameters
 
 
+def identify_file_type(file: Union[str, IO]) -> str:
+    """
+    Identify whether a single MetaMorpheus file is the TOML settings file or the version text file.
+
+    Parameters
+    ----------
+    file : Union[str, IO]
+        Path string or file-like object to inspect.
+
+    Returns
+    -------
+    str
+        ``"toml"`` if the file parses as a TOML settings file, ``"version"`` otherwise.
+    """
+    if isinstance(file, (str, PosixPath, Path)):
+        try:
+            with open(file, "rb") as f:
+                toml.load(f)
+            return "toml"
+        except Exception:
+            return "version"
+    elif hasattr(file, "read"):
+        try:
+            file.seek(0)
+            content = file.read()
+            if isinstance(content, str):
+                content = content.encode("utf-8")
+            toml.loads(content.decode("utf-8"))
+            return "toml"
+        except Exception:
+            return "version"
+        finally:
+            try:
+                file.seek(0)
+            except Exception:
+                pass
+    return "version"
+
+
+def get_incomplete_upload_warning(files: list) -> str:
+    """
+    Return a user-facing warning string when fewer than two MetaMorpheus files are uploaded.
+
+    Parameters
+    ----------
+    files : list
+        List of uploaded file objects (expected to contain exactly one element).
+
+    Returns
+    -------
+    str
+        Warning message describing which file is missing.
+    """
+    file_type = identify_file_type(files[0]) if files else None
+    if file_type == "toml":
+        return (
+            "You uploaded the MetaMorpheus search task settings file (.toml). "
+            "Please also upload the version file (the plain-text file containing "
+            "the MetaMorpheus version, typically named 'allResults.txt' or similar)."
+        )
+    return "You uploaded the MetaMorpheus version file. " "Please also upload the search task settings file (.toml)."
+
+
+def _homogenize_mod(mod_str: str) -> str:
+    """Convert MetaMorpheus modification format to ProForma-like notation.
+
+    MetaMorpheus format: ``{modname} on {residue}``
+    with optional terminal qualifiers like ``(Pep N-term)`` or ``(Prot N-term)``.
+
+    Examples:
+        ``Carbamidomethyl on C`` -> ``C[Carbamidomethyl]``
+        ``Acetylation on X (Prot N-term)`` -> ``Protein N-term[Acetylation]``
+        ``Oxidation on M`` -> ``M[Oxidation]``
+    """
+    mod_str = mod_str.strip()
+    if " on " not in mod_str:
+        return mod_str
+    name, residue_part = mod_str.split(" on ", 1)
+    residue_part = residue_part.strip()
+    if "(Prot N-Term)" in residue_part:
+        return f"Protein N-term[{name}]"
+    elif "(Pep N-Term)" in residue_part:
+        return f"N-term[{name}]"
+    elif "(Prot C-Term)" in residue_part:
+        return f"Protein C-term[{name}]"
+    elif "(Pep C-Term)" in residue_part:
+        return f"C-term[{name}]"
+    else:
+        return f"{residue_part}[{name}]"
+
+
 def load_files(file1: Union[str, IO], file2: Union[str, IO]) -> Tuple[Union[str, None], Union[dict, None]]:
     """
     Load two files (IO objects or file paths), returning:
@@ -108,9 +199,9 @@ def parse_modifications(mods: str) -> list:
     mod_list = mods.split("\t\t")
     for mod in mod_list:
         mod_spec = mod.split("\t")[1]
-        parsed_mod_list.append(mod_spec)
+        parsed_mod_list.append(_homogenize_mod(mod_spec))
 
-    return ";".join(parsed_mod_list) if parsed_mod_list else []
+    return ", ".join(parsed_mod_list) if parsed_mod_list else []
 
 
 def format_tolerances(tolerance: str) -> str:
@@ -134,8 +225,10 @@ def format_tolerances(tolerance: str) -> str:
     return formatted_tolerance
 
 
-def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
-    params = ProteoBenchParameters()
+def extract_params(
+    file_path_1, file_path_2, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
+) -> ProteoBenchParameters:
+    params = ProteoBenchParameters(filename=json_file)
 
     versions_line, settings = load_files(file_path_1, file_path_2)
 
@@ -166,6 +259,7 @@ def extract_params(file_path_1, file_path_2) -> ProteoBenchParameters:
     params.ident_fdr_peptide = None
     params.ident_fdr_protein = None
     params.search_engine_version = None
+    params.fill_none()
     return params
 
 

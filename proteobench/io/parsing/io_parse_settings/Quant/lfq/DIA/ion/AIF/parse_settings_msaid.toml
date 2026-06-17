@@ -20,3 +20,9 @@ decoy_flag = false
 "[unimod:4]" = "Carbamidomethyl"
 "[unimod:1]" = "Acetyl"
 "[unimod:35]" = "Oxidation"
+
+[upload_info]
+"datapoint_file" = "*.tsv"
+"datapoint_file_description" = "Upload the MSAID output TSV file."
+"params_file" = "MSAID_params.csv"
+"params_file_description" = "Upload the MSAID parameters CSV file."

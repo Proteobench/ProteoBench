@@ -150,9 +150,14 @@ build.sh
 
 # temp results
 jupyter_notebooks/analysis/temp_results/*
+jupyter_notebooks/analysis/
+testfolder
 .claude
 uv.lock
 
 # Large files
 *.gz
 
+# Atomic-write / editor temp files
+*.tmp
+*.tmp.*

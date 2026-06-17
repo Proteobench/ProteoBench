@@ -37,6 +37,18 @@ GROUND_TRUTH_DIR_LOCAL_DENOVO = os.path.join(
 GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
 GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
+_TOOL_METADATA_PATH = os.path.join(
+    Path(__file__).resolve().parent,
+    "io_parse_settings",
+    "tool_metadata.toml",
+)
+
+
+def get_open_source_tools() -> set:
+    """Return the set of open-source tool names (lower-cased) from tool_metadata.toml."""
+    metadata = toml.load(_TOOL_METADATA_PATH)
+    return {name.lower() for name in metadata.get("open_source", {}).get("tools", [])}
+
 
 class ConverterBuilder:
     """
@@ -111,6 +123,36 @@ class ConverterBuilder:
             parser.add_modification_parser(ModificationConverter(parse_settings))
 
         return parser
+
+    def get_upload_info(self, input_format: str) -> Dict[str, str]:
+        """
+        Return the upload_info block for a given input format.
+
+        Reads the ``[upload_info]`` section from the tool's TOML file and returns
+        it as a plain dict.  Returns an empty dict when the section is absent
+        (e.g., for the Custom format).
+
+        Parameters
+        ----------
+        input_format : str
+            The input format to query (e.g., "MaxQuant", "DIA-NN").
+
+        Returns
+        -------
+        Dict[str, str]
+            A dict with keys ``datapoint_file``, ``datapoint_file_description``,
+            ``params_file``, and ``params_file_description``, or an empty dict
+            if ``[upload_info]`` is not present in the TOML.
+        """
+        toml_file = self.PARSE_SETTINGS_FILES.get(input_format)
+        if toml_file is None:
+            return {}
+        parse_settings = toml.load(toml_file)
+        base = parse_settings.get("upload_info", {})
+        # Apply per-tool overrides when multiple input_formats share the same TOML
+        # (e.g. "FragPipe (DIA-NN quant)" shares parse_settings_diann.toml with "DIA-NN").
+        override = parse_settings.get("upload_info_overrides", {}).get(input_format, {})
+        return {**base, **override}
 
 
 class IntermediateFormatConverter:
@@ -839,7 +881,6 @@ MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_Astral": IntermediateFormatConverter,
     "quant_lfq_DDA_ion_QExactive": IntermediateFormatConverter,
     "quant_lfq_DDA_peptidoform": IntermediateFormatConverter,
-    "quant_lfq_DDA_ion_Astral": IntermediateFormatConverter,
     "quant_lfq_DIA_ion_AIF": IntermediateFormatConverter,
     "quant_lfq_DIA_ion_diaPASEF": IntermediateFormatConverter,
     "quant_lfq_DIA_ion_singlecell": IntermediateFormatConverter,

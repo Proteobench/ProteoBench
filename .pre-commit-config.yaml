@@ -70,3 +70,11 @@ repos:
     hooks:
       - id: numpydoc-validation
         exclude: "test/.*|exceptions.py|noxfile.py|jupyter_notebooks/.*|docs/parse_tables.py|webinterface/.*|modules/denovo/.*|test_data_download/.*"
+  - repo: local
+    hooks:
+      - id: check-contributing-institutes-symlink
+        name: check contributing-institutes logo is a symlink to docs/_static/img/
+        language: script
+        entry: bash scripts/check_contributing_institutes_symlink.sh
+        pass_filenames: false
+        always_run: true

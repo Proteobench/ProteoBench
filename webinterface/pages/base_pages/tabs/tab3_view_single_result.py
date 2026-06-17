@@ -70,7 +70,7 @@ def generate_indepth_plots(
     Optional[go.Figure]
         The first generated plot or None if generation fails.
     """
-    plot_generator = module.get_plot_generator()
+    plot_generator = module.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # Validate that we have data to plot
     if variables.result_perf not in st.session_state:
@@ -209,7 +209,7 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
                         st.caption(f"Data source: {public_id}")
 
                 # Display plot
-                st.plotly_chart(plots[plot_name], width='stretch')
+                st.plotly_chart(plots[plot_name], use_container_width=True)
 
         # Add separator after each section (except last)
         if section != layout_config[-1] and len(section["plots"]) > 0:
@@ -241,8 +241,15 @@ def display_performance_table(
     if hasattr(variables, "description_table_md") and os.path.exists(variables.description_table_md):
         st.markdown(open(variables.description_table_md, "r", encoding="utf-8").read())
 
-    # Display table
-    st.dataframe(performance_data.head(100))
+    # Hide this dataframe's built-in toolbar (including its CSV-download icon) so the
+    # explicit "Download full table" button below is the only download path. Scoped to
+    # this table via the keyed container, so dataframes elsewhere keep their toolbars.
+    st.markdown(
+        "<style>.st-key-single_result_preview_table [data-testid='stElementToolbar'] {display: none;}</style>",
+        unsafe_allow_html=True,
+    )
+    with st.container(key="single_result_preview_table"):
+        st.dataframe(performance_data.head(100))
 
     # Generate sample name (used for user-facing filenames)
     if public_id == "Uploaded dataset":
@@ -256,12 +263,12 @@ def display_performance_table(
     else:
         cache_key = public_hash or public_id
 
-    # Download button
+    # Full-table download button (exports every row, not just the preview)
     random_uuid = uuid.uuid4()
     # Clean data for CSV export (replace newlines with spaces)
     cleaned_data = clean_dataframe_for_export(performance_data)
     st.download_button(
-        label="Download table",
+        label="Download full table",
         data=streamlit_utils.save_dataframe(cleaned_data),
         file_name=f"{sample_name}.csv",
         mime="text/csv",
@@ -313,7 +320,7 @@ def display_in_depth_plots_generic(variables, ionmodule, performance_data: pd.Da
         return
 
     # Get plot generator from module
-    plot_generator = ionmodule.get_plot_generator()
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # Generate plots
     try:

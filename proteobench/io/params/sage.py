@@ -11,6 +11,68 @@ import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
 
+MASS_TO_MOD_MAPPING = {
+    57.021464: "Carbamidomethyl",
+    15.9949: "Oxidation",
+    42.0106: "Acetyl",
+}
+MASS_TOLERANCE = 0.001
+
+# Sage uses "[" for N-terminal and "]" for C-terminal modifications
+RESIDUE_MAP = {"[": "Protein N-term", "]": "Protein C-term", "^": "N-term", "$": "C-term"}
+
+
+def _lookup_mod_name(mass: float) -> str:
+    """Look up a modification name by mass shift within tolerance."""
+    for ref_mass, name in MASS_TO_MOD_MAPPING.items():
+        if abs(mass - ref_mass) < MASS_TOLERANCE:
+            return name
+    return str(mass)
+
+
+def _parse_static_mods(mods: dict) -> str:
+    """Parse Sage static_mods dict into ProForma-like format."""
+    if not mods:
+        return ""
+    results = []
+    for residue, mass in mods.items():
+        mod_name = _lookup_mod_name(mass)
+        res = RESIDUE_MAP.get(residue, residue)
+        results.append(f"{res}[{mod_name}]")
+    return ", ".join(results)
+
+
+def _parse_variable_mods(mods: dict) -> str:
+    """Parse Sage variable_mods dict into ProForma-like format."""
+    if not mods:
+        return ""
+    results = []
+    for residue, masses in mods.items():
+        res = RESIDUE_MAP.get(residue, residue)
+        for mass in masses:
+            mod_name = _lookup_mod_name(mass)
+            results.append(f"{res}[{mod_name}]")
+    return ", ".join(results)
+
+
+def _format_tolerance_range(tolerance_data: dict) -> str:
+    """Format tolerance range from Sage JSON, supporting legacy and newer key casings."""
+    if not isinstance(tolerance_data, dict):
+        raise ValueError(f"Tolerance entry should be a dictionary, got: {type(tolerance_data)}")
+
+    unit_lookup = {
+        "ppm": "ppm",
+        "da": "Da",
+    }
+
+    for key, values in tolerance_data.items():
+        normalized_key = str(key).lower()
+        if normalized_key in unit_lookup:
+            unit = unit_lookup[normalized_key]
+            return "[" + ", ".join(f"{val} {unit}" for val in values) + "]"
+
+    raise KeyError(f"Unsupported tolerance unit(s): {list(tolerance_data.keys())}")
+
 
 def extract_params(
     fname: Union[str, pathlib.Path],
@@ -51,7 +113,7 @@ def extract_params(
             if data["database"]["enzyme"]["restrict"] == "P":
                 params.enzyme = "Trypsin"
         except KeyError:
-            params.enyzme = "Trypsin/P"
+            params.enzyme = "Trypsin/P"
 
     params.allowed_miscleavages = data["database"]["enzyme"]["missed_cleavages"]
 
@@ -64,32 +126,21 @@ def extract_params(
     else:
         raise ValueError(f"Unknown value for semi_enzymatic: {data['database']['enzyme']['semi_enzymatic']}")
 
-    params.fixed_mods = data["database"]["static_mods"]
-    params.variable_mods = data["database"]["variable_mods"]
+    params.fixed_mods = _parse_static_mods(data["database"]["static_mods"])
+    params.variable_mods = _parse_variable_mods(data["database"]["variable_mods"])
 
-    try:
-        _precursor_mass_tolerance = data["precursor_tol"]["ppm"]
-        # add unit after each value in list
-        _precursor_mass_tolerance = [str(val) + " ppm" for val in _precursor_mass_tolerance]
-        params.precursor_mass_tolerance = "[" + ", ".join(_precursor_mass_tolerance) + "]"
-    except KeyError:
-        _precursor_mass_tolerance = data["precursor_tol"]["Da"]
-        # add unit after each value in list
-        _precursor_mass_tolerance = [str(val) + " Da" for val in params.precursor_mass_tolerance]
-        params.precursor_mass_tolerance = "[" + ", ".join(_precursor_mass_tolerance) + "]"
-
-    _fragment_mass_tolerance = data["fragment_tol"]["ppm"]
-    # add unit after each value in list
-    _fragment_mass_tolerance = [str(val) + " ppm" for val in _fragment_mass_tolerance]
-    params.fragment_mass_tolerance = "[" + ", ".join(_fragment_mass_tolerance) + "]"
+    params.precursor_mass_tolerance = _format_tolerance_range(data["precursor_tol"])
+    params.fragment_mass_tolerance = _format_tolerance_range(data["fragment_tol"])
 
     params.min_peptide_length = int(data["database"]["enzyme"]["min_len"])
-    params.max_peptide_length = int(data["database"]["enzyme"]["max_len"])
+    max_len = data["database"]["enzyme"]["max_len"]
+    params.max_peptide_length = int(max_len) if max_len is not None else None
     params.max_mods = int(data["database"]["max_variable_mods"])
     params.min_precursor_charge = int(data["precursor_charge"][0])
     params.max_precursor_charge = int(data["precursor_charge"][1])
     params.enable_match_between_runs = True
 
+    params.fill_none()
     return params
 
 

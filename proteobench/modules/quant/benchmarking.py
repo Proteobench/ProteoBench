@@ -69,7 +69,7 @@ def _generate_datapoint(
     intermediate_metric_structure,
     input_format,
     user_input,
-    default_cutoff_min_prec,
+    default_cutoff_min_feature,
     max_nr_observed=None,
     datapoint_class=QuantDatapointHYE,
 ):
@@ -78,7 +78,7 @@ def _generate_datapoint(
         intermediate_metric_structure,
         input_format,
         user_input,
-        default_cutoff_min_prec=default_cutoff_min_prec,
+        default_cutoff_min_feature=default_cutoff_min_feature,
         max_nr_observed=max_nr_observed,
     )
 
@@ -97,7 +97,7 @@ def run_benchmarking(
     user_input: dict,
     precursor_column_name: str,
     all_datapoints: Optional[pd.DataFrame] = None,
-    default_cutoff_min_prec: int = 3,
+    default_cutoff_min_feature: int = 3,
     add_datapoint_func=None,
     max_nr_observed: int = None,
     quant_score_class=QuantScoresHYE,
@@ -122,7 +122,7 @@ def run_benchmarking(
         Name of the precursor column.
     all_datapoints : Optional[pd.DataFrame]
         DataFrame containing all data points from the repo.
-    default_cutoff_min_prec : int, optional
+    default_cutoff_min_feature : int, optional
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
         Function to add the current datapoint to all datapoints.
@@ -152,7 +152,7 @@ def run_benchmarking(
         intermediate_metric_structure,
         input_format,
         user_input,
-        default_cutoff_min_prec,
+        default_cutoff_min_feature,
         max_nr_observed=max_nr_observed,
         datapoint_class=datapoint_class,
     )

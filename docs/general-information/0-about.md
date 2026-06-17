@@ -2,7 +2,7 @@
 
 ## Introduction
 
-`ProteoBench <https://proteobench.cubimed.rub.de/>`\_ is an open and collaborative platform for community-curated benchmarks for proteomics
+[ProteoBench](https://proteobench.cubimed.rub.de/) is an open and collaborative platform for community-curated benchmarks for proteomics
 data analysis pipelines. Our goal is to allow a continuous, easy, and controlled comparison of
 proteomics data analysis workflows.
 
@@ -14,8 +14,6 @@ applications. The goal is not to select a single best one-fits-all data analysis
 1. **end-users** to identify a good workflow to fulfill their specific needs
 2. **developers** to identify the specific strengths and weaknesses in their workflows, guiding the development process
 3. **the field** to easily position a newly published workflow within the context of the existing state-of-the-art
-
-## Workflow
 
 Participants (both end-users and developers) can download a set of input files (e.g., raw MS files,
 search databases, or spectral libraries) tailored to specific benchmark metrics. They can then analyze

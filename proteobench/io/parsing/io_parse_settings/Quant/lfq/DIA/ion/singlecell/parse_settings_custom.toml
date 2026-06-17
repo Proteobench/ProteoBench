@@ -8,3 +8,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
+
+[upload_info]
+"datapoint_file" = "custom_input.tsv"
+"datapoint_file_description" = "Upload a tab-delimited file following the Custom format. See the [documentation](https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-singlecell/#custom-format) for the required column names and format."
+"params_file" = ""
+"params_file_description" = ""

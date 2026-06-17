@@ -74,5 +74,5 @@ class DDAQuantIonAstralModule(QuantModule):
         """
         return True
 
-    def get_plot_generator(self):
-        return super().get_plot_generator()
+    def get_plot_generator(self, y_axis_title: str = None):
+        return super().get_plot_generator(y_axis_title=y_axis_title)

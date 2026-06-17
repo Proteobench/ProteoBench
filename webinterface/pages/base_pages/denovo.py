@@ -181,7 +181,25 @@ class DeNovoUIObjects(BaseUIModule):
             )
 
         if submit_button:
-            st.info("Calculating metrics. This will take around two minutes. Please be patient.")
+            # Clear any previously uploaded parameter file and widget state so Tab 5
+            # starts fresh for the new tool/file combination.
+            st.session_state[self.variables.params_file_dict] = {}
+            # Erase the old file uploader's stored file before cycling the UUID,
+            # so the uploader cannot resurrect the old file even if the key persists.
+            _old_meta_uuid = st.session_state.get(self.variables.meta_file_uploader_uuid)
+            if _old_meta_uuid is not None:
+                st.session_state.pop(_old_meta_uuid, None)
+            st.session_state[self.variables.meta_file_uploader_uuid] = uuid.uuid4()
+            with open(self.variables.additional_params_json, encoding="utf-8") as f:
+                _param_config = json.load(f)
+            for _key in _param_config.keys():
+                st.session_state.pop(self.variables.prefix_params + _key, None)
+
+            st.info(
+                "Calculating metrics for {}. This will take around two minutes. Please be patient.".format(
+                    self.user_input["input_format"]
+                )
+            )
             self.first_point_plotted = tab2.process_submission_form(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
@@ -284,7 +302,7 @@ class DeNovoUIObjects(BaseUIModule):
                             if plot_name in descriptions:
                                 st.caption(descriptions[plot_name])
                             self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
-                            # st.plotly_chart(plots[plot_name], use_container_width=True)
+
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
                 import traceback
@@ -314,6 +332,7 @@ class DeNovoUIObjects(BaseUIModule):
                 st.header(mod_label)
                 st.plotly_chart(
                     figs[mod_label],
+                    key=f"ptm_plot_{mod_label}",
                     width="stretch",
                 )
 
@@ -489,38 +508,96 @@ class DeNovoUIObjects(BaseUIModule):
         if self.variables.check_submission not in st.session_state:
             st.session_state[self.variables.check_submission] = False
 
-        if self.variables.first_new_plot:
-            self.submission_ready = tab5_quant.generate_submission_ui_elements(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
+        self.submission_ready = tab5_quant.generate_submission_ui_elements(
+            variables=self.variables,
+            user_input=self.user_input,
+        )
 
+        # Parse parameter file if uploaded so parsed values pre-populate the fields below.
+        # If no file is provided the fields render with schema defaults for manual entry.
         if self.user_input[self.variables.meta_data]:
-            params = tab5_quant.load_user_parameters(
+            params_from_file = tab5_quant.load_user_parameters(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
             )
-            st.session_state[self.variables.params_file_dict] = params.__dict__
-            self.params_file_dict_copy = copy.deepcopy(params.__dict__)
-
-            tab5_quant.generate_additional_parameters_fields_submission(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
-            tab5_quant.generate_comments_section(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
-            # ? stop_duplicating is not used?
-            self.stop_duplicating = tab5_quant.generate_confirmation_checkbox(
-                check_submission=self.variables.check_submission
-            )
+            if params_from_file is not None:
+                st.session_state[self.variables.params_file_dict] = params_from_file.__dict__
+                self.params_file_dict_copy = copy.deepcopy(params_from_file.__dict__)
+                # Directly update widget session state keys so Streamlit uses the parsed values.
+                # Without this, Streamlit ignores the `value` arg on widgets whose keys already exist
+                # (registered from the pre-upload render of the always-visible fields).
+                # Values must be sanitized: ProteoBenchParameters stores np.nan for missing fields,
+                # which Streamlit cannot assign to a protobuf string field.
+                for key, val in params_from_file.__dict__.items():
+                    try:
+                        is_missing = pd.isna(val)
+                    except (TypeError, ValueError):
+                        is_missing = False
+                    if is_missing:
+                        sanitized = None
+                    elif not isinstance(val, str):
+                        sanitized = str(val)
+                    else:
+                        sanitized = val
+                    st.session_state[self.variables.prefix_params + key] = sanitized
+            else:
+                self.params_file_dict_copy = {}
         else:
-            params = None
+            self.params_file_dict_copy = {}
 
+        # Always override software_name with the active input_format. This must come after
+        # the parameter file re-application above, which does a full dict replacement and
+        # would otherwise overwrite this value.
+        st.session_state[self.variables.params_file_dict]["software_name"] = self.user_input["input_format"]
+
+        # Explicitly write every parameter widget's session state to the desired value
+        # (YAML-parsed value if available, otherwise JSON default for the current tool).
+        # This is necessary because generate_additional_parameters_fields_submission contains
+        # `on_change=func(args)` — Python evaluates these arguments immediately on every render,
+        # reading stale browser-sent session state and rewriting params_file_dict with old values.
+        # By explicitly owning the session state keys here, before the widgets render, we
+        # prevent any browser-side stale value from slipping through.
+        with open(self.variables.additional_params_json, encoding="utf-8") as _schema_f:
+            _param_schema = json.load(_schema_f)
+        _file_dict = st.session_state.get(self.variables.params_file_dict, {})
+        for _field_key, _field_schema in _param_schema.items():
+            if _field_key in _file_dict:
+                _val = _file_dict[_field_key]
+                # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
+                # np.nan is a float and cannot be serialized by Streamlit's protobuf for
+                # text_input; convert to "" (empty). Non-string non-missing values are
+                # stringified to match what st.text_input expects.
+                try:
+                    _is_missing = pd.isna(_val)
+                except (TypeError, ValueError):
+                    _is_missing = False
+                if _is_missing:
+                    _val = ""
+                elif not isinstance(_val, str):
+                    _val = str(_val)
+                st.session_state[self.variables.prefix_params + _field_key] = _val
+            else:
+                _default = _field_schema.get("value", {}).get(self.user_input.get("input_format", ""), None)
+                st.session_state[self.variables.prefix_params + _field_key] = _default if _default is not None else ""
+
+        # Always show parameter fields, comments, and confirmation checkbox.
+        tab5_quant.generate_additional_parameters_fields_submission(
+            variables=self.variables,
+            user_input=self.user_input,
+        )
+        tab5_quant.generate_comments_section(
+            variables=self.variables,
+            user_input=self.user_input,
+        )
+        # ? stop_duplicating is not used?
+        self.stop_duplicating = tab5_quant.generate_confirmation_checkbox(
+            check_submission=self.variables.check_submission
+        )
+
+        params = None
         pr_url = None
-        if st.session_state[self.variables.check_submission] and params is not None:
+        if st.session_state[self.variables.check_submission]:
             get_form_values = tab5_quant.get_form_values(
                 variables=self.variables,
             )

@@ -19,6 +19,9 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
     Used by plasma benchmarking modules that use human plasma, yeast, and E. coli species.
     """
 
+    def __init__(self, y_axis_title: str = "Number of quantified spike-in precursors"):
+        self.y_axis_title = y_axis_title
+
     def generate_in_depth_plots(
         self, performance_data: pd.DataFrame, species_expected_ratio: dict = None, **kwargs
     ) -> Dict[str, go.Figure]:
@@ -629,15 +632,15 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         metric: str = "Median",
         mode: str = "Species-weighted",
         software_colors: Dict[str, str] = {
-            "MaxQuant": "#8bc6fd",
-            "AlphaPept": "#17212b",
-            "ProlineStudio": "#8b26ff",
-            "MSAngel": "#C0FA7D",
-            "FragPipe": "#F89008",
-            "i2MassChroQ": "#108E2E",
-            "Sage": "#E43924",
-            "WOMBAT": "#663200",
-            "DIA-NN": "#d42f2f",
+            "MaxQuant": "#88ccef",
+            "AlphaPept": "#cc6777",
+            "ProlineStudio": "#ddcc77",
+            "MSAngel": "#147733",
+            "FragPipe": "#342288",
+            "i2MassChroQ": "#aa4599",
+            "Sage": "#671100",
+            "WOMBAT": "#44aa9a",
+            "DIA-NN": "#999934",
             "AlphaDIA": "#1D2732",
             "Custom": "#000000",
             "Spectronaut": "#007548",
@@ -674,7 +677,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         hide_annot: bool = False,
         colorblind_mode: bool = False,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         min_nr_observed: int = None,
         annotation: str = "",
         **kwargs,
@@ -705,7 +708,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Mapping for legend names.
         hide_annot : bool
             Whether to hide annotations on the plot.
-        default_cutoff_min_prec : int
+        default_cutoff_min_feature : int
             Default min precursor threshold for extracting metrics.
         min_nr_observed : int, optional
             Override the cutoff level with this value if provided.
@@ -719,8 +722,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with the plasma scatterplot.
         """
-        # Use min_nr_observed if provided, otherwise use default_cutoff_min_prec
-        cutoff_level = min_nr_observed if min_nr_observed is not None else default_cutoff_min_prec
+        # Use min_nr_observed if provided, otherwise use default_cutoff_min_feature
+        cutoff_level = min_nr_observed if min_nr_observed is not None else default_cutoff_min_feature
         return self._plot_plasma_scatterplot(
             result_df,
             metric=metric,
@@ -733,7 +736,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             legend_name_map=legend_name_map,
             hide_annot=hide_annot,
             colorblind_mode=colorblind_mode,
-            default_cutoff_min_prec=cutoff_level,
+            default_cutoff_min_feature=cutoff_level,
             annotation=annotation,
             **kwargs,
         )
@@ -745,15 +748,15 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         mode: str = "Species-weighted",
         # TODO: move software_colors to constants
         software_colors: Dict[str, str] = {
-            "MaxQuant": "#8bc6fd",
-            "AlphaPept": "#17212b",
-            "ProlineStudio": "#8b26ff",
-            "MSAngel": "#C0FA7D",
-            "FragPipe": "#F89008",
-            "i2MassChroQ": "#108E2E",
-            "Sage": "#E43924",
-            "WOMBAT": "#663200",
-            "DIA-NN": "#d42f2f",
+            "MaxQuant": "#88ccef",
+            "AlphaPept": "#cc6777",
+            "ProlineStudio": "#ddcc77",
+            "MSAngel": "#147733",
+            "FragPipe": "#342288",
+            "i2MassChroQ": "#aa4599",
+            "Sage": "#671100",
+            "WOMBAT": "#44aa9a",
+            "DIA-NN": "#999934",
             "AlphaDIA": "#1D2732",
             "Custom": "#000000",
             "Spectronaut": "#007548",
@@ -790,7 +793,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
         hide_annot: bool = False,
         colorblind_mode: bool = False,
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         annotation: str = "",
         **kwargs,
     ) -> go.Figure:
@@ -824,7 +827,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             Mapping for legend names.
         hide_annot : bool
             Whether to hide annotations on the plot.
-        default_cutoff_min_prec : int
+        default_cutoff_min_feature : int
             Default min precursor threshold for extracting metrics.
         annotation : str, optional
             Text annotation to display on the plot (e.g., "-Alpha-", "-Beta-").
@@ -850,11 +853,25 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Human plasma metrics don't have mode variants (single species)
         opacity_metric_key = f"{metric_lower}_abs_epsilon_human_plasma"
 
+        # Pre-pass: collect raw dynamic-range values for data-driven size normalization.
+        # This ensures the full [8, 40] marker-size range is used regardless of where
+        # values cluster, maximising visual separation for small differences.
+        raw_size_vals = []
+        for _, row in result_df.iterrows():
+            m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_feature)
+            if m is not None:
+                sv = m.get("dynamic_range_human_plasma_mean", 0.0)
+                if sv > 0:
+                    raw_size_vals.append(sv)
+        size_min = min(raw_size_vals) if raw_size_vals else 0.0
+        size_max = max(raw_size_vals) if raw_size_vals else 1.0
+        size_data_range = size_max - size_min if size_max > size_min else 1.0
+
         # Create scatter plot with all four visual dimensions
         # Group by software to create separate traces (allows colorblind markers)
         software_data = {}
         for idx, row in result_df.iterrows():
-            metrics = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_prec)
+            metrics = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_feature)
             if metrics is None:
                 continue
 
@@ -882,12 +899,13 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             software_data[software]["x"].append(x_val)
             software_data[software]["y"].append(y_val)
 
-            # Size scaling: normalize dynamic range to reasonable marker sizes (5-30)
+            # Size scaling: min-max normalise across the loaded data so the full
+            # [8, 40] range is always used, making even small differences visible.
             if size_val > 0:
-                normalized_size = 5 + (size_val / 3) * 25
+                normalized_size = 8 + ((size_val - size_min) / size_data_range) * 10
             else:
                 normalized_size = 8
-            software_data[software]["sizes"].append(min(normalized_size, 30))
+            software_data[software]["sizes"].append(normalized_size)
 
             # Opacity: lower error = higher opacity (higher alpha)
             opacity = max(0.2, 0.9 - (opacity_val * 0.7))
@@ -911,7 +929,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 f"Quantified spike-ins: {y_val}<br>"
                 f"Plasma dynamic range: {size_val:.2f}<br>"
                 f"Plasma accuracy error ({metric_lower}): {opacity_val:.3f}<br>"
-                f"ID: {row['id']}"
+                f"ProteoBench ID: {row['id']}"
             )
             software_data[software]["hover_texts"].append(hover_text)
 
@@ -951,7 +969,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 showgrid=True,
             ),
             yaxis=dict(
-                title="Number of quantified spike-in precursors",
+                title=self.y_axis_title,
                 gridcolor="lightgray",
                 gridwidth=1,
                 linecolor="black",

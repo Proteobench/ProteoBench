@@ -51,6 +51,7 @@ class EntrapmentDatapoint(DatapointBase):
         lower_bound_FDP (float): estimated false discovery proportion based on entrapment IDs.
         combined_FDP (float): estimated False discovery proportion based on entrapment IDs.
         paired_FDP (float): estimated False discovery proportion based on entrapment IDs.
+        reported_fdr_parsed_from_input (float): FDR threshold inferred from the input data (max Q-value).
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
     """
@@ -79,6 +80,7 @@ class EntrapmentDatapoint(DatapointBase):
     category_combined: str = ""
     category_paired: str = ""
     paired_FDP: float = np.nan
+    reported_fdr_parsed_from_input: float = np.nan
     comments: str = ""
     proteobench_version: str = ""
 
@@ -157,6 +159,7 @@ class EntrapmentDatapoint(DatapointBase):
         result_datapoint.generate_id()
         metrics = EntrapmentDatapoint.get_metrics(intermediate)
 
+        result_datapoint.reported_fdr_parsed_from_input = metrics["reported_fdr_parsed_from_input"]
         result_datapoint.nr_id_features = metrics["nr_id_features"]
         result_datapoint.lower_bound_FDP = metrics["lower_bound_FDP"]
         result_datapoint.combined_FDP = metrics["combined_FDP"]

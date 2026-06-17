@@ -70,7 +70,7 @@ class VariablesDIAEntrapmentAstral:
             "enable_match_between_runs",
             "max_mods",
             "enzyme",
-            "ident_fdr_psm",
+            "reported_fdr_parsed_from_input",
             "ident_fdr_peptide",
             "allowed_miscleavages",
         ]

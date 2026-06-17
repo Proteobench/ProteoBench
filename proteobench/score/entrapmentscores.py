@@ -179,11 +179,11 @@ class EntrapmentScores(ScoreBase):
             The computed paired FDP value.
         """
 
-        return 0.01
+        # return 0.01
 
         mapping_df = pd.read_csv(filepath_paired, sep="\t", index_col=False)
-        print(mapping_df.head())
-        print(mapping_df.columns)
+        # print(mapping_df.head())
+        # print(mapping_df.columns)
 
         # safety check: are all identified peptides in the mapping file?
         missing_peptides = set(df["Peptide"]) - set(mapping_df["sequence"])
@@ -200,8 +200,8 @@ class EntrapmentScores(ScoreBase):
             left_on="Peptide",
             right_on="sequence",
         )
-        print(df)
-        print(df.columns)
+        # print(df)
+        # print(df.columns)
 
         # sort by score (probably already sorted, but just to be sure)
         df = df.sort_values("Score", ascending=True).reset_index(drop=True)  # The lower the better, so ascending order
@@ -210,13 +210,13 @@ class EntrapmentScores(ScoreBase):
         df["nr_targets"] = (df["Target or Entrapment"] == "target").cumsum()
         df["nr_entrapments"] = (df["Target or Entrapment"] == "entrapment").cumsum()
 
-        print(df.head())
+        # print(df.head())
 
         # get identification where we have targets and entrapments
         df_targets_only = df[df["Target or Entrapment"] == "target"]
         df_entraps_only = df[df["Target or Entrapment"] == "entrapment"]
 
-        print(df_targets_only.head())
+        # print(df_targets_only.head())
 
         target_entrap_ids = df_targets_only[["Peptide", "Score", "Q-Value", "peptide_pair_index"]].merge(
             df_entraps_only[["Peptide", "Score", "Q-Value", "peptide_pair_index"]],
@@ -225,7 +225,7 @@ class EntrapmentScores(ScoreBase):
             suffixes=("_target", "_entrap"),
         )
 
-        print(target_entrap_ids.head())
+        # print(target_entrap_ids.head())
 
         # calculate the FDP by paired method
 
@@ -246,8 +246,8 @@ class EntrapmentScores(ScoreBase):
 
         fdp_estimation = (Nr_E + Nr_E_s_T + 2 * Nr_E_T_s) / (Nr_T + Nr_E)
 
-        print(df.head())
-        print(df.columns)
+        # print(df.head())
+        # print(df.columns)
 
         return fdp_estimation
 
@@ -288,6 +288,38 @@ class EntrapmentScores(ScoreBase):
             raise ValueError("Invalid categorisation logic. Check the bounds and FDR values.")
 
     @staticmethod
+    def calculate_reported_fdr(
+        df: pd.DataFrame,
+        score_col: str = "Q-Value",
+    ) -> float:
+        """
+        Estimate the FDR threshold applied by the search engine from the output data.
+
+        The reported FDR is inferred as the maximum score value in the DataFrame for
+        the given score column. For Q-value-based outputs this equals the least
+        significant accepted Q-value, which corresponds to the FDR cutoff the search
+        engine applied. The ``score_col`` parameter makes the method applicable to
+        different entrapment levels: use ``"Q-Value"`` for PSM/precursor level,
+        or the appropriate column name for peptide- or protein-level outputs.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame containing the intermediate data for one entrapment run.
+            Must contain the column specified by ``score_col``.
+        score_col : str, optional
+            Name of the Q-value (or equivalent score) column. Defaults to
+            ``"Q-Value"``.
+
+        Returns
+        -------
+        float
+            The maximum value found in ``score_col``, interpreted as the applied
+            FDR threshold.
+        """
+        return float(df[score_col].max())
+
+    @staticmethod
     def calculate_metrics(
         df: pd.DataFrame,
     ) -> Dict[str, float]:
@@ -307,6 +339,7 @@ class EntrapmentScores(ScoreBase):
             A dictionary containing all computed metric values.
         """
 
+        reported_fdr = EntrapmentScores.calculate_reported_fdr(df)
         fdr_ensured_df = df[df["Q-Value"] <= 0.01]
 
         combined_fdp = EntrapmentScores.calculate_upper_bound_combined_fdp(fdr_ensured_df)
@@ -318,6 +351,7 @@ class EntrapmentScores(ScoreBase):
 
         return {
             "nr_id_features": fdr_ensured_df.shape[0],
+            "reported_fdr_parsed_from_input": reported_fdr,
             "combined_FDP": combined_fdp,
             "lower_bound_FDP": lower_bound_fdp,
             "paired_FDP": paired_fdp,

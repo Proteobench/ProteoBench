@@ -38,8 +38,7 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonMod
 QEXACTIVE_PAGE = "pages/2_Quant_LFQ_DDA_ion_QExactive.py"
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/quant/quant_lfq_ion_DDA_QExactive")
 MAXQUANT_FILE = os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt")
-SAGE_FILE = os.path.join(TESTDATA_DIR, "sage_sample_input_lfq.tsv")
-SAGE_PARAMS_FILE = os.path.join(os.path.dirname(__file__), "params", "sage_parameterfile.json")
+MAXQUANT_PARAMS_FILE = os.path.join(os.path.dirname(__file__), "params", "mqpar_MQ1.6.3.3_MBR.xml")
 
 # Minimal valid user input for the benchmarking pipeline (mirrors the module test).
 USER_INPUT = {
@@ -188,12 +187,11 @@ def test_tab6_full_submission_via_ui(monkeypatch):
     ending in the pull-request creation. GitHub I/O (`clone_pr`) and the
     FASTA-backed submission validation are mocked so no network is touched.
 
-    Uses Sage rather than MaxQuant to keep the test on the generic submission path
-    (the MaxQuant branch applies tool-specific fixed-modification rewriting that is
-    out of scope here).
+    Uses MaxQuant so the run also exercises the MaxQuant-specific fixed-modification
+    rewriting in submit_to_repository (the path that previously crashed).
     """
-    res_content = Path(SAGE_FILE).read_bytes()
-    params_content = Path(SAGE_PARAMS_FILE).read_bytes()
+    res_content = Path(MAXQUANT_FILE).read_bytes()
+    params_content = Path(MAXQUANT_PARAMS_FILE).read_bytes()
     clone_pr = mock.Mock(return_value="https://github.com/Proteobot/Results_quant_ion_DDA/pull/777")
     empty_report = mock.Mock(summary=lambda: "")
 
@@ -206,15 +204,15 @@ def test_tab6_full_submission_via_ui(monkeypatch):
         app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
         app_test.run()
 
-        # Tab 2: benchmark a Sage result file (provides the datapoint to submit).
-        app_test.selectbox(key="software_tool_selector").set_value("Sage").run()
-        app_test.file_uploader[0].upload("sage_sample_input_lfq.tsv", res_content)
+        # Tab 2: benchmark a MaxQuant result file (provides the datapoint to submit).
+        app_test.selectbox(key="software_tool_selector").set_value("MaxQuant").run()
+        app_test.file_uploader[0].upload("MaxQuant_evidence_sample.txt", res_content)
         next(b for b in app_test.button if b.label == "Parse and bench").click().run()
         assert not app_test.exception, f"benchmark step raised: {[e.message for e in app_test.exception]}"
 
         # Tab 6: upload the parameter file -> parameter form + confirmation checkbox appear.
         meta_uploader = next(u for u in app_test.file_uploader if u.label == "Meta data for searches")
-        meta_uploader.upload("sage_parameterfile.json", params_content).run()
+        meta_uploader.upload("mqpar.xml", params_content).run()
         assert not app_test.exception, f"metadata upload raised: {[e.message for e in app_test.exception]}"
 
         # Confirm metadata correctness -> the final upload button is rendered.

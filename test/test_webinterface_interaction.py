@@ -38,6 +38,8 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonMod
 QEXACTIVE_PAGE = "pages/2_Quant_LFQ_DDA_ion_QExactive.py"
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/quant/quant_lfq_ion_DDA_QExactive")
 MAXQUANT_FILE = os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt")
+SAGE_FILE = os.path.join(TESTDATA_DIR, "sage_sample_input_lfq.tsv")
+SAGE_PARAMS_FILE = os.path.join(os.path.dirname(__file__), "params", "sage_parameterfile.json")
 
 # Minimal valid user input for the benchmarking pipeline (mirrors the module test).
 USER_INPUT = {
@@ -176,3 +178,54 @@ def test_tab2_file_upload_runs_benchmarking(monkeypatch):
     assert any(
         "submitted successfully" in str(info.value) for info in app_test.info
     ), f"expected success message; infos seen: {[info.value for info in app_test.info]}"
+
+
+def test_tab6_full_submission_via_ui(monkeypatch):
+    """Drive the complete submission UI: benchmark -> metadata upload -> confirm -> submit.
+
+    Exercises Tab 2 (result upload + benchmark) followed by Tab 6 (parameter-file
+    upload, parameter form, confirmation checkbox, and the final upload button),
+    ending in the pull-request creation. GitHub I/O (`clone_pr`) and the
+    FASTA-backed submission validation are mocked so no network is touched.
+
+    Uses Sage rather than MaxQuant to keep the test on the generic submission path
+    (the MaxQuant branch applies tool-specific fixed-modification rewriting that is
+    out of scope here).
+    """
+    res_content = Path(SAGE_FILE).read_bytes()
+    params_content = Path(SAGE_PARAMS_FILE).read_bytes()
+    clone_pr = mock.Mock(return_value="https://github.com/Proteobot/Results_quant_ion_DDA/pull/777")
+    empty_report = mock.Mock(summary=lambda: "")
+
+    extra = [
+        mock.patch.object(DDAQuantIonModuleQExactive, "clone_pr", clone_pr),
+        mock.patch("pages.base_pages.tabs.tab6_submit_results.run_submission_validation", lambda **k: empty_report),
+        mock.patch("pages.base_pages.tabs.tab6_submit_results.render_validation_report", lambda report: None),
+    ]
+    with mocked_backend(extra_patches=extra):
+        app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
+        app_test.run()
+
+        # Tab 2: benchmark a Sage result file (provides the datapoint to submit).
+        app_test.selectbox(key="software_tool_selector").set_value("Sage").run()
+        app_test.file_uploader[0].upload("sage_sample_input_lfq.tsv", res_content)
+        next(b for b in app_test.button if b.label == "Parse and bench").click().run()
+        assert not app_test.exception, f"benchmark step raised: {[e.message for e in app_test.exception]}"
+
+        # Tab 6: upload the parameter file -> parameter form + confirmation checkbox appear.
+        meta_uploader = next(u for u in app_test.file_uploader if u.label == "Meta data for searches")
+        meta_uploader.upload("sage_parameterfile.json", params_content).run()
+        assert not app_test.exception, f"metadata upload raised: {[e.message for e in app_test.exception]}"
+
+        # Confirm metadata correctness -> the final upload button is rendered.
+        confirm = next(c for c in app_test.checkbox if "confirm that the metadata is correct" in c.label)
+        confirm.set_value(True).run()
+        assert not app_test.exception
+
+        # Click the final "I really want to upload it" button -> pull request creation.
+        next(b for b in app_test.button if "really want to upload" in b.label).click().run()
+
+    assert not app_test.exception, f"submission raised: {[e.message for e in app_test.exception]}"
+    assert clone_pr.called, "clone_pr (pull-request creation) was not called"
+    submitted_df = clone_pr.call_args.args[0]
+    assert (submitted_df["old_new"] == "new").any(), "submitted frame has no newly benchmarked datapoint"

@@ -252,6 +252,134 @@ class EntrapmentUIObjects(BaseUIModule):
                 pr_url=pr_url,
             )
 
+    def _render_fdp_ratio_plot(self, session_key: str, metric: str, colorblind_mode: bool, is_public_only: bool = False) -> None:
+        """Render the FDP / reported-FDR ratio plot from the given session-state key."""
+        all_data = st.session_state.get(session_key)
+        if all_data is None or not isinstance(all_data, pd.DataFrame):
+            st.info("No data loaded yet — please wait for public results to load.", icon="ℹ️")
+            return
+
+        st.subheader("FDP / Reported FDR by Workflow")
+        st.markdown(
+            "Ratio of empirical false discovery proportion (FDP) to the FDR threshold "
+            "declared for each workflow. A ratio ≤ 1 means the empirical FDP does not "
+            "exceed the claimed FDR. Workflows are coloured by validity category: "
+            ":green[valid] (upper bound ≤ reported FDR), "
+            ":red[invalid] (lower bound > reported FDR), "
+            ":orange[inconclusive] (lower bound ≤ reported FDR < upper bound). "
+            "Newly uploaded results are shown with larger open markers (⬤)."
+        )
+
+        if is_public_only:
+            submitted_key = self.variables.all_datapoints_submitted
+            if submitted_key in st.session_state and isinstance(st.session_state[submitted_key], pd.DataFrame):
+                new_df = st.session_state[submitted_key]
+                if "old_new" in new_df.columns and (new_df["old_new"] == "new").any():
+                    st.info(
+                        "You have an uploaded result. Switch to **Tab 4 (View Public + New Results)** "
+                        "to see it in this plot.",
+                        icon="ℹ️",
+                    )
+
+        if all_data.empty:
+            st.info("No datapoints available to plot.", icon="ℹ️")
+            return
+
+        if "old_new" in all_data.columns:
+            new_rows = all_data[all_data["old_new"] == "new"]
+            if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
+                fdr_vals = pd.to_numeric(new_rows["reported_fdr_parsed_from_input"], errors="coerce")
+                missing = fdr_vals.isna() | (fdr_vals == 0)
+                if missing.any():
+                    st.warning(
+                        "Your uploaded result has no FDR threshold set — the plot uses 0.01 as a fallback. "
+                        "To see the correct ratio, re-upload and fill in the **FDR PSM** field in the form.",
+                        icon="⚠️",
+                    )
+
+        try:
+            fdp_ratio_fig = self.ionmodule.get_plot_generator().plot_fdp_ratio(
+                all_data,
+                metric=metric,
+                colorblind_mode=colorblind_mode,
+            )
+            st.plotly_chart(fdp_ratio_fig, use_container_width=True)
+        except Exception as e:
+            st.error(f"Could not render FDP ratio plot: {e}", icon="🚨")
+
+    def _render_category_strip(self, session_key: str) -> None:
+        """Render the category strip plot from the given session-state key."""
+        all_data = st.session_state.get(session_key)
+        if all_data is None or not isinstance(all_data, pd.DataFrame) or all_data.empty:
+            return
+
+        st.subheader("Identified Features by Validity Category")
+        st.markdown(
+            "Points are grouped into the three validity categories based on the paired FDP bounds "
+            "vs each workflow's declared PSM-level FDR. "
+            "**Point colour** indicates the software tool. "
+            "Within each category, points are spread horizontally for readability and sorted "
+            "by number of identified features."
+        )
+        try:
+            fig = self.ionmodule.get_plot_generator().plot_category_strip(all_data)
+            st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.error(f"Could not render category strip plot: {e}", icon="🚨")
+
+    def _render_fdp_id_scatter(self, session_key: str) -> None:
+        """Render the FDP/FDR ratio vs number of IDs scatter from the given session-state key."""
+        all_data = st.session_state.get(session_key)
+        if all_data is None or not isinstance(all_data, pd.DataFrame) or all_data.empty:
+            return
+
+        st.subheader("FDP/FDR Ratio vs Identified Features")
+        st.markdown(
+            "Each point is one submitted workflow. "
+            "**Colour** indicates the software tool; **shape** indicates the validity category "
+            "(○ valid, △ inconclusive, ✕ invalid). "
+            "The x-axis shows the ratio of the paired upper FDP bound to the declared PSM-level FDR; "
+            "a ratio below 1 (left of the dashed line) means the empirical FDP is within the claimed threshold."
+        )
+        try:
+            fig = self.ionmodule.get_plot_generator().plot_fdp_id_scatter(all_data)
+            st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.error(f"Could not render FDP/FDR scatter: {e}", icon="🚨")
+
+    def _render_forest_plot(self, session_key: str) -> None:
+        """Render the FDP interval forest plot from the given session-state key."""
+        all_data = st.session_state.get(session_key)
+        if all_data is None or not isinstance(all_data, pd.DataFrame) or all_data.empty:
+            return
+
+        st.subheader("FDP Interval Plot")
+        st.markdown(
+            "Each row is one submitted workflow. The thick horizontal bar spans the FDP "
+            "uncertainty interval from the **lower bound** (left) to the **paired upper bound** "
+            "(right); open circles mark both endpoints. "
+            "The diamond marker (◆) shows the workflow's declared FDR threshold "
+            "(``reported_fdr_parsed_from_input``); a star (★) marks newly uploaded results. "
+            "Bar colour indicates the validity category: "
+            "**green** = valid, **orange** = inconclusive, **red** = invalid."
+        )
+        sort_dir = st.radio(
+            "Sort by number of identified features",
+            ["Ascending ↑", "Descending ↓"],
+            index=1,
+            horizontal=True,
+            key=f"forest_sort_{session_key}",
+        )
+        sort_ascending = sort_dir.startswith("Ascending")
+        try:
+            fig = self.ionmodule.get_plot_generator().plot_forest(
+                all_data,
+                sort_ascending=sort_ascending,
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.error(f"Could not render forest plot: {e}", icon="🚨")
+
     @st.fragment
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
@@ -300,6 +428,17 @@ class EntrapmentUIObjects(BaseUIModule):
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
         )
+
+        self._render_fdp_ratio_plot(
+            session_key=self.variables.all_datapoints,
+            metric=metric,
+            colorblind_mode=colorblind_mode,
+            is_public_only=True,
+        )
+
+        self._render_forest_plot(session_key=self.variables.all_datapoints)
+        self._render_fdp_id_scatter(session_key=self.variables.all_datapoints)
+        self._render_category_strip(session_key=self.variables.all_datapoints)
 
     @st.fragment
     def display_all_data_results_submitted(self) -> None:
@@ -370,3 +509,13 @@ class EntrapmentUIObjects(BaseUIModule):
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
         )
+
+        self._render_fdp_ratio_plot(
+            session_key=self.variables.all_datapoints_submitted,
+            metric=metric,
+            colorblind_mode=colorblind_mode,
+        )
+
+        self._render_forest_plot(session_key=self.variables.all_datapoints_submitted)
+        self._render_fdp_id_scatter(session_key=self.variables.all_datapoints_submitted)
+        self._render_category_strip(session_key=self.variables.all_datapoints_submitted)

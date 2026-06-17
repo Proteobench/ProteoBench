@@ -1090,7 +1090,9 @@ def create_batch_pr(
 
         try:
             gh_repo.commit(commit_name, commit_message)
-            pr_number = gh_repo.create_pull_request(commit_name, commit_message, submission_source="resubmission-script")
+            pr_number = gh_repo.create_pull_request(
+                commit_name, commit_message, submission_source="resubmission-script"
+            )
             pr_url = f"https://github.com/{proteobot_name}/pull/{pr_number}"
             logger.info(f"  PR created: {pr_url}")
             return pr_url
@@ -1304,7 +1306,7 @@ def reprocess_datapoint(
                         default_cutoff = min(cutoffs) if cutoffs else 3
                     except (ValueError, TypeError):
                         pass
-                kwargs["default_cutoff_min_prec"] = default_cutoff
+                kwargs["default_cutoff_min_feature"] = default_cutoff
 
                 # AlphaDIA secondary file
                 if extracted["input_file_secondary"]:

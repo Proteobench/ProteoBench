@@ -36,6 +36,8 @@ dependencies = [
   "GitPython",
   "psm-utils",
   "pmultiqc>=0.0.33",
+  "requests",
+  "beautifulsoup4",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"

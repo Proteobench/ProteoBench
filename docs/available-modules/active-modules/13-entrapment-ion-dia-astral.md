@@ -8,7 +8,7 @@ This module uses entrapment peptides to assess whether the false discovery rate 
 
 FDR control is a central assumption in proteomics data analysis. When a search engine reports 1% FDR, the actual proportion of false discoveries should not exceed 1%. This module tests that assumption empirically by spiking a known set of "entrapment" peptides into the search space. These peptides cannot be present in the sample (they are derived from a shuffled or decoupled database), so any identification of an entrapment peptide represents a false discovery.
 
-It is important to note that different search engines calculate the FDR on different levels - within a run, globally, on the precursor level, peptidoform level, protein group level, ...
+It is important to note that different search engines calculate the FDR on different levels - within a run, globally, on the precursor level, peptidoform level, protein group level, ... .
 This module tests the **global precursor ion level FDR**. Search engines that do not calculate the FDR on this level can not be benchmarked with this module.
 
 Three metrics are computed:

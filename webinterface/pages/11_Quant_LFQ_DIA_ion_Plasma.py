@@ -13,7 +13,7 @@ from pages.pages_variables.Quant.lfq_DIA_ion_Plasma_variables import (
 )
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
 
 
@@ -39,7 +39,7 @@ class StreamlitUI:
         except KeyError:
             token = ""
         self.ionmodule: DIAQuantIonModulePlasma = DIAQuantIonModulePlasma(token=token)
-        self.parsesettingsbuilder = ParseSettingsBuilder(
+        self.parsesettingsbuilder = ConverterBuilder(
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dia_quant.parse_settings_dir
         )
 

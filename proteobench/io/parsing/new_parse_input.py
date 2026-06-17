@@ -14,7 +14,7 @@ import pandas as pd
 import toml
 
 from proteobench.io.parsing.load_input import load_input_file
-from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 
 
 @dataclass
@@ -147,7 +147,7 @@ def process_species(df: pd.DataFrame, module_settings: ModuleSettings) -> pd.Dat
     """
     Add species boolean columns and filter multi-species rows.
 
-    Extracted from ParseSettingsQuant._process_species_information().
+    Extracted from IntermediateFormatConverter._process_species_information().
 
     Parameters
     ----------
@@ -198,7 +198,7 @@ def parse_input(
         Dataclass with standard_format DataFrame and replicate_to_raw mapping.
     """
     input_df = load_input_file(input_file, input_format, input_file_secondary)
-    parse_settings = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(
+    parse_settings = ConverterBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id).build_parser(
         input_format
     )
     standard_format = parse_settings.convert_to_standard_format(input_df)

@@ -100,7 +100,7 @@ MOCK_MODULE_SETTINGS = {"general": {"min_count_multispec": 1, "level": "ion"}, "
 
 
 class TestIntermediateFormatConverter:
-    """Tests for IntermediateFormatConverter (was ParseSettingsQuant)."""
+    """Tests for IntermediateFormatConverter (was IntermediateFormatConverter)."""
 
     @pytest.fixture
     def converter_long(self):
@@ -236,7 +236,7 @@ class TestIntermediateFormatConverter:
 
 
 class TestModificationConverter:
-    """Tests for ModificationConverter (was ParseModificationSettings)."""
+    """Tests for ModificationConverter (was ModificationConverter)."""
 
     @pytest.fixture
     def mock_parse_settings(self):
@@ -306,7 +306,7 @@ class TestModificationConverter:
 
 
 class TestConverterBuilder:
-    """Tests for ConverterBuilder (was ParseSettingsBuilder)."""
+    """Tests for ConverterBuilder (was ConverterBuilder)."""
 
     PARSE_SETTINGS_DIR = os.path.abspath(
         os.path.join(

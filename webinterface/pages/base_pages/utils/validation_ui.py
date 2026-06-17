@@ -21,7 +21,7 @@ from typing import Any, Optional
 import pandas as pd
 import streamlit as st
 
-from proteobench.io.parsing.convert_to_intermediate import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.validation import (
     FastaReference,
     ModuleValidationConfig,
@@ -69,7 +69,7 @@ def _build_standard_dataframe(ionmodule: Any, input_format: str, input_df: pd.Da
     pandas.DataFrame
         The standardized result DataFrame.
     """
-    parser = ParseSettingsBuilder(
+    parser = ConverterBuilder(
         parse_settings_dir=ionmodule.parse_settings_dir,
         module_id=ionmodule.module_id,
     ).build_parser(input_format)

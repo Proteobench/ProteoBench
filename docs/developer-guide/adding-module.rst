@@ -52,8 +52,8 @@ The backend is organized into seven main components that you can extend or custo
    - Initialize with custom parameters in the ``__init__`` method
 
 **2. Data parsing** - Convert software output to standard format
-   - Functions in :file:`proteobench/io/parsing/parse_ion.py` parse precursor ion data
-   - :file:`proteobench/io/parsing/parse_settings.py` handles format conversion
+   - Functions in :file:`proteobench/io/parsing/load_input.py` parse precursor ion data
+   - :file:`proteobench/io/parsing/convert_to_intermediate.py` handles format conversion
    - Settings defined in TOML files in :file:`proteobench/io/parsing/io_parse_settings/`
    - For new software tools, extend :func:`~proteobench.io.parsing.parse_ion.load_input_file`
    - Each tool TOML must include an ``[upload_info]`` section (see the checklist below for
@@ -897,7 +897,7 @@ Most quantification modules use the default 6-tab configuration and require mini
     from pages.base_pages.quant import QuantUIObjects
     from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
     from pages.texts.generic_texts import WebpageTexts
-    from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+    from proteobench.io.parsing.parse_settings import ConverterBuilder
     from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
     
     if __name__ == "__main__":
@@ -906,7 +906,7 @@ Most quantification modules use the default 6-tab configuration and require mini
             variables=VariablesDDAQuant(),
             texts=WebpageTexts,
             ionmodule=DDAQuantIonModuleQExactive,
-            parsesettingsbuilder=ParseSettingsBuilder,
+            parsesettingsbuilder=ConverterBuilder,
             uiobjects=QuantUIObjects,
             page_name="Quant LFQ DDA ion QExactive",
         )
@@ -952,7 +952,7 @@ If your module needs a different number or order of tabs, create a subclass and 
             variables=VariablesDDADeNovo(),
             texts=WebpageTexts,
             ionmodule=DDAHCDDeNovoModule,
-            parsesettingsbuilder=ParseSettingsBuilder,
+            parsesettingsbuilder=ConverterBuilder,
             uiobjects=DeNovoUIObjects,
             page_name="De novo DDA-HCD peptidoform",
         )
@@ -1058,13 +1058,13 @@ a new type of module:
       "params_file" = "fragpipe.workflow"
       "params_file_description" = "Upload the FragPipe workflow file (.workflow)."
 
-   :func:`~proteobench.io.parsing.parse_settings.ParseSettingsBuilder.get_upload_info` merges the
+   :func:`~proteobench.io.parsing.parse_settings.ConverterBuilder.get_upload_info` merges the
    base ``[upload_info]`` with the matching override (if any) and returns the result as a dict.
    Missing ``[upload_info]`` sections are handled gracefully — no message is shown in the UI.
 
 3. Check, modify or add a parsing procedures in
    `proteobench/io/parsing <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_
-   e.g. :file:`parse_ion.py` or :file:`parse_peptidoform.py`.
+   e.g. :file:`load_input.py` or :file:`parse_peptidoform.py`.
 4. **Create a datapoint class** by subclassing
    :class:`~proteobench.datapoint.datapoint_base.DatapointBase` in
    `proteobench/datapoint <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/datapoint>`_.

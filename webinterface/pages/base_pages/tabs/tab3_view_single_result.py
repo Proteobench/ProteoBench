@@ -50,7 +50,7 @@ def generate_indepth_plots(
         The module instance (Quant, De Novo, etc.).
     variables : object
         Variables object containing session state keys.
-    parsesettingsbuilder : ParseSettingsBuilder
+    parsesettingsbuilder : ConverterBuilder
         Parse settings builder for the module.
     user_input : dict
         User input parameters.

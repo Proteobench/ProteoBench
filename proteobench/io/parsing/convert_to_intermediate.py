@@ -891,6 +891,3 @@ MODULE_TO_CLASS = {
 }
 
 # Deprecated aliases for backward compatibility during transition
-ParseSettingsQuant = IntermediateFormatConverter
-ParseModificationSettings = ModificationConverter
-ParseSettingsBuilder = ConverterBuilder

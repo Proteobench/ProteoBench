@@ -133,7 +133,7 @@ enough:
    with an informational message and the other checks still run.
 
 2. The profile resolves automatically to ``quant_lfq`` from the module's parser
-   class (``ParseSettingsQuant``), so no profile declaration is needed. You may
+   class (``IntermediateFormatConverter``), so no profile declaration is needed. You may
    pin it explicitly if you prefer:
 
    .. code-block:: toml
@@ -147,7 +147,7 @@ order of precedence:
 
 1. an explicit ``[validation].profile`` key in ``module_settings.toml``;
 2. inference from the parser class via the ``MODULE_TO_CLASS`` registry
-   (``ParseSettingsQuant`` -> ``quant_lfq``, ``ParseSettingsDeNovo`` -> ``denovo``);
+   (``IntermediateFormatConverter`` -> ``quant_lfq``, ``ParseSettingsDeNovo`` -> ``denovo``);
 3. the ``DEFAULT_VALIDATION_PROFILE`` fallback (``quant_lfq``).
 
 An unregistered profile name produces a single ``unknown_validation_profile``

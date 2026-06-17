@@ -23,7 +23,7 @@ from streamlit_extras.let_it_rain import rain
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
-from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
@@ -51,7 +51,7 @@ class DeNovoUIObjects(BaseUIModule):
         The variables for the quantification module.
     ionmodule : IonModule
         The quantification module.
-    parsesettingsbuilder : ParseSettingsBuilder
+    parsesettingsbuilder : ConverterBuilder
         The parse settings builder.
     """
 
@@ -59,7 +59,7 @@ class DeNovoUIObjects(BaseUIModule):
         self,
         variables: VariablesDDADeNovo,
         ionmodule: IonModule,
-        parsesettingsbuilder: ParseSettingsBuilder,
+        parsesettingsbuilder: ConverterBuilder,
         page_name: str = "/",
     ) -> None:
         """
@@ -71,7 +71,7 @@ class DeNovoUIObjects(BaseUIModule):
             The variables for the de novo module.
         ionmodule : IonModule
             The de novo module.
-        parsesettingsbuilder : ParseSettingsBuilder
+        parsesettingsbuilder : ConverterBuilder
             The parse settings builder.
         """
         super().__init__(

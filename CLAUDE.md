@@ -95,11 +95,11 @@ In `run_benchmarking()`, each step is a helper wrapped with `handle_benchmarking
 
 **Pipeline steps (decorated helpers in `run_benchmarking`):**
 
-1. **Load input** (`_load_input`, `ParseError`) - `io/parsing/parse_ion.py:load_input_file()` dispatches to format-specific loaders via the `_LOAD_FUNCTIONS` dict (17 entries). AlphaDIA has special handling: auto-detects matrix vs long format between two files and supports v1 (TSV) and v2 (parquet).
+1. **Load input** (`_load_input`, `ParseError`) - `io/parsing/load_input.py:load_input_file()` dispatches to format-specific loaders via the `_LOAD_FUNCTIONS` dict (17 entries). AlphaDIA has special handling: auto-detects matrix vs long format between two files and supports v1 (TSV) and v2 (parquet).
 
-2. **Load settings** (`_load_settings`, `ParseSettingsError`) - `ParseSettingsBuilder(parse_settings_dir, module_id).build_parser(input_format)` loads the tool's TOML config and builds a `ParseSettingsQuant` parser.
+2. **Load settings** (`_load_settings`, `ParseSettingsError`) - `ConverterBuilder(parse_settings_dir, module_id).build_parser(input_format)` loads the tool's TOML config and builds a `IntermediateFormatConverter` parser.
 
-3. **Convert to standard format** (`_convert_format`, `ConvertStandardFormatError`) - `ParseSettingsQuant.convert_to_standard_format()` runs a 10-step pipeline: validate/rename columns, create replicate mapping, filter decoys, clean run names via `_clean_run_name()` regex, mark contaminants, process species (filter multi-species by `min_count_multispec`), process modifications to ProForma notation, melt wide-to-long if needed (with run-name cleanup on the `Raw file` column), filter zero intensities, format by analysis level (create the "precursor ion" or "peptidoform" column).
+3. **Convert to standard format** (`_convert_format`, `ConvertStandardFormatError`) - `IntermediateFormatConverter.convert_to_standard_format()` runs a 10-step pipeline: validate/rename columns, create replicate mapping, filter decoys, clean run names via `_clean_run_name()` regex, mark contaminants, process species (filter multi-species by `min_count_multispec`), process modifications to ProForma notation, melt wide-to-long if needed (with run-name cleanup on the `Raw file` column), filter zero intensities, format by analysis level (create the "precursor ion" or "peptidoform" column).
 
 4. **Create quant scores** (`_create_quant_scores`, `QuantificationError`) - instantiates `QuantScoresHYE(precursor_column_name, species_expected_ratio, species_dict)`.
 
@@ -160,12 +160,12 @@ Each `run_benchmarking()` step wraps its errors into the appropriate type via `h
 Each software tool + module combination has a TOML file in `proteobench/io/parsing/io_parse_settings/Quant/lfq/<DDA|DIA>/<ion|peptidoform>/<instrument>/`. The master mapping is `io_parse_settings/parse_settings_files.toml` (maps `module_id` sections to TOML filenames). Each settings directory also has a `module_settings.toml`.
 
 `io_parse_settings/tool_metadata.toml` is a platform-wide metadata file with one section:
-- `[open_source].tools`: list of tool names whose source code is publicly available (13 entries: AdaNovo, AlphaDIA, AlphaPept, Casanovo, DeepNovo, i2MassChroQ, InstaNovo, MetaMorpheus, Pi-HelixNovo, Pi-PrimeNovo, PointNovo, Sage, ProlineStudio). Used by `get_open_source_tools()` in `parse_settings.py` to populate the `open_source` (✅) column in the Benchmark Results table. Names must match the `software_name` values set in `io/params/*.py`.
+- `[open_source].tools`: list of tool names whose source code is publicly available (13 entries: AdaNovo, AlphaDIA, AlphaPept, Casanovo, DeepNovo, i2MassChroQ, InstaNovo, MetaMorpheus, Pi-HelixNovo, Pi-PrimeNovo, PointNovo, Sage, ProlineStudio). Used by `get_open_source_tools()` in `convert_to_intermediate.py` to populate the `open_source` (✅) column in the Benchmark Results table. Names must match the `software_name` values set in `io/params/*.py`.
 
-**Parser classes.** There are three classes in `parse_settings.py`:
-- `ParseSettingsQuant`: parser for all quant modules.
+**Parser classes.** There are three classes in `convert_to_intermediate.py`:
+- `IntermediateFormatConverter`: parser for all quant modules.
 - `ParseSettingsDeNovo`: parser for `denovo_DDA_HCD`. It uses different TOML sections (`[mapper]`, `[spectrum_id_mapper]`, `[sequence_mapper]`) and loads a ground-truth CSV (`GROUND_TRUTH_FILENAME`), checking `GROUND_TRUTH_DIR_SERVER`, then `GROUND_TRUTH_DIR_LOCAL_DENOVO`, then downloading from `GROUND_TRUTH_URL`.
-- `ParseModificationSettings`: backs the optional `[modifications_parser]` section, attached by `ParseSettingsBuilder.build_parser()` only when that section is present.
+- `ModificationConverter`: backs the optional `[modifications_parser]` section, attached by `ConverterBuilder.build_parser()` only when that section is present.
 
 **Quant tool TOML structure:**
 - `[mapper]`: column renames (e.g., `"Sequence" = "Sequence"`)
@@ -175,11 +175,11 @@ Each software tool + module combination has a TOML file in `proteobench/io/parsi
 - `[general]`: `contaminant_flag`, `decoy_flag`, and optionally `run_name_cleanup` (regex to override the default extension-stripping pattern)
 - `[modifications_parser]` (optional): `parse_column`, `before_aa`, `isalpha`, `isupper`, `pattern` (regex), `modification_dict` (mass -> name)
 - `[upload_info]`: human-readable guidance shown in the web UI when the tool is selected. Keys: `datapoint_file` (filename), `datapoint_file_description` (shown above the result-file uploader in Tab 2), `params_file` (filename), `params_file_description` (shown above the metadata uploader in Tab 6). Markdown is supported in description strings. The Custom format uses `datapoint_file_description` to embed a module-specific link to the documentation. Missing `[upload_info]` is handled gracefully — no message is shown.
-- `[upload_info_overrides.<tool_name>]` (optional): per-tool overrides applied on top of `[upload_info]` when `ParseSettingsBuilder.get_upload_info(tool_name)` is called. Used when multiple tool names share the same TOML file but require different upload guidance. Example: `parse_settings_diann.toml` is shared by "DIA-NN" and "FragPipe (DIA-NN quant)"; the override supplies the correct `.workflow` params description for the latter.
+- `[upload_info_overrides.<tool_name>]` (optional): per-tool overrides applied on top of `[upload_info]` when `ConverterBuilder.get_upload_info(tool_name)` is called. Used when multiple tool names share the same TOML file but require different upload guidance. Example: `parse_settings_diann.toml` is shared by "DIA-NN" and "FragPipe (DIA-NN quant)"; the override supplies the correct `.workflow` params description for the latter.
 
 ### Run Name Cleanup (`_clean_run_name`)
 
-File/column names from tool outputs may include extensions (`.mzML`, `.raw`, `.mzML.gz`, `.d`, `.wiff`) or tool-specific suffixes (`_uncalibrated` from FragPipe DIA-NN, see #827). The `_clean_run_name()` method on `ParseSettingsQuant` strips these using a regex so they match the `condition_mapper` keys. The default regex is:
+File/column names from tool outputs may include extensions (`.mzML`, `.raw`, `.mzML.gz`, `.d`, `.wiff`) or tool-specific suffixes (`_uncalibrated` from FragPipe DIA-NN, see #827). The `_clean_run_name()` method on `IntermediateFormatConverter` strips these using a regex so they match the `condition_mapper` keys. The default regex is:
 ```
 (?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$
 ```
@@ -193,7 +193,7 @@ run_name_cleanup = "(?:\\.custom_suffix|\\.raw)$"
 - `[species_expected_ratio.<SPECIES>]`: `A_vs_B` (float ratio), `color` (hex)
 - `[general]`: `min_count_multispec` (int), `level` ("ion" or "peptidoform")
 
-The `MODULE_TO_CLASS` dict at the bottom of `parse_settings.py` routes module IDs to parser classes: all `quant_lfq_*` modules use `ParseSettingsQuant`, and `denovo_DDA_HCD` uses `ParseSettingsDeNovo`. (It has no `quant_lfq_DIA_peptidoform` entry, matching that module being an unregistered stub.) The validation layer reuses this dict to infer a module's default validation profile.
+The `MODULE_TO_CLASS` dict at the bottom of `convert_to_intermediate.py` routes module IDs to parser classes: all `quant_lfq_*` modules use `IntermediateFormatConverter`, and `denovo_DDA_HCD` uses `ParseSettingsDeNovo`. (It has no `quant_lfq_DIA_peptidoform` entry, matching that module being an unregistered stub.) The validation layer reuses this dict to infer a module's default validation profile.
 
 `io/parsing/utils.py` provides ProForma fixed-modification helpers: `add_fixed_mod(proforma, mod_name, aas)` and `add_maxquant_fixed_modifications(params, result_perf)`.
 
@@ -267,7 +267,7 @@ Streamlit multi-page app. Entry point: `Home.py` (`StreamlitPageHome`, inherits 
 1. `variables`: a `Variables*` dataclass **instance** from `pages/pages_variables/` (defines session state keys with unique prefixes, plus sidebar metadata for module registry discovery and a `texts` attribute)
 2. `texts`: a `WebpageTexts` class (UI copy)
 3. `ionmodule`: the backend module **class** (instantiated with the token inside `BaseStreamlitUI`)
-4. `parsesettingsbuilder`: the `ParseSettingsBuilder` class
+4. `parsesettingsbuilder`: the `ConverterBuilder` class
 5. `uiobjects`: `QuantUIObjects` or `DeNovoUIObjects`
 6. `page_name`: the sidebar label
 
@@ -353,7 +353,7 @@ A framework-agnostic, **registry-driven** validation package that checks uploade
 
 **Profile resolution** (`ModuleValidationConfig.from_parse_settings`, in precedence order):
 1. explicit `[validation].profile` in the module's `module_settings.toml` (declarative);
-2. inferred from the parser class via the existing `MODULE_TO_CLASS` registry (`ParseSettingsQuant` → `quant_lfq`, `ParseSettingsDeNovo` → `denovo`);
+2. inferred from the parser class via the existing `MODULE_TO_CLASS` registry (`IntermediateFormatConverter` → `quant_lfq`, `ParseSettingsDeNovo` → `denovo`);
 3. `DEFAULT_VALIDATION_PROFILE` (`quant_lfq`).
 
 An unregistered profile name produces a single `unknown_validation_profile` warning and runs nothing (never blocks).
@@ -447,7 +447,7 @@ Only two module-level test files exist: `test_module_quant_ion_DDA_QExactive.py`
 
 **Other test files (not module/param tests):**
 - `test_quant_datapoint.py` - unit tests for `QuantDatapointHYE`/`QuantScoresHYE` (epsilon accuracy/precision metrics); the largest test file (~18 functions across `TestQuantDatapointHYE`, `TestEpsilonPrecision`, `TestQuantScoresComputeEpsilon`)
-- `test_parse_settings.py` - `TestParseSettingsQuant` validates each step of `convert_to_standard_format()`
+- `test_convert_to_intermediate.py` - `TestIntermediateFormatConverter` validates each step of `convert_to_standard_format()`
 - `test_plot_quant.py` - `TestPlotDataPoint`
 - `test_modules_constants.py` - parametrized check that every `MODULE_SETTINGS_DIRS` entry resolves to an existing directory
 - `test_github_repo.py` - tests for `GithubProteobotRepo`
@@ -486,7 +486,7 @@ Separate workflow for the webinterface (`test-streamlit.yml`):
 1. Create a module class in `modules/quant/` inheriting `QuantModule`, setting `module_id`, the precursor column, and repo names
    - For submission validation (see the Submission Validation Layer section): add a `[reference_database] fasta_url = "..."` entry to the new module's `module_settings.toml` (if absent, protein-identifier validation is silently skipped). A quant module auto-resolves to the `quant_lfq` profile; a module of a new category should declare `[validation] profile = "<name>"` and register a matching profile in `proteobench/validation/profiles.py`.
 2. Add the settings directory to `MODULE_SETTINGS_DIRS` in `modules/constants.py`
-3. Register the parse settings class in `MODULE_TO_CLASS` in `parse_settings.py`
+3. Register the parse settings class in `MODULE_TO_CLASS` in `convert_to_intermediate.py`
 4. Create TOML configs: `module_settings.toml` + per-tool parse settings in the new directory
 5. Add the module class to `MODULE_CLASSES` in `utils/server_io.py` (needed for programmatic submission)
 6. Create a Streamlit page in `webinterface/pages/`

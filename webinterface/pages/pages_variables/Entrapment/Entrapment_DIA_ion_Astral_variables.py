@@ -116,7 +116,7 @@ class VariablesDIAEntrapmentAstral:
     )
 
     additional_params_json: str = "../proteobench/io/params/json/Entrapment/entrapment_DIA_ion.json"
-    title: str = "DIA Ion Entrapment (Astral)"
+    title: str = "FDRBench - DIA Ion Entrapment (Astral)"
     prefix_params: str = "ion_dia_entrapment_Astral_"
     params_json_dict: str = "params_json_dict_lfq_ion_dia_entrapment_astral"
     params_file_dict: str = "params_file_dict_lfq_ion_dia_entrapment_astral"

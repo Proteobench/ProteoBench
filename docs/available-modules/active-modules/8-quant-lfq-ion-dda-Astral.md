@@ -1,5 +1,7 @@
 # DDA quantification - precursor ion level - Astral
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on an Orbitrap Astral (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
@@ -83,15 +85,21 @@ After upload, you will get a link to a Github pull request associated with your 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
 **Table 2. Overview of input files required for metric caluclation and public submission**
-|Tool|Input file|Parameter File|
-|---------|-----|-|
-|AlphaPept|result_peptides.tsv|results.yaml|
-|FragPipe|combined_ion.tsv|fragpipe.workflow|
-|i2MassChroQ|_export.tsv|Project parameters.tsv|
-|MaxQuant|evidence.txt|mqpar.xml|
-|Proline Studio|<result file>.xlsx|<result file>.xlsx|
-|Sage|lfq.tsv|results.json|
-|PEAKS|lfq_features.csv|parameters.txt|
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaPept | *.csv | results.yaml |
+| Custom | *.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| MSAngel | *.xlsx | *.json |
+| MaxQuant | evidence.txt | mqpar.xml |
+| MetaMorpheus | AllQuantifiedPeaks.tsv | search_task_config.toml + version_result.txt |
+| PEAKS | lfq.features.csv | *.txt |
+| ProlineStudio | *.xlsx | *.xlsx |
+| Sage | *.sage.tsv | *.json |
+| WOMBAT | *.csv | config.yaml |
+| i2MassChroQ | *.tsv | *.tsv |
+| quantms | *.csv | *.json |
 
 ### AlphaPept (legacy tool\*)
 

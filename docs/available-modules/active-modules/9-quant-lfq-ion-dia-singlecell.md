@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level - Single Cell
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the sensitivity and quantification accuracy of workflows for data acquired with data-independent acquisition (DIA) on an Astral with low sample input.
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
@@ -32,6 +34,23 @@ present in the samples **and contaminant proteins**
 ([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145)).
 
 For search specific instructions, metric definitions, troubleshooting, and result descriptions, see [the DIA Astral bulk module](#8-quant-lfq-ion-dia-Astral_2Th).
+
+## Important Tool-specific settings
+
+Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
+
+**Table 2. Overview of input files required for metric calculation and public submission**
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| MSAID | MSAID_output.tsv | MSAID_params.csv |
+| MaxQuant | evidence.txt | mqpar.xml |
+| PEAKS | lfq.features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
 
 ### Custom format
 

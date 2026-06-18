@@ -20,3 +20,9 @@ decoy_flag = true
 "[oxidation (m)]" = "Oxidation"
 "[acetyl (protein n-term)]" = "Acetyl"
 "[carbamidomethyl (c)]" = "Carbamidomethyl"
+
+[upload_info]
+"datapoint_file" = "Spectronaut_report.tsv"
+"datapoint_file_description" = "Upload the Spectronaut report TSV file exported from the Spectronaut analysis."
+"params_file" = "Spectronaut_ExperimentSetupOverview.txt"
+"params_file_description" = "Upload the Spectronaut ExperimentSetupOverview export file (`.txt`), available via Export > ExperimentSetupOverview in Spectronaut."

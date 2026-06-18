@@ -16,7 +16,7 @@ from proteobench.exceptions import (
     QuantificationError,
 )
 from proteobench.io.parsing.parse_denovo import load_input_file
-from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.denovo.denovo_base import DeNovoModule
 from proteobench.score.denovoscores import DenovoScores
@@ -74,6 +74,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
         user_input: dict,
         all_datapoints: pd.DataFrame,
         evaluation_type: str = "mass",
+        input_file_secondary: str = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
@@ -100,7 +101,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
         """
         # Parse workflow output file
         try:
-            input_df = load_input_file(input_file_loc, input_format)
+            input_df = load_input_file(input_file_loc, input_format, input_secondary=input_file_secondary)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please make sure the format is correct and the correct software tool is chosen: {e}"
@@ -112,7 +113,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
 
         # Parse settings file
         try:
-            parse_settings = ParseSettingsBuilder(
+            parse_settings = ConverterBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
         except KeyError as e:

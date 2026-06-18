@@ -4,6 +4,9 @@ AdaNovo parameter parsing.
 
 from __future__ import annotations
 
+import pathlib
+
+import pandas as pd
 import yaml
 
 from proteobench.io.params import ProteoBenchParameters
@@ -52,3 +55,13 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
 
     params.fill_none()
     return params
+
+
+if __name__ == "__main__":
+    fname = "../../../test/params/denovo/adanovo/config.yaml"
+    file = pathlib.Path(fname)
+    params = extract_params(file)
+    data_dict = params.__dict__
+    series = pd.Series(data_dict)
+    print(series)
+    series.to_csv(file.with_suffix(".csv"))

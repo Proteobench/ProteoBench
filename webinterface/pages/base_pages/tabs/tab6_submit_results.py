@@ -11,9 +11,10 @@ from streamlit_extras.let_it_rain import rain
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 
 from ..utils.inputs import generate_input_widget
+from ..utils.validation_ui import render_validation_report, run_submission_validation
 
 
-def generate_submission_ui_elements(variables, user_input) -> bool:
+def generate_submission_ui_elements(variables, user_input, parsesettingsbuilder=None) -> bool:
     """
     Create the UI elements necessary for data submission,
     including metadata uploader and comments section.
@@ -24,7 +25,7 @@ def generate_submission_ui_elements(variables, user_input) -> bool:
         submission_ready = True
     except Exception:
         st.error(":x: Please provide a result file", icon="🚨")
-    generate_metadata_uploader(variables, user_input)
+    generate_metadata_uploader(variables, user_input, parsesettingsbuilder)
     return submission_ready
 
 
@@ -41,6 +42,11 @@ def load_user_parameters(variables, ionmodule, user_input) -> Any:
         The parsed parameters.
     """
     params = None
+
+    warning = ionmodule.validate_params_files(user_input[variables.meta_data], user_input["input_format"])
+    if warning:
+        st.warning(warning, icon="⚠️")
+        return None
 
     try:
         params = ionmodule.load_params_file(
@@ -81,30 +87,31 @@ def generate_additional_parameters_fields_submission(
     # Check if parsed values exist in session state
     _ = st.session_state.get(variables.params_json_dict, {})
 
-    st_col1, st_col2, st_col3 = st.columns(3)
-    input_param_len = int(len(config.items()) / 3)
+    with st.container(key="tour_param_fields"):
+        st_col1, st_col2, st_col3 = st.columns(3)
+        input_param_len = int(len(config.items()) / 3)
 
-    for idx, (key, value) in enumerate(config.items()):
-        if key.lower() == "software_name":
-            editable = False
-        else:
-            editable = True
+        for idx, (key, value) in enumerate(config.items()):
+            if key.lower() == "software_name":
+                editable = False
+            else:
+                editable = True
 
-        if idx < input_param_len:
-            with st_col1:
-                user_input[key] = generate_input_widget(
-                    variables, user_input["input_format"], value, key, editable=editable
-                )
-        elif idx < input_param_len * 2:
-            with st_col2:
-                user_input[key] = generate_input_widget(
-                    variables, user_input["input_format"], value, key, editable=editable
-                )
-        else:
-            with st_col3:
-                user_input[key] = generate_input_widget(
-                    variables, user_input["input_format"], value, key, editable=editable
-                )
+            if idx < input_param_len:
+                with st_col1:
+                    user_input[key] = generate_input_widget(
+                        variables, user_input["input_format"], value, key, editable=editable
+                    )
+            elif idx < input_param_len * 2:
+                with st_col2:
+                    user_input[key] = generate_input_widget(
+                        variables, user_input["input_format"], value, key, editable=editable
+                    )
+            else:
+                with st_col3:
+                    user_input[key] = generate_input_widget(
+                        variables, user_input["input_format"], value, key, editable=editable
+                    )
 
 
 def generate_comments_section(variables, user_input) -> None:
@@ -181,6 +188,18 @@ def submit_to_repository(
     if not button_pressed:  # if button_pressed is None
         return None
 
+    # Run automated submission checks (results vs parameters vs reference FASTA).
+    # These never block submission: the findings are shown to the submitter and
+    # included in the pull-request description for the reviewers.
+    validation_report = run_submission_validation(
+        variables=variables,
+        ionmodule=ionmodule,
+        user_input=user_input,
+        params=params,
+    )
+    render_validation_report(validation_report)
+    validation_summary = validation_report.summary()
+
     # MaxQuant fixed modification handling
     if user_input["input_format"] == "MaxQuant":
         st.session_state[variables.result_perf] = add_maxquant_fixed_modifications(
@@ -201,6 +220,7 @@ def submit_to_repository(
         params_from_file=params_from_file,
         params=params,
         submission_source=submission_source,
+        validation_summary=validation_summary,
     )
 
     if pr_url:
@@ -254,15 +274,24 @@ def copy_dataframes_for_submission(variables) -> None:
         st.session_state[variables.result_performance_submission] = st.session_state[variables.result_perf].copy()
 
 
-def generate_metadata_uploader(variables, user_input) -> None:
+def generate_metadata_uploader(variables, user_input, parsesettingsbuilder=None) -> None:
     """
     Create the file uploader for meta data.
     """
-    user_input[variables.meta_data] = st.file_uploader(
-        "Meta data for searches",
-        help=variables.texts.Help.meta_data_file,
-        accept_multiple_files=True,
-    )
+    if parsesettingsbuilder is not None:
+        upload_info = parsesettingsbuilder.get_upload_info(user_input.get("input_format", ""))
+        params_desc = upload_info.get("params_file_description", "")
+        if params_desc:
+            st.info(params_desc)
+    if variables.meta_file_uploader_uuid not in st.session_state:
+        st.session_state[variables.meta_file_uploader_uuid] = uuid.uuid4()
+    with st.container(key="tour_meta_uploader"):
+        user_input[variables.meta_data] = st.file_uploader(
+            "Meta data for searches",
+            key=st.session_state[variables.meta_file_uploader_uuid],
+            help=variables.texts.Help.meta_data_file,
+            accept_multiple_files=True,
+        )
 
 
 # submit_to_repository
@@ -346,6 +375,7 @@ def create_pull_request(
     params_from_file: dict[str, Any],
     params: dataclass,
     submission_source: str = "unknown",
+    validation_summary: str = "",
 ) -> Optional[str]:
     """
     Submit the pull request with the benchmark results and returns the PR URL.
@@ -354,6 +384,9 @@ def create_pull_request(
     ----------
     params : Any
         The parameters object.
+    validation_summary : str, optional
+        A Markdown summary of the submission-validation report (warnings/info),
+        appended to the PR description for curator visibility.
 
     Returns
     -------
@@ -364,12 +397,16 @@ def create_pull_request(
 
     changed_params_str = compare_dictionaries(params_from_file, params.__dict__)
 
+    submission_comments = user_comments + "\n" + changed_params_str
+    if validation_summary:
+        submission_comments += "\n\n" + validation_summary
+
     try:
         pr_url = ionmodule.clone_pr(
             st.session_state[variables.all_datapoints_submission],
             params,
             remote_git=variables.github_link_pr,
-            submission_comments=user_comments + "\n" + changed_params_str,
+            submission_comments=submission_comments,
             submission_source=submission_source,
         )
     except Exception as e:

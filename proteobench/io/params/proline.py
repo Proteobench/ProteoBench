@@ -16,6 +16,7 @@ from typing import List
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.maxquant import _homogenize_mods
 
 # Column names for different sheets in the Excel file
 use_columns = {
@@ -117,8 +118,8 @@ def extract_params(
     params.search_engine_version = sheet.loc[0, "software_version"]
     params.enzyme = sheet.loc[0, "enzymes"]
     params.allowed_miscleavages = sheet.loc[0, "max_missed_cleavages"]
-    params.fixed_mods = sheet.loc[0, "fixed_ptms"]
-    params.variable_mods = sheet.loc[0, "variable_ptms"]
+    params.fixed_mods = _homogenize_mods(sheet.loc[0, "fixed_ptms"], sep="; ")
+    params.variable_mods = _homogenize_mods(sheet.loc[0, "variable_ptms"], sep="; ")
     _precursor_mass_tolerance = sheet.loc[0, "peptide_mass_error_tolerance"]
     params.precursor_mass_tolerance = f"[-{_precursor_mass_tolerance}, {_precursor_mass_tolerance}]"
     _fragment_mass_tolerance = sheet.loc[0, "fragment_mass_error_tolerance"]
@@ -186,5 +187,6 @@ if __name__ == "__main__":
         data_dict = params.__dict__
         series = pd.Series(data_dict)
 
+        print(series)
         # Write the Series to a CSV file
         series.to_csv(file.with_suffix(".csv"))

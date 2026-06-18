@@ -50,6 +50,7 @@ class VariablesDIAQuantZenoTOF:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion ZenoTOF"
+    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA (Zeno SWATH) workflows using a multi-species (HYE) sample on a ZenoTOF 8600 instrument."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_ZenoTOF"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
@@ -114,6 +115,7 @@ class VariablesDIAQuantZenoTOF:
     )
 
     title: str = "DIA Precursor ion quantification - ZenoTOF"
+    y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_ZenoTOF_quant_"

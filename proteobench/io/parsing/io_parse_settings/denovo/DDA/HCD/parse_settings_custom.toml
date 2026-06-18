@@ -1,0 +1,11 @@
+[mapper]
+"spectrum_id" = "spectrum_id"
+"sequence" = "sequence"
+"score" = "score"
+"aa_scores" = "aa_scores"
+
+[spectrum_id]
+"pattern" = "scan=(\\d+)"
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]

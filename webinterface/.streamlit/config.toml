@@ -6,7 +6,7 @@ base="light"
 disableWidgetStateDuplicationWarning = true
 
 [server]
-maxUploadSize = 1000
+maxUploadSize = 5000
 
 [client]
 showSidebarNavigation = false

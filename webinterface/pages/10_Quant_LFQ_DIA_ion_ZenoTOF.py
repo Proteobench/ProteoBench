@@ -14,7 +14,7 @@ from pages.pages_variables.Quant.lfq_DIA_ion_ZenoTOF_variables import (
 )
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
 
 if __name__ == "__main__":
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         variables=VariablesDIAQuantZenoTOF(),
         texts=WebpageTexts,
         ionmodule=DIAQuantIonModuleZenoTOF,
-        parsesettingsbuilder=ParseSettingsBuilder,
+        parsesettingsbuilder=ConverterBuilder,
         uiobjects=QuantUIObjects,
         page_name="Quant LFQ DIA ion ZenoTOF",
     )

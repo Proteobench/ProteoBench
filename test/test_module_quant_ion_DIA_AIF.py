@@ -6,7 +6,7 @@ import pytest
 from proteobench.exceptions import DatapointGenerationError
 from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
 from proteobench.io.parsing.load_input import load_input_file
-from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.score.quantscoresHYE import QuantScoresHYE
 
@@ -55,7 +55,7 @@ def load_file(format_name: str):
 class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_valid_and_supported_search_tool_settings_exists(self, software_tool):
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DIA_ion_AIF")
+        parse_settings = ConverterBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DIA_ion_AIF")
         assert software_tool in parse_settings.INPUT_FORMATS
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
@@ -65,7 +65,7 @@ class TestSoftwareToolOutputParsing:
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_settings_parser_created_successfully(self, software_tool):
-        parse_settings_builder = ParseSettingsBuilder(
+        parse_settings_builder = ConverterBuilder(
             module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
@@ -73,7 +73,7 @@ class TestSoftwareToolOutputParsing:
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_software_tool_output_converted_to_standard_format(self, software_tool):
-        parse_settings_builder = ParseSettingsBuilder(
+        parse_settings_builder = ConverterBuilder(
             module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
@@ -88,7 +88,7 @@ class TestSoftwareToolOutputParsing:
 class TestQuantScores:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_intermediate_generated_from_software_tool_output(self, software_tool):
-        parse_settings_builder = ParseSettingsBuilder(
+        parse_settings_builder = ConverterBuilder(
             module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)

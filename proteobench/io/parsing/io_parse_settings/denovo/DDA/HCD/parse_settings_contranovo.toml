@@ -1,0 +1,27 @@
+[mapper]
+"spectra_ref" = "spectrum_id"
+"sequence" = "sequence"
+"search_engine_score[1]" = "score"
+"opt_ms_run[1]_aa_scores" = "aa_scores"
+
+[spectrum_id_mapper]
+"pattern" = "scan=(\\d+)"
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"C+57.021" = "C[UNIMOD:4]"
+"M+15.995" = "M[UNIMOD:35]"
+"N+0.984" = "N[UNIMOD:7]"
+"Q+0.984" = "Q[UNIMOD:7]"
+"+43.006-17.027" = "[Formula:H2C101]-"
+"-17.027+43.006" = "[Formula:H2C101]-"
+"+42.011" = "[UNIMOD:1]-"
+"+43.006" = "[UNIMOD:5]-"
+"-17.027" = "[UNIMOD:385]-"
+
+[upload_info]
+"datapoint_file" = "*.mztab"
+"datapoint_file_description" = "Upload the Contranovo de novo sequencing output mzTab file."
+"params_file" = "*.yaml"
+"params_file_description" = ""
+

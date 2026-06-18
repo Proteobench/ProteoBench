@@ -14,7 +14,7 @@ from pages.pages_variables.Quant.lfq_DIA_ion_singlecell_variables import (
 )
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder as ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
     DIAQuantIonModulediaSC,
 )
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         variables=VariablesDIAQuantSC(),
         texts=WebpageTexts,
         ionmodule=DIAQuantIonModulediaSC,
-        parsesettingsbuilder=ParseSettingsBuilder,
+        parsesettingsbuilder=ConverterBuilder,
         uiobjects=QuantUIObjects,
         page_name="Quant LFQ DIA ion Single Cell",
     )

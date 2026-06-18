@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level - diaPASEF
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-independent acquisition (DIA) on a timsTOF (Bruker).
 It is similar to the DIA quantification module "precursor ion-level" described [here](#7-quant-lfq-precursor-dia-Astral_2Th).
@@ -85,14 +87,17 @@ To submit your run for public usage, you need to upload the parameter file assoc
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
 **Table 2. Overview of input files required for metric caluclation and public submission**
-| Tool        | Input file                                                                  | Parameter File    |
-| ----------- | --------------------------------------------------------------------------- | ----------------- |
-| AlphaDIA    | precursors.tsv & precursor.matrix.tsv (v1) or precursors.tsv/.parquet (v2+) | log.txt           |
-| DIA-NN      | *_report.tsv or *_report.parquet                                            | *report.log.txt   |
-| FragPipe    | *_report.tsv                                                                | fragpipe.workflow |
-| MaxDIA      | evidence.txt                                                                | mqpar.xml         |
-| Spectronaut | *.tsv                                                                       | *.txt             |
-| PEAKS       | lfq.dia.features.csv                                                        | parameters.txt    |
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| MSAID | MSAID_output.tsv | MSAID_params.csv |
+| MaxQuant | evidence.txt | mqpar.xml |
+| PEAKS | lfq.features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 

@@ -1,0 +1,21 @@
+[mapper]
+"index" = "spectrum_id"
+"sequence" = "sequence"
+"peptide_score" = "score"
+"aa_scores" = "aa_scores"
+
+[spectrum_id_mapper]
+
+[sequence_mapper]
+[sequence_mapper.replacement_dict]
+"C" = "C[UNIMOD:4]"
+"m" = "M[UNIMOD:35]"
+"n" = "N[UNIMOD:7]"
+"q" = "Q[UNIMOD:7]"
+
+[upload_info]
+"datapoint_file" = "results + results_prob (2 files)"
+"datapoint_file_description" = """Two files are needed for upload. Please first upload the sequence prediction file (with the tokens tab separated).
+                                The second file should contain the probabilities per token. Normally, the file should end with _prob."""
+"params_file" = ""
+"params_file_description" = ""

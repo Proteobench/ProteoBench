@@ -1,9 +1,17 @@
 """Utilities for parsing modifications."""
 
+import re
+
 import pandas as pd
 import psm_utils as pu
 
 from proteobench.io.params import ProteoBenchParameters
+
+# MaxQuant fixed modifications are exposed in the ProForma-like notation produced by
+# ``io.params.maxquant._homogenize_mod`` (e.g. ``"C[Carbamidomethyl]"`` or
+# ``"Protein N-term[Acetyl]"``), comma-separated. Match a residue specifier followed
+# by a bracketed modification name.
+_PROFORMA_FIXED_MOD = re.compile(r"^(?P<residues>[^\[]+)\[(?P<name>[^\]]+)\]$")
 
 
 def add_fixed_mod(proforma: str, mod_name: str, aas: str) -> str:
@@ -46,13 +54,32 @@ def add_maxquant_fixed_modifications(params: ProteoBenchParameters, result_perf:
     -------
     pd.DataFrame
         Results of benchmarking with parsed modifications.
-    """
-    if hasattr(params, "fixed_mods"):
-        fixed_mods = params.fixed_mods.split(",")
 
-        for mod in fixed_mods:
-            mod_name, aas = mod.split(" ")
-            aas_list = list(aas[1:-1])
-            result_perf["precursor ion"] = result_perf["precursor ion"].apply(add_fixed_mod, args=(mod_name, aas_list))
+    Notes
+    -----
+    ``params.fixed_mods`` uses ProForma-like notation (``"C[Carbamidomethyl]"``,
+    comma-separated). Empty values (no fixed modifications), terminal modifications
+    (e.g. ``"Protein N-term[Acetyl]"``), and unrecognised tokens are skipped rather
+    than raised, so a submission is never blocked by modification formatting.
+    """
+    fixed_mods = getattr(params, "fixed_mods", None)
+    if not isinstance(fixed_mods, str) or not fixed_mods.strip():
+        return result_perf
+
+    for token in fixed_mods.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        match = _PROFORMA_FIXED_MOD.match(token)
+        if match is None:
+            # Unrecognised format; skip rather than crash the whole submission.
+            continue
+        residues = match.group("residues").strip()
+        mod_name = match.group("name").strip()
+        # Terminal fixed modifications are not applied at the residue level here.
+        if "-term" in residues.lower():
+            continue
+        aas_list = list(residues)
+        result_perf["precursor ion"] = result_perf["precursor ion"].apply(add_fixed_mod, args=(mod_name, aas_list))
 
     return result_perf

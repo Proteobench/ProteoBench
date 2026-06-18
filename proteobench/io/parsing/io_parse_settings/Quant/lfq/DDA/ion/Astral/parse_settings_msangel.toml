@@ -8,3 +8,9 @@
 "contaminant_flag" = "Cont_"
 "decoy_flag" = true
 "run_name_cleanup" = "^abundance_"
+
+[upload_info]
+"datapoint_file" = "*.xlsx"
+"datapoint_file_description" = "Upload the MSAngel export Excel file (`.xlsx`) containing the 'Quantified peptide ions' sheet."
+"params_file" = "*.json"
+"params_file_description" = "Upload the MSAngel pipeline export JSON file."

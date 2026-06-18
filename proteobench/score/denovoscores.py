@@ -254,7 +254,7 @@ class DenovoScores(ScoreBase):
 
         out = []
         n_mod = peptidoform.properties["n_term"]
-        if n_mod is None:
+        if n_mod is None or len(n_mod) == 0:
             n_mod = [None]
 
         # If there is an N-terminal mod, this is separately tokenized.

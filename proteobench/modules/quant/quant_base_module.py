@@ -21,10 +21,10 @@ from pandas import DataFrame
 from proteobench.datapoint.quant_datapoint import (
     QuantDatapointHYE,
     filter_df_numquant_epsilon,
-    filter_df_numquant_nr_prec,
+    filter_df_numquant_nr_feature,
 )
 from proteobench.github.gh import GithubProteobotRepo
-from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
 from proteobench.io.params.alphadia import extract_params as extract_params_alphadia
 from proteobench.io.params.alphapept import extract_params as extract_params_alphapept
 from proteobench.io.params.diann import extract_params as extract_params_diann
@@ -35,6 +35,7 @@ from proteobench.io.params.i2masschroq import (
 from proteobench.io.params.maxquant import extract_params as extract_params_maxquant
 from proteobench.io.params.metamorpheus import (
     extract_params as extract_params_metamorpheus,
+    get_incomplete_upload_warning as validate_metamorpheus_files,
 )
 from proteobench.io.params.msaid import extract_params as extract_params_msaid
 from proteobench.io.params.msangel import extract_params as extract_params_msangel
@@ -75,6 +76,13 @@ class QuantModule:
 
     quant_score_class = QuantScoresHYE
     datapoint_class = QuantDatapointHYE
+
+    # Maps format name to a function(files) -> str warning when the upload is incomplete.
+    # Only formats that require multiple files need an entry here.
+    VALIDATE_FILES_DICT: Dict[str, Any] = {
+        "MetaMorpheus": validate_metamorpheus_files,
+    }
+    y_axis_title: str = "Total number of features quantified in the selected number of raw files"
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
@@ -207,6 +215,7 @@ class QuantModule:
         if not isinstance(all_datapoints, pd.DataFrame):
             all_datapoints = self.github_repo.read_results_json_repo()
 
+        all_datapoints = normalize_dataframe_columns(all_datapoints)
         all_datapoints["old_new"] = "old"
 
         return all_datapoints
@@ -264,8 +273,8 @@ class QuantModule:
             for v in all_datapoints["results"]
         ]
 
-        all_datapoints["nr_prec"] = [
-            filter_df_numquant_nr_prec(v, min_quant=default_val_slider) for v in all_datapoints["results"]
+        all_datapoints["nr_feature"] = [
+            filter_df_numquant_nr_feature(v, min_quant=default_val_slider) for v in all_datapoints["results"]
         ]
 
         return all_datapoints
@@ -276,7 +285,7 @@ class QuantModule:
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
         max_nr_observed: int = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
@@ -293,8 +302,8 @@ class QuantModule:
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all datapoints from the ProteoBench repo.
-        default_cutoff_min_prec : int, optional
-            Minimum number of runs a precursor ion has to be identified in. Defaults to 3.
+        default_cutoff_min_feature : int, optional
+            Minimum number of runs a feature has to be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
         max_nr_observed : int, optional
@@ -324,7 +333,7 @@ class QuantModule:
             user_input=user_input,
             precursor_column_name=self.precursor_column_name,
             all_datapoints=all_datapoints,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            default_cutoff_min_feature=default_cutoff_min_feature,
             add_datapoint_func=self.add_current_data_point,
             max_nr_observed=max_nr_observed,
             quant_score_class=self.quant_score_class,
@@ -565,6 +574,29 @@ class QuantModule:
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 
+    def validate_params_files(self, input_file: List, input_format: str) -> Optional[str]:
+        """
+        Validate the uploaded parameter files before parsing.
+
+        Parameters
+        ----------
+        input_file : List
+            List of uploaded files.
+        input_format : str
+            Format of the parameter file.
+
+        Returns
+        -------
+        Optional[str]
+            A warning message if validation fails, or None if the upload is complete.
+        """
+        validator = self.VALIDATE_FILES_DICT.get(input_format)
+        if validator is None:
+            return None
+        if len(input_file) < 2:
+            return validator(input_file)
+        return None
+
     def load_params_file(self, input_file: List[str], input_format: str, json_file: str) -> ProteoBenchParameters:
         """
         Load parameters from a metadata file depending on its format.
@@ -590,13 +622,19 @@ class QuantModule:
         params.software_name = input_format
         return params
 
-    def get_plot_generator(self) -> PlotGeneratorBase:
+    def get_plot_generator(self, y_axis_title: str = None) -> PlotGeneratorBase:
         """
         Get the plot generator for LFQ Ion plots.
+
+        Parameters
+        ----------
+        y_axis_title : str, optional
+            Override the default y-axis title. If None, the class default is used.
 
         Returns
         -------
         PlotGeneratorBase
             The plot generator instance.
         """
-        return LFQHYEPlotGenerator()
+        title = y_axis_title if y_axis_title is not None else self.y_axis_title
+        return LFQHYEPlotGenerator(y_axis_title=title)

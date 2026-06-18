@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level (PYE: Plasma/Yeast/E. coli)
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data on plasma samples spiked with yeast and E. coli (PYE dataset).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
@@ -212,12 +214,12 @@ Once submitted, a GitHub pull request will be automatically generated for tracki
 
 | Tool | Quantification input | Metadata / parameter file |
 |---|---|---|
-| DIA-NN | `*_report.tsv` or `*_report.parquet` | `*_report.log.txt` |
-| AlphaDIA | `precursors.tsv` + `precursor.matrix.tsv` (both required; see Jupyter Notebook for preprocessing) | `log.txt` |
-| Spectronaut | `*_Report.tsv` (BGS factory report format) | `*_Report.setup.txt` |
-| FragPipe (DIA-NN Quant) | `*_report.tsv` | `fragpipe.workflow` |
-| PEAKS | PEAKS DIA output file (`.txt` format - export as text report) | Settings text file (`.txt`) |
-| Custom | Tab-separated values (`.tsv` or `.csv`) following standard format | Not required |
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| PEAKS | lfq.features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
 
 ## Notes
 

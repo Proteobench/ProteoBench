@@ -1,0 +1,6 @@
+[validation]
+# Validation profile applied to submissions for this module.
+# Resolved by proteobench.validation (ModuleValidationConfig.from_parse_settings).
+# De novo modules use a different standardized schema than quant modules, so the
+# quant checks (protein IDs, charge, peptide length) do not apply.
+"profile" = "denovo"

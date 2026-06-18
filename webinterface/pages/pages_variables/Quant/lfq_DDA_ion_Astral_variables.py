@@ -92,6 +92,7 @@ class VariablesDDAQuantAstral:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DDA ion Astral"
+    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
     sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(
@@ -115,6 +116,7 @@ class VariablesDDAQuantAstral:
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Ion quantification (Astral)"
+    y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"
     prefix_params: str = "lfq_ion_dda_quant_Astral_"
     params_json_dict: str = "params_json_dict_lfq_ion_dda_quant_astral"
     params_file_dict: str = "params_file_dict_lfq_ion_dda_quant_astral"

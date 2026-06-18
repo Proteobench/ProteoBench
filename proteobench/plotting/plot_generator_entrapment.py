@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.score.entrapmentscores import EntrapmentScores
 
 
 class EntrapmentPlotGenerator(PlotGeneratorBase):
@@ -36,8 +37,9 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         """
         plots = {}
 
-        # Generate QQ plot
-        plots["qq"] = self._plot_qq_plot(performance_data)
+        # Generate QQ plot — use pre-computed curve if provided, otherwise derive it
+        # from the intermediate DataFrame (e.g. for public datasets loaded from storage).
+        plots["qq"] = self._plot_qq_plot(performance_data, fdp_curve=kwargs.get("fdp_curve"))
 
         return plots
 
@@ -55,7 +57,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 "plots": ["qq"],
                 "columns": 1,
                 "titles": {
-                    "qq": "Placeholder plot",
+                    "qq": "FDP vs Q-value Threshold",
                 },
             },
         ]
@@ -70,40 +72,212 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             Dictionary mapping plot names to their descriptions
         """
         return {
-            "qq": "Placeholder for a future FDP-vs-FDR plot.",
+            "qq": (
+                "False discovery proportion (FDP) as a function of Q-value threshold. "
+                "The grey dashed diagonal marks FDP = FDR (perfect calibration). "
+                "Points below the diagonal indicate conservative FDR control; "
+                "points above indicate that the empirical FDP exceeds the declared threshold. "
+                "The shaded band spans the FDP uncertainty interval (lower bound to combined upper bound). "
+                "The right axis shows the number of identified features at each threshold."
+            ),
         }
 
-    def _plot_qq_plot(self, performance_data: pd.DataFrame) -> go.Figure:
+    def _plot_qq_plot(self, performance_data: pd.DataFrame, fdp_curve: dict = None) -> go.Figure:
         """
-        Plot a placeholder for the future FDP-vs-FDR comparison.
+        Plot FDP (lower bound, combined, paired) against Q-value threshold.
+
+        Each FDP estimator is shown as a line. The grey dashed diagonal marks
+        perfect calibration (FDP = declared FDR). The shaded band spans the
+        uncertainty interval between the lower and combined upper FDP bounds.
+        A secondary right-hand axis shows the number of identified features at
+        each threshold.
 
         Parameters
         ----------
         performance_data : pd.DataFrame
-            DataFrame containing entrapment performance results. Currently unused.
+            Intermediate DataFrame produced by ``EntrapmentScores.generate_intermediate``.
+            Must contain at least ``Q-Value``, ``Peptide``, and
+            ``Target or Entrapment`` columns.
+        fdp_curve : dict, optional
+            Pre-computed FDP curve from ``EntrapmentScores.calculate_fdp_at_fdr_thresholds``.
+            When provided the intermediate DataFrame is not re-processed. Pass this
+            from the already-computed datapoint to avoid redundant computation.
 
         Returns
         -------
         go.Figure
-            Placeholder figure.
+            Plotly figure with the FDP calibration curve.
         """
-        fig = go.Figure()
-        fig.update_layout(
-            xaxis_title="FDP",
-            yaxis_title="FDR",
-            template="plotly_white",
-            height=500,
-            annotations=[
-                dict(
-                    text="FDP vs FDR plot is not implemented yet.",
-                    x=0.5,
-                    y=0.5,
-                    xref="paper",
-                    yref="paper",
-                    showarrow=False,
+        if fdp_curve is None:
+            try:
+                performance_data = EntrapmentScores.validate_entrapment_coverage(performance_data)
+                fdp_curve = EntrapmentScores.calculate_fdp_at_fdr_thresholds(performance_data)
+            except Exception as exc:
+                fig = go.Figure()
+                fig.update_layout(
+                    xaxis_title="Q-value threshold",
+                    yaxis_title="FDP",
+                    template="plotly_white",
+                    height=500,
+                    annotations=[
+                        dict(
+                            text=f"Could not compute FDP curve: {exc}",
+                            x=0.5,
+                            y=0.5,
+                            xref="paper",
+                            yref="paper",
+                            showarrow=False,
+                        )
+                    ],
                 )
-            ],
+                return fig
+
+        if not fdp_curve:
+            fig = go.Figure()
+            fig.update_layout(
+                template="plotly_white",
+                height=500,
+                annotations=[
+                    dict(
+                        text="No FDP curve data — intermediate DataFrame may be empty.",
+                        x=0.5,
+                        y=0.5,
+                        xref="paper",
+                        yref="paper",
+                        showarrow=False,
+                    )
+                ],
+            )
+            return fig
+
+        thresholds = sorted(fdp_curve.keys())
+        lower = [fdp_curve[t]["lower_bound_FDP"] for t in thresholds]
+        combined = [fdp_curve[t]["combined_FDP"] for t in thresholds]
+        paired = [fdp_curve[t]["paired_FDP"] for t in thresholds]
+        nr_features = [fdp_curve[t]["nr_id_features"] for t in thresholds]
+
+        hover_lower = [
+            f"Q-value ≤ {t:.5f}<br>Lower bound FDP: {l:.4f}<br>Nr features: {n}"
+            for t, l, n in zip(thresholds, lower, nr_features)
+        ]
+        hover_combined = [
+            f"Q-value ≤ {t:.5f}<br>Combined FDP: {c:.4f}<br>Nr features: {n}"
+            for t, c, n in zip(thresholds, combined, nr_features)
+        ]
+        hover_paired = [
+            f"Q-value ≤ {t:.5f}<br>Paired FDP: {p:.4f}<br>Nr features: {n}"
+            for t, p, n in zip(thresholds, paired, nr_features)
+        ]
+        hover_nr = [f"Q-value ≤ {t:.5f}<br>Nr features: {n}" for t, n in zip(thresholds, nr_features)]
+
+        fig = go.Figure()
+
+        # Shaded uncertainty band: lower bound → combined upper bound
+        fig.add_trace(
+            go.Scatter(
+                x=thresholds + thresholds[::-1],
+                y=combined + lower[::-1],
+                fill="toself",
+                fillcolor="rgba(120,120,120,0.12)",
+                line=dict(color="rgba(0,0,0,0)"),
+                name="FDP uncertainty band",
+                hoverinfo="skip",
+                showlegend=True,
+            )
         )
+
+        fig.add_trace(
+            go.Scatter(
+                x=thresholds,
+                y=lower,
+                mode="lines+markers",
+                name="Lower bound FDP",
+                line=dict(color="#2ecc71", width=2),
+                marker=dict(size=7),
+                hovertext=hover_lower,
+                hoverinfo="text",
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=thresholds,
+                y=combined,
+                mode="lines+markers",
+                name="Combined FDP (upper)",
+                line=dict(color="#e74c3c", width=2),
+                marker=dict(size=7),
+                hovertext=hover_combined,
+                hoverinfo="text",
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=thresholds,
+                y=paired,
+                mode="lines+markers",
+                name="Paired FDP (upper)",
+                line=dict(color="#f39c12", width=2, dash="dot"),
+                marker=dict(size=7, symbol="diamond"),
+                hovertext=hover_paired,
+                hoverinfo="text",
+            )
+        )
+
+        # Identity reference: FDP = declared FDR
+        x_max = max(thresholds)
+        fig.add_trace(
+            go.Scatter(
+                x=[0, x_max],
+                y=[0, x_max],
+                mode="lines",
+                name="FDP = FDR (identity)",
+                line=dict(color="gray", width=1.5, dash="dash"),
+                hoverinfo="skip",
+            )
+        )
+
+        # Nr. identified features on secondary right axis
+        fig.add_trace(
+            go.Scatter(
+                x=thresholds,
+                y=nr_features,
+                mode="lines",
+                name="Nr. identified features",
+                line=dict(color="rgba(60,60,180,0.45)", width=1.5, dash="longdash"),
+                yaxis="y2",
+                hovertext=hover_nr,
+                hoverinfo="text",
+            )
+        )
+
+        fig.update_layout(
+            xaxis=dict(
+                title="Q-value threshold (declared FDR)",
+                gridcolor="lightgray",
+                linecolor="black",
+            ),
+            yaxis=dict(
+                title="False Discovery Proportion (FDP)",
+                gridcolor="lightgray",
+                linecolor="black",
+                rangemode="tozero",
+            ),
+            yaxis2=dict(
+                title="Nr. identified features",
+                overlaying="y",
+                side="right",
+                showgrid=False,
+                linecolor="rgba(60,60,180,0.45)",
+                rangemode="tozero",
+            ),
+            template="plotly_white",
+            height=520,
+            margin=dict(l=80, r=110, t=60, b=100),
+            legend=dict(orientation="h", y=-0.28),
+        )
+
         return fig
 
     def plot_fdp_ratio(

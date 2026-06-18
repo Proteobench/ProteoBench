@@ -36,6 +36,7 @@ def generate_indepth_plots(
     metric: str = "Median",
     mode: str = "Species-weighted",
     colorblind_mode: bool = False,
+    **plot_kwargs,
 ) -> Optional[go.Figure]:
     """
     Generate and display in-depth plots for the selected dataset.
@@ -98,6 +99,7 @@ def generate_indepth_plots(
             metric=metric,
             mode=mode,
             colorblind_mode=colorblind_mode,
+            **plot_kwargs,
         )
     except Exception as e:
         st.error(f"Error generating in-depth plots: {e}", icon="🚨")

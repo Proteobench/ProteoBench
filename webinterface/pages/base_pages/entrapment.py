@@ -151,6 +151,19 @@ class EntrapmentUIObjects(BaseUIModule):
         )
 
         public_id, selected_hash = dataset_selection
+
+        # For the uploaded dataset, reuse the fdp_curve already computed during
+        # benchmarking rather than recomputing it from the intermediate DataFrame.
+        plot_kwargs = {}
+        if public_id == "Uploaded dataset":
+            all_dp = st.session_state.get(self.variables.all_datapoints)
+            if all_dp is not None and not all_dp.empty and "fdp_curve" in all_dp.columns:
+                new_rows = all_dp[all_dp.get("old_new", pd.Series()) == "new"] if "old_new" in all_dp.columns else pd.DataFrame()
+                if not new_rows.empty:
+                    candidate = new_rows.iloc[0]["fdp_curve"]
+                    if isinstance(candidate, dict) and candidate:
+                        plot_kwargs["fdp_curve"] = candidate
+
         tab3_view_single_result.generate_indepth_plots(
             module=self.ionmodule,
             variables=self.variables,
@@ -158,6 +171,7 @@ class EntrapmentUIObjects(BaseUIModule):
             user_input=self.user_input,
             public_id=public_id,
             public_hash=selected_hash,
+            **plot_kwargs,
         )
 
     def display_public_submission_ui(self) -> None:

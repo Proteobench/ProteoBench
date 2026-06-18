@@ -81,6 +81,7 @@ class EntrapmentDatapoint(DatapointBase):
     category_paired: str = ""
     paired_FDP: float = np.nan
     reported_fdr_parsed_from_input: float = np.nan
+    fdp_curve: dict = None
     comments: str = ""
     proteobench_version: str = ""
 
@@ -166,6 +167,7 @@ class EntrapmentDatapoint(DatapointBase):
         result_datapoint.paired_FDP = metrics["paired_FDP"]
         result_datapoint.category_combined = metrics["category_combined"]
         result_datapoint.category_paired = metrics["category_paired"]
+        result_datapoint.fdp_curve = metrics["fdp_curve"]
 
         result_datapoint.results = metrics
         results_series = pd.Series(dataclasses.asdict(result_datapoint))

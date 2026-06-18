@@ -47,7 +47,7 @@ class StreamlitUI:
             self.variables_dia_entrapment,
             self.ionmodule,
             self.parsesettingsbuilder,
-            page_name="Entrapment DIA ion Astral",
+            page_name="FDRBench - Entrapment DIA ion Astral",
         )
 
         self._main_page()

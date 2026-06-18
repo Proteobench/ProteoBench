@@ -158,7 +158,11 @@ class EntrapmentUIObjects(BaseUIModule):
         if public_id == "Uploaded dataset":
             all_dp = st.session_state.get(self.variables.all_datapoints)
             if all_dp is not None and not all_dp.empty and "fdp_curve" in all_dp.columns:
-                new_rows = all_dp[all_dp.get("old_new", pd.Series()) == "new"] if "old_new" in all_dp.columns else pd.DataFrame()
+                new_rows = (
+                    all_dp[all_dp.get("old_new", pd.Series()) == "new"]
+                    if "old_new" in all_dp.columns
+                    else pd.DataFrame()
+                )
                 if not new_rows.empty:
                     candidate = new_rows.iloc[0]["fdp_curve"]
                     if isinstance(candidate, dict) and candidate:
@@ -266,7 +270,9 @@ class EntrapmentUIObjects(BaseUIModule):
                 pr_url=pr_url,
             )
 
-    def _render_fdp_ratio_plot(self, session_key: str, metric: str, colorblind_mode: bool, is_public_only: bool = False) -> None:
+    def _render_fdp_ratio_plot(
+        self, session_key: str, metric: str, colorblind_mode: bool, is_public_only: bool = False
+    ) -> None:
         """Render the FDP / reported-FDR ratio plot from the given session-state key."""
         all_data = st.session_state.get(session_key)
         if all_data is None or not isinstance(all_data, pd.DataFrame):

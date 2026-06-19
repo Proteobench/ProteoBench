@@ -403,9 +403,70 @@ class EntrapmentUIObjects(BaseUIModule):
     @st.fragment
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
+        tab1_view_public_results.initialize_main_data_points(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )
         tab1_view_public_results.initialize_main_selectbox(
             selectbox_id_uuid=self.variables.selectbox_id_uuid,
             default_value="None",
+        )
+
+        with st.expander("Quick Intro", expanded=False):
+            st.markdown(
+                "**Entrapment benchmarking** assesses whether FDR control is well-calibrated in a "
+                "proteomics database search. A set of *entrapment* peptides — derived from organisms "
+                "that are absent from the sample — is added to the search database. Because these "
+                "sequences cannot be present in the sample, every entrapment identification is a false "
+                "positive by construction. Comparing the fraction of entrapment identifications to the "
+                "declared FDR threshold reveals whether the reported FDR is accurate. "
+                "The approach is described in "
+                "[Wen et al. (2025), *Nature Methods*]"
+                "(https://www.nature.com/articles/s41592-025-02719-x)."
+            )
+            st.markdown("##### FDP estimates")
+            st.markdown("Two bounds on the false discovery proportion (FDP) are computed from the search results:")
+            st.markdown("**Lower FDP bound** — fraction of identified entrapment peptides among all identifications:")
+            st.latex(
+                r"\widehat{\underline{\mathrm{FDP}}}_{\mathcal{T}\cup\mathcal{E}_{\mathcal{T}}}"
+                r"= \frac{N_{\mathcal{E}}}{N_{\mathcal{T}}+N_{\mathcal{E}}}"
+            )
+            st.markdown(
+                "**Upper FDP bound (paired method)** — additionally accounts for entrapment peptides "
+                "that outscore their paired target:"
+            )
+            st.latex(
+                r"\widehat{\mathrm{FDP}}_{\mathcal{T}\cup\mathcal{E}_{\mathcal{T}}}^{\,*}"
+                r"= \frac{N_{\mathcal{E}} + N_{\mathcal{E}\,\ge\,s\,>\,\mathcal{T}}"
+                r"+ 2\,N_{\mathcal{E}\,>\,\mathcal{T}\,\ge\,s}}{N_{\mathcal{T}}+N_{\mathcal{E}}}"
+            )
+            st.markdown(
+                r"$N_\mathcal{E}$: identified entrapments — "
+                r"$N_\mathcal{T}$: identified targets — "
+                r"$N_{\mathcal{E}\,\ge\,s\,>\,\mathcal{T}}$: entrapments with no identified paired target — "
+                r"$N_{\mathcal{E}\,>\,\mathcal{T}\,\ge\,s}$: pairs where the entrapment outscores the target."
+            )
+            st.markdown("##### Interpreting results")
+            st.markdown(
+                "The FDP interval is compared to the declared FDR threshold of the workflow:\n\n"
+                "- **Valid** (green bar): both FDP bounds are lower than the declared FDR threshold — "
+                "FDR control is valid (but overestimated).\n"
+                "- **Inconclusive** (orange bar): the FDP interval includes the threshold — "
+                "insufficient evidence to confirm or reject FDR calculation.\n"
+                "- **Invalid** (red bar): both FDP bounds exceed the declared threshold — "
+                "the reported FDR is invalid and underestimated."
+            )
+
+        self._render_forest_plot(session_key=self.variables.all_datapoints)
+
+        st.subheader("FDR Control and Sensitivity Overview")
+        st.markdown(
+            "Each point represents a submitted workflow. "
+            "The x-axis shows the **false discovery proportion (FDP)** — an empirical estimate "
+            "of the actual FDR computed from entrapment peptides. "
+            "The y-axis shows the number of identified precursor ions. "
+            "Workflows to the left have better-calibrated FDR control. "
+            "Use the options below to select the FDP metric and adjust the display."
         )
 
         # Define callbacks for plot options
@@ -449,26 +510,42 @@ class EntrapmentUIObjects(BaseUIModule):
             },
         )
 
-        self._render_fdp_ratio_plot(
-            session_key=self.variables.all_datapoints,
-            metric=metric,
-            colorblind_mode=colorblind_mode,
-            is_public_only=True,
-        )
-
-        self._render_forest_plot(session_key=self.variables.all_datapoints)
-        self._render_fdp_id_scatter(session_key=self.variables.all_datapoints)
-        self._render_category_strip(session_key=self.variables.all_datapoints)
+        with st.expander("Show more"):
+            self._render_fdp_id_scatter(session_key=self.variables.all_datapoints)
+            self._render_fdp_ratio_plot(
+                session_key=self.variables.all_datapoints,
+                metric=metric,
+                colorblind_mode=colorblind_mode,
+                is_public_only=True,
+            )
+            self._render_category_strip(session_key=self.variables.all_datapoints)
 
     @st.fragment
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
 
+        tab4_view_public_and_new_results.initialize_submitted_data_points(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )
+
         # Initialize plot options controls (same as tab 1)
         tab1_view_public_results.initialize_main_selectbox(
             selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
             default_value="None",
+        )
+
+        self._render_forest_plot(session_key=self.variables.all_datapoints_submitted)
+
+        st.subheader("FDR Control and Sensitivity Overview")
+        st.markdown(
+            "Each point represents a submitted workflow. "
+            "The x-axis shows the **false discovery proportion (FDP)** — an empirical estimate "
+            "of the actual FDR computed from entrapment peptides. "
+            "The y-axis shows the number of identified precursor ions. "
+            "Workflows to the left have better-calibrated FDR control. "
+            "Use the options below to select the FDP metric and adjust the display."
         )
 
         # Define callbacks for plot options
@@ -492,7 +569,7 @@ class EntrapmentUIObjects(BaseUIModule):
             )
             metric = st.radio(
                 "Select metric to show in x axis",
-                ["Lower FDP bound", "Upper FDP bound - Combined method", "Upper FDP bound - Paired method"],
+                ["Lower FDP bound", "Upper FDP bound - Paired method"],
                 help=help_text,
                 horizontal=True,
                 key=metric_uuid,
@@ -530,12 +607,11 @@ class EntrapmentUIObjects(BaseUIModule):
             },
         )
 
-        self._render_fdp_ratio_plot(
-            session_key=self.variables.all_datapoints_submitted,
-            metric=metric,
-            colorblind_mode=colorblind_mode,
-        )
-
-        self._render_forest_plot(session_key=self.variables.all_datapoints_submitted)
-        self._render_fdp_id_scatter(session_key=self.variables.all_datapoints_submitted)
-        self._render_category_strip(session_key=self.variables.all_datapoints_submitted)
+        with st.expander("Show more"):
+            self._render_fdp_id_scatter(session_key=self.variables.all_datapoints_submitted)
+            self._render_fdp_ratio_plot(
+                session_key=self.variables.all_datapoints_submitted,
+                metric=metric,
+                colorblind_mode=colorblind_mode,
+            )
+            self._render_category_strip(session_key=self.variables.all_datapoints_submitted)

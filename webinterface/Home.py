@@ -30,8 +30,6 @@ def _show_tool_breakdown(module_title, tool_counts):
     st.plotly_chart(pie_fig, use_container_width=True)
 
 
-# Path to the index.rst file
-file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
 fig_path = Path(__file__).resolve().parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
 
 
@@ -56,7 +54,7 @@ class StreamlitPageHome(StreamlitPage):
         # Placeholders TODO: replace with actual data
 
         n_modules_all = get_n_modules()
-        n_modules_proposed = get_n_modules_proposed(file_path.read_text(encoding="utf-8"))
+        n_modules_proposed = get_n_modules_proposed()
         n_tools_supported = get_n_supported_tools()
         n_of_points_submitted = get_n_submitted_points()  # This function should return the number of submitted points
 

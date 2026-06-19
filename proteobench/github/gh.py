@@ -223,6 +223,16 @@ class GithubProteobotRepo:
             raise FileNotFoundError(f"File '{f_name}' does not exist.")
 
         all_datapoints = pd.read_json(f_name)
+        # Old datapoints were serialised with 'nr_prec'; newer ones use 'nr_feature'.
+        # Normalise so callers always see a single 'nr_feature' column.
+        if "nr_prec" in all_datapoints.columns:
+            if "nr_feature" not in all_datapoints.columns:
+                # All rows are old-format: simply rename the column.
+                all_datapoints = all_datapoints.rename(columns={"nr_prec": "nr_feature"})
+            else:
+                # Mixed old/new: fill gaps in 'nr_feature' from 'nr_prec', then drop the legacy column.
+                all_datapoints["nr_feature"] = all_datapoints["nr_feature"].fillna(all_datapoints["nr_prec"])
+                all_datapoints = all_datapoints.drop(columns=["nr_prec"])
         return all_datapoints
 
     def read_results_json_repo(self) -> pd.DataFrame:
@@ -249,7 +259,18 @@ class GithubProteobotRepo:
             except FileNotFoundError:
                 data = []
 
-        return pd.DataFrame(data)
+        df = pd.DataFrame(data)
+        # Old datapoints were serialised with 'nr_prec'; newer ones use 'nr_feature'.
+        # Normalise so callers always see a single 'nr_feature' column.
+        if "nr_prec" in df.columns:
+            if "nr_feature" not in df.columns:
+                # All rows are old-format: simply rename the column.
+                df = df.rename(columns={"nr_prec": "nr_feature"})
+            else:
+                # Mixed old/new: fill gaps in 'nr_feature' from 'nr_prec', then drop the legacy column.
+                df["nr_feature"] = df["nr_feature"].fillna(df["nr_prec"])
+                df = df.drop(columns=["nr_prec"])
+        return df
 
     def clone_repo(self) -> Repo:
         """

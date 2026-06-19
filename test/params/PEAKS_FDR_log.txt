@@ -1,0 +1,64 @@
+Project:
+* Name: 250522_PEAKS13_Astral_DIA_50ng_15min
+* Description: 
+* Project Version: 13 20250520
+* Created at: 2025-05-22 17:18:52
++ Proteobench_DIA_Astral_Trypsin
+  Description: 
+  PEAKS Version: 13 20250520
+  Created at: 2025-05-27 10:17:22
+
+  DIA Db Search Parameters:
+    Precursor Mass Error Tolerance: Auto Detected
+    Fragment Mass Error Tolerance: Auto Detected
+    Match Between Run: Yes
+    Enzyme: Trypsin
+    Max Missed Cleavage: 1
+    Digest Mode: Specific
+    Max Variable PTM per Peptide: 1
+    Fixed Modifications: 
+    - Carbamidomethylation (+57.02)
+    Variable Modifications: 
+    - Oxidation (M) (+15.99)
+    - Acetylation (Protein N-term) (+42.01)
+    Database: 
+    - Proteobench
+      - Taxonomy: all species
+      - Searched Entries: 31889
+     Peptide Length between: 6,30
+     Precursor M/Z between: 380,980
+     Fragment M/Z between: 150,2000
+     Precursor Charge between: 1,5
+    Find Sequence Variants: No
+    Find Novel Peptides: No
+    Report Filter: 
+      Peptide FDR: 1.0%
+      Precursor FDR: 1.0%
+      Proteins Unique Peptides >= 1
+
+  LFQ Parameters:
+    Quantification Type: Label Free Quantification
+    LFQ Method: Identification Directed Quantification
+    Retention Time Range: [0.0 - Max]
+    Base Sample: Average
+    Peptide Feature Filter:
+      Avg Area >= 0.0
+      Quality >= 0.0
+      Charge between: [1 - 5]
+      Detected in at least 0 samples per group
+      Use in Group Coefficient of Variation Filter: No
+    Protein:
+      Significance Method: ANOVA
+      Modified Form Exclusion: Yes
+      Remove Outlier: Yes
+      Use Top 3 Peptide
+      Significance >= 0.0
+      Fold Change between: [1.0 - 64.0]
+      Has at least 1 Used Peptide
+    Samples: 6 Samples in 2 Groups
+      Group 1: 
+        LFQ_Astral_DIA_15min_50ng_Condition_A_REP1;LFQ_Astral_DIA_15min_50ng_Condition_A_REP2;LFQ_Astral_DIA_15min_50ng_Condition_A_REP3;
+      Group 2: 
+        LFQ_Astral_DIA_15min_50ng_Condition_B_REP1;LFQ_Astral_DIA_15min_50ng_Condition_B_REP2;LFQ_Astral_DIA_15min_50ng_Condition_B_REP3;
+    Normalization Method: No Normalization
+

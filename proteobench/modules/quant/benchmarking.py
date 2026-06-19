@@ -83,14 +83,14 @@ def _generate_intermediate(quant_score, standard_format, replicate_to_raw):
 
 @handle_benchmarking_error(DatapointGenerationError, "Error generating datapoint")
 def _generate_datapoint(
-    intermediate_metric_structure, input_format, user_input, default_cutoff_min_prec, max_nr_observed=None
+    intermediate_metric_structure, input_format, user_input, default_cutoff_min_feature, max_nr_observed=None
 ):
     """Generate datapoint."""
     return QuantDatapointHYE.generate_datapoint(
         intermediate_metric_structure,
         input_format,
         user_input,
-        default_cutoff_min_prec=default_cutoff_min_prec,
+        default_cutoff_min_feature=default_cutoff_min_feature,
         max_nr_observed=max_nr_observed,
     )
 
@@ -109,7 +109,7 @@ def run_benchmarking(
     parse_settings_dir: str,
     module_id: str,
     precursor_column_name: str,
-    default_cutoff_min_prec: int = 3,
+    default_cutoff_min_feature: int = 3,
     add_datapoint_func=None,
     input_file_secondary: str = None,
     max_nr_observed: int = None,
@@ -133,7 +133,7 @@ def run_benchmarking(
         Module identifier for configuration.
     precursor_column_name : str
         Name of the precursor column.
-    default_cutoff_min_prec : int, optional
+    default_cutoff_min_feature : int, optional
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
         Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
@@ -165,7 +165,7 @@ def run_benchmarking(
         intermediate_metric_structure,
         input_format,
         user_input,
-        default_cutoff_min_prec,
+        default_cutoff_min_feature,
         max_nr_observed=max_nr_observed,
     )
 
@@ -188,7 +188,7 @@ def run_benchmarking_with_timing(
     parse_settings_dir: str,
     module_id: str,
     precursor_column_name: str,
-    default_cutoff_min_prec: int = 3,
+    default_cutoff_min_feature: int = 3,
     add_datapoint_func=None,
     input_file_secondary: str = None,
     max_nr_observed: int = None,
@@ -212,7 +212,7 @@ def run_benchmarking_with_timing(
         Module identifier for configuration.
     precursor_column_name : str
         Name of the precursor column.
-    default_cutoff_min_prec : int, optional
+    default_cutoff_min_feature : int, optional
         Minimum number of runs a precursor ion must be identified in. Defaults to 3.
     add_datapoint_func : callable, optional
         Function to add the current datapoint to all datapoints. If None, the datapoint won't be added.
@@ -260,7 +260,7 @@ def run_benchmarking_with_timing(
             intermediate_metric_structure,
             input_format,
             user_input,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            default_cutoff_min_feature=default_cutoff_min_feature,
             max_nr_observed=max_nr_observed,
         )
 

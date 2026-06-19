@@ -16,7 +16,6 @@
 [quant_lfq_DDA_peptidoform]
 "WOMBAT" = "parse_settings_wombat.toml"
 "PEAKS" = "parse_settings_peaks.toml"
-"Proteome Discoverer" = "parse_settings_proteomediscoverer.toml"
 "Custom" = "parse_settings_custom.toml"
 
 [quant_lfq_DIA_ion_AIF]
@@ -50,7 +49,6 @@
 "AlphaDIA" = "parse_settings_alphadia.toml"
 "MSAID" = "parse_settings_msaid.toml"
 "Custom" = "parse_settings_custom.toml"
-"Sage" = "parse_settings_sage.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 
 [quant_lfq_DIA_ion_Astral]
@@ -106,3 +104,8 @@
 "Pi-HelixNovo" = "parse_settings_pihelixnovo.toml"
 "Pi-PrimeNovo" = "parse_settings_piprimenovo.toml"
 "PepNet" = "parse_settings_pepnet.toml"
+"ContraNovo" = "parse_settings_contranovo.toml"
+"NovoB" = "parse_settings_novob.toml"
+"PointNovo" = "parse_settings_pointnovo.toml"
+"SMSNet" = "parse_settings_smsnet.toml"
+"Custom" = "parse_settings_custom.toml"

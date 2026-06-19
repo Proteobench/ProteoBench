@@ -14,6 +14,37 @@ from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
 EPSILON = 0.0001
 
+SOFTWARE_COLORS = {
+    "AdaNovo": "#88CCEE",
+    "Casanovo": "#CC6677",
+    "DeepNovo": "#DDCC77",
+    "PepNet": "#117733",
+    "Pi-HelixNovo": "#332288",
+    "Pi-PrimeNovo": "#AA4499",
+    "PEAKS": "#661100",
+    "SMSNet": "#44AA99",
+    "InstaNovo": "#999933",
+    "ContraNovo": "#882255",
+    "PointNovo": "#E07030",
+    "NovoB": "#4477AA",
+    "Custom": "#000000",
+}
+SOFTWARE_MARKERS = {
+    "AdaNovo": "circle",
+    "Casanovo": "square",
+    "DeepNovo": "diamond",
+    "PepNet": "cross",
+    "Pi-HelixNovo": "x",
+    "Pi-PrimeNovo": "triangle-up",
+    "PEAKS": "star",
+    "SMSNet": "triangle-down",
+    "InstaNovo": "pentagon",
+    "ContraNovo": "hexagon",
+    "PointNovo": "triangle-left",
+    "NovoB": "triangle-right",
+    "Custom": "circle-open",
+}
+
 
 def flatten_results_column(df):
     results = {
@@ -88,29 +119,11 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         colorblind_mode = kwargs.get("colorblind_mode", False)
         software_colors = kwargs.get(
             "software_colors",
-            {
-                "AdaNovo": "#88ccef",
-                "Casanovo": "#cc6777",
-                "DeepNovo": "#ddcc77",
-                "InstaNovo": "#44aa99",
-                "PepNet": "#147733",
-                "Pi-HelixNovo": "#342288",
-                "Pi-PrimeNovo": "#aa4599",
-                "PEAKS": "#671100",
-            },
+            SOFTWARE_COLORS,
         )
         software_markers = kwargs.get(
             "software_markers",
-            {
-                "AdaNovo": "circle",
-                "Casanovo": "square",
-                "DeepNovo": "diamond",
-                "InstaNovo": "hexagon",
-                "PepNet": "cross",
-                "Pi-HelixNovo": "x",
-                "Pi-PrimeNovo": "triangle-up",
-                "PEAKS": "star",
-            },
+            SOFTWARE_MARKERS,
         )
         mapping = kwargs.get("mapping", {"old": 10, "new": 20})
         highlight_color = kwargs.get("highlight_color", "#d30067")
@@ -120,6 +133,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df = result_df
 
         # Define layout
+        benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
         results_df = flatten_results_column(benchmark_metrics_df)
         benchmark_metrics_df = pd.concat([benchmark_metrics_df, results_df], axis=1)
         results_min = results_df.min()
@@ -179,7 +193,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             ]
 
         # Color plot based on software tool
-        colors = [software_colors.get(software, "gray") for software in benchmark_metrics_df["software_name"]]
+        colors = [software_colors[software] for software in benchmark_metrics_df["software_name"]]
         if "Highlight" in benchmark_metrics_df.columns:
             colors = [
                 highlight_color if highlight else item
@@ -320,16 +334,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         evaluation_types = kwargs.get("evaluation_type", ["mass", "exact"])
         software_colors = kwargs.get(
             "software_colors",
-            {
-                "AdaNovo": "#88ccef",
-                "Casanovo": "#cc6777",
-                "DeepNovo": "#ddcc77",
-                "InstaNovo": "#44aa99",
-                "PepNet": "#147733",
-                "Pi-HelixNovo": "#342288",
-                "Pi-PrimeNovo": "#aa4599",
-                "PEAKS": "#671100",
-            },
+            SOFTWARE_COLORS,
         )
 
         # Generate PTM plots
@@ -399,16 +404,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         self,
         benchmark_metrics_df: pd.DataFrame,
         mod_labels: List[str],
-        software_colors: Dict[str, str] = {
-            "AdaNovo": "#8b26ff",
-            "Casanovo": "#8bc6fd",
-            "DeepNovo": "#108E2E",
-            "InstaNovo": "#44aa99",
-            "PepNet": "#F89008",
-            "Pi-HelixNovo": "#E43924",
-            "Pi-PrimeNovo": "#663200",
-            "PEAKS": "#f032e6",
-        },
+        software_colors: Dict[str, str] = SOFTWARE_COLORS,
     ):
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
@@ -416,9 +412,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             tool = row["software_name"]
 
             fig.add_trace(
-                go.Scatter(
-                    x=x, y=y, mode="lines+markers", name=tool, marker=dict(color=software_colors.get(tool, "gray"))
-                )
+                go.Scatter(x=x, y=y, mode="lines+markers", name=tool, marker=dict(color=software_colors[tool]))
             )
 
         fig.update_layout(
@@ -436,16 +430,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         self,
         benchmark_metrics_df,
         mod_label,
-        software_colors: Dict[str, str] = {
-            "AdaNovo": "#8b26ff",
-            "Casanovo": "#8bc6fd",
-            "DeepNovo": "#108E2E",
-            "InstaNovo": "#44aa99",
-            "PepNet": "#F89008",
-            "Pi-HelixNovo": "#E43924",
-            "Pi-PrimeNovo": "#663200",
-            "PEAKS": "#f032e6",
-        },
+        software_colors: Dict[str, str] = SOFTWARE_COLORS,
     ):
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
@@ -456,7 +441,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             x = ptm_data[mod_label]["correct_gt"] / (ptm_data[mod_label]["counts_gt"] + EPSILON)
             y = ptm_data[mod_label]["correct_dn"] / (ptm_data[mod_label]["counts_dn"] + EPSILON)
             tool = row["software_name"]
-            fig.add_trace(go.Scatter(x=[x], y=[y], name=tool, marker=dict(color=software_colors.get(tool, "gray"))))
+            fig.add_trace(go.Scatter(x=[x], y=[y], name=tool, marker=dict(color=software_colors[tool])))
 
         fig.update_layout(
             width=500,
@@ -482,17 +467,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df,
         feature,
         evaluation_type="mass",
-        software_colors={
-            "AdaNovo": "#8b26ff",
-            "Casanovo": "#8bc6fd",
-            "DeepNovo": "#108E2E",
-            "InstaNovo": "#44aa99",
-            "PepNet": "#F89008",
-            "Pi-HelixNovo": "#E43924",
-            "Pi-PrimeNovo": "#663200",
-            "PEAKS": "#f032e6",
-            "test": "black",
-        },
+        software_colors=SOFTWARE_COLORS,
     ):
         # Create a subplot with 2 rows, shared x-axis
         fig = make_subplots(
@@ -601,17 +576,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         self,
         benchmark_metrics_df,
         evaluation_type="mass",
-        software_colors={
-            "AdaNovo": "#8b26ff",
-            "Casanovo": "#8bc6fd",
-            "DeepNovo": "#108E2E",
-            "InstaNovo": "#44aa99",
-            "PepNet": "#F89008",
-            "Pi-HelixNovo": "#E43924",
-            "Pi-PrimeNovo": "#663200",
-            "PEAKS": "#f032e6",
-            "test": "black",
-        },
+        software_colors=SOFTWARE_COLORS,
     ):
         # Create a subplot with 2 rows, shared x-axis
         fig = make_subplots(

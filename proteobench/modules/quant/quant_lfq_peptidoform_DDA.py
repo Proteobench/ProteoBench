@@ -48,6 +48,7 @@ class DDAQuantPeptidoformModule(QuantModule):
     """
 
     module_id: str = "quant_lfq_DDA_peptidoform"
+    y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
 
     def __init__(
         self,
@@ -95,7 +96,7 @@ class DDAQuantPeptidoformModule(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
         max_nr_observed: int = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
@@ -112,8 +113,8 @@ class DDAQuantPeptidoformModule(QuantModule):
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all data points from the repo.
-        default_cutoff_min_prec : int, optional
-            Minimum number of runs a precursor ion must be identified in. Defaults to 3.
+        default_cutoff_min_feature : int, optional
+            Minimum number of runs a feature must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
 
@@ -171,7 +172,7 @@ class DDAQuantPeptidoformModule(QuantModule):
                 intermediate_metric_structure,
                 input_format,
                 user_input,
-                default_cutoff_min_prec=default_cutoff_min_prec,
+                default_cutoff_min_feature=default_cutoff_min_feature,
                 max_nr_observed=max_nr_observed,
             )
         except Exception as e:
@@ -185,5 +186,5 @@ class DDAQuantPeptidoformModule(QuantModule):
 
         return intermediate_metric_structure, all_datapoints, input_df
 
-    def get_plot_generator(self):
-        return super().get_plot_generator()
+    def get_plot_generator(self, y_axis_title: str = None):
+        return super().get_plot_generator(y_axis_title=y_axis_title)

@@ -1,0 +1,26 @@
+# Tool metadata for ProteoBench
+# Centralised classification of tools used across the platform.
+
+[open_source]
+# Software tools whose source code is publicly available.
+# Names must match the 'software_name' values set in proteobench/io/params/*.py
+tools = [
+    "AdaNovo",
+    "AlphaDIA",
+    "AlphaPept",
+    "Casanovo",
+    "ContraNovo",
+    "NovoB",
+    "DeepNovo",
+    "i2MassChroQ",
+    "InstaNovo",
+    "MetaMorpheus",
+    "Pi-HelixNovo",
+    "Pi-PrimeNovo",
+    "PointNovo",
+    "Sage",
+    "ProlineStudio",
+    "ContraNovo",
+    "SMSNet",
+    "PepNet"
+]

@@ -35,3 +35,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = false
+
+[upload_info]
+"datapoint_file" = "*.sage.tsv"
+"datapoint_file_description" = "Upload the Sage LFQ output TSV file (e.g., `results.sage.tsv`)."
+"params_file" = "*.json"
+"params_file_description" = "Upload the Sage results JSON file (`results.json`) or a Sage parameter JSON file."

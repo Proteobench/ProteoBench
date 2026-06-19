@@ -153,6 +153,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Novo Nordisk Foundation Center for Protein Research, Proteomics Program, Faculty of Health and Medical Sciences, University of Copenhagen, Copenhagen, Denmark*
 
 .. line-block::
+    **William S. Noble**
+    *Department of Genome Sciences, University of Washington*, Seattle, WA, USA*
+
+.. line-block::
     **Jesper Velgaard Olsen**
     *Novo Nordisk Foundation Center for Protein Research, Department of Cellular and Molecular Medicine, Faculty of Health and Medical Sciences, University of Copenhagen, Denmark*
 

@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level - SCIEX ZenoTOF 8600 system - Zeno SWATH DIA
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Zeno SWATH 85 variable windows, on a ZenoTOF 8600 (SCIEX).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
@@ -70,14 +72,17 @@ To submit your run for public usage, you need to upload the parameter file assoc
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
 **Table 2. Overview of input files required for metric caluclation and public submission**
-| Tool        | Input file                                                                  | Parameter File    |
-| ----------- | --------------------------------------------------------------------------- | ----------------- |
-| AlphaDIA    | precursors.tsv & precursor.matrix.tsv (v1) or precursors.tsv/.parquet (v2+) | log.txt           |
-| DIA-NN      | *_report.tsv or *_report.parquet                                            | *report.log.txt   |
-| FragPipe    | *_report.tsv                                                                | fragpipe.workflow |
-| MaxDIA      | evidence.txt                                                                | mqpar.xml         |
-| Spectronaut | *.tsv                                                                       | *.txt             |
-| PEAKS       | lfq.dia.features.csv                                                        | parameters.txt    |
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| MSAID | MSAID_output.tsv | MSAID_params.csv |
+| MaxQuant | evidence.txt | mqpar.xml |
+| PEAKS | PEAKS_lfq_features.csv | PEAKS_parameters.txt |
+| Spectronaut | Spectronaut_report.tsv | Spectronaut_ExperimentSetupOverview.txt |
 
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `DIANN_20250505_083341`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure.

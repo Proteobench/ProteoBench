@@ -9,6 +9,12 @@ import yaml
 
 from proteobench.io.params import ProteoBenchParameters
 
+MODIFICATION_MAPPING = {
+    "cC": "C[Carbamidomethyl]",
+    "oxM": "M[Oxidation]",
+    "a<^": "N-term[Acetyl]",
+}
+
 
 def extract_params(
     fname: pathlib.Path, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
@@ -53,12 +59,12 @@ def extract_params(
     mods_fixed = fasta["mods_fixed"]
     mods_fixed.extend(fasta["mods_fixed_terminal"])
     mods_fixed.extend(fasta["mods_fixed_terminal_prot"])
-    params.fixed_mods = ",".join(mods_fixed)
+    params.fixed_mods = ", ".join(MODIFICATION_MAPPING.get(mod, mod) for mod in mods_fixed)
 
     mods_variable = fasta["mods_variable"]
     mods_variable.extend(fasta["mods_variable_terminal"])
     mods_variable.extend(fasta["mods_variable_terminal_prot"])
-    params.variable_mods = ",".join(mods_variable)
+    params.variable_mods = ", ".join(MODIFICATION_MAPPING.get(mod, mod) for mod in mods_variable)
 
     params.max_mods = fasta["n_modifications_max"]
     params.min_peptide_length = fasta["pep_length_min"]

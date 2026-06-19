@@ -26,6 +26,97 @@ Parameter = namedtuple("Parameter", ["name", "value", "comment"])
 
 VERSION_NO_PATTERN = r"MSFragger-(.+)\.jar"
 
+# Common mass shifts mapped to modification names (ProForma notation)
+MASS_TO_MOD = {
+    57.02146: "Carbamidomethyl",
+    15.9949: "Oxidation",
+    42.0106: "Acetyl",
+    79.96633: "Phospho",
+    114.04293: "GG",
+    -17.0265: "Pyro-glu",
+    -18.0106: "Pyro-glu",
+    4.025107: "Label:2H(4)",
+    6.020129: "Label:13C(6)",
+    8.014199: "Label:13C(6)15N(2)",
+    10.008269: "Label:13C(6)15N(4)",
+}
+MASS_TOLERANCE = 0.001
+
+
+def _lookup_mod_name(mass: float) -> str | None:
+    """Look up a modification name by mass shift within tolerance."""
+    for ref_mass, name in MASS_TO_MOD.items():
+        if abs(mass - ref_mass) < MASS_TOLERANCE:
+            return name
+    return None
+
+
+def _parse_fixed_mods(raw: str) -> str:
+    """Parse MSFragger fixed modifications string into ProForma-like format.
+
+    Input format: ``mass,residue_description,active,num_sites`` entries separated by ``; ``.
+    Example: ``57.02146,C (cysteine),true,-1``
+    """
+    if not raw or not raw.strip():
+        return ""
+    results = []
+    for entry in raw.split("; "):
+        parts = entry.strip().split(",", 3)
+        if len(parts) < 3:
+            continue
+        mass_str, residue_desc, active = parts[0].strip(), parts[1].strip(), parts[2].strip()
+        if active != "true":
+            continue
+        mass = float(mass_str)
+        if abs(mass) < MASS_TOLERANCE:
+            continue
+        mod_name = _lookup_mod_name(mass) or mass_str.strip()
+        residue_match = re.match(r"^([A-Z])\s*\(", residue_desc)
+        if residue_match:
+            residue = residue_match.group(1)
+        elif "N-Term" in residue_desc:
+            residue = "N-term"
+        elif "C-Term" in residue_desc:
+            residue = "C-term"
+        else:
+            residue = residue_desc
+        results.append(f"{residue}[{mod_name}]")
+    return ", ".join(results)
+
+
+def _parse_variable_mods(raw: str) -> str:
+    """Parse MSFragger variable modifications string into ProForma-like format.
+
+    Input format: ``mass,residue,active,max_occurrences`` entries separated by ``; ``.
+    Special residue notations: ``[^`` = protein N-term, ``nX`` = peptide N-term of residue X.
+    """
+    if not raw or not raw.strip():
+        return ""
+    results = []
+    for entry in raw.split("; "):
+        parts = entry.strip().split(",", 3)
+        if len(parts) < 3:
+            continue
+        mass_str, residue_field, active = parts[0].strip(), parts[1].strip(), parts[2].strip()
+        if active != "true":
+            continue
+        mass = float(mass_str)
+        if abs(mass) < MASS_TOLERANCE:
+            continue
+        mod_name = _lookup_mod_name(mass) or mass_str.strip()
+        if residue_field == "[^":
+            results.append(f"N-term[{mod_name}]")
+        elif residue_field.startswith("n"):
+            aa_residues = re.findall(r"n([A-Z])", residue_field)
+            if aa_residues:
+                for aa in aa_residues:
+                    results.append(f"N-term {aa}[{mod_name}]")
+            else:
+                results.append(f"N-term[{mod_name}]")
+        else:
+            results.append(f"{residue_field}[{mod_name}]")
+    return ", ".join(results)
+
 
 def parse_phi_report_filters(phi_report_cmd: str) -> tuple[float, float, float]:
     """
@@ -194,8 +285,8 @@ def extract_params(
         params.semi_enzymatic = True
 
     # Modifications
-    params.fixed_mods = fragpipe_params.loc["msfragger.table.fix-mods"]
-    params.variable_mods = fragpipe_params.loc["msfragger.table.var-mods"]
+    params.fixed_mods = _parse_fixed_mods(fragpipe_params.loc["msfragger.table.fix-mods"])
+    params.variable_mods = _parse_variable_mods(fragpipe_params.loc["msfragger.table.var-mods"])
     params.max_mods = int(fragpipe_params.loc["msfragger.max_variable_mods_per_peptide"])
 
     # Peptide length

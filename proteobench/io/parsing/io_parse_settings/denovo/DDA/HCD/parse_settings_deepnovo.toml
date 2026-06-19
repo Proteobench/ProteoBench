@@ -2,9 +2,9 @@
 "scan" = "spectrum_id"
 "output_seq" = "sequence"
 "output_score" = "score"
+"aa_score" = "aa_scores"
 
 [spectrum_id_mapper]
-"pattern" = ":(\\d+)"
 
 [sequence_mapper]
 [sequence_mapper.replacement_dict]
@@ -21,3 +21,9 @@
 "isupper" = true
 "pattern" = "\\(([^)]+)\\)"
 "modification_dict" = {"(+57.02)" = "UNIMOD:4", "(+15.99)" = "UNIMOD:35", "(+.98)" = "UNIMOD:7"}
+
+[upload_info]
+"datapoint_file" = "*.tab"
+"datapoint_file_description" = "Upload the DeepNovo de novo sequencing output tab file."
+"params_file" = ""
+"params_file_description" = ""

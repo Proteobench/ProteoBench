@@ -55,7 +55,7 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
     Parameters
     ----------
     file_path : str
-        The path to the config file.
+        The path to the InstaNovo config file.
 
     Returns
     -------
@@ -70,7 +70,7 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
 
     instanovo_model = _get_first(file, "instanovo_model", "model_path", "model")
     instanovo_plus_model = _get_first(file, "instanovo_plus_model")
-    if instanovo_model and instanovo_plus_model and file.get("refine", False):
+    if instanovo_model and instanovo_plus_model and file.get("refine", file.get("with_refinement", False)):
         params.checkpoint = f"{instanovo_model}; {instanovo_plus_model}"
     else:
         _set_if_present(params, "checkpoint", instanovo_model or instanovo_plus_model)
@@ -93,18 +93,20 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
     if isotope_error_range is not None:
         params.isotope_error_range = str(isotope_error_range)
 
-    residues = _get_first(file, "residues")
+    residues = _get_first(file, "residues", "residue_remapping")
     if isinstance(residues, dict):
         params.tokens = "; ".join(list(residues.keys()))
 
-    if n_beams == 1:
+    if file.get("use_knapsack"):
+        params.decoding_strategy = "knapsack beam search"
+    elif n_beams == 1:
         params.decoding_strategy = "greedy search"
     elif n_beams is not None:
         params.decoding_strategy = "beam search"
     elif file.get("decoding") == "greedy":
         params.decoding_strategy = "greedy search"
-    else:
-        params.decoding_strategy = "beam search" if file.get("decoding") == "beam" else params.decoding_strategy
+    elif file.get("decoding") == "beam":
+        params.decoding_strategy = "beam search"
 
     params.fill_none()
     return params

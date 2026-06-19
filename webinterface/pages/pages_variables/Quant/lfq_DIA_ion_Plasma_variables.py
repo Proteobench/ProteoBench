@@ -50,6 +50,7 @@ class VariablesDIAQuantPlasma:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion Plasma"
+    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_Plasma"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
@@ -109,6 +110,7 @@ class VariablesDIAQuantPlasma:
     )
 
     title: str = "DIA Precursor quantification - Plasma"
+    y_axis_title: str = "Number of quantified spike-in precursors"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_Plasma_quant_"

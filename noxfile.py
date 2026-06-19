@@ -40,6 +40,9 @@ def docs(session: nox.Session) -> None:
     session.install("-e.[docs]", *extra_installs)
     session.chdir("docs")
 
+    # Keep the auto-generated module grid in sync before building
+    session.run("python", "generate_module_grid.py")
+
     if args.builder == "linkcheck":
         session.run("sphinx-build", "-b", "linkcheck", ".", "_build/linkcheck", *posargs)
         return

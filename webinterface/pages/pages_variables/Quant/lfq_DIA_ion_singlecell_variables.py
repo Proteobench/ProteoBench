@@ -49,6 +49,7 @@ class VariablesDIAQuantSC:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion Single Cell"
+    documentation_description: str = "Benchmark identification and quantification workflows for low-input and single-cell proteomics using DIA acquisitions."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_singlecell"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
@@ -123,6 +124,7 @@ class VariablesDIAQuantSC:
     )
 
     title: str = "DIA Precursor quantification - Single Cell"
+    y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_singlecell_quant_"

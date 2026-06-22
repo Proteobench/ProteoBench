@@ -541,10 +541,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         def _row_label(row):
             name = str(row.get("software_name", ""))
             ver = str(row.get("software_version", ""))
-            nr = row.get("nr_id_features", np.nan)
-            nr_str = f"[{int(nr)}]" if pd.notna(nr) else ""
             base = f"{name} v{ver}" if ver and ver not in ("nan", "0", "") else name
-            return f"{base} {nr_str}".strip()
+            return base.strip()
 
         raw_labels = plot_df.apply(_row_label, axis=1).tolist()
         seen: dict = {}
@@ -690,6 +688,22 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             )
         )
 
+        # Secondary-axis bars: nr_id_features on right side
+        nr_vals = plot_df["nr_id_features"].tolist()
+        nr_colors = [category_colors.get(c, "#cccccc") for c in plot_df["category"].tolist()]
+        fig.add_trace(
+            go.Bar(
+                x=nr_vals,
+                y=y_pos,
+                orientation="h",
+                name="Nr. identified features",
+                marker=dict(color=nr_colors, opacity=0.35),
+                xaxis="x2",
+                hovertemplate="%{x:,} features<extra></extra>",
+                showlegend=False,
+            )
+        )
+
         row_height = 30
         fig_height = max(400, n * row_height + 140)
 
@@ -699,6 +713,16 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 gridcolor="lightgray",
                 linecolor="black",
                 range=[-0.002, None],
+                domain=[0, 0.55],
+            ),
+            xaxis2=dict(
+                title="Nr. identified features",
+                side="top",
+                overlaying=None,
+                domain=[0.60, 1.0],
+                gridcolor="lightgray",
+                linecolor="black",
+                tickformat=",d",
             ),
             yaxis=dict(
                 tickmode="array",
@@ -709,7 +733,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             ),
             template="plotly_white",
             height=fig_height,
-            margin=dict(l=220, r=20, t=60, b=80),
+            margin=dict(l=180, r=20, t=80, b=80),
         )
 
         return fig

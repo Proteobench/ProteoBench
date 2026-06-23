@@ -31,5 +31,5 @@ def test_read_spectronaut_settings(file):
 def test_no_digestion_enzyme():
     params = diann_params.extract_params(TESTDATA_DIR / "diann_nodigestion.txt")
     assert (
-        params.enzyme == "none"
-    ), f"Expected 'none' for empty --cut flag (no-digestion mode), got {repr(params.enzyme)}"
+        params.enzyme == "No digestion"
+    ), f"Expected 'No digestion' for empty --cut flag (no-digestion mode), got {repr(params.enzyme)}"

@@ -19,7 +19,10 @@ Developer guide
     :hidden:
 
     repo_layout
+    intermediate-format
     adding-module
+    parameter-homogenization
+    
     submission-validation
 
     modules/index

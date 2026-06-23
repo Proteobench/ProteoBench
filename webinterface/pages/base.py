@@ -1,7 +1,15 @@
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
-from streamlit_tour import Tour
+
+# The guided tour is an optional driver.js overlay. Importing it can fail when the
+# installed streamlit_tour is incompatible with the streamlit version (e.g.
+# streamlit_tour 1.1.0 raises at import under streamlit>=1.58). Degrade gracefully:
+# disable the tour rather than breaking the whole page.
+try:
+    from streamlit_tour import Tour
+except Exception:  # noqa: BLE001 - any import/component-registration failure
+    Tour = None
 
 
 class BaseStreamlitUI:
@@ -83,6 +91,7 @@ class BaseStreamlitUI:
 
         # Get tab configuration
         tab_config = self.get_tab_config()
+        # ? could also go here: if debug state is set, show debug tab
         tab_names = [name for name, _ in tab_config]
 
         # Create tabs dynamically
@@ -95,7 +104,8 @@ class BaseStreamlitUI:
                 # Call the appropriate method on uiobjects
                 getattr(self.uiobjects, method_name)()
 
-        tour_steps = self.uiobjects.get_tour_steps()
+        # Skip tour setup entirely when the streamlit_tour component is unavailable.
+        tour_steps = self.uiobjects.get_tour_steps() if Tour is not None else None
         if tour_steps:
             if st.sidebar.button("Take a Tour", key="module_tour_trigger"):
                 st.session_state["start_module_tour"] = True

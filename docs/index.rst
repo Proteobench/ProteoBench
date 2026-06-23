@@ -12,7 +12,7 @@ Home
 
     Home <self>
     Learn more <general-information/index.rst>
-    Benchmarking modules <available-modules/index.rst>
+    Benchmarking Modules <available-modules/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
     Manuscript <https://doi.org/10.64898/2025.12.09.692895>

@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level - SCIEX ZenoTOF 8600 system - Zeno SWATH DIA
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Zeno SWATH 85 variable windows, on a ZenoTOF 8600 (SCIEX).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 

@@ -124,7 +124,7 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
         st.session_state[plot_key] = str(uuid.uuid4())
 
     # Generate the plot
-    plot_generator = ionmodule.get_plot_generator()
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
     fig_metric = plot_generator.plot_main_metric(
         filtered_data,
         metric=metric,

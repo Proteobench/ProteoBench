@@ -199,7 +199,18 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
         "isotope_error_range",
         "decoding_strategy",
     }
-    result_cols = {"median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results", "precision", "recall"}
+
+    result_cols = {"median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results", "precision", "recall"}
+    technical_cols = {
+        "proteobench_version",
+        "intermediate_hash",
+        "hover_text",
+        "color",
+        "old_new",
+        "is_temporary",
+        "comments",
+        "scatter_size",
+    }
 
     for col in df.columns:
         if col == "selected":
@@ -308,7 +319,7 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
             "isotope_error_range",
             "decoding_strategy",
         ]
-        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_prec", "results", "precision", "recall"]
+        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results", "precision", "recall"]
         technical_cols = [
             "proteobench_version",
             "intermediate_hash",

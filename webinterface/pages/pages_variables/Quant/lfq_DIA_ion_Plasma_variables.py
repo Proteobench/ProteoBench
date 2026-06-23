@@ -110,6 +110,7 @@ class VariablesDIAQuantPlasma:
     )
 
     title: str = "DIA Precursor quantification - Plasma"
+    y_axis_title: str = "Number of quantified spike-in precursors"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DIA_ion.json"
     prefix_params: str = "lfq_ion_dia_Plasma_quant_"

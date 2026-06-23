@@ -5,7 +5,13 @@ from pathlib import Path
 import streamlit as st
 from _base import StreamlitPage
 from pages.base_pages.tour_steps import get_homepage_tour_steps
-from streamlit_tour import Tour
+
+# Optional guided-tour overlay; disable gracefully if streamlit_tour cannot be
+# imported (e.g. version-incompatible with the installed streamlit). See base.py.
+try:
+    from streamlit_tour import Tour
+except Exception:  # noqa: BLE001 - any import/component-registration failure
+    Tour = None
 from UI_utils import (
     build_submissions_figure,
     build_tool_pie_chart,
@@ -24,8 +30,6 @@ def _show_tool_breakdown(module_title, tool_counts):
     st.plotly_chart(pie_fig, use_container_width=True)
 
 
-# Path to the index.rst file
-file_path = Path(__file__).resolve().parent.parent / "docs" / "index.rst"
 fig_path = Path(__file__).resolve().parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
 
 
@@ -34,6 +38,8 @@ class StreamlitPageHome(StreamlitPage):
     This class sets up the main page layout for the Streamlit application.
     """
 
+    # overwrites _main_page from StreamlitPage
+    # is called by initializer along sidebar and other setup
     def _main_page(self):
         """
         Set up the main page layout for the Streamlit application.
@@ -48,7 +54,7 @@ class StreamlitPageHome(StreamlitPage):
         # Placeholders TODO: replace with actual data
 
         n_modules_all = get_n_modules()
-        n_modules_proposed = get_n_modules_proposed(file_path.read_text(encoding="utf-8"))
+        n_modules_proposed = get_n_modules_proposed()
         n_tools_supported = get_n_supported_tools()
         n_of_points_submitted = get_n_submitted_points()  # This function should return the number of submitted points
 
@@ -202,25 +208,26 @@ class StreamlitPageHome(StreamlitPage):
             else:
                 st.info("Submission data is currently unavailable.")
 
-        tour = Tour(
-            get_homepage_tour_steps(),
-            key=_home_tour_key,
-            show_progress=True,
-            animate=True,
-            overlay_opacity=0.75,
-            one_time_tour=False,
-        )
-        if st.session_state.pop("start_home_tour", False):
-            # Manual button: always start regardless of opt-in.
-            st.session_state["_home_tour_in_progress"] = True
-            tour.start()
-        elif "_tour_opted_in" in st.session_state and "_tour_auto_home" not in st.session_state:
-            # User has made a decision and auto-start has not been handled yet.
-            st.session_state["_tour_auto_home"] = True
-            if st.session_state["_tour_opted_in"] is True:
+        if Tour is not None:
+            tour = Tour(
+                get_homepage_tour_steps(),
+                key=_home_tour_key,
+                show_progress=True,
+                animate=True,
+                overlay_opacity=0.75,
+                one_time_tour=False,
+            )
+            if st.session_state.pop("start_home_tour", False):
+                # Manual button: always start regardless of opt-in.
                 st.session_state["_home_tour_in_progress"] = True
                 tour.start()
-            # Opted out: mark handled, do not start.
+            elif "_tour_opted_in" in st.session_state and "_tour_auto_home" not in st.session_state:
+                # User has made a decision and auto-start has not been handled yet.
+                st.session_state["_tour_auto_home"] = True
+                if st.session_state["_tour_opted_in"] is True:
+                    st.session_state["_home_tour_in_progress"] = True
+                    tour.start()
+                # Opted out: mark handled, do not start.
 
 
 if __name__ == "__main__":

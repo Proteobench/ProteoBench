@@ -151,6 +151,7 @@ build.sh
 jupyter_notebooks/analysis/temp_results/*
 .claude
 uv.lock
+test/mock_entrapment_datapoints
 
 # Large files
 *.gz

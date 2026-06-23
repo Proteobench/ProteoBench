@@ -452,6 +452,8 @@ def extract_params(
     # Parse cut parameter to standard enzyme name
     if "enzyme" not in parameters.keys():  # This happens when running fragpipe-diann
         parameters["enzyme"] = "cut"
+    elif parameters["enzyme"] is True:  # bare --cut flag with no value = no-digestion mode
+        parameters["enzyme"] = "none"
     elif parameters["enzyme"] == "K*,R*":
         parameters["enzyme"] = "Trypsin/P"
     elif parameters["enzyme"] == "K*,R*,!*P":

@@ -436,6 +436,8 @@ class EntrapmentScores(ScoreBase):
             df = df[~df["Peptide"].isin(missing_peptides)].reset_index(drop=True)
             print(f"Filtered DataFrame now contains {len(df)} peptides after removing unmatched entries.")
             return df
+        else:
+            print("All identified peptides are covered by the entrapment mapping file.")
 
         return df
 

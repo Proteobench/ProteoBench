@@ -89,7 +89,7 @@ Available ProteoBench modules
         ^^^
         
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dia-Astral/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion Plasma
         :columns: 6 6 4 4

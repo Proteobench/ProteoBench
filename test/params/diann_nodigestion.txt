@@ -1,0 +1,201 @@
+
+DIA-NN 2.3.1 Academia  (Data-Independent Acquisition by Neural Networks)
+Compiled on Dec  5 2025 10:52:39
+Current date and time: Tue Jun 23 11:01:22 2026
+CPU: AuthenticAMD AMD Ryzen 9 5950X 16-Core Processor
+SIMD instructions: AVX AVX2 FMA SSE4.1 SSE4.2 SSE4a 
+Logical CPU cores: 32
+57Gb out of 127Gb RAM is free
+diann.exe --f C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_01.raw  --f C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_02.raw  --f C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_03.raw  --lib C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_speclibs\no_Mexcision_no_varmods_cutempty_7_30\no_Mexc_no_varmods_cutempty_7_30.predicted.speclib --threads 16 --verbose 1 --out C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.parquet --qvalue 0.01 --matrices --out-lib C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_speclibs\no_Mexcision_no_varmods_cutempty_7_30\no_Mexc_no_varmods_cutempty_7_30.parquet --gen-spec-lib --fasta C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\FDRBench_output\ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.fasta --min-pep-len 7 --max-pep-len 30 --min-pr-mz 300 --max-pr-mz 1800 --min-pr-charge 1 --max-pr-charge 4 --min-fr-mz 200 --max-fr-mz 1800 --cut K*,R* --missed-cleavages 1 --unimod4 --reanalyse --rt-profiling --cut 
+
+Thread number set to 16
+Output will be filtered at 0.01 FDR
+Precursor/protein x samples expression level matrices will be saved along with the main report
+A spectral library will be generated
+Min peptide length set to 7
+Max peptide length set to 30
+Min precursor m/z set to 300
+Max precursor m/z set to 1800
+Min precursor charge set to 1
+Max precursor charge set to 4
+Min fragment m/z set to 200
+Max fragment m/z set to 1800
+In silico digest will involve cuts at K*,R*
+Maximum number of missed cleavages set to 1
+Cysteine carbamidomethylation enabled as a fixed modification
+MBR enabled; .quant files will only be saved to disk during the first pass
+The spectral library (if generated) will retain the original spectra but will include empirically-aligned RTs
+DIA-NN will automatically optimise the mass accuracy for the first run of the experiment, use this mode for preliminary analyses only
+
+3 files will be processed
+[0:00] Loading spectral library C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_speclibs\no_Mexcision_no_varmods_cutempty_7_30\no_Mexc_no_varmods_cutempty_7_30.predicted.speclib
+[0:12] Library annotated with sequence database(s): C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\FDRBench_output\ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.fasta
+[0:14] Spectral library loaded: 2692562 protein isoforms, 2692562 protein groups and 8649692 precursors in 2692562 elution groups.
+[0:14] Loading protein annotations from FASTA C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\FDRBench_output\ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.fasta
+[1:03] Annotating library proteins with information from the FASTA database
+[1:06] Gene names missing for some isoforms
+[1:06] Library contains 2692562 proteins, and 0 genes
+WARNING: no gene information in the FASTA or library: consider using --ids-to-names
+[1:16] Initialising library
+
+First pass: generating a spectral library from DIA data
+
+[1:35] File #1/3
+[1:35] Loading run C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_01.raw
+[2:12] Pre-processing...
+[2:22] 2928 MS1 and 292883 MS2 scans in 976 (inferred) and 976 (encoded) cycles, 5370648 precursors in range
+[2:24] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[3:09] RT window set to 1.49073
+[3:09] Peak width: 2.856
+[3:09] Scan window radius set to 6
+[3:09] Recommended MS1 mass accuracy setting: 2.2 ppm
+[4:20] Optimised mass accuracy: 7 ppm
+[4:34] Main search
+[7:27] Removing low confidence identifications
+[7:44] Removing interfering precursors
+[7:54] Training neural networks on 162322 target and 100568 decoy PSMs
+[9:45] IDs at 0.01 FDR: 81701
+[9:48] Number of IDs at 0.01 FDR: 81701
+[9:48] Calculating protein q-values
+[9:49] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[9:49] Quantification
+[9:52] Quantification information saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_01.raw.quant
+
+[9:52] File #2/3
+[9:52] Loading run C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_02.raw
+[10:06] Pre-processing...
+[10:17] 2928 MS1 and 292914 MS2 scans in 976 (inferred) and 976 (encoded) cycles, 5370648 precursors in range
+[10:18] Calibrating with mass accuracies 20 (MS1), 25 (MS2)
+[11:06] RT window set to 1.56762
+[11:07] Recommended MS1 mass accuracy setting: 2.3 ppm
+[11:22] Main search
+[14:08] Removing low confidence identifications
+[14:26] Removing interfering precursors
+[14:41] Training neural networks on 163437 target and 100620 decoy PSMs
+[16:25] IDs at 0.01 FDR: 82781
+[16:27] Number of IDs at 0.01 FDR: 82781
+[16:27] Calculating protein q-values
+[16:27] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[16:28] Quantification
+[16:30] Quantification information saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_02.raw.quant
+
+[16:31] File #3/3
+[16:31] Loading run C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_03.raw
+[16:54] Pre-processing...
+[17:06] 2927 MS1 and 292757 MS2 scans in 976 (inferred) and 976 (encoded) cycles, 5370648 precursors in range
+[17:07] Calibrating with mass accuracies 20 (MS1), 25 (MS2)
+[17:57] RT window set to 1.4467
+[17:57] Recommended MS1 mass accuracy setting: 2.2 ppm
+[18:11] Main search
+[20:55] Removing low confidence identifications
+[21:10] Removing interfering precursors
+[21:23] Training neural networks on 162512 target and 100309 decoy PSMs
+[22:57] IDs at 0.01 FDR: 81529
+[23:00] Number of IDs at 0.01 FDR: 81529
+[23:00] Calculating protein q-values
+[23:00] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[23:00] Quantification
+[23:03] Quantification information saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_03.raw.quant
+
+[23:03] Cross-run analysis
+[23:03] Reading quantification information: 3 files
+[23:24] Quantifying peptides
+[23:58] Assembling protein groups
+[24:00] Quantifying proteins
+[24:00] Calculating q-values for protein and gene groups
+[24:01] Calculating global q-values for protein and gene groups
+[24:01] Protein groups with global q-value <= 0.01: 85140
+[24:02] Compressed report saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty-first-pass.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[24:02] Saving precursor levels matrix
+[24:02] Precursor levels matrix (1% precursor and protein group FDR) saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty-first-pass.pr_matrix.tsv.
+[24:02] Manifest saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty-first-pass.manifest.txt
+[24:02] Stats report saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty-first-pass.stats.tsv
+[24:02] Generating spectral library:
+[24:04] 93698 target and 920 decoy precursors saved
+[24:04] Spectral library saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_speclibs\no_Mexcision_no_varmods_cutempty_7_30\no_Mexc_no_varmods_cutempty_7_30.parquet
+
+[24:05] Loading spectral library C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_speclibs\no_Mexcision_no_varmods_cutempty_7_30\no_Mexc_no_varmods_cutempty_7_30.parquet
+[24:07] Spectral library loaded: 86661 protein isoforms, 86661 protein groups and 94617 precursors in 86686 elution groups.
+[24:07] Loading protein annotations from FASTA C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\FDRBench_output\ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.fasta
+[25:16] Annotating library proteins with information from the FASTA database
+[25:16] Gene names missing for some isoforms
+[25:16] Library contains 86661 proteins, and 0 genes
+WARNING: no gene information in the FASTA or library: consider using --ids-to-names
+[25:16] Initialising library
+[25:19] Saving the library to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_speclibs\no_Mexcision_no_varmods_cutempty_7_30\no_Mexc_no_varmods_cutempty_7_30.parquet.skyline.speclib
+
+
+Second pass: using the newly created spectral library to reanalyse the data
+
+[25:19] File #1/3
+[25:19] Loading run C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_01.raw
+[25:40] Pre-processing...
+[25:41] 2928 MS1 and 292883 MS2 scans in 976 (inferred) and 976 (encoded) cycles, 93698 precursors in range
+[25:41] Calibrating with mass accuracies 21 (MS1), 25 (MS2)
+[25:43] RT window set to 0.428753
+[25:43] Recommended MS1 mass accuracy setting: 2.4 ppm
+[25:43] Main search
+[25:46] Removing low confidence identifications
+[25:51] Removing interfering precursors
+[25:52] Training neural networks on 85521 target and 46501 decoy PSMs
+[26:44] IDs at 0.01 FDR: 87706
+[26:45] Number of IDs at 0.01 FDR: 87729
+[26:45] Calculating protein q-values
+[26:45] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[26:45] Quantification
+
+[26:47] File #2/3
+[26:47] Loading run C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_02.raw
+[27:01] Pre-processing...
+[27:02] 2928 MS1 and 292914 MS2 scans in 976 (inferred) and 976 (encoded) cycles, 93698 precursors in range
+[27:02] Calibrating with mass accuracies 20 (MS1), 25 (MS2)
+[27:03] RT window set to 0.429435
+[27:03] Recommended MS1 mass accuracy setting: 2.7 ppm
+[27:04] Main search
+[27:07] Removing low confidence identifications
+[27:11] Removing interfering precursors
+[27:12] Training neural networks on 85588 target and 46636 decoy PSMs
+[28:03] IDs at 0.01 FDR: 87642
+[28:04] Number of IDs at 0.01 FDR: 87642
+[28:04] Calculating protein q-values
+[28:04] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[28:04] Quantification
+
+[28:06] File #3/3
+[28:06] Loading run C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\LFQ_Astral_DIA_15min_50ng_Human_03.raw
+[28:20] Pre-processing...
+[28:21] 2927 MS1 and 292757 MS2 scans in 976 (inferred) and 976 (encoded) cycles, 93698 precursors in range
+[28:21] Calibrating with mass accuracies 20 (MS1), 25 (MS2)
+[28:22] RT window set to 0.427269
+[28:22] Recommended MS1 mass accuracy setting: 2.7 ppm
+[28:22] Main search
+[28:25] Removing low confidence identifications
+[28:29] Removing interfering precursors
+[28:31] Training neural networks on 85421 target and 46306 decoy PSMs
+[29:13] IDs at 0.01 FDR: 87311
+[29:14] Number of IDs at 0.01 FDR: 87315
+[29:14] Calculating protein q-values
+[29:14] Number of genes identified at 1% FDR: 0 (precursor-level), 0 (protein-level) (inference performed using proteotypic peptides only)
+[29:14] Quantification
+
+[29:15] Cross-run analysis
+[29:15] Reading quantification information: 3 files
+[29:16] Quantifying peptides
+WARNING: QuantUMS requires 6 or more runs for the optimisation of its hyperparameters to perform best.
+[33:06] Quantification parameters: 0.348105, 0.00214552, 0.00161385, 0.599389, 0.530161, 0.520505, 0.0113209, 0.537516, 0.380838, 0.710343, 0.0595221, 0.12441, 0.8233, 0.0481904, 0.0444435, 0.00988654
+[33:27] Quantifying proteins
+[33:27] Calculating q-values for protein and gene groups
+[33:27] Calculating global q-values for protein and gene groups
+[33:27] Protein groups with global q-value <= 0.01: 83153
+[33:29] Compressed report saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.parquet. Use R 'arrow' or Python 'PyArrow' package to process
+[33:29] Saving precursor levels matrix
+[33:29] Precursor levels matrix (1% precursor and protein group FDR) saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.pr_matrix.tsv.
+[33:29] Saving protein group levels matrix
+[33:30] Protein groups matrix saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.pg_matrix.tsv.
+[33:30] Saving gene group levels matrix
+[33:30] Gene groups matrix saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.gg_matrix.tsv.
+[33:30] Saving unique genes levels matrix
+[33:30] Unique genes matrix saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.unique_genes_matrix.tsv.
+[33:30] Manifest saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.manifest.txt
+[33:30] Stats report saved to C:\Users\cajac\Documents\ProteoBench\Entrapment_Runs\DIANN_output\DIANN_search_results\report_no_Mexc_no_varmods_7_30_cutempty.stats.tsv
+

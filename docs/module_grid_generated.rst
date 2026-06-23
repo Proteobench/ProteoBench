@@ -81,6 +81,16 @@ Available ProteoBench modules
         +++
         `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-denovo-dda-hcd/>`__
 
+    .. grid-item-card:: Entrapment DIA ion Astral
+        :columns: 6 6 4 4
+        :padding: 1
+
+        :bdg-info:`in development`
+        ^^^
+        
+        +++
+        `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/>`__
+
     .. grid-item-card:: Quant LFQ DIA ion Plasma
         :columns: 6 6 4 4
         :padding: 1

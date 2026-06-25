@@ -174,6 +174,10 @@ class EntrapmentDatapoint(DatapointBase):
         return results_series
 
     @staticmethod
-    def get_metrics(intermediate: pd.DataFrame, entrapment_scores: "EntrapmentScores") -> Dict[str, Any]:
+    def get_metrics(
+        intermediate: pd.DataFrame, entrapment_scores: "EntrapmentScores" | None = None
+    ) -> Dict[str, Any]:
+        if entrapment_scores is None:
+            raise ValueError("entrapment_scores must be provided for EntrapmentDatapoint.get_metrics")
         metrics = entrapment_scores.calculate_metrics(intermediate)
         return metrics

@@ -49,9 +49,7 @@ class VariablesDIAQuantLI:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion Low Input"
-    documentation_description: str = (
-        "Benchmark identification and quantification workflows for low-input and single-cell proteomics using DIA acquisitions."
-    )
+    documentation_description: str = "Benchmark identification and quantification workflows for low-input and single-cell proteomics using DIA acquisitions."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_lowinput"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(

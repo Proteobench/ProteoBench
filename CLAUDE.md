@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ProteoBench is a community-curated benchmarking platform for proteomics data analysis pipelines. It compares outputs from mass spectrometry tools (MaxQuant, DIA-NN, FragPipe, Spectronaut, AlphaDIA, Sage, PEAKS, MSAID, AlphaPept, i2MassChroQ, ProlineStudio, MSAngel, WOMBAT, MetaMorpheus, quantms, Proteome Discoverer) across different acquisition modes (DDA/DIA) and instrument types (QExactive, Astral, diaPASEF, AIF, ZenoTOF, single-cell). It also hosts a de novo sequencing module (Casanovo, InstaNovo, and related tools).
+ProteoBench is a community-curated benchmarking platform for proteomics data analysis pipelines. It compares outputs from mass spectrometry tools (MaxQuant, DIA-NN, FragPipe, Spectronaut, AlphaDIA, Sage, PEAKS, MSAID, AlphaPept, i2MassChroQ, ProlineStudio, MSAngel, WOMBAT, MetaMorpheus, quantms, Proteome Discoverer) across different acquisition modes (DDA/DIA) and instrument types (QExactive, Astral, diaPASEF, AIF, ZenoTOF, low input). It also hosts a de novo sequencing module (Casanovo, InstaNovo, and related tools).
 
 The core library (`proteobench/`) processes tool outputs into a standardized format and computes quantification metrics. A Streamlit web app (`webinterface/`) provides the interactive UI. Benchmark results are stored as individual JSON files and submitted via GitHub pull requests to separate results repositories (e.g., `Proteobench/Results_quant_ion_DDA`).
 
@@ -211,7 +211,7 @@ Each quant benchmark module is a thin subclass of `QuantModule` that sets `modul
 
 `QuantModule.__init__` defaults `self.precursor_column_name = ""`. Most modules override it (e.g. `"precursor ion"` / `"peptidoform"`), but `DIAQuantIonModulediaSC` and `DIAQuantIonModulePlasma` instead set `self.precursor_name` (used in their inline benchmarking), leaving `precursor_column_name` empty.
 
-The `MODULE_CLASSES` dict in `utils/server_io.py` maps module class-name strings to classes for programmatic instantiation, but it currently lists **only 7** modules (QExactive DDA; AIF, Astral, diaPASEF, single-cell DIA; DDA and DIA peptidoform). It does **not** include the Astral DDA, ZenoTOF, Plasma, or de novo modules; `make_submission()` raises `ValueError` for those names.
+The `MODULE_CLASSES` dict in `utils/server_io.py` maps module class-name strings to classes for programmatic instantiation, but it currently lists **only 7** modules (QExactive DDA; AIF, Astral, diaPASEF, low input DIA; DDA and DIA peptidoform). It does **not** include the Astral DDA, ZenoTOF, Plasma, or de novo modules; `make_submission()` raises `ValueError` for those names.
 
 ### Rescoring Module (`proteobench/modules/rescoring/`)
 
@@ -387,7 +387,7 @@ The `denovo` profile currently runs only `run_consistency` plus a `denovo_pendin
 "profile" = "quant_lfq"   # optional; usually inferred from the parser class
 ```
 
-`[reference_database]` is populated for all 9 quant modules (HYE modules share the HYE FASTA; single-cell uses HY; Plasma uses Distler-PYE). The de novo `module_settings.toml` declares `[validation] profile = "denovo"`. If `[reference_database]` is absent the FASTA check is skipped with an info message.
+`[reference_database]` is populated for all 9 quant modules (HYE modules share the HYE FASTA; low input uses HY; Plasma uses Distler-PYE). The de novo `module_settings.toml` declares `[validation] profile = "denovo"`. If `[reference_database]` is absent the FASTA check is skipped with an info message.
 
 **Integration point.** Validation runs inside `submit_to_repository()` in `webinterface/pages/base_pages/tabs/tab6_submit_results.py`, after the "I really want to upload it" button press and before `create_pull_request()`. The standardized DataFrame is re-derived by rerunning the existing parser on the `input_df` already in session state (no duplicated tool-specific parsing logic). All findings (errors and warnings) are rendered in the UI and appended to the PR description via `ValidationReport.summary()`; none of them block the PR. The local Tab 2 upload path is unaffected.
 
@@ -441,7 +441,7 @@ monkeypatch.setattr("proteobench.github.gh.GithubProteobotRepo.read_results_json
 2. `TestQuantScores` - intermediate metric generation
 3. `TestDDAQuantIonModule` (or `TestDIAQuantIonModule`) - full benchmarking pipeline, return types, datapoint deduplication, error handling
 
-Only two module-level test files exist: `test_module_quant_ion_DDA_QExactive.py` and `test_module_quant_ion_DIA_AIF.py`. The Astral, diaPASEF, ZenoTOF, single-cell, Plasma, peptidoform, and de novo modules have data/params but no dedicated `test_module_*` file.
+Only two module-level test files exist: `test_module_quant_ion_DDA_QExactive.py` and `test_module_quant_ion_DIA_AIF.py`. The Astral, diaPASEF, ZenoTOF, low input, Plasma, peptidoform, and de novo modules have data/params but no dedicated `test_module_*` file.
 
 **Parameter parsing tests:** Each parser has a `test_parse_params_*.py` file (alphadia, alphapept, diann, fragger, i2masschroq, maxquant, metamorpheus, msangel, peaks, proline, quantms, sage, spectronaut, wombat) that reads native format files and compares extracted parameters against expected CSV/JSON output.
 
@@ -511,12 +511,12 @@ Parameter field definitions are in `proteobench/io/params/json/`. Present files:
 | `DIAQuantIonModulediaPASEF` | `quant_lfq_DIA_ion_diaPASEF` | `precursor ion` | `Results_quant_ion_DIA_diaPASEF` | No |
 | `DIAQuantIonModuleAstral` | `quant_lfq_DIA_ion_Astral` | `precursor ion` | `Results_quant_ion_DIA_Astral` | No |
 | `DIAQuantIonModuleZenoTOF` | `quant_lfq_DIA_ion_ZenoTOF` | `precursor ion` | `Results_quant_lfq_DIA_ion_ZenoTOF` | No |
-| `DIAQuantIonModulediaSC` | `quant_lfq_DIA_ion_singlecell` | `precursor ion`* | `Results_quant_ion_DIA_singlecell` | No |
+| `DIAQuantIonModulediaSC` | `quant_lfq_DIA_ion_lowinput` | `precursor ion`* | `Results_quant_ion_DIA_lowinput` | No |
 | `DIAQuantIonModulePlasma` | `quant_lfq_DIA_ion_plasma` | `precursor ion`* | `Results_quant_ion_DIA_plasma` | No |
 | `DDAQuantPeptidoformModule` | `quant_lfq_DDA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DDA` | No |
 | `DIAQuantPeptidoformModule` | `quant_lfq_DIA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DIA` | No (stub, raises NotImplementedError) |
 
-*The single-cell and Plasma modules set `self.precursor_name` instead of `self.precursor_column_name`, so the documented value is the intent but `precursor_column_name` stays `""` at runtime.
+*The low input and Plasma modules set `self.precursor_name` instead of `self.precursor_column_name`, so the documented value is the intent but `precursor_column_name` stays `""` at runtime.
 
 ### De Novo Module (`proteobench/modules/denovo/`)
 
@@ -544,7 +544,7 @@ De novo `EXTRACT_PARAMS_DICT` (`denovo_base.py`): AdaNovo, Casanovo, DeepNovo, I
 
 **DIA ion (AIF, diaPASEF, Astral, ZenoTOF):** DIA-NN, MaxQuant, FragPipe, FragPipe (DIA-NN quant), Spectronaut, AlphaDIA, MSAID, PEAKS, Custom
 
-**DIA ion (single-cell):** Same as DIA + Sage
+**DIA ion (low input):** Same as DIA + Sage
 
 **DIA ion (Plasma):** DIA-NN, Spectronaut, FragPipe (DIA-NN quant), AlphaDIA, PEAKS, Custom
 
@@ -561,7 +561,7 @@ De novo `EXTRACT_PARAMS_DICT` (`denovo_base.py`): AdaNovo, Casanovo, DeepNovo, I
 | `6_Quant_LFQ_DIA_ion_Astral.py` | `VariablesDIAQuantAstral` | `DIAQuantIonModuleAstral` | `QuantUIObjects` | `BaseStreamlitUI` |
 | `7_denovo_DDA_HCD.py` | `VariablesDDADeNovo` | `DDAHCDDeNovoModule` | `DeNovoUIObjects` | `BaseStreamlitUI` subclass `StreamlitUI`, overrides `get_tab_config()` for 5 tabs |
 | `8_Quant_LFQ_DDA_ion_Astral.py` | `VariablesDDAQuantAstral` | `DDAQuantIonAstralModule` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `9_Quant_LFQ_DIA_ion_singlecell.py` | `VariablesDIAQuantSC` | `DIAQuantIonModulediaSC` | `QuantUIObjects` | `BaseStreamlitUI` |
+| `9_Quant_LFQ_DIA_ion_lowinput.py` | `VariablesDIAQuantSC` | `DIAQuantIonModulediaSC` | `QuantUIObjects` | `BaseStreamlitUI` |
 | `10_Quant_LFQ_DIA_ion_ZenoTOF.py` | `VariablesDIAQuantZenoTOF` | `DIAQuantIonModuleZenoTOF` | `QuantUIObjects` | `BaseStreamlitUI` |
 | `11_Quant_LFQ_DIA_ion_Plasma.py` | `VariablesDIAQuantPlasma` | `DIAQuantIonModulePlasma` | `QuantUIObjects` | Standalone `StreamlitUI` (not `BaseStreamlitUI`), 5 tabs, delegates to `QuantUIObjects` |
 
@@ -653,7 +653,7 @@ A ~1780-line CLI script for reprocessing previously submitted datapoints with co
 ## Key External Resources
 
 - **Public server for intermediate data**: `https://proteobench.cubimed.rub.de/datasets/` (`DATASETS_BASE_URL` in `server_io.py`)
-- **Results repositories** (GitHub): `Proteobench/Results_quant_ion_DDA`, `Proteobench/Results_quant_ion_DDA_Astral`, `Proteobench/Results_quant_ion_DIA`, `Proteobench/Results_quant_ion_DIA_diaPASEF`, `Proteobench/Results_quant_ion_DIA_Astral`, `Proteobench/Results_quant_lfq_DIA_ion_ZenoTOF`, `Proteobench/Results_quant_ion_DIA_singlecell`, `Proteobench/Results_quant_ion_DIA_plasma`, `Proteobench/Results_quant_peptidoform_DDA`, `Proteobench/Results_denovo_lfq_DDA_HCD`
+- **Results repositories** (GitHub): `Proteobench/Results_quant_ion_DDA`, `Proteobench/Results_quant_ion_DDA_Astral`, `Proteobench/Results_quant_ion_DIA`, `Proteobench/Results_quant_ion_DIA_diaPASEF`, `Proteobench/Results_quant_ion_DIA_Astral`, `Proteobench/Results_quant_lfq_DIA_ion_ZenoTOF`, `Proteobench/Results_quant_ion_DIA_lowinput`, `Proteobench/Results_quant_ion_DIA_plasma`, `Proteobench/Results_quant_peptidoform_DDA`, `Proteobench/Results_denovo_lfq_DDA_HCD`
 - **PR submission repositories**: same names under the `Proteobot/` organization
 - **Documentation**: `https://proteobench.readthedocs.io/`
 - **Web app**: `https://proteobench.cubimed.rub.de/`

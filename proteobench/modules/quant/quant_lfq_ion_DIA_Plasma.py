@@ -1,5 +1,5 @@
 """
-DIA Quantification Module for precursor level Quantification for single cell data.
+DIA Quantification Module for precursor level Quantification for plasma data.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from proteobench.score.quantscoresPYE import QuantScoresPYE
 
 class DIAQuantIonModulePlasma(QuantModule):
     """
-    DIA Quantification Module for precursor level Quantification for low input (single-cell) data.
+    DIA Quantification Module for precursor level Quantification for plasma data.
 
     Parameters
     ----------

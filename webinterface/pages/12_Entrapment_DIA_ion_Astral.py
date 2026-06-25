@@ -3,10 +3,7 @@ Streamlit UI for the DIA entrapment - precursor ions module - Plasma.
 """
 
 import logging
-from typing import Any, Dict, Type
 
-import pages.texts.proteobench_builder as pbb
-import streamlit as st
 from pages.base import BaseStreamlitUI
 from pages.base_pages.entrapment import EntrapmentUIObjects
 from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import (

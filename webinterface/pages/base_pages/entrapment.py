@@ -32,6 +32,7 @@ from .tabs_entrapment import (
     tab2_upload_results,
     tab3_view_single_result,
     tab4_view_public_and_new_results,
+    tab5_compare_results,
     tab6_submit_results,
 )
 
@@ -615,3 +616,10 @@ class EntrapmentUIObjects(BaseUIModule):
                 colorblind_mode=colorblind_mode,
             )
             self._render_category_strip(session_key=self.variables.all_datapoints_submitted)
+
+    def display_workflow_comparison(self) -> None:
+        """Display the workflow comparison page in Tab 5."""
+        tab5_compare_results.display_workflow_comparison(
+            variables=self.variables,
+            ionmodule=self.ionmodule,
+        )

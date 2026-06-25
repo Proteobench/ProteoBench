@@ -1,13 +1,8 @@
 """Tab for comparing two selected workflows."""
 
 import os
-import re
-import uuid
-import zipfile
-from typing import Dict, List, Optional
+from typing import List, Optional
 
-import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 
 

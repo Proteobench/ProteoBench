@@ -100,6 +100,7 @@ class EntrapmentDatapoint(DatapointBase):
         intermediate: pd.DataFrame,
         input_format: str,
         user_input: dict,
+        entrapment_scores: "EntrapmentScores",
     ) -> pd.Series:
         """
         Generate a Datapoint object containing metadata and results from the benchmark run.
@@ -112,10 +113,8 @@ class EntrapmentDatapoint(DatapointBase):
             The format of the input data (e.g., file format).
         user_input : dict
             User-defined input values for the benchmark.
-        default_cutoff_min_prec : int, optional
-            The default minimum precursor cutoff value. Defaults to 3.
-        max_nr_observed : int, optional
-            Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
+        entrapment_scores : EntrapmentScores
+            Configured EntrapmentScores instance used to compute FDP metrics.
 
         Returns
         -------
@@ -158,7 +157,7 @@ class EntrapmentDatapoint(DatapointBase):
         )
 
         result_datapoint.generate_id()
-        metrics = EntrapmentDatapoint.get_metrics(intermediate)
+        metrics = EntrapmentDatapoint.get_metrics(intermediate, entrapment_scores)
 
         result_datapoint.reported_fdr_parsed_from_input = metrics["reported_fdr_parsed_from_input"]
         result_datapoint.nr_id_features = metrics["nr_id_features"]
@@ -175,6 +174,8 @@ class EntrapmentDatapoint(DatapointBase):
         return results_series
 
     @staticmethod
-    def get_metrics(intermediate: pd.DataFrame) -> Dict[str, Any]:
-        metrics = EntrapmentScores.calculate_metrics(intermediate)
+    def get_metrics(intermediate: pd.DataFrame, entrapment_scores: "EntrapmentScores" | None = None) -> Dict[str, Any]:
+        if entrapment_scores is None:
+            raise ValueError("entrapment_scores must be provided for EntrapmentDatapoint.get_metrics")
+        metrics = entrapment_scores.calculate_metrics(intermediate)
         return metrics

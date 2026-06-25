@@ -35,6 +35,7 @@ def generate_indepth_plots(
     public_hash: Optional[str],
     metric: str = "Combined",
     colorblind_mode: bool = False,
+    **kwargs,
 ) -> Optional[go.Figure]:
     """
     Generate and display in-depth plots for the selected dataset.
@@ -94,6 +95,7 @@ def generate_indepth_plots(
             parse_settings=parse_settings,
             metric=metric,
             colorblind_mode=colorblind_mode,
+            **kwargs,
         )
     except Exception as e:
         st.error(f"Error generating in-depth plots: {e}", icon="🚨")

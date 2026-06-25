@@ -39,7 +39,9 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
 
         # Generate QQ plot — use pre-computed curve if provided, otherwise derive it
         # from the intermediate DataFrame (e.g. for public datasets loaded from storage).
-        plots["qq"] = self._plot_qq_plot(performance_data, fdp_curve=kwargs.get("fdp_curve"))
+        plots["qq"] = self._plot_qq_plot(
+            performance_data, fdp_curve=kwargs.get("fdp_curve"), mapping_file=kwargs.get("mapping_file")
+        )
 
         return plots
 
@@ -82,7 +84,9 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             ),
         }
 
-    def _plot_qq_plot(self, performance_data: pd.DataFrame, fdp_curve: dict = None) -> go.Figure:
+    def _plot_qq_plot(
+        self, performance_data: pd.DataFrame, fdp_curve: dict = None, mapping_file: str = None
+    ) -> go.Figure:
         """
         Plot FDP (lower bound, combined, paired) against Q-value threshold.
 
@@ -102,6 +106,9 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             Pre-computed FDP curve from ``EntrapmentScores.calculate_fdp_at_fdr_thresholds``.
             When provided the intermediate DataFrame is not re-processed. Pass this
             from the already-computed datapoint to avoid redundant computation.
+        mapping_file : str, optional
+            Path or URL to the entrapment peptide mapping file. Required when
+            ``fdp_curve`` is not provided.
 
         Returns
         -------
@@ -110,8 +117,9 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         """
         if fdp_curve is None:
             try:
-                performance_data = EntrapmentScores.validate_entrapment_coverage(performance_data)
-                fdp_curve = EntrapmentScores.calculate_fdp_at_fdr_thresholds(performance_data)
+                entrapment_scores = EntrapmentScores(mapping_file=mapping_file)
+                performance_data = entrapment_scores.validate_entrapment_coverage(performance_data)
+                fdp_curve = entrapment_scores.calculate_fdp_at_fdr_thresholds(performance_data)
             except Exception as exc:
                 fig = go.Figure()
                 fig.update_layout(
@@ -538,20 +546,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             drop=True
         )
 
-        def _row_label(row):
-            name = str(row.get("software_name", ""))
-            ver = str(row.get("software_version", ""))
-            base = f"{name} v{ver}" if ver and ver not in ("nan", "0", "") else name
-            return base.strip()
-
-        raw_labels = plot_df.apply(_row_label, axis=1).tolist()
-        seen: dict = {}
-        unique_labels = []
-        for lbl in raw_labels:
-            count = seen.get(lbl, 0)
-            seen[lbl] = count + 1
-            unique_labels.append(f"{lbl} ({count + 1})" if count > 0 else lbl)
-        plot_df["y_label"] = unique_labels
+        plot_df["y_label"] = plot_df["id"].astype(str)
 
         n = len(plot_df)
         y_pos = list(range(n))

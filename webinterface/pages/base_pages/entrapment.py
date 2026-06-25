@@ -153,19 +153,31 @@ class EntrapmentUIObjects(BaseUIModule):
 
         public_id, selected_hash = dataset_selection
 
-        # For the uploaded dataset, reuse the fdp_curve already computed during
-        # benchmarking rather than recomputing it from the intermediate DataFrame.
-        plot_kwargs = {}
+        # Supply the mapping file for the fallback path; also try to pass the
+        # pre-computed fdp_curve so it is never recomputed from scratch.
+        plot_kwargs = {"mapping_file": self.ionmodule.mapping_file}
         if public_id == "Uploaded dataset":
-            all_dp = st.session_state.get(self.variables.all_datapoints)
+            # The freshly benchmarked datapoint (with its fdp_curve) is stored in
+            # all_datapoints_submitted, not in all_datapoints (which is the public
+            # repo data loaded at startup and contains no "new" rows).
+            all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
             if all_dp is not None and not all_dp.empty and "fdp_curve" in all_dp.columns:
                 new_rows = (
-                    all_dp[all_dp.get("old_new", pd.Series()) == "new"]
+                    all_dp[all_dp["old_new"] == "new"]
                     if "old_new" in all_dp.columns
                     else pd.DataFrame()
                 )
                 if not new_rows.empty:
                     candidate = new_rows.iloc[0]["fdp_curve"]
+                    if isinstance(candidate, dict) and candidate:
+                        plot_kwargs["fdp_curve"] = candidate
+        elif selected_hash is not None:
+            # For a public dataset, look up its fdp_curve from the loaded datapoints.
+            all_dp = st.session_state.get(self.variables.all_datapoints)
+            if all_dp is not None and not all_dp.empty and "fdp_curve" in all_dp.columns:
+                matching = all_dp[all_dp["intermediate_hash"] == selected_hash]
+                if not matching.empty:
+                    candidate = matching.iloc[0]["fdp_curve"]
                     if isinstance(candidate, dict) and candidate:
                         plot_kwargs["fdp_curve"] = candidate
 

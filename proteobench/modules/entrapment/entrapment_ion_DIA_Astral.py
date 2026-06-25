@@ -155,7 +155,7 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
 
         # Generate entrapment intermediate format
         try:
-            entrapment_score = EntrapmentScores()
+            entrapment_score = EntrapmentScores(mapping_file=self.mapping_file)
         except Exception as e:
             raise EntrapmentError(f"Error generating entrapment scores: {e}")
         try:
@@ -173,6 +173,7 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
                 intermediate_metric_structure,
                 input_format,
                 user_input,
+                entrapment_scores=entrapment_score,
             )
         except Exception as e:
             raise DatapointGenerationError(f"Error generating datapoint: {e}")

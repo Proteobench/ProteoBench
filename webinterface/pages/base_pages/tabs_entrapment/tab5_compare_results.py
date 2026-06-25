@@ -1,6 +1,5 @@
 """Tab for comparing two selected workflows."""
 
-import os
 from typing import List, Optional
 
 import streamlit as st

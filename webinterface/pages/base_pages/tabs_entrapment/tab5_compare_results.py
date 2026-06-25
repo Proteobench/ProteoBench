@@ -1,6 +1,5 @@
 """Tab for comparing two selected workflows."""
 
-import glob
 import os
 import re
 import uuid

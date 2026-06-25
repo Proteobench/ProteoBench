@@ -24,10 +24,17 @@ class EntrapmentScores(ScoreBase):
         Name of the precursor column.
     """
 
-    def __init__(self):
+    def __init__(self, mapping_file: str):
         """
         Initialize the EntrapmentScores object.
+
+        Parameters
+        ----------
+        mapping_file : str
+            Path or URL to the tab-separated entrapment peptide mapping file.
+            Loaded from the module's ``module_settings.toml`` ``[general].mapping_file`` key.
         """
+        self.mapping_file = mapping_file
 
     def generate_intermediate(
         self,
@@ -157,10 +164,9 @@ class EntrapmentScores(ScoreBase):
 
         return fdp_lower_bound
 
-    @staticmethod
     def calculate_paired_fdp(
+        self,
         df: pd.DataFrame,
-        filepath_paired: str = "../proteobench/score/static_files/ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt",
     ) -> Dict[int, float]:
         """
         Compute the paired false discovery proportion (FDP) for the given DataFrame.
@@ -169,8 +175,6 @@ class EntrapmentScores(ScoreBase):
         ----------
         df : pd.DataFrame
             DataFrame containing the intermediate file for which to compute the paired FDP.
-        filepath_paired : str
-            File path to the paired mapping file for computing the paired FDP.
 
         Returns
         -------
@@ -178,7 +182,7 @@ class EntrapmentScores(ScoreBase):
             The computed paired FDP value.
         """
 
-        mapping_df = pd.read_csv(filepath_paired, sep="\t", index_col=False)
+        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
         df_merged = df.merge(
             mapping_df[["sequence", "peptide_pair_index"]],
             how="left",
@@ -252,11 +256,10 @@ class EntrapmentScores(ScoreBase):
 
         return (Nr_E + Nr_E_s_T + 2 * Nr_E_T_s) / (Nr_T + Nr_E)
 
-    @staticmethod
     def calculate_fdp_at_fdr_thresholds(
+        self,
         df: pd.DataFrame,
         n_intervals: int = 10,
-        filepath_paired: str = "../proteobench/score/static_files/ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt",
     ) -> Dict[float, Dict[str, float]]:
         """
         Compute lower-bound, combined, and paired FDP at evenly-spaced Q-value thresholds.
@@ -273,8 +276,6 @@ class EntrapmentScores(ScoreBase):
             filtered by ``validate_entrapment_coverage``.
         n_intervals : int
             Number of evenly-spaced thresholds. Defaults to 10.
-        filepath_paired : str
-            Path to the tab-separated entrapment peptide mapping file.
 
         Returns
         -------
@@ -282,7 +283,7 @@ class EntrapmentScores(ScoreBase):
             Mapping of ``{threshold: {lower_bound_FDP, combined_FDP, paired_FDP, nr_id_features}}``.
             Thresholds where no targets are identified are omitted.
         """
-        mapping_df = pd.read_csv(filepath_paired, sep="\t", index_col=False)
+        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
         df_merged = df.merge(
             mapping_df[["sequence", "peptide_pair_index"]],
             how="left",
@@ -376,10 +377,9 @@ class EntrapmentScores(ScoreBase):
         """
         return float(df[score_col].max())
 
-    @staticmethod
     def validate_entrapment_coverage(
+        self,
         df: pd.DataFrame,
-        filepath_paired: str = "../proteobench/score/static_files/ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt",
         max_missing_fraction: float = 0.03,
     ) -> pd.DataFrame:
         """
@@ -396,10 +396,8 @@ class EntrapmentScores(ScoreBase):
         df : pd.DataFrame
             Intermediate DataFrame produced by ``generate_intermediate``.
             Must contain a ``"Peptide"`` column.
-        filepath_paired : str
-            Path to the tab-separated entrapment peptide mapping file.
         max_missing_fraction : float
-            Maximum tolerated fraction of unmatched peptides. Defaults to 0.01.
+            Maximum tolerated fraction of unmatched peptides. Defaults to 0.03.
 
         Returns
         -------
@@ -411,7 +409,7 @@ class EntrapmentScores(ScoreBase):
         EntrapmentError
             If the fraction of unmatched peptides exceeds ``max_missing_fraction``.
         """
-        mapping_df = pd.read_csv(filepath_paired, sep="\t", index_col=False)
+        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
         all_peptides = set(df["Peptide"])
         missing_peptides = all_peptides - set(mapping_df["sequence"])
         missing_fraction = len(missing_peptides) / len(all_peptides) if all_peptides else 0.0
@@ -441,8 +439,8 @@ class EntrapmentScores(ScoreBase):
 
         return df
 
-    @staticmethod
     def calculate_metrics(
+        self,
         df: pd.DataFrame,
     ) -> Dict[str, float]:
         """
@@ -462,7 +460,7 @@ class EntrapmentScores(ScoreBase):
         """
         # check that the identified peptides are covered by the entrapment mapping file
         # filters out peptides without a pair
-        df = EntrapmentScores.validate_entrapment_coverage(df)
+        df = self.validate_entrapment_coverage(df)
 
         # extract reported FDR from input data (e.g. from the maximum Q-value)
         reported_fdr = EntrapmentScores.calculate_reported_fdr(df)
@@ -470,13 +468,13 @@ class EntrapmentScores(ScoreBase):
         # calculate bounds as explained in Wen et al 2025
         combined_fdp = EntrapmentScores.calculate_upper_bound_combined_fdp(df)
         lower_bound_fdp = EntrapmentScores.calculate_lower_bound_fdp(df)
-        paired_fdp = EntrapmentScores.calculate_paired_fdp(df)
+        paired_fdp = self.calculate_paired_fdp(df)
 
         # based on the calculated bounds and the reported FDR, categorise the results into valid, invalid, and inconclusive
         category_combined = EntrapmentScores.categorise_metric(lower_bound_fdp, combined_fdp, reported_fdr)
         category_paired = EntrapmentScores.categorise_metric(lower_bound_fdp, paired_fdp, reported_fdr)
 
-        fdp_curve = EntrapmentScores.calculate_fdp_at_fdr_thresholds(df)
+        fdp_curve = self.calculate_fdp_at_fdr_thresholds(df)
 
         return {
             "nr_id_features": df.shape[0],

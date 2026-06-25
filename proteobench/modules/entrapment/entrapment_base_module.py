@@ -8,9 +8,11 @@ import hashlib
 import json
 import logging
 import os
+import tomllib
 import uuid
 import zipfile
 from datetime import datetime
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
@@ -128,6 +130,11 @@ class EntrapmentModule:
         )
         self.github_repo.clone_repo()
         self.parse_settings_dir = parse_settings_dir
+
+        module_settings_path = Path(parse_settings_dir) / "module_settings.toml"
+        with open(module_settings_path, "rb") as f:
+            module_settings = tomllib.load(f)
+        self.mapping_file: str = module_settings["general"]["mapping_file"]
 
         self.precursor_column_name = ""
         self.module_id = module_id

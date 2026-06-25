@@ -158,6 +158,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             )
             return fig
 
+        fdp_curve = {float(k): v for k, v in fdp_curve.items()}
         thresholds = sorted(fdp_curve.keys())
         lower = [fdp_curve[t]["lower_bound_FDP"] for t in thresholds]
         combined = [fdp_curve[t]["combined_FDP"] for t in thresholds]
@@ -1303,15 +1304,5 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 font=dict(size=50, color="rgba(0,0,0,0.1)"),
                 showarrow=False,
             )
-
-        # add orientation line at 1% FDR
-        fig.add_shape(
-            type="line",
-            x0=0.01,
-            y0=0,
-            x1=0.01,
-            y1=plot_df["nr_id_features"].max() * 1.1,
-            line=dict(color="red", width=2, dash="dash"),
-        )
 
         return fig

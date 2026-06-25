@@ -409,7 +409,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 all_data,
                 sort_ascending=sort_ascending,
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key=f"forest_plot_{session_key}")
         except Exception as e:
             st.error(f"Could not render forest plot: {e}", icon="🚨")
 

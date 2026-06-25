@@ -162,11 +162,7 @@ class EntrapmentUIObjects(BaseUIModule):
             # repo data loaded at startup and contains no "new" rows).
             all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
             if all_dp is not None and not all_dp.empty and "fdp_curve" in all_dp.columns:
-                new_rows = (
-                    all_dp[all_dp["old_new"] == "new"]
-                    if "old_new" in all_dp.columns
-                    else pd.DataFrame()
-                )
+                new_rows = all_dp[all_dp["old_new"] == "new"] if "old_new" in all_dp.columns else pd.DataFrame()
                 if not new_rows.empty:
                     candidate = new_rows.iloc[0]["fdp_curve"]
                     if isinstance(candidate, dict) and candidate:

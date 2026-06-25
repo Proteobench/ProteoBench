@@ -61,8 +61,14 @@ def get_n_modules():
     # The number of modules is defined by the number of .py files in the pages directory that are not __init__.py
 
     pages_dir = Path(__file__).parent / "pages"
+    # Could be done more nicely by reading the module registry, but "Active" only contains those not in alpha or archived
+    # If this is desired, we can change the logic to read the module registry and count only those with release_stage == "active"
     n_modules = len(
-        [f for f in pages_dir.glob("*.py") if not f.name == "__init__.py" and not f.name.startswith("base")]
+        [
+            f
+            for f in pages_dir.glob("*.py")
+            if not f.name == "__init__.py" and not f.name.startswith("base") and not f.name.startswith("0")
+        ]
     )
     return n_modules
 
@@ -157,23 +163,35 @@ def parse_proteobench_index(rst_text: str) -> Dict[str, int]:
     return dict(status_counter)
 
 
-def get_n_modules_proposed(rst_text: str) -> int:
+def get_n_modules_proposed() -> int:
     """
     Computes the number of proposed modules as the sum of modules
-    'in discussion' and 'in development'.
-
-    Parameters
-    ----------
-    status_counts : Dict[str, int]
-        A dictionary of status counts as returned by parse_proteobench_index().
+    'in development' (from module_grid_generated.rst) and 'in discussion'
+    (from module_in_discussion_grid_extra.yaml).
 
     Returns
     -------
     int
         The total number of proposed modules.
     """
-    status_counts = parse_proteobench_index(rst_text)
-    return status_counts.get("in discussion", 0) + status_counts.get("in development", 0)
+    import yaml
+
+    docs_dir = Path(__file__).resolve().parent.parent / "docs"
+    grid_rst = docs_dir / "module_grid_generated.rst"
+    discussion_yaml = docs_dir / "module_in_discussion_grid_extra.yaml"
+
+    n_in_development = 0
+    if grid_rst.exists():
+        status_counts = parse_proteobench_index(grid_rst.read_text(encoding="utf-8"))
+        n_in_development = status_counts.get("in development", 0)
+
+    n_in_discussion = 0
+    if discussion_yaml.exists():
+        with discussion_yaml.open(encoding="utf-8") as fh:
+            extra = yaml.safe_load(fh)
+        n_in_discussion = len(extra.get("modules", []))
+
+    return n_in_development + n_in_discussion
 
 
 def get_monthly_visits(api_endpoint: str, token: str, id_site: int) -> Optional[int]:
@@ -421,6 +439,4 @@ if __name__ == "__main__":
     print(f"Number of modules: {get_n_modules()}")
     print(f"Number of submitted points: {get_n_submitted_points()}")
     print(f"Number of supported tools: {get_n_supported_tools()}")
-    file_path = Path(__file__).parent.parent / "docs" / "index.rst"
-    status_counts = parse_proteobench_index(file_path.read_text(encoding="utf-8"))
-    print(f"Number of proposed modules: {get_n_modules_proposed(file_path.read_text(encoding='utf-8'))}")
+    print(f"Number of proposed modules: {get_n_modules_proposed()}")

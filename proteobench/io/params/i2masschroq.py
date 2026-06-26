@@ -49,13 +49,25 @@ def _homogenize_tolerance_string_sage(raw_tol: str) -> str:
     Sage uses a space-separated format like "-10 10 ppm" or "-0.02 0.02 da".
     This function converts it to the format: "[-10 ppm, 10 ppm]" or "[-0.02 Da, 0.02 Da]".
     """
-    if not raw_tol or not raw_tol.strip():
+    if raw_tol is None:
         return ""
-    parts = raw_tol.strip().split()
+    raw_tol = str(raw_tol).strip()
+    if not raw_tol or raw_tol.lower() in {"nan", "none"}:
+        return ""
+
+    parts = raw_tol.split()
     if len(parts) != 3:
         raise ValueError(f"Unexpected Sage tolerance format: {raw_tol}")
+
     lower, upper, unit = parts
-    unit = unit.replace("da", "Da").replace("ppm", "ppm")  # Normalize units
+    unit_norm = unit.strip().lower()
+    if unit_norm == "ppm":
+        unit = "ppm"
+    elif unit_norm == "da":
+        unit = "Da"
+    else:
+        raise ValueError(f"Unsupported Sage tolerance unit: {unit}")
+
     return f"[{lower} {unit}, {upper} {unit}]"
 
 

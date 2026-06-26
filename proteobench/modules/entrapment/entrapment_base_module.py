@@ -43,11 +43,8 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_entrapment import EntrapmentPlotGenerator
-from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class EntrapmentModule:
@@ -142,7 +139,7 @@ class EntrapmentModule:
     def _apply_mapping(
         self,
         standard_format: pd.DataFrame,
-        max_missing_fraction: float = 0.03,
+        max_missing_fraction: float = 0.01,
     ) -> pd.DataFrame:
         """
         Filter unmapped peptides, assign target/entrapment labels, and merge pair index.

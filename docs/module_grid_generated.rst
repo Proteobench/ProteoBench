@@ -135,3 +135,4 @@ Modules in discussion
 * `benchmark with Dynamic Organellar Mapping <https://github.com/orgs/Proteobench/discussions/404>`__ — Single-species benchmark using spatial proteomics.
 * `DDA identification - phosphopeptides <https://github.com/orgs/Proteobench/discussions/625>`__ — Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy.
 * `Identification with DDA <https://github.com/orgs/Proteobench/discussions/373>`__ — Benchmark the identification sensitivity and specificity of data dependent acquisition workflows using an entrapment strategy.
+* `Feature finding algorithms for MALDI MS imaging  <https://github.com/orgs/Proteobench/discussions/1072>`__ — Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides.

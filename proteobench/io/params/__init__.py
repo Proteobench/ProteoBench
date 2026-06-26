@@ -63,7 +63,9 @@ import numpy as np
 import pandas as pd
 
 # Strings that should be treated as missing / unset values.
-_MISSING_SENTINELS = frozenset({"none", "n/a", "not specified", "unknown", "placeholder", "na", "nan", "", "-", "[missing]"})
+_MISSING_SENTINELS = frozenset(
+    {"none", "n/a", "not specified", "unknown", "placeholder", "na", "nan", "", "-", "[missing]"}
+)
 
 # Canonical enzyme name mapping (lowercase key → display name). Add keys here in lowercase.
 _ENZYME_MAP = {
@@ -120,6 +122,7 @@ def _flatten_predictors(val) -> str:
     if len(unique) == 1:
         return next(iter(unique))
     return ", ".join(f"{k}: {v}" for k, v in val.items())
+
 
 # Fields that must be coerced to float (FDR values, decimal 0-1).
 _FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")

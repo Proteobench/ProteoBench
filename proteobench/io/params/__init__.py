@@ -63,7 +63,7 @@ import numpy as np
 import pandas as pd
 
 # Strings that should be treated as missing / unset values.
-_MISSING_SENTINELS = frozenset({"none", "n/a", "not specified", "unknown", "placeholder", "na", "nan", "", "-"})
+_MISSING_SENTINELS = frozenset({"none", "n/a", "not specified", "unknown", "placeholder", "na", "nan", "", "-", "[missing]"})
 
 # Canonical enzyme name mapping (lowercase key → display name). Add keys here in lowercase.
 _ENZYME_MAP = {
@@ -100,6 +100,26 @@ _TOLERANCE_FIELDS = ("precursor_mass_tolerance", "fragment_mass_tolerance")
 _SEARCH_ENGINE_MAP = {
     "xtandem": "X!Tandem",
 }
+
+
+def _flatten_predictors(val) -> str:
+    """Convert a predictors dict to a human-readable string.
+
+    Parameters
+    ----------
+    val : dict
+        Mapping of prediction target (RT, IM, MS2_int) to predictor name.
+
+    Returns
+    -------
+    str
+        If all values are identical, returns that value.
+        Otherwise returns ``"key: value"`` pairs joined by ``", "``.
+    """
+    unique = set(val.values())
+    if len(unique) == 1:
+        return next(iter(unique))
+    return ", ".join(f"{k}: {v}" for k, v in val.items())
 
 # Fields that must be coerced to float (FDR values, decimal 0-1).
 _FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")
@@ -299,6 +319,11 @@ class ProteoBenchParameters:
                 if canonical is not None:
                     setattr(self, "search_engine", canonical)
 
+        # --- H. Flatten predictors_library dict to string --------------------
+        val = getattr(self, "predictors_library", None)
+        if isinstance(val, dict):
+            setattr(self, "predictors_library", _flatten_predictors(val))
+
 
 # Note: this should be able to be removed when we have resubmitted all points again.
 def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -361,6 +386,12 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
     if "search_engine" in df.columns:
         df["search_engine"] = df["search_engine"].apply(
             lambda v: (_SEARCH_ENGINE_MAP.get(v.strip().lower(), v) if isinstance(v, str) and pd.notna(v) else v)
+        )
+
+    # H. Flatten predictors_library dict to string
+    if "predictors_library" in df.columns:
+        df["predictors_library"] = df["predictors_library"].apply(
+            lambda v: _flatten_predictors(v) if isinstance(v, dict) else v
         )
 
     return df

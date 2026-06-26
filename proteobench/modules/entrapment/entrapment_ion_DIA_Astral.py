@@ -153,11 +153,16 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
         except Exception as e:
             raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
 
-        # Generate entrapment intermediate format
+        # Apply mapping file: filter unmapped peptides, assign target/entrapment, merge pair index
         try:
-            entrapment_score = EntrapmentScores(mapping_file=self.mapping_file)
+            standard_format = self._apply_mapping(standard_format)
+        except EntrapmentError:
+            raise
         except Exception as e:
-            raise EntrapmentError(f"Error generating entrapment scores: {e}")
+            raise IntermediateFormatGenerationError(f"Error applying entrapment mapping: {e}")
+
+        # Generate entrapment intermediate format
+        entrapment_score = EntrapmentScores()
         try:
             intermediate_metric_structure = entrapment_score.generate_intermediate(standard_format)
         except Exception as e:

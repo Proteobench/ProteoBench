@@ -7,7 +7,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from proteobench.exceptions import EntrapmentError, ParseError
+from proteobench.exceptions import ParseError
 from proteobench.score.score_base import ScoreBase
 
 
@@ -24,17 +24,9 @@ class EntrapmentScores(ScoreBase):
         Name of the precursor column.
     """
 
-    def __init__(self, mapping_file: str):
-        """
-        Initialize the EntrapmentScores object.
-
-        Parameters
-        ----------
-        mapping_file : str
-            Path or URL to the tab-separated entrapment peptide mapping file.
-            Loaded from the module's ``module_settings.toml`` ``[general].mapping_file`` key.
-        """
-        self.mapping_file = mapping_file
+    def __init__(self):
+        """Initialize the EntrapmentScores object."""
+        pass
 
     def generate_intermediate(
         self,
@@ -43,71 +35,58 @@ class EntrapmentScores(ScoreBase):
         """
         Generate intermediate data structure for entrapment scores.
 
+        The input DataFrame must already have ``"Target or Entrapment"`` and
+        ``"peptide_pair_index"`` columns populated by the caller (i.e. the
+        benchmarking module applies the mapping file before this step).
+
         Parameters
         ----------
         filtered_df : pd.DataFrame
-            DataFrame containing the filtered data.
+            DataFrame containing the filtered data with target/entrapment labels
+            and peptide pair indices already assigned.
+
         Returns
         -------
         pd.DataFrame
             DataFrame containing the intermediate data structure.
         """
-
-        # select columns which are relevant for the statistics
-        # TODO, this should be handled different, probably in the parse settings
-
-        necessary_columns = ["Peptide", "Sequence", "Charge", "Q-Value", "Protein Group"]
+        necessary_columns = [
+            "Peptide",
+            "Sequence",
+            "Charge",
+            "Q-Value",
+            "Protein Group",
+            "Target or Entrapment",
+            "peptide_pair_index",
+        ]
         for col in necessary_columns:
             if col not in filtered_df.columns:
                 raise ParseError(f"Necessary column '{col}' not found in the input DataFrame.")
-        # "Raw file" is optional: formats that aggregate across runs (e.g. FragPipe ion.tsv)
-        # do not expose a per-run column; fill with an empty string in that case.
+
         if "Raw file" not in filtered_df.columns:
             filtered_df = filtered_df.copy()
             filtered_df["Raw file"] = ""
 
         scores_to_sort_by = ["Q-Value", "PEP"]
-
         if "PEP" not in filtered_df.columns:
             if "Expectation" in filtered_df.columns:
-                # can use the reverse expectation score as a back up
                 filtered_df = filtered_df.copy()
                 filtered_df["PEP"] = 1 - filtered_df["Expectation"]
             else:
-                scores_to_sort_by.pop("PEP")
+                scores_to_sort_by.remove("PEP")
 
         precursor_group_columns = ["Peptide", "Sequence", "Charge"]
 
-        # We need to make sure that the DataFrame contains one row per unique precursor ion.
-        # E.g. DIANN reports one row per Run, with the same Lib.Q.Value for the same precursor ion.
-        # The following steps are performed to generate the intermediate data structure:
-        # 1. Group the DataFrame by the specified precursor group columns (Peptide,
-        #    Sequence, Charge).
-        # 2. Within each group, sort the entries by Q-Value and PEP in ascending order.
-        # 3. Filter the groups to retain only the top entry (the one with the lowest Q-Value and PEP) for each group.
-        # 4. After filtering, sort the resulting DataFrame again by Q-Value and PEP in ascending order.
-        # 5. Assign a score to each entry based on its rank in the sorted DataFrame
-
+        # Deduplicate to one row per precursor: keep the hit with the lowest Q-Value (and PEP).
+        # Then re-rank by the same sort order to assign a monotone Score column.
         filtered_df = (
             filtered_df.sort_values(scores_to_sort_by, kind="mergesort")
             .groupby(precursor_group_columns, as_index=False, sort=False)
             .head(1)
             .reset_index(drop=True)
         )
-
-        filtered_df = filtered_df.sort_values(["Q-Value", "PEP"], kind="mergesort").reset_index(drop=True)
+        filtered_df = filtered_df.sort_values(scores_to_sort_by, kind="mergesort").reset_index(drop=True)
         filtered_df["Score"] = filtered_df.index + 1
-
-        # assign 'entrapment' or 'target': if at least one protein (or peptide in case of a peptide level fasta) in the group is target,
-        # the whole group is target, otherwise it is entrapment (p_target is entrapment)
-        def assign_target_entrapment(protein_group: str) -> str:
-            proteins = protein_group.split(";")
-            for protein in proteins:
-                if not protein.endswith("_p_target"):
-                    return "target"
-            return "entrapment"
-
-        filtered_df["Target or Entrapment"] = filtered_df["Protein Group"].apply(assign_target_entrapment)
 
         return filtered_df[
             [
@@ -120,6 +99,7 @@ class EntrapmentScores(ScoreBase):
                 "PEP",
                 "Protein Group",
                 "Target or Entrapment",
+                "peptide_pair_index",
             ]
         ]
 
@@ -179,32 +159,27 @@ class EntrapmentScores(ScoreBase):
 
         return fdp_lower_bound
 
+    @staticmethod
     def calculate_paired_fdp(
-        self,
         df: pd.DataFrame,
-    ) -> Dict[int, float]:
+    ) -> float:
         """
         Compute the paired false discovery proportion (FDP) for the given DataFrame.
+
+        Requires ``peptide_pair_index`` to already be present in ``df`` (populated
+        by the benchmarking module when applying the mapping file).
 
         Parameters
         ----------
         df : pd.DataFrame
-            DataFrame containing the intermediate file for which to compute the paired FDP.
+            Intermediate DataFrame with ``peptide_pair_index`` already present.
 
         Returns
         -------
-        Float
+        float
             The computed paired FDP value.
         """
-
-        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
-        df_merged = df.merge(
-            mapping_df[["sequence", "peptide_pair_index"]],
-            how="left",
-            left_on="Peptide",
-            right_on="sequence",
-        )
-        return EntrapmentScores._paired_fdp_from_merged(df_merged)
+        return EntrapmentScores._paired_fdp_from_merged(df)
 
     @staticmethod
     def _paired_fdp_from_merged(df: pd.DataFrame) -> float:
@@ -289,7 +264,7 @@ class EntrapmentScores(ScoreBase):
         ----------
         df : pd.DataFrame
             Intermediate DataFrame produced by ``generate_intermediate`` and
-            filtered by ``validate_entrapment_coverage``.
+            produced by ``generate_intermediate``.
         n_intervals : int
             Number of evenly-spaced thresholds. Defaults to 10.
 
@@ -299,14 +274,6 @@ class EntrapmentScores(ScoreBase):
             Mapping of ``{threshold: {lower_bound_FDP, combined_FDP, paired_FDP, nr_id_features}}``.
             Thresholds where no targets are identified are omitted.
         """
-        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
-        df_merged = df.merge(
-            mapping_df[["sequence", "peptide_pair_index"]],
-            how="left",
-            left_on="Peptide",
-            right_on="sequence",
-        )
-
         max_q = float(df["Q-Value"].max())
         fixed_thresholds = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
         linspace_thresholds = list(np.linspace(max_q / n_intervals, max_q, n_intervals))
@@ -314,7 +281,7 @@ class EntrapmentScores(ScoreBase):
 
         result: Dict[float, Dict[str, float]] = {}
         for threshold in thresholds:
-            subset = df_merged[df_merged["Q-Value"] <= threshold]
+            subset = df[df["Q-Value"] <= threshold]
             if subset.empty or (subset["Target or Entrapment"] == "target").sum() == 0:
                 continue
             key = round(float(threshold), 8)
@@ -398,69 +365,12 @@ class EntrapmentScores(ScoreBase):
             The maximum value found in ``score_col``, interpreted as the applied
             FDR threshold.
         """
+        print(f"Calculating reported FDR from column '{score_col}'")
+        print(f"Available columns in DataFrame: {df.columns.tolist()}")
+        print(f"DataFrame shape: {df.shape}")
+        print(f"DataFrame head:\n{df.head()}")
+        print(float(df[score_col].max()))
         return float(df[score_col].max())
-
-    def validate_entrapment_coverage(
-        self,
-        df: pd.DataFrame,
-        max_missing_fraction: float = 0.03,
-    ) -> pd.DataFrame:
-        """
-        Check that identified peptides are covered by the entrapment mapping file
-        and return a filtered DataFrame containing only peptides that have a pair.
-
-        Raises ``EntrapmentError`` if the fraction of peptides absent from the
-        mapping file exceeds ``max_missing_fraction``. This indicates a FASTA
-        mismatch — most commonly caused by enabling in-silico digestion in the
-        search engine when the entrapment FASTA is already pre-digested.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Intermediate DataFrame produced by ``generate_intermediate``.
-            Must contain a ``"Peptide"`` column.
-        max_missing_fraction : float
-            Maximum tolerated fraction of unmatched peptides. Defaults to 0.03.
-
-        Returns
-        -------
-        pd.DataFrame
-            Copy of ``df`` with rows whose peptide has no paired entrapment removed.
-
-        Raises
-        ------
-        EntrapmentError
-            If the fraction of unmatched peptides exceeds ``max_missing_fraction``.
-        """
-        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
-        all_peptides = set(df["Peptide"])
-        missing_peptides = all_peptides - set(mapping_df["sequence"])
-        missing_fraction = len(missing_peptides) / len(all_peptides) if all_peptides else 0.0
-
-        if missing_fraction > max_missing_fraction:
-            n_total = len(all_peptides)
-            n_missing = len(missing_peptides)
-            examples = ", ".join(sorted(missing_peptides)[:5])
-            raise EntrapmentError(
-                f"{n_missing} of {n_total} identified peptides ({missing_fraction:.1%}) are absent from the "
-                f"entrapment mapping file. The threshold is {max_missing_fraction:.0%}.\n\n"
-                f"This usually means one of the following:\n"
-                f"  - In-silico digestion was enabled in the search engine. The entrapment FASTA is "
-                f"pre-digested and must be searched without enzymatic cleavage ('No enzyme' / '--cut ').\n"
-                f"  - The wrong FASTA file was used. Use the ProteoBench entrapment FASTA "
-                f"(ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt).\n\n"
-                f"First {min(5, n_missing)} missing peptides: {examples}"
-            )
-
-        if missing_peptides:
-            print(f"Warning: {len(missing_peptides)} peptide(s) have no paired entrapment and will be excluded.")
-            df = df[~df["Peptide"].isin(missing_peptides)].reset_index(drop=True)
-            print(f"Filtered DataFrame now contains {len(df)} peptides after removing unmatched entries.")
-            return df
-        else:
-            print("All identified peptides are covered by the entrapment mapping file.")
-
-        return df
 
     def calculate_metrics(
         self,
@@ -468,32 +378,26 @@ class EntrapmentScores(ScoreBase):
     ) -> Dict[str, float]:
         """
         Handle the calculation of all entrapment metrics for the given DataFrame.
-        Ensures 1% FDR filtering for the main plot metrics.
-        Handles categorisation into valid, invalid, and inconclusive based on bound values.
+
+        The input ``df`` must already contain ``"Target or Entrapment"`` and
+        ``"peptide_pair_index"`` columns (populated by the benchmarking module).
 
         Parameters
         ----------
         df : pd.DataFrame
-            DataFrame containing the intermediate file for which to compute the metrics.
+            Intermediate DataFrame produced by ``generate_intermediate``.
 
         Returns
         -------
         Dict[str, float]
             A dictionary containing all computed metric values.
         """
-        # check that the identified peptides are covered by the entrapment mapping file
-        # filters out peptides without a pair
-        df = self.validate_entrapment_coverage(df)
-
-        # extract reported FDR from input data (e.g. from the maximum Q-value)
         reported_fdr = EntrapmentScores.calculate_reported_fdr(df)
 
-        # calculate bounds as explained in Wen et al 2025
         combined_fdp = EntrapmentScores.calculate_upper_bound_combined_fdp(df)
         lower_bound_fdp = EntrapmentScores.calculate_lower_bound_fdp(df)
-        paired_fdp = self.calculate_paired_fdp(df)
+        paired_fdp = EntrapmentScores.calculate_paired_fdp(df)
 
-        # based on the calculated bounds and the reported FDR, categorise the results into valid, invalid, and inconclusive
         category_combined = EntrapmentScores.categorise_metric(lower_bound_fdp, combined_fdp, reported_fdr)
         category_paired = EntrapmentScores.categorise_metric(lower_bound_fdp, paired_fdp, reported_fdr)
 

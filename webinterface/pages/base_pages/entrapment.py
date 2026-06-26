@@ -404,7 +404,10 @@ class EntrapmentUIObjects(BaseUIModule):
         with col_thresh:
             threshold_str = st.selectbox(
                 "Q-value threshold",
-                ["Maximum reported", "0.001", "0.01", "0.05", "0.1", "1.0"],
+                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                index=1,
+                help="Filter workflows by their reported FDR threshold. "
+                "The forest plot will only show workflows with a reported FDR below the selected value.",
                 key=f"forest_threshold_{session_key}",
             )
         sort_ascending = sort_dir.startswith("Ascending")
@@ -509,7 +512,8 @@ class EntrapmentUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             return st.selectbox(
                 "Q-value threshold",
-                ["Maximum reported", "0.001", "0.01", "0.05", "0.1", "1.0"],
+                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                index=1,
                 key=st.session_state[key],
             )
 
@@ -615,7 +619,8 @@ class EntrapmentUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             return st.selectbox(
                 "Q-value threshold",
-                ["Maximum reported", "0.001", "0.01", "0.05", "0.1", "1.0"],
+                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                index=1,
                 key=st.session_state[key],
             )
 

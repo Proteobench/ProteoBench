@@ -139,6 +139,76 @@ class EntrapmentModule:
         self.precursor_column_name = ""
         self.module_id = module_id
 
+    def _apply_mapping(
+        self,
+        standard_format: pd.DataFrame,
+        max_missing_fraction: float = 0.03,
+    ) -> pd.DataFrame:
+        """
+        Filter unmapped peptides, assign target/entrapment labels, and merge pair index.
+
+        Reads ``self.mapping_file`` (TSV with ``sequence``, ``peptide_pair_index``,
+        and ``peptide_type`` columns).  Peptides absent from the mapping are removed;
+        if more than ``max_missing_fraction`` of unique peptides are absent an
+        ``EntrapmentError`` is raised.  The caller receives a DataFrame with two extra
+        columns: ``"Target or Entrapment"`` (from ``peptide_type``) and
+        ``"peptide_pair_index"``.
+
+        Parameters
+        ----------
+        standard_format : pd.DataFrame
+            Standardised input DataFrame (output of ``convert_to_standard_format``).
+            Must contain a ``"Peptide"`` column.
+        max_missing_fraction : float
+            Maximum tolerated fraction of unmatched peptides. Defaults to 0.03.
+
+        Returns
+        -------
+        pd.DataFrame
+            Copy of ``standard_format`` filtered and augmented with mapping columns.
+
+        Raises
+        ------
+        EntrapmentError
+            If the fraction of unmatched peptides exceeds ``max_missing_fraction``.
+        """
+        from proteobench.exceptions import EntrapmentError
+
+        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
+        all_peptides = set(standard_format["Peptide"])
+        missing_peptides = all_peptides - set(mapping_df["sequence"])
+        missing_fraction = len(missing_peptides) / len(all_peptides) if all_peptides else 0.0
+
+        if missing_fraction > max_missing_fraction:
+            n_total = len(all_peptides)
+            n_missing = len(missing_peptides)
+            examples = ", ".join(sorted(missing_peptides)[:5])
+            raise EntrapmentError(
+                f"{n_missing} of {n_total} identified peptides ({missing_fraction:.1%}) are absent from the "
+                f"entrapment mapping file. The threshold is {max_missing_fraction:.0%}.\n\n"
+                f"This usually means one of the following:\n"
+                f"  - In-silico digestion was enabled in the search engine. The entrapment FASTA is "
+                f"pre-digested and must be searched without enzymatic cleavage ('No enzyme' / '--cut ').\n"
+                f"  - The wrong FASTA file was used. Use the ProteoBench entrapment FASTA "
+                f"(ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt).\n\n"
+                f"First {min(5, n_missing)} missing peptides: {examples}"
+            )
+
+        df = standard_format.copy()
+        if missing_peptides:
+            df = df[~df["Peptide"].isin(missing_peptides)].reset_index(drop=True)
+
+        df = df.merge(
+            mapping_df[["sequence", "peptide_pair_index", "peptide_type"]],
+            how="left",
+            left_on="Peptide",
+            right_on="sequence",
+        ).drop(columns=["sequence"])
+        df["Target or Entrapment"] = df["peptide_type"].replace("p_target", "entrapment")
+        df = df.drop(columns=["peptide_type"])
+
+        return df
+
     def is_implemented(self) -> bool:
         """
         Return whether the module is fully implemented.

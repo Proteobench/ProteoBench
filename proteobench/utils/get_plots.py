@@ -13,7 +13,7 @@ from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModule
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
-from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
+from proteobench.modules.quant.quant_lfq_ion_DIA_lowinput import (
     DIAQuantIonModulediaSC,
 )
 from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (

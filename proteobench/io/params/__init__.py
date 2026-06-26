@@ -96,6 +96,11 @@ _AUTO_CALIBRATION_LABEL = "Automatic calibration"
 # Tolerance fields to which the auto-calibration mapping applies.
 _TOLERANCE_FIELDS = ("precursor_mass_tolerance", "fragment_mass_tolerance")
 
+# Canonical search engine name mapping (lowercase key → display name).
+_SEARCH_ENGINE_MAP = {
+    "xtandem": "X!Tandem",
+}
+
 # Fields that must be coerced to float (FDR values, decimal 0-1).
 _FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")
 
@@ -286,6 +291,14 @@ class ProteoBenchParameters:
                 if check in _AUTO_CALIBRATION_SENTINELS:
                     setattr(self, fld, _AUTO_CALIBRATION_LABEL)
 
+        # --- G. Search engine name normalization ------------------------------
+        val = getattr(self, "search_engine", None)
+        if val is not None and not (isinstance(val, float) and np.isnan(val)):
+            if isinstance(val, str):
+                canonical = _SEARCH_ENGINE_MAP.get(val.strip().lower())
+                if canonical is not None:
+                    setattr(self, "search_engine", canonical)
+
 
 # Note: this should be able to be removed when we have resubmitted all points again.
 def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -342,6 +355,12 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
                 if (v.strip().lower() if isinstance(v, str) else v) in _AUTO_CALIBRATION_SENTINELS and pd.notna(v)
                 else v
             )
+        )
+
+    # G. Search engine name normalization
+    if "search_engine" in df.columns:
+        df["search_engine"] = df["search_engine"].apply(
+            lambda v: (_SEARCH_ENGINE_MAP.get(v.strip().lower(), v) if isinstance(v, str) and pd.notna(v) else v)
         )
 
     return df

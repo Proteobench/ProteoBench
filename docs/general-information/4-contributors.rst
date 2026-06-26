@@ -187,6 +187,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Proteomics and Signaltransduction, Max-Planck-Institute of Biochemistry, Martinsried, Germany*
 
 .. line-block::
+    **Matthew The**
+    *School of Life Sciences, Technical University of Munich, 85354 Freising, Germany*
+
+.. line-block::
     **Julian Uszkoreit**
     *Ruhr University Bochum, Medical Faculty, Medical Bioinformatics, Bochum, Germany*
 

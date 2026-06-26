@@ -125,9 +125,11 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
             # get tolerance:
             tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["TOL"]
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["TOLU"]
+            unit_homogenized = "ppm" if unit.lower() == "ppm" else "Da"
             tol = float(tol)
-            print(tol)
-            input_params.precursor_mass_tolerance = "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
+            input_params.precursor_mass_tolerance = (
+                "[-" + str(tol) + " " + unit_homogenized + ", " + str(tol) + " " + unit_homogenized + "]"
+            )
 
         if "validationConfig" in each_search_params:
             input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100
@@ -182,14 +184,18 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
             # get tolerance for precursors:
             tol = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorTolerance"]
             unit = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["precursorAccuracyType"]
+            unit_homogenized = "ppm" if unit.lower() == "ppm" else "Da"
             tol = float(tol)
-            input_params.precursor_mass_tolerance = "[-" + str(tol) + " " + unit + ", +" + str(tol) + " " + unit + "]"
+            input_params.precursor_mass_tolerance = (
+                "[-" + str(tol) + " " + unit_homogenized + ", " + str(tol) + " " + unit_homogenized + "]"
+            )
             # get tolerance for fragments:
             tol2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentIonMZTolerance"]
             unit2 = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["fragmentAccuracyType"]
+            unit2_homogenized = "ppm" if unit2.lower() == "ppm" else "Da"
             tol2 = float(tol2)
             input_params.fragment_mass_tolerance = (
-                "[-" + str(tol2) + " " + unit2 + ", +" + str(tol2) + " " + unit2 + "]"
+                "[-" + str(tol2) + " " + unit2_homogenized + ", " + str(tol2) + " " + unit2_homogenized + "]"
             )
 
             # Add "hidden" modifications when using X!Tandem:

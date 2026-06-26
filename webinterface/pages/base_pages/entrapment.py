@@ -332,7 +332,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 metric=metric,
                 colorblind_mode=colorblind_mode,
             )
-            st.plotly_chart(fdp_ratio_fig, use_container_width=True)
+            st.plotly_chart(fdp_ratio_fig)
         except Exception as e:
             st.error(f"Could not render FDP ratio plot: {e}", icon="🚨")
 
@@ -352,7 +352,7 @@ class EntrapmentUIObjects(BaseUIModule):
         )
         try:
             fig = self.ionmodule.get_plot_generator().plot_category_strip(all_data)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig)
         except Exception as e:
             st.error(f"Could not render category strip plot: {e}", icon="🚨")
 
@@ -372,7 +372,7 @@ class EntrapmentUIObjects(BaseUIModule):
         )
         try:
             fig = self.ionmodule.get_plot_generator().plot_fdp_id_scatter(all_data)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig)
         except Exception as e:
             st.error(f"Could not render FDP/FDR scatter: {e}", icon="🚨")
 
@@ -418,7 +418,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 sort_ascending=sort_ascending,
                 threshold=threshold,
             )
-            st.plotly_chart(fig, use_container_width=True, key=f"forest_plot_{session_key}")
+            st.plotly_chart(fig, key=f"forest_plot_{session_key}")
         except Exception as e:
             st.error(f"Could not render forest plot: {e}", icon="🚨")
 

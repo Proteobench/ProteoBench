@@ -27,7 +27,7 @@ from UI_utils import (
 @st.dialog("Tool Breakdown", width="large")
 def _show_tool_breakdown(module_title, tool_counts):
     pie_fig = build_tool_pie_chart(module_title, tool_counts)
-    st.plotly_chart(pie_fig, use_container_width=True)
+    st.plotly_chart(pie_fig)
 
 
 fig_path = Path(__file__).resolve().parent.parent / "img" / "icons" / "png"  # Adjusted to match the new structure
@@ -85,11 +85,11 @@ class StreamlitPageHome(StreamlitPage):
                         "**Want a quick guided tour?** We will walk you through a benchmark module step by step."
                     )
                 with col_yes:
-                    if st.button("Yes, show me!", type="primary", use_container_width=True, key="tour_opt_in_yes"):
+                    if st.button("Yes, show me!", type="primary", key="tour_opt_in_yes"):
                         st.session_state["_tour_opted_in"] = True
                         st.rerun()
                 with col_no:
-                    if st.button("No, thanks!", use_container_width=True, key="tour_opt_in_no"):
+                    if st.button("No, thanks!", key="tour_opt_in_no"):
                         st.session_state["_tour_opted_in"] = False
                         st.rerun()
 
@@ -192,7 +192,6 @@ class StreamlitPageHome(StreamlitPage):
             if bar_fig is not None:
                 event = st.plotly_chart(
                     bar_fig,
-                    use_container_width=True,
                     on_select="rerun",
                     selection_mode="points",
                     key="submissions_chart",

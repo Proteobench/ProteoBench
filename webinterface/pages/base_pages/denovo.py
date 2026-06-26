@@ -302,7 +302,7 @@ class DeNovoUIObjects(BaseUIModule):
                             if plot_name in descriptions:
                                 st.caption(descriptions[plot_name])
                             self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
-                            # st.plotly_chart(plots[plot_name], use_container_width=True)
+                            # st.plotly_chart(plots[plot_name])
 
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
@@ -318,7 +318,7 @@ class DeNovoUIObjects(BaseUIModule):
         with st.expander("Description"):
             st.markdown(self.variables.texts.Description.ptm_overview)
 
-        st.plotly_chart(figs, use_container_width=True)
+        st.plotly_chart(figs)
 
     def _display_ptm_specific(self, figs) -> None:
         # Specific PTM plots
@@ -334,7 +334,6 @@ class DeNovoUIObjects(BaseUIModule):
                 st.plotly_chart(
                     figs[mod_label],
                     key=f"ptm_plot_{mod_label}",
-                    use_container_width=True,
                 )
 
     def _display_spectrum_features(self, figs) -> None:
@@ -355,7 +354,7 @@ class DeNovoUIObjects(BaseUIModule):
         for feature_name, tab in tab_dict.items():
             with tab:
                 st.header(feature_name)
-                st.plotly_chart(figs[feature_name][evaluation_type], use_container_width=True)
+                st.plotly_chart(figs[feature_name][evaluation_type])
 
     def _display_species_overview(self, figs) -> None:
         with st.expander("Description"):
@@ -369,7 +368,7 @@ class DeNovoUIObjects(BaseUIModule):
         else:
             evaluation_type = "mass"
 
-        st.plotly_chart(figs[evaluation_type], use_container_width=True, key=self.variables.fig_species_overview)
+        st.plotly_chart(figs[evaluation_type], key=self.variables.fig_species_overview)
 
     def _display_indepth_plot(self, plot_name: str, figs) -> None:
         if plot_name == "ptm_overview":

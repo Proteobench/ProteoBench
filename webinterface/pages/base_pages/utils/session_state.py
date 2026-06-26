@@ -19,6 +19,8 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+from pages.base_pages.utils.general import prepare_df_for_display
+
 _MAX_SCALAR_REPR = 200  # max chars for an inline scalar repr before truncation
 _MAX_FULL_REPR = 20000  # max chars for the full-value view in the inspector
 
@@ -112,7 +114,7 @@ def ui_overview_table(max_list_repr: int = 5) -> None:
             rows.append({"key": str(key), "type": "?", "preview": f"<error: {exc}>"})
 
     overview = pd.DataFrame(rows, columns=["key", "type", "preview"]).sort_values("key").reset_index(drop=True)
-    st.dataframe(overview, use_container_width=True, hide_index=True)
+    st.dataframe(prepare_df_for_display(overview), hide_index=True)
 
 
 def ui_key_inspector(max_list_repr: int = 5) -> None:
@@ -155,10 +157,10 @@ def ui_key_inspector(max_list_repr: int = 5) -> None:
 
     if isinstance(value, pd.DataFrame):
         st.caption(f"shape={value.shape}")
-        st.dataframe(value, use_container_width=True)
+        st.dataframe(prepare_df_for_display(value))
     elif isinstance(value, pd.Series):
         st.caption(f"len={len(value)}, dtype={value.dtype}")
-        st.dataframe(value.to_frame(name=str(actual_key)), use_container_width=True)
+        st.dataframe(prepare_df_for_display(value.to_frame(name=str(actual_key))))
     elif isinstance(value, (dict, list, tuple, set)):
         text = pprint.pformat(value, width=100)
         st.code(text if len(text) <= _MAX_FULL_REPR else text[:_MAX_FULL_REPR] + "\n… (truncated)", language="python")

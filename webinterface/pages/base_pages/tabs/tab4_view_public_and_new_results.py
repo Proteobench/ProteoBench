@@ -224,7 +224,7 @@ def display_submitted_results(
                 hide_annot=plot_params.get("hide_annot", False),
                 **plot_params,
             )
-            st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+            st.plotly_chart(fig, key=plot_uuid)
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
             import traceback

@@ -12,6 +12,8 @@ from typing import Any, Callable, Dict, Optional
 import pandas as pd
 import streamlit as st
 
+from pages.base_pages.utils.general import prepare_df_for_display
+
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
     """
@@ -199,7 +201,7 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
         fig = plot_generator.plot_main_metric(
             result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
         )
-        st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+        st.plotly_chart(fig, key=plot_uuid)
     except Exception as e:
         st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
         import traceback
@@ -245,10 +247,10 @@ def render_results_table(
             AgGrid(data, gridOptions=grid_options, height=400, fit_columns_on_grid_load=True)
         except ImportError:
             st.warning("AgGrid not available, falling back to dataframe", icon="⚠️")
-            st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
+            st.dataframe(prepare_df_for_display(data), hide_index=True, column_config=column_config)
     else:
         # Standard dataframe display
-        st.dataframe(data, use_container_width=True, hide_index=True, column_config=column_config)
+        st.dataframe(prepare_df_for_display(data), hide_index=True, column_config=column_config)
 
 
 def display_download_section(variables, sort_by: str = "id") -> None:

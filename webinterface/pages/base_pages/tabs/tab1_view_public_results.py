@@ -247,7 +247,7 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
             fig = plot_generator.plot_main_metric(
                 result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
             )
-            st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+            st.plotly_chart(fig, key=plot_uuid)
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
             import traceback

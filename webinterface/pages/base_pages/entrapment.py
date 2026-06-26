@@ -392,18 +392,28 @@ class EntrapmentUIObjects(BaseUIModule):
             "Bar colour indicates the validity category: "
             "**green** = valid, **orange** = inconclusive, **red** = invalid."
         )
-        sort_dir = st.radio(
-            "Sort by number of identified features",
-            ["Ascending ↑", "Descending ↓"],
-            index=1,
-            horizontal=True,
-            key=f"forest_sort_{session_key}",
-        )
+        col_sort, col_thresh = st.columns([2, 1])
+        with col_sort:
+            sort_dir = st.radio(
+                "Sort by number of identified features",
+                ["Ascending ↑", "Descending ↓"],
+                index=1,
+                horizontal=True,
+                key=f"forest_sort_{session_key}",
+            )
+        with col_thresh:
+            threshold_str = st.selectbox(
+                "Q-value threshold",
+                ["Maximum reported", "0.001", "0.01", "0.05", "0.1", "1.0"],
+                key=f"forest_threshold_{session_key}",
+            )
         sort_ascending = sort_dir.startswith("Ascending")
+        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
         try:
             fig = self.ionmodule.get_plot_generator().plot_forest(
                 all_data,
                 sort_ascending=sort_ascending,
+                threshold=threshold,
             )
             st.plotly_chart(fig, use_container_width=True, key=f"forest_plot_{session_key}")
         except Exception as e:
@@ -466,8 +476,6 @@ class EntrapmentUIObjects(BaseUIModule):
                 "the reported FDR is invalid and underestimated."
             )
 
-        self._render_forest_plot(session_key=self.variables.all_datapoints)
-
         st.subheader("FDR Control and Sensitivity Overview")
         st.markdown(
             "Each point represents a submitted workflow. "
@@ -495,17 +503,29 @@ class EntrapmentUIObjects(BaseUIModule):
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables)
 
+        def render_threshold_selector():
+            key = f"threshold_selector_{self.variables.all_datapoints}"
+            if key not in st.session_state:
+                st.session_state[key] = uuid.uuid4()
+            return st.selectbox(
+                "Q-value threshold",
+                ["Maximum reported", "0.001", "0.01", "0.05", "0.1", "1.0"],
+                key=st.session_state[key],
+            )
+
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
-            selector_callbacks=[render_metric_selector, render_colorblind_selector],
+            selector_callbacks=[render_metric_selector, render_threshold_selector, render_colorblind_selector],
             filter_cols_spec=1,
-            selector_cols_spec=[1, 1],
+            selector_cols_spec=[1, 1, 1],
         )
 
         # Extract returned values
         metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
-        colorblind_mode = results[2] if len(results) > 2 else False
+        threshold_str = results[2] if len(results) > 3 else "Maximum reported"
+        colorblind_mode = results[3] if len(results) > 2 else False
+        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
@@ -513,10 +533,12 @@ class EntrapmentUIObjects(BaseUIModule):
             plot_params={
                 "metric": metric,
                 "colorblind_mode": colorblind_mode,
+                "threshold": threshold,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
+            render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints),
         )
 
         with st.expander("Show more"):
@@ -544,8 +566,6 @@ class EntrapmentUIObjects(BaseUIModule):
             selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
             default_value="None",
         )
-
-        self._render_forest_plot(session_key=self.variables.all_datapoints_submitted)
 
         st.subheader("FDR Control and Sensitivity Overview")
         st.markdown(
@@ -578,7 +598,7 @@ class EntrapmentUIObjects(BaseUIModule):
             )
             metric = st.radio(
                 "Select metric to show in x axis",
-                ["Lower FDP bound", "Upper FDP bound - Paired method"],
+                ["Upper FDP bound - Paired method", "Lower FDP bound"],
                 help=help_text,
                 horizontal=True,
                 key=metric_uuid,
@@ -589,17 +609,29 @@ class EntrapmentUIObjects(BaseUIModule):
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables, use_submitted=True)
 
+        def render_threshold_selector():
+            key = f"threshold_selector_{self.variables.all_datapoints_submitted}"
+            if key not in st.session_state:
+                st.session_state[key] = uuid.uuid4()
+            return st.selectbox(
+                "Q-value threshold",
+                ["Maximum reported", "0.001", "0.01", "0.05", "0.1", "1.0"],
+                key=st.session_state[key],
+            )
+
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
-            selector_callbacks=[render_metric_selector, render_colorblind_selector],
+            selector_callbacks=[render_metric_selector, render_threshold_selector, render_colorblind_selector],
             filter_cols_spec=1,
-            selector_cols_spec=[1, 1],
+            selector_cols_spec=[1, 1, 1],
         )
 
         # Extract returned values
         metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
-        colorblind_mode = results[2] if len(results) > 2 else False
+        threshold_str = results[2] if len(results) > 2 else "Maximum reported"
+        colorblind_mode = results[3] if len(results) > 3 else False
+        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
@@ -610,10 +642,12 @@ class EntrapmentUIObjects(BaseUIModule):
             plot_params={
                 "metric": metric,
                 "colorblind_mode": colorblind_mode,
+                "threshold": threshold,
                 "label": label,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
+            render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints_submitted),
         )
 
         with st.expander("Show more"):

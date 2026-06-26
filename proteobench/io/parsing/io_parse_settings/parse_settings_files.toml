@@ -112,3 +112,4 @@
 
 [entrapment_DIA_ion_Astral]
 "DIA-NN" = "parse_settings_diann.toml"
+"FragPipe" = "parse_settings_fragpipe_DIA.toml"

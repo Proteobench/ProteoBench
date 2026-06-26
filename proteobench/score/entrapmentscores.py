@@ -56,10 +56,25 @@ class EntrapmentScores(ScoreBase):
         # select columns which are relevant for the statistics
         # TODO, this should be handled different, probably in the parse settings
 
-        necessary_columns = ["Raw file", "Peptide", "Sequence", "Charge", "Q-Value", "PEP", "Protein Group"]
+        necessary_columns = ["Peptide", "Sequence", "Charge", "Q-Value", "Protein Group"]
         for col in necessary_columns:
             if col not in filtered_df.columns:
                 raise ParseError(f"Necessary column '{col}' not found in the input DataFrame.")
+        # "Raw file" is optional: formats that aggregate across runs (e.g. FragPipe ion.tsv)
+        # do not expose a per-run column; fill with an empty string in that case.
+        if "Raw file" not in filtered_df.columns:
+            filtered_df = filtered_df.copy()
+            filtered_df["Raw file"] = ""
+
+        scores_to_sort_by = ["Q-Value", "PEP"]
+
+        if "PEP" not in filtered_df.columns:
+            if "Expectation" in filtered_df.columns:
+                # can use the reverse expectation score as a back up
+                filtered_df = filtered_df.copy()
+                filtered_df["PEP"] = 1 - filtered_df["Expectation"]
+            else:
+                scores_to_sort_by.pop("PEP")
 
         precursor_group_columns = ["Peptide", "Sequence", "Charge"]
 
@@ -74,7 +89,7 @@ class EntrapmentScores(ScoreBase):
         # 5. Assign a score to each entry based on its rank in the sorted DataFrame
 
         filtered_df = (
-            filtered_df.sort_values(["Q-Value", "PEP"], kind="mergesort")
+            filtered_df.sort_values(scores_to_sort_by, kind="mergesort")
             .groupby(precursor_group_columns, as_index=False, sort=False)
             .head(1)
             .reset_index(drop=True)
@@ -84,7 +99,7 @@ class EntrapmentScores(ScoreBase):
         filtered_df["Score"] = filtered_df.index + 1
 
         # assign 'entrapment' or 'target': if at least one protein (or peptide in case of a peptide level fasta) in the group is target,
-        # the whole group is target, otherwise it is entrapment
+        # the whole group is target, otherwise it is entrapment (p_target is entrapment)
         def assign_target_entrapment(protein_group: str) -> str:
             proteins = protein_group.split(";")
             for protein in proteins:
@@ -262,12 +277,13 @@ class EntrapmentScores(ScoreBase):
         n_intervals: int = 10,
     ) -> Dict[float, Dict[str, float]]:
         """
-        Compute lower-bound, combined, and paired FDP at evenly-spaced Q-value thresholds.
+        Compute lower-bound, combined, and paired FDP at Q-value thresholds.
 
-        Thresholds are spaced from ``max_q / n_intervals`` to ``max_q`` in
-        ``n_intervals`` equal steps, where ``max_q`` is the maximum Q-value in
-        ``df`` (i.e. the reported FDR). The mapping file is loaded once and the
-        pair-index merge is performed once; only the Q-value filter varies per step.
+        Thresholds are the union of ``n_intervals`` evenly-spaced values from
+        ``max_q / n_intervals`` to ``max_q`` and the fixed set
+        ``{0.001, 0.01, 0.05, 0.1, 1.0}`` capped at ``max_q``.
+        The mapping file is loaded once and the pair-index merge is performed
+        once; only the Q-value filter varies per step.
 
         Parameters
         ----------
@@ -292,7 +308,9 @@ class EntrapmentScores(ScoreBase):
         )
 
         max_q = float(df["Q-Value"].max())
-        thresholds = np.linspace(max_q / n_intervals, max_q, n_intervals)
+        fixed_thresholds = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
+        linspace_thresholds = list(np.linspace(max_q / n_intervals, max_q, n_intervals))
+        thresholds = sorted(set(fixed_thresholds + linspace_thresholds))
 
         result: Dict[float, Dict[str, float]] = {}
         for threshold in thresholds:
@@ -300,11 +318,16 @@ class EntrapmentScores(ScoreBase):
             if subset.empty or (subset["Target or Entrapment"] == "target").sum() == 0:
                 continue
             key = round(float(threshold), 8)
+            lower = EntrapmentScores.calculate_lower_bound_fdp(subset)
+            combined = EntrapmentScores.calculate_upper_bound_combined_fdp(subset)
+            paired = EntrapmentScores._paired_fdp_from_merged(subset)
             result[key] = {
-                "lower_bound_FDP": EntrapmentScores.calculate_lower_bound_fdp(subset),
-                "combined_FDP": EntrapmentScores.calculate_upper_bound_combined_fdp(subset),
-                "paired_FDP": EntrapmentScores._paired_fdp_from_merged(subset),
+                "lower_bound_FDP": lower,
+                "combined_FDP": combined,
+                "paired_FDP": paired,
                 "nr_id_features": int(subset.shape[0]),
+                "category_combined": EntrapmentScores.categorise_metric(lower, combined, threshold),
+                "category_paired": EntrapmentScores.categorise_metric(lower, paired, threshold),
             }
 
         return result

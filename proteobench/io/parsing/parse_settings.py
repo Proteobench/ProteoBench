@@ -871,7 +871,6 @@ class ParseSettingsEntrapment:
         self.mapper = parse_settings["mapper"]
         self.run_mapper = parse_settings["run_mapper"]
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
-        self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
         self.modification_parser = None
 
         # Regex pattern for cleaning run names (strips extensions, suffixes, paths)

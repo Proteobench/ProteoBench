@@ -88,7 +88,7 @@ def display_metric_selector(variables) -> str:
     help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
     metric = st.radio(
         "Select metric to show in x axis",
-        ["Lower FDP bound", "Upper FDP bound - Paired method"],
+        ["Upper FDP bound - Paired method", "Lower FDP bound"],
         help=help_text,
         horizontal=True,
     )
@@ -338,6 +338,7 @@ def display_existing_results(
     use_slider: bool = True,
     table_style: str = "dataframe",
     column_config: Optional[Dict] = None,
+    render_forest_plot=None,
 ) -> None:
     """
     Main orchestration function for displaying benchmark results.
@@ -358,6 +359,8 @@ def display_existing_results(
         Table rendering style ("dataframe" or "aggrid").
     column_config : Optional[Dict], optional
         Streamlit column configuration for dataframe display.
+    render_forest_plot : callable, optional
+        Optional callable that renders a forest plot between the scatter and the table.
     """
     # Initialize and filter data
     initialize_main_data_points(variables, ionmodule)
@@ -368,6 +371,9 @@ def display_existing_results(
 
     # Render main plot
     render_main_plot(plot_generator, filtered_data, variables, plot_params)
+
+    if render_forest_plot is not None:
+        render_forest_plot()
 
     # Render results table
     render_results_table(filtered_data, table_style, column_config)

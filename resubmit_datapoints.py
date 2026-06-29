@@ -1286,7 +1286,15 @@ def reprocess_datapoint(
             kwargs: dict[str, Any] = {
                 "input_format": input_format,
                 "user_input": user_input,
-                "all_datapoints": None,
+                # Start from an EMPTY datapoint table (not None). With None,
+                # add_current_data_point() loads the public repo and silently DROPS
+                # the freshly computed datapoint whenever its recomputed
+                # intermediate_hash already exists there (always the case for an
+                # unchanged resubmission). The downstream `all_dp.iloc[-1]` then
+                # returns an unrelated repo datapoint, corrupting the metrics.
+                # An empty frame has nothing to deduplicate against, so the
+                # recomputed datapoint is always appended and is the last row.
+                "all_datapoints": pd.DataFrame(),
             }
 
             # Module-specific kwargs
@@ -1299,15 +1307,27 @@ def reprocess_datapoint(
             else:
                 # Quant modules
                 default_cutoff = 3  # default
+                max_nr_observed = None
                 results_dict = dp_json.get("results", {})
                 if isinstance(results_dict, dict) and results_dict:
                     try:
                         cutoffs = [int(k) for k in results_dict.keys()]
+                        if cutoffs:
+                            default_cutoff = min(cutoffs)
+                            # Reproduce the original quantification depth. The plasma
+                            # module uses 12 nr_observed thresholds, the others 6.
+                            # If max_nr_observed is left as None, the PYE path only
+                            # applies the 12 default inside _get_plasma_metrics, while
+                            # the HYE base results dict it merges into defaults to 6 and
+                            # silently drops levels 7-12. Deriving it from the original
+                            # datapoint keeps every module at its original depth.
+                            max_nr_observed = max(cutoffs)
                         default_cutoff = min(cutoffs) if cutoffs else 3
                     except (ValueError, TypeError):
                         pass
                 kwargs["default_cutoff_min_feature"] = default_cutoff
-
+                if max_nr_observed is not None:
+                    kwargs["max_nr_observed"] = max_nr_observed
                 # AlphaDIA secondary file
                 if extracted["input_file_secondary"]:
                     kwargs["input_file_secondary"] = extracted["input_file_secondary"]
@@ -1316,6 +1336,20 @@ def reprocess_datapoint(
             if input_format == "MaxQuant" and parsed_params:
                 pass  # Applied after benchmarking below
             intermediate_result, all_dp, _ = module_instance.benchmarking(input_file_val, **kwargs)
+
+            # Safety guard: resubmission relies on the freshly computed datapoint
+            # being the last row of all_dp (it is tagged old_new="new"). If the
+            # dedup logic in add_current_data_point() ever drops it again, the last
+            # row would be an unrelated repo datapoint and its metrics would be
+            # written under this datapoint's id. Fail loudly instead of silently
+            # corrupting the datapoint (routes to status="error" in failed_items).
+            last_old_new = all_dp.iloc[-1].get("old_new") if len(all_dp) else None
+            if "old_new" not in all_dp.columns or str(last_old_new) != "new":
+                raise RuntimeError(
+                    "Freshly computed datapoint was not returned by benchmarking(): "
+                    f"all_dp has {len(all_dp)} row(s), last row old_new={last_old_new!r} "
+                    "(expected 'new'). Refusing to write mismatched metrics."
+                )
 
             # MaxQuant post-processing
             if input_format == "MaxQuant" and parsed_params:

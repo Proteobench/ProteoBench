@@ -14,7 +14,7 @@ runs. It is the name of a profile registered in
 1. an explicit ``[validation].profile`` key in the module's ``module_settings.toml``
    (the declarative path: adding a new module of an existing category is config-only);
 2. inferred from the module's parser class via the existing ``MODULE_TO_CLASS``
-   registry (``ParseSettingsQuant`` -> ``"quant_lfq"``, ``ParseSettingsDeNovo`` -> ``"denovo"``);
+   registry (``IntermediateFormatConverter`` -> ``"quant_lfq"``, ``ParseSettingsDeNovo`` -> ``"denovo"``);
 3. the :data:`DEFAULT_VALIDATION_PROFILE` fallback.
 
 A genuinely new category of module is supported by registering a new profile
@@ -54,7 +54,7 @@ DEFAULT_VALIDATION_PROFILE = "quant_lfq"
 #: Maps a parser class name to the default validation profile for that family.
 #: Resolution falls back to this when no ``[validation].profile`` is declared.
 _PROFILE_BY_PARSER_CLASS = {
-    "ParseSettingsQuant": "quant_lfq",
+    "IntermediateFormatConverter": "quant_lfq",
     "ParseSettingsDeNovo": "denovo",
 }
 
@@ -89,7 +89,7 @@ def _resolve_profile(module_id: str, declared_profile: Optional[str]) -> str:
         return declared_profile
 
     try:
-        from proteobench.io.parsing.parse_settings import MODULE_TO_CLASS
+        from proteobench.io.parsing.convert_to_intermediate import MODULE_TO_CLASS
 
         parser_cls = MODULE_TO_CLASS.get(module_id)
         if parser_cls is not None:
@@ -181,7 +181,7 @@ class ModuleValidationConfig:
         """
         Build a config from the existing parse settings of a module/tool.
 
-        This reuses :class:`~proteobench.io.parsing.parse_settings.ParseSettingsBuilder`
+        This reuses :class:`~proteobench.io.parsing.convert_to_intermediate.ConverterBuilder`
         to read the contaminant flag and species flags for the selected tool,
         reads the optional ``[reference_database]`` and ``[validation]`` sections
         from the module's ``module_settings.toml``, and resolves the validation
@@ -208,9 +208,9 @@ class ModuleValidationConfig:
         # Best effort: read the contaminant flag and species from the tool parser.
         # Wrapped defensively so validation never crashes on a parser issue.
         try:
-            from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+            from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 
-            builder = ParseSettingsBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id)
+            builder = ConverterBuilder(parse_settings_dir=parse_settings_dir, module_id=module_id)
             parser = builder.build_parser(input_format)
             config.contaminant_flag = getattr(parser, "contaminant_flag", None)
             species = parser.species_dict() if hasattr(parser, "species_dict") else {}

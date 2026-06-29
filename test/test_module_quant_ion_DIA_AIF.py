@@ -4,8 +4,9 @@ import pandas as pd
 import pytest
 
 from proteobench.exceptions import DatapointGenerationError
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.new_parse_input import load_module_settings, process_species
+from proteobench.io.parsing.load_input import load_input_file
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.score.quantscoresHYE import QuantScoresHYE
 
@@ -54,7 +55,7 @@ def load_file(format_name: str):
 class TestSoftwareToolOutputParsing:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_valid_and_supported_search_tool_settings_exists(self, software_tool):
-        parse_settings = ParseSettingsBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DIA_ion_AIF")
+        parse_settings = ConverterBuilder(parse_settings_dir=PARSE_SETTINGS_DIR, module_id="quant_lfq_DIA_ion_AIF")
         assert software_tool in parse_settings.INPUT_FORMATS
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
@@ -64,7 +65,7 @@ class TestSoftwareToolOutputParsing:
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_settings_parser_created_successfully(self, software_tool):
-        parse_settings_builder = ParseSettingsBuilder(
+        parse_settings_builder = ConverterBuilder(
             module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
@@ -72,12 +73,13 @@ class TestSoftwareToolOutputParsing:
 
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_software_tool_output_converted_to_standard_format(self, software_tool):
-        parse_settings_builder = ParseSettingsBuilder(
+        parse_settings_builder = ConverterBuilder(
             module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
         input_df = load_file(software_tool)
-        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        prepared_df = parse_settings.convert_to_standard_format(input_df)
+        replicate_to_raw = parse_settings.create_replicate_mapping()
 
         assert not prepared_df.empty
         assert replicate_to_raw != {}
@@ -86,17 +88,20 @@ class TestSoftwareToolOutputParsing:
 class TestQuantScores:
     @pytest.mark.parametrize("software_tool", TESTED_SOFTWARE_TOOLS)
     def test_intermediate_generated_from_software_tool_output(self, software_tool):
-        parse_settings_builder = ParseSettingsBuilder(
+        parse_settings_builder = ConverterBuilder(
             module_id="quant_lfq_DIA_ion_AIF", parse_settings_dir=PARSE_SETTINGS_DIR
         )
         parse_settings = parse_settings_builder.build_parser(software_tool)
 
         input_df = load_file(software_tool)
-        prepared_df, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        prepared_df = parse_settings.convert_to_standard_format(input_df)
+        replicate_to_raw = parse_settings.create_replicate_mapping()
 
-        # Get quantification data
+        # Process species and get quantification data
+        module_settings = load_module_settings(PARSE_SETTINGS_DIR)
+        prepared_df = process_species(prepared_df, module_settings)
         quant_score = QuantScoresHYE(
-            "precursor ion", parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            "precursor ion", module_settings.species_expected_ratio, module_settings.species_dict
         )
         intermediate = quant_score.generate_intermediate(prepared_df, replicate_to_raw)
 

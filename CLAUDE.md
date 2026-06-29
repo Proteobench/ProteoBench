@@ -89,25 +89,29 @@ So, for example, `from proteobench.score.quantscoresHYE import QuantScoresHYE` a
 
 ### Core Benchmarking Pipeline
 
-The reference entry point is `run_benchmarking()` in `proteobench/modules/quant/benchmarking.py`. **Only two modules actually delegate to it:** `DDAQuantIonModuleQExactive.benchmarking()` calls `run_benchmarking()`, and `DDAQuantIonAstralModule.benchmarking()` calls `run_benchmarking_with_timing()` (a profiling variant returning an extra `timings` dict with per-step durations) and slices `[:3]`. The Astral DDA module also exposes a `benchmarking_2()` that returns the full 4-tuple including `timings`. **All other quant modules implement the same load/parse/score/datapoint pipeline inline within their own `benchmarking()` methods** rather than calling the shared helper.
+The reference entry point is `run_benchmarking()` in `proteobench/modules/quant/benchmarking.py`, which now receives **already-parsed** data plus a `ModuleSettings` object and returns a 2-tuple `(intermediate, all_datapoints)`. **All quant modules share a single `benchmarking()` implementation on the `QuantModule` base class** — no module overrides it. The base method calls `parse_input()` and `load_module_settings()` (from `io/parsing/new_parse_input.py`) to produce the standard format, replicate mapping, and module settings, then delegates to `run_benchmarking()`, passing `quant_score_class=self.quant_score_class` and `datapoint_class=self.datapoint_class` so each module's scoring/datapoint classes are dispatched via class attributes (defaults `QuantScoresHYE`/`QuantDatapointHYE`; e.g. Plasma sets `QuantScoresPYE`/`QuantDatapointPYE`). The base `benchmarking()` returns a 3-tuple `(intermediate, all_datapoints, input_df)`, re-loading `input_df` for webinterface compatibility. The earlier profiling variant `run_benchmarking_with_timing()` and the Astral `benchmarking_2()` were removed in PR #1012.
 
-In `run_benchmarking()`, each step is a helper wrapped with `handle_benchmarking_error(<ExceptionType>, ...)`, which maps raised exceptions to the custom exception hierarchy (see `proteobench/exceptions.py`). Note that `run_benchmarking_with_timing()` calls the underlying functions directly and does **not** apply this error wrapping.
+**Parsing layer (`io/parsing/new_parse_input.py`).** `parse_input(input_file, input_format, module_id, parse_settings_dir, input_file_secondary=None) -> ParsedInput` wraps the load->convert sequence: it calls `load_input_file()` (in `io/parsing/load_input.py`), builds the converter via `ConverterBuilder(...).build_parser(input_format)`, then calls `convert_to_standard_format(input_df)` and `create_replicate_mapping()`, returning a `ParsedInput(standard_format, replicate_to_raw)` dataclass. `load_module_settings(parse_settings_dir) -> ModuleSettings` reads `module_settings.toml` into a `ModuleSettings` dataclass (`species_dict`, `species_expected_ratio`, `min_count_multispec`, `analysis_level`, `samples: List[SampleAnnotation]`) exposing derived `condition_mapper`/`run_mapper`/`replicate_to_raw` properties. A standalone `process_species(df, module_settings)` adds per-species boolean columns and filters multi-species rows by `min_count_multispec`.
 
-**Pipeline steps (decorated helpers in `run_benchmarking`):**
+In `run_benchmarking()`, each of the four scoring/datapoint steps is a helper wrapped with `handle_benchmarking_error(<ExceptionType>, ...)`, which maps raised exceptions to the custom exception hierarchy (see `proteobench/exceptions.py`). The input-loading, settings-loading, and standard-format-conversion steps now run in the parsing layer (`parse_input()`), not inside `run_benchmarking()`.
 
-1. **Load input** (`_load_input`, `ParseError`) - `io/parsing/parse_ion.py:load_input_file()` dispatches to format-specific loaders via the `_LOAD_FUNCTIONS` dict (17 entries). AlphaDIA has special handling: auto-detects matrix vs long format between two files and supports v1 (TSV) and v2 (parquet).
+**Parsing-layer steps (run by `parse_input()` / `load_module_settings()`, before `run_benchmarking()`):**
 
-2. **Load settings** (`_load_settings`, `ParseSettingsError`) - `ParseSettingsBuilder(parse_settings_dir, module_id).build_parser(input_format)` loads the tool's TOML config and builds a `ParseSettingsQuant` parser.
+1. **Load input** (`ParseError`) - `io/parsing/load_input.py:load_input_file()` dispatches to format-specific loaders via the `_LOAD_FUNCTIONS` dict (18 entries). AlphaDIA has special handling: auto-detects matrix vs long format between two files and supports v1 (TSV) and v2 (parquet).
 
-3. **Convert to standard format** (`_convert_format`, `ConvertStandardFormatError`) - `ParseSettingsQuant.convert_to_standard_format()` runs a 10-step pipeline: validate/rename columns, create replicate mapping, filter decoys, clean run names via `_clean_run_name()` regex, mark contaminants, process species (filter multi-species by `min_count_multispec`), process modifications to ProForma notation, melt wide-to-long if needed (with run-name cleanup on the `Raw file` column), filter zero intensities, format by analysis level (create the "precursor ion" or "peptidoform" column).
+2. **Build converter** (`ParseSettingsError`) - `ConverterBuilder(parse_settings_dir, module_id).build_parser(input_format)` loads the tool's TOML config and builds an `IntermediateFormatConverter`.
 
-4. **Create quant scores** (`_create_quant_scores`, `QuantificationError`) - instantiates `QuantScoresHYE(precursor_column_name, species_expected_ratio, species_dict)`.
+3. **Convert to standard format** (`ConvertStandardFormatError`) - `IntermediateFormatConverter.convert_to_standard_format()` runs an 8-step pipeline and returns **only** the standard DataFrame (the replicate mapping comes from a separate `create_replicate_mapping()`): validate/rename columns, fix column names via `_clean_run_name()` regex, melt wide-to-long if needed (with run-name cleanup on the `Raw file` column), filter decoys, mark contaminants, process modifications to ProForma notation, filter zero intensities, format by analysis level (create the "precursor ion" or "peptidoform" column). Species filtering by `min_count_multispec` is no longer part of this converter; it runs via `process_species()` in `new_parse_input.py`.
+
+**Steps inside `run_benchmarking()` (decorated helpers; it receives parsed data + `ModuleSettings` and first calls `process_species(standard_format, module_settings)`):**
+
+4. **Create quant scores** (`_create_quant_scores`, `QuantificationError`) - instantiates `quant_score_class(precursor_column_name, module_settings.species_expected_ratio, module_settings.species_dict)`, where `quant_score_class` defaults to `QuantScoresHYE` but is supplied by the module (`QuantScoresPYE` for Plasma).
 
 5. **Generate intermediate** (`_generate_intermediate`, `IntermediateFormatGenerationError`) - `QuantScoresHYE.generate_intermediate()`:
    - `compute_condition_stats()`: Groups by precursor/condition, computes log2 intensities, CV (= Intensity_std/Intensity_mean), pivots wide with columns like `log_Intensity_mean_A`, `CV_B`. Calculates `log2_A_vs_B = log_Intensity_mean_A - log_Intensity_mean_B`.
    - `compute_epsilon()`: Filters to single-species precursors (`unique==1`), assigns `log2_expectedRatio` per species (e.g., log2(2.0) for YEAST), computes `epsilon = log2_A_vs_B - log2_expectedRatio` (accuracy) plus the empirical per-species centers `log2_empirical_median`/`log2_empirical_mean` and `epsilon_precision_median`/`epsilon_precision_mean = log2_A_vs_B - empirical_center` (precision/reproducibility). When no single-species precursors remain it returns an empty DataFrame with the expected columns.
 
-6. **Generate datapoint** (`_generate_datapoint`, `DatapointGenerationError`) - `QuantDatapointHYE.generate_datapoint()`:
+6. **Generate datapoint** (`_generate_datapoint`, `DatapointGenerationError`) - calls `datapoint_class.generate_datapoint()` (default `QuantDatapointHYE`; `QuantDatapointPYE` for Plasma), passing `default_cutoff_min_feature`:
    - Computes `intermediate_hash` = SHA1 of the intermediate DataFrame string representation (`intermediate.to_string()`).
    - Calls `get_metrics()` for `min_nr_observed` thresholds `1..max_nr_observed` (default 6; configurable, the Plasma/PYE path uses 12), producing a nested dict `{threshold: {metric_name: value, ...}, ...}`.
    - Metrics include: epsilon accuracy (`{median,mean}_abs_epsilon_global` and `_eq_species`, plus per-species), epsilon precision (`*_abs_epsilon_precision_global`/`_eq_species`), per-species empirical centers (`{median,mean}_log2_empirical_{SPECIES}`), CV quantiles (`CV_median`/`q75`/`q90`/`q95`), `roc_auc` (abs-log2FC based), precursor counts (`nr_prec`), and `variance_epsilon_global`. Note: `compute_roc_auc_directional()` is implemented but is **not** invoked by `get_metrics()`, so only the abs-based ROC-AUC is stored.
@@ -121,7 +125,7 @@ After scoring, each row is one precursor/peptidoform. Key columns: precursor ion
 
 ### Results Dictionary Structure
 
-The `results` field in each datapoint is `{1: {...}, 2: {...}, ..., N: {...}}` where keys are `min_nr_observed` thresholds (1..max_nr_observed, default N=6) and values contain all metrics for that threshold. This allows querying performance at different stringency levels. The default display threshold (`default_cutoff_min_prec`) is 3. Keys are integers when generated in-process; the legacy/filter code also handles string keys for JSON-loaded data.
+The `results` field in each datapoint is `{1: {...}, 2: {...}, ..., N: {...}}` where keys are `min_nr_observed` thresholds (1..max_nr_observed, default N=6) and values contain all metrics for that threshold. This allows querying performance at different stringency levels. The default display threshold (`default_cutoff_min_feature`) is 3. Keys are integers when generated in-process; the legacy/filter code also handles string keys for JSON-loaded data.
 
 ### Accuracy vs Precision Metrics
 
@@ -160,30 +164,28 @@ Each `run_benchmarking()` step wraps its errors into the appropriate type via `h
 Each software tool + module combination has a TOML file in `proteobench/io/parsing/io_parse_settings/Quant/lfq/<DDA|DIA>/<ion|peptidoform>/<instrument>/`. The master mapping is `io_parse_settings/parse_settings_files.toml` (maps `module_id` sections to TOML filenames). Each settings directory also has a `module_settings.toml`.
 
 `io_parse_settings/tool_metadata.toml` is a platform-wide metadata file with one section:
-- `[open_source].tools`: list of tool names whose source code is publicly available (13 entries: AdaNovo, AlphaDIA, AlphaPept, Casanovo, DeepNovo, i2MassChroQ, InstaNovo, MetaMorpheus, Pi-HelixNovo, Pi-PrimeNovo, PointNovo, Sage, ProlineStudio). Used by `get_open_source_tools()` in `parse_settings.py` to populate the `open_source` (✅) column in the Benchmark Results table. Names must match the `software_name` values set in `io/params/*.py`.
+- `[open_source].tools`: list of tool names whose source code is publicly available (13 entries: AdaNovo, AlphaDIA, AlphaPept, Casanovo, DeepNovo, i2MassChroQ, InstaNovo, MetaMorpheus, Pi-HelixNovo, Pi-PrimeNovo, PointNovo, Sage, ProlineStudio). Used by `get_open_source_tools()` in `convert_to_intermediate.py` to populate the `open_source` (✅) column in the Benchmark Results table. Names must match the `software_name` values set in `io/params/*.py`.
 
-**Parser classes.** There are three classes in `parse_settings.py`:
-- `ParseSettingsQuant`: parser for all quant modules.
+**Parser classes.** There are three classes in `convert_to_intermediate.py`:
+- `IntermediateFormatConverter`: parser for all quant modules.
 - `ParseSettingsDeNovo`: parser for `denovo_DDA_HCD`. It uses different TOML sections (`[mapper]`, `[spectrum_id_mapper]`, `[sequence_mapper]`) and loads a ground-truth CSV (`GROUND_TRUTH_FILENAME`), checking `GROUND_TRUTH_DIR_SERVER`, then `GROUND_TRUTH_DIR_LOCAL_DENOVO`, then downloading from `GROUND_TRUTH_URL`.
-- `ParseModificationSettings`: backs the optional `[modifications_parser]` section, attached by `ParseSettingsBuilder.build_parser()` only when that section is present.
+- `ModificationConverter`: backs the optional `[modifications_parser]` section, attached by `ConverterBuilder.build_parser()` only when that section is present.
 
 **Quant tool TOML structure:**
 - `[mapper]`: column renames (e.g., `"Sequence" = "Sequence"`)
-- `[condition_mapper]`: raw file name -> condition ("A"/"B"). Keys are normalized at init via `_clean_run_name()` (extensions like `.mzML`, `.raw` are stripped automatically).
-- `[run_mapper]`: raw file name -> display name (also normalized at init)
-- `[species_mapper]`: protein ID flag -> species (e.g., `"_YEAST" = "YEAST"`)
 - `[general]`: `contaminant_flag`, `decoy_flag`, and optionally `run_name_cleanup` (regex to override the default extension-stripping pattern)
+- `[condition_mapper]` / `[run_mapper]` (optional, per-tool **fallback** only): since PR #1012 condition/run mapping normally comes from `[[samples]]` in `module_settings.toml`. These per-tool tables are used only for tools whose column names cannot be matched to raw file names via regex cleanup (e.g. WOMBAT, MSAngel, Proteome Discoverer); `[run_mapper]` maps a tool column name -> `sample_name`, which is then joined to `[[samples]]` for the condition. `[species_mapper]` is **no longer** a per-tool section (moved to `module_settings.toml`).
 - `[modifications_parser]` (optional): `parse_column`, `before_aa`, `isalpha`, `isupper`, `pattern` (regex), `modification_dict` (mass -> name)
 - `[upload_info]`: human-readable guidance shown in the web UI when the tool is selected. Keys: `datapoint_file` (filename), `datapoint_file_description` (shown above the result-file uploader in Tab 2), `params_file` (filename), `params_file_description` (shown above the metadata uploader in Tab 6). Markdown is supported in description strings. The Custom format uses `datapoint_file_description` to embed a module-specific link to the documentation. Missing `[upload_info]` is handled gracefully — no message is shown.
-- `[upload_info_overrides.<tool_name>]` (optional): per-tool overrides applied on top of `[upload_info]` when `ParseSettingsBuilder.get_upload_info(tool_name)` is called. Used when multiple tool names share the same TOML file but require different upload guidance. Example: `parse_settings_diann.toml` is shared by "DIA-NN" and "FragPipe (DIA-NN quant)"; the override supplies the correct `.workflow` params description for the latter.
+- `[upload_info_overrides.<tool_name>]` (optional): per-tool overrides applied on top of `[upload_info]` when `ConverterBuilder.get_upload_info(tool_name)` is called. Used when multiple tool names share the same TOML file but require different upload guidance. Example: `parse_settings_diann.toml` is shared by "DIA-NN" and "FragPipe (DIA-NN quant)"; the override supplies the correct `.workflow` params description for the latter.
 
 ### Run Name Cleanup (`_clean_run_name`)
 
-File/column names from tool outputs may include extensions (`.mzML`, `.raw`, `.mzML.gz`, `.d`, `.wiff`) or tool-specific suffixes (`_uncalibrated` from FragPipe DIA-NN, see #827). The `_clean_run_name()` method on `ParseSettingsQuant` strips these using a regex so they match the `condition_mapper` keys. The default regex is:
+File/column names from tool outputs may include extensions (`.mzML`, `.raw`, `.mzML.gz`, `.d`, `.wiff`) or tool-specific suffixes (`_uncalibrated` from FragPipe DIA-NN, see #827). The `_clean_run_name()` method on `IntermediateFormatConverter` strips these using a regex so they match the `condition_mapper` keys. The default regex is:
 ```
-(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$
+(?:\.mzML\.gz|\.mzML|\.mgf|\.raw|\.RAW|\.d|\.wiff|_uncalibrated| Intensity| Normalized Area)$
 ```
-It also strips path prefixes, but path stripping is **disabled for DataFrame column names** (`strip_path=False`) so columns like PEAKS' `m/z` are not mangled; it is applied (with `strip_path=True`) to `Raw file` column values and to `condition_mapper`/`run_mapper` keys at init. To override per-tool, add to the TOML:
+It also strips path prefixes, but path stripping is **disabled for DataFrame column names** (`strip_path=False`) so columns like PEAKS' `m/z` are not mangled; it is applied (with `strip_path=True`) to `Raw file` column values and to the `[[samples]]`-derived `condition_mapper`/`run_mapper` keys at init. To override per-tool, add to the TOML:
 ```toml
 [general]
 run_name_cleanup = "(?:\\.custom_suffix|\\.raw)$"
@@ -191,9 +193,13 @@ run_name_cleanup = "(?:\\.custom_suffix|\\.raw)$"
 
 **Module settings TOML structure:**
 - `[species_expected_ratio.<SPECIES>]`: `A_vs_B` (float ratio), `color` (hex)
+- `[species_mapper]`: protein ID flag -> species (e.g., `"_YEAST" = "YEAST"`); **moved here from the per-tool TOMLs in PR #1012**, read by `load_module_settings()` (`ModuleSettings.species_dict`)
+- `[[samples]]`: array of sample-annotation tables, each with `raw_file`, `sample_name`, `condition`; loaded into `SampleAnnotation` dataclasses and used to derive the `condition_mapper`/`run_mapper`/`replicate_to_raw` (replacing the old per-tool `[condition_mapper]`/`[run_mapper]`)
 - `[general]`: `min_count_multispec` (int), `level` ("ion" or "peptidoform")
+- `[reference_database]` (optional): `fasta_url` — see the Submission Validation Layer section
+- `[validation]` (optional): `profile` — validation profile name
 
-The `MODULE_TO_CLASS` dict at the bottom of `parse_settings.py` routes module IDs to parser classes: all `quant_lfq_*` modules use `ParseSettingsQuant`, and `denovo_DDA_HCD` uses `ParseSettingsDeNovo`. (It has no `quant_lfq_DIA_peptidoform` entry, matching that module being an unregistered stub.) The validation layer reuses this dict to infer a module's default validation profile.
+The `MODULE_TO_CLASS` dict at the bottom of `convert_to_intermediate.py` routes module IDs to parser classes: all `quant_lfq_*` modules use `IntermediateFormatConverter`, and `denovo_DDA_HCD` uses `ParseSettingsDeNovo`. (It has no `quant_lfq_DIA_peptidoform` entry, matching that module being an unregistered stub.) The validation layer reuses this dict to infer a module's default validation profile.
 
 `io/parsing/utils.py` provides ProForma fixed-modification helpers: `add_fixed_mod(proforma, mod_name, aas)` and `add_maxquant_fixed_modifications(params, result_perf)`.
 
@@ -209,7 +215,7 @@ A `maxdia.py` parser exists (delegating to MaxQuant's parser) but is **not** wir
 
 Each quant benchmark module is a thin subclass of `QuantModule` that sets `module_id`, GitHub repo names, and typically a precursor column. The `MODULE_SETTINGS_DIRS` dict in `modules/constants.py` maps module IDs to their TOML config directories (10 entries; `quant_lfq_DIA_peptidoform` is deliberately absent).
 
-`QuantModule.__init__` defaults `self.precursor_column_name = ""`. Most modules override it (e.g. `"precursor ion"` / `"peptidoform"`), but `DIAQuantIonModulediaSC` and `DIAQuantIonModulePlasma` instead set `self.precursor_name` (used in their inline benchmarking), leaving `precursor_column_name` empty.
+`QuantModule.__init__` defaults `self.precursor_column_name = ""`, and every module overrides it: `"precursor ion"` for the ion modules (including single-cell and Plasma) or `"peptidoform"` for the peptidoform modules. The shared base `benchmarking()` passes `self.precursor_column_name` to `run_benchmarking()`. (The old `self.precursor_name` attribute was removed in PR #1012.) Modules also set `quant_score_class`/`datapoint_class` (defaulting to `QuantScoresHYE`/`QuantDatapointHYE`; Plasma uses the PYE variants) to select scoring/datapoint behavior without overriding `benchmarking()`.
 
 The `MODULE_CLASSES` dict in `utils/server_io.py` maps module class-name strings to classes for programmatic instantiation, but it currently lists **only 7** modules (QExactive DDA; AIF, Astral, diaPASEF, low input DIA; DDA and DIA peptidoform). It does **not** include the Astral DDA, ZenoTOF, Plasma, or de novo modules; `make_submission()` raises `ValueError` for those names.
 
@@ -267,7 +273,7 @@ Streamlit multi-page app. Entry point: `Home.py` (`StreamlitPageHome`, inherits 
 1. `variables`: a `Variables*` dataclass **instance** from `pages/pages_variables/` (defines session state keys with unique prefixes, plus sidebar metadata for module registry discovery and a `texts` attribute)
 2. `texts`: a `WebpageTexts` class (UI copy)
 3. `ionmodule`: the backend module **class** (instantiated with the token inside `BaseStreamlitUI`)
-4. `parsesettingsbuilder`: the `ParseSettingsBuilder` class
+4. `parsesettingsbuilder`: the `ConverterBuilder` class
 5. `uiobjects`: `QuantUIObjects` or `DeNovoUIObjects`
 6. `page_name`: the sidebar label
 
@@ -353,7 +359,7 @@ A framework-agnostic, **registry-driven** validation package that checks uploade
 
 **Profile resolution** (`ModuleValidationConfig.from_parse_settings`, in precedence order):
 1. explicit `[validation].profile` in the module's `module_settings.toml` (declarative);
-2. inferred from the parser class via the existing `MODULE_TO_CLASS` registry (`ParseSettingsQuant` → `quant_lfq`, `ParseSettingsDeNovo` → `denovo`);
+2. inferred from the parser class via the existing `MODULE_TO_CLASS` registry (`IntermediateFormatConverter` → `quant_lfq`, `ParseSettingsDeNovo` → `denovo`);
 3. `DEFAULT_VALIDATION_PROFILE` (`quant_lfq`).
 
 An unregistered profile name produces a single `unknown_validation_profile` warning and runs nothing (never blocks).
@@ -447,7 +453,7 @@ Only two module-level test files exist: `test_module_quant_ion_DDA_QExactive.py`
 
 **Other test files (not module/param tests):**
 - `test_quant_datapoint.py` - unit tests for `QuantDatapointHYE`/`QuantScoresHYE` (epsilon accuracy/precision metrics); the largest test file (~18 functions across `TestQuantDatapointHYE`, `TestEpsilonPrecision`, `TestQuantScoresComputeEpsilon`)
-- `test_parse_settings.py` - `TestParseSettingsQuant` validates each step of `convert_to_standard_format()`
+- `test_convert_to_intermediate.py` - `TestIntermediateFormatConverter` validates each step of `convert_to_standard_format()`
 - `test_plot_quant.py` - `TestPlotDataPoint`
 - `test_modules_constants.py` - parametrized check that every `MODULE_SETTINGS_DIRS` entry resolves to an existing directory
 - `test_github_repo.py` - tests for `GithubProteobotRepo`
@@ -486,7 +492,7 @@ Separate workflow for the webinterface (`test-streamlit.yml`):
 1. Create a module class in `modules/quant/` inheriting `QuantModule`, setting `module_id`, the precursor column, and repo names
    - For submission validation (see the Submission Validation Layer section): add a `[reference_database] fasta_url = "..."` entry to the new module's `module_settings.toml` (if absent, protein-identifier validation is silently skipped). A quant module auto-resolves to the `quant_lfq` profile; a module of a new category should declare `[validation] profile = "<name>"` and register a matching profile in `proteobench/validation/profiles.py`.
 2. Add the settings directory to `MODULE_SETTINGS_DIRS` in `modules/constants.py`
-3. Register the parse settings class in `MODULE_TO_CLASS` in `parse_settings.py`
+3. Register the parse settings class in `MODULE_TO_CLASS` in `convert_to_intermediate.py`
 4. Create TOML configs: `module_settings.toml` + per-tool parse settings in the new directory
 5. Add the module class to `MODULE_CLASSES` in `utils/server_io.py` (needed for programmatic submission)
 6. Create a Streamlit page in `webinterface/pages/`
@@ -511,12 +517,12 @@ Parameter field definitions are in `proteobench/io/params/json/`. Present files:
 | `DIAQuantIonModulediaPASEF` | `quant_lfq_DIA_ion_diaPASEF` | `precursor ion` | `Results_quant_ion_DIA_diaPASEF` | No |
 | `DIAQuantIonModuleAstral` | `quant_lfq_DIA_ion_Astral` | `precursor ion` | `Results_quant_ion_DIA_Astral` | No |
 | `DIAQuantIonModuleZenoTOF` | `quant_lfq_DIA_ion_ZenoTOF` | `precursor ion` | `Results_quant_lfq_DIA_ion_ZenoTOF` | No |
-| `DIAQuantIonModulediaSC` | `quant_lfq_DIA_ion_lowinput` | `precursor ion`* | `Results_quant_ion_DIA_lowinput` | No |
-| `DIAQuantIonModulePlasma` | `quant_lfq_DIA_ion_plasma` | `precursor ion`* | `Results_quant_ion_DIA_plasma` | No |
+| `DIAQuantIonModulediaSC` | `quant_lfq_DIA_ion_lowinput` | `precursor ion` | `Results_quant_ion_DIA_lowinput` | No |
+| `DIAQuantIonModulePlasma` | `quant_lfq_DIA_ion_plasma` | `precursor ion` | `Results_quant_ion_DIA_plasma` | No |
 | `DDAQuantPeptidoformModule` | `quant_lfq_DDA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DDA` | No |
 | `DIAQuantPeptidoformModule` | `quant_lfq_DIA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DIA` | No (stub, raises NotImplementedError) |
 
-*The low input and Plasma modules set `self.precursor_name` instead of `self.precursor_column_name`, so the documented value is the intent but `precursor_column_name` stays `""` at runtime.
+Since PR #1012 the low-input and Plasma modules set `self.precursor_column_name = "precursor ion"` like the other ion modules (the old `self.precursor_name` attribute was removed).
 
 ### De Novo Module (`proteobench/modules/denovo/`)
 

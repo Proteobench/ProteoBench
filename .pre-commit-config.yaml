@@ -69,7 +69,7 @@ repos:
     rev: "v1.8.0"
     hooks:
       - id: numpydoc-validation
-        exclude: "test/.*|exceptions.py|noxfile.py|jupyter_notebooks/.*|docs/parse_tables.py"
+        exclude: "test/.*|exceptions.py|noxfile.py|jupyter_notebooks/.*|docs/parse_tables.py|webinterface/.*|modules/denovo/.*|test_data_download/.*"
   - repo: local
     hooks:
       - id: check-contributing-institutes-symlink

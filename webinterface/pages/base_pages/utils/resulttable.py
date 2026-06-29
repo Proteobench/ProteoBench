@@ -1,7 +1,7 @@
 import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
 
-from proteobench.io.parsing.parse_settings import get_open_source_tools
+from proteobench.io.parsing.convert_to_intermediate import get_open_source_tools
 
 # this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
 

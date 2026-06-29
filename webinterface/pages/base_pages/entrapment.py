@@ -15,12 +15,12 @@ from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import
 from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
     DIAEntrapmentIonModuleAstral as IonModule,
 )
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
     DIAEntrapmentIonModuleAstral as IonModule,
 )
@@ -48,7 +48,7 @@ class EntrapmentUIObjects(BaseUIModule):
         The variables for the entrapment module.
     ionmodule : IonModule
         The entrapment module.
-    parsesettingsbuilder : ParseSettingsBuilder
+    parsesettingsbuilder : ConverterBuilder
         The parse settings builder.
     """
 
@@ -56,7 +56,7 @@ class EntrapmentUIObjects(BaseUIModule):
         self,
         variables: VariablesDIAEntrapmentAstral,
         ionmodule: IonModule,
-        parsesettingsbuilder: ParseSettingsBuilder,
+        parsesettingsbuilder: ConverterBuilder,
         page_name: str = "/",
     ) -> None:
         """
@@ -68,7 +68,7 @@ class EntrapmentUIObjects(BaseUIModule):
             The variables for the entrapment module.
         ionmodule : IonModule
             The entrapment module.
-        parsesettingsbuilder : ParseSettingsBuilder
+        parsesettingsbuilder : ConverterBuilder
             The parse settings builder.
         """
         super().__init__(

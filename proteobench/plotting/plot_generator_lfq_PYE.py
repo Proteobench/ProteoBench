@@ -23,7 +23,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         self.y_axis_title = y_axis_title
 
     def generate_in_depth_plots(
-        self, performance_data: pd.DataFrame, parse_settings: any, **kwargs
+        self, performance_data: pd.DataFrame, species_expected_ratio: dict = None, **kwargs
     ) -> Dict[str, go.Figure]:
         """
         Generate standard LFQ PYE plots from intermediate data.
@@ -32,8 +32,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         ----------
         performance_data : pd.DataFrame
             The intermediate performance data to plot
-        parse_settings : ParseSettings
-            The parse settings for the module
+        species_expected_ratio : dict, optional
+            Expected ratios per species from module_settings.toml.
         **kwargs : dict
             Additional module-specific parameters
 
@@ -44,10 +44,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         """
         plots = {}
 
-        # Get expected ratios from parse settings if available
-        try:
-            species_expected_ratio = parse_settings.species_expected_ratio()
-        except:
+        if species_expected_ratio is None:
             species_expected_ratio = {}
 
         # Generate fold change histogram

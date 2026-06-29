@@ -23,7 +23,7 @@ from streamlit_extras.let_it_rain import rain
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
@@ -51,7 +51,7 @@ class DeNovoUIObjects(BaseUIModule):
         The variables for the quantification module.
     ionmodule : IonModule
         The quantification module.
-    parsesettingsbuilder : ParseSettingsBuilder
+    parsesettingsbuilder : ConverterBuilder
         The parse settings builder.
     """
 
@@ -59,7 +59,7 @@ class DeNovoUIObjects(BaseUIModule):
         self,
         variables: VariablesDDADeNovo,
         ionmodule: IonModule,
-        parsesettingsbuilder: ParseSettingsBuilder,
+        parsesettingsbuilder: ConverterBuilder,
         page_name: str = "/",
     ) -> None:
         """
@@ -71,7 +71,7 @@ class DeNovoUIObjects(BaseUIModule):
             The variables for the de novo module.
         ionmodule : IonModule
             The de novo module.
-        parsesettingsbuilder : ParseSettingsBuilder
+        parsesettingsbuilder : ConverterBuilder
             The parse settings builder.
         """
         super().__init__(
@@ -302,7 +302,6 @@ class DeNovoUIObjects(BaseUIModule):
                             if plot_name in descriptions:
                                 st.caption(descriptions[plot_name])
                             self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
-                            # st.plotly_chart(plots[plot_name], use_container_width=True)
 
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
@@ -334,7 +333,7 @@ class DeNovoUIObjects(BaseUIModule):
                 st.plotly_chart(
                     figs[mod_label],
                     key=f"ptm_plot_{mod_label}",
-                    use_container_width=True,
+                    width="stretch",
                 )
 
     def _display_spectrum_features(self, figs) -> None:

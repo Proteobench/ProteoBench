@@ -21,8 +21,8 @@ from proteobench.exceptions import (
     ParseSettingsError,
     EntrapmentError,
 )
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.load_input import load_input_file
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.entrapment.entrapment_base_module import EntrapmentModule
 
@@ -136,7 +136,7 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
 
         # Parse settings file
         try:
-            parse_settings = ParseSettingsBuilder(
+            parse_settings = ConverterBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
         except KeyError as e:

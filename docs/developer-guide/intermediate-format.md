@@ -22,7 +22,7 @@ There are two distinct tables:
 
 | Artifact | Produced by | Persisted | Consumed by |
 |----------|-------------|-----------|-------------|
-| **Standard format** (pre-scoring) | `ParseSettingsQuant.convert_to_standard_format()` | No (in-memory) | Scoring; the submission-validation layer |
+| **Standard format** (pre-scoring) | `IntermediateFormatConverter.convert_to_standard_format()` | No (in-memory) | Scoring; the submission-validation layer |
 | **Intermediate format** (post-scoring) | `QuantScoresHYE.generate_intermediate()` | Yes, as `result_performance.csv` in the dataset archive; also hashed into `intermediate_hash` | Plotting, datapoint metrics, the "View Single Result" table |
 
 The intermediate format is the primary subject of this specification. The
@@ -32,7 +32,7 @@ tool parser must produce.
 ## Standard format
 
 Produced by `convert_to_standard_format()` in
-`proteobench/io/parsing/parse_settings.py`. It is a long table with one row per
+`proteobench/io/parsing/convert_to_intermediate.py`. It is a long table with one row per
 (e.g., precursor, run for the precursor quantification module): a precursor 
 that was quantified in six runs yields six rows. The table is not projected to a fixed column set, so unmapped input columns may
 also be present; only the columns below are relied upon downstream (this is quite specific
@@ -147,6 +147,6 @@ MaxQuant DDA submission.
 ## Non-goals
 
 - This specification does not define the per-tool native output formats; those
-  are handled by the format-specific loaders in `io/parsing/parse_ion.py`.
+  are handled by the format-specific loaders in `io/parsing/load_input.py`.
 - It does not define the datapoint JSON stored in the results repositories; that
   is a separate structure built by the `QuantDatapoint*` classes.

@@ -1,4 +1,10 @@
-"""All formats available for the module."""
+"""
+Converters that transform raw vendor DataFrames into the intermediate format.
+
+Contains IntermediateFormatConverter (quant), ModificationConverter, ConverterBuilder,
+and ParseSettingsDeNovo (de novo). The ConverterBuilder reads per-tool TOML configs
+and instantiates the appropriate converter.
+"""
 
 from __future__ import annotations
 
@@ -13,10 +19,11 @@ import pandas as pd
 import toml
 from psm_utils import Peptidoform
 
-from .parse_ion import get_proforma_bracketed
+from .proforma import get_proforma_bracketed
 
 # IMPORTANT: it is defined here, but filled in after defining the classes
 # new classes need to be filled in there too!!!
+
 MODULE_TO_CLASS = {}
 GROUND_TRUTH_DIR_SERVER = "/mnt/data/proteobench/module_data/"
 
@@ -44,7 +51,7 @@ def get_open_source_tools() -> set:
     return {name.lower() for name in metadata.get("open_source", {}).get("tools", [])}
 
 
-class ParseSettingsBuilder:
+class ConverterBuilder:
     """
     Class to build the parser settings for a given input format.
 
@@ -58,7 +65,7 @@ class ParseSettingsBuilder:
 
     def __init__(self, parse_settings_dir: str, module_id: str):
         """
-        Initialize the ParseSettingsBuilder object.
+        Initialize the ConverterBuilder object.
 
         Parameters
         ----------
@@ -105,7 +112,7 @@ class ParseSettingsBuilder:
 
         Returns
         -------
-        ParseSettings
+        IntermediateFormatConverter
             The parser for the specified input format.
         """
         toml_file = self.PARSE_SETTINGS_FILES[input_format]
@@ -114,7 +121,7 @@ class ParseSettingsBuilder:
 
         parser = MODULE_TO_CLASS[self.MODULE_ID](parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
-            parser.add_modification_parser(ParseModificationSettings(parse_settings))
+            parser.add_modification_parser(ModificationConverter(parse_settings))
 
         return parser
 
@@ -149,7 +156,7 @@ class ParseSettingsBuilder:
         return {**base, **override}
 
 
-class ParseSettingsQuant:
+class IntermediateFormatConverter:
     """
     Structure that contains all the parameters used to parse
     the given benchmark run output depending on the software tool used.
@@ -164,7 +171,19 @@ class ParseSettingsQuant:
 
     def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
         """
-        Initialize the ParseSettings object with the parameters from the TOML files.
+        Initialize the converter with parameters from the TOML files.
+
+        The condition_mapper is resolved in this order:
+
+        1. Per-tool TOML ``[condition_mapper]`` (if present — takes priority).
+        2. Per-tool TOML ``[run_mapper]`` + ``[[samples]]`` from module_settings.toml:
+           column_name → sample_name (via run_mapper) → condition (via [[samples]]).
+           Used for tools with completely tool-specific column names (WOMBAT, Proteome
+           Discoverer, PEAKS peptidoform) whose column names cannot be matched to raw
+           file names via regex cleanup alone.
+        3. ``[[samples]]`` from module_settings.toml directly: raw_file → condition.
+           Used for long-format tools and wide-format tools whose column names match
+           bare raw file names (after extension stripping by ``_clean_run_name()``).
 
         Parameters
         ----------
@@ -174,14 +193,24 @@ class ParseSettingsQuant:
             Module-specific settings, typically loaded from a TOML file.
         """
         self.mapper = parse_settings["mapper"]
-        self.condition_mapper = parse_settings["condition_mapper"]
-        self.run_mapper = parse_settings["run_mapper"]
+        if "condition_mapper" in parse_settings:
+            self.condition_mapper = parse_settings["condition_mapper"]
+        elif "run_mapper" in parse_settings and "samples" in parse_settings_module:
+            # Tier 3: tool-specific column names → sample_name (run_mapper) → condition ([[samples]])
+            # Used when column names bear no resemblance to raw file names (WOMBAT, Proteome Discoverer, etc.)
+            name_to_condition = {s["sample_name"]: s["condition"] for s in parse_settings_module["samples"]}
+            self.condition_mapper = {
+                col: name_to_condition[name]
+                for col, name in parse_settings["run_mapper"].items()
+                if name in name_to_condition
+            }
+        elif "samples" in parse_settings_module:
+            self.condition_mapper = {s["raw_file"]: s["condition"] for s in parse_settings_module["samples"]}
+        else:
+            raise ValueError("No condition_mapper found in per-tool TOML or [[samples]] in module_settings.toml")
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
-        self._species_dict = parse_settings["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
-        self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
         self.analysis_level = parse_settings_module["general"]["level"]
-        self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
         self.modification_parser = None
 
         # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
@@ -196,38 +225,19 @@ class ParseSettingsQuant:
                     f"Please fix the pattern in the TOML configuration. Details: {exc}"
                 ) from exc
         else:
-            # Default: strip common MS file extensions and known suffixes
-            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
+            # Default: strip common MS file extensions and tool-added column suffixes.
+            # Covers: standard MS extensions, FragPipe ` Intensity`, PEAKS ` Normalized Area`,
+            # Proline `.mgf`, and FragPipe DIA-NN `_uncalibrated` (see #827).
+            self._run_name_cleanup = re.compile(
+                r"(?:\.mzML\.gz|\.mzML|\.mgf|\.raw|\.RAW|\.d|\.wiff|_uncalibrated| Intensity| Normalized Area)$"
+            )
 
-        # Normalize the condition_mapper and run_mapper keys using the same cleanup
+        # Normalize the condition_mapper keys using the same cleanup
         # so that keys like "file.mzML" and column names like "file.mzML" both
         # resolve to "file" after cleaning (see #827, #876)
         self.condition_mapper = {self._clean_run_name(k): v for k, v in self.condition_mapper.items()}
-        self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
 
-    def species_dict(self) -> Dict[str, str]:
-        """
-        Get the species dictionary.
-
-        Returns
-        -------
-        Dict[str, str]
-            A dictionary of species mappings.
-        """
-        return self._species_dict
-
-    def species_expected_ratio(self) -> float:
-        """
-        Get the expected species ratio.
-
-        Returns
-        -------
-        float
-            The expected ratio of species.
-        """
-        return self._species_expected_ratio
-
-    def add_modification_parser(self, parser: ParseModificationSettings):
+    def add_modification_parser(self, parser: ModificationConverter):
         """
         Add a modification parser to the settings.
 
@@ -296,10 +306,10 @@ class ParseSettingsQuant:
         Fix column names in the DataFrame by applying the cleanup regex.
 
         Strips tool-specific column suffixes (e.g. `` Intensity`` for FragPipe,
-        `` Normalized Area`` for PEAKS) and MS file extensions so that wide-format
-        column names line up with ``condition_mapper`` keys. Does not apply
-        path-prefix stripping, which would break metadata column names containing
-        ``/`` (e.g. PEAKS' ``m/z`` column).
+        `` Normalized Area`` for PEAKS) and MS file extensions so that wide-
+        format column names line up with ``condition_mapper`` keys for the
+        subsequent melt. Does not apply path-prefix stripping, which would
+        break metadata column names containing ``/`` (e.g. PEAKS' ``m/z``).
 
         Parameters
         ----------
@@ -332,28 +342,6 @@ class ParseSettingsQuant:
         df_no_contaminants = df[df["contaminant"] == False].copy()
         return df_no_contaminants
 
-    def _process_species_information(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Generate species information from the DataFrame.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Input DataFrame containing protein data.
-
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame with processed species information.
-        """
-        # Process species flags
-        for flag, species in self._species_dict.items():
-            df[species] = df["Proteins"].str.contains(flag)
-
-        # Filter multi-species
-        df["MULTI_SPEC"] = df[list(self._species_dict.values())].sum(axis=1) > self.min_count_multispec
-        return df[df["MULTI_SPEC"] == False]
-
     def _validate_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Validate and rename columns according to the mapper.
@@ -376,7 +364,7 @@ class ParseSettingsQuant:
         df.rename(columns=self.mapper, inplace=True)
         return df
 
-    def _create_replicate_mapping(self) -> Dict[int, List[str]]:
+    def create_replicate_mapping(self) -> Dict[int, List[str]]:
         """
         Create replicate mapping for the DataFrame.
 
@@ -485,21 +473,19 @@ class ParseSettingsQuant:
         else:
             raise ValueError(f"Analysis level '{self.analysis_level}' not supported.")
 
-    def convert_to_standard_format(self, df: pd.DataFrame) -> tuple[pd.DataFrame, Dict[int, List[str]]]:
+    def convert_to_standard_format(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Convert a software tool output into a generic format supported by the module.
 
         Steps:
         1. Validate and rename columns
-        2. Create replicate mapping
-        3. Filter decoys
-        4. Fix column names
+        2. Fix column names (clean run names)
+        3. Handle data format (melt wide to long if needed)
+        4. Filter decoys
         5. Mark contaminants
-        6. Process species information
-        7. Handle data format (long vs short)
-        8. Process modifications if needed
-        9. Filter zero intensities
-        10. Format based on analysis level
+        6. Process modifications if needed
+        7. Filter zero intensities
+        8. Format based on analysis level
 
         Parameters
         ----------
@@ -508,22 +494,20 @@ class ParseSettingsQuant:
 
         Returns
         -------
-        tuple[pd.DataFrame, Dict[int, List[str]]]
-            The converted DataFrame and a dictionary mapping replicates to raw data.
+        pd.DataFrame
+            The converted DataFrame in standard format.
         """
         df = self._validate_and_rename_columns(df)
-        replicate_to_raw = self._create_replicate_mapping()
-        df = self._filter_decoys(df)
         df = self._fix_colnames(df)
+        df = self._handle_data_format(df)
+        df = self._filter_decoys(df)
         df = self._mark_contaminants(df)
-        df = self._process_species_information(df)
         df = self._process_modifications(df)
-        df_melted = self._handle_data_format(df)
-        df_melted = self._filter_zero_intensities(df_melted)
-        return self._format_by_analysis_level(df_melted), replicate_to_raw
+        df = self._filter_zero_intensities(df)
+        return self._format_by_analysis_level(df)
 
 
-class ParseModificationSettings:
+class ModificationConverter:
     """
     Settings for parsing modifications in protein data.
 
@@ -535,7 +519,7 @@ class ParseModificationSettings:
 
     def __init__(self, parse_settings: Dict[str, Any]):
         """
-        Initialize ParseModificationSettings.
+        Initialize ModificationConverter.
 
         Parameters
         ----------
@@ -593,7 +577,19 @@ class ParseModificationSettings:
 
 
 class ParseSettingsDeNovo:
-    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+    """
+    Parse settings and converter for de novo sequencing tool outputs.
+
+    Parameters
+    ----------
+    parse_settings : Dict[str, Any]
+        Tool-specific settings loaded from TOML.
+    parse_settings_module : Dict[str, Any]
+        Module-level settings loaded from TOML.
+    """
+
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):  # numpydoc ignore=PR01
+        """Initialize with tool-specific and module-level settings."""
         self.mapper = parse_settings["mapper"]
         self.spectrum_id_mapper = parse_settings["spectrum_id_mapper"]
         self.sequence_mapper = parse_settings["sequence_mapper"]
@@ -646,14 +642,18 @@ class ParseSettingsDeNovo:
                 sequence = sequence.replace(key, value)
         return sequence
 
-    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length=False) -> List[float]:
+    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length: bool = False) -> List[float]:
         """
         Format the amino acid scores into a list of float numbers.
 
         Parameters
         ----------
-        aa_scores : List[float]
+        aa_scores : Any
             The input list of scores.
+        peptidoform : Peptidoform
+            The peptidoform object for length correction.
+        fix_aa_length : bool, optional
+            Whether to fix AA score length for collapsed N-term modifications.
 
         Returns
         -------
@@ -677,15 +677,49 @@ class ParseSettingsDeNovo:
             # aa_scores = [float(score) for score in aa_scores]
         return aa_scores
 
-    def add_modification_parser(self, parser: ParseModificationSettings):
+    def add_modification_parser(self, parser: ModificationConverter):
+        """
+        Add a modification parser to the settings.
+
+        Parameters
+        ----------
+        parser : ModificationConverter
+            The modification parser to add.
+        """
         self.modification_parser = parser
 
     def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
+        """
+        Get peptidoform length including N-terminal modifications.
+
+        Parameters
+        ----------
+        peptidoform : Peptidoform
+            The peptidoform object.
+
+        Returns
+        -------
+        int
+            Length of peptidoform including N-terminal modifications.
+        """
         if peptidoform.properties["n_term"] is None:
             return len(peptidoform)
         return len(peptidoform) + len(peptidoform.properties["n_term"])
 
     def add_features(self, df: pd.DataFrame):
+        """
+        Add PTM and peptide length features to the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with peptidoform columns.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with added feature columns.
+        """
         columns_to_keep_gt = [
             "spectrum_id",
             "peptidoform",
@@ -802,10 +836,10 @@ class ParseSettingsDeNovo:
         else:
             df["proforma"] = df["sequence"]
 
-        def convert_to_peptidoform(proforma):
+        def convert_to_peptidoform(proforma):  # numpydoc ignore=GL08
             try:
                 return Peptidoform(proforma)
-            except:
+            except:  # noqa: E722
                 return None
 
         if "proforma" in df.columns:
@@ -945,7 +979,7 @@ class ParseSettingsEntrapment:
         df.rename(columns=self.mapper, inplace=True)
         return df
 
-    def add_modification_parser(self, parser: ParseModificationSettings):
+    def add_modification_parser(self, parser: ModificationConverter):
         """
         Add a modification parser to the settings.
 
@@ -994,15 +1028,15 @@ class ParseSettingsEntrapment:
 
 
 MODULE_TO_CLASS = {
-    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
-    "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
-    "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_lowinput": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
+    "quant_lfq_DDA_ion_Astral": IntermediateFormatConverter,
+    "quant_lfq_DDA_ion_QExactive": IntermediateFormatConverter,
+    "quant_lfq_DDA_peptidoform": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_AIF": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_diaPASEF": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_lowinput": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_Astral": IntermediateFormatConverter,
     "denovo_DDA_HCD": ParseSettingsDeNovo,
-    "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_plasma": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_ZenoTOF": IntermediateFormatConverter,
+    "quant_lfq_DIA_ion_plasma": IntermediateFormatConverter,
     "entrapment_DIA_ion_Astral": ParseSettingsEntrapment,
 }

@@ -714,6 +714,18 @@ def apply_pr_corrections(
         # What did the current parsing produce?
         auto_parsed = getattr(parsed_params, key, "[MISSING]")
 
+        # If the parser now reproduces the corrected value up to formatting
+        # (e.g. whitespace differences), defer to the parser so an improved
+        # parser supersedes a stale frozen override instead of being clobbered.
+        if _correction_superseded_by_parser(parsed_params, key, new_val):
+            logger.info(
+                f"  [{intermediate_hash[:12]}] {key}: parser now produces "
+                f"'{auto_parsed}', equivalent to corrected '{new_str}' up to "
+                f"formatting; using parsed value (stale override superseded)"
+            )
+            user_input[key] = auto_parsed
+            continue
+
         # Compare: does current parsing now produce the corrected value?
         auto_matches_new = _values_equal(auto_parsed, new_val)
         auto_matches_old = _values_equal(auto_parsed, old_val)
@@ -756,6 +768,42 @@ def _values_equal(a: Any, b: Any) -> bool:
         return str(a) == str(b)
     except Exception:
         return a == b
+
+
+def _values_equal_normalized(a: Any, b: Any) -> bool:
+    """
+    Like _values_equal, but ignores whitespace differences between string values.
+
+    Used to detect when the current parser reproduces a previously corrected
+    value up to formatting only (e.g. "[-10ppm, 10ppm]" vs "[-10 ppm, 10 ppm]").
+    """
+    if _values_equal(a, b):
+        return True
+    if a is None or b is None:
+        return False
+    if isinstance(a, float) and np.isnan(a):
+        return False
+    if isinstance(b, float) and np.isnan(b):
+        return False
+    return re.sub(r"\s+", "", str(a)) == re.sub(r"\s+", "", str(b))
+
+
+def _correction_superseded_by_parser(parsed_params: Any, key: str, new_val: Any) -> bool:
+    """
+    Return True when the freshly parsed parameter already matches the corrected
+    value up to formatting (whitespace), so the stored override is redundant.
+
+    A stored correction is meant to fix a value the parser once got wrong. Once
+    the parser is fixed, replaying the frozen corrected string can reintroduce a
+    stale formatting (e.g. "[-10ppm, 10ppm]" instead of the now-correct
+    "[-10 ppm, 10 ppm]"). In that case the parser output should win.
+    """
+    if parsed_params is None or not hasattr(parsed_params, key):
+        return False
+    auto_parsed = getattr(parsed_params, key)
+    if _values_equal(auto_parsed, new_val):
+        return False  # exact match: applying the override changes nothing
+    return _values_equal_normalized(auto_parsed, new_val)
 
 
 def compare_results(
@@ -1371,7 +1419,14 @@ def reprocess_datapoint(
                 # Apply effective corrections on top of that
                 if effective_corrections:
                     for key, (_, new_val) in effective_corrections.items():
-                        new_datapoint[key] = _coerce_value(new_val)
+                        coerced = _coerce_value(new_val)
+                        if _correction_superseded_by_parser(parsed_params, key, coerced):
+                            logger.info(
+                                f"  [{intermediate_hash[:12]}] {key}: keeping parsed value "
+                                f"'{getattr(parsed_params, key)}' over stale override '{new_val}'"
+                            )
+                            continue
+                        new_datapoint[key] = coerced
 
                 # Preserve fields from the original submission that must not be
                 # recalculated or overwritten during resubmission.

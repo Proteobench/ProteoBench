@@ -389,16 +389,16 @@ def extract_params(
     # Format some values
     all_parameters["precursor_mass_tolerance"] = (
         "[-"
-        + all_parameters["precursor_mass_tolerance"]
+        + all_parameters["precursor_mass_tolerance"].strip()
         + "ppm, "
-        + all_parameters["precursor_mass_tolerance"]
+        + all_parameters["precursor_mass_tolerance"].strip()
         + "ppm]"
     )
     all_parameters["fragment_mass_tolerance"] = (
         "[-"
-        + all_parameters["fragment_mass_tolerance"]
+        + all_parameters["fragment_mass_tolerance"].strip()
         + " ppm, "
-        + all_parameters["fragment_mass_tolerance"]
+        + all_parameters["fragment_mass_tolerance"].strip()
         + " ppm]"
     )
 

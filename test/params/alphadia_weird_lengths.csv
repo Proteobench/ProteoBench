@@ -7,7 +7,7 @@ ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,0.01
 enable_match_between_runs,True
-precursor_mass_tolerance,"[-15ppm, 15ppm]"
+precursor_mass_tolerance,"[-15 ppm, 15 ppm]"
 fragment_mass_tolerance,"[-15 ppm, 15 ppm]"
 enzyme,Trypsin/P
 allowed_miscleavages,1

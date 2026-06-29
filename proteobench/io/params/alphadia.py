@@ -395,7 +395,11 @@ def extract_params(
         + "ppm]"
     )
     all_parameters["fragment_mass_tolerance"] = (
-        "[-" + all_parameters["fragment_mass_tolerance"] + "ppm, " + all_parameters["fragment_mass_tolerance"] + "ppm]"
+        "[-"
+        + all_parameters["fragment_mass_tolerance"]
+        + " ppm, "
+        + all_parameters["fragment_mass_tolerance"]
+        + " ppm]"
     )
 
     # 'True' and 'False' to boolean

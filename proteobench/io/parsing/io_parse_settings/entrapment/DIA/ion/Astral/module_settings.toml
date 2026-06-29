@@ -1,0 +1,3 @@
+[general]
+"level" = "ion"
+"mapping_file" = "https://proteobench.cubimed.rub.de/datasets/module_data/ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt.gz"

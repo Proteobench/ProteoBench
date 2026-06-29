@@ -62,15 +62,15 @@ class TestLoadModuleSettings:
         assert len(r2r["A"]) == 3
         assert len(r2r["B"]) == 3
 
-    def test_loads_singlecell_settings(self):
-        singlecell_dir = os.path.abspath(
+    def test_loads_lowinput_settings(self):
+        lowinput_dir = os.path.abspath(
             os.path.join(
                 os.path.dirname(__file__),
                 "..",
-                "proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/singlecell",
+                "proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/lowinput",
             )
         )
-        ms = load_module_settings(singlecell_dir)
+        ms = load_module_settings(lowinput_dir)
         assert "_YEAST" in ms.species_dict
         assert "_HUMAN" in ms.species_dict
         assert "_ECOLI" not in ms.species_dict

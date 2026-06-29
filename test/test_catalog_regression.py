@@ -24,7 +24,7 @@ from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonMod
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import DIAQuantIonModulediaPASEF
-from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import DIAQuantIonModulediaSC
+from proteobench.modules.quant.quant_lfq_ion_DIA_lowinput import DIAQuantIonModulediaSC
 from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
 from proteobench.modules.quant.quant_lfq_peptidoform_DDA import DDAQuantPeptidoformModule
 
@@ -39,7 +39,7 @@ MODULE_KEY_TO_CLASS = {
     "dia_diapasef": DIAQuantIonModulediaPASEF,
     "dia_aif": DIAQuantIonModuleAIF,
     "dia_zenotof": DIAQuantIonModuleZenoTOF,
-    "dia_singlecell": DIAQuantIonModulediaSC,
+    "dia_lowinput": DIAQuantIonModulediaSC,
 }
 
 METRICS_TO_CHECK = [

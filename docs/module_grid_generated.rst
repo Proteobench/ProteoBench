@@ -81,6 +81,26 @@ Available ProteoBench modules
         +++
         `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-denovo-dda-hcd/>`__
 
+    .. grid-item-card:: Entrapment DIA ion Astral
+        :columns: 6 6 4 4
+        :padding: 1
+
+        :bdg-info:`in development`
+        ^^^
+        
+        +++
+        `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/>`__
+
+    .. grid-item-card:: Quant LFQ DIA ion Low Input
+        :columns: 6 6 4 4
+        :padding: 1
+
+        :bdg-info:`in development`
+        ^^^
+        Benchmark identification and quantification workflows for low-input and single-cell proteomics using DIA acquisitions.
+        +++
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-lowinput/>`__
+
     .. grid-item-card:: Quant LFQ DIA ion Plasma
         :columns: 6 6 4 4
         :padding: 1
@@ -90,16 +110,6 @@ Available ProteoBench modules
         Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample.
         +++
         `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/>`__
-
-    .. grid-item-card:: Quant LFQ DIA ion Single Cell
-        :columns: 6 6 4 4
-        :padding: 1
-
-        :bdg-info:`in development`
-        ^^^
-        Benchmark identification and quantification workflows for low-input and single-cell proteomics using DIA acquisitions.
-        +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_singlecell>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-singlecell/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion AIF
         :columns: 6 6 4 4
@@ -125,3 +135,4 @@ Modules in discussion
 * `benchmark with Dynamic Organellar Mapping <https://github.com/orgs/Proteobench/discussions/404>`__ — Single-species benchmark using spatial proteomics.
 * `DDA identification - phosphopeptides <https://github.com/orgs/Proteobench/discussions/625>`__ — Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy.
 * `Identification with DDA <https://github.com/orgs/Proteobench/discussions/373>`__ — Benchmark the identification sensitivity and specificity of data dependent acquisition workflows using an entrapment strategy.
+* `Feature finding algorithms for MALDI MS imaging  <https://github.com/orgs/Proteobench/discussions/1072>`__ — Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides.

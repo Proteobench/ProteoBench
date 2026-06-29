@@ -2,7 +2,7 @@
   "_doc": "Per-hash baseline overrides for test_catalog_regression.py. When a hash appears here, the harness compares the regenerated metrics against the `metrics` block below instead of the upstream Results_* JSON. Use this to accept deliberate drift caused by pipeline refactors until the upstream Results JSONs are resubmitted. When a submission is resubmitted upstream with fresh metrics, delete its entry here.",
 
   "0b5a0c9b8387b98db6f1c287c516fa6ddf2a74ee": {
-    "module": "dia_singlecell",
+    "module": "dia_lowinput",
     "software": "FragPipe (DIA-NN quant) 23.1",
     "reason": "proteobench 0.13.2 -> 0.15.x parsing pipeline refactor (species_mapper move, pipeline reorder). Consistent ~1% nr_prec drop across all FragPipe (DIA-NN quant) cases. Accepted 2026-04-23.",
     "metrics": {

@@ -400,6 +400,26 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def get_all_parameter_fields() -> frozenset:
+    """Return the union of all parameter field names defined across every JSON file in the params/json/ directory.
+
+    This is the canonical, module-agnostic set of parameter column names.
+    New modules only need to add their JSON file — no other code changes required.
+    """
+    json_root = os.path.join(os.path.dirname(__file__), "json")
+    fields: set = set()
+    for dirpath, _, filenames in os.walk(json_root):
+        for fname in filenames:
+            if not fname.endswith(".json"):
+                continue
+            try:
+                with open(os.path.join(dirpath, fname), encoding="utf-8") as fh:
+                    fields.update(json.load(fh).keys())
+            except (OSError, json.JSONDecodeError):
+                pass
+    return frozenset(fields)
+
+
 # Automatically initialize from fields.json if run directly
 if __name__ == "__main__":
     proteo_params = ProteoBenchParameters()

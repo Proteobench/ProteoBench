@@ -949,7 +949,6 @@ def _build_pareto_scatter(
 
     if per_tool_fronts is not None:
         # Per-tool mode: all points colored by tool; front points are larger/opaque.
-        all_front_ids = set().union(*per_tool_fronts.values()) if per_tool_fronts else set()
         for sw_name in sorted(sw_col.unique()):
             tool_mask = sw_col == sw_name
             tool_df = dfc[tool_mask]

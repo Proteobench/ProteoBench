@@ -365,11 +365,6 @@ class EntrapmentScores(ScoreBase):
             The maximum value found in ``score_col``, interpreted as the applied
             FDR threshold.
         """
-        print(f"Calculating reported FDR from column '{score_col}'")
-        print(f"Available columns in DataFrame: {df.columns.tolist()}")
-        print(f"DataFrame shape: {df.shape}")
-        print(f"DataFrame head:\n{df.head()}")
-        print(float(df[score_col].max()))
         return float(df[score_col].max())
 
     def calculate_metrics(

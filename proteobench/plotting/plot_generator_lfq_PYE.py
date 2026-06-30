@@ -2,7 +2,7 @@
 Plot generator for LFQ PYE (Plasma-Yeast-Ecoli) quantification modules.
 """
 
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd

@@ -471,11 +471,11 @@ class EntrapmentUIObjects(BaseUIModule):
             st.markdown("##### Interpreting results")
             st.markdown(
                 "The FDP interval is compared to the declared FDR threshold of the workflow:\n\n"
-                "- **Valid** (green bar): both FDP bounds are lower than the declared FDR threshold — "
+                "- **Valid**: both FDP bounds are lower than the declared FDR threshold — "
                 "FDR control is valid (but overestimated).\n"
-                "- **Inconclusive** (orange bar): the FDP interval includes the threshold — "
+                "- **Inconclusive**: the FDP interval includes the threshold — "
                 "insufficient evidence to confirm or reject FDR calculation.\n"
-                "- **Invalid** (red bar): both FDP bounds exceed the declared threshold — "
+                "- **Invalid**: both FDP bounds exceed the declared threshold — "
                 "the reported FDR is invalid and underestimated."
             )
 

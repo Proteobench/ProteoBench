@@ -240,9 +240,13 @@ class EntrapmentScores(ScoreBase):
         # Nr_E_s_T: mapped entrapments with no identified paired target
         Nr_E_s_T = int(entrap_target["Score_target"].isna().sum())
 
-        # Nr_E_T_s: pairs where entrapment has a better (higher) score than target
+        # Nr_E_T_s: pairs where entrapment has a better (lower) score than target
         paired = entrap_target.dropna(subset=["Score_target"])
-        Nr_E_T_s = int((paired["Score_entrap"] > paired["Score_target"]).sum())
+        Nr_E_T_s = int((paired["Score_entrap"] < paired["Score_target"]).sum())
+
+        print("for paired FDP calculation:")
+        print(f"Nr_E: {Nr_E}, Nr_T: {Nr_T}, Nr_E_s_T: {Nr_E_s_T}, Nr_E_T_s: {Nr_E_T_s}")
+        print(f"Paired FDP: {(Nr_E + Nr_E_s_T + 2 * Nr_E_T_s) / (Nr_T + Nr_E)}")
 
         return (Nr_E + Nr_E_s_T + 2 * Nr_E_T_s) / (Nr_T + Nr_E)
 

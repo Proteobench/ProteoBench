@@ -59,7 +59,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 "plots": ["qq"],
                 "columns": 1,
                 "titles": {
-                    "qq": "FDP vs Q-value Threshold",
+                    "qq": "Estimated FDP vs Q-value Threshold",
                 },
             },
         ]
@@ -75,11 +75,12 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         """
         return {
             "qq": (
-                "False discovery proportion (FDP) as a function of Q-value threshold. "
-                "The grey dashed diagonal marks FDP = FDR (perfect calibration). "
+                "Estimated false discovery proportion (FDP) bounds as a function of Q-value threshold. "
+                "The grey dashed diagonal marks estimated FDP = FDR (perfect calibration). "
                 "Points below the diagonal indicate conservative FDR control; "
-                "points above indicate that the empirical FDP exceeds the declared threshold. "
-                "The shaded band spans the FDP uncertainty interval (lower bound to combined upper bound). "
+                "points above indicate that the estimated FDP exceeds the declared threshold. "
+                "The shaded band spans the estimated FDP uncertainty interval (lower bound to combined "
+                "upper bound). "
                 "The right axis shows the number of identified features at each threshold."
             ),
         }
@@ -88,11 +89,11 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         self, performance_data: pd.DataFrame, fdp_curve: dict = None, mapping_file: str = None
     ) -> go.Figure:
         """
-        Plot FDP (lower bound, combined, paired) against Q-value threshold.
+        Plot estimated FDP bounds (lower bound, combined, paired) against Q-value threshold.
 
-        Each FDP estimator is shown as a line. The grey dashed diagonal marks
-        perfect calibration (FDP = declared FDR). The shaded band spans the
-        uncertainty interval between the lower and combined upper FDP bounds.
+        Each estimated FDP bound is shown as a line. The grey dashed diagonal marks
+        perfect calibration (estimated FDP = declared FDR). The shaded band spans the
+        uncertainty interval between the estimated lower and combined upper FDP bounds.
         A secondary right-hand axis shows the number of identified features at
         each threshold.
 
@@ -113,7 +114,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         Returns
         -------
         go.Figure
-            Plotly figure with the FDP calibration curve.
+            Plotly figure with the estimated FDP calibration curve.
         """
         if fdp_curve is None:
             try:
@@ -124,7 +125,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 fig = go.Figure()
                 fig.update_layout(
                     xaxis_title="Q-value threshold",
-                    yaxis_title="FDP",
+                    yaxis_title="Estimated FDP",
                     template="plotly_white",
                     height=500,
                     annotations=[
@@ -166,15 +167,15 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         nr_features = [fdp_curve[t]["nr_id_features"] for t in thresholds]
 
         hover_lower = [
-            f"Q-value ≤ {t:.5f}<br>Lower bound FDP: {l:.4f}<br>Nr features: {n}"
+            f"Q-value ≤ {t:.5f}<br>Estimated lower bound FDP: {l:.4f}<br>Nr features: {n}"
             for t, l, n in zip(thresholds, lower, nr_features)
         ]
         hover_combined = [
-            f"Q-value ≤ {t:.5f}<br>Combined FDP: {c:.4f}<br>Nr features: {n}"
+            f"Q-value ≤ {t:.5f}<br>Estimated combined FDP: {c:.4f}<br>Nr features: {n}"
             for t, c, n in zip(thresholds, combined, nr_features)
         ]
         hover_paired = [
-            f"Q-value ≤ {t:.5f}<br>Paired FDP: {p:.4f}<br>Nr features: {n}"
+            f"Q-value ≤ {t:.5f}<br>Estimated paired FDP: {p:.4f}<br>Nr features: {n}"
             for t, p, n in zip(thresholds, paired, nr_features)
         ]
         hover_nr = [f"Q-value ≤ {t:.5f}<br>Nr features: {n}" for t, n in zip(thresholds, nr_features)]
@@ -189,7 +190,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 fill="toself",
                 fillcolor="rgba(120,120,120,0.12)",
                 line=dict(color="rgba(0,0,0,0)"),
-                name="FDP uncertainty band",
+                name="Estimated FDP uncertainty band",
                 hoverinfo="skip",
                 showlegend=True,
             )
@@ -200,7 +201,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 x=thresholds,
                 y=lower,
                 mode="lines+markers",
-                name="Lower bound FDP",
+                name="Estimated lower bound FDP",
                 line=dict(color="#2ecc71", width=2),
                 marker=dict(size=7),
                 hovertext=hover_lower,
@@ -213,7 +214,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 x=thresholds,
                 y=combined,
                 mode="lines+markers",
-                name="Combined FDP (upper)",
+                name="Estimated combined FDP (upper)",
                 line=dict(color="#e74c3c", width=2),
                 marker=dict(size=7),
                 hovertext=hover_combined,
@@ -226,7 +227,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 x=thresholds,
                 y=paired,
                 mode="lines+markers",
-                name="Paired FDP (upper)",
+                name="Estimated paired FDP (upper)",
                 line=dict(color="#f39c12", width=2, dash="dot"),
                 marker=dict(size=7, symbol="diamond"),
                 hovertext=hover_paired,
@@ -241,7 +242,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 x=[0, x_max],
                 y=[0, x_max],
                 mode="lines",
-                name="FDP bound = FDR (identity)",
+                name="Estimated FDP bound = FDR (identity)",
                 line=dict(color="gray", width=1.5, dash="dash"),
                 hoverinfo="skip",
             )
@@ -268,7 +269,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 linecolor="black",
             ),
             yaxis=dict(
-                title="False Discovery Proportion (FDP)",
+                title="Estimated False Discovery Proportion (FDP)",
                 gridcolor="lightgray",
                 linecolor="black",
                 rangemode="tozero",
@@ -292,7 +293,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
     def plot_fdp_ratio(
         self,
         result_df: pd.DataFrame,
-        metric: str = "Upper FDP bound - Paired method",
+        metric: str = "Estimated upper FDP bound - Paired method",
         colorblind_mode: bool = False,
         software_markers: Dict[str, str] = {
             "MaxQuant": "circle",
@@ -333,10 +334,10 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             Must include columns ``software_name``, ``reported_fdr_parsed_from_input``,
             ``lower_bound_FDP``, and the FDP column resolved from ``metric``.
         metric : str, optional
-            Which FDP bound to place on the y-axis. One of
-            ``"Lower FDP bound"``,
-            ``"Upper FDP bound - Combined method"``,
-            ``"Upper FDP bound - Paired method"``.
+            Which estimated FDP bound to place on the y-axis. One of
+            ``"Estimated lower FDP bound"``,
+            ``"Estimated upper FDP bound - Combined method"``,
+            ``"Estimated upper FDP bound - Paired method"``.
         colorblind_mode : bool, optional
             If ``True``, use distinct marker shapes per software tool in addition
             to category colours.
@@ -459,7 +460,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             y=1.0,
             line_dash="dash",
             line_color="gray",
-            annotation_text="FDP bound = reported FDR",
+            annotation_text="Estimated FDP bound = reported FDR",
             annotation_position="top right",
         )
 
@@ -490,10 +491,10 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         **kwargs,
     ) -> go.Figure:
         """
-        Plot a forest / interval plot of FDP bounds per submitted workflow.
+        Plot a forest / interval plot of estimated FDP bounds per submitted workflow.
 
         Each row represents one submission. A thick horizontal bar spans from the
-        lower FDP bound to the paired upper FDP bound; open circle markers at
+        estimated lower FDP bound to the estimated paired upper FDP bound; open circle markers at
         both endpoints make the interval limits explicit. A diamond marker shows
         the declared FDR threshold (``reported_fdr_parsed_from_input``). Bar colour indicates the
         validity category (valid / inconclusive / invalid) computed against each
@@ -595,8 +596,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 f"<b>{row.get('id', '')}</b><br>"
                 f"Software: {row.get('software_name', '')} {row.get('software_version', '')}<br>"
                 f"Identified features: {nr_str}<br>"
-                f"Lower FDP bound: {lo_str}<br>"
-                f"Upper FDP bound (paired): {hi_str}<br>"
+                f"Estimated lower FDP bound: {lo_str}<br>"
+                f"Estimated upper FDP bound (paired): {hi_str}<br>"
                 f"Reported FDR (from input): {fdr_str}<br>"
                 f"Category: {row.get('category', '')}"
             )
@@ -732,7 +733,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
 
         fig.update_layout(
             xaxis=dict(
-                title="FDP — lower bound to upper bound (paired method)",
+                title="Estimated FDP — lower bound to upper bound (paired method)",
                 gridcolor="lightgray",
                 linecolor="black",
                 range=[-0.002, None],
@@ -862,7 +863,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 f"<b>{row.get('id', '')}</b><br>"
                 f"Software: {row.get('software_name', '')} {row.get('software_version', '')}<br>"
                 f"Identified features: {nr_str}<br>"
-                f"Upper FDP (paired): {fdp_str}<br>"
+                f"Estimated upper FDP bound (paired): {fdp_str}<br>"
                 f"Reported FDR (from input): {fdr_str}<br>"
                 f"FDP / FDR: {ratio_str}<br>"
                 f"Category: {row.get('category', '')}"
@@ -918,13 +919,13 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             x=1.0,
             line_dash="dash",
             line_color="gray",
-            annotation_text="upper FDP bound = declared FDR",
+            annotation_text="estimated upper FDP bound = declared FDR",
             annotation_position="top right",
         )
 
         fig.update_layout(
             xaxis=dict(
-                title="Upper FDP (paired) / Declared FDR",
+                title="Estimated upper FDP bound (paired) / Declared FDR",
                 gridcolor="lightgray",
                 linecolor="black",
             ),
@@ -1056,8 +1057,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 f"<b>{row.get('id', '')}</b><br>"
                 f"Software: {row.get('software_name', '')} {row.get('software_version', '')}<br>"
                 f"Identified features: {int(nr) if pd.notna(nr) else 'N/A'}<br>"
-                f"Lower FDP: {f'{lo:.4f}' if pd.notna(lo) else 'N/A'}<br>"
-                f"Upper FDP (paired): {f'{hi:.4f}' if pd.notna(hi) else 'N/A'}<br>"
+                f"Estimated lower FDP bound: {f'{lo:.4f}' if pd.notna(lo) else 'N/A'}<br>"
+                f"Estimated upper FDP bound (paired): {f'{hi:.4f}' if pd.notna(hi) else 'N/A'}<br>"
                 f"Reported FDR (from input): {f'{fdr}' if pd.notna(fdr) and fdr != 0 else 'not set (0.01 used)'}<br>"
                 f"Category: {row.get('category', '')}"
             )
@@ -1151,12 +1152,12 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         Tuple[str, str]
             A tuple containing the resolved metric column name and the corresponding plot title.
         """
-        if metric == "Lower FDP bound":
-            return "lower_bound_FDP", "Lower FDP bound"
-        elif metric == "Upper FDP bound - Combined method":
-            return "combined_FDP", "Upper FDP bound - Combined method"
-        elif metric == "Upper FDP bound - Paired method":
-            return "paired_FDP", "Upper FDP bound - Paired method"
+        if metric == "Estimated lower FDP bound":
+            return "lower_bound_FDP", "Estimated lower FDP bound"
+        elif metric == "Estimated upper FDP bound - Combined method":
+            return "combined_FDP", "Estimated upper FDP bound - Combined method"
+        elif metric == "Estimated upper FDP bound - Paired method":
+            return "paired_FDP", "Estimated upper FDP bound - Paired method"
         else:
             raise ValueError(f"Unsupported metric '{metric}' selected for plotting.")
 
@@ -1164,7 +1165,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         self,
         result_df: pd.DataFrame,
         hide_annot: bool = False,
-        metric: str = "Upper FDP bound - Paired method",
+        metric: str = "Estimated upper FDP bound - Paired method",
         colorblind_mode: bool = False,
         threshold: float = None,
         software_colors: Dict[str, str] = {
@@ -1222,7 +1223,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         result_df : pd.DataFrame
             DataFrame containing the results to plot.
         metric : str, optional
-            Bound to plot on the x axis, one of "Lower FDP bound", "Upper FDP bound - Combined method", or "Upper FDP bound - Paired method".
+            Estimated bound to plot on the x axis, one of "Estimated lower FDP bound",
+            "Estimated upper FDP bound - Combined method", or "Estimated upper FDP bound - Paired method".
         colorblind_mode : Bool, optional
             If True, use different shapes for workflows.
         software_colors : Dict[str, str]
@@ -1386,7 +1388,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
                 x=threshold,
                 line_dash="dash",
                 line_color="gray",
-                annotation_text=f"FDP bound = declared FDR ({threshold})",
+                annotation_text=f"Estimated FDP bound = declared FDR ({threshold})",
                 annotation_position="top right",
             )
 

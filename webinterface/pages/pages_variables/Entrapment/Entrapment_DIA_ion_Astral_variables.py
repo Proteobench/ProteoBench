@@ -108,7 +108,7 @@ class VariablesDIAEntrapmentAstral:
     description_results_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/result_description.md"
     description_submission_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/entrapment/DIA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = (

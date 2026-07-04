@@ -23,6 +23,10 @@ _NON_METRIC_COLS = PARAMETER_COLS | TECHNICAL_COLS | {
     "fragment_mass_tolerance_min", "fragment_mass_tolerance_max",
     # Column name used in some tool outputs; JSON defines it as 'semi_enzymatic'.
     "semi_specific",
+    # Legacy no-suffix columns kept by filter_data_point() as fallback aliases;
+    # they are computed identically to the "_global" columns, so listing both
+    # would offer the same metric twice.
+    "median_abs_epsilon", "mean_abs_epsilon",
 }
 
 
@@ -236,6 +240,10 @@ def _display_parameter_vs_performance(df, param_cols, numeric_param_cols, metric
                 key=pareto_per_tool_key,
                 help="Compute a separate Pareto front within each software tool, removing the tool-choice confound.",
             )
+
+    if pareto_minimize == pareto_maximize:
+        st.info("Select two different metrics to compute a Pareto front.")
+        return
 
     if per_tool_mode:
         per_tool_fronts = _compute_per_tool_pareto_fronts(df, pareto_minimize, pareto_maximize)

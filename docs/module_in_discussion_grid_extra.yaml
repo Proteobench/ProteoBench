@@ -1,0 +1,26 @@
+# Modules that are in discussion or in development but do not yet have a
+# Variables dataclass (and therefore no Streamlit page).
+# Each entry appears as a bullet point below the main module grid on the
+# documentation homepage (docs/index.rst).
+#
+# Fields:
+#   label       – display name shown as the link text
+#   url         – GitHub discussion or issue URL
+#   description – one-sentence description (optional)
+
+modules:
+  - label: "benchmark with Dynamic Organellar Mapping"
+    url: "https://github.com/orgs/Proteobench/discussions/404"
+    description: "Single-species benchmark using spatial proteomics."
+
+  - label: "DDA identification - phosphopeptides"
+    url: "https://github.com/orgs/Proteobench/discussions/625"
+    description: "Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy."
+
+  - label: "Identification with DDA"
+    url: "https://github.com/orgs/Proteobench/discussions/373"
+    description: "Benchmark the identification sensitivity and specificity of data dependent acquisition workflows using an entrapment strategy."
+
+  - label: "Feature finding algorithms for MALDI MS imaging "
+    url: "https://github.com/orgs/Proteobench/discussions/1072"
+    description: "Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides."

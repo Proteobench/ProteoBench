@@ -77,6 +77,12 @@ class QuantUIObjects(BaseUIModule):
         st.session_state[self.variables.submit] = False
         self.stop_duplicating = False
 
+    def get_tour_steps(self) -> list:
+        """Return tour steps for this quantification module."""
+        from pages.base_pages.tour_steps import get_quant_tour_steps
+
+        return get_quant_tour_steps(module_name=getattr(self.variables, "title", "this module"))
+
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
         # Display software selector and AlphaDIA info outside the form so it updates immediately
@@ -85,21 +91,22 @@ class QuantUIObjects(BaseUIModule):
             parsesettingsbuilder=self.parsesettingsbuilder,
             user_input=self.user_input,
         )
-        with st.form(key="main_form"):
-            tab2_upload_results.generate_input_fields(
-                user_input=self.user_input,
-            )
-            # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
-            tab2_upload_results.generate_additional_parameters_fields(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
-            text = self.variables.texts.ShortMessages.run_instructions
-            st.markdown(text)
-            submit_button = st.form_submit_button(
-                "Parse and bench",
-                help=self.variables.texts.Help.parse_button,
-            )
+        with st.container(key="tour_upload_form"):
+            with st.form(key="main_form"):
+                tab2_upload_results.generate_input_fields(
+                    user_input=self.user_input,
+                )
+                # TODO: Investigate the necessity of generating additional parameters fields in the first tab.
+                tab2_upload_results.generate_additional_parameters_fields(
+                    variables=self.variables,
+                    user_input=self.user_input,
+                )
+                text = self.variables.texts.ShortMessages.run_instructions
+                st.markdown(text)
+                submit_button = st.form_submit_button(
+                    "Parse and bench",
+                    help=self.variables.texts.Help.parse_button,
+                )
 
         if submit_button:
             self.first_point_plotted = tab2_upload_results.process_submission_form(
@@ -108,6 +115,7 @@ class QuantUIObjects(BaseUIModule):
                 user_input=self.user_input,
             )
 
+    @st.fragment
     def display_indepth_plots(self) -> None:
         """
         Display the dataset selection dropdown and plot the selected dataset (Tab 3).
@@ -140,28 +148,32 @@ class QuantUIObjects(BaseUIModule):
         else:
             dataset_options = [("Uploaded dataset", None)]
 
-        dataset_selection = st.selectbox(
-            "Select dataset",
-            dataset_options,
-            index=0,
-            key=st.session_state[self.variables.dataset_selector_id_uuid],
-            format_func=lambda x: x[0],
-        )
+        with st.container(key="tour_dataset_selector"):
+            dataset_selection = st.selectbox(
+                "Select dataset",
+                dataset_options,
+                index=0,
+                key=st.session_state[self.variables.dataset_selector_id_uuid],
+                format_func=lambda x: x[0],
+            )
 
         public_id, selected_hash = dataset_selection
-        tab3_view_single_result.generate_indepth_plots(
-            module=self.ionmodule,
-            variables=self.variables,
-            parsesettingsbuilder=self.parsesettingsbuilder,
-            user_input=self.user_input,
-            public_id=public_id,
-            public_hash=selected_hash,
-        )
+        with st.container(key="tour_indepth_plots"):
+            tab3_view_single_result.generate_indepth_plots(
+                module=self.ionmodule,
+                variables=self.variables,
+                parsesettingsbuilder=self.parsesettingsbuilder,
+                user_input=self.user_input,
+                public_id=public_id,
+                public_hash=selected_hash,
+            )
 
     def display_public_submission_ui(self) -> None:
         """
         Display the public submission section of the page in Tab 5.
         """
+        is_tour = st.session_state.get("_module_tour_in_progress", False)
+
         submission_source = get_submission_source()
         if not is_official_server():
             st.warning(
@@ -193,7 +205,11 @@ class QuantUIObjects(BaseUIModule):
             self.submission_ready = tab6_submit_results.generate_submission_ui_elements(
                 variables=self.variables,
                 user_input=self.user_input,
+                parsesettingsbuilder=self.parsesettingsbuilder,
             )
+        elif is_tour:
+            # Show the metadata uploader for tour preview even without a result file
+            tab6_submit_results.generate_metadata_uploader(self.variables, self.user_input)
 
         if self.user_input[self.variables.meta_data]:
             params = tab6_submit_results.load_user_parameters(
@@ -216,6 +232,24 @@ class QuantUIObjects(BaseUIModule):
             self.stop_duplicating = tab6_submit_results.generate_confirmation_checkbox(
                 check_submission=self.variables.check_submission
             )
+        elif is_tour:
+            # Tour preview: render parameter fields with defaults so users can see the form.
+            if self.variables.params_file_dict not in st.session_state:
+                st.session_state[self.variables.params_file_dict] = {}
+            self.user_input.setdefault(
+                "input_format",
+                st.session_state.get("software_tool_selector") or next(iter(self.parsesettingsbuilder.INPUT_FORMATS)),
+            )
+            st.info(
+                "These fields are auto-filled when you upload a parameter file above. "
+                "Shown here with default values as a preview.",
+                icon="ℹ️",
+            )
+            tab6_submit_results.generate_additional_parameters_fields_submission(
+                variables=self.variables,
+                user_input=self.user_input,
+            )
+            return
         else:
             params = None
 
@@ -262,9 +296,8 @@ class QuantUIObjects(BaseUIModule):
             default_value="None",
         )
 
-        # Define callbacks for plot options
+        # --- OPTIONS EXPANDER FIRST ---
         def render_slider():
-            # Get max_nr_observed for slider range if available
             max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
             tab1_view_public_results.generate_main_slider(
                 slider_id_uuid=self.variables.slider_id_uuid,
@@ -278,38 +311,57 @@ class QuantUIObjects(BaseUIModule):
                 self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid
             )
 
-        # Store metric in a container to share between callbacks
-        metric_container = {"metric": None}
+        metric_key = f"_tab1_metric_{self.variables.sidebar_path}"
+        mode_key = f"_tab1_mode_{self.variables.sidebar_path}"
+        if metric_key not in st.session_state:
+            st.session_state[metric_key] = "Median"
+        if mode_key not in st.session_state:
+            st.session_state[mode_key] = "Species-weighted"
 
         def render_metric_selector():
-            metric = tab1_view_public_results.display_metric_selector(self.variables)
-            metric_container["metric"] = metric
-            return metric
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
+            )
+            return st.radio("Select metric", ["Median", "Mean"], key=metric_key, help=help_text, horizontal=True)
 
         def render_mode_selector():
-            # ROC-AUC has no mode variants (it's already species-aware by design)
-            if metric_container["metric"] == "ROC-AUC":
+            if st.session_state.get(metric_key) == "ROC-AUC":
                 return None
-            else:
-                return tab1_view_public_results.display_metric_calc_approach_selector(self.variables)
+            help_text = (
+                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
+            )
+            return st.radio(
+                "Select metric calculation approach",
+                ["Species-weighted", "Global"],
+                key=mode_key,
+                help=help_text,
+                horizontal=True,
+            )
 
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables)
 
-        # Render plot options expander and capture return values
-        results = self.render_plot_options_expander(
+        self.render_plot_options_expander(
             filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            selector_callbacks=[
+                render_metric_selector,
+                render_mode_selector,
+                render_colorblind_selector,
+            ],
             filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
+            selector_cols_spec=[1, 1, 1],
+            expander_key="tour_plot_options",
         )
 
-        # Extract returned values
-        metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Species-weighted"
-        colorblind_mode = results[4] if len(results) > 4 else False
+        # --- PLOT, TABLE, DOWNLOAD BELOW ---
+        metric = st.session_state[metric_key]
+        mode = st.session_state[mode_key]
 
-        # Get the min_nr_observed value from the slider if available
+        if self.variables.colorblind_mode_selector_uuid not in st.session_state:
+            st.session_state[self.variables.colorblind_mode_selector_uuid] = uuid.uuid4()
+        colorblind_uuid = st.session_state[self.variables.colorblind_mode_selector_uuid]
+        colorblind_mode = st.session_state.get(colorblind_uuid, False)
+
         min_nr_observed = None
         if self.variables.slider_id_uuid in st.session_state:
             slider_key = st.session_state[self.variables.slider_id_uuid]
@@ -411,9 +463,13 @@ class QuantUIObjects(BaseUIModule):
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
             filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
+            selector_callbacks=[
+                render_metric_selector,
+                render_mode_selector,
+                render_colorblind_selector,
+            ],
             filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1, 1],
+            selector_cols_spec=[1, 1, 1],
         )
 
         # Extract returned values

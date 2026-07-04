@@ -1,5 +1,5 @@
 """
-DIA Quantification Module for precursor level Quantification for single cell data.
+DIA Quantification Module for precursor level Quantification for plasma data.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from proteobench.score.quantscoresPYE import QuantScoresPYE
 
 class DIAQuantIonModulePlasma(QuantModule):
     """
-    DIA Quantification Module for precursor level Quantification for low input (single-cell) data.
+    DIA Quantification Module for precursor level Quantification for plasma data.
 
     Parameters
     ----------
@@ -49,6 +49,7 @@ class DIAQuantIonModulePlasma(QuantModule):
     """
 
     module_id: str = "quant_lfq_DIA_ion_plasma"
+    y_axis_title: str = "Number of quantified spike-in precursors"
 
     def __init__(
         self,
@@ -94,7 +95,7 @@ class DIAQuantIonModulePlasma(QuantModule):
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_prec: int = 3,
+        default_cutoff_min_feature: int = 3,
         input_file_secondary: str = None,
         max_nr_observed: int = None,
     ) -> Tuple[DataFrame, DataFrame, DataFrame]:
@@ -111,7 +112,7 @@ class DIAQuantIonModulePlasma(QuantModule):
             User-provided parameters for plotting.
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all data points from the repo.
-        default_cutoff_min_prec : int, optional
+        default_cutoff_min_feature : int, optional
             Minimum number of runs a precursor ion must be identified in. Defaults to 3.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
@@ -172,7 +173,7 @@ class DIAQuantIonModulePlasma(QuantModule):
                 intermediate_data_structure,
                 input_format,
                 user_input,
-                default_cutoff_min_prec=default_cutoff_min_prec,
+                default_cutoff_min_feature=default_cutoff_min_feature,
                 max_nr_observed=max_nr_observed,
             )
         except Exception as e:
@@ -191,13 +192,18 @@ class DIAQuantIonModulePlasma(QuantModule):
             input_df,
         )
 
-    def get_plot_generator(self):
+    def get_plot_generator(self, y_axis_title: str = None):
         """Return the plot generator for the module.
+
+        Parameters
+        ----------
+        y_axis_title : str, optional
+            Override the default y-axis title. If None, the class default is used.
 
         Returns
         -------
         PlotGenerator
             The plot generator for the module.
         """
-
-        return LFQPYEPlotGenerator()
+        title = y_axis_title if y_axis_title is not None else self.y_axis_title
+        return LFQPYEPlotGenerator(y_axis_title=title)

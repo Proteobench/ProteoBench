@@ -12,7 +12,7 @@ Home
 
     Home <self>
     Learn more <general-information/index.rst>
-    Benchmarking modules <available-modules/index.rst>
+    Benchmarking Modules <available-modules/index.rst>
     Developer guide <developer-guide/index.rst>
     Contributing <contributing.rst>
     Manuscript <https://doi.org/10.64898/2025.12.09.692895>
@@ -67,146 +67,7 @@ ProteoBench in 5 steps
 
 
 
-Available ProteoBench modules
-==============================
-
-.. For card colors, use:
-.. in development: primary
-.. active: success
-.. archived: dark
-
-.. grid::
-
-    .. grid-item-card:: Label-free quantification of precursor ions with DDA (QExactive)
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive
-
-        :bdg-success:`active`
-        ^^^
-        Benchmark the ion-level quantification accuracy of label-free data dependent acquisition
-        workflows using a multi-species sample
-
-    .. grid-item-card:: Label-free quantification of peptidoforms with DDA (QExactive)
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform
-
-        :bdg-success:`active`
-        ^^^
-        Benchmark the peptidoform-level quantification accuracy of label-free data dependent
-        acquisition workflows using a multi-species sample. Data associated to this module is the same as for the module Quant LFQ DDA precursors (QExactive).
-
-    .. grid-item-card:: Label-free quantification of precursor ions with DDA (Astral)
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
-
-        :bdg-success:`active`
-        ^^^
-        Benchmark the ion-level quantification accuracy of label-free data dependent acquisition
-        workflows using a multi-species sample
-
-    .. grid-item-card:: Label-free quantification of precursor ions with DIA-PASEF
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF
-
-        :bdg-success:`active`
-        ^^^
-        additional DIA ion-level module with DIA-PASEF data
-
-    .. grid-item-card:: Label-free quantification of precursor ions with Astral data
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
-
-        :bdg-success:`active`
-        ^^^
-        additional DIA ion-level module with Astral DIA data
-
-    .. grid-item-card:: Label-free quantification of precursor ions with ZenoTOF 8600 - ZenoSWATH data
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF
-
-        :bdg-success:`active`
-        ^^^
-        additional DIA ion-level module with ZenoTOF 8600 - Zeno SWATH data
-
-    .. grid-item-card:: single-cell label free DIA quantification
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/426
-
-        :bdg-success:`active`
-        ^^^
-        benchmarking identification and quantification workflows for low-input and single cell proteomics (SCP)
-
-    .. grid-item-card:: benchmark with Dynamic Organellar Mapping
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/404
-
-        :bdg-info:`in development`
-        ^^^
-        Single-species benchmark using spatial proteomics
-
-    .. grid-item-card:: De novo identification
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/356
-
-        :bdg-info:`in development`
-        ^^^
-        Benchmark the identification sensitivity and specificity of de novo sequencing workflows
-
-    .. grid-item-card:: LFQ in Human Plasma
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/659
-
-        :bdg-info:`in development`
-        ^^^
-        Benchmarking with a high dynamic range multispecies dataset
-
-    .. grid-item-card:: DDA identification - phosphopeptides
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/625
-
-        :bdg-warning:`in discussion`
-        ^^^
-        Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy
-
-    .. grid-item-card:: Identification with DDA
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: https://github.com/orgs/Proteobench/discussions/373
-
-        :bdg-warning:`in discussion`
-        ^^^
-        Benchmark the identification sensitivity and specificity of data dependent acquisition
-        workflows using an entrapment strategy
-
-    .. grid-item-card:: Label-free quantification of precursor ions with DIA (AIF)
-        :columns: 6 6 4 4
-        :padding: 1
-        :link: available-modules/archived-modules/4-quant-lfq-ion-dia-aif
-
-        :bdg-dark:`archived`
-        ^^^
-        Benchmark the quantification accuracy of label-free data independent acquisition workflows (All-Ion Fragmentation - AIF)
-        using a multi-species sample analysed with an Orbitrap.
-        *A discussion on oxidation-related issues with the data used for this module can be found here:* https://github.com/orgs/Proteobench/discussions/641.
-
-
-.. button-ref:: available-modules/index
-    :ref-type: doc
-    :class: sd-px-4
-    :color: primary
-
-    Module descriptions
+.. include:: module_grid_generated.rst
 
 
 Join the ProteoBench community

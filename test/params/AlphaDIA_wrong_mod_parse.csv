@@ -1,0 +1,29 @@
+,0
+software_name,AlphaDIA
+software_version,2.1.0
+search_engine,AlphaDIA
+search_engine_version,
+ident_fdr_psm,0.01
+ident_fdr_peptide,
+ident_fdr_protein,0.01
+enable_match_between_runs,False
+precursor_mass_tolerance,"[-5 ppm, 5 ppm]"
+fragment_mass_tolerance,"[-10 ppm, 10 ppm]"
+enzyme,Trypsin
+allowed_miscleavages,2
+min_peptide_length,7
+max_peptide_length,30
+fixed_mods,C[Carbamidomethyl]
+variable_mods,M[Oxidation]
+max_mods,3
+min_precursor_charge,2
+max_precursor_charge,4
+min_precursor_mz,400
+max_precursor_mz,1200
+min_fragment_mz,200
+max_fragment_mz,2000
+quantification_method,DirectLFQ
+protein_inference,heuristic
+abundance_normalization_ions,
+predictors_library,AlphaPeptDeep
+scan_window,

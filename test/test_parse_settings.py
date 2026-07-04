@@ -123,10 +123,14 @@ class TestParseSettingsQuant:
 
     def test_fix_colnames(self, parse_settings_long, parse_settings_short):
         df = TEST_DATA["long_format"].copy()
+        original_cols = list(df.columns)
         df.columns = [f"{col}.mzML.gz" for col in df.columns]
         result = parse_settings_long._fix_colnames(df)
+        # Extensions should be fully stripped
         assert all(".mzML.gz" not in col for col in result.columns)
-        assert all(".mzML" in col for col in result.columns)
+        assert all(".mzML" not in col for col in result.columns)
+        # Column names should match the originals (without extension)
+        assert list(result.columns) == original_cols
 
     def test_mark_contaminants(self, parse_settings_long, parse_settings_short):
         df = TEST_DATA["long_format"].copy()

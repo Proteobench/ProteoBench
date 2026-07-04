@@ -8,6 +8,23 @@ import pandas as pd
 import yaml
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.msangel import _homogenize_mod_xtandem
+
+
+def _homogenize_tolerance(tol_str: str) -> str:
+    """
+    Homogenizes the tolerance string to a standard format.
+
+    Args:
+        tol_str (str): The tolerance string to homogenize. Of format "X unit"
+
+    Returns:
+        str: The homogenized tolerance string. Format: "[-X unit, X unit]" where X is the tolerance value and unit is either "ppm" or "Da".
+    """
+    tolerance_value, tolerance_unit = tol_str.split()
+
+    unit_homogenized = "ppm" if tolerance_unit.lower() == "ppm" else "Da"
+    return f"[-{tolerance_value} {unit_homogenized}, {tolerance_value} {unit_homogenized}]"
 
 
 def extract_params(
@@ -45,15 +62,15 @@ def extract_params(
     if params.enzyme == "trypsin":
         params.enzyme = "Trypsin"
     params.allowed_miscleavages = summary["miscleavages"]
-    params.fixed_mods = summary["fixed_mods"]
-    params.variable_mods = summary["variable_mods"]
+    params.fixed_mods = ", ".join(_homogenize_mod_xtandem(m) for m in summary["fixed_mods"].split(","))
+    params.variable_mods = ", ".join(_homogenize_mod_xtandem(m) for m in summary["variable_mods"].split(","))
     params.max_mods = summary["max_mods"]
     params.min_peptide_length = summary["min_peptide_length"]
     params.max_peptide_length = summary["max_peptide_length"]
 
     # Extract search parameters
-    params.precursor_mass_tolerance = summary["precursor_mass_tolerance"]
-    params.fragment_mass_tolerance = summary["fragment_mass_tolerance"]
+    params.precursor_mass_tolerance = _homogenize_tolerance(summary["precursor_mass_tolerance"])
+    params.fragment_mass_tolerance = _homogenize_tolerance(summary["fragment_mass_tolerance"])
     params.ident_fdr_protein = summary["ident_fdr_protein"]
     params.ident_fdr_peptide = summary["ident_fdr_peptide"]
     params.ident_fdr_psm = summary["ident_fdr_psm"]
@@ -74,4 +91,5 @@ if __name__ == "__main__":
         params = extract_params(file)
         data_dict = params.__dict__
         series = pd.Series(data_dict)
+        print(series)
         series.to_csv(file.with_suffix(".csv"))

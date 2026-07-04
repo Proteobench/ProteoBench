@@ -24,10 +24,11 @@ dependencies = [
   "plotly>=6.0.0",
   "upsetplot",
   "seaborn",
-  "streamlit>=1.31",
+  "streamlit>=1.58",
   "streamlit-aggrid>=1.1.7",
   "streamlit_extras",
   "streamlit-plotly-events",
+  "streamlit-tour>=1.1.0",
   "scipy",
   "matplotlib",
   "toml",
@@ -35,13 +36,27 @@ dependencies = [
   "GitPython",
   "psm-utils",
   "pmultiqc>=0.0.33",
+  "requests",
+  "beautifulsoup4",
 ]
 license = { file = "LICENSE" }
 name = "proteobench"
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = ["black~=23.0", "jupyterlab", "ipywidgets", "notebook", "tqdm", "wget", "nox", "pytest"]
+dev = [
+  "black~=23.0",
+  "jupyterlab",
+  "ipywidgets",
+  "notebook",
+  "tqdm",
+  "wget",
+  "nox",
+  "pytest",
+  "flake8",
+  "flake8-bugbear",
+  "flake8-comprehensions",
+]
 docs = [
   "sphinx",
   "sphinx-design",
@@ -67,7 +82,7 @@ build-backend = "setuptools.build_meta"
 # used to pick up the version from the git tags or the latest commit.
 
 [tool.setuptools.packages.find]
-include = ["proteobench"]
+include = ["proteobench*"]
 
 [tool.isort]
 profile = "black"

@@ -61,7 +61,7 @@ from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
 from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
-from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
+from proteobench.modules.quant.quant_lfq_ion_DIA_lowinput import (
     DIAQuantIonModulediaSC,
 )
 from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
@@ -91,7 +91,7 @@ REPO_MODULE_REGISTRY: dict[str, tuple[str, type, Path]] = {
     # Quant — DIA ion
     "Results_quant_ion_DIA":              ("quant_lfq_DIA_ion_AIF",         DIAQuantIonModuleAIF,        _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_ion_DIA_diaPASEF":     ("quant_lfq_DIA_ion_diaPASEF",   DIAQuantIonModulediaPASEF,   _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
-    "Results_quant_ion_DIA_singlecell":   ("quant_lfq_DIA_ion_singlecell", DIAQuantIonModulediaSC,      _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
+    "Results_quant_ion_DIA_lowinput":   ("quant_lfq_DIA_ion_lowinput", DIAQuantIonModulediaSC,      _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_ion_DIA_Astral":       ("quant_lfq_DIA_ion_Astral",     DIAQuantIonModuleAstral,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_lfq_DIA_ion_ZenoTOF":  ("quant_lfq_DIA_ion_ZenoTOF",   DIAQuantIonModuleZenoTOF,    _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
     "Results_quant_ion_DIA_plasma":       ("quant_lfq_DIA_ion_Plasma",     DIAQuantIonModulePlasma,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"), 
@@ -714,6 +714,18 @@ def apply_pr_corrections(
         # What did the current parsing produce?
         auto_parsed = getattr(parsed_params, key, "[MISSING]")
 
+        # If the parser now reproduces the corrected value up to formatting
+        # (e.g. whitespace differences), defer to the parser so an improved
+        # parser supersedes a stale frozen override instead of being clobbered.
+        if _correction_superseded_by_parser(parsed_params, key, new_val):
+            logger.info(
+                f"  [{intermediate_hash[:12]}] {key}: parser now produces "
+                f"'{auto_parsed}', equivalent to corrected '{new_str}' up to "
+                f"formatting; using parsed value (stale override superseded)"
+            )
+            user_input[key] = auto_parsed
+            continue
+
         # Compare: does current parsing now produce the corrected value?
         auto_matches_new = _values_equal(auto_parsed, new_val)
         auto_matches_old = _values_equal(auto_parsed, old_val)
@@ -756,6 +768,42 @@ def _values_equal(a: Any, b: Any) -> bool:
         return str(a) == str(b)
     except Exception:
         return a == b
+
+
+def _values_equal_normalized(a: Any, b: Any) -> bool:
+    """
+    Like _values_equal, but ignores whitespace differences between string values.
+
+    Used to detect when the current parser reproduces a previously corrected
+    value up to formatting only (e.g. "[-10ppm, 10ppm]" vs "[-10 ppm, 10 ppm]").
+    """
+    if _values_equal(a, b):
+        return True
+    if a is None or b is None:
+        return False
+    if isinstance(a, float) and np.isnan(a):
+        return False
+    if isinstance(b, float) and np.isnan(b):
+        return False
+    return re.sub(r"\s+", "", str(a)) == re.sub(r"\s+", "", str(b))
+
+
+def _correction_superseded_by_parser(parsed_params: Any, key: str, new_val: Any) -> bool:
+    """
+    Return True when the freshly parsed parameter already matches the corrected
+    value up to formatting (whitespace), so the stored override is redundant.
+
+    A stored correction is meant to fix a value the parser once got wrong. Once
+    the parser is fixed, replaying the frozen corrected string can reintroduce a
+    stale formatting (e.g. "[-10ppm, 10ppm]" instead of the now-correct
+    "[-10 ppm, 10 ppm]"). In that case the parser output should win.
+    """
+    if parsed_params is None or not hasattr(parsed_params, key):
+        return False
+    auto_parsed = getattr(parsed_params, key)
+    if _values_equal(auto_parsed, new_val):
+        return False  # exact match: applying the override changes nothing
+    return _values_equal_normalized(auto_parsed, new_val)
 
 
 def compare_results(
@@ -1090,7 +1138,9 @@ def create_batch_pr(
 
         try:
             gh_repo.commit(commit_name, commit_message)
-            pr_number = gh_repo.create_pull_request(commit_name, commit_message, submission_source="resubmission-script")
+            pr_number = gh_repo.create_pull_request(
+                commit_name, commit_message, submission_source="resubmission-script"
+            )
             pr_url = f"https://github.com/{proteobot_name}/pull/{pr_number}"
             logger.info(f"  PR created: {pr_url}")
             return pr_url
@@ -1284,7 +1334,15 @@ def reprocess_datapoint(
             kwargs: dict[str, Any] = {
                 "input_format": input_format,
                 "user_input": user_input,
-                "all_datapoints": None,
+                # Start from an EMPTY datapoint table (not None). With None,
+                # add_current_data_point() loads the public repo and silently DROPS
+                # the freshly computed datapoint whenever its recomputed
+                # intermediate_hash already exists there (always the case for an
+                # unchanged resubmission). The downstream `all_dp.iloc[-1]` then
+                # returns an unrelated repo datapoint, corrupting the metrics.
+                # An empty frame has nothing to deduplicate against, so the
+                # recomputed datapoint is always appended and is the last row.
+                "all_datapoints": pd.DataFrame(),
             }
 
             # Module-specific kwargs
@@ -1297,15 +1355,27 @@ def reprocess_datapoint(
             else:
                 # Quant modules
                 default_cutoff = 3  # default
+                max_nr_observed = None
                 results_dict = dp_json.get("results", {})
                 if isinstance(results_dict, dict) and results_dict:
                     try:
                         cutoffs = [int(k) for k in results_dict.keys()]
+                        if cutoffs:
+                            default_cutoff = min(cutoffs)
+                            # Reproduce the original quantification depth. The plasma
+                            # module uses 12 nr_observed thresholds, the others 6.
+                            # If max_nr_observed is left as None, the PYE path only
+                            # applies the 12 default inside _get_plasma_metrics, while
+                            # the HYE base results dict it merges into defaults to 6 and
+                            # silently drops levels 7-12. Deriving it from the original
+                            # datapoint keeps every module at its original depth.
+                            max_nr_observed = max(cutoffs)
                         default_cutoff = min(cutoffs) if cutoffs else 3
                     except (ValueError, TypeError):
                         pass
-                kwargs["default_cutoff_min_prec"] = default_cutoff
-
+                kwargs["default_cutoff_min_feature"] = default_cutoff
+                if max_nr_observed is not None:
+                    kwargs["max_nr_observed"] = max_nr_observed
                 # AlphaDIA secondary file
                 if extracted["input_file_secondary"]:
                     kwargs["input_file_secondary"] = extracted["input_file_secondary"]
@@ -1314,6 +1384,20 @@ def reprocess_datapoint(
             if input_format == "MaxQuant" and parsed_params:
                 pass  # Applied after benchmarking below
             intermediate_result, all_dp, _ = module_instance.benchmarking(input_file_val, **kwargs)
+
+            # Safety guard: resubmission relies on the freshly computed datapoint
+            # being the last row of all_dp (it is tagged old_new="new"). If the
+            # dedup logic in add_current_data_point() ever drops it again, the last
+            # row would be an unrelated repo datapoint and its metrics would be
+            # written under this datapoint's id. Fail loudly instead of silently
+            # corrupting the datapoint (routes to status="error" in failed_items).
+            last_old_new = all_dp.iloc[-1].get("old_new") if len(all_dp) else None
+            if "old_new" not in all_dp.columns or str(last_old_new) != "new":
+                raise RuntimeError(
+                    "Freshly computed datapoint was not returned by benchmarking(): "
+                    f"all_dp has {len(all_dp)} row(s), last row old_new={last_old_new!r} "
+                    "(expected 'new'). Refusing to write mismatched metrics."
+                )
 
             # MaxQuant post-processing
             if input_format == "MaxQuant" and parsed_params:
@@ -1335,7 +1419,14 @@ def reprocess_datapoint(
                 # Apply effective corrections on top of that
                 if effective_corrections:
                     for key, (_, new_val) in effective_corrections.items():
-                        new_datapoint[key] = _coerce_value(new_val)
+                        coerced = _coerce_value(new_val)
+                        if _correction_superseded_by_parser(parsed_params, key, coerced):
+                            logger.info(
+                                f"  [{intermediate_hash[:12]}] {key}: keeping parsed value "
+                                f"'{getattr(parsed_params, key)}' over stale override '{new_val}'"
+                            )
+                            continue
+                        new_datapoint[key] = coerced
 
                 # Preserve fields from the original submission that must not be
                 # recalculated or overwritten during resubmission.

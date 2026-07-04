@@ -4,8 +4,8 @@ software_version,1.8.2 beta 22
 search_engine,DIA-NN
 search_engine_version,1.8.2 beta 22
 ident_fdr_psm,0.01
-ident_fdr_peptide,None
-ident_fdr_protein,None
+ident_fdr_peptide,
+ident_fdr_protein,
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-8.42079 ppm, 8.42079 ppm]"
 fragment_mass_tolerance,"[-12.0213 ppm, 12.0213 ppm]"
@@ -13,8 +13,8 @@ enzyme,Trypsin/P
 allowed_miscleavages,1
 min_peptide_length,6
 max_peptide_length,40
-fixed_mods,unimod4
-variable_mods,UniMod:35/15.994915/M
+fixed_mods,C[Carbamidomethyl]
+variable_mods,M[Oxidation]
 max_mods,1
 min_precursor_charge,1
 max_precursor_charge,4
@@ -25,5 +25,5 @@ max_fragment_mz,2000
 quantification_method,QuantUMS high-accuracy
 protein_inference,1
 abundance_normalization_ions,Cross-run normalization
-predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
+predictors_library,DIANN
 scan_window,13

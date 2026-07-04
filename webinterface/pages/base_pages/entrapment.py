@@ -290,8 +290,8 @@ class EntrapmentUIObjects(BaseUIModule):
 
         st.subheader("FDP / Reported FDR by Workflow")
         st.markdown(
-            "Ratio of empirical false discovery proportion (FDP) to the FDR threshold "
-            "declared for each workflow. A ratio ≤ 1 means the empirical FDP does not "
+            "Ratio of estimated false discovery proportion (FDP) to the FDR threshold "
+            "declared for each workflow. A ratio ≤ 1 means the estimated FDP does not "
             "exceed the claimed FDR. Workflows are coloured by validity category: "
             ":green[valid] (upper bound ≤ reported FDR), "
             ":red[invalid] (lower bound > reported FDR), "
@@ -344,7 +344,7 @@ class EntrapmentUIObjects(BaseUIModule):
 
         st.subheader("Identified Features by Validity Category")
         st.markdown(
-            "Points are grouped into the three validity categories based on the paired FDP bounds "
+            "Points are grouped into the three validity categories based on the estimated paired FDP bounds "
             "vs each workflow's declared PSM-level FDR. "
             "**Point colour** indicates the software tool. "
             "Within each category, points are spread horizontally for readability and sorted "
@@ -367,8 +367,8 @@ class EntrapmentUIObjects(BaseUIModule):
             "Each point is one submitted workflow. "
             "**Colour** indicates the software tool; **shape** indicates the validity category "
             "(○ valid, △ inconclusive, ✕ invalid). "
-            "The x-axis shows the ratio of the paired upper FDP bound to the declared PSM-level FDR; "
-            "a ratio below 1 (left of the dashed line) means the empirical FDP is within the claimed threshold."
+            "The x-axis shows the ratio of the estimated paired upper FDP bound to the declared PSM-level FDR; "
+            "a ratio below 1 (left of the dashed line) means the estimated FDP is within the claimed threshold."
         )
         try:
             fig = self.ionmodule.get_plot_generator().plot_fdp_id_scatter(all_data)
@@ -384,9 +384,9 @@ class EntrapmentUIObjects(BaseUIModule):
 
         st.subheader("FDP Interval Plot")
         st.markdown(
-            "Each row is one submitted workflow. The thick horizontal bar spans the FDP "
-            "uncertainty interval from the **lower bound** (left) to the **paired upper bound** "
-            "(right); open circles mark both endpoints. "
+            "Each row is one submitted workflow. The thick horizontal bar spans the estimated FDP "
+            "uncertainty interval from the **estimated lower bound** (left) to the **estimated paired "
+            "upper bound** (right); open circles mark both endpoints. "
             "The diamond marker (◆) shows the workflow's declared FDR threshold "
             "(``reported_fdr_parsed_from_input``); a star (★) marks newly uploaded results. "
             "Bar colour indicates the validity category: "
@@ -447,14 +447,19 @@ class EntrapmentUIObjects(BaseUIModule):
                 "(https://www.nature.com/articles/s41592-025-02719-x)."
             )
             st.markdown("##### FDP estimates")
-            st.markdown("Two bounds on the false discovery proportion (FDP) are computed from the search results:")
-            st.markdown("**Lower FDP bound** — fraction of identified entrapment peptides among all identifications:")
+            st.markdown(
+                "Two estimated bounds on the false discovery proportion (FDP) are computed from the search results:"
+            )
+            st.markdown(
+                "**Estimated lower FDP bound** — fraction of identified entrapment peptides among all "
+                "identifications:"
+            )
             st.latex(
                 r"\widehat{\underline{\mathrm{FDP}}}_{\mathcal{T}\cup\mathcal{E}_{\mathcal{T}}}"
                 r"= \frac{N_{\mathcal{E}}}{N_{\mathcal{T}}+N_{\mathcal{E}}}"
             )
             st.markdown(
-                "**Upper FDP bound (paired method)** — additionally accounts for entrapment peptides "
+                "**Estimated upper FDP bound (paired method)** — additionally accounts for entrapment peptides "
                 "that outscore their paired target:"
             )
             st.latex(
@@ -470,23 +475,23 @@ class EntrapmentUIObjects(BaseUIModule):
             )
             st.markdown("##### Interpreting results")
             st.markdown(
-                "The FDP interval is compared to the declared FDR threshold of the workflow:\n\n"
-                "- **Valid**: both FDP bounds are lower than the declared FDR threshold — "
+                "The estimated FDP interval is compared to the declared FDR threshold of the workflow:\n\n"
+                "- **Valid**: both estimated FDP bounds are lower than the declared FDR threshold — "
                 "FDR control is valid (but overestimated).\n"
-                "- **Inconclusive**: the FDP interval includes the threshold — "
+                "- **Inconclusive**: the estimated FDP interval includes the threshold — "
                 "insufficient evidence to confirm or reject FDR calculation.\n"
-                "- **Invalid**: both FDP bounds exceed the declared threshold — "
+                "- **Invalid**: both estimated FDP bounds exceed the declared threshold — "
                 "the reported FDR is invalid and underestimated."
             )
 
         st.subheader("FDR Control and Sensitivity Overview")
         st.markdown(
             "Each point represents a submitted workflow. "
-            "The x-axis shows the **false discovery proportion (FDP)** — an empirical estimate "
+            "The x-axis shows the **estimated false discovery proportion (FDP) bound** — an estimate "
             "of the actual FDR computed from entrapment peptides. "
             "The y-axis shows the number of identified precursor ions. "
             "Workflows to the left have better-calibrated FDR control. "
-            "Use the options below to select the FDP metric and adjust the display."
+            "Use the options below to select the estimated FDP bound and adjust the display."
         )
 
         # Define callbacks for plot options
@@ -526,7 +531,7 @@ class EntrapmentUIObjects(BaseUIModule):
         )
 
         # Extract returned values
-        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
+        metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
         threshold_str = results[2] if len(results) > 3 else "Maximum reported"
         colorblind_mode = results[3] if len(results) > 2 else False
         threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
@@ -574,11 +579,11 @@ class EntrapmentUIObjects(BaseUIModule):
         st.subheader("FDR Control and Sensitivity Overview")
         st.markdown(
             "Each point represents a submitted workflow. "
-            "The x-axis shows the **false discovery proportion (FDP)** — an empirical estimate "
+            "The x-axis shows the **estimated false discovery proportion (FDP) bound** — an estimate "
             "of the actual FDR computed from entrapment peptides. "
             "The y-axis shows the number of identified precursor ions. "
             "Workflows to the left have better-calibrated FDR control. "
-            "Use the options below to select the FDP metric and adjust the display."
+            "Use the options below to select the estimated FDP bound and adjust the display."
         )
 
         # Define callbacks for plot options
@@ -602,7 +607,7 @@ class EntrapmentUIObjects(BaseUIModule):
             )
             metric = st.radio(
                 "Select metric to show in x axis",
-                ["Upper FDP bound - Paired method", "Lower FDP bound"],
+                ["Estimated upper FDP bound - Paired method", "Estimated lower FDP bound"],
                 help=help_text,
                 horizontal=True,
                 key=metric_uuid,
@@ -633,7 +638,7 @@ class EntrapmentUIObjects(BaseUIModule):
         )
 
         # Extract returned values
-        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
+        metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
         threshold_str = results[2] if len(results) > 2 else "Maximum reported"
         colorblind_mode = results[3] if len(results) > 3 else False
         threshold = None if threshold_str == "Maximum reported" else float(threshold_str)

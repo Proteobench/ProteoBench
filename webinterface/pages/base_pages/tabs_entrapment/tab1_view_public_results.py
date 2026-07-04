@@ -90,7 +90,7 @@ def display_metric_selector(variables) -> str:
     help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
     metric = st.radio(
         "Select metric to show in x axis",
-        ["Upper FDP bound - Paired method", "Lower FDP bound"],
+        ["Estimated upper FDP bound - Paired method", "Estimated lower FDP bound"],
         help=help_text,
         horizontal=True,
     )

@@ -30,13 +30,11 @@ def load_input_file(input_csv: str, input_format: str, input_csv_secondary: str 
     """
     try:
         if input_format == "MaxQuant":
-            warnings.warn(
-                """
+            warnings.warn("""
                 WARNING: MaxQuant proforma parsing does not take into account fixed modifications\n
                 because they are implicit. Only after providing the appropriate parameter file,\n
                 fixed modifications will be added correctly.
-                """
-            )
+                """)
         load_function = _LOAD_FUNCTIONS[input_format]
     except KeyError as e:
         raise ValueError(f"Invalid input format: {input_format}") from e
@@ -902,6 +900,56 @@ def _load_quantms(input_csv: str) -> pd.DataFrame:
     )
     input_data_frame["Sequence"] = input_data_frame["PeptideSequence"].str.replace(r"\(([^)]+)\)", r"", regex=True)
     return input_data_frame
+
+
+def _load_alphadia_entrapment(input_csv: str) -> pd.DataFrame:
+    """
+    Load AlphaDIA v2 precursors.parquet for the entrapment module.
+
+    Keeps long format so per-precursor Q-value is preserved for FDP computation.
+
+    Parameters
+    ----------
+    input_csv : str
+        Path to the AlphaDIA precursors.parquet file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe with ProForma-style modified sequences.
+    """
+    if isinstance(input_csv, str) and input_csv.lower().endswith(".parquet"):
+        df = pd.read_parquet(input_csv)
+    else:
+        try:
+            df = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        except UnicodeDecodeError:
+            df = pd.read_parquet(input_csv)
+
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    gene_column = "pg.genes" if "pg.genes" in df.columns else "genes"
+    df["genes"] = df[gene_column].map(
+        lambda x: ";".join([mapper.get(p, p) for p in x.split(";")]) if isinstance(x, str) else x
+    )
+
+    df = df.rename(
+        columns={
+            "precursor.sequence": "sequence",
+            "precursor.mods": "mods",
+            "precursor.mod_sites": "mod_sites",
+            "precursor.charge": "charge",
+            "precursor.qval": "qval",
+            "raw.name": "run",
+        }
+    )
+
+    df["proforma"] = df.apply(
+        lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
+        axis=1,
+    )
+    return df
 
 
 _LOAD_FUNCTIONS = {

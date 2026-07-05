@@ -12,7 +12,7 @@ from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DDA_peptidoform_variables import VariablesDDAQuant
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
     DDAQuantPeptidoformModule,
 )
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         variables=VariablesDDAQuant(),
         texts=WebpageTexts,
         ionmodule=DDAQuantPeptidoformModule,
-        parsesettingsbuilder=ParseSettingsBuilder,
+        parsesettingsbuilder=ConverterBuilder,
         uiobjects=QuantUIObjects,
         page_name="Quant LFQ DDA peptidoform",
     )

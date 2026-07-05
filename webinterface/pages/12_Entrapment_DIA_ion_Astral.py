@@ -11,7 +11,7 @@ from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import
 )
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import DIAEntrapmentIonModuleAstral
 
 if __name__ == "__main__":
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         variables=VariablesDIAEntrapmentAstral(),
         texts=WebpageTexts,
         ionmodule=DIAEntrapmentIonModuleAstral,
-        parsesettingsbuilder=ParseSettingsBuilder,
+        parsesettingsbuilder=ConverterBuilder,
         uiobjects=EntrapmentUIObjects,
         page_name="Entrapment DIA ion Astral",
     )

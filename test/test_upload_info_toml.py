@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 import pytest
 import toml
 
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 
 _SETTINGS_ROOT = Path(__file__).resolve().parent.parent / "proteobench" / "io" / "parsing" / "io_parse_settings"
@@ -51,8 +51,8 @@ def test_upload_info_present_and_non_empty(toml_path):
 
 @pytest.mark.parametrize("module_id,parse_dir", list(MODULE_SETTINGS_DIRS.items()))
 def test_get_upload_info_returns_dict_for_known_tools(module_id, parse_dir):
-    """ParseSettingsBuilder.get_upload_info returns a dict for every registered tool."""
-    builder = ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id)
+    """ConverterBuilder.get_upload_info returns a dict for every registered tool."""
+    builder = ConverterBuilder(parse_settings_dir=parse_dir, module_id=module_id)
     for input_format in builder.INPUT_FORMATS:
         result = builder.get_upload_info(input_format)
         assert isinstance(
@@ -64,7 +64,7 @@ def test_get_upload_info_custom_contains_docs_link():
     """get_upload_info for Custom includes a documentation URL in datapoint_file_description."""
     module_id = "quant_lfq_DDA_ion_QExactive"
     parse_dir = MODULE_SETTINGS_DIRS[module_id]
-    builder = ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id)
+    builder = ConverterBuilder(parse_settings_dir=parse_dir, module_id=module_id)
     result = builder.get_upload_info("Custom")
     assert "datapoint_file_description" in result
 
@@ -79,7 +79,7 @@ _DIA_MODULES_WITH_FRAGPIPE_DIANN_QUANT = [
     module_id
     for module_id, parse_dir in MODULE_SETTINGS_DIRS.items()
     if "FragPipe (DIA-NN quant)"
-    in ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id).INPUT_FORMATS
+    in ConverterBuilder(parse_settings_dir=parse_dir, module_id=module_id).INPUT_FORMATS
 ]
 
 
@@ -87,7 +87,7 @@ _DIA_MODULES_WITH_FRAGPIPE_DIANN_QUANT = [
 def test_get_upload_info_fragpipe_diann_quant_overrides_params(module_id):
     """FragPipe (DIA-NN quant) shares parse_settings_diann.toml but must report the FragPipe .workflow as params file in every DIA module that includes it."""
     parse_dir = MODULE_SETTINGS_DIRS[module_id]
-    builder = ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id)
+    builder = ConverterBuilder(parse_settings_dir=parse_dir, module_id=module_id)
 
     diann_info = builder.get_upload_info("DIA-NN")
     fp_info = builder.get_upload_info("FragPipe (DIA-NN quant)")

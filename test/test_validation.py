@@ -11,8 +11,8 @@ from types import SimpleNamespace
 import pandas as pd
 import pytest
 
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.load_input import load_input_file
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.validation import (
     Check,
     FastaReference,
@@ -680,10 +680,12 @@ def _standard_df_for_tool(tool):
     if not os.path.isfile(path):
         pytest.skip(f"Test data for {tool} not available: {path}")
     input_df = load_input_file(path, tool)
-    parser = ParseSettingsBuilder(
+    parser = ConverterBuilder(
         parse_settings_dir=QEXACTIVE_SETTINGS_DIR, module_id=QEXACTIVE_MODULE_ID
     ).build_parser(tool)
-    standard_df, _ = parser.convert_to_standard_format(input_df)
+    # convert_to_standard_format now returns only the standard DataFrame
+    # (replicate mapping is obtained separately via create_replicate_mapping()).
+    standard_df = parser.convert_to_standard_format(input_df)
     return standard_df
 
 

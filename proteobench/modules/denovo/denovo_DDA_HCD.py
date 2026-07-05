@@ -16,7 +16,7 @@ from proteobench.exceptions import (
     QuantificationError,
 )
 from proteobench.io.parsing.parse_denovo import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.denovo.denovo_base import DeNovoModule
 from proteobench.score.denovoscores import DenovoScores
@@ -113,7 +113,7 @@ class DDAHCDDeNovoModule(DeNovoModule):
 
         # Parse settings file
         try:
-            parse_settings = ParseSettingsBuilder(
+            parse_settings = ConverterBuilder(
                 parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
             ).build_parser(input_format)
         except KeyError as e:

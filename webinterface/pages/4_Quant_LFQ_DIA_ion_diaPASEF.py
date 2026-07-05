@@ -14,7 +14,7 @@ from pages.pages_variables.Quant.lfq_DIA_ion_diaPASEF_variables import (
 )
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         variables=VariablesDIAQuantdiaPASEF(),
         texts=WebpageTexts,
         ionmodule=DIAQuantIonModulediaPASEF,
-        parsesettingsbuilder=ParseSettingsBuilder,
+        parsesettingsbuilder=ConverterBuilder,
         uiobjects=QuantUIObjects,
         page_name="Quant LFQ DIA ion diaPASEF",
     )

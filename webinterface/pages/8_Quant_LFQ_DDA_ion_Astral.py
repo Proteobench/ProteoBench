@@ -14,7 +14,7 @@ from pages.pages_variables.Quant.lfq_DDA_ion_Astral_variables import (
 )
 from pages.texts.generic_texts import WebpageTexts
 
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.io.parsing.convert_to_intermediate import ConverterBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
 
 if __name__ == "__main__":
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         variables=VariablesDDAQuantAstral(),
         texts=WebpageTexts,
         ionmodule=DDAQuantIonAstralModule,
-        parsesettingsbuilder=ParseSettingsBuilder,
+        parsesettingsbuilder=ConverterBuilder,
         uiobjects=QuantUIObjects,
         page_name="Quant LFQ DDA ion Astral",
     )

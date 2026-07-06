@@ -69,10 +69,11 @@ class EntrapmentScores(ScoreBase):
 
         scores_to_sort_by = ["Q-Value", "PEP"]
         if "PEP" not in filtered_df.columns:
+            filtered_df = filtered_df.copy()
             if "Expectation" in filtered_df.columns:
-                filtered_df = filtered_df.copy()
                 filtered_df["PEP"] = 1 - filtered_df["Expectation"]
             else:
+                filtered_df["PEP"] = float("nan")
                 scores_to_sort_by.remove("PEP")
 
         precursor_group_columns = ["Peptide", "Sequence", "Charge"]

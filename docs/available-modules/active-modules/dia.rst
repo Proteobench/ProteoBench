@@ -9,3 +9,4 @@ DIA Active Modules
     9-quant-lfq-ion-dia-singlecell
     10-quant-lfq-ion-dia-ZenoTOF
     12-quant-lfq-ion-dia-plasma
+    13-entrapment-ion-dia-astral

@@ -278,7 +278,8 @@ def display_performance_table(
         icon=":material/download:",
     )
 
-    display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name, cache_key=cache_key)
+    if getattr(variables, "enable_pmultiqc", True):
+        display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name, cache_key=cache_key)
 
 
 def generate_sample_name(input_format: str) -> str:

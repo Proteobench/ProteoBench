@@ -22,12 +22,11 @@ from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
-from .tabs_entrapment import (
+from .tabs import (
     tab1_view_public_results,
     tab2_upload_results,
     tab3_view_single_result,
     tab4_view_public_and_new_results,
-    tab5_compare_results,
     tab6_submit_results,
 )
 
@@ -499,7 +498,11 @@ class EntrapmentUIObjects(BaseUIModule):
         metric_container = {"metric": None}
 
         def render_metric_selector():
-            metric = tab1_view_public_results.display_metric_selector(self.variables)
+            metric = tab1_view_public_results.display_metric_selector(
+                self.variables,
+                options=["Estimated upper FDP bound - Paired method", "Estimated lower FDP bound"],
+                label="Select metric to show in x axis",
+            )
             metric_container["metric"] = metric
             return metric
 
@@ -683,7 +686,6 @@ class EntrapmentUIObjects(BaseUIModule):
 
     def display_workflow_comparison(self) -> None:
         """Display the workflow comparison page in Tab 5."""
-        tab5_compare_results.display_workflow_comparison(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
-        )
+        # WORK IN PROGRESS: workflow comparison is not yet implemented for entrapment modules.
+        st.header("Compare Two Results")
+        st.write("This feature is under development. Please check back later for updates.")

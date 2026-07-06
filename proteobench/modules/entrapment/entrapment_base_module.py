@@ -526,9 +526,15 @@ class EntrapmentModule:
         params.software_name = input_format
         return params
 
-    def get_plot_generator(self) -> PlotGeneratorBase:
+    def get_plot_generator(self, y_axis_title: str = None) -> PlotGeneratorBase:
         """
         Get the plot generator for entrapment plots.
+
+        Parameters
+        ----------
+        y_axis_title : str, optional
+            Unused by the entrapment plot generator; accepted for interface
+            compatibility with other modules' ``get_plot_generator``.
 
         Returns
         -------

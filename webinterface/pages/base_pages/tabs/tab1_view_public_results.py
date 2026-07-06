@@ -134,7 +134,7 @@ def generate_main_selectbox(variables, selectbox_id_uuid: str) -> None:
     )
 
 
-def display_metric_selector(variables, options: Optional[list] = None) -> str:
+def display_metric_selector(variables, options: Optional[list] = None, label: str = "Select metric") -> str:
     """Display metric selector and return selected metric.
 
     Parameters
@@ -144,12 +144,14 @@ def display_metric_selector(variables, options: Optional[list] = None) -> str:
     options : list, optional
         The metric options to show. Defaults to ``["Median", "Mean"]`` (quant modules).
         Other module types (e.g. entrapment) pass their own option list.
+    label : str, optional
+        The radio widget label. Defaults to ``"Select metric"``.
     """
     if options is None:
         options = ["Median", "Mean"]
     help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
     return st.radio(
-        "Select metric",
+        label,
         options,
         help=help_text,
         horizontal=True,
@@ -350,6 +352,7 @@ def display_existing_results(
     use_slider: bool = True,
     table_style: str = "aggrid",
     column_config: Optional[Dict] = None,
+    render_forest_plot=None,
 ) -> None:
     """
     Main orchestration function for Tab 1: plot + interactive table with bidirectional
@@ -373,6 +376,9 @@ def display_existing_results(
         Reserved; AgGrid is always used.
     column_config : Optional[Dict], optional
         Reserved for future st.dataframe column configuration.
+    render_forest_plot : callable, optional
+        Optional callable that renders an additional plot (e.g. a forest plot)
+        between the scatter plot and the results table.
     """
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
@@ -434,6 +440,9 @@ def display_existing_results(
         st.session_state[highlight_key] = plot_clicked_id
         st.session_state[agrid_key_id] = uuid.uuid4()
         st.rerun(scope="fragment")
+
+    if render_forest_plot is not None:
+        render_forest_plot()
 
     # --- Render table via shared utilities ---
     with st.container(key="tour_results_table"):

@@ -169,6 +169,7 @@ def display_submitted_results(
     plot_params: Dict[str, Any],
     table_style: str = "dataframe",
     column_config: Optional[Dict] = None,
+    render_forest_plot=None,
 ) -> None:
     """
     Display submitted benchmark results with plot and table.
@@ -187,6 +188,9 @@ def display_submitted_results(
         Table rendering style ("dataframe" or "aggrid").
     column_config : Optional[Dict], optional
         Streamlit column configuration for dataframe display.
+    render_forest_plot : callable, optional
+        Optional callable that renders an additional plot (e.g. a forest plot)
+        between the scatter plot and the results table.
     """
     # Initialize submitted data
     initialize_submitted_data_points(variables, ionmodule)
@@ -231,6 +235,9 @@ def display_submitted_results(
 
             with st.expander("Error details"):
                 st.code(traceback.format_exc())
+
+    if render_forest_plot is not None:
+        render_forest_plot()
 
     # Render results table (same styled grid as Tab 1)
     render_submitted_results_table(filtered_data, variables)

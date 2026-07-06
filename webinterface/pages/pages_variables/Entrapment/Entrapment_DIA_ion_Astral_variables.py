@@ -90,6 +90,7 @@ class VariablesDIAEntrapmentAstral:
     alpha_warning: bool = True
     beta_warning: bool = False
     archived_warning: bool = False
+    enable_pmultiqc: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_entrapment_ion_DIA_Astral.git"
 
     # Sidebar metadata

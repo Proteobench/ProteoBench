@@ -46,6 +46,17 @@ The parameters that are retrieved from the parameter files are the following:
 | predictors_library       | Library used for the analysis in DIA. With the current module, we do not support experimentally generated libraries, but some software tools allow use of different in-silico-generated libraries.                            |
 | scan_window              | Scan window settings.                                                                                                                                                                                                        |
 
+## Parameters that will never be parsed
+
+Some fields in the submission form cannot be retrieved from any tool's parameter or log file, because they capture
+information that only the person submitting the run knows. These fields are always left for the submitter to fill in
+manually, and are identical across all modules and tools:
+
+| Parameter                   | Description                                                                                                                   |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| postprocessing_performed    | Whether any postprocessing (e.g. manual rescoring, custom filtering, merging of results) was applied after the search engine run. |
+| postprocessing_description  | Free-text description of the postprocessing performed, if any.                                                                 |
+
 ## Tool-specific information
 ### AlphaDIA
 *Parsed parameter file: log.txt

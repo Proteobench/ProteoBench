@@ -134,12 +134,23 @@ def generate_main_selectbox(variables, selectbox_id_uuid: str) -> None:
     )
 
 
-def display_metric_selector(variables) -> str:
-    """Display metric selector and return selected metric."""
+def display_metric_selector(variables, options: Optional[list] = None) -> str:
+    """Display metric selector and return selected metric.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object (used for help text).
+    options : list, optional
+        The metric options to show. Defaults to ``["Median", "Mean"]`` (quant modules).
+        Other module types (e.g. entrapment) pass their own option list.
+    """
+    if options is None:
+        options = ["Median", "Mean"]
     help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
     return st.radio(
         "Select metric",
-        ["Median", "Mean"],
+        options,
         help=help_text,
         horizontal=True,
     )

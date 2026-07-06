@@ -100,7 +100,7 @@ class VariablesDIAEntrapmentAstral:
         default_factory=lambda: ["DIA", "entrapment", "Astral", "orbitrap", "precursor", "ion", "FDR"]
     )
 
-    description_module_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/introduction_DIA_quan_ions.md"
+    description_module_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/introduction_DIA_entrapment_ions_astral.md"
     description_files_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/input_file_description.md"
     description_slider_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/slider_description.md"

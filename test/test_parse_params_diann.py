@@ -19,7 +19,7 @@ fnames = [TESTDATA_DIR / f for f in fnames]
 
 
 @pytest.mark.parametrize("file", fnames)
-def test_read_spectronaut_settings(file):
+def test_read_diann_settings(file):
     expected = pd.read_csv(file.with_suffix(".csv"), index_col=0).squeeze("columns")
     actual = diann_params.extract_params(file)
     actual = pd.Series(actual.__dict__)

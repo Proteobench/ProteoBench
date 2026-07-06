@@ -8,14 +8,9 @@ from typing import Any, Dict
 import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import streamlit as st
-
 from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import (
     VariablesDIAEntrapmentAstral,
 )
-from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
-    DIAEntrapmentIonModuleAstral as IonModule,
-)
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import get_submission_source, is_official_server
@@ -642,6 +637,23 @@ class EntrapmentUIObjects(BaseUIModule):
         threshold_str = results[2] if len(results) > 2 else "Maximum reported"
         colorblind_mode = results[3] if len(results) > 3 else False
         threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
+
+        # Warn when the newly uploaded datapoint's max Q-value is below the selected threshold,
+        # which means it won't appear in the plot at the current setting.
+        if threshold is not None:
+            all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
+            if all_dp is not None and not all_dp.empty and "old_new" in all_dp.columns:
+                new_rows = all_dp[all_dp["old_new"] == "new"]
+                if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
+                    max_q = float(new_rows.iloc[0]["reported_fdr_parsed_from_input"])
+                    if max_q < threshold:
+                        available = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
+                        suggestion = f"Try selecting **{max(available):.3f}** or lower." if available else ""
+                        st.warning(
+                            f"🚨 The uploaded data has a maximum Q-value of **{max_q:.4f}**, which is below "
+                            f"the selected threshold of **{threshold}**. "
+                            f"The uploaded datapoint is not shown at this threshold. {suggestion} 🚨"
+                        )
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")

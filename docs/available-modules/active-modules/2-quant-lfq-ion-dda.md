@@ -77,7 +77,7 @@ After upload, you will get a link to a Github pull request associated with your 
 ## Important Tool-specific settings
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for metric caluclation and public submission**
+**Table 2. Overview of input files required for metric calculation and public submission**
 | Tool | Input file | Parameter File |
 |---|---|---|
 | AlphaPept | *.csv | *.yaml |

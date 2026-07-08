@@ -81,7 +81,7 @@ To submit your run for public usage, you need to upload the parameter file assoc
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for metric caluclation and public submission**
+**Table 2. Overview of input files required for metric calculation and public submission**
 | Tool | Input file | Parameter File |
 |---|---|---|
 | AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |

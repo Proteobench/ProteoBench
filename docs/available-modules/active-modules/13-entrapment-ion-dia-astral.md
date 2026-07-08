@@ -41,6 +41,8 @@ Download the raw files from the ProteoBench server:
 - `LFQ_Astral_DIA_15min_50ng_Human_02`
 - `LFQ_Astral_DIA_15min_50ng_Human_03`
 
+You can download all three files at once as a single archive: [all_data_Entrapment_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz).
+
 **It is imperative not to rename the files once downloaded.**
 
 The entrapment FASTA (`ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt`) is available from the ProteoBench server. It contains human peptide sequences alongside a matched set of entrapment peptide sequences (suffixed `_p_target` to allow classification). **This file is pre-digested: do not apply enzymatic digestion in your search engine settings.**

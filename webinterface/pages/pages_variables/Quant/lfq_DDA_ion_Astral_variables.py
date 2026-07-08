@@ -113,6 +113,7 @@ class VariablesDDAQuantAstral:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DDA-astral/all_data_LFQ_Quant_DDA_Astral.tar.gz"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Ion quantification (Astral)"

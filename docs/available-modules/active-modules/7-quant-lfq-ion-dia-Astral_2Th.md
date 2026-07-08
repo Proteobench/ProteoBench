@@ -36,7 +36,7 @@ For now, you can download the raw files from the ProteoBench server here:
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw)
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw)
 
-All files can be found here [proteobench.cubimed.rub.de/raws/DIA-astral/](https://proteobench.cubimed.rub.de/raws/DIA-astral/)
+All files can be found here [proteobench.cubimed.rub.de/raws/DIA-astral/](https://proteobench.cubimed.rub.de/raws/DIA-astral/), or download them all at once as a single archive: [all_data_LFQ_Quant_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral/all_data_LFQ_Quant_DIA_Astral.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 

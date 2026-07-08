@@ -29,7 +29,7 @@ The files can be downloaded from the proteomeXchange repository [PXD028735](http
 - [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw)
 - [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DDA/](https://proteobench.cubimed.rub.de/raws/DDA/)
+Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DDA/](https://proteobench.cubimed.rub.de/raws/DDA/), or download all files at once as a single archive: [all_data_LFQ_Quant_DDA_QExactive.tar.gz](https://proteobench.cubimed.rub.de/raws/DDA/all_data_LFQ_Quant_DDA_QExactive.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 

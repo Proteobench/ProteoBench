@@ -40,7 +40,7 @@ The files can be downloaded from the proteomeXchange repository [PXD028735](http
 - [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
 - [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA/](https://proteobench.cubimed.rub.de/raws/DIA/)
+Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA/](https://proteobench.cubimed.rub.de/raws/DIA/), or download all files at once as a single archive: [all_data_LFQ_Quant_DIA_AIF.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA/all_data_LFQ_Quant_DIA_AIF.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 

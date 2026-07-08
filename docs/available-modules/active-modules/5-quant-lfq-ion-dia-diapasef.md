@@ -41,7 +41,7 @@ For now, you can download the raw files from the ProteoBench server here:
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d.zip)
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d.zip)
 
-All files can be found here [proteobench.cubimed.rub.de/raws/diaPASEF/](https://proteobench.cubimed.rub.de/raws/diaPASEF/)
+All files can be found here [proteobench.cubimed.rub.de/raws/diaPASEF/](https://proteobench.cubimed.rub.de/raws/diaPASEF/), or download them all at once as a single archive: [all_data_LFQ_Quant_DIA_diaPASEF.tar.gz](https://proteobench.cubimed.rub.de/raws/diaPASEF/all_data_LFQ_Quant_DIA_diaPASEF.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 

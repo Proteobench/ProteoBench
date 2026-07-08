@@ -64,7 +64,7 @@ The files can be downloaded from the proteomeXchange repository [JPST003358](htt
 - [B9_G_DIA_nLC_tTOF_R5.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R5.d.zip)
 - [B9_G_DIA_nLC_tTOF_R6.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R6.d.zip)
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA-plasma/](https://proteobench.cubimed.rub.de/raws/DIA-plasma/)
+Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA-plasma/](https://proteobench.cubimed.rub.de/raws/DIA-plasma/), or download all files at once as a single archive: [all_data_LFQ_Quant_DIA_Plasma.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-plasma/all_data_LFQ_Quant_DIA_Plasma.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 

@@ -113,6 +113,7 @@ class VariablesDIAQuantAstral:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-astral/all_data_LFQ_Quant_DIA_Astral.tar.gz"
 
     title: str = "DIA Precursor ion quantification - Astral 2 Th"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

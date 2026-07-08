@@ -113,6 +113,7 @@ class VariablesDIAQuantZenoTOF:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/10-quant-lfq-ion-dia-ZenoTOF/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz"
 
     title: str = "DIA Precursor ion quantification - ZenoTOF"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

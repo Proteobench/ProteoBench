@@ -44,12 +44,25 @@ class BaseStreamlitUI:
     def _render_tab_header(self) -> None:
         """Render common tab header elements: title, documentation link, and banner."""
         st.title(self.variables.title)
-        st.link_button(
-            "Go to module documentation",
-            url=self.variables.doc_url,
-            type="secondary",
-            help="link to the module documentation",
-        )
+        raw_data_url = getattr(self.variables, "raw_data_url", None)
+        doc_col, download_col = st.columns(2)
+        with doc_col:
+            st.link_button(
+                "Module documentation",
+                url=self.variables.doc_url,
+                type="secondary",
+                icon="📖",
+                help="link to the module documentation",
+            )
+        if raw_data_url:
+            with download_col:
+                st.link_button(
+                    "Download input files",
+                    url=raw_data_url,
+                    type="secondary",
+                    icon="⬇️",
+                    help="Download the raw input files used to benchmark this module",
+                )
         display_banner(self.variables)
 
     def get_tab_config(self) -> list:

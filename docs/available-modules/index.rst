@@ -33,7 +33,7 @@ Are you looking for...
       :bdg-info:`beta`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive>`__ · `Documentation <active-modules/2-quant-lfq-ion-dda.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive>`__ · :doc:`Documentation <active-modules/2-quant-lfq-ion-dda>`
 
 
 ...a quantification module for DIA data?
@@ -49,7 +49,7 @@ Are you looking for...
       :bdg-info:`beta`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF>`__ · `Documentation <active-modules/5-quant-lfq-ion-dia-diapasef.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF>`__ · :doc:`Documentation <active-modules/5-quant-lfq-ion-dia-diapasef>`
 
 
    .. grid-item-card:: LFQ of precursor ions with Astral data
@@ -60,7 +60,7 @@ Are you looking for...
       :bdg-info:`beta`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral>`__ · `Documentation <active-modules/7-quant-lfq-ion-dia-Astral_2Th.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral>`__ · :doc:`Documentation <active-modules/7-quant-lfq-ion-dia-Astral_2Th>`
 
 
    .. grid-item-card:: LFQ of precursor ions with ZenoTOF 8600 - ZenoSWATH data
@@ -71,7 +71,7 @@ Are you looking for...
       :bdg-info:`beta`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF>`__ · `Documentation <active-modules/10-quant-lfq-ion-dia-ZenoTOF.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF>`__ · :doc:`Documentation <active-modules/10-quant-lfq-ion-dia-ZenoTOF>`
 
 
 ...a quantification module for DDA data?
@@ -87,7 +87,7 @@ Are you looking for...
       :bdg-info:`beta`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive>`__ · `Documentation <active-modules/2-quant-lfq-ion-dda.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive>`__ · :doc:`Documentation <active-modules/2-quant-lfq-ion-dda>`
 
 
    .. grid-item-card:: LFQ of peptidoforms with DDA (QExactive)
@@ -98,7 +98,7 @@ Are you looking for...
       :bdg-info:`beta`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform>`__ · `Documentation <active-modules/3-quant-lfq-peptidoform-dda.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform>`__ · :doc:`Documentation <active-modules/3-quant-lfq-peptidoform-dda>`
 
 
    .. grid-item-card:: LFQ of precursor ions with Astral data
@@ -109,7 +109,7 @@ Are you looking for...
       :bdg-info:`beta`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral>`__ · `Documentation <active-modules/8-quant-lfq-ion-dda-Astral.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral>`__ · :doc:`Documentation <active-modules/8-quant-lfq-ion-dda-Astral>`
 
 ... Identification modules?
 -----
@@ -122,10 +122,10 @@ Are you looking for...
       :padding: 1
       :class-card: sd-mb-4
 
-      :bdg-sucdess:`alpha`
+      :bdg-success:`alpha`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · `Documentation <active-modules/11-denovo-dda-hcd.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · :doc:`Documentation <active-modules/11-denovo-dda-hcd>`
 
 
 ...a usecase specific module?
@@ -141,7 +141,7 @@ Are you looking for...
       :bdg-success:`alpha`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <active-modules/9-quant-lfq-ion-dia-lowinput.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · :doc:`Documentation <active-modules/9-quant-lfq-ion-dia-lowinput>`
 
 
    .. grid-item-card:: Human Plasma LFQ, DIA
@@ -152,7 +152,7 @@ Are you looking for...
       :bdg-success:`alpha`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <active-modules/12-quant-lfq-ion-dia-plasma.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · :doc:`Documentation <active-modules/12-quant-lfq-ion-dia-plasma>`
 
 
 ...an archived module?
@@ -168,7 +168,7 @@ Are you looking for...
       :bdg-dark:`archived`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`__ · `Documentation <archived-modules/4-quant-lfq-ion-dia-aif.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`__ · :doc:`Documentation <archived-modules/4-quant-lfq-ion-dia-aif>`
 
 .. toctree::
     :maxdepth: 2

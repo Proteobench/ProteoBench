@@ -16,6 +16,19 @@ For **software and method developers**, ProteoBench provides a framework to iden
 
 For the **wider proteomics community**, ProteoBench makes it easier to position newly published workflows within the context of the existing state of the art. It can therefore support reviewers, editors, and readers who require transparent evidence for claims about workflow performance.
 
+## How do I use ProteoBench?
+
+Depending on your goal, there are multiple ways to interact with ProteoBench. If you want...
+
+- a pointer towards which workflow to use for your data:
+Select the module that fits the best to your use case (e.g. single cell, de novo, DIA LFQ Quantification, ...). Open the module page in the web app, and investigate which workflow performs best on the metric that is important to you (e.g. quantification accuracy).
+
+- to compare your own workflow performance with public results:
+Download the associated files (e.g. raw files and fasta files for quantification modules) from the module page or the documentation, run your workflow, and upload the results in the custom format. Keep in mind that custom formats can not be made public, and take a look at the module documentation page for module specific information.
+
+- automatic local benchmarking:
+ProteoBench is open source, and is available as a [pypi package](https://pypi.org/project/proteobench/). Instructions and examples of how to use the functions are available in a [python notebook](https://github.com/Proteobench/ProteoBench/examples/local_usage_walkthrough.ipynb).
+
 ## Do I need to run my workflow on a predefined data set?
 
 Yes. To compare results meaningfully within a ProteoBench module, all submitted workflows must be evaluated on the benchmark dataset defined for that module. This ensures that differences between submitted results reflect differences in data analysis workflows rather than differences in sample composition, instrument configuration, acquisition design, or data quality.

@@ -67,7 +67,7 @@ docs = [
   "sphinx_new_tab_link",
   "sphinx_copybutton",
 ]
-web = ["streamlit>1.27", "scipy"]
+web = ["streamlit>1.27", "scipy", "PyJWT", "extra-streamlit-components"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/ProteoBench/ProteoBench/issues/"

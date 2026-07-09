@@ -68,9 +68,16 @@ class StreamlitPage(ABC):
         pbb.proteobench_sidebar(current_page="/")
 
         # Auth: handle callback, show user badge in header
-        from pages.base_pages.utils.auth import render_auth_home
+        from pages.base_pages.utils.auth import render_auth_home, render_oauth_success_banner
 
         render_auth_home()
+
+        # If this tab was opened solely to complete an OAuth sign-in, show a banner
+        # telling the user they can close it. We intentionally keep rendering the
+        # full Home page below (rather than replacing it): the full render is what
+        # reliably lets the sign-in cookie reach the browser so the user's other
+        # tab picks it up. A minimal replacement page broke that.
+        render_oauth_success_banner()
 
         self._preface()
 

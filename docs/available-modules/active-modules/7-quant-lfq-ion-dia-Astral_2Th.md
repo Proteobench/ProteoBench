@@ -53,25 +53,6 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-### Suggested parameters
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
-
-| Parameter                                | Value                                  |
-| ---------------------------------------- | -------------------------------------- |
-| Maximum number of missed cleavages       | 1                                      |
-| PSM/Precursor FDR                        | 0.01                                   |
-| Spectral Library                         | Predicted spectral library from FASTA  |
-| Precursor charge state                   | 1-5                                    |
-| Precursor m/z range                      | 380-980                                |
-| Fragment ion m/z range                   | 150-2000                               |
-| Endopeptidase                            | Trypsin/P                              |
-| Fixed modifications                      | Carbamidomethylation (C)               |
-| Variable modifications                   | Oxidation (M), Acetyl (Protein N-term) |
-| Maximum number of variable modifications | 1                                      |
-| Minimum peptide length                   | 6 residues                             |
-
-
 ### Submit your run for public usage
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 

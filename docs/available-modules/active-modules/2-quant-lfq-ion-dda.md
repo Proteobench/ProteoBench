@@ -17,7 +17,8 @@ Other modules will be more suited to explore further post-pocessing steps.
 
 ## Data set
 
-A subset of the Q Exactive HF-X Orbitrap (Thermo Fisher) data dependent acquisition (DDA) data described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. Here, only the first biological replicate series (named “alpha”) was used, encompassing three technical replicates of two different conditions (referred to as “A” and “B”). The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli.
+A subset of the Q Exactive HF-X Orbitrap (Thermo Fisher) data dependent acquisition (DDA) data described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. Here, only the first biological replicate series (named “alpha”) was used, encompassing three technical replicates of two different conditions (referred to as “A” and “B”). The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli. The data-dependent acquisition runs on the Q Exactive HF-X were acquired with MS survey scans across 350–1400 m/z.
+
 Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)).
 
 The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DDA/):
@@ -49,22 +50,6 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 ## How to use
 
 Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion) if you want to submit your results or when you want to explore the DDA quantification module.
-
-### Suggested parameters
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
-
-**Table 1. Suggested parameters**
-|Parameter|Value|
-|---------|-----|
-|Maximum number of missed cleavages|2|
-|PSM FDR|0.01|
-|Endopeptidase|Trypsin/P|
-|Fixed modifications|Carbamidomethylation (C)|
-|Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
-|Precursor mass tolerance|10 ppm|
-|Fragment mass tolerance|0.02 Da|
-|Minimum peptide length|7 residues|
 
 ### Submit your run for public usage
 

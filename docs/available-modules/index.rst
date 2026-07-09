@@ -41,7 +41,7 @@ Are you looking for...
 
 .. grid::
 
-   .. grid-item-card:: LFQ of precursor ions with DIA-PASEF
+   .. grid-item-card:: LFQ of precursor ions with diaPASEF
       :columns: 6 6 6 6
       :padding: 1
       :class-card: sd-mb-4
@@ -52,7 +52,7 @@ Are you looking for...
       `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF>`__ · :doc:`Documentation <active-modules/5-quant-lfq-ion-dia-diapasef>`
 
 
-   .. grid-item-card:: LFQ of precursor ions with Astral data
+   .. grid-item-card:: LFQ of precursor ions with DIA Astral data
       :columns: 6 6 6 6
       :padding: 1
       :class-card: sd-mb-4
@@ -101,7 +101,7 @@ Are you looking for...
       `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform>`__ · :doc:`Documentation <active-modules/3-quant-lfq-peptidoform-dda>`
 
 
-   .. grid-item-card:: LFQ of precursor ions with Astral data
+   .. grid-item-card:: LFQ of precursor ions with DDA Astral data
       :columns: 6 6 6 6
       :padding: 1
       :class-card: sd-mb-4

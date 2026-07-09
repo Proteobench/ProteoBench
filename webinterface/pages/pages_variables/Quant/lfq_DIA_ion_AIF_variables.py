@@ -111,6 +111,7 @@ class VariablesDIAQuant:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/archived-modules/4-quant-lfq-ion-dia-aif/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA/all_data_LFQ_Quant_DIA_AIF.tar.gz"
 
     title: str = "DIA Precursor quantification - AIF"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

@@ -122,6 +122,7 @@ class VariablesDIAQuantLI:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-lowinput/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/all_data_LFQ_Quant_DIA_SC.tar.gz"
 
     title: str = "DIA Precursor quantification - Low Input"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

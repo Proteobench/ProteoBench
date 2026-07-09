@@ -20,8 +20,11 @@ Other modules will be more suited to explore further post-pocessing steps.
 A subset of the Q Exactive HF-X Orbitrap (Thermo Fisher) data dependent acquisition (DDA) data described by [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6) was used as a benchmark dataset. Here, only the first biological replicate series (named “alpha”) was used, encompassing three technical replicates of two different conditions (referred to as “A” and “B”). The samples are a mixture of commercial peptide digest standards of the following species: Escherichia coli (P/N:186003196, Waters Corporation), Yeast (P/N: V7461, Promega) and Human (P/N: V6951, Promega), with logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, Yeast and E.coli.
 Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)).
 
-The files can be downloaded from the proteomeXchange repository [PXD028735](https://www.ebi.ac.uk/pride/archive/projects/PXD028735), make sure that you download the following raw files:
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DDA/):
 
+- single archive with FASTA: [all_data_LFQ_Quant_DDA_QExactive.tar.gz](https://proteobench.cubimed.rub.de/raws/DDA/all_data_LFQ_Quant_DDA_QExactive.tar.gz).
+
+As an alternative, the files can also be downloaded from the proteomeXchange repository [PXD028735](https://www.ebi.ac.uk/pride/archive/projects/PXD028735):
 - [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01.raw)
 - [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02.raw)
 - [LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03.raw)
@@ -29,7 +32,6 @@ The files can be downloaded from the proteomeXchange repository [PXD028735](http
 - [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02.raw)
 - [LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03.raw)
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DDA/](https://proteobench.cubimed.rub.de/raws/DDA/), or download all files at once as a single archive: [all_data_LFQ_Quant_DDA_QExactive.tar.gz](https://proteobench.cubimed.rub.de/raws/DDA/all_data_LFQ_Quant_DDA_QExactive.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -48,11 +50,11 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion) if you want to submit your results or when you want to explore the DDA quantification module.
 
-### Input data for private visualisation of your benchmark run(s)
+### Suggested parameters
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
 
-**Table 1. Suggested parameters for module 2**
+**Table 1. Suggested parameters**
 |Parameter|Value|
 |---------|-----|
 |Maximum number of missed cleavages|2|

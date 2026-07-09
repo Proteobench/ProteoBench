@@ -27,7 +27,9 @@ The mass spectrometer was operated in positive ionization mode with data-depende
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-For now, you can download the raw files from the ProteoBench server here:
+You can download the raw files from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DDA-astral/) here:
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DDA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DDA-astral/all_data_LFQ_Quant_DDA_Astral.tar.gz).
 
 - [LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw)
 - [LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw)
@@ -35,8 +37,6 @@ For now, you can download the raw files from the ProteoBench server here:
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw)
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw)
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw)
-
-All files can be found here [proteobench.cubimed.rub.de/raws/DDA-astral/](https://proteobench.cubimed.rub.de/raws/DDA-astral/), or download them all at once as a single archive: [all_data_LFQ_Quant_DDA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DDA-astral/all_data_LFQ_Quant_DDA_Astral.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -55,11 +55,11 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral) if you want to submit your results or when you want to explore the DDA quantification module.
 
-### Input data for private visualisation of your benchmark run(s)
+### Suggested parameters
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
 
-**Table 1. Suggested parameters for module 2**
+**Table 1. Suggested parameters**
 |Parameter|Value|
 |---------|-----|
 |Maximum number of missed cleavages|2|

@@ -14,7 +14,11 @@ A subset of the Astral (Thermo Fisher) data independent acquisition (DIA) data d
 The samples are a mixture of commercial peptide digest standards of the following species: HeLa (H) (Thermo Scientific, Pierce™ HeLa Protein Digest Standard, 88328) and yeast (Y) (Promega, MS Compatible Yeast Protein Extract, Digest, Saccharomyces cerevisiae, 100ug, V7461), combined in 0.1% TFA.
 Please refer to the original publication for the full description of sample preparation and data acquisition parameters ([Bubis et al., 2024](https://www.biorxiv.org/content/10.1101/2024.02.01.578358v2.abstract)). 
 
-The files can be downloaded from the proteomeXchange repository [PXD049412](https://www.ebi.ac.uk/pride/archive/projects/PXD049412), make sure that you download the following raw files:
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/):
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_SC.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/all_data_LFQ_Quant_DIA_SC.tar.gz).
+
+Alternatively, you can download them from the proteomeXchange repository [PXD049412](https://www.ebi.ac.uk/pride/archive/projects/PXD049412):
 
 - [	20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2025/01/PXD049412/20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1.raw)
 - [	20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2025/01/PXD049412/20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2.raw)
@@ -23,7 +27,6 @@ The files can be downloaded from the proteomeXchange repository [PXD049412](http
 - [	20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2025/01/PXD049412/20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2.raw)
 - [	20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2025/01/PXD049412/20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3.raw)
 
-Alternatively, you can download them from the ProteoBench server [here](https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/), or download them all at once as a single archive: [all_data_LFQ_Quant_DIA_SC.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/all_data_LFQ_Quant_DIA_SC.tar.gz).
 
 
 **It is imperative not to rename the files once downloaded!**

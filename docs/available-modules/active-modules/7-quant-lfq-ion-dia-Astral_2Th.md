@@ -27,7 +27,9 @@ The mass spectrometer was operated in positive ionization mode with data-indepen
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-For now, you can download the raw files from the ProteoBench server here:
+You can download the raw files from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-astral/) here:
+
+- Single archive with FASTA: single archive: [all_data_LFQ_Quant_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral/all_data_LFQ_Quant_DIA_Astral.tar.gz).
 
 - [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw)
 - [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw)
@@ -35,8 +37,6 @@ For now, you can download the raw files from the ProteoBench server here:
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw)
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw)
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw)
-
-All files can be found here [proteobench.cubimed.rub.de/raws/DIA-astral/](https://proteobench.cubimed.rub.de/raws/DIA-astral/), or download them all at once as a single archive: [all_data_LFQ_Quant_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral/all_data_LFQ_Quant_DIA_Astral.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -53,7 +53,7 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-### Input data for private visualisation of your benchmark run(s)
+### Suggested parameters
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
 

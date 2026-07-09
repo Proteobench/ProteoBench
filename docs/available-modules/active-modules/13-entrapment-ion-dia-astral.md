@@ -35,13 +35,13 @@ Each workflow submission is classified as:
 
 The benchmark dataset consists of three technical replicates of a human plasma digest acquired on an Orbitrap Astral (Thermo Fisher Scientific) in DIA mode with a 15-minute gradient.
 
-Download the raw files from the ProteoBench server:
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/):
 
-- `LFQ_Astral_DIA_15min_50ng_Human_01`
-- `LFQ_Astral_DIA_15min_50ng_Human_02`
-- `LFQ_Astral_DIA_15min_50ng_Human_03`
+- Single archive with FASTA: [all_data_Entrapment_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz).
 
-You can download all three files at once as a single archive: [all_data_Entrapment_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz).
+- [LFQ_Astral_DIA_15min_50ng_Human_01.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_01.raw)
+- [LFQ_Astral_DIA_15min_50ng_Human_02.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_02.raw)
+- [LFQ_Astral_DIA_15min_50ng_Human_03.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_03.raw)
 
 **It is imperative not to rename the files once downloaded.**
 
@@ -55,7 +55,7 @@ The three FDP estimates are computed from the resulting set and compared to the 
 
 ## How to use
 
-### Input data for private visualisation
+### Suggested parameters
 
 The module currently accepts DIA-NN output (`report.tsv` or `report.parquet`). Use the suggested parameters in Table 1 for a fair comparison between tools.
 

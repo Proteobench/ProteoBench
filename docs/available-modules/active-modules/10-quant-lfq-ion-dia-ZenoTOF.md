@@ -26,7 +26,9 @@ An OptiFlow Pro Nano ion source was used with a NanoCal probe (<1 µL electrode)
 The 15-min Zeno SWATH DIA experiments used 85 variable windows spanning the TOF MS mass range 400-900 Da and MS/MS mass range 140-1750 Da, with Zeno trap pulsing turned on, with MS/MS accumulation times of 16 ms. Before each Zeno SWATH MS DIA cycle an additional MS1 survey scan from 400-1500 Da was recorded for 50 ms.
 The files have been uploaded to the ProteomeXchange repository, with PXD accession number (PXD070049). 
 
-All files can be downloaded here [proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/), or download them all at once as a single archive: [all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz).
+All files can be downloaded [from the ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/):
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -43,7 +45,7 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-### Input data for private visualisation of your benchmark run(s)
+### Suggested parameters
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
 

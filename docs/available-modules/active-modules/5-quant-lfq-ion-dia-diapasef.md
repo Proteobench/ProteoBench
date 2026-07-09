@@ -26,13 +26,11 @@ Please refer to the original publication for the full description of sample prep
 Data acquisition parameters were as following: 
 The resulting peptides were analysed in triplicate (25ng) by nanoLC-MS/MS using an UltiMate 3000 RS nanoLC system (Thermo Fisher Scientific) coupled to a timsTOF SCP mass spectrometer (Bruker). Peptides were separated on a C18 Aurora column (25cm x 75µm ID, IonOpticks) using a gradient ramping from 2% to 20% of B in 30 min, then to 37% of B in 3min and to 85% of B in 2min (solvent A: 0.1% formic acid in H2O; solvent B: 0.1% FA in acetonitrile), with a flow rate of 150nL/min. MS acquisition was performed in diaPASEF mode on the precursor mass range [400-1000] m/z and ion mobility 1/K0 [0.64-1.37]. The acquisition scheme was composed of 8 consecutive TIMS ramps using an accumulation time of 100ms, with 3 MS/MS acquisition windows of 25 Th for each of them. The resulting cycle time was 0.96 seconds. The collision energy was ramped linearly as a function of the ion mobility from 59 eV at 1/K0=1.6Vs cm−2 to 20 eV at 1/K0=0.6Vs cm−2.
 
-These files are available alongside all the associated metadata27 on the ProteomeXchange28 repository PRIDE29 with the following identifier: PXD062685.
+You can download the raw files from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/diaPASEF/):
 
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_diaPASEF.tar.gz](https://proteobench.cubimed.rub.de/raws/diaPASEF/all_data_LFQ_Quant_DIA_diaPASEF.tar.gz).
 
-
-The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
-
-For now, you can download the raw files from the ProteoBench server here:
+Or individually:
 
 - [ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d.zip)
 - [ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d.zip)
@@ -40,8 +38,6 @@ For now, you can download the raw files from the ProteoBench server here:
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d.zip)
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d.zip)
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d.zip)
-
-All files can be found here [proteobench.cubimed.rub.de/raws/diaPASEF/](https://proteobench.cubimed.rub.de/raws/diaPASEF/), or download them all at once as a single archive: [all_data_LFQ_Quant_DIA_diaPASEF.tar.gz](https://proteobench.cubimed.rub.de/raws/diaPASEF/all_data_LFQ_Quant_DIA_diaPASEF.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -58,7 +54,7 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-### Input data for private visualisation of your benchmark run(s)
+### Suggested parameters
 
 The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
 

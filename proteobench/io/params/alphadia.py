@@ -370,9 +370,13 @@ def extract_params(
 
         # Rewrite modifications
         if "fixed_modifications" in cleaned_line:
-            all_parameters["fixed_mods"] = homogenize_modification_string(cleaned_line.split(":", 1)[1].strip())
+            mod_value = cleaned_line.split(":", 1)[1].strip()
+            mod_value = re.sub(r"\s*\[user defined[^\]]*\]", "", mod_value, flags=re.IGNORECASE).strip()
+            all_parameters["fixed_mods"] = homogenize_modification_string(mod_value)
         if "variable_modifications" in cleaned_line:
-            all_parameters["variable_mods"] = homogenize_modification_string(cleaned_line.split(":", 1)[1].strip())
+            mod_value = cleaned_line.split(":", 1)[1].strip()
+            mod_value = re.sub(r"\s*\[user defined[^\]]*\]", "", mod_value, flags=re.IGNORECASE).strip()
+            all_parameters["variable_mods"] = homogenize_modification_string(mod_value)
 
     # Remove raw modification keys so map_keys_to_desired_format doesn't
     # overwrite the homogenized fixed_mods / variable_mods values.
@@ -385,13 +389,17 @@ def extract_params(
     # Format some values
     all_parameters["precursor_mass_tolerance"] = (
         "[-"
-        + all_parameters["precursor_mass_tolerance"]
-        + "ppm, "
-        + all_parameters["precursor_mass_tolerance"]
-        + "ppm]"
+        + all_parameters["precursor_mass_tolerance"].strip()
+        + " ppm, "
+        + all_parameters["precursor_mass_tolerance"].strip()
+        + " ppm]"
     )
     all_parameters["fragment_mass_tolerance"] = (
-        "[-" + all_parameters["fragment_mass_tolerance"] + "ppm, " + all_parameters["fragment_mass_tolerance"] + "ppm]"
+        "[-"
+        + all_parameters["fragment_mass_tolerance"].strip()
+        + " ppm, "
+        + all_parameters["fragment_mass_tolerance"].strip()
+        + " ppm]"
     )
 
     # 'True' and 'False' to boolean
@@ -414,6 +422,7 @@ if __name__ == "__main__":
         "../../../test/params/log_alphadia_1.12.txt",
         "../../../test/params/log_alphadia_1.12MBR.txt",
         "../../../test/params/alphadia_weird_lengths.txt",
+        "../../../test/params/AlphaDIA_wrong_mod_parse.txt",
     ]:
         file = pathlib.Path(fname)
         pb_params = extract_params(file)

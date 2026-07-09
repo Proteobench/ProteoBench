@@ -98,6 +98,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Netherlands eScience Center, Science Park 402, 1098 XH, Amsterdam, The Netherlands*
 
 .. line-block::
+    **Uri Keich**
+    *School of Mathematics and Statistics, University of Sydney NSW 2006, Australia*
+
+.. line-block::
     **Ville Koskinen**
     *Matrix Science Ltd, London, United Kingdom*
 
@@ -185,6 +189,10 @@ People who contributed to ProteoBench, in alphabetical order:
 .. line-block::
     **Julia Schessner**
     *Department of Proteomics and Signaltransduction, Max-Planck-Institute of Biochemistry, Martinsried, Germany*
+
+.. line-block::
+    **Matthew The**
+    *School of Life Sciences, Technical University of Munich, 85354 Freising, Germany*
 
 .. line-block::
     **Julian Uszkoreit**

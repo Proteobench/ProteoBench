@@ -1,9 +1,20 @@
 """Streamlit-wide page settings and tools for ProteoBench."""
 
+import base64
+
 import streamlit as st
 import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
 from pages.utils.module_registry import MODULE_CATEGORIES
+
+_ICON_PATH = "../img/proteobench-icon.svg"
+
+
+def _svg_data_uri(path: str) -> str:
+    """Encode an SVG file as a base64 data URI for embedding in markdown labels."""
+    with open(path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("utf-8")
+    return f"data:image/svg+xml;base64,{encoded}"
 
 
 def proteobench_page_config(page_layout="wide"):
@@ -65,7 +76,7 @@ def render_links(modules):
                 )
 
 
-def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_logos_sidebar.png"):
+def proteobench_sidebar(current_page):
     """
     Format the sidebar for ProteoBench with active page highlighting, search, and release stage badges.
 
@@ -73,8 +84,6 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
     ----------
     current_page : str
         The name of the current page (should match label).
-    proteobench_logo : str, optional
-        Path to the ProteoBench logo image file.
     """
     from pages.utils.module_registry import filter_modules, get_all_modules
 
@@ -116,7 +125,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
 
     # Sidebar layout
     with st.sidebar:
-        st.page_link("Home.py", label="Home")
+        st.page_link("Home.py", label=f"![Home]({_svg_data_uri(_ICON_PATH)}) **ProteoBench**")
 
         # Search box
         search_query = st.text_input(
@@ -148,7 +157,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
                 with st.expander(category, expanded=(current_page in [m.label for m in all_modules[category]])):
                     render_links(filtered_modules[category])
 
-        st.image(proteobench_logo, width=300)
+        st.image("logos/logo_funding/main_logos_sidebar_only_eubic_eupa.png", width=220)
         st.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")
         st.page_link(texts.ShortMessages.legal_notice, label="legal notice")
 

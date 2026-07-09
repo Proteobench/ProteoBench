@@ -117,22 +117,6 @@ The module supports multiple data formats to maximize flexibility. Users can pro
 - FragPipe (DIA-NN Quant)
 - Custom (tab-delimited format)
 
-### Suggested parameters
-
-To ensure fair comparison between different processing workflows, we suggest using the parameters listed below:
-
-| Parameter | Value |
-|-----------|-------|
-| Maximum number of missed cleavages | 1 |
-| PSM/Precursor FDR | 0.01 |
-| Spectral Library | Predicted spectral library from FASTA |
-| Precursor charge state | 1-5 |
-| Fixed modifications | Carbamidomethylation (C) |
-| Variable modifications | Oxidation (M), Acetyl (Protein N-term) |
-| Minimum peptide length | 6-7 residues |
-
-These parameters represent a standardized configuration to evaluate the intrinsic performance of different analysis tools without the confounding effects of non-standard parameter choices.
-
 ### Important Tool-specific settings
 
 Detailed instructions and optimal settings for each supported tool are provided below.

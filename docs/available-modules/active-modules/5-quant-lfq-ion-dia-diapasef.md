@@ -24,7 +24,7 @@ A dia-PASEF dataset using the same sample composition (for "A" and "B") as descr
 Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
 Data acquisition parameters were as following: 
-The resulting peptides were analysed in triplicate (25ng) by nanoLC-MS/MS using an UltiMate 3000 RS nanoLC system (Thermo Fisher Scientific) coupled to a timsTOF SCP mass spectrometer (Bruker). Peptides were separated on a C18 Aurora column (25cm x 75µm ID, IonOpticks) using a gradient ramping from 2% to 20% of B in 30 min, then to 37% of B in 3min and to 85% of B in 2min (solvent A: 0.1% formic acid in H2O; solvent B: 0.1% FA in acetonitrile), with a flow rate of 150nL/min. MS acquisition was performed in diaPASEF mode on the precursor mass range [400-1000] m/z and ion mobility 1/K0 [0.64-1.37]. The acquisition scheme was composed of 8 consecutive TIMS ramps using an accumulation time of 100ms, with 3 MS/MS acquisition windows of 25 Th for each of them. The resulting cycle time was 0.96 seconds. The collision energy was ramped linearly as a function of the ion mobility from 59 eV at 1/K0=1.6Vs cm−2 to 20 eV at 1/K0=0.6Vs cm−2.
+The resulting peptides were analysed in triplicate (25ng) by nanoLC-MS/MS using an UltiMate 3000 RS nanoLC system (Thermo Fisher Scientific) coupled to a timsTOF SCP mass spectrometer (Bruker). Peptides were separated on a C18 Aurora column (25cm x 75µm ID, IonOpticks) using a gradient ramping from 2% to 20% of B in 30 min, then to 37% of B in 3min and to 85% of B in 2min (solvent A: 0.1% formic acid in H2O; solvent B: 0.1% FA in acetonitrile), with a flow rate of 150nL/min. MS acquisition was performed in diaPASEF mode on the precursor mass range [400-1000] m/z and ion mobility 1/K0 [0.64-1.37]. The acquisition scheme was composed of 8 consecutive TIMS ramps using an accumulation time of 100ms, with 3 MS/MS acquisition windows of 25 Th for each of them. The resulting cycle time was 0.96 seconds. The collision energy was ramped linearly as a function of the ion mobility from 59 eV at 1/K0=1.6Vs cm−2 to 20 eV at 1/K0=0.6Vs cm−2. MS2 scan range was set from 100 to 1700 m/z.
 
 You can download the raw files from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/diaPASEF/):
 
@@ -53,25 +53,6 @@ Then we log2-transform the values, and calculate the mean signal per condition, 
 The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
 
 ## How to use
-
-### Suggested parameters
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
-
-| Parameter                                | Value                                  |
-| ---------------------------------------- | -------------------------------------- |
-| Maximum number of missed cleavages       | 1                                      |
-| PSM FDR                                  | 0.01                                   |
-| Spectral Library                         | Predicted spectral library from FASTA  |
-| Precursor charge state                   | 1-5                                    |
-| Precursor m/z range                      | 400-1000                               |
-| Fragment ion m/z range                   | 100-1700                               |
-| Endopeptidase                            | Trypsin/P                              |
-| Fixed modifications                      | Carbamidomethylation (C)               |
-| Variable modifications                   | Oxidation (M), Acetyl (Protein N-term) |
-| Maximum number of variable modifications | 1                                      |
-| Minimum peptide length                   | 6 residues                             |
-
 
 ### Submit your run for public usage
 

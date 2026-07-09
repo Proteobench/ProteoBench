@@ -45,14 +45,13 @@ For modules where database choice affects the benchmark outcome, the recommended
 
 
 ## Can I benchmark commercial software?
-Yes. ProteoBench is designed to include results from commercial software when the software outputs all the workflow parameters/metadata in a format that can be parsed or converted into one of the supported submission formats. 
 Yes. ProteoBench can include results from commercial software when the software output can be parsed or converted into one of the supported submission formats. 
 
 ## What should I do if my software is not directly supported?
 
 If a tool-specific parser is not yet available, users can submit results using the custom tabular format described in the module documentation. This format defines the required columns for metric calculation and enables benchmarking of tools that are not yet natively supported.
 
-Users and developers are encouraged to contact the ProteoBench community if they want a new parser to be added for a specific software package.
+Users and developers are encouraged to contact the ProteoBench developers if they want a new parser to be added for a specific software package.
 
 ## Why are submissions reviewed before becoming public?
 
@@ -65,6 +64,7 @@ ProteoBench evaluates submitted workflow outputs rather than executing every wor
 This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. 
 
 ## How do I find the input data associated with a benchmark module?
+
 Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as [ProteomeXchange](https://www.proteomexchange.org/), depending on the dataset.
 If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
@@ -111,6 +111,12 @@ ProteoBench does not point to a single best one-size-fits-all data analysis work
 ProteoBench development and discussion are community-oriented. Users can follow the relevant repository, documentation pages, discussion forum, or community channels to receive updates about new modules, software parsers, benchmark datasets, documentation improvements, and public releases.
 
 Ongoing discussions can be followed on the [ProteoBench Discussions page](https://github.com/orgs/Proteobench/discussions). Please note that to take part in the discussion a GitHub account is needed.
+To get email updates on ProteoBench developments, you can use the Github functionality to "watch" the [ProteoBench repository](https://github.com/ProteoBench/Proteobench). For this you also require a GitHub account. You can receive email updates on discussions or issues you either participate or are mentioned in, but you can also use the Custom setting which will allow you to subscribe to specific events, such as issues, pull requests, new version releases and new discussions.
+
+![Screenshot showing "watch" button on GitHub](../_static/img/watch_image.png)
+
+We also have a [LinkedIn page](https://www.linkedin.com/company/proteobench)! Here, we will provide regular updates on the developments of ProteoBench, such as new available modules, new updates, and we will also regularly ask for community feedback. Please follow us!
+
 
 ### For GitHub users
 

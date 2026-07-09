@@ -55,22 +55,6 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral) if you want to submit your results or when you want to explore the DDA quantification module.
 
-### Suggested parameters
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
-
-**Table 1. Suggested parameters**
-|Parameter|Value|
-|---------|-----|
-|Maximum number of missed cleavages|2|
-|PSM FDR|0.01|
-|Endopeptidase|Trypsin/P|
-|Fixed modifications|Carbamidomethylation (C)|
-|Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
-|Precursor mass tolerance|10 ppm|
-|Fragment mass tolerance|20 ppm|
-|Minimum peptide length|7 residues|
-
 ### Submit your run for public usage
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available.

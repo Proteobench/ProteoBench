@@ -112,6 +112,7 @@ class VariablesDDAQuant:
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/2-quant-lfq-ion-dda/"
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DDA/all_data_LFQ_Quant_DDA_QExactive.tar.gz"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Precursor quantification (QExactive)"

@@ -26,7 +26,9 @@ An OptiFlow Pro Nano ion source was used with a NanoCal probe (<1 µL electrode)
 The 15-min Zeno SWATH DIA experiments used 85 variable windows spanning the TOF MS mass range 400-900 Da and MS/MS mass range 140-1750 Da, with Zeno trap pulsing turned on, with MS/MS accumulation times of 16 ms. Before each Zeno SWATH MS DIA cycle an additional MS1 survey scan from 400-1500 Da was recorded for 50 ms.
 The files have been uploaded to the ProteomeXchange repository, with PXD accession number (PXD070049). 
 
-All files can be downloaded here [proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/)
+All files can be downloaded [from the ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/):
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -43,25 +45,6 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-### Input data for private visualisation of your benchmark run(s)
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
-
-| Parameter                                | Value                                  |
-| ---------------------------------------- | -------------------------------------- |
-| Maximum number of missed cleavages       | 1                                      |
-| PSM/Precursor FDR                        | 0.01                                   |
-| Spectral Library                         | Predicted spectral library from FASTA  |
-| Precursor charge state                   | 1-5                                    |
-| Precursor m/z range                      | 400-900                                |
-| Fragment ion m/z range                   | 140-1750                               |
-| Endopeptidase                            | Trypsin/P                              |
-| Fixed modifications                      | Carbamidomethylation (C)               |
-| Variable modifications                   | Oxidation (M), Acetyl (Protein N-term) |
-| Maximum number of variable modifications | 1                                      |
-| Minimum peptide length                   | 6 residues                             |
-
-
 ### Submit your run for public usage
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available.
@@ -71,7 +54,7 @@ To submit your run for public usage, you need to upload the parameter file assoc
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for metric caluclation and public submission**
+**Table 2. Overview of input files required for metric calculation and public submission**
 | Tool | Input file | Parameter File |
 |---|---|---|
 | AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |

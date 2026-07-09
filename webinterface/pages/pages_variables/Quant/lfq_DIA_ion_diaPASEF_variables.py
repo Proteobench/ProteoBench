@@ -115,6 +115,7 @@ class VariablesDIAQuantdiaPASEF:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-diapasef/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/diaPASEF/all_data_LFQ_Quant_DIA_diaPASEF.tar.gz"
 
     title: str = "DIA Precursor quantification - diaPASEF"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

@@ -33,13 +33,15 @@ Each workflow submission is classified as:
 
 ## Data set
 
-The benchmark dataset consists of three technical replicates of a human plasma digest acquired on an Orbitrap Astral (Thermo Fisher Scientific) in DIA mode with a 15-minute gradient.
+The benchmark dataset consists of three technical replicates of a human plasma digest acquired on an Orbitrap Astral (Thermo Fisher Scientific) in DIA mode with a 15-minute gradient The mass spectrometer was operated in positive ionization mode with data-independent acquisition, with a full MS scans over a mass range of m/z 380-980 with detection in the Orbitrap at a resolution of 240,000. In each cycle of data-independent acquisition, 300 windows of 2 Th were used to isolate and fragment all precursor ions from 380 to 980 m/z. A normalized collision energy of 25% was used for HCD fragmentation. MS2 scan range was set from 150 to 2000 m/z with detection in the Astral with a maximum injection time of 3 ms. Full details on the dataset can be found in [this preprint](https://www.biorxiv.org/content/10.64898/2026.01.29.702266v2)
 
-Download the raw files from the ProteoBench server:
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/):
 
-- `LFQ_Astral_DIA_15min_50ng_Human_01`
-- `LFQ_Astral_DIA_15min_50ng_Human_02`
-- `LFQ_Astral_DIA_15min_50ng_Human_03`
+- Single archive with FASTA: [all_data_Entrapment_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz).
+
+- [LFQ_Astral_DIA_15min_50ng_Human_01.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_01.raw)
+- [LFQ_Astral_DIA_15min_50ng_Human_02.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_02.raw)
+- [LFQ_Astral_DIA_15min_50ng_Human_03.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_03.raw)
 
 **It is imperative not to rename the files once downloaded.**
 
@@ -53,7 +55,7 @@ The three FDP estimates are computed from the resulting set and compared to the 
 
 ## How to use
 
-### Input data for private visualisation
+### Suggested parameters
 
 The module currently accepts DIA-NN output (`report.tsv` or `report.parquet`). Use the suggested parameters in Table 1 for a fair comparison between tools.
 

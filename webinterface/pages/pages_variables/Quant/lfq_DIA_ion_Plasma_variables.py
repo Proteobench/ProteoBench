@@ -108,6 +108,7 @@ class VariablesDIAQuantPlasma:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-plasma/all_data_LFQ_Quant_DIA_Plasma.tar.gz"
 
     title: str = "DIA Precursor quantification - Plasma"
     y_axis_title: str = "Number of quantified spike-in precursors"

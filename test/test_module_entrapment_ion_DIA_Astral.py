@@ -1,4 +1,5 @@
 import os
+import tomllib
 
 import pandas as pd
 import pytest
@@ -10,7 +11,6 @@ from proteobench.score.entrapmentscores import EntrapmentScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/entrapment")
 TESTDATA_FILE = os.path.join(TESTDATA_DIR, "entrapment_test_subset.parquet")
-MAPPING_FILE = os.path.join(TESTDATA_DIR, "entrapment_mapping_subset.txt")
 PARSE_SETTINGS_DIR = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
@@ -25,6 +25,11 @@ PARSE_SETTINGS_DIR = os.path.abspath(
         "Astral",
     )
 )
+
+# Full mapping file, as configured for the module (no local subset fixture is kept
+# around; matching against the full mapping is equivalent for this fixture's peptides).
+with open(os.path.join(PARSE_SETTINGS_DIR, "module_settings.toml"), "rb") as f:
+    MAPPING_FILE = tomllib.load(f)["general"]["mapping_file"]
 
 # Ground truth baked into the fixture: a 100-row DIA-NN report subset built so that
 # the target/entrapment composition, and the pairing of entrapments to their real

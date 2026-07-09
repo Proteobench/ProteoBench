@@ -63,7 +63,7 @@ QuantError should be interpreted together with the other module-specific metrics
 
 ## Does ProteoBench perform normalization or missing-value imputation?
 
-ProteoBench does not apply post-processing steps that may affect the benchmark metrics. We consider normalization, missing-value handling, transfer steps, protein inference, and quantification strategies as integral parts of benchmarked workflows. They should be reported in the parameter files submitted alongside the workflow results upon public submission.
+In the current modules, ProteoBench does not apply post-processing steps that may affect the benchmark metrics. We consider normalization, missing-value handling, transfer steps, protein inference, and quantification strategies as integral parts of benchmarked workflows. They should be reported in the parameter files submitted alongside the workflow results upon public submission.
 
 Where relevant, module documentation specifies which processing steps are performed by ProteoBench itself and which are expected to have been performed by the submitted workflow.
 

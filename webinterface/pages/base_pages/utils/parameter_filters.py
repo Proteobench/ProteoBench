@@ -92,6 +92,8 @@ _PARAMETER_FILTERS = [
         "type": "combined_range",
     },
     {"col": "max_mods", "label": "Max mods per peptide", "type": "max_slider"},
+    {"col": "fixed_mods", "label": "Fixed modifications", "type": "mod_multiselect"},
+    {"col": "variable_mods", "label": "Variable modifications", "type": "mod_multiselect"},
     {
         "col_min": "min_precursor_charge",
         "col_max": "max_precursor_charge",
@@ -137,6 +139,15 @@ _PARAMETER_FILTERS = [
 ]
 
 
+def _parse_mod_list(val) -> List[str]:
+    """Split a semicolon- or comma-separated modification string into individual entries."""
+    if pd.isna(val) or str(val).strip() in ("", "nan", _NOT_SPECIFIED):
+        return [_NOT_SPECIFIED]
+    parts = re.split(r"[;,]", str(val))
+    cleaned = [p.strip() for p in parts if p.strip()]
+    return cleaned if cleaned else [_NOT_SPECIFIED]
+
+
 def _get_unique_values(series: pd.Series) -> List[str]:
     """Return sorted unique string values from *series*, mapping NaN to _NOT_SPECIFIED."""
     values = series.fillna(_NOT_SPECIFIED).astype(str).unique()
@@ -145,7 +156,7 @@ def _get_unique_values(series: pd.Series) -> List[str]:
 
 # Pattern to extract numeric value + unit pairs from tolerance strings.
 _TOL_VALUE_PATTERN = re.compile(
-    r"([+-]?\d+(?:\.\d+)?)\s*(ppm|da|th)",
+    r"([+-]?\d+(?:\.\d+)?)\s*(ppm|da|th|Da)",
     re.IGNORECASE,
 )
 
@@ -266,6 +277,11 @@ def apply_parameter_filters(
             threshold = selection
             mask &= pd.to_numeric(data[col], errors="coerce").fillna(0) <= threshold
 
+        elif spec["type"] == "mod_multiselect":
+            if isinstance(selection, list):
+                selected_set = set(selection)
+                mask &= data[col].apply(lambda v: bool(selected_set & set(_parse_mod_list(v))))
+
     filtered = data.loc[mask]
     if filter_selections.get("latest_version_only"):
         filtered = keep_latest_version_per_tool(filtered)
@@ -329,6 +345,13 @@ def generate_parameter_filters(
                 has_open = (data[col].astype(str) == "✅").any()
                 has_closed = (data[col].astype(str) != "✅").any()
                 if has_open and has_closed:
+                    applicable.append(spec)
+                continue
+            if spec["type"] == "mod_multiselect":
+                all_mods: set = set()
+                for val in data[col]:
+                    all_mods.update(_parse_mod_list(val))
+                if len(all_mods) >= 2:
                     applicable.append(spec)
                 continue
             n_unique = data[col].dropna().nunique()
@@ -489,6 +512,23 @@ def generate_parameter_filters(
                         value=default,
                         key=sk,
                     )
+                    filter_selections[col_name] = selected
+
+                elif spec["type"] == "mod_multiselect":
+                    col_name = spec["col"]
+                    sk = f"{key_prefix}_{col_name}"
+                    all_mods: set = set()
+                    for val in data[col_name]:
+                        all_mods.update(_parse_mod_list(val))
+                    all_options = sorted(all_mods, key=lambda v: (v == _NOT_SPECIFIED, v))
+                    raw_default = st.session_state.get(sk, all_options)
+                    options_set = set(all_options)
+                    default = (
+                        [v for v in raw_default if v in options_set] if isinstance(raw_default, list) else all_options
+                    )
+                    if not default:
+                        default = all_options
+                    selected = st.multiselect(label, options=all_options, default=default, key=sk)
                     filter_selections[col_name] = selected
 
                 elif spec["type"] == "tolerance_range":

@@ -1,9 +1,10 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
+from proteobench.plotting.plot_constants import QUANT_SOFTWARE_COLORS, QUANT_SOFTWARE_MARKERS
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.score.entrapmentscores import EntrapmentScores
 
@@ -294,26 +295,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         result_df: pd.DataFrame,
         metric: str = "Upper FDP bound - Paired method",
         colorblind_mode: bool = False,
-        software_markers: Dict[str, str] = {
-            "MaxQuant": "circle",
-            "AlphaPept": "square",
-            "ProlineStudio": "diamond",
-            "MSAngel": "cross",
-            "FragPipe": "x",
-            "i2MassChroQ": "triangle-up",
-            "Sage": "triangle-down",
-            "WOMBAT": "pentagon",
-            "DIA-NN": "star",
-            "AlphaDIA": "star-triangle-up",
-            "Custom": "star-square",
-            "Spectronaut": "diamond-tall",
-            "FragPipe (DIA-NN quant)": "circle-x",
-            "MSAID": "square-cross",
-            "MetaMorpheus": "asterisk",
-            "Proteome Discoverer": "hash",
-            "PEAKS": "diamond-wide",
-            "quantms": "hexagram",
-        },
+        software_markers: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> go.Figure:
         """
@@ -350,6 +332,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with the FDP-ratio strip plot.
         """
+        if software_markers is None:
+            software_markers = QUANT_SOFTWARE_MARKERS
         metric_col_name, plot_title = self._resolve_metric_column(metric)
 
         plot_df = result_df.copy()
@@ -737,26 +721,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
     def plot_fdp_id_scatter(
         self,
         result_df: pd.DataFrame,
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
+        software_colors: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> go.Figure:
         """
@@ -783,6 +748,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure.
         """
+        if software_colors is None:
+            software_colors = QUANT_SOFTWARE_COLORS
         category_symbols = {"valid": "circle", "inconclusive": "triangle-up", "invalid": "x"}
 
         plot_df = result_df.copy()
@@ -908,26 +875,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
     def plot_category_strip(
         self,
         result_df: pd.DataFrame,
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
+        software_colors: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> go.Figure:
         """
@@ -955,6 +903,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure.
         """
+        if software_colors is None:
+            software_colors = QUANT_SOFTWARE_COLORS
         category_order = ["invalid", "inconclusive", "valid"]
         x_centers = {cat: i for i, cat in enumerate(category_order)}
 
@@ -1116,46 +1066,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         hide_annot: bool = False,
         metric: str = "Upper FDP bound - Paired method",
         colorblind_mode: bool = False,
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
-        software_markers: Dict[str, str] = {
-            "MaxQuant": "circle",
-            "AlphaPept": "square",
-            "ProlineStudio": "diamond",
-            "MSAngel": "cross",
-            "FragPipe": "x",
-            "i2MassChroQ": "triangle-up",
-            "Sage": "triangle-down",
-            "WOMBAT": "pentagon",
-            "DIA-NN": "star",
-            "AlphaDIA": "star-triangle-up",
-            "Custom": "star-square",
-            "Spectronaut": "diamond-tall",
-            "FragPipe (DIA-NN quant)": "circle-x",
-            "MSAID": "square-cross",
-            "MetaMorpheus": "asterisk",
-            "Proteome Discoverer": "hash",
-            "PEAKS": "diamond-wide",
-            "quantms": "hexagram",
-        },
+        software_colors: Optional[Dict[str, str]] = None,
+        software_markers: Optional[Dict[str, str]] = None,
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
@@ -1195,6 +1107,10 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with the main performance metric plot.
         """
+        if software_colors is None:
+            software_colors = QUANT_SOFTWARE_COLORS
+        if software_markers is None:
+            software_markers = QUANT_SOFTWARE_MARKERS
         metric_col_name, plot_title = self._resolve_metric_column(metric)
 
         if metric_col_name not in result_df.columns:

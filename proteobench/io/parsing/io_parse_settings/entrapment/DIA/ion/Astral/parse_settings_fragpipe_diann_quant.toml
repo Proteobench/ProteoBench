@@ -26,6 +26,6 @@
 
 [upload_info]
 "datapoint_file" = "report.tsv or report.parquet"
-"datapoint_file_description" = "Upload the DIA-NN report file (`report.tsv` or `report.parquet`)."
+"datapoint_file_description" = "Upload the DIA-NN report file found in the `dia-quant-output` folder (`report.tsv` or `report.parquet`)."
 "params_file" = "fragpipe.workflow"
 "params_file_description" = "Upload the FragPipe workflow file (`.workflow`)."

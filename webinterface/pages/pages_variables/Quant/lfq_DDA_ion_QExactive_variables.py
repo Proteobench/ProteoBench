@@ -93,6 +93,7 @@ class VariablesDDAQuant:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DDA ion QExactive"
+    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument."
     sidebar_path: str = "/Quant_LFQ_DDA_ion_QExactive"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(
@@ -111,9 +112,11 @@ class VariablesDDAQuant:
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/2-quant-lfq-ion-dda/"
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DDA/all_data_LFQ_Quant_DDA_QExactive.tar.gz"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"
     title: str = "DDA Precursor quantification (QExactive)"
+    y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"
     prefix_params: str = "lfq_ion_dda_quant_"
     params_json_dict: str = "params_json_dict_lfq_ion_dda_quant"
     params_file_dict: str = "params_file_dict_lfq_ion_dda_quant"

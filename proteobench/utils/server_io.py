@@ -9,15 +9,18 @@ import requests
 import toml
 from bs4 import BeautifulSoup
 
+from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
     DDAQuantIonModuleQExactive,
 )
 from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
 from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
+from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
+from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
 from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
     DIAQuantIonModulediaPASEF,
 )
-from proteobench.modules.quant.quant_lfq_ion_DIA_singlecell import (
+from proteobench.modules.quant.quant_lfq_ion_DIA_lowinput import (
     DIAQuantIonModulediaSC,
 )
 from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
@@ -30,10 +33,13 @@ from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
     "DDAQuantIonModuleQExactive": DDAQuantIonModuleQExactive,
+    "DDAQuantIonAstralModule": DDAQuantIonAstralModule,
     "DIAQuantIonModuleAIF": DIAQuantIonModuleAIF,
     "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
     "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
+    "DIAQuantIonModuleZenoTOF": DIAQuantIonModuleZenoTOF,
     "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,
+    "DIAQuantIonModulePlasma": DIAQuantIonModulePlasma,
     "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
     "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
 }
@@ -237,7 +243,7 @@ def make_submission(submission_files=[], token="", module_name=""):
         param_file = submission_settings["param_file"]
         input_file = submission_settings["input_file"]
         input_type = submission_settings["input_type"]
-        default_cutoff_min_prec = submission_settings["default_cutoff_min_prec"]
+        default_cutoff_min_feature = submission_settings["default_cutoff_min_feature"]
         user_comments = submission_settings["user_comments"]
 
         user_config = defaultdict(lambda: "")
@@ -247,7 +253,7 @@ def make_submission(submission_files=[], token="", module_name=""):
             input_type,
             user_config,
             results_df,
-            default_cutoff_min_prec=default_cutoff_min_prec,
+            default_cutoff_min_feature=default_cutoff_min_feature,
         )
 
         results_df_new.tail(5)

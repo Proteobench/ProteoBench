@@ -9,6 +9,67 @@ import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
 
+MODIFICATION_MAPPING = {
+    # X!Tandem format: mass@residue
+    "57.02146@C": "C[Carbamidomethyl]",
+    "15.99491@M": "M[Oxidation]",
+    "+42.01056@[": "N-term[Acetyl]",
+    "-18.0106@^E": "N-term E[Pyro-glu]",
+    "-17.0265@^Q": "N-term Q[Pyro-glu]",
+    # X!Tandem "quick" options
+    "Acetyl(N-term)": "N-term[Acetyl]",
+    "Pyrolidone(N-term)": "N-term[Pyrolidone]",
+    # Sage format: residue:mass or ^residue:mass
+    "C:57.021465": "C[Carbamidomethyl]",
+    "M:15.994915": "M[Oxidation]",
+    "^E:-18.010565": "N-term E[Pyro-glu]",
+    "^Q:-17.026548": "N-term Q[Pyro-glu]",
+}
+
+
+def _homogenize_mods(raw_mods: str, sep: str = ";") -> str:
+    """Map raw modification strings to ProForma-like format using MODIFICATION_MAPPING.
+
+    Splits on *sep*, looks up each token, and falls back to the raw token if not found.
+    """
+    if not raw_mods or not raw_mods.strip():
+        return ""
+    mapped = []
+    for mod in raw_mods.split(sep):
+        mod = mod.strip()
+        if not mod:
+            continue
+        mapped.append(MODIFICATION_MAPPING.get(mod, mod))
+    return ", ".join(mapped)
+
+
+def _homogenize_tolerance_string_sage(raw_tol: str) -> str:
+    """Convert Sage tolerance string to ProteoBench format.
+
+    Sage uses a space-separated format like "-10 10 ppm" or "-0.02 0.02 da".
+    This function converts it to the format: "[-10 ppm, 10 ppm]" or "[-0.02 Da, 0.02 Da]".
+    """
+    if raw_tol is None:
+        return ""
+    raw_tol = str(raw_tol).strip()
+    if not raw_tol or raw_tol.lower() in {"nan", "none"}:
+        return ""
+
+    parts = raw_tol.split()
+    if len(parts) != 3:
+        raise ValueError(f"Unexpected Sage tolerance format: {raw_tol}")
+
+    lower, upper, unit = parts
+    unit_norm = unit.strip().lower()
+    if unit_norm == "ppm":
+        unit = "ppm"
+    elif unit_norm == "da":
+        unit = "Da"
+    else:
+        raise ValueError(f"Unsupported Sage tolerance unit: {unit}")
+
+    return f"[{lower} {unit}, {upper} {unit}]"
+
 
 def _extract_xtandem_params(
     params: pd.Series, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
@@ -70,7 +131,7 @@ def _extract_xtandem_params(
         filename=json_file,
         software_name="i2MassChroQ",
         software_version=params.loc["i2MassChroQ_VERSION"],
-        search_engine=params.loc["AnalysisSoftware_name"],
+        search_engine=params.loc["AnalysisSoftware_name"].replace("X! ", "X!"),  # Normalize the search engine name
         search_engine_version=str(params.loc["AnalysisSoftware_version"] or ""),
         ident_fdr_psm=float(params.loc["psm_fdr"]),
         ident_fdr_peptide=float(params.loc["peptide_fdr"]),
@@ -84,8 +145,8 @@ def _extract_xtandem_params(
         allowed_miscleavages=max_cleavage,
         min_peptide_length=None,  # xtandem: "spectrum, minimum fragment mz"
         max_peptide_length=None,
-        fixed_mods=";".join(fixed_mods_list),
-        variable_mods=";".join(var_mods_list),
+        fixed_mods=_homogenize_mods(";".join(fixed_mods_list)),
+        variable_mods=_homogenize_mods(";".join(var_mods_list)),
         max_mods=None,
         min_precursor_charge=None,
         max_precursor_charge=int(params.loc["spectrum, maximum parent charge"]),
@@ -112,9 +173,11 @@ def _extract_sage_params(
     """
     # Construct tolerance strings for fragment and parent mass errors
     fragment_mass_tolerance = params.loc["sage_fragment_tol"]  # e.g '-0.02 0.02 da'
+    fragment_mass_tolerance = _homogenize_tolerance_string_sage(fragment_mass_tolerance)
 
     # Construct tolerance strings for parent mass error
     precursor_mass_tolerance = params.loc["sage_precursor_tol"]  # e.g. "-10 10 ppm"
+    precursor_mass_tolerance = _homogenize_tolerance_string_sage(precursor_mass_tolerance)
 
     # Max missed cleavage sites, either from scoring or refinement
     max_cleavage = int(params.loc["sage_database_enzyme_missed_cleavages"])  # e.g. "2"
@@ -134,8 +197,11 @@ def _extract_sage_params(
     # elif _enzyme == "[RK]":
     #     _enzyme = "Trypsin/P"
 
-    fixed_mods_list = params.loc["sage_database_static_mods"]  # 	C:57.021465
-    var_mods_list = params.loc["sage_database_variable_mods"]  # "M:15.994915 ^E:-18.010565 ^Q:-17.026548"
+    # Sage uses space-separated mods; convert to ", " for _homogenize_mods
+    fixed_mods_list = params.loc["sage_database_static_mods"].replace(" ", ", ")  # C:57.021465
+    var_mods_list = params.loc["sage_database_variable_mods"].replace(
+        " ", ", "
+    )  # "M:15.994915, ^E:-18.010565, ^Q:-17.026548"
 
     min_precursor_charge, max_precursor_charge = params.loc["sage_precursor_charge"].split()
 
@@ -158,8 +224,8 @@ def _extract_sage_params(
         allowed_miscleavages=max_cleavage,
         min_peptide_length=int(params.loc["sage_database_enzyme_min_len"]),  # 5
         max_peptide_length=int(params.loc["sage_database_enzyme_max_len"]),  # 50
-        fixed_mods=fixed_mods_list,
-        variable_mods=var_mods_list,
+        fixed_mods=_homogenize_mods(fixed_mods_list, sep=", "),
+        variable_mods=_homogenize_mods(var_mods_list, sep=", "),
         max_mods=int(params.loc["sage_database_max_variable_mods"]),  # 2
         min_precursor_charge=int(min_precursor_charge),
         max_precursor_charge=int(max_precursor_charge),

@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level - Astral 2Th
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Narrow-window 2 Th, on an Orbitrap Astral (Thermo Fisher Scientific).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
@@ -25,7 +27,9 @@ The mass spectrometer was operated in positive ionization mode with data-indepen
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-For now, you can download the raw files from the ProteoBench server here:
+You can download the raw files from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-astral/) here:
+
+- Single archive with FASTA: single archive: [all_data_LFQ_Quant_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral/all_data_LFQ_Quant_DIA_Astral.tar.gz).
 
 - [LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP1.raw)
 - [LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_A_REP2.raw)
@@ -33,8 +37,6 @@ For now, you can download the raw files from the ProteoBench server here:
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP1.raw)
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP2.raw)
 - [LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral/LFQ_Astral_DIA_15min_50ng_Condition_B_REP3.raw)
-
-All files can be found here [proteobench.cubimed.rub.de/raws/DIA-astral/](https://proteobench.cubimed.rub.de/raws/DIA-astral/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -51,25 +53,6 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-### Input data for private visualisation of your benchmark run(s)
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
-
-| Parameter                                | Value                                  |
-| ---------------------------------------- | -------------------------------------- |
-| Maximum number of missed cleavages       | 1                                      |
-| PSM/Precursor FDR                        | 0.01                                   |
-| Spectral Library                         | Predicted spectral library from FASTA  |
-| Precursor charge state                   | 1-5                                    |
-| Precursor m/z range                      | 380-980                                |
-| Fragment ion m/z range                   | 150-2000                               |
-| Endopeptidase                            | Trypsin/P                              |
-| Fixed modifications                      | Carbamidomethylation (C)               |
-| Variable modifications                   | Oxidation (M), Acetyl (Protein N-term) |
-| Maximum number of variable modifications | 1                                      |
-| Minimum peptide length                   | 6 residues                             |
-
-
 ### Submit your run for public usage
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
@@ -79,15 +62,18 @@ To submit your run for public usage, you need to upload the parameter file assoc
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for metric caluclation and public submission**
-| Tool        | Input file                                                                  | Parameter File    |
-| ----------- | --------------------------------------------------------------------------- | ----------------- |
-| AlphaDIA    | precursors.tsv & precursor.matrix.tsv (v1) or precursors.tsv/.parquet (v2+) | log.txt           |
-| DIA-NN      | *_report.tsv or *_report.parquet                                            | *report.log.txt   |
-| FragPipe    | *_report.tsv                                                                | fragpipe.workflow |
-| MaxDIA      | evidence.txt                                                                | mqpar.xml         |
-| Spectronaut | *.tsv                                                                       | *.txt             |
-| PEAKS       | lfq.dia.features.csv                                                        | parameters.txt    |
+**Table 2. Overview of input files required for metric calculation and public submission**
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| MSAID | MSAID_output.tsv | MSAID_params.csv |
+| MaxQuant | evidence.txt | mqpar.xml |
+| PEAKS | lfq-features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
 
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `DIANN_20250505_083341`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 

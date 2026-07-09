@@ -35,3 +35,9 @@
 [general]
 "contaminant_flag" = "Cont_"
 "decoy_flag" = false
+
+[upload_info]
+"datapoint_file" = "lfq.features.csv"
+"datapoint_file_description" = "Upload the PEAKS LFQ feature output CSV file."
+"params_file" = "*.txt"
+"params_file_description" = "Upload the PEAKS parameter export file (`.txt`)."

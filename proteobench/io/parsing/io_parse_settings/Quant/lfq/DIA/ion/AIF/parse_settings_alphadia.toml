@@ -27,3 +27,9 @@
 [general]
 contaminant_flag = "Cont_"
 decoy_flag = true
+
+[upload_info]
+"datapoint_file" = "precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1)"
+"datapoint_file_description" = "For AlphaDIA >= 2.0: upload `precursors.parquet` or `precursors.tsv`. For earlier versions: upload both `precursor.matrix.tsv` and `precursors.tsv` using the two-file upload option."
+"params_file" = "*.txt"
+"params_file_description" = "Upload the AlphaDIA log file (e.g., `log_alphadia.txt`)."

@@ -1,0 +1,34 @@
+[mapper]
+"sequence" = "Sequence"
+"charge" = "Charge"
+"genes" = "Proteins"
+
+[condition_mapper]
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3" = "A"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1" = "B"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2" = "B"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3" = "B"
+
+[run_mapper]
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1" = "Condition_A_Sample_1"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r2" = "Condition_A_Sample_2"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r3" = "Condition_A_Sample_3"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r1" = "Condition_B_Sample_1"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r2" = "Condition_B_Sample_2"
+"20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_200pg_50pg_H_Y_r3" = "Condition_B_Sample_3"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_HUMAN" = "HUMAN"
+
+[general]
+contaminant_flag = "Cont_"
+decoy_flag = true
+
+[upload_info]
+"datapoint_file" = "precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1)"
+"datapoint_file_description" = "For AlphaDIA >= 2.0: upload `precursors.parquet` or `precursors.tsv`. For earlier versions: upload both `precursor.matrix.tsv` and `precursors.tsv` using the two-file upload option."
+"params_file" = "log_alphadia.txt"
+"params_file_description" = "Upload the AlphaDIA log file (e.g., `log_alphadia.txt`)."

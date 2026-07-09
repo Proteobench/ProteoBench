@@ -7,15 +7,15 @@ ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,
 enable_match_between_runs,True
-precursor_mass_tolerance,"[-10.0 PPM, +10.0 PPM]"
-fragment_mass_tolerance,"[-0.02 DA, +0.02 DA]"
+precursor_mass_tolerance,"[-10.0 ppm, 10.0 ppm]"
+fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
 enzyme,Trypsin
 semi_enzymatic,False
 allowed_miscleavages,2
 min_peptide_length,
 max_peptide_length,
-fixed_mods,Carbamidomethylation of C
-variable_mods,"Oxidation of M, Acetylation of protein N-term;Acetyl(N-term);Pyrolidone(N-term)"
+fixed_mods,C[Carbamidomethylation]
+variable_mods,"M[Oxidation], Protein N-term[Acetylation], N-term[Acetyl], N-term[Pyrolidone]"
 max_mods,
 min_precursor_charge,
 max_precursor_charge,

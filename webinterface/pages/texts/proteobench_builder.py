@@ -3,6 +3,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
+from pages.utils.module_registry import MODULE_CATEGORIES
 
 
 def proteobench_page_config(page_layout="wide"):
@@ -29,9 +30,23 @@ def proteobench_page_config(page_layout="wide"):
         pass
 
 
+# Release-stage badges as Streamlit color-badge Markdown directives. Appended to the
+# page-link label so the badge is part of the link text: it wraps and aligns with the
+# label naturally, with no separate column or custom CSS needed.
+RELEASE_STAGE_BADGES = {
+    "alpha": ":orange-badge[ALPHA]",
+    "beta": ":blue-badge[BETA]",
+    "archived": ":gray-badge[ARCH]",
+}
+
+
 def render_links(modules):
     """
     Render sidebar links for modules with release stage badges using native Streamlit.
+
+    The release-stage badge is embedded in the page-link label as a color-badge
+    Markdown directive, so it flows with the link text and wraps together with it
+    when the sidebar is narrowed.
 
     Parameters
     ----------
@@ -39,29 +54,9 @@ def render_links(modules):
         List of module metadata objects to render.
     """
     for module in modules:
-        # Use wider column ratio to prevent text cutoff
-        cols = st.columns([7, 1])
-
-        with cols[0]:
-            st.page_link(module.file_path, label=module.label)
-
-        with cols[1]:
-            # Add styled badge based on release stage
-            if module.release_stage == "alpha":
-                st.markdown(
-                    '<span style="background-color: #FF8C00; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ALPHA</span>',
-                    unsafe_allow_html=True,
-                )
-            elif module.release_stage == "beta":
-                st.markdown(
-                    '<span style="background-color: #4169E1; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">BETA</span>',
-                    unsafe_allow_html=True,
-                )
-            elif module.release_stage == "archived":
-                st.markdown(
-                    '<span style="background-color: #808080; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.6rem; font-weight: 600; white-space: nowrap; display: inline-block;">ARCH</span>',
-                    unsafe_allow_html=True,
-                )
+        badge = RELEASE_STAGE_BADGES.get(module.release_stage)
+        label = f"{badge} {module.label}" if badge else module.label
+        st.page_link(module.file_path, label=label)
 
 
 def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_logos_sidebar.png"):
@@ -103,12 +98,17 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
             white-space: normal !important;
             line-height: 1.4 !important;
         }
-        
-        /* Allow columns in sidebar to wrap content */
-        [data-testid="stSidebar"] [data-testid="column"] {
-            overflow: visible !important;
+
+        /* Give release-stage badges a fixed width so the title always starts at the same
+           offset, keeping the badge-to-title spacing equal regardless of the badge text
+           (e.g. "BETA" vs the longer "ALPHA"). Adjust min-width if a badge label changes length. */
+        [data-testid="stSidebar"] .stMarkdownBadge {
+            min-width: 3.4rem;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
         }
-        
+
         /* Ensure expander content wraps */
         [data-testid="stSidebar"] [data-testid="stExpander"] {
             overflow-wrap: break-word;
@@ -136,7 +136,7 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
         if search_query:
             st.markdown("### Search Results")
             all_filtered = []
-            for category in ["DDA", "DIA", "Archived"]:
+            for category in MODULE_CATEGORIES:
                 all_filtered.extend(filtered_modules[category])
 
             if all_filtered:
@@ -145,14 +145,12 @@ def proteobench_sidebar(current_page, proteobench_logo="logos/logo_funding/main_
                 st.markdown("*No modules match your search.*")
         else:
             # Show normal categorized expanders
-            with st.expander("DDA", expanded=(current_page in [m.label for m in all_modules["DDA"]])):
-                render_links(filtered_modules["DDA"])
-
-            with st.expander("DIA", expanded=(current_page in [m.label for m in all_modules["DIA"]])):
-                render_links(filtered_modules["DIA"])
-
-            with st.expander("Archived", expanded=(current_page in [m.label for m in all_modules["Archived"]])):
-                render_links(filtered_modules["Archived"])
+            for category in MODULE_CATEGORIES:
+                # Skip categories with no modules (e.g. Debug when not enabled locally)
+                if not all_modules[category]:
+                    continue
+                with st.expander(category, expanded=(current_page in [m.label for m in all_modules[category]])):
+                    render_links(filtered_modules[category])
 
         st.image(proteobench_logo, width=300)
         st.page_link(texts.ShortMessages.privacy_notice, label="privacy notice")

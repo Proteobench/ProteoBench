@@ -2,16 +2,35 @@
 Module registry for discovering and loading ProteoBench module metadata.
 
 This module dynamically imports all pages_variables files to extract
-module metadata for the sidebar navigation system.
+module metadata for the sidebar navigation system and documentation main page.
 """
 
 import importlib
 import inspect
+import os
 from dataclasses import dataclass, is_dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import streamlit as st
+
+MODULE_CATEGORIES = ["DDA", "DIA", "Archived", "Debug"]
+
+
+def is_debug_enabled() -> bool:
+    """Return whether local debug pages should be shown.
+
+    Debug pages (category ``"Debug"``) are intended only for local development
+    and must never appear on the public server. They are enabled by setting the
+    environment variable ``PROTEOBENCH_DEBUG=1`` before launching Streamlit,
+    which the production server does not set.
+
+    Returns
+    -------
+    bool
+        True if ``PROTEOBENCH_DEBUG`` equals ``"1"``, otherwise False.
+    """
+    return os.environ.get("PROTEOBENCH_DEBUG") == "1"
 
 
 @dataclass
@@ -26,6 +45,8 @@ class ModuleMetadata:
     keywords: List[str]
     title: str
     doc_url: str
+    documentation_description: str = ""  # One-liner description for the docs homepage card
+    results_repo: Optional[str] = None  # e.g. "Results_quant_ion_DDA"
 
 
 @st.cache_resource
@@ -39,9 +60,9 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
     Returns
     -------
     Dict[str, List[ModuleMetadata]]
-        Dictionary mapping categories ("DDA", "DIA", "Archived") to lists of ModuleMetadata.
+        Dictionary mapping categories ("DDA", "DIA", "Archived", "Debug") to lists of ModuleMetadata.
     """
-    modules_by_category = {"DDA": [], "DIA": [], "Archived": []}
+    modules_by_category = {c: [] for c in MODULE_CATEGORIES}
 
     # Get the path to the pages_variables directory
     # Assuming this file is in webinterface/pages/utils/
@@ -104,6 +125,12 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
                 # Fallback
                 file_path = f"pages/{page_name}.py"
 
+            # Extract results repo name from github_link_pr
+            # e.g. "github.com/Proteobot/Results_quant_ion_DDA.git" -> "Results_quant_ion_DDA"
+            results_repo = None
+            if hasattr(variables, "github_link_pr") and variables.github_link_pr:
+                results_repo = variables.github_link_pr.removesuffix(".git").split("/")[-1]
+
             # Create metadata object
             metadata = ModuleMetadata(
                 label=variables.sidebar_label,
@@ -114,6 +141,8 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
                 keywords=variables.keywords,
                 title=variables.title,
                 doc_url=variables.doc_url,
+                documentation_description=getattr(variables, "documentation_description", ""),
+                results_repo=results_repo,
             )
 
             # Add to appropriate category
@@ -125,6 +154,10 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             # In production, you might want to log this
             print(f"Warning: Failed to load module {module_path}: {e}")
             continue
+
+    # Debug-only modules are hidden unless explicitly enabled for a local run.
+    if not is_debug_enabled():
+        modules_by_category["Debug"] = []
 
     return modules_by_category
 
@@ -184,7 +217,7 @@ def filter_modules(
         return modules_by_category
 
     query_lower = search_query.lower()
-    filtered = {"DDA": [], "DIA": [], "Archived": []}
+    filtered = {category: [] for category in MODULE_CATEGORIES}
 
     for category, modules in modules_by_category.items():
         for module in modules:

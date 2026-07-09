@@ -106,7 +106,7 @@ class DenovoDatapoint(DatapointBase):
         results (dict): A dictionary of metrics for the benchmark run.
         median_abs_epsilon (float): Median absolute epsilon value for the benchmark.
         mean_abs_epsilon (float): Mean absolute epsilon value for the benchmark.
-        nr_prec (int): Number of precursors identified.
+        nr_feature (int): Number of features identified.
         comments (str): Any additional comments.
         proteobench_version (str): Version of the Proteobench tool used.
     """
@@ -345,7 +345,7 @@ class DenovoDatapoint(DatapointBase):
             mod_count += peptidoform.modified_sequence.count(mod_tag)
             parsed_seq = peptidoform.parsed_sequence
             # N-term mod is seperatly tokenized and thus seperatly evaluated (aa_match list is longer than peptide length)
-            if isinstance(peptidoform.properties["n_term"], list):
+            if isinstance(peptidoform.properties["n_term"], list) and len(peptidoform.properties["n_term"]) > 0:
                 parsed_seq = [(None, None)] + parsed_seq
 
             assert len(parsed_seq) == len(match_array)

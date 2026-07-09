@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level (PYE: Plasma/Yeast/E. coli)
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data on plasma samples spiked with yeast and E. coli (PYE dataset).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
@@ -47,7 +49,11 @@ Full acquisition details and analytical procedures are available in the [origina
 
 ### Downloading the data
 
-The files can be downloaded from the proteomeXchange repository [JPST003358](https://repository.jpostdb.org/entry/JPST003358):
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-plasma/):
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_Plasma.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-plasma/all_data_LFQ_Quant_DIA_Plasma.tar.gz).
+
+Alternatively, the files can be downloaded from the proteomeXchange repository [JPST003358](https://repository.jpostdb.org/entry/JPST003358):
 
 - [A9_G_DIA_nLC_tTOF_R1.d](https://storage.jpostdb.org/JPST003358/A9_G_DIA_nLC_tTOF_R1.d.zip)
 - [A9_G_DIA_nLC_tTOF_R2.d](https://storage.jpostdb.org/JPST003358/A9_G_DIA_nLC_tTOF_R2.d.zip)
@@ -61,8 +67,6 @@ The files can be downloaded from the proteomeXchange repository [JPST003358](htt
 - [B9_G_DIA_nLC_tTOF_R4.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R4.d.zip)
 - [B9_G_DIA_nLC_tTOF_R5.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R5.d.zip)
 - [B9_G_DIA_nLC_tTOF_R6.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R6.d.zip)
-
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA-plasma/](https://proteobench.cubimed.rub.de/raws/DIA-plasma/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -112,22 +116,6 @@ The module supports multiple data formats to maximize flexibility. Users can pro
 - PEAKS
 - FragPipe (DIA-NN Quant)
 - Custom (tab-delimited format)
-
-### Suggested parameters
-
-To ensure fair comparison between different processing workflows, we suggest using the parameters listed below:
-
-| Parameter | Value |
-|-----------|-------|
-| Maximum number of missed cleavages | 1 |
-| PSM/Precursor FDR | 0.01 |
-| Spectral Library | Predicted spectral library from FASTA |
-| Precursor charge state | 1-5 |
-| Fixed modifications | Carbamidomethylation (C) |
-| Variable modifications | Oxidation (M), Acetyl (Protein N-term) |
-| Minimum peptide length | 6-7 residues |
-
-These parameters represent a standardized configuration to evaluate the intrinsic performance of different analysis tools without the confounding effects of non-standard parameter choices.
 
 ### Important Tool-specific settings
 
@@ -212,12 +200,12 @@ Once submitted, a GitHub pull request will be automatically generated for tracki
 
 | Tool | Quantification input | Metadata / parameter file |
 |---|---|---|
-| DIA-NN | `*_report.tsv` or `*_report.parquet` | `*_report.log.txt` |
-| AlphaDIA | `precursors.tsv` + `precursor.matrix.tsv` (both required; see Jupyter Notebook for preprocessing) | `log.txt` |
-| Spectronaut | `*_Report.tsv` (BGS factory report format) | `*_Report.setup.txt` |
-| FragPipe (DIA-NN Quant) | `*_report.tsv` | `fragpipe.workflow` |
-| PEAKS | PEAKS DIA output file (`.txt` format - export as text report) | Settings text file (`.txt`) |
-| Custom | Tab-separated values (`.tsv` or `.csv`) following standard format | Not required |
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| PEAKS | lfq.features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
 
 ## Notes
 

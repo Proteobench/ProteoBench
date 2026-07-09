@@ -1,5 +1,7 @@
 # DIA quantification - precursor ion level - diaPASEF
 
+> **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
+
 
 This module compares the sensitivity and quantification accuracy for data acquired with data-independent acquisition (DIA) on a timsTOF (Bruker).
 It is similar to the DIA quantification module "precursor ion-level" described [here](#7-quant-lfq-precursor-dia-Astral_2Th).
@@ -22,15 +24,13 @@ A dia-PASEF dataset using the same sample composition (for "A" and "B") as descr
 Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
 Data acquisition parameters were as following: 
-The resulting peptides were analysed in triplicate (25ng) by nanoLC-MS/MS using an UltiMate 3000 RS nanoLC system (Thermo Fisher Scientific) coupled to a timsTOF SCP mass spectrometer (Bruker). Peptides were separated on a C18 Aurora column (25cm x 75µm ID, IonOpticks) using a gradient ramping from 2% to 20% of B in 30 min, then to 37% of B in 3min and to 85% of B in 2min (solvent A: 0.1% formic acid in H2O; solvent B: 0.1% FA in acetonitrile), with a flow rate of 150nL/min. MS acquisition was performed in diaPASEF mode on the precursor mass range [400-1000] m/z and ion mobility 1/K0 [0.64-1.37]. The acquisition scheme was composed of 8 consecutive TIMS ramps using an accumulation time of 100ms, with 3 MS/MS acquisition windows of 25 Th for each of them. The resulting cycle time was 0.96 seconds. The collision energy was ramped linearly as a function of the ion mobility from 59 eV at 1/K0=1.6Vs cm−2 to 20 eV at 1/K0=0.6Vs cm−2.
+The resulting peptides were analysed in triplicate (25ng) by nanoLC-MS/MS using an UltiMate 3000 RS nanoLC system (Thermo Fisher Scientific) coupled to a timsTOF SCP mass spectrometer (Bruker). Peptides were separated on a C18 Aurora column (25cm x 75µm ID, IonOpticks) using a gradient ramping from 2% to 20% of B in 30 min, then to 37% of B in 3min and to 85% of B in 2min (solvent A: 0.1% formic acid in H2O; solvent B: 0.1% FA in acetonitrile), with a flow rate of 150nL/min. MS acquisition was performed in diaPASEF mode on the precursor mass range [400-1000] m/z and ion mobility 1/K0 [0.64-1.37]. The acquisition scheme was composed of 8 consecutive TIMS ramps using an accumulation time of 100ms, with 3 MS/MS acquisition windows of 25 Th for each of them. The resulting cycle time was 0.96 seconds. The collision energy was ramped linearly as a function of the ion mobility from 59 eV at 1/K0=1.6Vs cm−2 to 20 eV at 1/K0=0.6Vs cm−2. MS2 scan range was set from 100 to 1700 m/z.
 
-These files are available alongside all the associated metadata27 on the ProteomeXchange28 repository PRIDE29 with the following identifier: PXD062685.
+You can download the raw files from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/diaPASEF/):
 
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_diaPASEF.tar.gz](https://proteobench.cubimed.rub.de/raws/diaPASEF/all_data_LFQ_Quant_DIA_diaPASEF.tar.gz).
 
-
-The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
-
-For now, you can download the raw files from the ProteoBench server here:
+Or individually:
 
 - [ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494.d.zip)
 - [ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_A_Sample_Alpha_02_11500.d.zip)
@@ -38,8 +38,6 @@ For now, you can download the raw files from the ProteoBench server here:
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_01_11496.d.zip)
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_02_11502.d.zip)
 - [ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d](https://proteobench.cubimed.rub.de/raws/diaPASEF/ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508.d.zip)
-
-All files can be found here [proteobench.cubimed.rub.de/raws/diaPASEF/](https://proteobench.cubimed.rub.de/raws/diaPASEF/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -56,25 +54,6 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-### Input data for private visualisation of your benchmark run(s)
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1. 
-
-| Parameter                                | Value                                  |
-| ---------------------------------------- | -------------------------------------- |
-| Maximum number of missed cleavages       | 1                                      |
-| PSM FDR                                  | 0.01                                   |
-| Spectral Library                         | Predicted spectral library from FASTA  |
-| Precursor charge state                   | 1-5                                    |
-| Precursor m/z range                      | 400-1000                               |
-| Fragment ion m/z range                   | 100-1700                               |
-| Endopeptidase                            | Trypsin/P                              |
-| Fixed modifications                      | Carbamidomethylation (C)               |
-| Variable modifications                   | Oxidation (M), Acetyl (Protein N-term) |
-| Maximum number of variable modifications | 1                                      |
-| Minimum peptide length                   | 6 residues                             |
-
-
 ### Submit your run for public usage
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
@@ -84,15 +63,18 @@ To submit your run for public usage, you need to upload the parameter file assoc
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for metric caluclation and public submission**
-| Tool        | Input file                                                                  | Parameter File    |
-| ----------- | --------------------------------------------------------------------------- | ----------------- |
-| AlphaDIA    | precursors.tsv & precursor.matrix.tsv (v1) or precursors.tsv/.parquet (v2+) | log.txt           |
-| DIA-NN      | *_report.tsv or *_report.parquet                                            | *report.log.txt   |
-| FragPipe    | *_report.tsv                                                                | fragpipe.workflow |
-| MaxDIA      | evidence.txt                                                                | mqpar.xml         |
-| Spectronaut | *.tsv                                                                       | *.txt             |
-| PEAKS       | lfq.dia.features.csv                                                        | parameters.txt    |
+**Table 2. Overview of input files required for metric calculation and public submission**
+| Tool | Input file | Parameter File |
+|---|---|---|
+| AlphaDIA | precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1) | log_alphadia.txt |
+| Custom | custom_input.tsv |  |
+| DIA-NN | report.tsv or report.parquet | report.log.txt |
+| FragPipe | combined_ion.tsv | fragpipe.workflow |
+| FragPipe (DIA-NN quant) | report.tsv or report.parquet | fragpipe.workflow |
+| MSAID | MSAID_output.tsv | MSAID_params.csv |
+| MaxQuant | evidence.txt | mqpar.xml |
+| PEAKS | lfq.features.csv | *.txt |
+| Spectronaut | *.tsv | ExperimentSetupOverview.txt |
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `Proline__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure. 
 

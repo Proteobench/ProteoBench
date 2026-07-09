@@ -9,7 +9,7 @@ from proteobench.datapoint.quant_datapoint import (
     _detect_unchanged_species,
     compute_roc_auc,
     filter_df_numquant_epsilon,
-    filter_df_numquant_nr_prec,
+    # filter_df_numquant_nr_prec,
 )
 from proteobench.score.quantscoresHYE import QuantScoresHYE
 
@@ -126,7 +126,7 @@ class TestQuantDatapointHYE:
             "median_abs_epsilon_precision_eq_species",
             "mean_abs_epsilon_precision_eq_species",
             "variance_epsilon_global",
-            "nr_prec",
+            "nr_feature",
             "CV_median",
             "CV_q75",
             "CV_q90",
@@ -139,7 +139,7 @@ class TestQuantDatapointHYE:
         # Test with min_nr_observed = 3
         result = QuantDatapointHYE.get_metrics(sample_dataframe, min_nr_observed=3)
         assert 3 in result
-        assert result[3]["nr_prec"] == 3  # Only 3 rows have nr_observed >= 3
+        assert result[3]["nr_feature"] == 3  # Only 3 rows have nr_observed >= 3
 
     def test_get_metrics_edge_cases(self):
         """Test the get_metrics method with edge cases."""
@@ -159,7 +159,7 @@ class TestQuantDatapointHYE:
         )
         result = QuantDatapointHYE.get_metrics(empty_df, min_nr_observed=1)
         assert 1 in result
-        assert result[1]["nr_prec"] == 0
+        assert result[1]["nr_feature"] == 0
 
         # Test with single row - epsilon_precision is 0 when there's only one value per species
         single_row_df = pd.DataFrame(
@@ -177,13 +177,13 @@ class TestQuantDatapointHYE:
         )
         result = QuantDatapointHYE.get_metrics(single_row_df, min_nr_observed=1)
         assert 1 in result
-        assert result[1]["nr_prec"] == 1
+        assert result[1]["nr_feature"] == 1
         assert result[1]["median_abs_epsilon_global"] == 0.1
         assert result[1]["median_abs_epsilon_precision_global"] == 0.0  # No deviation from self
 
     def test_filter_df_numquant_epsilon(self):
         """Test the filter_df_numquant_epsilon function."""
-        sample_row = {"3": {"median_abs_epsilon": 0.25, "mean_abs_epsilon": 0.3, "nr_prec": 100}}
+        sample_row = {"3": {"median_abs_epsilon": 0.25, "mean_abs_epsilon": 0.3, "nr_feature": 100}}
 
         # Test with default parameters
         result = filter_df_numquant_epsilon(sample_row)
@@ -250,8 +250,8 @@ class TestQuantDatapointHYE:
         assert np.isnan(compute_roc_auc(single_class_df))
 
     def test_compute_roc_auc_two_species(self):
-        """Test compute_roc_auc with two species (like singlecell module)."""
-        # Simulate 2-species scenario (singlecell: HUMAN=1.2, YEAST=0.2)
+        """Test compute_roc_auc with two species (like low input module)."""
+        # Simulate 2-species scenario (low input: HUMAN=1.2, YEAST=0.2)
         data = {
             "log2_A_vs_B": [0.1, -0.05, 0.15, -1.5, -1.8, -1.2],
             "species": ["HUMAN", "HUMAN", "HUMAN", "YEAST", "YEAST", "YEAST"],
@@ -287,7 +287,7 @@ class TestQuantDatapointHYE:
         df = pd.DataFrame(data)
         assert _detect_unchanged_species(df) == "HUMAN"
 
-        # Singlecell 2-species: HUMAN=1.2, YEAST=0.2
+        # Low input 2-species: HUMAN=1.2, YEAST=0.2
         data_sc = {
             "species": ["HUMAN", "YEAST"],
             "log2_expectedRatio": [0.263, -2.322],  # log2(1.2), log2(0.2)

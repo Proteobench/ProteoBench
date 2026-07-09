@@ -31,6 +31,18 @@ GROUND_TRUTH_DIR_LOCAL_DENOVO = os.path.join(
 GROUND_TRUTH_FILENAME = "De_Novo_module_ground_truth.csv.gz"
 GROUND_TRUTH_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/De_Novo_module_ground_truth.csv.gz"
 
+_TOOL_METADATA_PATH = os.path.join(
+    Path(__file__).resolve().parent,
+    "io_parse_settings",
+    "tool_metadata.toml",
+)
+
+
+def get_open_source_tools() -> set:
+    """Return the set of open-source tool names (lower-cased) from tool_metadata.toml."""
+    metadata = toml.load(_TOOL_METADATA_PATH)
+    return {name.lower() for name in metadata.get("open_source", {}).get("tools", [])}
+
 
 class ParseSettingsBuilder:
     """
@@ -106,6 +118,36 @@ class ParseSettingsBuilder:
 
         return parser
 
+    def get_upload_info(self, input_format: str) -> Dict[str, str]:
+        """
+        Return the upload_info block for a given input format.
+
+        Reads the ``[upload_info]`` section from the tool's TOML file and returns
+        it as a plain dict.  Returns an empty dict when the section is absent
+        (e.g., for the Custom format).
+
+        Parameters
+        ----------
+        input_format : str
+            The input format to query (e.g., "MaxQuant", "DIA-NN").
+
+        Returns
+        -------
+        Dict[str, str]
+            A dict with keys ``datapoint_file``, ``datapoint_file_description``,
+            ``params_file``, and ``params_file_description``, or an empty dict
+            if ``[upload_info]`` is not present in the TOML.
+        """
+        toml_file = self.PARSE_SETTINGS_FILES.get(input_format)
+        if toml_file is None:
+            return {}
+        parse_settings = toml.load(toml_file)
+        base = parse_settings.get("upload_info", {})
+        # Apply per-tool overrides when multiple input_formats share the same TOML
+        # (e.g. "FragPipe (DIA-NN quant)" shares parse_settings_diann.toml with "DIA-NN").
+        override = parse_settings.get("upload_info_overrides", {}).get(input_format, {})
+        return {**base, **override}
+
 
 class ParseSettingsQuant:
     """
@@ -141,6 +183,27 @@ class ParseSettingsQuant:
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
         self.modification_parser = None
+
+        # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
+        # Can be overridden per-tool in the TOML [general] section
+        cleanup_pattern = parse_settings["general"].get("run_name_cleanup", "")
+        if cleanup_pattern:
+            try:
+                self._run_name_cleanup = re.compile(cleanup_pattern)
+            except re.error as exc:
+                raise ValueError(
+                    f"Invalid regex in [general].run_name_cleanup: {cleanup_pattern!r}. "
+                    f"Please fix the pattern in the TOML configuration. Details: {exc}"
+                ) from exc
+        else:
+            # Default: strip common MS file extensions and known suffixes
+            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
+
+        # Normalize the condition_mapper and run_mapper keys using the same cleanup
+        # so that keys like "file.mzML" and column names like "file.mzML" both
+        # resolve to "file" after cleaning (see #827, #876)
+        self.condition_mapper = {self._clean_run_name(k): v for k, v in self.condition_mapper.items()}
+        self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
 
     def species_dict(self) -> Dict[str, str]:
         """
@@ -195,9 +258,48 @@ class ParseSettingsQuant:
             df_filtered = df.copy()
         return df_filtered
 
+    def _clean_run_name(self, name: str, strip_path: bool = True) -> str:
+        """
+        Clean a run/file name by removing extensions and known suffixes.
+
+        When ``strip_path`` is True, also strips path prefixes
+        (e.g., ``/path/to/file.mzML`` -> ``file``). Path stripping is
+        appropriate for raw-file values and condition_mapper keys, but must
+        be disabled when cleaning DataFrame column names, where ``/`` can
+        appear as part of legitimate metadata (e.g. PEAKS' ``m/z`` column).
+
+        Parameters
+        ----------
+        name : str
+            The raw file name or column name to clean.
+        strip_path : bool, optional
+            Whether to apply path-prefix stripping (default True).
+
+        Returns
+        -------
+        str
+            The cleaned name.
+        """
+        if not isinstance(name, str):
+            return name
+        if strip_path:
+            # Strip path prefix (some tools include full paths)
+            name = name.replace("\\", "/")
+            if "/" in name:
+                name = name.rsplit("/", 1)[-1]
+        # Apply the cleanup regex
+        name = self._run_name_cleanup.sub("", name)
+        return name
+
     def _fix_colnames(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Fix column names in the DataFrame according to the mapper.
+        Fix column names in the DataFrame by applying the cleanup regex.
+
+        Strips tool-specific column suffixes (e.g. `` Intensity`` for FragPipe,
+        `` Normalized Area`` for PEAKS) and MS file extensions so that wide-format
+        column names line up with ``condition_mapper`` keys. Does not apply
+        path-prefix stripping, which would break metadata column names containing
+        ``/`` (e.g. PEAKS' ``m/z`` column).
 
         Parameters
         ----------
@@ -209,7 +311,7 @@ class ParseSettingsQuant:
         pd.DataFrame
             DataFrame with standardized column names.
         """
-        df.columns = [c.replace(".mzML.gz", ".mzML") for c in df.columns]
+        df.columns = [self._clean_run_name(c, strip_path=False) for c in df.columns]
         return df
 
     def _mark_contaminants(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -313,6 +415,10 @@ class ParseSettingsQuant:
             )
         else:
             df_melted = df.copy()
+
+        # Clean run names in the "Raw file" column (strip extensions, paths, suffixes)
+        # so they match the condition_mapper keys (see #827, #876)
+        df_melted["Raw file"] = df_melted["Raw file"].apply(self._clean_run_name)
 
         df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
         return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)
@@ -738,16 +844,165 @@ class ParseSettingsDeNovo:
         return df
 
 
+class ParseSettingsEntrapment:
+    """
+    Structure that contains all the parameters used to parse
+    the given benchmark run output depending on the software tool used.
+
+    Parameters
+    ----------
+    parse_settings : Dict[str, Any]
+        The settings for parsing, typically loaded from a TOML file.
+    parse_settings_module : Dict[str, Any]
+        Module-specific settings, typically loaded from a TOML file.
+    """
+
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+        """
+        Initialize the ParseSettings object with the parameters from the TOML files.
+
+        Parameters
+        ----------
+        parse_settings : Dict[str, Any]
+            The settings for parsing, typically loaded from a TOML file.
+        parse_settings_module : Dict[str, Any]
+            Module-specific settings, typically loaded from a TOML file.
+        """
+        self.mapper = parse_settings["mapper"]
+        self.run_mapper = parse_settings["run_mapper"]
+        self.decoy_flag = parse_settings["general"]["decoy_flag"]
+        self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
+        self.modification_parser = None
+
+        # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
+        # Can be overridden per-tool in the TOML [general] section
+        cleanup_pattern = parse_settings["general"].get("run_name_cleanup", "")
+        if cleanup_pattern:
+            try:
+                self._run_name_cleanup = re.compile(cleanup_pattern)
+            except re.error as exc:
+                raise ValueError(
+                    f"Invalid regex in [general].run_name_cleanup: {cleanup_pattern!r}. "
+                    f"Please fix the pattern in the TOML configuration. Details: {exc}"
+                ) from exc
+        else:
+            # Default: strip common MS file extensions and known suffixes
+            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
+
+        # Normalize the condition_mapper and run_mapper keys using the same cleanup
+        # so that keys like "file.mzML" and column names like "file.mzML" both
+        # resolve to "file" after cleaning (see #827, #876)
+        self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
+
+    def _clean_run_name(self, name: str) -> str:
+        """
+        Clean a run/file name by removing extensions and known suffixes.
+
+        Strips path prefixes (e.g., ``/path/to/file.mzML`` -> ``file``)
+        and applies the run_name_cleanup regex to remove extensions like
+        ``.raw``, ``.mzML``, ``.mzML.gz``, ``.d``, ``.wiff``, and
+        tool-specific suffixes like ``_uncalibrated`` (FragPipe DIA-NN, see #827).
+
+        Parameters
+        ----------
+        name : str
+            The raw file name or column name to clean.
+
+        Returns
+        -------
+        str
+            The cleaned name.
+        """
+        if not isinstance(name, str):
+            return name
+        # Strip path prefix (some tools include full paths)
+        name = name.replace("\\", "/")
+        if "/" in name:
+            name = name.rsplit("/", 1)[-1]
+        # Apply the cleanup regex
+        name = self._run_name_cleanup.sub("", name)
+        return name
+
+    def _validate_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Validate and rename columns according to the mapper.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame with original column names.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with validated and renamed columns.
+        """
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected software tool."
+            )
+        df.rename(columns=self.mapper, inplace=True)
+        return df
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        """
+        Add a modification parser to the settings.
+
+        Parameters
+        ----------
+        parser : object
+            The modification parser to add.
+        """
+        self.modification_parser = parser
+
+    def convert_to_standard_format(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert a software tool output into a generic format supported by the module.
+
+        Steps:
+        1. Validate and rename columns
+        2. Create replicate mapping
+        3. Filter decoys
+        4. Fix column names
+        5. Mark contaminants
+        6. Process species information
+        7. Handle data format (long vs short)
+        8. Process modifications if needed
+        9. Format based on analysis level
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
+
+        Returns
+        -------
+        pd.DataFrame
+            The converted DataFrame.
+        """
+        df = self._validate_and_rename_columns(df)
+        # replicate_to_raw = self._create_replicate_mapping()
+        # df = self._filter_decoys(df)
+        # df = self._fix_colnames(df)
+        # df = self._mark_contaminants(df)
+        # df = self._process_species_information(df)
+        # df = self._process_modifications(df)
+        # df_melted = self._handle_data_format(df)
+        # df_melted = self._filter_zero_intensities(df_melted)
+        return df  # self._format_by_analysis_level(df_melted), replicate_to_raw
+
+
 MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
-    "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_lowinput": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
     "denovo_DDA_HCD": ParseSettingsDeNovo,
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_plasma": ParseSettingsQuant,
+    "entrapment_DIA_ion_Astral": ParseSettingsEntrapment,
 }

@@ -38,15 +38,21 @@ def display_workflow_comparison(variables, ionmodule) -> None:
     _initialize_comparison_data(variables, ionmodule)
 
     # Display the selection plot
-    selected_ids = _display_selection_plot(variables, ionmodule)
+    with st.container(key="tour_compare_plot"):
+        selected_ids = _display_selection_plot(variables, ionmodule)
 
     # Show selection status
     _display_selection_status(selected_ids)
 
-    # Perform comparison if two workflows are selected
-    if len(selected_ids) == 2:
-        st.markdown("---")
-        _compare_workflows(variables, selected_ids[0], selected_ids[1])
+    # Comparison results — always rendered so the tour can highlight this area
+    with st.container(key="tour_compare_results"):
+        if len(selected_ids) == 2:
+            st.markdown("---")
+            _compare_workflows(variables, selected_ids[0], selected_ids[1])
+        else:
+            st.markdown(
+                "_Select two workflows in the plot above to see precursor overlap and parameter differences here._"
+            )
 
 
 def _initialize_comparison_data(variables, ionmodule) -> None:
@@ -79,7 +85,8 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
         return []
 
     # Apply filter based on slider if available
-    if hasattr(variables, 'slider_id_uuid'):
+    min_prec = None
+    if hasattr(variables, "slider_id_uuid"):
         slider_key = variables.slider_id_uuid
         if slider_key in st.session_state:
             slider_uuid = st.session_state[slider_key]
@@ -100,10 +107,16 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
 
     # Get metric settings
     metric = "Median"  # Default metric
-    mode = "Global"  # Default mode
+    mode = "Species-weighted"  # Default mode
 
     st.subheader("Select Two Workflows to Compare")
     st.markdown("Click on points in the plot below. Your selections will be highlighted.")
+    default_slider = getattr(variables, "default_val_slider", 3)
+    st.info(
+        f"Below plot uses default settings: **{metric}** metric, **{mode}** mode, "
+        f"min. precursor quantifications = **{min_prec if min_prec is not None else default_slider}**.",
+        icon="ℹ️",
+    )
 
     # Create unique key for this plot
     plot_key = f"{variables.all_datapoints}_compare_plot"
@@ -111,7 +124,7 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
         st.session_state[plot_key] = str(uuid.uuid4())
 
     # Generate the plot
-    plot_generator = ionmodule.get_plot_generator()
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
     fig_metric = plot_generator.plot_main_metric(
         filtered_data,
         metric=metric,

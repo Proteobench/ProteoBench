@@ -113,6 +113,7 @@ class VariablesDDADeNovo:
 
     # Sidebar metadata
     sidebar_label: str = "De novo DDA peptidoform"
+    homepage_title: str = "De Novo Sequencing on DDA-HCD"
     documentation_description: str = (
         "Benchmark the identification sensitivity and specificity of de novo sequencing workflows using DDA-HCD data."
     )

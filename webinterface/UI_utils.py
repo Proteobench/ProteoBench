@@ -1,3 +1,4 @@
+import base64
 import io
 import json
 import logging
@@ -13,6 +14,13 @@ import streamlit as st
 from pages.utils.module_registry import get_all_modules
 
 logger = logging.getLogger(__name__)
+
+
+def svg_data_uri(path: str) -> str:
+    """Encode an SVG file as a base64 data URI for embedding in markdown labels/images."""
+    with open(path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("utf-8")
+    return f"data:image/svg+xml;base64,{encoded}"
 
 
 def get_n_modules():

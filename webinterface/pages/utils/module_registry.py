@@ -47,6 +47,7 @@ class ModuleMetadata:
     doc_url: str
     documentation_description: str = ""  # One-liner description for the docs homepage card
     results_repo: Optional[str] = None  # e.g. "Results_quant_ion_DDA"
+    homepage_title: str = ""  # Friendlier phrase shown on the homepage module cards; falls back to `label`
 
 
 @st.cache_resource
@@ -143,6 +144,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
                 doc_url=variables.doc_url,
                 documentation_description=getattr(variables, "documentation_description", ""),
                 results_repo=results_repo,
+                homepage_title=getattr(variables, "homepage_title", ""),
             )
 
             # Add to appropriate category

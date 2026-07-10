@@ -50,6 +50,7 @@ class VariablesDIAQuantZenoTOF:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion ZenoTOF"
+    homepage_title: str = "LFQ Quantification on a ZenoTOF"
     documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA (Zeno SWATH) workflows using a multi-species (HYE) sample on a ZenoTOF 8600 instrument."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_ZenoTOF"
     sidebar_category: str = "DIA"

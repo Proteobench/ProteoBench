@@ -25,21 +25,6 @@ from UI_utils import (
 _MODULE_CARD_ICON = "../img/icons/module.svg"
 _MODULE_CARD_FALLBACK_DESCRIPTION = "Benchmark this workflow and compare your results with the community."
 
-# Friendlier, human-readable phrasing of each module's raw sidebar label, keyed by
-# the module's path. Falls back to the raw label for any module not listed here.
-_MODULE_FRIENDLY_TITLES = {
-    "/denovo_DDA_HCD": "De Novo Sequencing on DDA-HCD",
-    "/Quant_LFQ_DDA_ion_Astral": "LFQ Quantification on an Astral",
-    "/Quant_LFQ_DDA_ion_QExactive": "LFQ Quantification on a QExactive",
-    "/Quant_LFQ_DDA_peptidoform": "LFQ Quantification at the Peptidoform Level",
-    "/Entrapment_DIA_ion_Astral": "FDR Validation on an Astral",
-    "/Quant_LFQ_DIA_ion_Astral": "LFQ Quantification on an Astral",
-    "/Quant_LFQ_DIA_ion_Plasma": "LFQ Quantification on Human Plasma",
-    "/Quant_LFQ_DIA_ion_ZenoTOF": "LFQ Quantification on a ZenoTOF",
-    "/Quant_LFQ_DIA_ion_diaPASEF": "LFQ Quantification on a timsTOF (diaPASEF)",
-    "/Quant_LFQ_DIA_ion_lowinput": "LFQ Quantification for Low-Input & Single-Cell",
-}
-
 
 def _chunked(items, size):
     """Yield successive `size`-sized chunks from `items`."""
@@ -74,6 +59,15 @@ def _module_instrument(keywords):
     for instrument in _INSTRUMENT_KEYWORDS:
         if instrument in keywords:
             return instrument
+    return None
+
+
+def _module_acquisition(keywords):
+    """Return the acquisition mode ("DDA" or "DIA") from a module's keyword list."""
+    if "DDA" in keywords:
+        return "DDA"
+    if "DIA" in keywords:
+        return "DIA"
     return None
 
 
@@ -131,8 +125,6 @@ class StreamlitPageHome(StreamlitPage):
             st.session_state["start_home_tour"] = True
             st.session_state["_tour_opted_in"] = True
 
-        self._render_tour_opt_in()
-
         st.space("large")
         self._render_feature_highlights()
 
@@ -154,26 +146,6 @@ class StreamlitPageHome(StreamlitPage):
         if st.session_state.get("_home_tour_in_progress", False) and not st.session_state.get(home_tour_active, False):
             st.session_state.pop("_home_tour_in_progress", None)
             st.switch_page("pages/6_Quant_LFQ_DIA_ion_Astral.py")
-
-    @staticmethod
-    def _render_tour_opt_in():
-        if "_tour_opted_in" in st.session_state:
-            return
-        with st.container(border=True):
-            col_text, col_yes, col_no = st.columns([7, 2, 1.5], vertical_alignment="center")
-            with col_text:
-                st.markdown(
-                    ":material/explore: **Want a quick guided tour?** "
-                    "We will walk you through a benchmark module step by step."
-                )
-            with col_yes:
-                if st.button("Yes, show me!", type="primary", width="content", key="tour_opt_in_yes"):
-                    st.session_state["_tour_opted_in"] = True
-                    st.rerun()
-            with col_no:
-                if st.button("No, thanks!", width="content", key="tour_opt_in_no"):
-                    st.session_state["_tour_opted_in"] = False
-                    st.rerun()
 
     @staticmethod
     def _render_feature_highlights():
@@ -204,7 +176,7 @@ class StreamlitPageHome(StreamlitPage):
         )
         with st.container(key="tour_module_grid"):
             st.subheader("Jump into a module", anchor="jump-into-a-module")
-            st.caption("Pick a benchmark to explore public results or submit a run of your own.")
+            st.caption("Pick a benchmark module to explore public results or submit a run of your own.")
 
             submission_data = get_module_submission_data()
             modules_by_category = get_all_modules()
@@ -218,18 +190,21 @@ class StreamlitPageHome(StreamlitPage):
                     for col, module in zip(cols, pair):
                         with col, st.container(key=f"module_card_{module.path}"):
                             with st.container(horizontal=True, gap="small"):
-                                badge_color = _BADGE_COLOR_BY_STAGE.get(module.release_stage)
-                                if badge_color:
-                                    st.badge(module.release_stage.upper(), color=badge_color)
                                 type_tag = _module_type_tag(module.keywords)
                                 if type_tag:
                                     st.badge(type_tag, color="violet")
                                 instrument = _module_instrument(module.keywords)
                                 if instrument:
                                     st.badge(instrument, icon=":material/precision_manufacturing:", color="gray")
+                                acquisition = _module_acquisition(module.keywords)
+                                if acquisition:
+                                    st.badge(acquisition, color="yellow")
+                                badge_color = _BADGE_COLOR_BY_STAGE.get(module.release_stage)
+                                if badge_color:
+                                    st.badge(module.release_stage.upper(), color=badge_color)
 
                             st.image(_MODULE_CARD_ICON, width=40)
-                            friendly_title = _MODULE_FRIENDLY_TITLES.get(module.path, module.label)
+                            friendly_title = module.homepage_title or module.label
                             st.page_link(
                                 module.file_path,
                                 label=f"**{friendly_title}**",
@@ -262,27 +237,32 @@ class StreamlitPageHome(StreamlitPage):
     def _render_stats(self):
         stats = [
             (
-                ":material/dashboard: Active modules",
+                f"{_ICON_DIR}/module.svg",
+                "Active modules",
                 get_n_modules(),
                 "Modules with a public benchmark you can explore or submit to today.",
             ),
             (
-                ":material/construction: In development",
+                f"{_ICON_DIR}/module-construction.svg",
+                "In development",
                 get_n_modules_proposed(),
                 "Modules currently in discussion or under active development.",
             ),
             (
-                ":material/build: Supported workflows",
+                f"{_ICON_DIR}/workflow-run.svg",
+                "Supported workflows",
                 get_n_supported_tools(),
                 "Software tools with parameter parsing support in ProteoBench.",
             ),
             (
-                ":material/scatter_plot: Submitted points",
+                f"{_ICON_DIR}/scatter-plot.svg",
+                "Submitted points",
                 get_n_submitted_points(),
                 "Public benchmark runs submitted by the community so far.",
             ),
             (
-                ":material/trending_up: Monthly visits",
+                f"{_ICON_DIR}/user.svg",
+                "Monthly visits",
                 self._get_monthly_visits(),
                 "Visits to the ProteoBench web server over the last 30 days.",
             ),
@@ -290,8 +270,10 @@ class StreamlitPageHome(StreamlitPage):
         with st.container(key="tour_stats_area"):
             st.subheader("Platform at a glance", anchor=False)
             with st.container(horizontal=True):
-                for label, value, help_text in stats:
-                    st.metric(label, value, border=True, help=help_text)
+                for icon, title, value, help_text in stats:
+                    with st.container(border=True):
+                        st.image(icon, width=48)
+                        st.metric(title, value, help=help_text)
 
     @staticmethod
     def _render_submissions_chart():

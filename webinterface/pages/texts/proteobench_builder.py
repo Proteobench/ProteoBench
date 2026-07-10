@@ -1,20 +1,12 @@
 """Streamlit-wide page settings and tools for ProteoBench."""
 
-import base64
-
 import streamlit as st
 import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
 from pages.utils.module_registry import MODULE_CATEGORIES
+from UI_utils import svg_data_uri
 
 _ICON_PATH = "../img/proteobench-icon.svg"
-
-
-def _svg_data_uri(path: str) -> str:
-    """Encode an SVG file as a base64 data URI for embedding in markdown labels."""
-    with open(path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode("utf-8")
-    return f"data:image/svg+xml;base64,{encoded}"
 
 
 def proteobench_page_config(page_layout="wide"):
@@ -124,7 +116,7 @@ def proteobench_sidebar(current_page):
 
     # Sidebar layout
     with st.sidebar:
-        st.page_link("Home.py", label=f"![Home]({_svg_data_uri(_ICON_PATH)}) **ProteoBench**")
+        st.page_link("Home.py", label=f"![Home]({svg_data_uri(_ICON_PATH)}) **ProteoBench**")
 
         # Search box
         search_query = st.text_input(

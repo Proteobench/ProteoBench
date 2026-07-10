@@ -50,6 +50,7 @@ class VariablesDIAQuantAstral:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion Astral"
+    homepage_title: str = "LFQ Quantification on an Astral"
     documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_Astral"
     sidebar_category: str = "DIA"

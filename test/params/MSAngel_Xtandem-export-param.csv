@@ -17,8 +17,8 @@ max_peptide_length,
 fixed_mods,C[Carbamidomethylation]
 variable_mods,"M[Oxidation], Protein N-term[Acetylation], N-term[Acetyl], N-term[Pyrolidone]"
 max_mods,
-min_precursor_charge,
-max_precursor_charge,
-quantification_method,
+min_precursor_charge,2
+max_precursor_charge,4
+quantification_method,label_free
 protein_inference,
 abundance_normalization_ions,

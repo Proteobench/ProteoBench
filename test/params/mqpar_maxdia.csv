@@ -19,12 +19,12 @@ max_mods,1
 min_precursor_charge,1
 max_precursor_charge,4
 min_precursor_mz,
-max_precursor_mz,4600.0
+max_precursor_mz,0
 min_fragment_mz,
 max_fragment_mz,
 quantification_method,7
 protein_inference,
 abundance_normalization_ions,
-predictors_library,
+predictors_library,Predicted by MaxQuant
 scan_window,
 semi_enzymatic,False

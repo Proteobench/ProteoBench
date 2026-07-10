@@ -313,22 +313,7 @@ class StreamlitPageHome(StreamlitPage):
             st.subheader("Submissions per module", anchor=False)
             st.caption("Click a bar to see the breakdown of tools used for that module.")
             bar_fig, tool_data = build_submissions_figure()
-            if bar_fig is not None:
-                event = st.plotly_chart(
-                    bar_fig,
-                    on_select="rerun",
-                    selection_mode="points",
-                    key="submissions_chart",
-                )
-
-                # Show pie chart in a dialog popup when a bar is clicked
-                selection = event.get("selection", {}) if event else {}
-                points = selection.get("points", [])
-                if points:
-                    module_title = points[0].get("x")
-                    if module_title and module_title in tool_data and tool_data[module_title]:
-                        _show_tool_breakdown(module_title, tool_data[module_title])
-            else:
+            if bar_fig is None:
                 st.info("Submission data is currently unavailable.")
                 return
 

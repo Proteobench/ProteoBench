@@ -20,8 +20,9 @@ import streamlit_utils
 from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
+from pages.utils.submission_source import get_submission_source, is_official_server
+
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
-from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications

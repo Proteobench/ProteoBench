@@ -43,10 +43,12 @@ def load_user_parameters(variables, ionmodule, user_input) -> Any:
     """
     params = None
 
-    warning = ionmodule.validate_params_files(user_input[variables.meta_data], user_input["input_format"])
-    if warning:
-        st.warning(warning, icon="⚠️")
-        return None
+    validate_params_files = getattr(ionmodule, "validate_params_files", None)
+    if validate_params_files is not None:
+        warning = validate_params_files(user_input[variables.meta_data], user_input["input_format"])
+        if warning:
+            st.warning(warning, icon="⚠️")
+            return None
 
     try:
         params = ionmodule.load_params_file(

@@ -43,11 +43,8 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_entrapment import EntrapmentPlotGenerator
-from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class EntrapmentModule:
@@ -138,6 +135,76 @@ class EntrapmentModule:
 
         self.precursor_column_name = ""
         self.module_id = module_id
+
+    def _apply_mapping(
+        self,
+        standard_format: pd.DataFrame,
+        max_missing_fraction: float = 0.01,
+    ) -> pd.DataFrame:
+        """
+        Filter unmapped peptides, assign target/entrapment labels, and merge pair index.
+
+        Reads ``self.mapping_file`` (TSV with ``sequence``, ``peptide_pair_index``,
+        and ``peptide_type`` columns).  Peptides absent from the mapping are removed;
+        if more than ``max_missing_fraction`` of unique peptides are absent an
+        ``EntrapmentError`` is raised.  The caller receives a DataFrame with two extra
+        columns: ``"Target or Entrapment"`` (from ``peptide_type``) and
+        ``"peptide_pair_index"``.
+
+        Parameters
+        ----------
+        standard_format : pd.DataFrame
+            Standardised input DataFrame (output of ``convert_to_standard_format``).
+            Must contain a ``"Peptide"`` column.
+        max_missing_fraction : float
+            Maximum tolerated fraction of unmatched peptides. Defaults to 0.03.
+
+        Returns
+        -------
+        pd.DataFrame
+            Copy of ``standard_format`` filtered and augmented with mapping columns.
+
+        Raises
+        ------
+        EntrapmentError
+            If the fraction of unmatched peptides exceeds ``max_missing_fraction``.
+        """
+        from proteobench.exceptions import EntrapmentError
+
+        mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
+        all_peptides = set(standard_format["Peptide"])
+        missing_peptides = all_peptides - set(mapping_df["sequence"])
+        missing_fraction = len(missing_peptides) / len(all_peptides) if all_peptides else 0.0
+
+        if missing_fraction > max_missing_fraction:
+            n_total = len(all_peptides)
+            n_missing = len(missing_peptides)
+            examples = ", ".join(sorted(missing_peptides)[:5])
+            raise EntrapmentError(
+                f"{n_missing} of {n_total} identified peptides ({missing_fraction:.1%}) are absent from the "
+                f"entrapment mapping file. The threshold is {max_missing_fraction:.0%}.\n\n"
+                f"This usually means one of the following:\n"
+                f"  - In-silico digestion was enabled in the search engine. The entrapment FASTA is "
+                f"pre-digested and must be searched without enzymatic cleavage ('No enzyme' / '--cut ').\n"
+                f"  - The wrong FASTA file was used. Use the ProteoBench entrapment FASTA "
+                f"(ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt).\n\n"
+                f"First {min(5, n_missing)} missing peptides: {examples}"
+            )
+
+        df = standard_format.copy()
+        if missing_peptides:
+            df = df[~df["Peptide"].isin(missing_peptides)].reset_index(drop=True)
+
+        df = df.merge(
+            mapping_df[["sequence", "peptide_pair_index", "peptide_type"]],
+            how="left",
+            left_on="Peptide",
+            right_on="sequence",
+        ).drop(columns=["sequence"])
+        df["Target or Entrapment"] = df["peptide_type"].replace("p_target", "entrapment")
+        df = df.drop(columns=["peptide_type"])
+
+        return df
 
     def is_implemented(self) -> bool:
         """
@@ -459,9 +526,15 @@ class EntrapmentModule:
         params.software_name = input_format
         return params
 
-    def get_plot_generator(self) -> PlotGeneratorBase:
+    def get_plot_generator(self, y_axis_title: str = None) -> PlotGeneratorBase:
         """
         Get the plot generator for entrapment plots.
+
+        Parameters
+        ----------
+        y_axis_title : str, optional
+            Unused by the entrapment plot generator; accepted for interface
+            compatibility with other modules' ``get_plot_generator``.
 
         Returns
         -------

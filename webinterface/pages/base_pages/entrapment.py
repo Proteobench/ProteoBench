@@ -8,14 +8,9 @@ from typing import Any, Dict
 import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import streamlit as st
-
 from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import (
     VariablesDIAEntrapmentAstral,
 )
-from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
-    DIAEntrapmentIonModuleAstral as IonModule,
-)
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import get_submission_source, is_official_server
@@ -27,12 +22,11 @@ from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
-from .tabs_entrapment import (
+from .tabs import (
     tab1_view_public_results,
     tab2_upload_results,
     tab3_view_single_result,
     tab4_view_public_and_new_results,
-    tab5_compare_results,
     tab6_submit_results,
 )
 
@@ -290,8 +284,8 @@ class EntrapmentUIObjects(BaseUIModule):
 
         st.subheader("FDP / Reported FDR by Workflow")
         st.markdown(
-            "Ratio of empirical false discovery proportion (FDP) to the FDR threshold "
-            "declared for each workflow. A ratio ≤ 1 means the empirical FDP does not "
+            "Ratio of estimated false discovery proportion (FDP) to the FDR threshold "
+            "declared for each workflow. A ratio ≤ 1 means the estimated FDP does not "
             "exceed the claimed FDR. Workflows are coloured by validity category: "
             ":green[valid] (upper bound ≤ reported FDR), "
             ":red[invalid] (lower bound > reported FDR), "
@@ -332,7 +326,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 metric=metric,
                 colorblind_mode=colorblind_mode,
             )
-            st.plotly_chart(fdp_ratio_fig, use_container_width=True)
+            st.plotly_chart(fdp_ratio_fig)
         except Exception as e:
             st.error(f"Could not render FDP ratio plot: {e}", icon="🚨")
 
@@ -344,7 +338,7 @@ class EntrapmentUIObjects(BaseUIModule):
 
         st.subheader("Identified Features by Validity Category")
         st.markdown(
-            "Points are grouped into the three validity categories based on the paired FDP bounds "
+            "Points are grouped into the three validity categories based on the estimated paired FDP bounds "
             "vs each workflow's declared PSM-level FDR. "
             "**Point colour** indicates the software tool. "
             "Within each category, points are spread horizontally for readability and sorted "
@@ -352,7 +346,7 @@ class EntrapmentUIObjects(BaseUIModule):
         )
         try:
             fig = self.ionmodule.get_plot_generator().plot_category_strip(all_data)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig)
         except Exception as e:
             st.error(f"Could not render category strip plot: {e}", icon="🚨")
 
@@ -367,12 +361,12 @@ class EntrapmentUIObjects(BaseUIModule):
             "Each point is one submitted workflow. "
             "**Colour** indicates the software tool; **shape** indicates the validity category "
             "(○ valid, △ inconclusive, ✕ invalid). "
-            "The x-axis shows the ratio of the paired upper FDP bound to the declared PSM-level FDR; "
-            "a ratio below 1 (left of the dashed line) means the empirical FDP is within the claimed threshold."
+            "The x-axis shows the ratio of the estimated paired upper FDP bound to the declared PSM-level FDR; "
+            "a ratio below 1 (left of the dashed line) means the estimated FDP is within the claimed threshold."
         )
         try:
             fig = self.ionmodule.get_plot_generator().plot_fdp_id_scatter(all_data)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig)
         except Exception as e:
             st.error(f"Could not render FDP/FDR scatter: {e}", icon="🚨")
 
@@ -384,28 +378,41 @@ class EntrapmentUIObjects(BaseUIModule):
 
         st.subheader("FDP Interval Plot")
         st.markdown(
-            "Each row is one submitted workflow. The thick horizontal bar spans the FDP "
-            "uncertainty interval from the **lower bound** (left) to the **paired upper bound** "
-            "(right); open circles mark both endpoints. "
+            "Each row is one submitted workflow. The thick horizontal bar spans the estimated FDP "
+            "uncertainty interval from the **estimated lower bound** (left) to the **estimated paired "
+            "upper bound** (right); open circles mark both endpoints. "
             "The diamond marker (◆) shows the workflow's declared FDR threshold "
             "(``reported_fdr_parsed_from_input``); a star (★) marks newly uploaded results. "
             "Bar colour indicates the validity category: "
             "**green** = valid, **orange** = inconclusive, **red** = invalid."
         )
-        sort_dir = st.radio(
-            "Sort by number of identified features",
-            ["Ascending ↑", "Descending ↓"],
-            index=1,
-            horizontal=True,
-            key=f"forest_sort_{session_key}",
-        )
+        col_sort, col_thresh = st.columns([2, 1])
+        with col_sort:
+            sort_dir = st.radio(
+                "Sort by number of identified features",
+                ["Ascending ↑", "Descending ↓"],
+                index=1,
+                horizontal=True,
+                key=f"forest_sort_{session_key}",
+            )
+        with col_thresh:
+            threshold_str = st.selectbox(
+                "Q-value threshold",
+                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                index=1,
+                help="Filter workflows by their reported FDR threshold. "
+                "The forest plot will only show workflows with a reported FDR below the selected value.",
+                key=f"forest_threshold_{session_key}",
+            )
         sort_ascending = sort_dir.startswith("Ascending")
+        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
         try:
             fig = self.ionmodule.get_plot_generator().plot_forest(
                 all_data,
                 sort_ascending=sort_ascending,
+                threshold=threshold,
             )
-            st.plotly_chart(fig, use_container_width=True, key=f"forest_plot_{session_key}")
+            st.plotly_chart(fig, key=f"forest_plot_{session_key}")
         except Exception as e:
             st.error(f"Could not render forest plot: {e}", icon="🚨")
 
@@ -434,14 +441,19 @@ class EntrapmentUIObjects(BaseUIModule):
                 "(https://www.nature.com/articles/s41592-025-02719-x)."
             )
             st.markdown("##### FDP estimates")
-            st.markdown("Two bounds on the false discovery proportion (FDP) are computed from the search results:")
-            st.markdown("**Lower FDP bound** — fraction of identified entrapment peptides among all identifications:")
+            st.markdown(
+                "Two estimated bounds on the false discovery proportion (FDP) are computed from the search results:"
+            )
+            st.markdown(
+                "**Estimated lower FDP bound** — fraction of identified entrapment peptides among all "
+                "identifications:"
+            )
             st.latex(
                 r"\widehat{\underline{\mathrm{FDP}}}_{\mathcal{T}\cup\mathcal{E}_{\mathcal{T}}}"
                 r"= \frac{N_{\mathcal{E}}}{N_{\mathcal{T}}+N_{\mathcal{E}}}"
             )
             st.markdown(
-                "**Upper FDP bound (paired method)** — additionally accounts for entrapment peptides "
+                "**Estimated upper FDP bound (paired method)** — additionally accounts for entrapment peptides "
                 "that outscore their paired target:"
             )
             st.latex(
@@ -457,25 +469,23 @@ class EntrapmentUIObjects(BaseUIModule):
             )
             st.markdown("##### Interpreting results")
             st.markdown(
-                "The FDP interval is compared to the declared FDR threshold of the workflow:\n\n"
-                "- **Valid** (green bar): both FDP bounds are lower than the declared FDR threshold — "
+                "The estimated FDP interval is compared to the declared FDR threshold of the workflow:\n\n"
+                "- **Valid**: both estimated FDP bounds are lower than the declared FDR threshold — "
                 "FDR control is valid (but overestimated).\n"
-                "- **Inconclusive** (orange bar): the FDP interval includes the threshold — "
+                "- **Inconclusive**: the estimated FDP interval includes the threshold — "
                 "insufficient evidence to confirm or reject FDR calculation.\n"
-                "- **Invalid** (red bar): both FDP bounds exceed the declared threshold — "
+                "- **Invalid**: both estimated FDP bounds exceed the declared threshold — "
                 "the reported FDR is invalid and underestimated."
             )
-
-        self._render_forest_plot(session_key=self.variables.all_datapoints)
 
         st.subheader("FDR Control and Sensitivity Overview")
         st.markdown(
             "Each point represents a submitted workflow. "
-            "The x-axis shows the **false discovery proportion (FDP)** — an empirical estimate "
+            "The x-axis shows the **estimated false discovery proportion (FDP) bound** — an estimate "
             "of the actual FDR computed from entrapment peptides. "
             "The y-axis shows the number of identified precursor ions. "
             "Workflows to the left have better-calibrated FDR control. "
-            "Use the options below to select the FDP metric and adjust the display."
+            "Use the options below to select the estimated FDP bound and adjust the display."
         )
 
         # Define callbacks for plot options
@@ -488,24 +498,41 @@ class EntrapmentUIObjects(BaseUIModule):
         metric_container = {"metric": None}
 
         def render_metric_selector():
-            metric = tab1_view_public_results.display_metric_selector(self.variables)
+            metric = tab1_view_public_results.display_metric_selector(
+                self.variables,
+                options=["Estimated upper FDP bound - Paired method", "Estimated lower FDP bound"],
+                label="Select metric to show in x axis",
+            )
             metric_container["metric"] = metric
             return metric
 
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables)
 
+        def render_threshold_selector():
+            key = f"threshold_selector_{self.variables.all_datapoints}"
+            if key not in st.session_state:
+                st.session_state[key] = uuid.uuid4()
+            return st.selectbox(
+                "Q-value threshold",
+                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                index=1,
+                key=st.session_state[key],
+            )
+
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
-            selector_callbacks=[render_metric_selector, render_colorblind_selector],
+            selector_callbacks=[render_metric_selector, render_threshold_selector, render_colorblind_selector],
             filter_cols_spec=1,
-            selector_cols_spec=[1, 1],
+            selector_cols_spec=[1, 1, 1],
         )
 
         # Extract returned values
-        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
-        colorblind_mode = results[2] if len(results) > 2 else False
+        metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
+        threshold_str = results[2] if len(results) > 3 else "Maximum reported"
+        colorblind_mode = results[3] if len(results) > 2 else False
+        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
@@ -513,10 +540,12 @@ class EntrapmentUIObjects(BaseUIModule):
             plot_params={
                 "metric": metric,
                 "colorblind_mode": colorblind_mode,
+                "threshold": threshold,
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
+            render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints),
         )
 
         with st.expander("Show more"):
@@ -545,16 +574,14 @@ class EntrapmentUIObjects(BaseUIModule):
             default_value="None",
         )
 
-        self._render_forest_plot(session_key=self.variables.all_datapoints_submitted)
-
         st.subheader("FDR Control and Sensitivity Overview")
         st.markdown(
             "Each point represents a submitted workflow. "
-            "The x-axis shows the **false discovery proportion (FDP)** — an empirical estimate "
+            "The x-axis shows the **estimated false discovery proportion (FDP) bound** — an estimate "
             "of the actual FDR computed from entrapment peptides. "
             "The y-axis shows the number of identified precursor ions. "
             "Workflows to the left have better-calibrated FDR control. "
-            "Use the options below to select the FDP metric and adjust the display."
+            "Use the options below to select the estimated FDP bound and adjust the display."
         )
 
         # Define callbacks for plot options
@@ -578,7 +605,7 @@ class EntrapmentUIObjects(BaseUIModule):
             )
             metric = st.radio(
                 "Select metric to show in x axis",
-                ["Lower FDP bound", "Upper FDP bound - Paired method"],
+                ["Estimated upper FDP bound - Paired method", "Estimated lower FDP bound"],
                 help=help_text,
                 horizontal=True,
                 key=metric_uuid,
@@ -589,17 +616,47 @@ class EntrapmentUIObjects(BaseUIModule):
         def render_colorblind_selector():
             return tab1_view_public_results.display_colorblindmode_selector(self.variables, use_submitted=True)
 
+        def render_threshold_selector():
+            key = f"threshold_selector_{self.variables.all_datapoints_submitted}"
+            if key not in st.session_state:
+                st.session_state[key] = uuid.uuid4()
+            return st.selectbox(
+                "Q-value threshold",
+                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                index=1,
+                key=st.session_state[key],
+            )
+
         # Render plot options expander and capture return values
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
-            selector_callbacks=[render_metric_selector, render_colorblind_selector],
+            selector_callbacks=[render_metric_selector, render_threshold_selector, render_colorblind_selector],
             filter_cols_spec=1,
-            selector_cols_spec=[1, 1],
+            selector_cols_spec=[1, 1, 1],
         )
 
         # Extract returned values
-        metric = results[1] if len(results) > 1 else "Upper FDP bound - Paired method"
-        colorblind_mode = results[2] if len(results) > 2 else False
+        metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
+        threshold_str = results[2] if len(results) > 2 else "Maximum reported"
+        colorblind_mode = results[3] if len(results) > 3 else False
+        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
+
+        # Warn when the newly uploaded datapoint's max Q-value is below the selected threshold,
+        # which means it won't appear in the plot at the current setting.
+        if threshold is not None:
+            all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
+            if all_dp is not None and not all_dp.empty and "old_new" in all_dp.columns:
+                new_rows = all_dp[all_dp["old_new"] == "new"]
+                if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
+                    max_q = float(new_rows.iloc[0]["reported_fdr_parsed_from_input"])
+                    if max_q < threshold:
+                        available = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
+                        suggestion = f"Try selecting **{max(available):.3f}** or lower." if available else ""
+                        st.warning(
+                            f"🚨 The uploaded data has a maximum Q-value of **{max_q:.4f}**, which is below "
+                            f"the selected threshold of **{threshold}**. "
+                            f"The uploaded datapoint is not shown at this threshold. {suggestion} 🚨"
+                        )
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
@@ -610,10 +667,12 @@ class EntrapmentUIObjects(BaseUIModule):
             plot_params={
                 "metric": metric,
                 "colorblind_mode": colorblind_mode,
+                "threshold": threshold,
                 "label": label,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
             },
+            render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints_submitted),
         )
 
         with st.expander("Show more"):
@@ -627,7 +686,6 @@ class EntrapmentUIObjects(BaseUIModule):
 
     def display_workflow_comparison(self) -> None:
         """Display the workflow comparison page in Tab 5."""
-        tab5_compare_results.display_workflow_comparison(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
-        )
+        # WORK IN PROGRESS: workflow comparison is not yet implemented for entrapment modules.
+        st.header("Compare Two Results")
+        st.write("This feature is under development. Please check back later for updates.")

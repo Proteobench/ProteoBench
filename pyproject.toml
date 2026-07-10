@@ -24,18 +24,15 @@ dependencies = [
   "plotly>=6.0.0",
   "upsetplot",
   "seaborn",
-  "streamlit>=1.58",
-  "streamlit-aggrid>=1.1.7",
-  "streamlit_extras",
-  "streamlit-plotly-events",
-  "streamlit-tour>=1.1.0",
   "scipy",
   "matplotlib",
+  "scikit-learn",
+  "pyteomics",
+  "PyYAML",
   "toml",
   "PyGithub",
   "GitPython",
   "psm-utils",
-  "pmultiqc>=0.0.33",
   "requests",
   "beautifulsoup4",
 ]
@@ -67,7 +64,14 @@ docs = [
   "sphinx_new_tab_link",
   "sphinx_copybutton",
 ]
-web = ["streamlit>1.27", "scipy"]
+web = [
+  "streamlit>=1.58",
+  "streamlit-aggrid>=1.1.7",
+  "streamlit_extras",
+  "streamlit-plotly-events",
+  "streamlit-tour>=1.1.0",
+  "pmultiqc>=0.0.33",
+]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/ProteoBench/ProteoBench/issues/"

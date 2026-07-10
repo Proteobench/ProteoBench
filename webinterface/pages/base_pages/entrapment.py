@@ -12,8 +12,9 @@ from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import
     VariablesDIAEntrapmentAstral,
 )
 
+from pages.utils.submission_source import get_submission_source, is_official_server
+
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
-from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (

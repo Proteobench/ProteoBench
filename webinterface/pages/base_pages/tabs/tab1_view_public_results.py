@@ -134,12 +134,25 @@ def generate_main_selectbox(variables, selectbox_id_uuid: str) -> None:
     )
 
 
-def display_metric_selector(variables) -> str:
-    """Display metric selector and return selected metric."""
+def display_metric_selector(variables, options: Optional[list] = None, label: str = "Select metric") -> str:
+    """Display metric selector and return selected metric.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object (used for help text).
+    options : list, optional
+        The metric options to show. Defaults to ``["Median", "Mean"]`` (quant modules).
+        Other module types (e.g. entrapment) pass their own option list.
+    label : str, optional
+        The radio widget label. Defaults to ``"Select metric"``.
+    """
+    if options is None:
+        options = ["Median", "Mean"]
     help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
     return st.radio(
-        "Select metric",
-        ["Median", "Mean"],
+        label,
+        options,
         help=help_text,
         horizontal=True,
     )
@@ -247,7 +260,7 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
             fig = plot_generator.plot_main_metric(
                 result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
             )
-            st.plotly_chart(fig, use_container_width=True, key=plot_uuid)
+            st.plotly_chart(fig, key=plot_uuid)
         except Exception as e:
             st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
             import traceback
@@ -339,6 +352,7 @@ def display_existing_results(
     use_slider: bool = True,
     table_style: str = "aggrid",
     column_config: Optional[Dict] = None,
+    render_forest_plot=None,
 ) -> None:
     """
     Main orchestration function for Tab 1: plot + interactive table with bidirectional
@@ -362,6 +376,9 @@ def display_existing_results(
         Reserved; AgGrid is always used.
     column_config : Optional[Dict], optional
         Reserved for future st.dataframe column configuration.
+    render_forest_plot : callable, optional
+        Optional callable that renders an additional plot (e.g. a forest plot)
+        between the scatter plot and the results table.
     """
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
@@ -423,6 +440,9 @@ def display_existing_results(
         st.session_state[highlight_key] = plot_clicked_id
         st.session_state[agrid_key_id] = uuid.uuid4()
         st.rerun(scope="fragment")
+
+    if render_forest_plot is not None:
+        render_forest_plot()
 
     # --- Render table via shared utilities ---
     with st.container(key="tour_results_table"):

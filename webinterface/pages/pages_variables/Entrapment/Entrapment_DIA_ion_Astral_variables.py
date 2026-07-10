@@ -90,6 +90,7 @@ class VariablesDIAEntrapmentAstral:
     alpha_warning: bool = True
     beta_warning: bool = False
     archived_warning: bool = False
+    enable_pmultiqc: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_entrapment_ion_DIA_Astral.git"
 
     # Sidebar metadata
@@ -105,7 +106,9 @@ class VariablesDIAEntrapmentAstral:
         default_factory=lambda: ["DIA", "entrapment", "Astral", "orbitrap", "precursor", "ion", "FDR", "Validation"]
     )
 
-    description_module_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/introduction_DIA_quan_ions.md"
+    description_module_md: str = (
+        "pages/markdown_files/Entrapment/DIA/ion/Astral/introduction_DIA_entrapment_ions_astral.md"
+    )
     description_files_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/file_description.md"
     description_input_file_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/input_file_description.md"
     description_slider_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/slider_description.md"
@@ -113,7 +116,7 @@ class VariablesDIAEntrapmentAstral:
     description_results_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/result_description.md"
     description_submission_md: str = "pages/markdown_files/Entrapment/DIA/ion/Astral/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/Astral"
+    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/entrapment/DIA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = (

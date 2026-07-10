@@ -51,6 +51,7 @@ class VariablesDIAQuantdiaPASEF:
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion diaPASEF"
     homepage_title: str = "LFQ Quantification on a timsTOF (diaPASEF)"
+    graphical_abstract: str = "Graphical_abstract_Quant_timsTOF.png"
     documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a multi-species (HYE) sample on a timsTOF instrument."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_diaPASEF"
     sidebar_category: str = "DIA"

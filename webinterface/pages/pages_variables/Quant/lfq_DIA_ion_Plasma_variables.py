@@ -51,6 +51,7 @@ class VariablesDIAQuantPlasma:
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion Plasma"
     homepage_title: str = "LFQ Quantification on Human Plasma"
+    graphical_abstract: str = "Graphical_abstract_Quant_plasma.png"
     documentation_description: str = (
         "Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample aquired on a timsTOF."
     )

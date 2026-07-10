@@ -24,6 +24,17 @@ from UI_utils import (
 
 _MODULE_CARD_ICON = "../img/icons/module.svg"
 _MODULE_CARD_FALLBACK_DESCRIPTION = "Benchmark this workflow and compare your results with the community."
+_MODULE_CARD_IMAGE_HEIGHT = 230
+
+_ABSTRACT_DIR = "../img/module_graphical_abstracts"
+
+
+def _module_graphical_abstract(module):
+    """Return the module's graphical abstract image, falling back to the generic
+    module icon if none is configured."""
+    if module.graphical_abstract:
+        return f"{_ABSTRACT_DIR}/{module.graphical_abstract}"
+    return _MODULE_CARD_ICON
 
 
 def _chunked(items, size):
@@ -163,13 +174,33 @@ class StreamlitPageHome(StreamlitPage):
         # no-wrap); let it wrap onto multiple lines instead so the full module
         # title is always visible.
         st.markdown(
-            """
+            f"""
             <style>
-            .st-key-tour_module_grid [data-testid="stPageLink"] span {
+            .st-key-tour_module_grid [data-testid="stPageLink"] span {{
                 white-space: normal;
                 overflow: visible;
                 text-overflow: unset;
-            }
+            }}
+            .st-key-tour_module_grid [data-testid="stImage"] {{
+                width: 100%;
+                height: {_MODULE_CARD_IMAGE_HEIGHT}px;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }}
+            .st-key-tour_module_grid [data-testid="stImageContainer"] {{
+                width: 100%;
+                height: {_MODULE_CARD_IMAGE_HEIGHT}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }}
+            .st-key-tour_module_grid [data-testid="stImage"] img {{
+                width: 100% !important;
+                height: {_MODULE_CARD_IMAGE_HEIGHT}px !important;
+                object-fit: contain;
+            }}
             </style>
             """,
             unsafe_allow_html=True,
@@ -189,6 +220,8 @@ class StreamlitPageHome(StreamlitPage):
                     cols = st.columns(2, border=True)
                     for col, module in zip(cols, pair):
                         with col, st.container(key=f"module_card_{module.path}"):
+                            st.image(_module_graphical_abstract(module), use_container_width=True)
+
                             with st.container(horizontal=True, gap="small"):
                                 type_tag = _module_type_tag(module.keywords)
                                 if type_tag:
@@ -203,7 +236,6 @@ class StreamlitPageHome(StreamlitPage):
                                 if badge_color:
                                     st.badge(module.release_stage.upper(), color=badge_color)
 
-                            st.image(_MODULE_CARD_ICON, width=40)
                             friendly_title = module.homepage_title or module.label
                             st.page_link(
                                 module.file_path,

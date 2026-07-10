@@ -94,6 +94,7 @@ class VariablesDDAQuant:
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DDA ion QExactive"
     homepage_title: str = "LFQ Quantification on a QExactive"
+    graphical_abstract: str = "Graphical_abstract_Quant_QExactive.png"
     documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument."
     sidebar_path: str = "/Quant_LFQ_DDA_ion_QExactive"
     sidebar_category: str = "DDA"

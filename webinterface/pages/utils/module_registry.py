@@ -48,6 +48,7 @@ class ModuleMetadata:
     documentation_description: str = ""  # One-liner description for the docs homepage card
     results_repo: Optional[str] = None  # e.g. "Results_quant_ion_DDA"
     homepage_title: str = ""  # Friendlier phrase shown on the homepage module cards; falls back to `label`
+    graphical_abstract: str = ""  # Filename in img/module_graphical_abstracts/; falls back to the generic module icon
 
 
 @st.cache_resource
@@ -145,6 +146,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
                 documentation_description=getattr(variables, "documentation_description", ""),
                 results_repo=results_repo,
                 homepage_title=getattr(variables, "homepage_title", ""),
+                graphical_abstract=getattr(variables, "graphical_abstract", ""),
             )
 
             # Add to appropriate category

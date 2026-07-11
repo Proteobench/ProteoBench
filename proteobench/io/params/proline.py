@@ -153,8 +153,8 @@ def extract_params(
     # Find the value where the index contains "peptides selection method"
     peptide_selection_method_row = sheet.index[sheet.index.str.contains("peptides selection method")].tolist()
     params.protein_inference = (
-        sheet.loc[peptide_selection_method_row[0]].iloc[0] if peptide_selection_method_row else None
-    ).lower()
+        sheet.loc[peptide_selection_method_row[0]].iloc[0].lower() if peptide_selection_method_row else None
+    )
 
     # Try to extract software version from "Dataset statistics and infos" sheet
     try:

@@ -8,6 +8,7 @@ from typing import Any, Optional
 import streamlit as st
 from streamlit_extras.let_it_rain import rain
 
+from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 
 from ..utils.inputs import generate_input_widget
@@ -411,6 +412,11 @@ def create_pull_request(
             submission_comments=submission_comments,
             submission_source=submission_source,
         )
+    except DatasetAlreadyExistsOnServerError:
+        # Let the dedicated handler in the UI objects surface this to the user.
+        if variables.submit in st.session_state:
+            del st.session_state[variables.submit]
+        raise
     except Exception as e:
         st.error(f"Unable to create the pull request: {e}", icon="🚨")
         pr_url = None

@@ -14,25 +14,6 @@ from github import Github
 logger = logging.getLogger(__name__)
 
 
-def is_official_server() -> bool:
-    """Check if running on the official ProteoBench server.
-
-    Uses the presence of storage configuration in Streamlit secrets
-    as the signal - only the production server has this configured.
-    """
-    try:
-        import streamlit as st
-
-        return "storage" in st.secrets.keys()
-    except (ImportError, FileNotFoundError):
-        return False
-
-
-def get_submission_source() -> str:
-    """Return the submission source: 'web-server' or 'local'."""
-    return "web-server" if is_official_server() else "local"
-
-
 class GithubProteobotRepo:
     """
     A class to interact with GitHub repositories related to Proteobot and Proteobench,

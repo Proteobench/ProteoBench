@@ -206,6 +206,7 @@ def extract_params(
     params.allowed_miscleavages = pipeline_params["allowed_missed_cleavages"]
     params.quantification_method = pipeline_params["quantification_method"]
     params.protein_inference = pipeline_params["protein_inference_method"]
+    params.abundance_normalization_ions = bool(pipeline_params["normalize"])
 
     # maybe (also) in sdrf infos?
     # params.quantification_method =

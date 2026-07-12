@@ -33,7 +33,7 @@ The parameters that are retrieved from the parameter files for the **quantificat
 | precursor_mass_tolerance | Precursor mass tolerance used for identification (in the format **[-20 ppm, 20 ppm]**).                                                                                                                                        |
 | fragment_mass_tolerance  | Fragment mass tolerance used for identification (in the format **[-50 ppm, 50 ppm]**).                                                                                                                                         |
 | enzyme                   | Enzyme used for digesting peptides.                                                                                                                                                                                          |
-| semi_enzymatic           | TRUE if semi-specific (not fully enzymatic) digestion is allowed. Note: two parsers (Spectronaut, MetaMorpheus) currently populate this same concept under the attribute name `semi_specific` instead of `semi_enzymatic`; this is an inconsistency in the parsers rather than an intentional second field. |
+| semi_enzymatic           | TRUE if semi-specific (not fully enzymatic) digestion is allowed. |
 | allowed_miscleavages     | Number of maximum missed cleavages allowed per peptide.                                                                                                                                                                      |
 | min_peptide_length       | Minimum peptide length considered in the analysis.                                                                                                                                                                           |
 | max_peptide_length       | Maximum peptide length considered in the analysis.                                                                                                                                                                           |
@@ -291,7 +291,7 @@ Example version file [here](https://github.com/Proteobench/ProteoBench/blob/main
 | precursor_mass_tolerance |      Parsed from **CommonParameters.PrecursorMassTolerance** (e.g. `"±20.0000 PPM"`), formatted as `[-X ppm, X ppm]` or `[-X Da, X Da]`       |
 | fragment_mass_tolerance  |      Parsed from **CommonParameters.ProductMassTolerance**, same formatting       |
 | enzyme                   |      Parsed from **CommonParameters.DigestionParams.Protease**       |
-| semi_enzymatic           |      Parsed as `semi_specific` from **CommonParameters.DigestionParams.FragmentationTerminus** (True unless the value is `"Both"`) — note this parser uses the attribute name `semi_specific` rather than `semi_enzymatic`       |
+| semi_enzymatic           |      Parsed from **CommonParameters.DigestionParams.FragmentationTerminus** (True unless the value is `"Both"`)       |
 | allowed_miscleavages     |      Parsed from **CommonParameters.DigestionParams.MaxMissedCleavages**       |
 | min_peptide_length       |      Parsed from **CommonParameters.DigestionParams.MinPeptideLength**       |
 | max_peptide_length       |      Parsed from **CommonParameters.DigestionParams.MaxPeptideLength**       |
@@ -537,7 +537,7 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | precursor_mass_tolerance |     Set to **Dynamic**, if the calibration method is set to **Dynamic**<br>If the calibration method is set to **Static** or **Relative**, tolerances are extracted from line **MS1 Tolerance: X**, with Th or ppm units, respectively (resolved within the tolerance section matching the instrument's **Vendor**)       |
 | fragment_mass_tolerance  |     Set to **Dynamic**, if the calibration method is set to **Dynamic**<br>If the calibration method is set to **Static** or **Relative**, tolerances are extracted from line **MS2 Tolerance: X**, with Th or ppm units, respectively        |
 | enzyme                   |     Parsed from line **Enzymes / Cleavage Rules: X**        |
-| semi_enzymatic           |     Parsed as `semi_specific` from line **Digest Type: X** (True unless the value is `"Specific"`) — note this parser uses the attribute name `semi_specific` rather than `semi_enzymatic`        |
+| semi_enzymatic           |     Parsed from line **Digest Type: X** (True unless the value is `"Specific"`)        |
 | allowed_miscleavages     |     Parsed from line **Missed Cleavages: X**        |
 | min_peptide_length       |     Parsed from line **Min Peptide Length: X**        |
 | max_peptide_length       |     Parsed from line **Max Peptide Length: X**       |

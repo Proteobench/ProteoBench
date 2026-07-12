@@ -389,7 +389,6 @@ if __name__ == "__main__":
     ]
 
     for file_path in files:
-
         file = pathlib.Path(file_path)
         with open(file, "rb") as f:
             _, _, _, data = read_fragpipe_workflow(f)

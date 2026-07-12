@@ -398,8 +398,11 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
             lambda v: (_SEARCH_ENGINE_MAP.get(v.strip().lower(), v) if isinstance(v, str) and pd.notna(v) else v)
         )
 
-    # H. Flatten any dict-valued cell to a string
+    # H. Flatten any dict-valued cell to a string (skip the nested "results" column,
+    # whose values are dicts-of-dicts of benchmark metrics, not parameter sub-settings)
     for col in df.columns:
+        if col == "results":
+            continue
         if df[col].apply(lambda v: isinstance(v, dict)).any():
             df[col] = df[col].apply(lambda v: _flatten_dict(v) if isinstance(v, dict) else v)
 

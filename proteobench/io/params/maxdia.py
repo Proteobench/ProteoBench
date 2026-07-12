@@ -71,7 +71,9 @@ def extract_params(
         f"[-{precursor_mass_tolerance_value:g} ppm, {precursor_mass_tolerance_value:g} ppm]"
     )
     library_type_dict = {0: "From evidence file", 1: "From tsv", 2: "Predicted by MaxQuant"}
-    parameters.predictors_library = library_type_dict[int(series.loc[series["level_2"] == "diaLibraryType", 0].values[0])]
+    parameters.predictors_library = library_type_dict[
+        int(series.loc[series["level_2"] == "diaLibraryType", 0].values[0])
+    ]
     parameters.fill_none()
     return parameters
 

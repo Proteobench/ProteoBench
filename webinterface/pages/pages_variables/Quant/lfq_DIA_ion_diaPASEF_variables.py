@@ -50,7 +50,9 @@ class VariablesDIAQuantdiaPASEF:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion diaPASEF"
-    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a multi-species (HYE) sample on a timsTOF instrument."
+    documentation_description: str = (
+        "Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a multi-species (HYE) sample on a timsTOF instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_diaPASEF"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(

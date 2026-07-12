@@ -408,11 +408,15 @@ def extract_params(
         all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"].strip() == "True"
     else:
         all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
-    
+
     # Normalization method
     if "abundance_normalization_ions" in all_parameters:
-        all_parameters["abundance_normalization_ions"] = "DirectLFQ" if all_parameters["abundance_normalization_ions"] == "directlfq" else all_parameters["abundance_normalization_ions"]
-                
+        all_parameters["abundance_normalization_ions"] = (
+            "DirectLFQ"
+            if all_parameters["abundance_normalization_ions"] == "directlfq"
+            else all_parameters["abundance_normalization_ions"]
+        )
+
     params = ProteoBenchParameters(**all_parameters, filename=json_file)
     params.fill_none()
     return params

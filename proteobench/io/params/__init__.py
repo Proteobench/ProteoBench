@@ -96,7 +96,9 @@ _ENZYME_MAP = {
 }
 
 # Tolerance values (lowercase) that indicate automatic calibration.
-_AUTO_CALIBRATION_SENTINELS = frozenset({"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]", "[-0 ppm, 0 ppm]"})
+_AUTO_CALIBRATION_SENTINELS = frozenset(
+    {"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]", "[-0 ppm, 0 ppm]"}
+)
 _AUTO_CALIBRATION_LABEL = "Automatic calibration"
 
 # Tolerance fields to which the auto-calibration mapping applies.

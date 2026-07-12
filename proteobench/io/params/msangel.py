@@ -84,6 +84,7 @@ def extract_search_engine(search_params: list) -> dict:
         if "searchEnginesWithForms" in each_search_params:
             return each_search_params["searchEnginesWithForms"][0][0]
 
+
 def get_charges(charge_str):
     """
     Extract minimum and maximum precursor charges from the charge string.
@@ -106,8 +107,7 @@ def get_charges(charge_str):
     min_charge = int(min(charges))
     max_charge = int(max(charges))
     return min_charge, max_charge
-    
-    
+
 
 def extract_params_mascot_specific(search_params: list, input_params: ProteoBenchParameters) -> ProteoBenchParameters:
     """
@@ -162,10 +162,12 @@ def extract_params_mascot_specific(search_params: list, input_params: ProteoBenc
         if "validationConfig" in each_search_params:
             input_params.ident_fdr_psm = each_search_params["validationConfig"]["psmExpectedFdr"] / 100
             # input_params.min_peptide_length = each_search_params["validationConfig"]["psmFilters"] #TODO: I am not sure if this is the max or min length
-        
+
         if "quantitationConfig" in each_search_params:
             input_params.quantification_method = each_search_params["quantitationConfig"]["quantMethod"]["type"]
-            input_params.abundance_normalization_ions = each_search_params["quantitationConfig"]["lfqConfig"]["masterMapCreationConfig"]["normalizationMethod"]["value"]
+            input_params.abundance_normalization_ions = each_search_params["quantitationConfig"]["lfqConfig"][
+                "masterMapCreationConfig"
+            ]["normalizationMethod"]["value"]
     return input_params
 
 
@@ -228,8 +230,12 @@ def extract_params_xtandem_specific(search_params: list, input_params: ProteoBen
             input_params.fragment_mass_tolerance = (
                 "[-" + str(tol2) + " " + unit2_homogenized + ", " + str(tol2) + " " + unit2_homogenized + "]"
             )
-            input_params.min_precursor_charge = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["minChargeSearched"]
-            input_params.max_precursor_charge = each_search_params["searchEnginesWithForms"][0][1]["paramMap"]["maxChargeSearched"]
+            input_params.min_precursor_charge = each_search_params["searchEnginesWithForms"][0][1]["paramMap"][
+                "minChargeSearched"
+            ]
+            input_params.max_precursor_charge = each_search_params["searchEnginesWithForms"][0][1]["paramMap"][
+                "maxChargeSearched"
+            ]
 
             # Add "hidden" modifications when using X!Tandem:
             for key, value in each_search_params["searchEnginesWithForms"][0][1]["paramMap"][

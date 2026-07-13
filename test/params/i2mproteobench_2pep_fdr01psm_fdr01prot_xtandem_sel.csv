@@ -22,3 +22,6 @@ max_precursor_charge,4
 quantification_method,
 protein_inference,
 abundance_normalization_ions,median.RT
+postprocessing_performed,False
+postprocessing_description,
+

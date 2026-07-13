@@ -131,6 +131,24 @@ class TestBoolNormalization:
         p = _make_params(enable_match_between_runs=0)
         assert p.enable_match_between_runs is False
 
+    @pytest.mark.parametrize("val", ["True", "true", "1", "yes"])
+    def test_postprocessing_performed_truthy_strings(self, val):
+        p = _make_params(postprocessing_performed=val)
+        assert p.postprocessing_performed is True
+
+    @pytest.mark.parametrize("val", ["False", "false", "0", "no"])
+    def test_postprocessing_performed_falsy_strings(self, val):
+        p = _make_params(postprocessing_performed=val)
+        assert p.postprocessing_performed is False
+
+    def test_postprocessing_performed_bool_stays(self):
+        p = _make_params(postprocessing_performed=True)
+        assert p.postprocessing_performed is True
+
+    def test_postprocessing_description_free_text_untouched(self):
+        p = _make_params(postprocessing_performed=True, postprocessing_description="Removed low-quality PSMs")
+        assert p.postprocessing_description == "Removed low-quality PSMs"
+
 
 # ── Missing sentinel handling ─────────────────────────────────────────────
 

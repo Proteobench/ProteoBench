@@ -27,3 +27,5 @@ max_precursor_mz,4000
 min_fragment_mz,
 max_fragment_mz,
 predictors_library,DIANN
+postprocessing_performed,False
+postprocessing_description,

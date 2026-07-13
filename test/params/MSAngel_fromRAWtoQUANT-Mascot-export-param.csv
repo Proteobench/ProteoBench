@@ -23,3 +23,5 @@ quantification_method,label_free
 protein_inference,
 abundance_normalization_ions,
 second_pass,False
+postprocessing_performed,False
+postprocessing_description,

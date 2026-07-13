@@ -53,6 +53,16 @@ The parameters that are retrieved from the parameter files for the **quantificat
 | scan_window              | Scan window settings.                                                                                                                                                                                                        |
 
 `min_precursor_mz`/`max_precursor_mz`/`min_fragment_mz`/`max_fragment_mz` and `predictors_library`/`scan_window` are only meaningful for DIA workflows and are typically "Not parsed" for DDA-only tools. `semi_enzymatic` is currently only defined in the DDA ion JSON schema (`json/Quant/quant_lfq_DDA_ion.json`); the DIA schemas do not declare it, though a parser can still set it dynamically as a plain Python attribute.
+## Parameters that will never be parsed
+
+Some fields in the submission form cannot be retrieved from any tool's parameter or log file, because they capture
+information that only the person submitting the run knows. These fields are always left for the submitter to fill in
+manually, and are identical across all modules and tools:
+
+| Parameter                   | Description                                                                                                                   |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| postprocessing_performed    | Whether any postprocessing (e.g. manual rescoring, custom filtering, merging of results) was applied after the search engine run. |
+| postprocessing_description  | Free-text description of the postprocessing performed, if any.                                                                 |
 
 ## Tool-specific information
 

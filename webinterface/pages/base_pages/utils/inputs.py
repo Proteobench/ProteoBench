@@ -3,6 +3,11 @@ from typing import Any, Optional
 
 import streamlit as st
 
+# Fields present in every module's parameter JSON that are never derived from a tool's
+# parameter/log file — the submitter always fills these in manually. See docs:
+# "Parameters that will never be parsed".
+NEVER_PARSED_KEYS = ("postprocessing_performed", "postprocessing_description")
+
 
 def generate_input_widget(
     variables_quant: dataclass,
@@ -258,3 +263,35 @@ def _generate_checkbox(variables_quant, content: dict, key: str = "", editable: 
         ),
         disabled=not editable,
     )
+
+
+def generate_never_parsed_fields_section(variables_quant, input_format: str, config: dict, user_input: dict) -> None:
+    """
+    Render the "never parsed" fields (e.g. postprocessing) in their own section.
+
+    These fields are present in every module's parameter JSON but are never derived
+    from a tool's parameter/log file — the submitter always fills them in manually.
+    Rendered separately, below the parsed-parameter grid, so it is clear they are not
+    part of the automatically parsed metadata.
+
+    Parameters
+    ----------
+    variables_quant : dataclass
+        The variables dataclass containing the session state keys used.
+    input_format : str
+        The selected software tool.
+    config : dict
+        The full parameter JSON config for the module.
+    user_input : dict
+        The dict collecting submitted form values; updated in place.
+    """
+    never_parsed_fields = {k: v for k, v in config.items() if k in NEVER_PARSED_KEYS}
+    if not never_parsed_fields:
+        return
+
+    st.markdown("##### Postprocessing")
+    st.caption("These fields are never derived from a tool's parameter or log file — " "please fill them in manually.")
+    columns = st.columns(len(never_parsed_fields))
+    for column, (key, content) in zip(columns, never_parsed_fields.items()):
+        with column:
+            user_input[key] = generate_input_widget(variables_quant, input_format, content, key, editable=True)

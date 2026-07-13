@@ -27,3 +27,5 @@ protein_inference,1
 abundance_normalization_ions,RT-dependent normalization
 predictors_library,DIANN
 scan_window,13
+postprocessing_performed,False
+postprocessing_description,

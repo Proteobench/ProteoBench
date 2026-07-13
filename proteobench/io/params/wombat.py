@@ -80,6 +80,8 @@ def extract_params(
     params.max_precursor_charge = summary["max_precursor_charge"]
     params.enable_match_between_runs = summary["enable_match_between_runs"]
     params.abundance_normalization_ions = summary["normalization_method"]
+    params.quantification_method = summary["quantification_method"]
+    params.protein_inference = summary["protein_inference"]
     params.fill_none()
     return params
 

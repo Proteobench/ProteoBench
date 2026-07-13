@@ -19,7 +19,7 @@ variable_mods,"C-term[49.2], C-term[22.9], ^Q[-17.026548], Protein N-term[42.0],
 max_mods,1
 min_precursor_charge,2
 max_precursor_charge,4
-quantification_method,
+quantification_method,"peak_scoring: Hybrid, integration: Sum, spectral_angle: 0.7, ppm_tolerance: 5.0, combine_charge_states: False"
 protein_inference,
 abundance_normalization_ions,
 postprocessing_performed,False

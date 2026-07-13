@@ -26,6 +26,10 @@ Normalization rules (applied by ``normalize()`` / ``normalize_dataframe_columns`
 - ``precursor_mass_tolerance``, ``fragment_mass_tolerance`` → mapped to
   ``"Automatic calibration"`` when a known auto-calibration sentinel is
   detected (e.g. ``"dynamic"``, ``"0 ppm"``)
+- Any parameter parsed as a ``dict`` (e.g. ``predictors_library``,
+  ``quantification_method``) → flattened to a human-readable string via
+  ``_flatten_dict()``: the common value if all sub-values are identical,
+  otherwise ``"key: value"`` pairs joined by ``", "``
 
 NOT normalized (kept as-is from parsers, parsers should homogenize themselves):
 
@@ -93,7 +97,9 @@ _ENZYME_MAP = {
 }
 
 # Tolerance values (lowercase) that indicate automatic calibration.
-_AUTO_CALIBRATION_SENTINELS = frozenset({"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]"})
+_AUTO_CALIBRATION_SENTINELS = frozenset(
+    {"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]", "[-0 ppm, 0 ppm]"}
+)
 _AUTO_CALIBRATION_LABEL = "Automatic calibration"
 
 # Tolerance fields to which the auto-calibration mapping applies.
@@ -105,23 +111,24 @@ _SEARCH_ENGINE_MAP = {
 }
 
 
-def _flatten_predictors(val) -> str:
-    """Convert a predictors dict to a human-readable string.
+def _flatten_dict(val: dict) -> str:
+    """Convert a dict-valued parameter to a human-readable string.
 
     Parameters
     ----------
     val : dict
-        Mapping of prediction target (RT, IM, MS2_int) to predictor name.
+        Mapping of sub-setting name to value (e.g. predictors per target,
+        or quantification sub-settings).
 
     Returns
     -------
     str
-        If all values are identical, returns that value.
+        If all values are identical, returns that value (as a string).
         Otherwise returns ``"key: value"`` pairs joined by ``", "``.
     """
     unique = set(val.values())
     if len(unique) == 1:
-        return next(iter(unique))
+        return str(next(iter(unique)))
     return ", ".join(f"{k}: {v}" for k, v in val.items())
 
 
@@ -324,10 +331,10 @@ class ProteoBenchParameters:
                 if canonical is not None:
                     setattr(self, "search_engine", canonical)
 
-        # --- H. Flatten predictors_library dict to string --------------------
-        val = getattr(self, "predictors_library", None)
-        if isinstance(val, dict):
-            setattr(self, "predictors_library", _flatten_predictors(val))
+        # --- H. Flatten any dict-valued parameter to a string -----------------
+        for key, val in list(self.__dict__.items()):
+            if isinstance(val, dict):
+                setattr(self, key, _flatten_dict(val))
 
 
 # Note: this should be able to be removed when we have resubmitted all points again.
@@ -394,11 +401,13 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
             lambda v: (_SEARCH_ENGINE_MAP.get(v.strip().lower(), v) if isinstance(v, str) and pd.notna(v) else v)
         )
 
-    # H. Flatten predictors_library dict to string
-    if "predictors_library" in df.columns:
-        df["predictors_library"] = df["predictors_library"].apply(
-            lambda v: _flatten_predictors(v) if isinstance(v, dict) else v
-        )
+    # H. Flatten any dict-valued cell to a string (skip the nested "results" column,
+    # whose values are dicts-of-dicts of benchmark metrics, not parameter sub-settings)
+    for col in df.columns:
+        if col == "results":
+            continue
+        if df[col].apply(lambda v: isinstance(v, dict)).any():
+            df[col] = df[col].apply(lambda v: _flatten_dict(v) if isinstance(v, dict) else v)
 
     return df
 

@@ -19,7 +19,7 @@ variable_mods,"M[Oxidation], N-term[Acetyl]"
 max_mods,3
 min_precursor_charge,1
 max_precursor_charge,6
-quantification_method,
+quantification_method,"lfq_ratio_min: 1, max_lfq: True, mode: ms1_int_sum_apex"
 protein_inference,
 abundance_normalization_ions,
 postprocessing_performed,False

@@ -275,4 +275,4 @@ if __name__ == "__main__":
         # Convert parameters to pandas Series and save to CSV
         actual = pd.Series(parameters.__dict__)
         actual.to_csv(Path(file).with_suffix(".csv"))
-        print(parameters)
+        print(parameters.__dict__)

@@ -150,6 +150,7 @@ def _extract_xtandem_params(
         max_mods=None,
         min_precursor_charge=None,
         max_precursor_charge=int(params.loc["spectrum, maximum parent charge"]),
+        abundance_normalization_ions=params.loc["mcqr_normalization_method"],
     )
     params.fill_none()
     return params
@@ -229,6 +230,7 @@ def _extract_sage_params(
         max_mods=int(params.loc["sage_database_max_variable_mods"]),  # 2
         min_precursor_charge=int(min_precursor_charge),
         max_precursor_charge=int(max_precursor_charge),
+        abundance_normalization_ions=params.loc["mcqr_normalization_method"],
         json_file=json_file,
     )
     params.fill_none()

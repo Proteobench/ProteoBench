@@ -52,6 +52,7 @@ def extract_params(
     )
     parameters.allowed_miscleavages = int(series.loc[series["level_2"] == "maxMissedCleavagesDia", 0].values[0])
     parameters.min_precursor_mz = None
+    parameters.max_precursor_mz = int(series.loc[series["level_2"] == "diaMaxPrecursorMz", 0].values[0])
     parameters.max_fragment_mz = None
     parameters.min_fragment_mz = None
     parameters.allowed_miscleavages = int(series.loc[series["level_2"] == "maxMissedCleavagesDia", 0].values[0])
@@ -69,7 +70,10 @@ def extract_params(
     parameters.precursor_mass_tolerance = (
         f"[-{precursor_mass_tolerance_value:g} ppm, {precursor_mass_tolerance_value:g} ppm]"
     )
-
+    library_type_dict = {0: "From evidence file", 1: "From tsv", 2: "Predicted by MaxQuant"}
+    parameters.predictors_library = library_type_dict[
+        int(series.loc[series["level_2"] == "diaLibraryType", 0].values[0])
+    ]
     parameters.fill_none()
     return parameters
 

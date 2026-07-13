@@ -61,6 +61,8 @@ var_mods_regex = r"Modification (.*) with mass delta \d+\.*\d* at .+ will be con
 quant_mode_regex = r"(.*?) quantification mode"
 protein_inference_regex = r"Implicit protein grouping: (.*);"
 normalisation_disabled_regex = r"(Normalisation disabled)"
+deep_learning_library_regex = r"(Deep learning will be used to generate a new in silico spectral library)"
+loading_spectral_library_regex = r"(Loading spectral library)"
 
 # Flags
 enable_match_between_runs_regex = r"(MBR enabled)|(reanalyse them)"  # If present, MBR is enabled
@@ -352,17 +354,28 @@ def parse_quantification_strategy(cmdline_dict: dict):
         return "QuantUMS high-precision"
 
 
-def parse_predictors_library(cmdline_dict: dict):
+def parse_predictors_library(cmdline_dict: dict, lines: Optional[List[str]] = None):
     """
     Parse the spectral library predictors from parsed execute command string.
 
     For now, only 'DIANN' and 'User defined speclib' are supported.
     In the future, the user might specify which algorithm was used for library generation.
 
+    When a ``--cfg`` file is used, ``--lib``/``--predictor`` are not visible on the
+    command line (they are set inside the cfg file instead). In that case, fall back
+    to the log body: the "Deep learning will be used to generate a new in silico
+    spectral library" line indicates DIA-NN predicted the library, while a
+    "Loading spectral library" line without that preceding message indicates a
+    user-supplied library was loaded directly.
+
     Parameters
     ----------
     cmdline_dict : dict
         Parsed execution command string.
+    lines : list[str], optional
+        All input lines from the DIA-NN log file, used as a fallback when the
+        library/predictor setting is not present in the command line (e.g. when
+        a ``--cfg`` file was used).
 
     Returns
     -------
@@ -373,6 +386,11 @@ def parse_predictors_library(cmdline_dict: dict):
         return {"RT": "DIANN", "IM": "DIANN", "MS2_int": "DIANN"}
     elif "lib" in cmdline_dict.keys():
         if not isinstance(cmdline_dict["lib"], bool):
+            return {"RT": "User defined speclib", "IM": "User defined speclib", "MS2_int": "User defined speclib"}
+    elif lines is not None:
+        if extract_with_regex(lines, deep_learning_library_regex):
+            return {"RT": "DIANN", "IM": "DIANN", "MS2_int": "DIANN"}
+        elif extract_with_regex(lines, loading_spectral_library_regex):
             return {"RT": "User defined speclib", "IM": "User defined speclib", "MS2_int": "User defined speclib"}
 
 
@@ -474,7 +492,7 @@ def extract_params(
 
     parameters["quantification_method"] = parse_quantification_strategy(cmdline_dict)
     parameters["protein_inference"] = parse_protein_inference_method(cmdline_dict)
-    parameters["predictors_library"] = parse_predictors_library(cmdline_dict)
+    parameters["predictors_library"] = parse_predictors_library(cmdline_dict, lines)
 
     # Parse most settings as possible from the execution command using PARAM_CMD_DICT for mapping.
     for proteobench_setting, cmd_setting in PARAM_CMD_DICT.items():
@@ -526,8 +544,12 @@ def extract_params(
     parameters["scan_window"] = int(extract_with_regex(lines, scan_window_regex))
     if "no-norm" in cmdline_dict:
         parameters["abundance_normalization_ions"] = "None"
+    if "global-norm" in cmdline_dict:
+        parameters["abundance_normalization_ions"] = "Global normalization"
+    if "sig-norm" in cmdline_dict:
+        parameters["abundance_normalization_ions"] = "RT & signal-dep. normalization"
     else:
-        parameters["abundance_normalization_ions"] = "Cross-run normalization"
+        parameters["abundance_normalization_ions"] = "RT-dependent normalization"
 
     # If cfg file is used, extract the parameters from the free text below the cmd line.
     if cfg_used:
@@ -584,13 +606,13 @@ def extract_params(
 
 if __name__ == "__main__":
     for fname in [
-        # "../../../test/params/DIANN_output_20240229_report.log.txt",
-        # "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
-        # "../../../test/params/DIANN_WU304578_report.log.txt",
-        # "../../../test/params/DIANN_1.7.16.log.txt",
-        # "../../../test/params/DIANN_cfg_settings.txt",
-        # "../../../test/params/DIANN_cfg_MBR.txt",
-        # "../../../test/params/DIA-NN_cfg_directq.txt",
+        "../../../test/params/DIANN_output_20240229_report.log.txt",
+        "../../../test/params/Version1_9_Predicted_Library_report.log.txt",
+        "../../../test/params/DIANN_WU304578_report.log.txt",
+        "../../../test/params/DIANN_1.7.16.log.txt",
+        "../../../test/params/DIANN_cfg_settings.txt",
+        "../../../test/params/DIANN_cfg_MBR.txt",
+        "../../../test/params/DIA-NN_cfg_directq.txt",
         "../../../test/params/diann_weird_enzyme.txt",
     ]:
         file = pathlib.Path(fname)

@@ -1,0 +1,31 @@
+[mapper]
+"Modified.Sequence" = "Sequence"
+"Run" = "Raw file"
+"Protein.Ids" = "Proteins"
+"Precursor.Charge" = "Charge"
+"Stripped.Sequence" = "Peptide"
+"Q.Value" = "Q-Value"
+"Protein.Group" = "Protein Group"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\(([^()]*)\\)"
+"modification_dict" = {"(unimod:35)" = "Oxidation", "(unimod:1)" = "Acetyl", "(unimod:4)" = "Carbamidomethyl"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true
+
+[run_mapper]
+"LFQ_Astral_DIA_15min_50ng_Human_01" = "LFQ_Astral_DIA_15min_50ng_Human_01"
+"LFQ_Astral_DIA_15min_50ng_Human_02" = "LFQ_Astral_DIA_15min_50ng_Human_02"
+"LFQ_Astral_DIA_15min_50ng_Human_03" = "LFQ_Astral_DIA_15min_50ng_Human_03"
+
+[upload_info]
+"datapoint_file" = "report.tsv or report.parquet"
+"datapoint_file_description" = "Upload the DIA-NN report file found in the `dia-quant-output` folder (`report.tsv` or `report.parquet`)."
+"params_file" = "fragpipe.workflow"
+"params_file_description" = "Upload the FragPipe workflow file (`.workflow`)."

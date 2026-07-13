@@ -49,6 +49,6 @@ if __name__ == "__main__":
         ionmodule=DDAHCDDeNovoModule,
         parsesettingsbuilder=ParseSettingsBuilder,
         uiobjects=DeNovoUIObjects,
-        page_name="De novo DDA-HCD peptidoform",
+        page_name="De novo DDA peptidoform",
     )
     st_ui.main_page()

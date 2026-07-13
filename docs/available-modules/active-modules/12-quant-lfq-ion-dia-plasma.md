@@ -49,7 +49,11 @@ Full acquisition details and analytical procedures are available in the [origina
 
 ### Downloading the data
 
-The files can be downloaded from the proteomeXchange repository [JPST003358](https://repository.jpostdb.org/entry/JPST003358):
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-plasma/):
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_Plasma.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-plasma/all_data_LFQ_Quant_DIA_Plasma.tar.gz).
+
+Alternatively, the files can be downloaded from the proteomeXchange repository [JPST003358](https://repository.jpostdb.org/entry/JPST003358):
 
 - [A9_G_DIA_nLC_tTOF_R1.d](https://storage.jpostdb.org/JPST003358/A9_G_DIA_nLC_tTOF_R1.d.zip)
 - [A9_G_DIA_nLC_tTOF_R2.d](https://storage.jpostdb.org/JPST003358/A9_G_DIA_nLC_tTOF_R2.d.zip)
@@ -63,8 +67,6 @@ The files can be downloaded from the proteomeXchange repository [JPST003358](htt
 - [B9_G_DIA_nLC_tTOF_R4.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R4.d.zip)
 - [B9_G_DIA_nLC_tTOF_R5.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R5.d.zip)
 - [B9_G_DIA_nLC_tTOF_R6.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R6.d.zip)
-
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA-plasma/](https://proteobench.cubimed.rub.de/raws/DIA-plasma/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -114,22 +116,6 @@ The module supports multiple data formats to maximize flexibility. Users can pro
 - PEAKS
 - FragPipe (DIA-NN Quant)
 - Custom (tab-delimited format)
-
-### Suggested parameters
-
-To ensure fair comparison between different processing workflows, we suggest using the parameters listed below:
-
-| Parameter | Value |
-|-----------|-------|
-| Maximum number of missed cleavages | 1 |
-| PSM/Precursor FDR | 0.01 |
-| Spectral Library | Predicted spectral library from FASTA |
-| Precursor charge state | 1-5 |
-| Fixed modifications | Carbamidomethylation (C) |
-| Variable modifications | Oxidation (M), Acetyl (Protein N-term) |
-| Minimum peptide length | 6-7 residues |
-
-These parameters represent a standardized configuration to evaluate the intrinsic performance of different analysis tools without the confounding effects of non-standard parameter choices.
 
 ### Important Tool-specific settings
 

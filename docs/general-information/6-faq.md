@@ -16,6 +16,19 @@ For **software and method developers**, ProteoBench provides a framework to iden
 
 For the **wider proteomics community**, ProteoBench makes it easier to position newly published workflows within the context of the existing state of the art. It can therefore support reviewers, editors, and readers who require transparent evidence for claims about workflow performance.
 
+## How do I use ProteoBench?
+
+Depending on your goal, there are multiple ways to interact with ProteoBench. If you want...
+
+- a pointer towards which workflow to use for your data:
+Select the module that fits the best to your use case (e.g. single cell, de novo, DIA LFQ Quantification, ...). Open the module page in the web app, and investigate which workflow performs best on the metric that is important to you (e.g. quantification accuracy).
+
+- to compare your own workflow performance with public results:
+Download the associated files (e.g. raw files and fasta files for quantification modules) from the module page or the documentation, run your workflow, and upload the results in the custom format. Keep in mind that custom formats can not be made public, and take a look at the module documentation page for module specific information.
+
+- automatic local benchmarking:
+ProteoBench is open source, and is available as a [pypi package](https://pypi.org/project/proteobench/). Instructions and examples of how to use the functions are available in a [python notebook](https://github.com/Proteobench/ProteoBench/examples/local_usage_walkthrough.ipynb).
+
 ## Do I need to run my workflow on a predefined data set?
 
 Yes. To compare results meaningfully within a ProteoBench module, all submitted workflows must be evaluated on the benchmark dataset defined for that module. This ensures that differences between submitted results reflect differences in data analysis workflows rather than differences in sample composition, instrument configuration, acquisition design, or data quality.
@@ -32,14 +45,13 @@ For modules where database choice affects the benchmark outcome, the recommended
 
 
 ## Can I benchmark commercial software?
-Yes. ProteoBench is designed to include results from commercial software when the software outputs all the workflow parameters/metadata in a format that can be parsed or converted into one of the supported submission formats. 
 Yes. ProteoBench can include results from commercial software when the software output can be parsed or converted into one of the supported submission formats. 
 
 ## What should I do if my software is not directly supported?
 
 If a tool-specific parser is not yet available, users can submit results using the custom tabular format described in the module documentation. This format defines the required columns for metric calculation and enables benchmarking of tools that are not yet natively supported.
 
-Users and developers are encouraged to contact the ProteoBench community if they want a new parser to be added for a specific software package.
+Users and developers are encouraged to contact the ProteoBench developers if they want a new parser to be added for a specific software package.
 
 ## Why are submissions reviewed before becoming public?
 
@@ -52,6 +64,7 @@ ProteoBench evaluates submitted workflow outputs rather than executing every wor
 This design allows ProteoBench to support a wide range of tools, including commercial software, locally configured pipelines, and workflows under active development. 
 
 ## How do I find the input data associated with a benchmark module?
+
 Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as [ProteomeXchange](https://www.proteomexchange.org/), depending on the dataset.
 If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
@@ -63,7 +76,7 @@ QuantError should be interpreted together with the other module-specific metrics
 
 ## Does ProteoBench perform normalization or missing-value imputation?
 
-ProteoBench does not apply post-processing steps that may affect the benchmark metrics. We consider normalization, missing-value handling, transfer steps, protein inference, and quantification strategies as integral parts of benchmarked workflows. They should be reported in the parameter files submitted alongside the workflow results upon public submission.
+In the current modules, ProteoBench does not apply post-processing steps that may affect the benchmark metrics. We consider normalization, missing-value handling, transfer steps, protein inference, and quantification strategies as integral parts of benchmarked workflows. They should be reported in the parameter files submitted alongside the workflow results upon public submission.
 
 Where relevant, module documentation specifies which processing steps are performed by ProteoBench itself and which are expected to have been performed by the submitted workflow.
 
@@ -98,6 +111,12 @@ ProteoBench does not point to a single best one-size-fits-all data analysis work
 ProteoBench development and discussion are community-oriented. Users can follow the relevant repository, documentation pages, discussion forum, or community channels to receive updates about new modules, software parsers, benchmark datasets, documentation improvements, and public releases.
 
 Ongoing discussions can be followed on the [ProteoBench Discussions page](https://github.com/orgs/Proteobench/discussions). Please note that to take part in the discussion a GitHub account is needed.
+To get email updates on ProteoBench developments, you can use the Github functionality to "watch" the [ProteoBench repository](https://github.com/ProteoBench/Proteobench). For this you also require a GitHub account. You can receive email updates on discussions or issues you either participate or are mentioned in, but you can also use the Custom setting which will allow you to subscribe to specific events, such as issues, pull requests, new version releases and new discussions.
+
+![Screenshot showing "watch" button on GitHub](../_static/img/watch_image.png)
+
+We also have a [LinkedIn page](https://www.linkedin.com/company/proteobench)! Here, we will provide regular updates on the developments of ProteoBench, such as new available modules, new updates, and we will also regularly ask for community feedback. Please follow us!
+
 
 ### For GitHub users
 

@@ -40,7 +40,7 @@ The files can be downloaded from the proteomeXchange repository [PXD028735](http
 - [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02.raw)
 - [LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw](https://ftp.pride.ebi.ac.uk/pride/data/archive/2022/02/PXD028735/LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.raw)
 
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA/](https://proteobench.cubimed.rub.de/raws/DIA/)
+Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA/](https://proteobench.cubimed.rub.de/raws/DIA/), or download all files at once as a single archive: [all_data_LFQ_Quant_DIA_AIF.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA/all_data_LFQ_Quant_DIA_AIF.tar.gz).
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -85,7 +85,7 @@ To submit your run for public usage, you need to upload the parameter file assoc
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for metric caluclation and public submission**
+**Table 2. Overview of input files required for metric calculation and public submission**
 |Tool|Input file|Parameter File|
 |---------|-----|-|
 |AlphaDIA|precursors.tsv|log.txt|

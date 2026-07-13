@@ -95,10 +95,15 @@ class VariablesDIAEntrapmentAstral:
 
     # Sidebar metadata
     sidebar_label: str = "Entrapment DIA ion Astral"
+    homepage_title: str = "FDR Entrapment on an Astral"
+    graphical_abstract: str = "Graphical_abstract_entrapment.png"
+    documentation_description: str = (
+        "Benchmark FDR Validation of workflows for DIA acquisitions using FDRBench entrapment on an Astral."
+    )
     sidebar_path: str = "/Entrapment_DIA_ion_Astral"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
-        default_factory=lambda: ["DIA", "entrapment", "Astral", "orbitrap", "precursor", "ion", "FDR"]
+        default_factory=lambda: ["DIA", "entrapment", "Astral", "orbitrap", "precursor", "ion", "FDR", "Validation"]
     )
 
     description_module_md: str = (

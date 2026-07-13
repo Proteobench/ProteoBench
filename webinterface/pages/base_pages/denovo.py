@@ -563,24 +563,42 @@ class DeNovoUIObjects(BaseUIModule):
             _param_schema = json.load(_schema_f)
         _file_dict = st.session_state.get(self.variables.params_file_dict, {})
         for _field_key, _field_schema in _param_schema.items():
+            _is_checkbox = _field_schema.get("type") == "checkbox"
             if _field_key in _file_dict:
                 _val = _file_dict[_field_key]
-                # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
-                # np.nan is a float and cannot be serialized by Streamlit's protobuf for
-                # text_input; convert to "" (empty). Non-string non-missing values are
-                # stringified to match what st.text_input expects.
-                try:
-                    _is_missing = pd.isna(_val)
-                except (TypeError, ValueError):
-                    _is_missing = False
-                if _is_missing:
-                    _val = ""
-                elif not isinstance(_val, str):
-                    _val = str(_val)
+                if _is_checkbox:
+                    # Checkbox fields (e.g. postprocessing_performed) carry a scalar bool
+                    # default, not a dict — keep them as real bool, not a stringified one.
+                    _val = bool(_val) if pd.notna(_val) else bool(_field_schema.get("value", False))
+                else:
+                    # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
+                    # np.nan is a float and cannot be serialized by Streamlit's protobuf for
+                    # text_input; convert to "" (empty). Non-string non-missing values are
+                    # stringified to match what st.text_input expects.
+                    try:
+                        _is_missing = pd.isna(_val)
+                    except (TypeError, ValueError):
+                        _is_missing = False
+                    if _is_missing:
+                        _val = ""
+                    elif not isinstance(_val, str):
+                        _val = str(_val)
                 st.session_state[self.variables.prefix_params + _field_key] = _val
             else:
-                _default = _field_schema.get("value", {}).get(self.user_input.get("input_format", ""), None)
-                st.session_state[self.variables.prefix_params + _field_key] = _default if _default is not None else ""
+                _schema_value = _field_schema.get("value")
+                if _is_checkbox:
+                    _default = bool(_schema_value) if _schema_value is not None else False
+                else:
+                    # Text-like fields store their per-tool default under "value" as a
+                    # dict keyed by input_format (tool name); fall back to the schema
+                    # value itself if it isn't a dict.
+                    _default = (
+                        _schema_value.get(self.user_input.get("input_format", ""), None)
+                        if isinstance(_schema_value, dict)
+                        else _schema_value
+                    )
+                    _default = _default if _default is not None else ""
+                st.session_state[self.variables.prefix_params + _field_key] = _default
 
         # Always show parameter fields, comments, and confirmation checkbox.
         tab5_quant.generate_additional_parameters_fields_submission(

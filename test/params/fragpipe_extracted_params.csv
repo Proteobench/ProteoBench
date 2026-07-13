@@ -26,3 +26,5 @@ min_precursor_mz,
 max_precursor_mz,4000
 min_fragment_mz,
 max_fragment_mz,
+postprocessing_performed,False
+postprocessing_description,

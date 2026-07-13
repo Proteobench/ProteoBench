@@ -20,7 +20,7 @@ Normalization rules (applied by ``normalize()`` / ``normalize_dataframe_columns`
   ``min/max_precursor_charge``, ``max_mods``,
   ``min/max_precursor_mz``, ``min/max_fragment_mz``,
   ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz`` → int
-- ``enable_match_between_runs`` → bool
+- ``enable_match_between_runs``, ``postprocessing_performed`` → bool
 - ``enzyme`` → canonical name via ``_ENZYME_MAP``
   (e.g. ``"trypsin"`` → ``"Trypsin"``, ``"kr|p,true"`` → ``"Trypsin"``)
 - ``precursor_mass_tolerance``, ``fragment_mass_tolerance`` → mapped to
@@ -40,6 +40,7 @@ NOT normalized (kept as-is from parsers, parsers should homogenize themselves):
 - ``tokens`` — string, semicolon-separated amino acids/modifications
 - ``isotope_error_range`` — string (e.g. ``"[0, 2]"``)
 - ``decoding_strategy``, ``checkpoint`` — string, tool-specific
+- ``postprocessing_description`` — free-text string, describes any postprocessing applied
 
 Classes
 -------
@@ -126,6 +127,9 @@ def _flatten_predictors(val) -> str:
 
 # Fields that must be coerced to float (FDR values, decimal 0-1).
 _FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")
+
+# Fields that must be coerced to bool.
+_BOOL_FIELDS = ("enable_match_between_runs", "postprocessing_performed")
 
 # Fields that must be coerced to int.
 _INT_FIELDS = (
@@ -281,21 +285,19 @@ class ProteoBenchParameters:
                 setattr(self, fld, np.nan)
 
         # D. Boolean coercion
-        val = getattr(self, "enable_match_between_runs", None)
-        if val is not None and not (isinstance(val, float) and np.isnan(val)):
+        for fld in _BOOL_FIELDS:
+            val = getattr(self, fld, None)
+            if val is None or (isinstance(val, float) and np.isnan(val)):
+                continue
             if isinstance(val, bool):
-                pass  # already correct
+                continue  # already correct
             elif isinstance(val, str):
-                setattr(
-                    self,
-                    "enable_match_between_runs",
-                    val.strip().lower() in ("true", "1", "yes"),
-                )
+                setattr(self, fld, val.strip().lower() in ("true", "1", "yes"))
             else:
                 try:
-                    setattr(self, "enable_match_between_runs", bool(val))
+                    setattr(self, fld, bool(val))
                 except (ValueError, TypeError):
-                    setattr(self, "enable_match_between_runs", np.nan)
+                    setattr(self, fld, np.nan)
 
         # --- E. Enzyme name normalization -----------------------------------
         val = getattr(self, "enzyme", None)
@@ -357,8 +359,9 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
         df[col] = pd.to_numeric(df[col], errors="coerce").round().astype("Int64")
 
     # D. Boolean coercion
-    if "enable_match_between_runs" in df.columns:
-        col = "enable_match_between_runs"
+    for col in _BOOL_FIELDS:
+        if col not in df.columns:
+            continue
         df[col] = df[col].apply(
             lambda v: (
                 v

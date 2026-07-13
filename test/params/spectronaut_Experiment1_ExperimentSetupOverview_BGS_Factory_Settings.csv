@@ -28,3 +28,5 @@ abundance_normalization_ions,True
 predictors_library,
 scan_window,Dynamic
 semi_specific,False
+postprocessing_performed,False
+postprocessing_description,

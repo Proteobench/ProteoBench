@@ -27,6 +27,9 @@ _MODULE_CARD_FALLBACK_DESCRIPTION = "Benchmark this workflow and compare your re
 _MODULE_CARD_IMAGE_HEIGHT = 230
 
 _ABSTRACT_DIR = "../img/module_graphical_abstracts"
+_GRAPHICAL_ABSTRACT_DISCLAIMER = (
+    "Graphical abstracts were created with BioRender.com and NIH BioArt Source (public domain)."
+)
 
 
 def _module_graphical_abstract(module):
@@ -208,6 +211,7 @@ class StreamlitPageHome(StreamlitPage):
         with st.container(key="tour_module_grid"):
             st.subheader("Jump into a module", anchor="jump-into-a-module")
             st.caption("Pick a benchmark module to explore public results or submit a run of your own.")
+            st.caption(_GRAPHICAL_ABSTRACT_DISCLAIMER)
 
             submission_data = get_module_submission_data()
             modules_by_category = get_all_modules()

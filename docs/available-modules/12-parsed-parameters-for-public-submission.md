@@ -518,8 +518,6 @@ Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/
 | predictors_library       |      Not parsed       |
 | scan_window              |      Not parsed       |
 
-**Known bug:** `extract_params()` calls `ProteoBenchParameters(json_file=json_file)` (`sage.py`), but `ProteoBenchParameters.__init__` only recognizes a `filename` keyword; `json_file` is silently absorbed into `**kwargs` and dropped (since `hasattr(self, "json_file")` is False right after init). As a result, Sage's `params` object is always initialized from the hardcoded default `json/Quant/quant_lfq_DDA_ion.json`, regardless of which JSON schema the calling module intended (e.g. the low-input DIA module, currently the only module offering Sage). Fields Sage explicitly sets via `params.<field> = ...` are unaffected, but DIA-only placeholder fields that Sage never sets explicitly (`min_precursor_mz`, `max_precursor_mz`, `min_fragment_mz`, `max_fragment_mz`, `predictors_library`, `scan_window`) never get created as attributes at all when Sage is used through a DIA module — unlike every other DIA-ion parser, which correctly receives `filename=json_file` and thus does get these attributes (typically as placeholders). This should be fixed to `ProteoBenchParameters(filename=json_file)`.
-
 ### Spectronaut
 *Parsed parameter file: .txt
 Example [here](https://github.com/Proteobench/ProteoBench/blob/main/test/params/spectronaut_Experiment1_ExperimentSetupOverview_BGS_Factory_Settings.txt) (also `Spectronaut_dynamic.txt`, `Spectronaut_static.txt`, `Spectronaut_relative.txt`, one per calibration-method branch).*
@@ -609,8 +607,6 @@ The `denovo_DDA_HCD` module uses a different, smaller set of parameter fields (d
 | remove_precursor_tol     | Tolerance window around the precursor m/z within which peaks are removed before prediction.                       |
 | isotope_error_range      | Allowed isotope error range (e.g. `"[0, 2]"`).                                                                     |
 | decoding_strategy        | Decoding strategy used (e.g. "greedy search", "beam search").                                                     |
-
-**Known bug shared by all six implemented de novo parsers below (AdaNovo, Casanovo, ContraNovo, InstaNovo, Pi-HelixNovo, Pi-PrimeNovo):** each calls `ProteoBenchParameters(json_path="denovo/denovo_lfq_DDA_HCD.json")`. This is wrong on two counts: `ProteoBenchParameters.__init__` only accepts a `filename` keyword (not `json_path`), so the kwarg is silently dropped; and even if it were accepted, the actual field-definition file is `json/denovo/denovo_DDA_HCD.json`, not `denovo_lfq_DDA_HCD.json`. In practice this means every de novo parser initializes its `ProteoBenchParameters` object from the **default quant DDA-ion JSON** (`json/Quant/quant_lfq_DDA_ion.json`) rather than the de novo JSON, before the parser overwrites the fields it explicitly sets via plain attribute assignment (which works regardless of the JSON that was loaded, since Python allows setting arbitrary attributes). Any de novo-only field the parser does *not* explicitly set will therefore be missing from the object entirely rather than present as a `None`/placeholder. This should be fixed to `ProteoBenchParameters(filename=os.path.join(os.path.dirname(__file__), "json/denovo/denovo_DDA_HCD.json"))`.
 
 ### AdaNovo
 *Parsed parameter file: config.yaml

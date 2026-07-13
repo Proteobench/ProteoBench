@@ -55,7 +55,16 @@ class VariablesDIAQuant:
     sidebar_path: str = "/Quant_LFQ_DIA_ion_AIF"
     sidebar_category: str = "Archived"
     keywords: List[str] = field(
-        default_factory=lambda: ["DIA", "quantification", "AIF", "all ion fragmentation", "precursor", "ion", "LFQ"]
+        default_factory=lambda: [
+            "DIA",
+            "quantification",
+            "AIF",
+            "all ion fragmentation",
+            "precursor",
+            "ion",
+            "LFQ",
+            "QExactive",
+        ]
     )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant"
     selectbox_id_uuid: str = "selectbox_id_dia_quant"

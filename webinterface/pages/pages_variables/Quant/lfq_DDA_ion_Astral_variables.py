@@ -92,9 +92,9 @@ class VariablesDDAQuantAstral:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DDA ion Astral"
-    documentation_description: str = (
-        "Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
-    )
+    homepage_title: str = "LFQ Quantification on an Astral"
+    graphical_abstract: str = "Graphical_abstract_Quant_astral.png"
+    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
     sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(

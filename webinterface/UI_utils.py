@@ -16,37 +16,11 @@ from pages.utils.module_registry import get_all_modules
 logger = logging.getLogger(__name__)
 
 
-def get_base64_image(path):
-    with open(path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
-
-
-def stat_box(title, value, icon_path, url=None):
-    img_data = get_base64_image(icon_path)
-    content = f"""
-    <div style="
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-        padding: 12px;
-        text-align: center;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.2s ease;
-    ">
-        <div style="margin-bottom: 8px;">
-            <img src="data:image/png;base64,{img_data}" alt="icon" style="width: 36px; height: 36px;" />
-        </div>
-        <div style="color: #37475E; font-weight: 600; font-size: 0.95rem; text-align: center;">{title}</div>
-        <div style="font-size: 1.5rem; font-weight: 700; margin-top: 6px; color: #37475E;">{value}</div>
-    </div>
-    """
-    if url:
-        return f"""<a href="{url}" target="_blank" style="text-decoration: none;">{content}</a>"""
-    return content
+def svg_data_uri(path: str) -> str:
+    """Encode an SVG file as a base64 data URI for embedding in markdown labels/images."""
+    with open(path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("utf-8")
+    return f"data:image/svg+xml;base64,{encoded}"
 
 
 def get_n_modules():

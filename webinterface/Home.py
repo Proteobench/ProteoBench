@@ -139,16 +139,16 @@ class StreamlitPageHome(StreamlitPage):
             st.session_state["start_home_tour"] = True
             st.session_state["_tour_opted_in"] = True
 
-        st.space("large")
+        st.space("small")
         self._render_feature_highlights()
 
-        st.space("large")
+        st.space("small")
         self._render_module_quicklinks()
 
-        st.space("large")
+        st.space("small")
         self._render_stats()
 
-        st.space("large")
+        st.space("small")
         self._render_submissions_chart()
 
         self._handle_tour_start()
@@ -305,11 +305,12 @@ class StreamlitPageHome(StreamlitPage):
         ]
         with st.container(key="tour_stats_area"):
             st.subheader("Platform at a glance", anchor=False)
-            with st.container(horizontal=True):
-                for icon, title, value, help_text in stats:
-                    with st.container(border=True):
-                        st.image(icon, width=48)
-                        st.metric(title, value, help=help_text)
+            for row_stats in (stats[:2], stats[2:]):
+                with st.container(horizontal=True):
+                    for icon, title, value, help_text in row_stats:
+                        with st.container(border=True):
+                            st.image(icon, width=48)
+                            st.metric(title, value, help=help_text)
 
     @staticmethod
     def _render_submissions_chart():
@@ -361,7 +362,7 @@ class StreamlitPageHome(StreamlitPage):
                 tour.start()
             # Opted out: mark handled, do not start.
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.space("medium")
 
         # Sign-in banner + leaderboard section
         from pages.base_pages.utils.auth import render_signin_banner
@@ -422,62 +423,67 @@ def _render_leaderboard():
     if leaderboard.empty:
         return
 
-    st.header("Top Submitters")
-    st.caption("Users who have submitted benchmark runs while signed in with GitHub or ORCID.")
+    # Same accent hues as the "Open source" / "Community-curated" / "FAIR & AI-ready"
+    # badges in the hero section, tinted rather than solid so the bars stay as muted
+    # as the rest of the page instead of reading as a separate, louder widget.
+    with st.container(key="tour_leaderboard", border=True):
+        st.subheader("Top Submitters", anchor=False)
+        st.caption("Users who have submitted benchmark runs while signed in with GitHub or ORCID.")
 
-    # Pagination
-    page_size = 7
-    total = len(leaderboard)
-    total_pages = max(1, (total + page_size - 1) // page_size)
+        # Pagination
+        page_size = 7
+        total = len(leaderboard)
+        total_pages = max(1, (total + page_size - 1) // page_size)
 
-    if "leaderboard_page" not in st.session_state:
-        st.session_state["leaderboard_page"] = 0
+        if "leaderboard_page" not in st.session_state:
+            st.session_state["leaderboard_page"] = 0
 
-    page = st.session_state["leaderboard_page"]
-    start = page * page_size
-    end = min(start + page_size, total)
-    page_data = leaderboard.iloc[start:end]
+        page = st.session_state["leaderboard_page"]
+        start = page * page_size
+        end = min(start + page_size, total)
+        page_data = leaderboard.iloc[start:end]
 
-    max_subs = leaderboard["submissions"].max()
-    medals = {1: "\U0001f947", 2: "\U0001f948", 3: "\U0001f949"}
-    bar_colors = {1: "#FFD700", 2: "#C0C0C0", 3: "#CD7F32"}
+        max_subs = leaderboard["submissions"].max()
+        medals = {1: "\U0001f947", 2: "\U0001f948", 3: "\U0001f949"}
+        bar_colors = {1: "rgba(154,93,255,0.55)", 2: "rgba(28,131,255,0.45)", 3: "rgba(33,195,84,0.45)"}
 
-    for i, row in zip(range(start + 1, end + 1), page_data.itertuples()):
-        medal = medals.get(i, f"#{i}")
-        color = bar_colors.get(i, "#89A2EE")
-        bar_pct = max(int((row.submissions / max_subs) * 100), 15) if max_subs else 15
-        provider_icon = "GitHub" if row.submitter_provider == "github" else "ORCID"
+        for i, row in zip(range(start + 1, end + 1), page_data.itertuples()):
+            medal = medals.get(i, f"#{i}")
+            color = bar_colors.get(i, "rgba(49,51,63,0.15)")
+            bar_pct = max(int((row.submissions / max_subs) * 100), 15) if max_subs else 15
+            provider_icon = "GitHub" if row.submitter_provider == "github" else "ORCID"
 
-        st.markdown(
-            f'<div style="background:linear-gradient(90deg, {color} {bar_pct}%, #f0f0f0 {bar_pct}%);'
-            f"border-radius:10px;padding:12px 18px;margin-bottom:6px;"
-            f'display:flex;align-items:center;justify-content:space-between;">'
-            f'<div style="display:flex;align-items:center;gap:12px;">'
-            f'<span style="font-size:1.6rem;">{medal}</span>'
-            f'<div><span style="font-weight:700;font-size:1.05rem;">{row.submitter_name}</span>'
-            f'<br><span style="font-size:0.75rem;color:#555;">{provider_icon}</span></div>'
-            f"</div>"
-            f'<span style="font-weight:700;font-size:1.1rem;color:#222;">{row.submissions}</span>'
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-
-    # Navigation buttons
-    if total_pages > 1:
-        nav_left, nav_center, nav_right = st.columns([1, 2, 1])
-        with nav_left:
-            if st.button("\u25c0 Previous", disabled=(page == 0), key="lb_prev"):
-                st.session_state["leaderboard_page"] = page - 1
-                st.rerun()
-        with nav_center:
             st.markdown(
-                f'<div style="text-align:center;padding-top:6px;color:#666;">Page {page + 1} of {total_pages}</div>',
+                f'<div style="background:linear-gradient(90deg, {color} {bar_pct}%, #eef1f4 {bar_pct}%);'
+                f"border-radius:10px;padding:12px 18px;margin-bottom:6px;"
+                f'display:flex;align-items:center;justify-content:space-between;">'
+                f'<div style="display:flex;align-items:center;gap:12px;">'
+                f'<span style="font-size:1.6rem;">{medal}</span>'
+                f'<div><span style="font-weight:700;font-size:1.05rem;">{row.submitter_name}</span>'
+                f'<br><span style="font-size:0.75rem;color:rgba(49,51,63,0.6);">{provider_icon}</span></div>'
+                f"</div>"
+                f'<span style="font-weight:700;font-size:1.1rem;color:#314159;">{row.submissions}</span>'
+                f"</div>",
                 unsafe_allow_html=True,
             )
-        with nav_right:
-            if st.button("Next \u25b6", disabled=(page >= total_pages - 1), key="lb_next"):
-                st.session_state["leaderboard_page"] = page + 1
-                st.rerun()
+
+        # Navigation buttons
+        if total_pages > 1:
+            nav_left, nav_center, nav_right = st.columns([1, 2, 1])
+            with nav_left:
+                if st.button("\u25c0 Previous", disabled=(page == 0), key="lb_prev"):
+                    st.session_state["leaderboard_page"] = page - 1
+                    st.rerun()
+            with nav_center:
+                st.markdown(
+                    f'<div style="text-align:center;padding-top:6px;color:rgba(49,51,63,0.6);">'
+                    f"Page {page + 1} of {total_pages}</div>",
+                    unsafe_allow_html=True,
+                )
+            with nav_right:
+                if st.button("Next \u25b6", disabled=(page >= total_pages - 1), key="lb_next"):
+                    st.session_state["leaderboard_page"] = page + 1
+                    st.rerun()
 
 
 if __name__ == "__main__":

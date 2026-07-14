@@ -422,17 +422,18 @@ def display_existing_results(
     extra_plot_kwargs = {k: v for k, v in plot_params.items() if k not in consumed_keys}
 
     # --- Render plot via the shared utility; get the clicked point ID ---
-    plot_clicked_id = render_metric_plot(
-        data=data_for_plot,
-        key=st.session_state[plot_key_id],
-        plot_generator=plot_generator,
-        metric=plot_params.get("metric"),
-        mode=plot_params.get("mode"),
-        label=plot_params.get("label", "None"),
-        colorblind_mode=plot_params.get("colorblind_mode", False),
-        annotation=annotation,
-        **extra_plot_kwargs,
-    )
+    with st.container(key="tour_metric_plot"):
+        plot_clicked_id = render_metric_plot(
+            data=data_for_plot,
+            key=st.session_state[plot_key_id],
+            plot_generator=plot_generator,
+            metric=plot_params.get("metric"),
+            mode=plot_params.get("mode"),
+            label=plot_params.get("label", "None"),
+            colorblind_mode=plot_params.get("colorblind_mode", False),
+            annotation=annotation,
+            **extra_plot_kwargs,
+        )
 
     if plot_clicked_id is not None and plot_clicked_id != highlight_id:
         st.session_state[highlight_key] = plot_clicked_id

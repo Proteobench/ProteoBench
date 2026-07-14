@@ -6,7 +6,10 @@ optional -- the application works fully without it. When configured (via
 secrets.toml) and the user chooses to sign in, their identity is stored in
 a cookie and automatically attached to public submissions.
 
-Sign-in is available from every page (top-right corner). Because an OAuth
+Sign-in is available from every page. On the Home page it sits in the hero
+button row, next to "Take a guided tour" / "Browse modules" / "Documentation" /
+"GitHub"; on module pages it sits next to the "Module documentation" /
+"Download input files" buttons at the top of each tab. Because an OAuth
 sign-in requires a full-page redirect to the identity provider, the sign-in
 links open in a **new browser tab**: the tab the user is working in keeps its
 Streamlit session (uploaded files, computed results) fully intact. The signed-in
@@ -346,8 +349,8 @@ def handle_oauth_callback() -> None:
     process; any repeat just clears the URL and returns.
 
     IMPORTANT: this must run before any ``CookieManager`` component renders on the
-    callback page (see ``render_auth_home``). Rendering a cookie component while
-    the unexchanged ``?code=`` is still in the URL triggers a rerun that
+    callback page (see ``handle_oauth_callback_if_pending``). Rendering a cookie
+    component while the unexchanged ``?code=`` is still in the URL triggers a rerun that
     re-renders the sign-in (authorize) link, the browser re-hits the authorize
     endpoint, and GitHub invalidates the pending code before we can exchange it.
     """
@@ -400,31 +403,52 @@ def handle_oauth_callback() -> None:
 # UI rendering
 # ---------------------------------------------------------------------------
 
+# The CookieManager component (rendered by _restore_user_from_cookie while not
+# signed in) hides its own 0-height iframe via a sibling markdown block that
+# contains nothing but a <style> tag. That sibling block still occupies normal
+# block flow (and the default gap between stacked elements) inside the sign-in
+# widget's own vertical stack, which visibly pushes the "Sign in" button down
+# relative to the plain buttons next to it. Collapse any element-container that
+# renders nothing but a <style> tag: a <style> tag's rules still apply
+# document-wide even while its container is hidden, so this is safe everywhere.
+_HIDE_STYLE_ONLY_MARKDOWN_CSS = (
+    '<style>[data-testid="stElementContainer"]:has(> div.stMarkdown '
+    '[data-testid="stMarkdownContainer"] > style) { display: none; }</style>'
+)
 
-def _render_user_topright(user: dict, key_suffix: str = "") -> None:
-    """Render the signed-in user popover in the top-right corner."""
+
+def _fix_signin_widget_alignment() -> None:
+    st.markdown(_HIDE_STYLE_ONLY_MARKDOWN_CSS, unsafe_allow_html=True)
+
+
+def _render_user_badge(user: dict, key_suffix: str = "") -> None:
+    """Render the signed-in user popover.
+
+    No outer layout of its own -- the caller places it (e.g. inside a
+    horizontal button row alongside other header buttons). ``key_suffix`` must
+    be unique per call site within a single script run (e.g. per tab), since
+    module-page headers render this once per tab.
+    """
     initials = "".join(w[0].upper() for w in user["name"].split() if w)[:2] or "?"
     popover_label = f":material/person: {initials}"
 
-    _, right_col = st.columns([6, 1])
-    with right_col:
-        with st.popover(popover_label):
-            if user["avatar_url"]:
-                st.image(user["avatar_url"], width=48)
-            else:
-                st.markdown(
-                    f'<div style="width:48px;height:48px;border-radius:50%;background:#4169E1;color:white;'
-                    f'display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">'
-                    f"{initials}</div>",
-                    unsafe_allow_html=True,
-                )
-            st.markdown(f"**{user['name']}**")
-            provider_label = "GitHub" if user["provider"] == "github" else "ORCID"
-            st.caption(f"Signed in via {provider_label}")
-            st.caption(f"ID: `{user['id']}`")
-            if st.button("Sign out", key=f"auth_sign_out{key_suffix}"):
-                sign_out()
-                st.rerun()
+    with st.popover(popover_label, key=f"auth_user_popover{key_suffix}"):
+        if user["avatar_url"]:
+            st.image(user["avatar_url"], width=48)
+        else:
+            st.markdown(
+                f'<div style="width:48px;height:48px;border-radius:50%;background:#4169E1;color:white;'
+                f'display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;">'
+                f"{initials}</div>",
+                unsafe_allow_html=True,
+            )
+        st.markdown(f"**{user['name']}**")
+        provider_label = "GitHub" if user["provider"] == "github" else "ORCID"
+        st.caption(f"Signed in via {provider_label}")
+        st.caption(f"ID: `{user['id']}`")
+        if st.button("Sign out", key=f"auth_sign_out{key_suffix}"):
+            sign_out()
+            st.rerun()
 
 
 def _signin_link(label: str, url: str) -> str:
@@ -444,35 +468,59 @@ def _signin_link(label: str, url: str) -> str:
     )
 
 
-def _render_signin_topright() -> None:
-    """Render a sign-in popover in the top-right corner.
+# Matches the popover trigger button regardless of key_suffix (Streamlit derives
+# the wrapper class from the exact key, e.g. "st-key-auth_signin_popover_home").
+_SIGNIN_BUTTON_CSS = """
+<style>
+[class*="st-key-auth_signin_popover"] [data-testid="stPopoverButton"] {
+    background-color: #314159;
+    border-color: #314159;
+}
+[class*="st-key-auth_signin_popover"] [data-testid="stPopoverButton"] * {
+    color: #ffffff;
+}
+</style>
+"""
 
-    Available on every page. The sign-in links open in a new browser tab so the
-    current tab's session state is preserved; the signed-in identity flows back
-    via the shared auth cookie on the working tab's next interaction.
+
+def _render_signin_popover(key_suffix: str = "") -> None:
+    """Render a sign-in popover.
+
+    No outer layout of its own -- the caller places it (e.g. inside a
+    horizontal button row alongside other header buttons). Available on every
+    page. The sign-in links open in a new browser tab so the current tab's
+    session state is preserved; the signed-in identity flows back via the
+    shared auth cookie on the working tab's next interaction. ``key_suffix``
+    must be unique per call site within a single script run (e.g. per tab),
+    since module-page headers render this once per tab.
     """
-    _, right_col = st.columns([6, 1])
-    with right_col:
-        with st.popover("Sign in"):
-            links = []
-            if _is_github_configured():
-                links.append(_signin_link("Sign in with GitHub", _github_auth_url()))
-            if _is_orcid_configured():
-                links.append(_signin_link("Sign in with ORCID", _orcid_auth_url()))
-            st.markdown("".join(links), unsafe_allow_html=True)
-            st.caption(
-                "Opens in a new tab. After signing in, return to this tab and continue "
-                "where you left off; your session and any in-progress work are preserved."
-            )
+    st.markdown(_SIGNIN_BUTTON_CSS, unsafe_allow_html=True)
+    with st.popover("Sign in", key=f"auth_signin_popover{key_suffix}"):
+        links = []
+        if _is_github_configured():
+            links.append(_signin_link("Sign in with GitHub", _github_auth_url()))
+        if _is_orcid_configured():
+            links.append(_signin_link("Sign in with ORCID", _orcid_auth_url()))
+        st.markdown("".join(links), unsafe_allow_html=True)
+        st.caption(
+            "Opens in a new tab. After signing in, return to this tab and continue "
+            "where you left off; your session and any in-progress work are preserved."
+        )
 
 
-def render_auth_status() -> None:
-    """Render the auth control in the top-right corner of a module page.
+def render_auth_status(key_suffix: str = "") -> None:
+    """Render the auth control inline in a module page's tab header.
 
+    Call this inside the same horizontal button row as "Module documentation"
+    / "Download input files" (see ``BaseStreamlitUI._render_tab_header``).
     Shows the signed-in user badge when signed in, or the sign-in popover when
     not. Sign-in is available here (not only on the Home page); the links open
     in a new tab so this page's session state is preserved, and the identity is
     restored from the shared cookie once sign-in completes.
+
+    Each module page renders its tab header once per tab within the same
+    script run, so ``key_suffix`` (e.g. the tab name) must be unique per call
+    to avoid colliding widget keys across tabs.
 
     The actual rendering happens in ``_render_auth_status_fragment``, an
     auto-refreshing ``st.fragment``: it periodically re-checks the cookie and
@@ -485,47 +533,58 @@ def render_auth_status() -> None:
     if not is_auth_configured():
         return
 
-    _render_auth_status_fragment()
+    _fix_signin_widget_alignment()
+    _render_auth_status_fragment(key_suffix)
 
 
 @st.fragment(run_every="5s")
-def _render_auth_status_fragment() -> None:
+def _render_auth_status_fragment(key_suffix: str) -> None:
     if not _process_pending_signout():
         _restore_user_from_cookie()
 
     user = get_current_user()
     if user:
-        _render_user_topright(user, key_suffix="_module")
+        _render_user_badge(user, key_suffix=f"_module{key_suffix}")
     else:
-        _render_signin_topright()
+        _render_signin_popover(key_suffix=f"_module{key_suffix}")
 
 
-def render_auth_home() -> None:
-    """Render sign-in handling on the Home page.
+def handle_oauth_callback_if_pending() -> None:
+    """Complete an in-flight OAuth callback (``?code=`` in the URL), if any.
 
-    Handles OAuth callbacks and shows the user badge if signed in.
-    Sets a flag for ``render_signin_banner`` if not signed in.
-    Sign-in buttons are shown in the banner above the leaderboard.
+    Must be called early in the Home page's script body -- BEFORE the hero
+    section (which contains ``render_auth_home_widget`` and its
+    ``CookieManager``) renders. Rendering a cookie component first triggers a
+    rerun that re-renders the authorize link while the single-use code is
+    still in the URL, causing the browser to re-hit authorize and the provider
+    to invalidate the code before we can exchange it. See
+    ``handle_oauth_callback`` for the exchange itself.
+    """
+    if not is_auth_configured():
+        return
+    if "code" in st.query_params:
+        handle_oauth_callback()
 
-    The exchange for an OAuth callback (``?code=`` present) runs here, in the
-    main (non-fragment) script body, on every real page load -- never inside
-    the auto-refreshing fragment below. It must complete BEFORE any
-    ``CookieManager`` component renders: rendering a cookie component first
-    triggers a rerun that re-renders the authorize link while the single-use
-    code is still in the URL, causing the browser to re-hit authorize and the
-    provider to invalidate the code before we can exchange it.
 
-    The rest of the widget (cookie restore + badge/popover) lives in
-    ``_render_auth_home_fragment``, an auto-refreshing ``st.fragment``: it
-    periodically re-checks the cookie so a sign-in completed in another tab
-    appears here without the user having to click or navigate.
+def render_auth_home_widget() -> None:
+    """Render the Home page's sign-in / signed-in-user control.
+
+    Call this inside the hero CTA button row, alongside "Take a guided tour" /
+    "Browse modules" / "Documentation" / "GitHub". Sets a flag for
+    ``render_signin_banner`` if not signed in.
+
+    ``handle_oauth_callback_if_pending`` must have already run earlier in the
+    script (see its docstring for why).
+
+    The actual rendering happens in ``_render_auth_home_fragment``, an
+    auto-refreshing ``st.fragment``: it periodically re-checks the cookie so a
+    sign-in completed in another tab appears here without the user having to
+    click or navigate.
     """
     if not is_auth_configured():
         return
 
-    if "code" in st.query_params:
-        handle_oauth_callback()
-
+    _fix_signin_widget_alignment()
     _render_auth_home_fragment()
 
 
@@ -538,9 +597,9 @@ def _render_auth_home_fragment() -> None:
     user = get_current_user()
 
     if user:
-        _render_user_topright(user, key_suffix="_home")
+        _render_user_badge(user, key_suffix="_home")
     else:
-        _render_signin_topright()
+        _render_signin_popover(key_suffix="_home")
         st.session_state["_auth_show_signin_banner"] = True
 
 
@@ -592,7 +651,7 @@ def render_signin_banner() -> None:
         "Sign in with your GitHub or ORCID account to have your name appear on the "
         "leaderboard when you submit benchmark runs. It's optional, but helps "
         "the community identify contributors and allows maintainers to direct questions. "
-        "Use the <b>Sign in</b> button in the top-right corner to get started."
+        "Use the <b>Sign in</b> button above to get started."
         "</span></div>",
         unsafe_allow_html=True,
     )
@@ -603,11 +662,11 @@ def render_upload_tab_signin_reminder() -> None:
 
     Call this at the top of the upload tab (tab 2) in each module.
 
-    Note: this does not read the cookie itself. ``render_auth_status`` (or
-    ``render_auth_home`` on Home) runs earlier in the same script run -- via the
-    sidebar during page setup -- and performs the single per-run cookie read.
-    Reading the cookie again here would render a second ``CookieManager`` with
-    the same component key in the same run and raise a duplicate-key error.
+    Note: this does not read the cookie itself. ``render_auth_status`` already
+    ran earlier in the same tab's render (via ``_render_tab_header``, before
+    the tab body) and performs that tab's cookie read. Reading the cookie
+    again here would render a second ``CookieManager`` with the same component
+    key in the same run and raise a duplicate-key error.
     """
     if not is_auth_configured():
         return
@@ -617,7 +676,7 @@ def render_upload_tab_signin_reminder() -> None:
 
     st.info(
         "You are not signed in. Optionally sign in with GitHub or ORCID using the "
-        "**Sign in** button in the top-right corner to get on the leaderboard! "
-        "It opens in a new tab, so your work on this page is preserved.",
+        "**Sign in** button next to the module documentation link above to get on the "
+        "leaderboard! It opens in a new tab, so your work on this page is preserved.",
         icon=":material/person_add:",
     )

@@ -71,12 +71,7 @@ def proteobench_sidebar(current_page):
     current_page : str
         The name of the current page (should match label).
     """
-    from pages.base_pages.utils.auth import render_auth_status
     from pages.utils.module_registry import filter_modules, get_all_modules
-
-    # Show signed-in user indicator on module pages (not Home — Home has its own)
-    if current_page != "/":
-        render_auth_status()
 
     texts = WebpageTexts
     all_modules = get_all_modules()

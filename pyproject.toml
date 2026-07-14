@@ -70,7 +70,7 @@ web = [
   "streamlit_extras",
   "streamlit-plotly-events",
   "streamlit-tour>=1.1.0",
-  "extra-streamlit-components"
+  "extra-streamlit-components",
   "pyJWT",
   "pmultiqc>=0.0.33",
 ]

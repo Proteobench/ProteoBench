@@ -21,7 +21,7 @@ from proteobench.exceptions import (
     ParseSettingsError,
     EntrapmentError,
 )
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_ion import _load_alphadia_entrapment, load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.entrapment.entrapment_base_module import EntrapmentModule
@@ -123,7 +123,10 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
         """
         # Parse workflow output file
         try:
-            input_df = load_input_file(input_file, input_format, input_file_secondary)
+            if input_format == "AlphaDIA":
+                input_df = _load_alphadia_entrapment(input_file)
+            else:
+                input_df = load_input_file(input_file, input_format, input_file_secondary)
         except pd.errors.ParserError as e:
             raise ParseError(
                 f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
@@ -153,11 +156,16 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
         except Exception as e:
             raise ConvertStandardFormatError(f"Error converting to standard format: {e}")
 
-        # Generate entrapment intermediate format
+        # Apply mapping file: filter unmapped peptides, assign target/entrapment, merge pair index
         try:
-            entrapment_score = EntrapmentScores(mapping_file=self.mapping_file)
+            standard_format = self._apply_mapping(standard_format)
+        except EntrapmentError:
+            raise
         except Exception as e:
-            raise EntrapmentError(f"Error generating entrapment scores: {e}")
+            raise IntermediateFormatGenerationError(f"Error applying entrapment mapping: {e}")
+
+        # Generate entrapment intermediate format
+        entrapment_score = EntrapmentScores()
         try:
             intermediate_metric_structure = entrapment_score.generate_intermediate(standard_format)
         except Exception as e:
@@ -195,5 +203,5 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
             input_df,
         )
 
-    def get_plot_generator(self):
-        return super().get_plot_generator()
+    def get_plot_generator(self, y_axis_title: str = None):
+        return super().get_plot_generator(y_axis_title=y_axis_title)

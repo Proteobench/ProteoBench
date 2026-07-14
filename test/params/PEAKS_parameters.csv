@@ -28,3 +28,5 @@ min_fragment_mz,50
 max_fragment_mz,2000
 scan_window,
 predictors_library,
+postprocessing_performed,False
+postprocessing_description,

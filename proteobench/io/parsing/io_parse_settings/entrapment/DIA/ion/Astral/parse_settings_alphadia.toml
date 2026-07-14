@@ -1,0 +1,21 @@
+[mapper]
+"proforma" = "Sequence"
+"sequence" = "Peptide"
+"charge" = "Charge"
+"qval" = "Q-Value"
+"run" = "Raw file"
+"genes" = "Protein Group"
+
+[general]
+"decoy_flag" = true
+
+[run_mapper]
+"LFQ_Astral_DIA_15min_50ng_Human_01" = "LFQ_Astral_DIA_15min_50ng_Human_01"
+"LFQ_Astral_DIA_15min_50ng_Human_02" = "LFQ_Astral_DIA_15min_50ng_Human_02"
+"LFQ_Astral_DIA_15min_50ng_Human_03" = "LFQ_Astral_DIA_15min_50ng_Human_03"
+
+[upload_info]
+"datapoint_file" = "precursors.parquet"
+"datapoint_file_description" = "Upload the AlphaDIA `precursors.parquet` file (AlphaDIA >= 2.0)."
+"params_file" = "log.txt"
+"params_file_description" = "Upload the AlphaDIA log file (`log.txt`)."

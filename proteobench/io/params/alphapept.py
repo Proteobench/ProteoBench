@@ -88,6 +88,13 @@ def extract_params(
     params.min_precursor_charge = record["features"]["iso_charge_min"]
     params.max_precursor_charge = record["features"]["iso_charge_max"]
     params.enable_match_between_runs = record["workflow"]["match"]  # Check if matching is enabled
+    # Format quantification settings as a dictionary
+    _quant = record.get("quantification", {})
+    params.quantification_method = {
+        "lfq_ratio_min": _quant.get("lfq_ratio_min"),
+        "max_lfq": _quant.get("max_lfq"),
+        "mode": _quant.get("mode"),
+    }
     params.abundance_normalization_ions = None  # No normalization in AlphaPept
     params.fill_none()
     return params

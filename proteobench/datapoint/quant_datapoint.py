@@ -380,7 +380,7 @@ class QuantDatapointHYE(DatapointBase):
             user_input = {key: ("" if value is None else value) for key, value in user_input.items()}
 
         result_datapoint = QuantDatapointHYE(
-            id=input_format + "_" + user_input["software_version"] + "_" + formatted_datetime,
+            id=input_format + "_" + str(user_input["software_version"]) + "_" + formatted_datetime,
             software_name=input_format,
             software_version=user_input["software_version"],
             search_engine=user_input["search_engine"],

@@ -50,11 +50,15 @@ class VariablesDIAQuantPlasma:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion Plasma"
-    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample."
+    homepage_title: str = "LFQ Quantification on Human Plasma"
+    graphical_abstract: str = "Graphical_abstract_Quant_plasma.png"
+    documentation_description: str = (
+        "Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample aquired on a timsTOF."
+    )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_Plasma"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
-        default_factory=lambda: ["DIA", "quantification", "Plasma", "precursor", "ion", "LFQ", "spike-in"]
+        default_factory=lambda: ["DIA", "quantification", "Plasma", "precursor", "ion", "LFQ", "spike-in", "timsTOF"]
     )
 
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_Plasma"

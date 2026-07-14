@@ -21,8 +21,10 @@ min_precursor_charge,1
 max_precursor_charge,
 quantification_method,
 protein_inference,ProteinProphet: --maxppmdiff 2000000
-abundance_normalization_ions,
+abundance_normalization_ions,True
 min_precursor_mz,
 max_precursor_mz,5000
 min_fragment_mz,
 max_fragment_mz,
+postprocessing_performed,False
+postprocessing_description,

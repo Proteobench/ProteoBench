@@ -20,8 +20,9 @@ import streamlit_utils
 from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
+from pages.utils.submission_source import get_submission_source, is_official_server
+
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
-from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
@@ -306,7 +307,7 @@ class DeNovoUIObjects(BaseUIModule):
                             if plot_name in descriptions:
                                 st.caption(descriptions[plot_name])
                             self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
-                            # st.plotly_chart(plots[plot_name], use_container_width=True)
+                            # st.plotly_chart(plots[plot_name])
 
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
@@ -322,7 +323,7 @@ class DeNovoUIObjects(BaseUIModule):
         with st.expander("Description"):
             st.markdown(self.variables.texts.Description.ptm_overview)
 
-        st.plotly_chart(figs, use_container_width=True)
+        st.plotly_chart(figs)
 
     def _display_ptm_specific(self, figs) -> None:
         # Specific PTM plots
@@ -338,7 +339,6 @@ class DeNovoUIObjects(BaseUIModule):
                 st.plotly_chart(
                     figs[mod_label],
                     key=f"ptm_plot_{mod_label}",
-                    use_container_width=True,
                 )
 
     def _display_spectrum_features(self, figs) -> None:
@@ -359,7 +359,7 @@ class DeNovoUIObjects(BaseUIModule):
         for feature_name, tab in tab_dict.items():
             with tab:
                 st.header(feature_name)
-                st.plotly_chart(figs[feature_name][evaluation_type], use_container_width=True)
+                st.plotly_chart(figs[feature_name][evaluation_type])
 
     def _display_species_overview(self, figs) -> None:
         with st.expander("Description"):
@@ -373,7 +373,7 @@ class DeNovoUIObjects(BaseUIModule):
         else:
             evaluation_type = "mass"
 
-        st.plotly_chart(figs[evaluation_type], use_container_width=True, key=self.variables.fig_species_overview)
+        st.plotly_chart(figs[evaluation_type], key=self.variables.fig_species_overview)
 
     def _display_indepth_plot(self, plot_name: str, figs) -> None:
         if plot_name == "ptm_overview":
@@ -567,24 +567,42 @@ class DeNovoUIObjects(BaseUIModule):
             _param_schema = json.load(_schema_f)
         _file_dict = st.session_state.get(self.variables.params_file_dict, {})
         for _field_key, _field_schema in _param_schema.items():
+            _is_checkbox = _field_schema.get("type") == "checkbox"
             if _field_key in _file_dict:
                 _val = _file_dict[_field_key]
-                # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
-                # np.nan is a float and cannot be serialized by Streamlit's protobuf for
-                # text_input; convert to "" (empty). Non-string non-missing values are
-                # stringified to match what st.text_input expects.
-                try:
-                    _is_missing = pd.isna(_val)
-                except (TypeError, ValueError):
-                    _is_missing = False
-                if _is_missing:
-                    _val = ""
-                elif not isinstance(_val, str):
-                    _val = str(_val)
+                if _is_checkbox:
+                    # Checkbox fields (e.g. postprocessing_performed) carry a scalar bool
+                    # default, not a dict — keep them as real bool, not a stringified one.
+                    _val = bool(_val) if pd.notna(_val) else bool(_field_schema.get("value", False))
+                else:
+                    # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
+                    # np.nan is a float and cannot be serialized by Streamlit's protobuf for
+                    # text_input; convert to "" (empty). Non-string non-missing values are
+                    # stringified to match what st.text_input expects.
+                    try:
+                        _is_missing = pd.isna(_val)
+                    except (TypeError, ValueError):
+                        _is_missing = False
+                    if _is_missing:
+                        _val = ""
+                    elif not isinstance(_val, str):
+                        _val = str(_val)
                 st.session_state[self.variables.prefix_params + _field_key] = _val
             else:
-                _default = _field_schema.get("value", {}).get(self.user_input.get("input_format", ""), None)
-                st.session_state[self.variables.prefix_params + _field_key] = _default if _default is not None else ""
+                _schema_value = _field_schema.get("value")
+                if _is_checkbox:
+                    _default = bool(_schema_value) if _schema_value is not None else False
+                else:
+                    # Text-like fields store their per-tool default under "value" as a
+                    # dict keyed by input_format (tool name); fall back to the schema
+                    # value itself if it isn't a dict.
+                    _default = (
+                        _schema_value.get(self.user_input.get("input_format", ""), None)
+                        if isinstance(_schema_value, dict)
+                        else _schema_value
+                    )
+                    _default = _default if _default is not None else ""
+                st.session_state[self.variables.prefix_params + _field_key] = _default
 
         # Always show parameter fields, comments, and confirmation checkbox.
         tab5_quant.generate_additional_parameters_fields_submission(

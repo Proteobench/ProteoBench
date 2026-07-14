@@ -95,11 +95,15 @@ class VariablesDDAQuant:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DDA peptidoform"
-    documentation_description: str = "Benchmark peptidoform-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument."
+    homepage_title: str = "LFQ Quantification at the Peptidoform Level"
+    graphical_abstract: str = "Graphical_abstract_Quant_QExactive.png"
+    documentation_description: str = (
+        "Benchmark peptidoform-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DDA_peptidoform"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(
-        default_factory=lambda: ["DDA", "quantification", "peptidoform", "modified peptide", "LFQ"]
+        default_factory=lambda: ["DDA", "quantification", "peptidoform", "modified peptide", "LFQ", "QExactive"]
     )
 
     additional_params_json: str = "../webinterface/configuration/dda_quant.json"

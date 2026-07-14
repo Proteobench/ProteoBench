@@ -92,8 +92,9 @@ def test_get_upload_info_fragpipe_diann_quant_overrides_params(module_id):
     diann_info = builder.get_upload_info("DIA-NN")
     fp_info = builder.get_upload_info("FragPipe (DIA-NN quant)")
 
-    # Datapoint description is the same (both parse report.tsv / parquet)
-    assert diann_info["datapoint_file_description"] == fp_info["datapoint_file_description"]
+    # Both point to the same file types, but FragPipe's report lives in a different output folder
+    assert diann_info["datapoint_file"] == fp_info["datapoint_file"]
+    assert "dia-quant-output" in fp_info["datapoint_file_description"]
 
     # But params differ: FragPipe needs a .workflow file, not a DIA-NN log
     assert ".workflow" in fp_info["params_file_description"]

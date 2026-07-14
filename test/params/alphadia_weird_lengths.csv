@@ -24,6 +24,6 @@ min_fragment_mz,50
 max_fragment_mz,2000
 quantification_method,DirectLFQ
 protein_inference,heuristic
-abundance_normalization_ions,
+abundance_normalization_ions,DirectLFQ
 predictors_library,AlphaPeptDeep
 scan_window,

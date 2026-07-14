@@ -8,9 +8,10 @@ from typing import Any, Optional
 import streamlit as st
 from streamlit_extras.let_it_rain import rain
 
+from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 
-from ..utils.inputs import generate_input_widget
+from ..utils.inputs import NEVER_PARSED_KEYS, generate_input_widget, generate_never_parsed_fields_section
 from ..utils.validation_ui import render_validation_report, run_submission_validation
 
 
@@ -43,10 +44,12 @@ def load_user_parameters(variables, ionmodule, user_input) -> Any:
     """
     params = None
 
-    warning = ionmodule.validate_params_files(user_input[variables.meta_data], user_input["input_format"])
-    if warning:
-        st.warning(warning, icon="⚠️")
-        return None
+    validate_params_files = getattr(ionmodule, "validate_params_files", None)
+    if validate_params_files is not None:
+        warning = validate_params_files(user_input[variables.meta_data], user_input["input_format"])
+        if warning:
+            st.warning(warning, icon="⚠️")
+            return None
 
     try:
         params = ionmodule.load_params_file(
@@ -84,14 +87,18 @@ def generate_additional_parameters_fields_submission(
     with open(variables.additional_params_json, encoding="utf-8") as file:
         config = json.load(file)
 
+    # Fields that are never derived from a tool's parameter/log file — the submitter
+    # always fills these in manually. Rendered separately, below the parsed parameters.
+    parsed_config = {k: v for k, v in config.items() if k not in NEVER_PARSED_KEYS}
+
     # Check if parsed values exist in session state
     _ = st.session_state.get(variables.params_json_dict, {})
 
     with st.container(key="tour_param_fields"):
         st_col1, st_col2, st_col3 = st.columns(3)
-        input_param_len = int(len(config.items()) / 3)
+        input_param_len = int(len(parsed_config.items()) / 3)
 
-        for idx, (key, value) in enumerate(config.items()):
+        for idx, (key, value) in enumerate(parsed_config.items()):
             if key.lower() == "software_name":
                 editable = False
             else:
@@ -112,6 +119,8 @@ def generate_additional_parameters_fields_submission(
                     user_input[key] = generate_input_widget(
                         variables, user_input["input_format"], value, key, editable=editable
                     )
+
+    generate_never_parsed_fields_section(variables, user_input["input_format"], config, user_input)
 
 
 def generate_submitter_identity(user_input) -> None:
@@ -439,6 +448,11 @@ def create_pull_request(
             submission_comments=submission_comments,
             submission_source=submission_source,
         )
+    except DatasetAlreadyExistsOnServerError:
+        # Let the dedicated handler in the UI objects surface this to the user.
+        if variables.submit in st.session_state:
+            del st.session_state[variables.submit]
+        raise
     except Exception as e:
         st.error(f"Unable to create the pull request: {e}", icon="🚨")
         pr_url = None

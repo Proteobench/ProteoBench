@@ -49,11 +49,22 @@ class VariablesDIAQuant:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion AIF"
-    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA (All-Ion Fragmentation) workflows using a multi-species (HYE) sample on an Orbitrap instrument."
+    documentation_description: str = (
+        "Benchmark ion-level label-free quantification accuracy of DIA (All-Ion Fragmentation) workflows using a multi-species (HYE) sample on an Orbitrap instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_AIF"
     sidebar_category: str = "Archived"
     keywords: List[str] = field(
-        default_factory=lambda: ["DIA", "quantification", "AIF", "all ion fragmentation", "precursor", "ion", "LFQ"]
+        default_factory=lambda: [
+            "DIA",
+            "quantification",
+            "AIF",
+            "all ion fragmentation",
+            "precursor",
+            "ion",
+            "LFQ",
+            "QExactive",
+        ]
     )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant"
     selectbox_id_uuid: str = "selectbox_id_dia_quant"

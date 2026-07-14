@@ -69,7 +69,7 @@ def get_leaderboard_data() -> pd.DataFrame:
             gh = GithubProteobotRepo(
                 token=st.secrets.get("gh", {}).get("token_read"),
                 clone_dir=clone_dir,
-                repo=repo_url,
+                repo_url=repo_url,
             )
             gh.clone_repo()
             all_records.extend(_read_submitters_from_repo(clone_dir))

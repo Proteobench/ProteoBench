@@ -376,50 +376,9 @@ def _render_leaderboard():
     import pandas as pd
 
     # TODO: Remove mock data once real submissions exist
-    # from pages.base_pages.utils.leaderboard import get_leaderboard_data
-    # leaderboard = get_leaderboard_data()
-    leaderboard = pd.DataFrame(
-        {
-            "submitter_id": [
-                "rodvrees",
-                "0000-0002-1825-0097",
-                "jdoe42",
-                "0000-0001-5678-1234",
-                "labuser",
-                "asmith",
-                "0000-0003-9876-5432",
-                "mbrown",
-                "0000-0004-1111-2222",
-                "ljohnson",
-            ],
-            "submitter_name": [
-                "Robbin Bouwmeester",
-                "Jane Doe",
-                "John Doe",
-                "Maria Garcia",
-                "Lab Account",
-                "Alice Smith",
-                "Bob Johnson",
-                "Charlie Brown",
-                "David Wilson",
-                "Eva Davis",
-            ],
-            "submitter_provider": [
-                "github",
-                "orcid",
-                "github",
-                "orcid",
-                "github",
-                "orcid",
-                "github",
-                "orcid",
-                "github",
-                "orcid",
-            ],
-            "submissions": [23, 17, 12, 8, 3, 2, 1, 1, 1, 1],
-        }
-    )
-
+    from pages.base_pages.utils.leaderboard import get_leaderboard_data
+    leaderboard = get_leaderboard_data()
+    
     if leaderboard.empty:
         return
 

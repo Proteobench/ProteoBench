@@ -1,7 +1,7 @@
 ## Development setup
 
 ### Local installation
-Install the package aber cloning it locally.
+Install the package after cloning it locally.
 
 ```
 pip install --editable '.[dev]'
@@ -61,7 +61,7 @@ Then browse to http://localhost:8000 to watch the live preview.
 - Commit and push your changes to your
   [fork](https://help.github.com/articles/pushing-to-a-remote/).
 - Ensure that the tests and documentation (both Python docstrings and files in
-  `/docs/source/`) have been updated according to your changes. Python
+  `/docs/`) have been updated according to your changes. Python
   docstrings are formatted in the
   [numpydoc style](https://numpydoc.readthedocs.io/en/latest/format.html).
 - Open a
@@ -82,12 +82,13 @@ Then browse to http://localhost:8000 to watch the live preview.
 
 - When a new version is ready to be published:
 
-    1. Change the `__version__` in `proteobench/__init__.py` following
-       [semantic versioning](https://semver.org/).
-    2. Update the changelog (if not already done) in `CHANGELOG.md` according to
+    1. Update the changelog (if not already done) in `CHANGELOG.md` according to
        [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-    3. Merge all final changes with the `main` branch.
-    4. Create a new release on GitHub.
+    2. Merge all final changes with the `main` branch.
+    3. Create a new release on GitHub, tagged following
+       [semantic versioning](https://semver.org/). The package version is derived
+       automatically from this tag via `setuptools_scm`; there is no `__version__`
+       string to edit.
 
 - When a new GitHub release is made, the `Publish` GitHub Action is automatically
   triggered to build the Python package and publish it to PyPI. Upon a new PyPI release,

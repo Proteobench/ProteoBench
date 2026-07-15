@@ -5,7 +5,7 @@
 This module compares the sensitivity and quantification accuracy for data acquired with data-dependent acquisition (DDA) on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
-**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**
+**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publicly upload data without replacement of missing values and without manual filtering.**
 
 We think that this module is more suited to evaluate the impact of (non exhaustive list):
 - search engine identification
@@ -13,7 +13,7 @@ We think that this module is more suited to evaluate the impact of (non exhausti
 - match between run
 - low-level ion signal normalisation
 
-Other modules will be more suited to explore further post-pocessing steps.
+Other modules will be more suited to explore further post-processing steps.
 
 ## Data set
 
@@ -49,14 +49,14 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 ## How to use
 
-Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion) if you want to submit your results or when you want to explore the DDA quantification module.
+Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive) if you want to submit your results or when you want to explore the DDA quantification module.
 
 ### Submit your run for public usage
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available.
 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from MaxQuant, FragPipe, Proline Studio, AlphaPept, PEAKS and i2MassChroQ (see below for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from the tools listed in Table 2 below (see the tool-specific sections for more details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button
 `I really want to upload it` will appear to trigger the submission.
 
 After upload, you will get a link to a Github pull request associated with your data. Please copy it and save it. With this link, you can get the unique identifier of your run (for example `ProlineStudio__20240106_141919`), and follow the advancement of your submission and add comments to communicate with the ProteoBench maintainers. If everything looks good, your submission will be reviewed and accepted (it will take a few working days). Then, your benchmark run will be added to the public runs of this module and plotted alongside all other benchmark runs in the figure.
@@ -156,11 +156,12 @@ For this module, use the excel exports. Make sure that the `Quantified peptide i
 The `Quantified peptide ions` tab reports the precursor ion quantities (retrieved from XICs). Shared peptides ions between multiple ProteinSets are duplicated. This redundancy is removed by combining the protein identification from all rows of a given precursor ion before metric calculation.
 In the outputs of ProlineStudio, we consider that decoys are already removed.
 
-For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`. For local usage and public submission, we strongly recommend to use the following [template.json](../../files_provided_to_users/quant_lfq_ion_DDA/ProlineStudio/template.json) to make sure that all the tabs and columns needed are exported to be correctly parsed. Make sure that no personal information is stored in the excel file before making it public. The version of ProlineStudio is only exported in the parameters from version 2.3.
+For public submission, you can upload the same excel export, just make sure to have the tabs `Search settings and infos`, `Import and filters`, `Quant config`. For local usage and public submission, we strongly recommend to use a template with all the tabs and columns needed for correct parsing.
+<!-- TODO(docs): the previously linked template.json (files_provided_to_users/quant_lfq_ion_DDA/ProlineStudio/template.json) no longer exists in the repository -- add the template file back (e.g. under docs/ or a dedicated assets location) and restore this link. --> Make sure that no personal information is stored in the excel file before making it public. The version of ProlineStudio is only exported in the parameters from version 2.3.
 
 ### MSAngel (work in progress..)
 
-MSAngel allows to build piplenes for bottom-up MS analysis with a choice of search engines, validation strategy and the Proline quantification.
+MSAngel allows to build pipelines for bottom-up MS analysis with a choice of search engines, validation strategy and the Proline quantification.
 More information can be found [here](https://www.profiproteomics.fr/ms-angel/)
 
 ### PEAKS
@@ -174,7 +175,7 @@ When starting a new project and selecting the .RAW files, there is no need to mo
 
 Make sure to set Enzyme as trypsin,  Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DDA.
 In workflow section use the PEAKS Q (de novo assisted search quantification) option. Set the different parameters in "Data refine" and "DB search". In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide FDR and Protein Group FDR are set to 1%.
-Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab.
+Once the workflow has run successfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab.
 
 ### Sage
 
@@ -237,7 +238,7 @@ the table must not contain non-validated precursor ions. If you have any issue, 
 Each software tool produces specific output files formats. We made ``.toml`` files that describe where to find the information needed in each type of input. These can be found in `proteobench/io/parsing/io_parse_settings`:
 
 - **[mapper]**
-mapping between the headers in the input file (left-hand side) and the header of the intermediate file generated by ProteoBench. If more parsing is required before metrics calculation, this part can contain mapping between intermediatec column names and the name in the intermediate file. This is the case for Proline Studio where protein accessions are reported in two independent columns that need to be combined. This should be commented in the toml.
+mapping between the headers in the input file (left-hand side) and the header of the intermediate file generated by ProteoBench. If more parsing is required before metrics calculation, this part can contain mapping between intermediate column names and the name in the intermediate file. This is the case for Proline Studio where protein accessions are reported in two independent columns that need to be combined. This should be commented in the toml.
 
   - "Raw file" = field that contains the raw file identifiers. **If the field "Raw file" is present, the table is parsed is a long format, otherwise it is parsed as wide format.**
 
@@ -299,15 +300,14 @@ After uploading an output file, a table is generated that contains the following
 - expected ratio for the given species
 - epsilon = difference of the observed and expected log2-transformed fold change
 
-Choose with the slider below the minimum number of quantification value per raw file.
+Choose with the slider below the minimum number of quantification values per raw file.
 Example: when 3 is selected, only the precursor ions quantified in 3 or more raw files will be considered for the plot.
 
 ## Define Parameters
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to
-your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratio's).
-See [here](#important-tool-specific-settings)
-for all compatible parameter files.
+your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratios).
+See the **Important Tool-specific settings** section above for all compatible parameter files.
 In this module, we keep track of the following parameters, if you feel
 that some important information is missing, please add it in the
 `Comments for submission` field.

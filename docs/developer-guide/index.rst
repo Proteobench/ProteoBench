@@ -22,10 +22,7 @@ Developer guide
     intermediate-format
     adding-module
     parameter-homogenization
-    
     submission-validation
-
-    modules/index
 
 .. toctree::
    :caption: Python API

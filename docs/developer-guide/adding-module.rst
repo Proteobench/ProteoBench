@@ -72,7 +72,7 @@ The backend is organized into seven main components that you can extend or custo
 
 **4. Result representation** - Store benchmark results as datapoints
    - Base class: :class:`~proteobench.datapoint.datapoint_base.DatapointBase` (ABC)
-   - For quantification: Use or extend :class:`~proteobench.datapoint.quant_datapoint_hye.QuantDatapointHYE`
+   - For quantification: Use or extend :class:`~proteobench.datapoint.quant_datapoint.QuantDatapointHYE`
    - Stores metadata and metrics for each benchmark run
    - For new module types: Create a new class inheriting from ``DatapointBase``
    - See :ref:`datapoint-configuration` for detailed information
@@ -113,11 +113,11 @@ Here's how these components work together for a quantification module:
     input_data = parse_ion.load_input_file(file_path, "MaxQuant")
     
     # 2. Calculate scores (generates intermediate data)
-    score_calculator = QuantScores(...)
+    score_calculator = QuantScoresHYE(...)
     intermediate = score_calculator.generate_intermediate(input_data, replicate_to_raw)
     
     # 3. Create datapoint from intermediate results
-    datapoint = QuantDatapoint.generate_datapoint(intermediate, "MaxQuant", user_input)
+    datapoint = QuantDatapointHYE.generate_datapoint(intermediate, "MaxQuant", user_input)
     
     # 4. Generate plots for visualization
     plot_generator = LFQHYEPlotGenerator()
@@ -725,7 +725,7 @@ Your variables dataclass must include these fields for the module registry to di
   
 - **sidebar_category**: Determines which expandable section contains the module
   
-  - Valid values: ``"DDA"``, ``"DIA"``, ``"DDA Id"``, ``"Archived"``
+  - Valid values: ``"DDA"``, ``"DIA"``, ``"Archived"``, ``"Debug"``
   - Modules are grouped by this category in the sidebar
   
 - **keywords**: List of search terms for the sidebar search functionality
@@ -849,27 +849,30 @@ After editing the YAML, regenerate and commit:
 Relevant functions in :class:`~webinterface.pages.base_pages.quant.QuantUIObjects`
 ...................................................................................
 
-- Tab 1: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_main`
+- Tab 1 "View Public Results": :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_main`
   shows the description of the module, which is defined in
   `webinterface/pages/pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_
   where we define custom text and **unique** component names for each module
   (e.g. for the main plot)
   to not display on several pages the same plot in the streamlit webinterface.
-- Tab 2: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_submission_form`
+- Tab 2 "Upload New Results (Private)": :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_submission_form`
   displays the submission form based on the module toml configurations in
-  `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_.
-- Tab 2.5: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_current_data_plots`
-  displays the metric plot if a new results were added to the module.
-- Tab 3: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_submitted`
-- Tab 4: :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_public_submission_ui`
-  creates  the input fields for the metadata and the
+  `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_,
+  and runs the benchmarking pipeline on upload.
+- Tab 3 "View Single Result": :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_indepth_plots`
+  displays the metric and in-depth plots for a single selected dataset.
+- Tab 4 "View Public + New Results": :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_all_data_results_submitted`
+  is the same as Tab 1 but also includes any privately-submitted (not-yet-public) results.
+- Tab 5 "Compare Two Results": :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_workflow_comparison`
+  compares precursor overlap and parameters between two selected workflows.
+- Tab 6 "Submit New Results": :meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.display_public_submission_ui`
+  creates the input fields for the metadata and the
   input file format and type. They are given in the
-  `proteobench/modules/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/io/io_parse_settings>`_ folder,
+  `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_ folder,
   same as for the backend of the module.
 
-:meth:`~webinterface.pages.base_pages.quant.QuantUIObjects.generate_results` gathers the data from the backend
-and displays them in several figures. Here you will need to edit and adapt the code
-to show the respective figures with the right metadata.
+The tab-to-method mapping is defined once in :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config`
+and dispatched via ``getattr``, so adding a module does not require changing this dispatch logic.
 
 Change the text and the field names accordingly in the ``dataclass``
 in `webinterface.pages.pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_.
@@ -1014,7 +1017,7 @@ To work locally on the documentation and get a live preview, install the require
 
     pip install '.[docs]'
     # selecting the docs folder to watch for changes
-    sphinx-autobuild  --watch ./docs ./docs/source/ ./docs/_build/html/
+    sphinx-autobuild --watch ./proteobench ./docs/ ./docs/_build/html/
 
 Then browse to http://localhost:8000 to watch the live preview.
 
@@ -1105,7 +1108,7 @@ a new type of module:
      
      - ``sidebar_label: str`` - Display name in sidebar
      - ``sidebar_path: str`` - URL path (must match page filename without numeric prefix)
-     - ``sidebar_category: str`` - Category: ``"DDA"``, ``"DIA"``, ``"DDA Id"``, or ``"Archived"``
+     - ``sidebar_category: str`` - Category: ``"DDA"``, ``"DIA"``, ``"Archived"``, or ``"Debug"``
      - ``keywords: List[str]`` - Search terms for sidebar filtering
    
    - **Module metadata**:
@@ -1140,3 +1143,21 @@ a new type of module:
     For a new module category, register a *validation profile* and point the
     module at it via ``[validation] profile = "<name>"``.
     See :doc:`submission-validation`.
+13. **Register the settings directory.** Add an entry to ``MODULE_SETTINGS_DIRS`` in
+    :file:`proteobench/modules/constants.py` mapping your ``module_id`` to the TOML
+    directory created in step 2. Without this, the module cannot locate its own
+    parse settings at runtime.
+14. **Register the parser class.** Add an entry to ``MODULE_TO_CLASS`` in
+    :file:`proteobench/io/parsing/parse_settings.py` so :class:`ParseSettingsBuilder`
+    resolves the correct parser class for your ``module_id`` (``ParseSettingsQuant``
+    for quantification modules; a new class for a new module category).
+15. **Register the module class.** Add an entry to ``MODULE_CLASSES`` in
+    :file:`proteobench/utils/server_io.py` so the module can be instantiated
+    programmatically (needed for :func:`~proteobench.utils.server_io.make_submission`
+    and the resubmission script).
+16. **Add module markdown files** in
+    `webinterface/pages/markdown_files <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/markdown_files>`_
+    for any in-app descriptive text referenced by your ``pages_variables`` dataclass.
+17. **Add tests.** Add a ``test_module_quant_*.py`` (or equivalent) test file plus
+    test data under :file:`test/data/` and parameter files under :file:`test/params/`,
+    following the pattern of an existing module's tests.

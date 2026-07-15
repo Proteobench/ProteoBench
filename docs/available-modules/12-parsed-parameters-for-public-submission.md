@@ -1,7 +1,7 @@
 # Parameters parsed for public submission
 
-We automatically retrieve the parameters used for a specific worklow run in the parameter file submitted next to the 
-result. The parsing depends on the tool and are described below. If you have any suggestions or concerns related to 
+We automatically retrieve the parameters used for a specific workflow run from the parameter file submitted alongside the
+result. The parsing depends on the tool and is described below. If you have any suggestions or concerns related to
 how we parse these parameters, please let us know by creating a 
 [GitHub issue](https://github.com/Proteobench/ProteoBench/issues).
 

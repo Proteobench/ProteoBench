@@ -12,9 +12,11 @@ an existing benchmark module, you will need to:
 - extend the documentation of the module for instruction of the new tools
 
 For adding new benchmarking metrics, you would need to add the new metrics to
-the ``datapoint.py`` file and the ``plot.py`` file for visualization. In that
-case have a look at the extended documentation of adding a new module,
-:ref:`Adding a new module`.
+the module's datapoint class in :file:`proteobench/datapoint/` (e.g.
+:file:`quant_datapoint.py`) and the corresponding plot generator in
+:file:`proteobench/plotting/` (e.g. :file:`plot_generator_lfq_HYE.py`) for
+visualization. In that case have a look at the extended documentation of
+adding a new module, :doc:`adding-module`.
 
 As an example for adding a new tool, see how quantms was added to the DDA quantification
 precursor ions module in

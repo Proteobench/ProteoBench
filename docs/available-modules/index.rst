@@ -16,12 +16,17 @@ Each module documentation includes:
 
 If you want to jump right into looking at public results, or uploading your own results, you can go to https://proteobench.cubimed.rub.de/ and click on the module you are interested in. You can also find the links to the webserver in the module documentations below.
 
+Before diving into a specific module, you may also want to read:
+
+- :doc:`What is a benchmark module? <1-description-benchmark-module>`
+- :doc:`Parameters parsed for public submission <12-parsed-parameters-for-public-submission>`
+
 
 Are you looking for...
-------
+----------------------
 
 ...an example module to get started?
-------
+-------------------------------------
 
 .. grid::
 
@@ -37,7 +42,7 @@ Are you looking for...
 
 
 ...a quantification module for DIA data?
--------
+-----------------------------------------
 
 .. grid::
 
@@ -75,7 +80,7 @@ Are you looking for...
 
 
 ...a quantification module for DDA data?
------
+-----------------------------------------
 
 .. grid::
 
@@ -112,7 +117,7 @@ Are you looking for...
       `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral>`__ · :doc:`Documentation <active-modules/8-quant-lfq-ion-dda-Astral>`
 
 ... Identification modules?
------
+---------------------------
 
 .. grid::
 
@@ -128,8 +133,24 @@ Are you looking for...
       `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · :doc:`Documentation <active-modules/11-denovo-dda-hcd>`
 
 
+...a module to validate reported FDR control?
+-----------------------------------------------
+
+.. grid::
+
+   .. grid-item-card:: DIA Ion Entrapment (Astral)
+      :columns: 6 6 6 6
+      :padding: 1
+      :class-card: sd-mb-4
+
+      :bdg-success:`alpha`
+      ^^^
+      +++
+      `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · :doc:`Documentation <active-modules/13-entrapment-ion-dia-astral>`
+
+
 ...a usecase specific module?
------
+-----------------------------
 
 .. grid::
 
@@ -156,7 +177,7 @@ Are you looking for...
 
 
 ...an archived module?
------
+----------------------
 
 .. grid::
 
@@ -175,5 +196,7 @@ Are you looking for...
     :glob:
     :hidden:
 
+    1-description-benchmark-module
+    12-parsed-parameters-for-public-submission
     active-modules/index
     archived-modules/index

@@ -3,7 +3,7 @@
 ## What is ProteoBench?
 ProteoBench is an open and collaborative platform for community-curated benchmarks that enables continuous, easy, and controlled comparison of proteomics data analysis workflows.
 
-It provides a centralized web platform where developers and end-users can compare proteomics data analysis {ref}`workflows<workflow>` using standardized benchmark datasets, transparent evaluation metrics, and public comparison plots. This community-curated effort supports the controlled evaluation of tools developed or used by participants against other state-of-the-art workflows for specific proteomics applications. The ability to add new benchmark runs and modules allows ProteoBench to grow with the proteomics field. (See our goals and non-goals [here](../general-information/0-about.html#goals-and-non-goals))
+It provides a centralized web platform where developers and end-users can compare proteomics data analysis {ref}`workflows<workflow>` using standardized benchmark datasets, transparent evaluation metrics, and public comparison plots. This community-curated effort supports the controlled evaluation of tools developed or used by participants against other state-of-the-art workflows for specific proteomics applications. The ability to add new benchmark runs and modules allows ProteoBench to grow with the proteomics field. (See our goals and non-goals in the ["About ProteoBench"](0-about.md) page.)
 
 The goal of ProteoBench is not to select or prescribe a single best one-size-fits-all data analysis workflow. Instead, ProteoBench aims to make workflow evaluation more transparent, reproducible, and comparable across tools, laboratories, software versions, and use cases.
 
@@ -24,10 +24,10 @@ Depending on your goal, there are multiple ways to interact with ProteoBench. If
 Select the module that fits the best to your use case (e.g. single cell, de novo, DIA LFQ Quantification, ...). Open the module page in the web app, and investigate which workflow performs best on the metric that is important to you (e.g. quantification accuracy).
 
 - to compare your own workflow performance with public results:
-Download the associated files (e.g. raw files and fasta files for quantification modules) from the module page or the documentation, run your workflow, and upload the results in the custom format. Keep in mind that custom formats can not be made public, and take a look at the module documentation page for module specific information.
+Download the associated files (e.g. raw files and fasta files for quantification modules) from the module page or the documentation, run your workflow, and upload the results using the custom tabular format described in the module documentation (see also "What should I do if my software is not directly supported?" below). Keep in mind that runs uploaded in the custom format can not be made public, and take a look at the module documentation page for module specific information.
 
-- automatic local benchmarking:
-ProteoBench is open source, and is available as a [pypi package](https://pypi.org/project/proteobench/). Instructions and examples of how to use the functions are available in a [python notebook](https://github.com/Proteobench/ProteoBench/examples/local_usage_walkthrough.ipynb).
+- to benchmark locally (programmatically):
+ProteoBench is open source, and is available as a [pypi package](https://pypi.org/project/proteobench/). Instructions and examples of how to use the functions are available in a [python notebook](https://github.com/Proteobench/ProteoBench/blob/main/examples/local_usage_walkthrough.ipynb).
 
 ## Do I need to run my workflow on a predefined data set?
 
@@ -68,11 +68,11 @@ This design allows ProteoBench to support a wide range of tools, including comme
 Each module provides a clear route to the required benchmark files, including raw MS files, search databases when applicable, example outputs, and documentation. The raw data are typically linked from the module documentation or from public repositories such as [ProteomeXchange](https://www.proteomexchange.org/), depending on the dataset.
 If you do not find the information that you need to run your workflow, don't hesitate to contact us.
 
-## What is QuantError?
+## What is the epsilon (quantification accuracy, QuantError) metric?
 
-QuantError is a module-specific metric used to assess quantitative accuracy when the expected abundance ratios are known. It compares observed quantitative values against expected values and summarizes how far a workflow deviates from the known experimental design.
+Epsilon (or QuantError in the manuscript) is the module-specific metric used to assess quantitative accuracy when the expected abundance ratios are known. For each quantified species it is computed as the difference between the observed and expected log2 fold change between conditions A and B (`epsilon = log2_A_vs_B - log2_expectedRatio`). The plots and tables report the median and mean absolute epsilon; a value close to zero indicates accurate quantification.
 
-QuantError should be interpreted together with the other module-specific metrics. A workflow that reports many quantified features is not necessarily optimal if the quantitative error is high.
+Epsilon should be interpreted together with the other module-specific metrics. A workflow that reports many quantified features is not necessarily optimal if its epsilon is high.
 
 ## Does ProteoBench perform normalization or missing-value imputation?
 
@@ -111,7 +111,7 @@ ProteoBench does not point to a single best one-size-fits-all data analysis work
 ProteoBench development and discussion are community-oriented. Users can follow the relevant repository, documentation pages, discussion forum, or community channels to receive updates about new modules, software parsers, benchmark datasets, documentation improvements, and public releases.
 
 Ongoing discussions can be followed on the [ProteoBench Discussions page](https://github.com/orgs/Proteobench/discussions). Please note that to take part in the discussion a GitHub account is needed.
-To get email updates on ProteoBench developments, you can use the Github functionality to "watch" the [ProteoBench repository](https://github.com/ProteoBench/Proteobench). For this you also require a GitHub account. You can receive email updates on discussions or issues you either participate or are mentioned in, but you can also use the Custom setting which will allow you to subscribe to specific events, such as issues, pull requests, new version releases and new discussions.
+To get email updates on ProteoBench developments, you can use the GitHub functionality to "watch" the [ProteoBench repository](https://github.com/Proteobench/ProteoBench). For this you also require a GitHub account. You can receive email updates on discussions or issues you either participate or are mentioned in, but you can also use the Custom setting which will allow you to subscribe to specific events, such as issues, pull requests, new version releases and new discussions.
 
 ![Screenshot showing "watch" button on GitHub](../_static/img/watch_image.png)
 

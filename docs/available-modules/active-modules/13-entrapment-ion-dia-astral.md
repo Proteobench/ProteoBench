@@ -11,11 +11,15 @@ FDR control is a central assumption in proteomics data analysis. When a search e
 It is important to note that different search engines calculate the FDR on different levels - within a run, globally, on the precursor level, peptidoform level, protein group level, ... .
 This module tests the **global precursor ion level FDR**. Search engines that do not calculate the FDR on this level can not be benchmarked with this module.
 
-Three metrics are computed:
+Two metrics are computed:
 
 - **Lower bound FDP**: minimum estimate of the false discovery proportion, based on the raw count of entrapment identifications.
-- **Combined FDP** (upper bound): corrected upper bound accounting for the 1:1 target-to-entrapment ratio in the search database.
+
 - **Paired FDP** (upper bound): refined upper bound using a paired peptide mapping, which accounts for entrapment peptides that are harder to identify than their target counterparts.
+
+The combined method from Wen et al. is also implemented, which represents a less tight upper bound. This bound is available for local use in the intermediate file format, and not shown in the plots.
+
+- **Combined FDP** (upper bound): corrected upper bound accounting for the 1:1 target-to-entrapment ratio in the search database.
 
 Each workflow submission is classified as:
 

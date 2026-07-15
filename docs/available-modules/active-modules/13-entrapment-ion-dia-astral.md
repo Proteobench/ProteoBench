@@ -55,7 +55,7 @@ The entrapment FASTA (`ProteoBenchFASTA_Entrapment_Human_with_contaminants_entra
 
 ProteoBench reads the search engine output, maps runs to samples, and classifies each precursor identification as either a **target** or an **entrapment** hit based on the tag in the fasta.
 
-The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold (inferred from the output file). Let $N_T$ and $N_E$ be the number of identified target and entrapment precursors, respectively, at a given score (Q-value) threshold.
+The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold (inferred from the output file). Let {math}`N_T` and {math}`N_E` be the number of identified target and entrapment precursors, respectively, at a given score (Q-value) threshold.
 
 **Lower bound FDP**: the raw proportion of entrapment identifications.
 
@@ -63,7 +63,7 @@ The three FDP estimates are computed from the resulting set and compared to the 
 FDP_{lower} = \frac{N_E}{N_T + N_E}
 ```
 
-**Combined FDP** (upper bound, Wen et al. 2025, eq. 1): corrects the raw entrapment proportion for the 1:1 ratio of target to entrapment sequences in the search database ($r = 1$).
+**Combined FDP** (upper bound, Wen et al. 2025, eq. 1): corrects the raw entrapment proportion for the 1:1 ratio of target to entrapment sequences in the search database ({math}`r = 1`).
 
 ```{math}
 FDP_{combined} = \frac{N_E \left(1 + \dfrac{1}{r}\right)}{N_T + N_E}
@@ -71,8 +71,8 @@ FDP_{combined} = \frac{N_E \left(1 + \dfrac{1}{r}\right)}{N_T + N_E}
 
 **Paired FDP** (upper bound, Wen et al. 2025, eq. 2): refines the estimate using the target/entrapment peptide pairing. For each identified entrapment peptide, its paired target counterpart is looked up:
 
-- $N_{E \sim T}$: identified entrapments whose paired target was **not** identified (unambiguous false positive).
-- $N_{E \succ T}$: identified pairs where the entrapment scored **better** than its paired target (counted twice, reflecting the pair's symmetric contribution to the inflation).
+- {math}`N_{E \sim T}`: identified entrapments whose paired target was **not** identified (unambiguous false positive).
+- {math}`N_{E \succ T}`: identified pairs where the entrapment scored **better** than its paired target (counted twice, reflecting the pair's symmetric contribution to the inflation).
 
 ```{math}
 FDP_{paired} = \frac{N_E + N_{E \sim T} + 2\, N_{E \succ T}}{N_T + N_E}

@@ -307,7 +307,7 @@ Example: when 3 is selected, only the precursor ions quantified in 3 or more raw
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to
 your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratios).
-See the **Important Tool-specific settings** section above for all compatible parameter files.
+See [Important Tool-specific settings](#important-tool-specific-settings) above for all compatible parameter files.
 In this module, we keep track of the following parameters, if you feel
 that some important information is missing, please add it in the
 `Comments for submission` field.

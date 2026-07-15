@@ -41,9 +41,9 @@ The ProteoBench project is divided into two main parts:
 
 Modules for Data Processing and Reporting
 -----------------------------------------
-These :ref:`proteobench` process the data and generate reports.
+These :doc:`proteobench <api/proteobench/proteobench>` modules process the data and generate reports.
 
 Web Interface for Result Visualization
 --------------------------------------
-The :ref:`webinterface` displays the results and allows
+The :doc:`webinterface <api/webinterface/webinterface>` displays the results and allows
 comparison with publicly available data.

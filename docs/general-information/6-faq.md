@@ -3,7 +3,7 @@
 ## What is ProteoBench?
 ProteoBench is an open and collaborative platform for community-curated benchmarks that enables continuous, easy, and controlled comparison of proteomics data analysis workflows.
 
-It provides a centralized web platform where developers and end-users can compare proteomics data analysis {ref}`workflows<workflow>` using standardized benchmark datasets, transparent evaluation metrics, and public comparison plots. This community-curated effort supports the controlled evaluation of tools developed or used by participants against other state-of-the-art workflows for specific proteomics applications. The ability to add new benchmark runs and modules allows ProteoBench to grow with the proteomics field. (See our goals and non-goals in the ["About ProteoBench"](0-about.md) page.)
+It provides a centralized web platform where developers and end-users can compare proteomics data analysis {ref}`workflows<workflow>` using standardized benchmark datasets, transparent evaluation metrics, and public comparison plots. This community-curated effort supports the controlled evaluation of tools developed or used by participants against other state-of-the-art workflows for specific proteomics applications. The ability to add new benchmark runs and modules allows ProteoBench to grow with the proteomics field. (See our [goals and non-goals](0-about.md#goals-and-non-goals).)
 
 The goal of ProteoBench is not to select or prescribe a single best one-size-fits-all data analysis workflow. Instead, ProteoBench aims to make workflow evaluation more transparent, reproducible, and comparable across tools, laboratories, software versions, and use cases.
 

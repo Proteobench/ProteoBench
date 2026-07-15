@@ -330,7 +330,7 @@ These models can be quite tricky to set up. Therefore, some people have made eff
 | https://github.com/SamvPy/DeNovo_Benchmark    | NextFlow and Python | **AdaNovo**, **Casanovo**, **ContraNovo**, **InstaNovo**, **NovoB**, **PepNet**, **π-HelixNovo**, **π-PrimeNovo**, **InstaNovo+**, **Spectralis**| 
 | https://github.com/bittremieuxlab/denovo_benchmarks  | Apptainer | **AdaNovo**, **Casanovo**, **ContraNovo**, **DePS**, **PEAKS**, **biatNovo-DDA**, **DeepNovo**, **GCNovo**, **InstaNovo**, **Novor**, **PepNet**, **π-HelixNovo**, **π-PrimeNovo**, **SMSNet**, **Spectralis**|
 
-> Note that the output of some of these pipelines might be different than is supported in ProteoBench. If you have difficulties uploading your results, you can (i) send out an email to [us](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query), (ii) create a [pull request](https://github.com/Proteobench/ProteoBench/pulls) to support it yourself, or (iii) parse the output to the custom format specified in the **Custom format** section above.
+> Note that the output of some of these pipelines might be different than is supported in ProteoBench. If you have difficulties uploading your results, you can (i) send out an email to [us](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query), (ii) create a [pull request](https://github.com/Proteobench/ProteoBench/pulls) to support it yourself, or (iii) parse the output to the custom format specified in [Custom format](#custom-format) above.
 
 
 ## toml file description
@@ -432,7 +432,7 @@ After uploading an output file, a table is generated. The table is built by left
 ## Define Parameters
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under "Download calculated metrics").
-See the **Important tool-specific settings** section above for all compatible parameter files.
+See [Important tool-specific settings](#important-tool-specific-settings) above for all compatible parameter files.
 
 In this module, we keep track of the following parameters. If you feel that some important information is missing, please add it in the `Comments for submission` field.
 

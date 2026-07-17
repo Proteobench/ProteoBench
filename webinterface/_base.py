@@ -70,7 +70,24 @@ class StreamlitPage(ABC):
         pbb.proteobench_page_config(page_layout=self.PAGE_LAYOUT)
         pbb.proteobench_sidebar(current_page="/")
 
+        # Auth: complete any pending OAuth callback before the hero section (which
+        # contains the sign-in widget) renders -- see handle_oauth_callback_if_pending.
+        from pages.base_pages.utils.auth import (
+            handle_oauth_callback_if_pending,
+            render_oauth_success_banner,
+        )
+
+        handle_oauth_callback_if_pending()
+
+        # If this tab was opened solely to complete an OAuth sign-in, show a banner
+        # telling the user they can close it. We intentionally keep rendering the
+        # full Home page below (rather than replacing it): the full render is what
+        # reliably lets the sign-in cookie reach the browser so the user's other
+        # tab picks it up. A minimal replacement page broke that.
+        render_oauth_success_banner()
+
         self._preface()
+
         self._main_page()
         self._logos()
 
@@ -78,6 +95,8 @@ class StreamlitPage(ABC):
         """
         Set up the preface (hero section) of the Streamlit application.
         """
+        from pages.base_pages.utils.auth import render_auth_home_widget
+
         version = getattr(proteobench, "__version__", "unknown")
 
         st.markdown(
@@ -96,7 +115,8 @@ class StreamlitPage(ABC):
             }
             /* Keep the hero CTA row buttons/links the same height regardless of label length. */
             .st-key-hero_cta_row [data-testid="stButton"] button,
-            .st-key-hero_cta_row [data-testid="stLinkButton"] a {
+            .st-key-hero_cta_row [data-testid="stLinkButton"] a,
+            .st-key-hero_cta_row [data-testid="stPopover"] button {
                 height: 2.5rem;
                 white-space: nowrap;
             }
@@ -153,6 +173,7 @@ class StreamlitPage(ABC):
                     "https://github.com/Proteobench/Proteobench",
                     icon=":material/code:",
                 )
+                render_auth_home_widget()
 
             st.caption(
                 "[Read the manuscript on bioRxiv](https://doi.org/10.64898/2025.12.09.692895) · "

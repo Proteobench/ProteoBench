@@ -30,7 +30,7 @@ def proteobench_page_config(page_layout="wide"):
             initial_sidebar_state="expanded",
         )
     except Exception:
-        return "Set already"
+        pass
 
 
 # Release-stage badges as Streamlit color-badge Markdown directives. Appended to the

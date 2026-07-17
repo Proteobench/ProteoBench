@@ -386,6 +386,10 @@ def display_existing_results(
     # Apply parameter-based filters (key_prefix must be unique per module page)
     filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
 
+    if filtered_data.empty:
+        st.info("No results available yet.", icon="ℹ️")
+        return
+
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
@@ -407,9 +411,10 @@ def display_existing_results(
     # Stamp the Highlight column so plot_main_metric renders the highlighted point
     # with a distinct colour and larger marker (both HYE and de novo generators respect this).
     data_for_plot = filtered_data.copy()
-    if "Highlight" not in data_for_plot.columns:
+    if "id" in data_for_plot.columns:
+        data_for_plot["Highlight"] = data_for_plot["id"] == highlight_id
+    else:
         data_for_plot["Highlight"] = False
-    data_for_plot["Highlight"] = data_for_plot["id"] == highlight_id
 
     # Build annotation and strip meta-keys before forwarding to render_metric_plot.
     annotation = ""

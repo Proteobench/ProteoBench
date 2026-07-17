@@ -122,7 +122,7 @@ Available ProteoBench modules
         `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/archived-modules/4-quant-lfq-ion-dia-aif/>`__
 
 
-.. button-ref:: available-modules/index
+.. button-ref:: modules/index
     :ref-type: doc
     :class: sd-px-4
     :color: primary

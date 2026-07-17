@@ -16,7 +16,8 @@ or in [GitHub Issues](https://github.com/proteobench/proteobench/issues).
 Not sure where to start? Great contributions to
 [ProteoBench](https://github.com/proteobench/proteobench) include:
 
-[TODO]
+<!-- TODO(docs): flesh out this list of example contributions (e.g. new tool parsers,
+     new benchmark modules, bug fixes, documentation improvements). -->
 
 Also check out the [open issues](https://github.com/proteobench/proteobench/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+label%3A%22help+wanted%22)
 that carry the `good first issue` or `help wanted` labels.
@@ -30,10 +31,11 @@ Install the package and dependencies with pip:
 Change into the directory where you cloned proteobench into, and run:
 
 ```
-pip install -e .
+pip install -e '.[dev]'
 ```
 
-Using a virtual environment is recommended.
+The `[dev]` extra installs the test and lint tooling (pytest, black, flake8, pre-commit) used
+later in this guide. Using a virtual environment is recommended.
 
 
 ### Unit tests
@@ -122,7 +124,7 @@ Then browse to http://localhost:8000 to watch the live preview.
 - Commit and push your changes to your
   [fork](https://help.github.com/articles/pushing-to-a-remote/).
 - Ensure that the tests and documentation (both Python docstrings and files in
-  `/docs/source/`) have been updated according to your changes. Python
+  `/docs/`) have been updated according to your changes. Python
   docstrings are formatted in the
   [numpydoc style](https://numpydoc.readthedocs.io/en/latest/format.html).
 - Open a
@@ -143,12 +145,13 @@ Then browse to http://localhost:8000 to watch the live preview.
 
 - When a new version is ready to be published:
 
-    1. Change the `__version__` in `proteobench/__init__.py` following
-       [semantic versioning](https://semver.org/).
-    2. Update the changelog (if not already done) in `CHANGELOG.md` according to
+    1. Update the changelog (if not already done) in `CHANGELOG.md` according to
        [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-    3. Merge all final changes with the `main` branch.
-    4. Create a new release on GitHub.
+    2. Merge all final changes with the `main` branch.
+    3. Create a new release on GitHub, tagged following
+       [semantic versioning](https://semver.org/). The package version is derived
+       automatically from this tag via `setuptools_scm`; there is no `__version__`
+       string to edit.
 
 - When a new GitHub release is made, the `Publish` GitHub Action is automatically
   triggered to build the Python package and publish it to PyPI. Upon a new PyPI release,

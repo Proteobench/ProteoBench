@@ -20,19 +20,19 @@ This module will also reflect which tools outperform others in specific scenario
 
 ## Data set
 
-The widely used 'balanced' nine species dataset from [Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2) (first used here: [Li et al., 2017](https://pubmed.ncbi.nlm.nih.gov/28720701/)) was used as a benchmark dataset. This dataset is composed of nine species, generated in different research groups (see Table 1) and was searched using Tide-Percolator. The PSMs were filtered at PSM-level FDR at 1% and all peptides shared between any species were removed. Further downsampling of the data ultimatly results in 779,879 PSMs. For more detailed information on how the nine-species benchmark was developed, see [Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2).
+The widely used 'balanced' nine species dataset from [Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2) (first used here: [Li et al., 2017](https://pubmed.ncbi.nlm.nih.gov/28720701/)) was used as a benchmark dataset. This dataset is composed of nine species, generated in different research groups (see Table 1) and was searched using Tide-Percolator. The PSMs were filtered at PSM-level FDR at 1% and all peptides shared between any species were removed. Further downsampling of the data ultimately results in 779,879 PSMs. For more detailed information on how the nine-species benchmark was developed, see [Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2).
 
 **Table 1: Benchmark dataset statistics ([Noble et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11549408/#notes2))**
 
 | PRIDE                                                               | Species                   | Instrument             | Spectra    | PSMs        |
 | ------------------------------------------------------------------- | ------------------------- | ---------------------- | ---------- | ----------- |
-| [PXD005025](https://www.ebi.ac.uk/pride/archive/projects/PXD005025) | *Vigna Mungo*             | QExactive              | 932,848    | **102,255** |
+| [PXD005025](https://www.ebi.ac.uk/pride/archive/projects/PXD005025) | *Vigna mungo*             | QExactive              | 932,848    | **102,255** |
 | [PXD004948](https://www.ebi.ac.uk/pride/archive/projects/PXD004948) | *Mus musculus*            | LTQ-Orbitrap Velos     | 306,786    | **25,522**  |
-| [PXD004325](https://www.ebi.ac.uk/pride/archive/projects/PXD004325) | *Methanosarcina mazei*    | QExative Plus          | 3,728,183  | **100,485** |
+| [PXD004325](https://www.ebi.ac.uk/pride/archive/projects/PXD004325) | *Methanosarcina mazei*    | QExactive Plus         | 3,728,183  | **100,485** |
 | [PXD004565](https://www.ebi.ac.uk/pride/archive/projects/PXD004565) | *Bacillus subtilis*       | QExactive              | 4,336,428  | **113,234** |
 | [PXD004536](https://www.ebi.ac.uk/pride/archive/projects/PXD004536) | *Candidatus endoloripes*  | Q Exactive Plus Hybrid | 2,272,023  | **82,514**  |
 | [PXD004947](https://www.ebi.ac.uk/pride/archive/projects/PXD004947) | *Solanum lycopersicum*    | QExactive              | 603,506    | **100,056** |
-| [PXD003868](https://www.ebi.ac.uk/pride/archive/projects/PXD003868) | *Saccharomyces cervisiae* | Q-Exactive Plus        | 1,477,397  | **108,973** |
+| [PXD003868](https://www.ebi.ac.uk/pride/archive/projects/PXD003868) | *Saccharomyces cerevisiae* | Q-Exactive Plus       | 1,477,397  | **108,973** |
 | [PXD004467](https://www.ebi.ac.uk/pride/archive/projects/PXD004467) | *Apis mellifera*          | QExactive              | 823,169    | **102,285** |
 | [PXD004424](https://www.ebi.ac.uk/pride/archive/projects/PXD004424) | *Homo sapiens*            | QExactive              | 684,821    | **44,555**  |
 | Total                                                               |                           |                        | 15,165,161 | **779,879** |
@@ -44,7 +44,7 @@ We recommend downloading the parsed and combined dataset from the ProteoBench se
 
 ## Metric calculation
 
-The performance is evaluated at both the amino acid and peptide level. As introduced by [DeepNovo](https://www.pnas.org/doi/10.1073/pnas.1705691114), a correct amino acid whose mass differs by less than 0.1 Da from the corresponding ground truth amino acid. Additionally, this predicted amino acid must have either a prefix or suffix that differs by no more than 0.5 Da in mass from the corresponding amino acid sequence in the ground truth peptide. Correct peptides are defined as sequences where all amino acid predictions meet these criteria, ensuring that only fully accurate predictions are considered correct at the peptide level. In the module, this mode of evaluation is called '**mass-based**'. However, a more strict evaluation mode can be selected and is termed '**exact mode**'. In this mode, the two sequences should be exactly the same, where also cases such as deamidated-Q and E are considered incorrect. Only isoleucine and leucine substitutions are allowed.
+The performance is evaluated at both the amino acid and peptide level. As introduced by [DeepNovo](https://www.pnas.org/doi/10.1073/pnas.1705691114), a predicted amino acid is counted as correct when it falls within the cumulative and individual mass tolerances described below relative to the corresponding ground-truth amino acid (see "Cumulative mass threshold" and "Individual mass threshold"). Correct peptides are defined as sequences where all amino acid predictions meet these criteria, ensuring that only fully accurate predictions are considered correct at the peptide level. In the module, this mode of evaluation is called '**mass-based**'. However, a more strict evaluation mode can be selected and is termed '**exact mode**'. In this mode, the two sequences should be exactly the same, where also cases such as deamidated-Q and E are considered incorrect. Only isoleucine and leucine substitutions are allowed.
 
 ### Main benchmarking plot
 
@@ -79,7 +79,7 @@ The algorithm identifies the longest **mass-matching prefix and suffix** between
 - **Cumulative mass threshold** – maximum allowed difference between cumulative fragment masses (50 ppm)  
 - **Individual mass threshold** – maximum allowed difference between individual amino-acid masses (20 ppm)
 
-This evaluation accounts for typical ambiguities in mass spectrometry data. Match-based evaluation therefore counts both **exact matches and mass-equivalent matches**, while exact evaluation only counts **perfect sequence matches**.
+This evaluation accounts for typical ambiguities in mass spectrometry data. Mass-based evaluation therefore counts both **exact matches and mass-equivalent matches**, while exact evaluation only counts **perfect sequence matches**.
 
 
 ### In-depth plots
@@ -91,7 +91,7 @@ The in-depth section provides a more detailed picture of the (relative) performa
 
 Firstly, the ability of the tool to accurately predict several **PTM's** can be evaluated. Since the ground-truth dataset was generated by searching against specific modifications, only these are supported. In Table 2, an overview of supported PTMs and their statistics are stated. Two types of plots are created for this: (i) an overview plot and (ii) PTM-specific plots. In the overview plot, the precision across all modifications are plotted together where precision is defined as the proportion of correctly predicted modifications over all peptides containing this modification in the ground-truth. A correct prediction does not require a fully correctly predicted peptide, only the specific amino acid with its PTM at the correct position. In the PTM-specific plots, this precision is plotted against the precision calculated as the proportion over all peptides containing this modification in the predicted peptide list. By doing so, biased precision estimates are handled in cases when the *de novo* tool would predict PTMs abundantly yet erroneously.
 
-**Table 3. PTMs in the ground-truth dataset**
+**Table 2. PTMs in the ground-truth dataset**
 
 | PTM                      | Occurrences | Fixed |
 | ------------------------ | ----------- | ----- |
@@ -144,14 +144,14 @@ Table 3 provides an overview of the required input files for public submission. 
 | AdaNovo | *.mzTab | *.yaml |
 | Casanovo | *.mztab | *.yaml |
 | ContraNovo | *.mztab | *.yaml |
-| DeepNovo | *.tab |  |
+| DeepNovo* | *.tab |  |
 | InstaNovo | *.csv | *.yaml |
-| NovoB | *.csv |  |
-| PepNet | *.tsv |  |
+| NovoB* | *.csv |  |
+| PepNet* | *.tsv |  |
 | Pi-HelixNovo | *.tsv | *.yaml |
 | Pi-PrimeNovo | *.tsv | *.yaml |
-| PointNovo | *.csv |  |
-| SMSNet | results + results_prob (2 files) |  |
+| PointNovo* | *.csv |  |
+| SMSNet* | results + results_prob (2 files) |  |
 
 \* PepNet, DeepNovo, PointNovo, NovoB, and SMSNet do not have a configuration file that is easily parsable, so no parameter file is required. When uploading a datapoint, do please make sure that the parameter metadata fields are filled in as much as possible to make your submission transparent to the community.
 
@@ -320,17 +320,17 @@ Ensure that the spectrum identifiers in your file match the scan numbers used in
 
 ## How to run these models more easily ?
 
-These models can be quiet tricky to set up. Therefore, some people have made efforts to streamline the execution of these tools into more easily configurable pipelines. Some examples are summarized in the table below with the models that are supported.
+These models can be quite tricky to set up. Therefore, some people have made efforts to streamline the execution of these tools into more easily configurable pipelines. Some examples are summarized in the table below with the models that are supported.
 
 **Table 4. Overview of public model execution pipelines**
 
 | Pipeline link  | Workflow manager | Supported tools    | 
 | ----------- | ------------- | ------------- | 
-| https://github.com/denisbeslic/denovopipeline | Python | **DeepNovo**, **PointNovo**, **SMSNet**, and **CasaNovo** (newer models might be incompatible) | 
+| https://github.com/denisbeslic/denovopipeline | Python | **DeepNovo**, **PointNovo**, **SMSNet**, and **Casanovo** (newer models might be incompatible) | 
 | https://github.com/SamvPy/DeNovo_Benchmark    | NextFlow and Python | **AdaNovo**, **Casanovo**, **ContraNovo**, **InstaNovo**, **NovoB**, **PepNet**, **π-HelixNovo**, **π-PrimeNovo**, **InstaNovo+**, **Spectralis**| 
 | https://github.com/bittremieuxlab/denovo_benchmarks  | Apptainer | **AdaNovo**, **Casanovo**, **ContraNovo**, **DePS**, **PEAKS**, **biatNovo-DDA**, **DeepNovo**, **GCNovo**, **InstaNovo**, **Novor**, **PepNet**, **π-HelixNovo**, **π-PrimeNovo**, **SMSNet**, **Spectralis**|
 
-> Note that the output of some of these pipelines might be different than is supported in ProteoBench. If you have difficulties uploading your results, you can (i) send out an email to [us](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query), (ii) create a [pull request] to support it yourself, or (iii) parse the output to the custom format specified [above](#custom-format).
+> Note that the output of some of these pipelines might be different than is supported in ProteoBench. If you have difficulties uploading your results, you can (i) send out an email to [us](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query), (ii) create a [pull request](https://github.com/Proteobench/ProteoBench/pulls) to support it yourself, or (iii) parse the output to the custom format specified in [Custom format](#custom-format) above.
 
 
 ## toml file description
@@ -432,7 +432,7 @@ After uploading an output file, a table is generated. The table is built by left
 ## Define Parameters
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under "Download calculated metrics").
-See [here](#important-tool-specific-settings) for all compatible parameter files.
+See [Important tool-specific settings](#important-tool-specific-settings) above for all compatible parameter files.
 
 In this module, we keep track of the following parameters. If you feel that some important information is missing, please add it in the `Comments for submission` field.
 

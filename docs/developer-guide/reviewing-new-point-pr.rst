@@ -1,6 +1,6 @@
-###############
+##########################################
 Reviewing the submission of new data point
-###############
+##########################################
 
 1. Go to the PR page on Proteobot.
 
@@ -13,10 +13,11 @@ Reviewing the submission of new data point
 5. Check if the submitted data is present on the server by clicking the link in the PR. For example, points submitted from local installs should not be accepted because the data will not be present on the server.
 
 6. If everything looks good and the PR is ready to be accepted, then:
-  * Press 'Merge pull request'. 
-  * Confirm the merge. 
-  * Go to the 'Code' page
-  * Sync the fork
-  * Click 'Contribute' and open a pull request.
 
-7. Go to the Proteobench github repository corresponding to the module results and accept (merge) the pull request.
+   * Press 'Merge pull request'.
+   * Confirm the merge.
+   * Go to the 'Code' page.
+   * Sync the fork.
+   * Click 'Contribute' and open a pull request against the Proteobench repository (the one holding the module results, not Proteobot).
+
+7. Go to the Proteobench github repository corresponding to the module results and accept (merge) the pull request opened in step 6.

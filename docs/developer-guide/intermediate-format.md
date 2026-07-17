@@ -1,13 +1,14 @@
 # Intermediate format specification
 
 This document specifies the internal tabular formats that ProteoBench produces
-while processing a benchmark submission. These formats are for the internal use of:
-scoring, plotting, datapoint generation, the submission-validation layer, and the
-`intermediate_hash` that identifies a dataset all depend on the column names,
-types, and semantics defined here. It is important to note that the intermediate format
-is specific for a module. Even though models can share intermediate formats where
-applicable. If there is any explanation on this page that is module specific, this
-is purely for illustrative purposes.
+while processing a benchmark submission. These formats are used internally by
+scoring, plotting, datapoint generation, and the submission-validation layer.
+Each of these, together with the `intermediate_hash` that identifies a dataset,
+depends on the column names, types, and semantics defined here. It is important
+to note that the intermediate format is specific to a module, even though
+modules can share intermediate formats where applicable. If there is any
+explanation on this page that is module specific, this is purely for
+illustrative purposes.
 
 ```{note}
 Status: descriptive specification of the current behaviour (format version 1,
@@ -80,7 +81,7 @@ precursors do not appear.
 | `log2_A_vs_B` | float | `log_Intensity_mean_A - log_Intensity_mean_B`. The observed log2 fold change. |
 | per-run intensity columns | float | One column per distinct run name (cleaned `Raw file`), holding that run's intensity for the quantified feature. The set of columns therefore depends on the experimental design. |
 | `nr_observed` | int | Number of runs in which the feature (i.e. precursor, peptidoform) was quantified. |
-| species flags | bool | One boolean per species (HYE: `YEAST`, `ECOLI`, `HUMAN`). For a retained row exactly one is `True`. |
+| species flags | bool | One boolean per species (HYE: `HUMAN`, `YEAST`, `ECOLI`). For a retained row exactly one is `True`. |
 | `unique` | int | Sum of the species flags. Always `1` in the persisted table. |
 | `species` | str | The single species name for the precursor. |
 | `log2_expectedRatio` | float | `log2` of the module's expected A-vs-B ratio for `species`. |
@@ -123,13 +124,13 @@ column order and row order as part of the format.
   error, dynamic range, human-plasma epsilon) are computed later, in
   `QuantDatapointPYE`, not in the intermediate table. The plasma datapoint also
   uses `max_nr_observed = 12` instead of 6.
-- **De novo (`denovo_DDA_HCD`)**: a different schema entirely, produced by
-  columns above. This modules is still in development, the full documentation of its intermediate format will be provided soon.
-  and carries match-type and amino-acid-level columns (for example `match_type`,
-  `aa_matches_dn`/`aa_matches_gt`, `pep_match`) rather than the quantitative
-  columns above. A detailed catalogue for the de novo intermediate is out of
-  scope for this revision and should be added alongside the de novo module's
-  maturation.
+- **De novo (`denovo_DDA_HCD`)**: a different schema entirely. This module is
+  still in development, and full documentation of its intermediate format will
+  be provided soon. It carries match-type and amino-acid-level columns (for
+  example `match_type`, `aa_matches_dn`/`aa_matches_gt`, `pep_match`) rather
+  than the quantitative columns above. A detailed catalogue for the de novo
+  intermediate is out of scope for this revision and should be added alongside
+  the de novo module's maturation.
 
 ## Persistence and external resources
 

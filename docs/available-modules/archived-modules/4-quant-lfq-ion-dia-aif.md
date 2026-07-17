@@ -3,7 +3,7 @@
 
 > **THIS MODULE IS NOW ARCHIVED**
 > 
-> This module is archived because we noticed the presence of oxidations that prevent the accurate mesure of quantification accuracy.
+> This module is archived because we noticed the presence of oxidations that prevent the accurate measure of quantification accuracy.
 > The original GitHub discussion highlighting the issue can be found [here](https://github.com/orgs/Proteobench/discussions/641)
 > 
 > We noticed that the presence of oxidised peptides creates human ratio that are close to the expected value for E. coli (see figure below).
@@ -17,14 +17,14 @@
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely All-Ion Fragmentation (AIF), on a Q Exactive HF-X Orbitrap (Thermo Fisher).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
-**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
+**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publicly upload data without replacement of missing values and without manual filtering.**  
 
 We think that this module is more suited to evaluate the impact of (non exhaustive list):
 - search engine identification
 - peak picking
 - low-level ion signal normalisation
 
-Other modules will be more suited to explore further post-pocessing steps. 
+Other modules will be more suited to explore further post-processing steps. 
 
 ## Data set
 
@@ -80,7 +80,7 @@ The module is flexible in terms of what workflow the participants can run. Howev
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from DIA-NN, AlphaDIA, FragPipe, MaxDIA and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from the tools listed in Table 2 below (see the tool-specific sections for more details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
 `I really want to upload it` will appear to trigger the submission.
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
@@ -129,14 +129,14 @@ In the windowsGUI:
 
 1. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
 2. In the "Analysis" tab, select "Set up a DirectDIA Analysis from file"
-3. Select the folder containting the raw files in order to load them
+3. Select the folder containing the raw files in order to load them
 4. Once loaded, you optionally can change the name of the project ("Condition" by default)
 5. In the next tab, click on "Import..." to import the proteobench fasta. Next, check the box corresponding to the proteobench fasta on the left panel, and click on "Next".
 6. Choose your settings in the next tab
 7. In the next tab, fill "A" and "B" in the "Condition" column:
    "A" for "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_02", "LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_03";
    "B" for "LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_01","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_02","LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03" 
-9. Do not tick any GO terms or Library exensions in the next tabs
+9. Do not tick any GO terms or Library extensions in the next tabs
 10. Finish the settings on the next tab in order to start the search
 11. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
 12. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
@@ -159,7 +159,7 @@ LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03.
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Orbi-Orbi), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
 In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Peptide and Precursor FDR are set to 1%. 
-Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
+Once the workflow has run successfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
 
 #### Troubleshooting: 
 
@@ -186,10 +186,10 @@ the table must not contain non-validated ions. If you have any issue, contact us
 
 ## toml file description (work in progress)
 
-Each software tool produces specific output files formats. We made ``.toml`` files that describe where to find the information needed in each type of input. These can be found in `proteobench/modules/dia_quant/io_parse_settings`:
+Each software tool produces specific output files formats. We made ``.toml`` files that describe where to find the information needed in each type of input. These can be found in `proteobench/io/parsing/io_parse_settings`:
 
 - **[mapper]**
-mapping between the headers in the input file (left-hand side) and the header of the intermediate file generated by ProteoBench. If more parsing is required before metrics calculation, this part can contain mapping between intermediatec column names and the name in the intermediate file. This is the case for Proline where protein accessions are reported in two independent columns that need to be combined. This should be commented in the toml.
+mapping between the headers in the input file (left-hand side) and the header of the intermediate file generated by ProteoBench. If more parsing is required before metrics calculation, this part can contain mapping between intermediate column names and the name in the intermediate file. This is the case, for example, for tools that report protein accessions in two independent columns that need to be combined. This should be commented in the toml.
 
   - "Raw file" = field that contains the raw file identifiers. **If the field "Raw file" is present, the table is parsed is a long format, otherwise it is parsed as wide format.**
  
@@ -201,7 +201,7 @@ mapping between the headers in the input file (left-hand side) and the header of
  
   - "Charge" = precursor charge.
  
-  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST"). *Curently, there is an exception for FragPipe's .toml where we combine two columns, and protein IDs are seperated by "," (see the FragPipe section).*
+  - "Proteins" = field containing the protein identifiers. These should be separated by ";", and contain the species flag (for example "_YEAST"). *Curently, there is an exception for FragPipe's .toml where we combine two columns, and protein IDs are separated by "," (see the FragPipe section).*
  
   - "Intensity" = field containing the intensities utilised to calculate the module metrics. Used for long-format input.
 
@@ -252,15 +252,14 @@ After uploading an output file, a table is generated that contains the following
 - epsilon = difference of the observed and expected log2-transformed fold change
 
 
-Choose with the slider below the minimum number of quantification value per raw file.
+Choose with the slider below the minimum number of quantification values per raw file.
 Example: when 3 is selected, only the precursor ions quantified in 3 or more raw files will be considered for the plot.
  
   ## Define Parameters
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to 
-your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratio's). 
-See [here](#important-tool-specific-settings)
-for all compatible parameter files.
+your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratios). 
+See [Important Tool-specific settings](#important-tool-specific-settings) above for all compatible parameter files.
 In this module, we keep track of the following parameters, if you feel 
 that some important information is missing, please add it in the 
 `Comments for submission` field. 

@@ -23,8 +23,18 @@ The module-specific standardized table that ProteoBench computes from a workflow
 ## Open source software
 We consider a tool open source if the code is publicly available in its latest version, whatever the licence.
 
+(workflow)=
 ## Workflow
 A combination of data analysis tools with associated parameters that takes workflow input files (provided by a benchmark module) and generates workflow output files. Based on the workflow output files, metrics can be calculated describing the workflow performance.
+
+## HYE
+The three-organism benchmark sample used in most quantification modules: a defined mixture of Human, Yeast, and *E. coli* proteins (HYE) combined in two conditions (A and B) with known between-condition ratios per species. These known ratios provide the ground truth for the quantification accuracy metric (see Epsilon below).
+
+## PYE
+A benchmark sample analogous to HYE but based on human Plasma, Yeast, and *E. coli* (PYE), used by the human plasma quantification module.
+
+## Epsilon
+The deviation of an observed log2 fold change between conditions A and B from the expected (known) ratio for a species: `epsilon = log2_A_vs_B - log2_expectedRatio`. Reported as the median and mean absolute epsilon; a value close to zero indicates accurate quantification. Requires ground-truth ratios (see HYE/PYE above).
 
 ## Workflow configuration files
 Files that contain parameters for a workflow or for a data analysis tool within a workflow. These files can be specific to the workflow or to the data analysis tool and help to re-execute it with the same parameters (e.g., mqpar.xml).

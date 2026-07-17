@@ -35,6 +35,14 @@ source_suffix = [".rst"]
 master_doc = "index"
 exclude_patterns = ["_build", "_autosummary", "reference", "Thumbs.db", ".DS_Store", "module_grid_generated.rst"]
 
+# Generate GitHub-style heading anchors (up to h3) so in-page markdown links like
+# [here](#some-heading) resolve. Without this, MyST cannot resolve such links at all.
+myst_heading_anchors = 3
+
+# Many module docs share identical section headings (e.g. "Data set", "Metric calculation"),
+# which otherwise collide under sphinx.ext.autosectionlabel and make `:ref:` targets ambiguous.
+autosectionlabel_prefix_document = True
+
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
 templates_path = ["_templates"]

@@ -7,7 +7,7 @@ All ProteoBench modules can be executed locally. Simply install the
 pip install proteobench
 ```
 
-Check out the {ref}`proteobench` documentation for more information.
+Check out the [ProteoBench API documentation](https://proteobench.readthedocs.io/) for more information.
 
 ## Step-by-step example notebook
 

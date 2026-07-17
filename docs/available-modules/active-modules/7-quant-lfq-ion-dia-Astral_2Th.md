@@ -5,14 +5,14 @@
 This module compares the sensitivity and quantification accuracy for data-independent acquisition (DIA) data, namely Narrow-window 2 Th, on an Orbitrap Astral (Thermo Fisher Scientific).
 Users can load their data and inspect the results privately. They can also make their outputs public by providing the associated parameter file and submitting the benchmark run to ProteoBench. By doing so, their workflow output will be stored alongside all other benchmark runs in ProteoBench and will be accessible to the entire community.
 
-**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publically upload data without replacement of missing values and without manual filtering.**  
+**This module is not designed to compare later-stages post-processing of quantitative data such as missing value replacement, and we advise users to publicly upload data without replacement of missing values and without manual filtering.**  
 
 We think that this module is more suited to evaluate the impact of (non exhaustive list):
 - search engine identification
 - peak picking
 - low-level ion signal normalisation
 
-Other modules will be more suited to explore further post-pocessing steps. 
+Other modules will be more suited to explore further post-processing steps. 
 
 ## Data set
 
@@ -20,7 +20,7 @@ A not yet released Astral (Thermo Fisher) data independent acquisition (DIA) dat
 Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
 Data acquisition parameters were as following: 
-Peptides were loaded directly onto the analytical column and were separated by reversed-phase chromatography using a 50 cm μPAC™ column (Thermo Scientific, cat # COL-NANO050NEOB), featuring a structured pillar array bed with a 180 µm bed width. The chromatographic gradient was initiated with 96% buffer A and 4% buffer B at a flow rate of 750 nL/min durig 1 minute. The flow rate was then reduced to 250 nL/min, and the percentage of buffer B was further increased to 40% over 15 minutes. Buffer A: 0.1% formic acid in water. Buffer B: 0.1% formic acid in 80% acetonitrile.
+Peptides were loaded directly onto the analytical column and were separated by reversed-phase chromatography using a 50 cm μPAC™ column (Thermo Scientific, cat # COL-NANO050NEOB), featuring a structured pillar array bed with a 180 µm bed width. The chromatographic gradient was initiated with 96% buffer A and 4% buffer B at a flow rate of 750 nL/min during 1 minute. The flow rate was then reduced to 250 nL/min, and the percentage of buffer B was further increased to 40% over 15 minutes. Buffer A: 0.1% formic acid in water. Buffer B: 0.1% formic acid in 80% acetonitrile.
 
 The mass spectrometer was operated in positive ionization mode with data-independent acquisition, with a full MS scans over a mass range of m/z 380-980 with detection in the Orbitrap at a resolution of 240,000. In each cycle of data-independent acquisition, 300 windows of 2 Th were used to isolate and fragment all precursor ions from 380 to 980 m/z. A normalized collision energy of 25% was used for higher-energy collisional dissociation
 (HCD) fragmentation. MS2 scan range was set from 150 to 2000 m/z with detection in the Astral with a maximum injection time of 3 ms.
@@ -48,7 +48,7 @@ present in the samples **and contaminant proteins**.
 ## Metric calculation
 
 For each precursor ion (modified sequence + charge), we calculate the sum of signal per raw file. Contaminant sequences flagged with the prefix "Cont_" in the fasta file are removed, as well as the peptide ions that match proteins from several species and the peptide ions that are not quantified in any raw file. When applicable, "0" are replaced by NAs and missing values are ignored.
-Then we log2-transform the values, and calculate the mean signal per condition, with the standard deviation and coefficient of variation (CV). For each precursor ion, we calculate the difference between the mean(log2) in A and B, and compare it to its expected value. The difference between measured and expected mean(log2) is called "epsilon".
+Then we log2-transform the values, and calculate the mean signal per condition, with the standard deviation and coefficient of variation (CV). For each precursor ion, we calculate the difference between the mean(log2) in A and B, and compare it to its expected value (Human: 0, _E. coli_: -2, and Yeast: 1). The difference between measured and expected mean(log2) is called "epsilon".
 The total number of unique precursor ions is reported on the vertical axis, and the mean or median absolute epsilon is reported on the horizontal axis. More detailed description of how the data are handled before metrics calculation may be found in the tool-specific paragraphs below. 
 
 ## How to use
@@ -57,7 +57,7 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available. 
 
-To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from AlphaDIA, DIA-NN, FragPipe, MaxDIA, PEAKS and Spectronaut (see bellow for more tool-specific details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
+To submit your run for public usage, you need to upload the parameter file associated to your run in the field `Meta data for searches`. Currently, we accept outputs from the tools listed in Table 2 below (see the tool-specific sections for more details). Please fill the `Comments for submission` if needed, and confirm that the metadata is correct (corresponds to the benchmark run) before checking the button `I confirm that the metadata is correct`. Then the button 
 `I really want to upload it` will appear to trigger the submission.
 
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
@@ -107,12 +107,12 @@ In FragPipe output files, the protein identifiers matching a given ion are in tw
 ### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE)
 1. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
 2. In the "Analysis" tab, select "Set up a DirectDIA Analysis from folder"
-3. Select the folder containting the raw files in order to load the raw files
+3. Select the folder containing the raw files in order to load the raw files
 4. Once loaded, you optionally can change the name of the project
 5. In the next tab select the proteobench fasta as the database
 6. Choose your settings in the next tab
 7. In the next tab fill in the conditions: "LFQ_Astral_DIA_15min_50ng_Condition_A_REP1","LFQ_Astral_DIA_15min_50ng_Condition_A_REP2", "LFQ_Astral_DIA_15min_50ng_Condition_A_REP3","LFQ_Astral_DIA_15min_50ng_Condition_B_REP1","LFQ_Astral_DIA_15min_50ng_Condition_B_REP2","LFQ_Astral_DIA_15min_50ng_Condition_B_REP3"
-8. Do not tick any GO terms or Library exensions in the next tabs
+8. Do not tick any GO terms or Library extensions in the next tabs
 9. Finish the settings on the next tab in order to start the search
 10. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
 11. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
@@ -136,7 +136,7 @@ When starting a new project and selecting the .RAW files for analysis, you will 
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
 In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Precursor or Peptide FDR and Protein Group FDR are set to 1%. 
-Once the workflow has run succesfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
+Once the workflow has run successfully, make sure to check the "All Search Parameters" and the "Feature Vector CSV" from the Label Free Quantification Exports in the "Export" tab. 
 
 ### Custom format
 
@@ -157,10 +157,10 @@ the table must not contain non-validated ions. If you have any issue, contact us
 
 ## toml file description (work in progress)
 
-Each software tool produces specific output files formats. We made ``.toml`` files that describe where to find the information needed in each type of input. These can be found in `proteobench/modules/dia_quant/io_parse_settings`:
+Each software tool produces specific output files formats. We made ``.toml`` files that describe where to find the information needed in each type of input. These can be found in `proteobench/io/parsing/io_parse_settings`:
 
 - **[mapper]**
-mapping between the headers in the input file (left-hand side) and the header of the intermediate file generated by ProteoBench. If more parsing is required before metrics calculation, this part can contain mapping between intermediatec column names and the name in the intermediate file. This is the case for Proline where protein accessions are reported in two independent columns that need to be combined. This should be commented in the toml.
+mapping between the headers in the input file (left-hand side) and the header of the intermediate file generated by ProteoBench. If more parsing is required before metrics calculation, this part can contain mapping between intermediate column names and the name in the intermediate file. This is the case, for example, for tools that report protein accessions in two independent columns that need to be combined. This should be commented in the toml.
 
   - "Raw file" = field that contains the raw file identifiers. **If the field "Raw file" is present, the table is parsed is a long format, otherwise it is parsed as wide format.**
  
@@ -223,15 +223,14 @@ After uploading an output file, a table is generated that contains the following
 - epsilon = difference of the observed and expected log2-transformed fold change
 
 
-Choose with the slider below the minimum number of quantification value per raw file.
+Choose with the slider below the minimum number of quantification values per raw file.
 Example: when 3 is selected, only the precursor ions quantified in 3 or more raw files will be considered for the plot.
  
   ## Define Parameters
 
 To make the results available to the entire community, you need to provide the parameter file that corresponds to 
-your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratio's). 
-See [here](#important-tool-specific-settings)
-for all compatible parameter files.
+your analysis. You can upload it in the drag and drop area in the "Add results to online repository" section (under Download calculated ratios). 
+See [Important Tool-specific settings](#important-tool-specific-settings) above for all compatible parameter files.
 In this module, we keep track of the following parameters, if you feel 
 that some important information is missing, please add it in the 
 `Comments for submission` field. 

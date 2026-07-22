@@ -20,9 +20,8 @@ import streamlit_utils
 from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
-from pages.utils.submission_source import get_submission_source, is_official_server
-
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
+from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
@@ -182,25 +181,7 @@ class DeNovoUIObjects(BaseUIModule):
             )
 
         if submit_button:
-            # Clear any previously uploaded parameter file and widget state so Tab 5
-            # starts fresh for the new tool/file combination.
-            st.session_state[self.variables.params_file_dict] = {}
-            # Erase the old file uploader's stored file before cycling the UUID,
-            # so the uploader cannot resurrect the old file even if the key persists.
-            _old_meta_uuid = st.session_state.get(self.variables.meta_file_uploader_uuid)
-            if _old_meta_uuid is not None:
-                st.session_state.pop(_old_meta_uuid, None)
-            st.session_state[self.variables.meta_file_uploader_uuid] = uuid.uuid4()
-            with open(self.variables.additional_params_json, encoding="utf-8") as f:
-                _param_config = json.load(f)
-            for _key in _param_config.keys():
-                st.session_state.pop(self.variables.prefix_params + _key, None)
-
-            st.info(
-                "Calculating metrics for {}. This will take around two minutes. Please be patient.".format(
-                    self.user_input["input_format"]
-                )
-            )
+            st.info("Calculating metrics. This will take around two minutes. Please be patient.")
             self.first_point_plotted = tab2.process_submission_form(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
@@ -247,8 +228,8 @@ class DeNovoUIObjects(BaseUIModule):
         )
 
         # Use default values for plot rendering (no user controls on this tab)
-        levels = ["precision", "recall"]
-        evaluation_types = ["exact", "mass"]
+        level = "precision"
+        evaluation_type = "exact"
         colorblind_mode = False
 
         modifications = [
@@ -282,9 +263,9 @@ class DeNovoUIObjects(BaseUIModule):
             # Create kwargs with De Novo-specific parameters (now using user selections)
             plot_kwargs = {
                 "mod_labels": modifications,
-                "feature": feature_names,
-                "level": levels,
-                "evaluation_type": evaluation_types,
+                "feature": feature_names[0] if feature_names else "Missing Fragmentation Sites",
+                "level": level,
+                "evaluation_type": evaluation_type,
                 "colorblind_mode": colorblind_mode,
             }
 
@@ -298,13 +279,13 @@ class DeNovoUIObjects(BaseUIModule):
 
                 for section in layout:
                     st.subheader(section.get("title", ""))
+                    cols = st.columns(section.get("columns", 1))
                     for idx, plot_name in enumerate(section["plots"]):
-                        if plot_name in plots:
-                            if plot_name in descriptions:
-                                st.caption(descriptions[plot_name])
-                            self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
-                            # st.plotly_chart(plots[plot_name])
-
+                        with cols[idx % len(cols)]:
+                            if plot_name in plots:
+                                st.plotly_chart(plots[plot_name], width='stretch')
+                                if plot_name in descriptions:
+                                    st.caption(descriptions[plot_name])
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
                 import traceback
@@ -313,75 +294,6 @@ class DeNovoUIObjects(BaseUIModule):
                     st.code(traceback.format_exc())
         else:
             st.info("No datasets selected for plotting.")
-
-    def _display_ptm_overview(self, figs) -> None:
-        # Overview PTM plot
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.ptm_overview)
-
-        st.plotly_chart(figs)
-
-    def _display_ptm_specific(self, figs) -> None:
-        # Specific PTM plots
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.ptm_specific)
-
-        modification_labels = list(figs.keys())
-        tabs = st.tabs(modification_labels)
-        tab_dict = {mod_label: tab for mod_label, tab in zip(modification_labels, tabs)}
-        for mod_label, tab in tab_dict.items():
-            with tab:
-                st.header(mod_label)
-                st.plotly_chart(
-                    figs[mod_label],
-                    key=f"ptm_plot_{mod_label}",
-                )
-
-    def _display_spectrum_features(self, figs) -> None:
-        feature_names = list(figs.keys())
-        exact_mode = st.toggle(
-            label="Exact evaluation mode", value=False, key=self.variables.evaluation_mode_toggle_tab3_features
-        )
-        if exact_mode:
-            evaluation_type = "exact"
-        else:
-            evaluation_type = "mass"
-
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.spectrum_features_overview)
-
-        tabs = st.tabs(feature_names)
-        tab_dict = {feature_name: tab for feature_name, tab in zip(feature_names, tabs)}
-        for feature_name, tab in tab_dict.items():
-            with tab:
-                st.header(feature_name)
-                st.plotly_chart(figs[feature_name][evaluation_type])
-
-    def _display_species_overview(self, figs) -> None:
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.species)
-
-        exact_mode = st.toggle(
-            label="Exact evaluation mode", value=False, key=self.variables.evaluation_mode_toggle_tab3_species
-        )
-        if exact_mode:
-            evaluation_type = "exact"
-        else:
-            evaluation_type = "mass"
-
-        st.plotly_chart(figs[evaluation_type], key=self.variables.fig_species_overview)
-
-    def _display_indepth_plot(self, plot_name: str, figs) -> None:
-        if plot_name == "ptm_overview":
-            self._display_ptm_overview(figs)
-        elif plot_name == "ptm_specific":
-            self._display_ptm_specific(figs)
-        elif plot_name == "spectrum_feature":
-            self._display_spectrum_features(figs)
-        elif plot_name == "species_overview":
-            self._display_species_overview(figs)
-        else:
-            raise Exception("Cannot display non-implemented in-depth plot.")
 
     @st.fragment
     def display_all_data_results_submitted(self) -> None:
@@ -470,7 +382,7 @@ class DeNovoUIObjects(BaseUIModule):
 
         st.title("Public submission")
         st.markdown(
-            "If you want to make this point — and the associated data — publicly available, please go to “Public Submission"
+            "If you want to make this point — and the associated data — publicly available, please go to “Public Submission”"
         )
 
     def display_workflow_comparison(self) -> None:
@@ -509,114 +421,38 @@ class DeNovoUIObjects(BaseUIModule):
         if self.variables.check_submission not in st.session_state:
             st.session_state[self.variables.check_submission] = False
 
-        self.submission_ready = tab5_quant.generate_submission_ui_elements(
-            variables=self.variables,
-            user_input=self.user_input,
-        )
+        if self.variables.first_new_plot:
+            self.submission_ready = tab5_quant.generate_submission_ui_elements(
+                variables=self.variables,
+                user_input=self.user_input,
+            )
 
-        # Parse parameter file if uploaded so parsed values pre-populate the fields below.
-        # If no file is provided the fields render with schema defaults for manual entry.
         if self.user_input[self.variables.meta_data]:
-            params_from_file = tab5_quant.load_user_parameters(
+            params = tab5_quant.load_user_parameters(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
             )
-            if params_from_file is not None:
-                st.session_state[self.variables.params_file_dict] = params_from_file.__dict__
-                self.params_file_dict_copy = copy.deepcopy(params_from_file.__dict__)
-                # Directly update widget session state keys so Streamlit uses the parsed values.
-                # Without this, Streamlit ignores the `value` arg on widgets whose keys already exist
-                # (registered from the pre-upload render of the always-visible fields).
-                # Values must be sanitized: ProteoBenchParameters stores np.nan for missing fields,
-                # which Streamlit cannot assign to a protobuf string field.
-                for key, val in params_from_file.__dict__.items():
-                    try:
-                        is_missing = pd.isna(val)
-                    except (TypeError, ValueError):
-                        is_missing = False
-                    if is_missing:
-                        sanitized = None
-                    elif not isinstance(val, str):
-                        sanitized = str(val)
-                    else:
-                        sanitized = val
-                    st.session_state[self.variables.prefix_params + key] = sanitized
-            else:
-                self.params_file_dict_copy = {}
+            st.session_state[self.variables.params_file_dict] = params.__dict__
+            self.params_file_dict_copy = copy.deepcopy(params.__dict__)
+
+            tab5_quant.generate_additional_parameters_fields_submission(
+                variables=self.variables,
+                user_input=self.user_input,
+            )
+            tab5_quant.generate_comments_section(
+                variables=self.variables,
+                user_input=self.user_input,
+            )
+            # ? stop_duplicating is not used?
+            self.stop_duplicating = tab5_quant.generate_confirmation_checkbox(
+                check_submission=self.variables.check_submission
+            )
         else:
-            self.params_file_dict_copy = {}
+            params = None
 
-        # Always override software_name with the active input_format. This must come after
-        # the parameter file re-application above, which does a full dict replacement and
-        # would otherwise overwrite this value.
-        st.session_state[self.variables.params_file_dict]["software_name"] = self.user_input["input_format"]
-
-        # Explicitly write every parameter widget's session state to the desired value
-        # (YAML-parsed value if available, otherwise JSON default for the current tool).
-        # This is necessary because generate_additional_parameters_fields_submission contains
-        # `on_change=func(args)` — Python evaluates these arguments immediately on every render,
-        # reading stale browser-sent session state and rewriting params_file_dict with old values.
-        # By explicitly owning the session state keys here, before the widgets render, we
-        # prevent any browser-side stale value from slipping through.
-        with open(self.variables.additional_params_json, encoding="utf-8") as _schema_f:
-            _param_schema = json.load(_schema_f)
-        _file_dict = st.session_state.get(self.variables.params_file_dict, {})
-        for _field_key, _field_schema in _param_schema.items():
-            _is_checkbox = _field_schema.get("type") == "checkbox"
-            if _field_key in _file_dict:
-                _val = _file_dict[_field_key]
-                if _is_checkbox:
-                    # Checkbox fields (e.g. postprocessing_performed) carry a scalar bool
-                    # default, not a dict — keep them as real bool, not a stringified one.
-                    _val = bool(_val) if pd.notna(_val) else bool(_field_schema.get("value", False))
-                else:
-                    # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
-                    # np.nan is a float and cannot be serialized by Streamlit's protobuf for
-                    # text_input; convert to "" (empty). Non-string non-missing values are
-                    # stringified to match what st.text_input expects.
-                    try:
-                        _is_missing = pd.isna(_val)
-                    except (TypeError, ValueError):
-                        _is_missing = False
-                    if _is_missing:
-                        _val = ""
-                    elif not isinstance(_val, str):
-                        _val = str(_val)
-                st.session_state[self.variables.prefix_params + _field_key] = _val
-            else:
-                _schema_value = _field_schema.get("value")
-                if _is_checkbox:
-                    _default = bool(_schema_value) if _schema_value is not None else False
-                else:
-                    # Text-like fields store their per-tool default under "value" as a
-                    # dict keyed by input_format (tool name); fall back to the schema
-                    # value itself if it isn't a dict.
-                    _default = (
-                        _schema_value.get(self.user_input.get("input_format", ""), None)
-                        if isinstance(_schema_value, dict)
-                        else _schema_value
-                    )
-                    _default = _default if _default is not None else ""
-                st.session_state[self.variables.prefix_params + _field_key] = _default
-
-        # Always show parameter fields, comments, and confirmation checkbox.
-        tab5_quant.generate_additional_parameters_fields_submission(
-            variables=self.variables,
-            user_input=self.user_input,
-        )
-        tab5_quant.generate_comments_section(
-            variables=self.variables,
-            user_input=self.user_input,
-        )
-        # ? stop_duplicating is not used?
-        self.stop_duplicating = tab5_quant.generate_confirmation_checkbox(
-            check_submission=self.variables.check_submission
-        )
-
-        params = None
         pr_url = None
-        if st.session_state[self.variables.check_submission]:
+        if st.session_state[self.variables.check_submission] and params is not None:
             get_form_values = tab5_quant.get_form_values(
                 variables=self.variables,
             )

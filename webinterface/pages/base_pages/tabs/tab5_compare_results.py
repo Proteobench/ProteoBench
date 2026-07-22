@@ -11,8 +11,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from pages.base_pages.utils.general import prepare_df_for_display
-
 
 def display_workflow_comparison(variables, ionmodule) -> None:
     """
@@ -26,35 +24,27 @@ def display_workflow_comparison(variables, ionmodule) -> None:
         Module for accessing data and methods.
     """
     st.header("Workflow Comparison")
-    st.markdown(
-        """
+    st.markdown("""
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
         - **Precursor overlap**: Bar plot showing number of shared and unique precursors
         - **Parameter differences**: Table highlighting what differs between workflows
-        """
-    )
+        """)
 
     # Initialize data
     _initialize_comparison_data(variables, ionmodule)
 
     # Display the selection plot
-    with st.container(key="tour_compare_plot"):
-        selected_ids = _display_selection_plot(variables, ionmodule)
+    selected_ids = _display_selection_plot(variables, ionmodule)
 
     # Show selection status
     _display_selection_status(selected_ids)
 
-    # Comparison results — always rendered so the tour can highlight this area
-    with st.container(key="tour_compare_results"):
-        if len(selected_ids) == 2:
-            st.markdown("---")
-            _compare_workflows(variables, selected_ids[0], selected_ids[1])
-        else:
-            st.markdown(
-                "_Select two workflows in the plot above to see precursor overlap and parameter differences here._"
-            )
+    # Perform comparison if two workflows are selected
+    if len(selected_ids) == 2:
+        st.markdown("---")
+        _compare_workflows(variables, selected_ids[0], selected_ids[1])
 
 
 def _initialize_comparison_data(variables, ionmodule) -> None:
@@ -126,7 +116,7 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
         st.session_state[plot_key] = str(uuid.uuid4())
 
     # Generate the plot
-    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
+    plot_generator = ionmodule.get_plot_generator()
     fig_metric = plot_generator.plot_main_metric(
         filtered_data,
         metric=metric,
@@ -138,6 +128,7 @@ def _display_selection_plot(variables, ionmodule) -> List[str]:
     # Display plot with selection enabled
     event_dict = st.plotly_chart(
         fig_metric,
+        width='stretch',
         on_select="rerun",
         selection_mode="points",
         key=st.session_state[plot_key],
@@ -372,7 +363,7 @@ def _display_precursor_overlap(
         yaxis_title="Number of Precursors",
         showlegend=True,
     )
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, width='stretch')
 
     # create a merged table for download
     merged_precursors = pd.merge(
@@ -491,7 +482,7 @@ def _display_parameter_differences(
     else:
         if not show_all:
             st.markdown(f"**{len(comparison_df)} parameter(s) differ:**")
-        st.dataframe(prepare_df_for_display(comparison_df), hide_index=True)
+        st.dataframe(comparison_df, width='stretch', hide_index=True)
 
     # Performance metrics comparison
     st.markdown("#### Performance Metrics Comparison")
@@ -529,7 +520,7 @@ def _display_metrics_comparison(
 
     if metrics_comparison:
         metrics_df = pd.DataFrame(metrics_comparison)
-        st.dataframe(prepare_df_for_display(metrics_df), hide_index=True)
+        st.dataframe(metrics_df, width='stretch', hide_index=True)
     else:
         st.info("Metrics data not available for comparison.")
 

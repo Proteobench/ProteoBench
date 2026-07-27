@@ -24,7 +24,11 @@ from UI_utils import (
 
 _MODULE_CARD_ICON = "../img/icons/module.svg"
 _MODULE_CARD_FALLBACK_DESCRIPTION = "Benchmark this workflow and compare your results with the community."
-_MODULE_CARD_IMAGE_HEIGHT = 230
+# Graphical abstracts are already tightly cropped to their content (no baked-in margin) and
+# range from ~2.8:1 to ~4.1:1. This matches the median/mean aspect ratio across the current
+# set, so most abstracts render with little to no letterboxing at a fixed height; only the
+# squarer ones (e.g. the LFQ quant overview) show a small side margin instead of being cropped.
+_MODULE_CARD_IMAGE_ASPECT_RATIO = 3.5
 
 _ABSTRACT_DIR = "../img/module_graphical_abstracts"
 _GRAPHICAL_ABSTRACT_DISCLAIMER = (
@@ -186,7 +190,7 @@ class StreamlitPageHome(StreamlitPage):
             }}
             .st-key-tour_module_grid [data-testid="stImage"] {{
                 width: 100%;
-                height: {_MODULE_CARD_IMAGE_HEIGHT}px;
+                aspect-ratio: {_MODULE_CARD_IMAGE_ASPECT_RATIO};
                 overflow: hidden;
                 display: flex;
                 align-items: center;
@@ -194,14 +198,14 @@ class StreamlitPageHome(StreamlitPage):
             }}
             .st-key-tour_module_grid [data-testid="stImageContainer"] {{
                 width: 100%;
-                height: {_MODULE_CARD_IMAGE_HEIGHT}px;
+                height: 100%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }}
             .st-key-tour_module_grid [data-testid="stImage"] img {{
                 width: 100% !important;
-                height: {_MODULE_CARD_IMAGE_HEIGHT}px !important;
+                height: 100% !important;
                 object-fit: contain;
             }}
             /* Make the whole card clickable: stretch the page_link's anchor over

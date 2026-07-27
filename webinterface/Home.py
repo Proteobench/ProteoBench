@@ -204,6 +204,29 @@ class StreamlitPageHome(StreamlitPage):
                 height: {_MODULE_CARD_IMAGE_HEIGHT}px !important;
                 object-fit: contain;
             }}
+            /* Make the whole card clickable: stretch the page_link's anchor over
+               the entire card via ::after, anchored to the card container (the
+               nearest positioned ancestor) rather than the anchor itself, so the
+               visible title/icon stay in their normal spot. Streamlit gives the
+               page_link's own .stElementContainer `position: relative` by default,
+               which would otherwise "steal" the containing block and shrink the
+               overlay back down to just that element - override it back to static. */
+            .st-key-tour_module_grid [class*="st-key-module_card_"] {{
+                position: relative;
+            }}
+            .st-key-tour_module_grid [class*="st-key-module_card_"] .stElementContainer:has([data-testid="stPageLink"]) {{
+                position: static !important;
+            }}
+            .st-key-tour_module_grid [class*="st-key-module_card_"] [data-testid="stPageLink"] a {{
+                position: static !important;
+            }}
+            .st-key-tour_module_grid [class*="st-key-module_card_"] [data-testid="stPageLink"] a::after {{
+                content: "";
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+                cursor: pointer;
+            }}
             </style>
             """,
             unsafe_allow_html=True,

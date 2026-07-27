@@ -27,3 +27,5 @@ protein_inference,heuristic
 abundance_normalization_ions,
 predictors_library,AlphaPeptDeep
 scan_window,
+postprocessing_performed,False
+postprocessing_description,

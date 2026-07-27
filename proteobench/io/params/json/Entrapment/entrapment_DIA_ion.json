@@ -138,5 +138,15 @@
         "type": "text_input",
         "label": "Window scanning size",
         "placeholder": "None"
+    },
+    "postprocessing_performed": {
+        "type": "checkbox",
+        "label": "Was any postprocessing applied to the results?",
+        "value": false
+    },
+    "postprocessing_description": {
+        "type": "text_input",
+        "label": "If yes, briefly describe the postprocessing performed",
+        "placeholder": "None"
     }
 }

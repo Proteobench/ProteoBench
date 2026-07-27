@@ -1,0 +1,30 @@
+,0
+software_name,FragPipe
+software_version,24.0
+search_engine,MSFragger
+search_engine_version,4.4
+ident_fdr_psm,0.01
+ident_fdr_peptide,
+ident_fdr_protein,0.01
+enable_match_between_runs,False
+precursor_mass_tolerance,"[-3 ppm, 3 ppm]"
+fragment_mass_tolerance,"[-10 ppm, 10 ppm]"
+enzyme,Trypsin/P
+allowed_miscleavages,1
+min_peptide_length,6
+max_peptide_length,30
+fixed_mods,C[Carbamidomethyl]
+variable_mods,M[Oxidation]
+max_mods,1
+min_precursor_charge,1
+max_precursor_charge,
+min_precursor_mz,
+max_precursor_mz,5000
+min_fragment_mz,
+max_fragment_mz,
+quantification_method,Robust LC (high accuracy)
+protein_inference,ProteinProphet: --maxppmdiff 2000000 --minprob 0.5
+abundance_normalization_ions,
+predictors_library,DIANN
+scan_window,
+semi_enzymatic,False

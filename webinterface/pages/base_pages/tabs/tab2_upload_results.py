@@ -230,8 +230,9 @@ def run_benchmarking_process(variables, ionmodule, user_input):
 
     # Get slider value if module uses sliders (e.g., quant module)
     if hasattr(variables, "slider_id_submitted_uuid") and hasattr(variables, "default_val_slider"):
-        if st.session_state[variables.slider_id_submitted_uuid] in st.session_state.keys():
-            set_slider_val = st.session_state[st.session_state[variables.slider_id_submitted_uuid]]
+        slider_uuid_key = st.session_state.get(variables.slider_id_submitted_uuid)
+        if slider_uuid_key is not None and slider_uuid_key in st.session_state:
+            set_slider_val = st.session_state[slider_uuid_key]
         else:
             set_slider_val = variables.default_val_slider
     else:

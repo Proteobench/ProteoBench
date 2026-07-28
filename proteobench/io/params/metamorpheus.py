@@ -8,6 +8,7 @@ from io import BytesIO
 from pathlib import Path, PosixPath
 from typing import IO, Tuple, Union
 
+import numpy as np
 import pandas as pd
 
 from proteobench.io.params import ProteoBenchParameters
@@ -181,9 +182,9 @@ def load_files(file1: Union[str, IO], file2: Union[str, IO]) -> Tuple[Union[str,
     return versions_line, settings
 
 
-def parse_modifications(mods: str) -> list:
+def parse_modifications(mods: str) -> Union[str, float]:
     """
-    Parse modifications from a string or list format into a standardized list.
+    Parse modifications from a string format into a standardized comma-separated string.
 
     Parameters
     ----------
@@ -193,11 +194,11 @@ def parse_modifications(mods: str) -> list:
 
     Returns
     -------
-    list
-        List of modifications.
+    Union[str, float]
+        Comma-separated modifications, or ``np.nan`` when none were configured.
     """
     if not mods or not mods.strip():
-        return []
+        return np.nan
 
     parsed_mod_list = []
     mod_list = mods.split("\t\t")
@@ -207,7 +208,7 @@ def parse_modifications(mods: str) -> list:
             continue
         parsed_mod_list.append(_homogenize_mod(fields[1]))
 
-    return ", ".join(parsed_mod_list) if parsed_mod_list else []
+    return ", ".join(parsed_mod_list) if parsed_mod_list else np.nan
 
 
 def parse_version(versions_line: Union[str, None]) -> Union[str, None]:

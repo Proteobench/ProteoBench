@@ -188,20 +188,50 @@ def parse_modifications(mods: str) -> list:
     Parameters
     ----------
     mods : Union[str]
-        Modifications in string format (e.g., ""Common Fixed\tCarbamidomethyl on C\t\tCommon Fixed\tCarbamidomethyl on U"")
+        Modifications in string format (e.g., ""Common Fixed\tCarbamidomethyl on C\t\tCommon Fixed\tCarbamidomethyl on U"").
+        May be an empty string when no modifications were configured.
 
     Returns
     -------
     list
         List of modifications.
     """
+    if not mods or not mods.strip():
+        return []
+
     parsed_mod_list = []
     mod_list = mods.split("\t\t")
     for mod in mod_list:
-        mod_spec = mod.split("\t")[1]
-        parsed_mod_list.append(_homogenize_mod(mod_spec))
+        fields = mod.split("\t")
+        if len(fields) < 2:
+            continue
+        parsed_mod_list.append(_homogenize_mod(fields[1]))
 
     return ", ".join(parsed_mod_list) if parsed_mod_list else []
+
+
+def parse_version(versions_line: Union[str, None]) -> Union[str, None]:
+    """
+    Extract the MetaMorpheus version from the first line of the results/version file.
+
+    Parameters
+    ----------
+    versions_line : Union[str, None]
+        First line of the version file (e.g., ``"MetaMorpheus: version 1.1.1"``).
+        Development builds report ``"MetaMorpheus: version Not a release version."``.
+
+    Returns
+    -------
+    Union[str, None]
+        The version string, or ``None`` if it could not be determined.
+    """
+    if not versions_line:
+        return None
+    _, keyword, version = versions_line.partition("version")
+    if not keyword:
+        return None
+    version = version.strip()
+    return version or None
 
 
 def format_tolerances(tolerance: str) -> str:
@@ -221,6 +251,8 @@ def format_tolerances(tolerance: str) -> str:
     tolerance, unit = tolerance.split()
     tolerance = tolerance.strip("±")
     tolerance = float(tolerance)
+    if unit.upper() == "PPM":
+        unit = "ppm"
     formatted_tolerance = f"[-{tolerance:.2f} {unit}, {tolerance:.2f} {unit}]"
     return formatted_tolerance
 
@@ -234,7 +266,7 @@ def extract_params(
 
     params.software_name = "MetaMorpheus"
     params.search_engine = "MetaMorpheus"
-    params.software_version = versions_line.split()[2]
+    params.software_version = parse_version(versions_line)
     params.enzyme = settings["CommonParameters"]["DigestionParams"]["Protease"]
     params.semi_enzymatic = settings["CommonParameters"]["DigestionParams"]["FragmentationTerminus"] != "Both"
     params.allowed_miscleavages = settings["CommonParameters"]["DigestionParams"]["MaxMissedCleavages"]

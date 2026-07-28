@@ -419,7 +419,7 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             if "submission_comments" in plot_df.columns:
                 comment = row.get("submission_comments", "")
                 if isinstance(comment, str) and comment.strip():
-                    hover_text += f"<br>Comment: {comment}"
+                    hover_text += f"<br>Comment: {self._truncate_comment(comment)}"
             hover_texts.append(hover_text)
         plot_df["hover_text"] = hover_texts
 
@@ -1125,6 +1125,14 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         return fig
 
     @staticmethod
+    def _truncate_comment(comment: str, max_length: int = 100) -> str:
+        """Truncate a free-text comment for display in hover text, appending '...' only if cut."""
+        comment = comment.strip()
+        if len(comment) <= max_length:
+            return comment
+        return comment[:max_length].rstrip() + "..."
+
+    @staticmethod
     def _get_fdp_entry_at_threshold(fdp_curve, threshold: float) -> dict:
         """Return the fdp_curve entry for the given threshold, within 1% relative tolerance."""
         if not isinstance(fdp_curve, dict) or not fdp_curve:
@@ -1288,11 +1296,11 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             if "comments" in plot_df.columns:
                 comment = row.get("comments", "")
                 if isinstance(comment, str) and comment.strip():
-                    hover_text += f"<br>Comment (private submission): {comment}"
+                    hover_text += f"<br>Comment (private submission): {self._truncate_comment(comment)}"
             if "submission_comments" in plot_df.columns:
                 comment = row.get("submission_comments", "")
                 if isinstance(comment, str) and comment.strip():
-                    hover_text += f"<br>Comment (public submission): {comment}"
+                    hover_text += f"<br>Comment (public submission): {self._truncate_comment(comment)}"
             hover_texts.append(hover_text)
 
         plot_df["hover_text"] = hover_texts

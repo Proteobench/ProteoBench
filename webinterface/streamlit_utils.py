@@ -208,8 +208,19 @@ def get_error_suggestions(exception: Exception, context: dict) -> tuple:
     error_type = type(exception).__name__
     suggestions = []
 
+    # Sample/run name(s) couldn't be confidently matched to what the module expects
+    # (currently only possible for PEAKS, where sample names are user-typed before export)
+    if "Sample name mismatch:" in error_str:
+        friendly = "Some sample names in your file don't match what this module expects"
+        suggestions.append("Check the module documentation for the exact required sample names")
+        suggestions.append(
+            "ProteoBench auto-corrects small naming differences (case, spacing, minor typos), "
+            "but couldn't confidently resolve the name(s) below - see the technical details"
+        )
+        suggestions.append("Rename the sample(s) in your search engine to match exactly and re-export")
+
     # Missing raw files / wrong dataset - this is a specific, identifiable error
-    if "Not all runs are present" in error_str:
+    elif "Not all runs are present" in error_str:
         friendly = "The uploaded file doesn't contain all expected sample names"
         suggestions.append("Ensure you processed the correct benchmark dataset for this module")
         suggestions.append("Check the module documentation for the expected raw file names")

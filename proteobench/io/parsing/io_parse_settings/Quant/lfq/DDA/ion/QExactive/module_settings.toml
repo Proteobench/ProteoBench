@@ -22,31 +22,37 @@
 
 [[samples]]
 raw_file = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01"
+raw_file_alias = "A_1"
 sample_name = "Condition_A_Sample_Alpha_01"
 condition = "A"
 
 [[samples]]
 raw_file = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02"
+raw_file_alias = "A_2"
 sample_name = "Condition_A_Sample_Alpha_02"
 condition = "A"
 
 [[samples]]
 raw_file = "LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03"
+raw_file_alias = "A_3"
 sample_name = "Condition_A_Sample_Alpha_03"
 condition = "A"
 
 [[samples]]
 raw_file = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01"
+raw_file_alias = "B_1"
 sample_name = "Condition_B_Sample_Alpha_01"
 condition = "B"
 
 [[samples]]
 raw_file = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02"
+raw_file_alias = "B_2"
 sample_name = "Condition_B_Sample_Alpha_02"
 condition = "B"
 
 [[samples]]
 raw_file = "LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03"
+raw_file_alias = "B_3"
 sample_name = "Condition_B_Sample_Alpha_03"
 condition = "B"
 

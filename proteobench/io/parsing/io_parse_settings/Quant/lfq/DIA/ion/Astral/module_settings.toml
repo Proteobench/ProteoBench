@@ -22,31 +22,37 @@
 
 [[samples]]
 raw_file = "LFQ_Astral_DIA_15min_50ng_Condition_A_REP1"
+raw_file_alias = "LFQ_Astral_DIA_15min_50ng_Condition_A_REP1_uncalibrated"
 sample_name = "Condition_A_Sample_Alpha_01"
 condition = "A"
 
 [[samples]]
 raw_file = "LFQ_Astral_DIA_15min_50ng_Condition_A_REP2"
+raw_file_alias = "LFQ_Astral_DIA_15min_50ng_Condition_A_REP2_uncalibrated"
 sample_name = "Condition_A_Sample_Alpha_02"
 condition = "A"
 
 [[samples]]
 raw_file = "LFQ_Astral_DIA_15min_50ng_Condition_A_REP3"
+raw_file_alias = "LFQ_Astral_DIA_15min_50ng_Condition_A_REP3_uncalibrated"
 sample_name = "Condition_A_Sample_Alpha_03"
 condition = "A"
 
 [[samples]]
 raw_file = "LFQ_Astral_DIA_15min_50ng_Condition_B_REP1"
+raw_file_alias = "LFQ_Astral_DIA_15min_50ng_Condition_B_REP1_uncalibrated"
 sample_name = "Condition_B_Sample_Alpha_01"
 condition = "B"
 
 [[samples]]
 raw_file = "LFQ_Astral_DIA_15min_50ng_Condition_B_REP2"
+raw_file_alias = "LFQ_Astral_DIA_15min_50ng_Condition_B_REP2_uncalibrated"
 sample_name = "Condition_B_Sample_Alpha_02"
 condition = "B"
 
 [[samples]]
 raw_file = "LFQ_Astral_DIA_15min_50ng_Condition_B_REP3"
+raw_file_alias = "LFQ_Astral_DIA_15min_50ng_Condition_B_REP3_uncalibrated"
 sample_name = "Condition_B_Sample_Alpha_03"
 condition = "B"
 

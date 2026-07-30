@@ -193,6 +193,34 @@ class TestParseSettingsQuant:
         replicate_to_raw = parse_settings_long._create_replicate_mapping()
         assert replicate_to_raw == {"A": ["file1"], "B": ["file2"]}
 
+    def test_validate_and_rename_columns_does_not_mutate_input(self):
+        # Regression test: renaming must not mutate the caller's DataFrame in
+        # place. `convert_to_standard_format` is called more than once on the
+        # same object in production (once during upload, again when
+        # submission validation re-parses the DataFrame from session state);
+        # an in-place rename here would make the second call fail with
+        # "Columns ... not found" because the columns were already renamed.
+        # Uses a mapper with an actual rename ("Accession" -> "Proteins"),
+        # unlike the identity mappers in MOCK_PARSE_SETTINGS_LONG/SHORT, so a
+        # regression would actually be observable.
+        parse_settings = {
+            "mapper": {"Accession": "Proteins", "Peptide": "Sequence"},
+            "condition_mapper": {},
+            "run_mapper": {},
+            "species_mapper": {},
+            "general": {"decoy_flag": True, "contaminant_flag": "Cont_"},
+        }
+        parser = ParseSettingsQuant(parse_settings, MOCK_MODULE_SETTINGS)
+        df = pd.DataFrame({"Accession": ["P1"], "Peptide": ["PEPTIDE"]})
+        original_columns = list(df.columns)
+
+        parser._validate_and_rename_columns(df)
+        assert list(df.columns) == original_columns
+
+        # Calling it again on the same, still-unmutated object must succeed.
+        result = parser._validate_and_rename_columns(df)
+        assert list(result.columns) == ["Proteins", "Sequence"]
+
     def test_filter_decoys(self, parse_settings_long, parse_settings_short):
         df = TEST_DATA["long_format"].copy()
         result = parse_settings_long._filter_decoys(df)

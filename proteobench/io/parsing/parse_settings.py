@@ -381,8 +381,7 @@ class ParseSettingsQuant:
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
                 " Please check input file and selected software tool."
             )
-        df.rename(columns=self.mapper, inplace=True)
-        return df
+        return df.rename(columns=self.mapper)
 
     def _create_replicate_mapping(self) -> Dict[int, List[str]]:
         """
@@ -1011,8 +1010,7 @@ class ParseSettingsEntrapment:
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
                 " Please check input file and selected software tool."
             )
-        df.rename(columns=self.mapper, inplace=True)
-        return df
+        return df.rename(columns=self.mapper)
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         """

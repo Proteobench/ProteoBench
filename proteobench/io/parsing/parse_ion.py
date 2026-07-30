@@ -385,7 +385,13 @@ def _load_sage(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+    df = pd.read_csv(input_csv, sep="\t", low_memory=False)
+    # Strip .raw or .mzML suffixes from the run column of long-format output
+    # (e.g. "Sample.mzML" -> "Sample"), mirroring the wide-format column cleanup.
+    for run_column in ("filename", "Raw file"):
+        if run_column in df.columns:
+            df[run_column] = df[run_column].str.replace(r"\.(raw|mzML)(\.gz)?(?=\s|$)", "", regex=True, case=False)
+    return df
 
 
 def _load_fragpipe(input_csv: str) -> pd.DataFrame:

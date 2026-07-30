@@ -304,39 +304,74 @@ class StreamlitPageHome(StreamlitPage):
                 "Active modules",
                 get_n_modules(),
                 "Modules with a public benchmark you can explore or submit to today.",
+                "https://proteobench.readthedocs.io/en/stable/available-modules/",
             ),
             (
                 f"{_ICON_DIR}/module-construction.svg",
                 "In development",
                 get_n_modules_proposed(),
                 "Modules currently in discussion or under active development.",
+                "https://github.com/orgs/Proteobench/discussions",
             ),
             (
                 f"{_ICON_DIR}/workflow-run.svg",
                 "Supported workflows",
                 get_n_supported_tools(),
                 "Software tools with parameter parsing support in ProteoBench.",
+                "https://proteobench.readthedocs.io/en/stable/available-modules/"
+                "12-parsed-parameters-for-public-submission/",
             ),
             (
                 f"{_ICON_DIR}/scatter-plot.svg",
                 "Submitted points",
                 get_n_submitted_points(),
                 "Public benchmark runs submitted by the community so far.",
+                "https://proteobench.cubimed.rub.de/datasets/",
             ),
             (
                 f"{_ICON_DIR}/user.svg",
                 "Monthly visits",
                 self._get_monthly_visits(),
                 "Visits to the ProteoBench web server over the last 30 days.",
+                None,
             ),
         ]
+        # Same "stretch an overlay anchor over the whole card" trick used for the
+        # module quicklinks above, adapted to a plain <a> (these are external
+        # links, not st.page_link targets).
+        st.markdown(
+            """
+            <style>
+            .st-key-tour_stats_area [class*="st-key-stat_card_"] {
+                position: relative;
+            }
+            .st-key-tour_stats_area [class*="st-key-stat_card_"] .stElementContainer:has(.stat-card-link) {
+                position: static !important;
+            }
+            .st-key-tour_stats_area [class*="st-key-stat_card_"] .stat-card-link {
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+                cursor: pointer;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
         with st.container(key="tour_stats_area"):
             st.subheader("Platform at a glance", anchor=False)
             with st.container(horizontal=True):
-                for icon, title, value, help_text in stats:
-                    with st.container(border=True):
+                for icon, title, value, help_text, url in stats:
+                    slug = title.lower().replace(" ", "_")
+                    with st.container(border=True, key=f"stat_card_{slug}"):
                         st.image(icon, width=48)
                         st.metric(title, value, help=help_text)
+                        if url:
+                            st.markdown(
+                                f'<a class="stat-card-link" href="{url}" target="_blank" '
+                                f'rel="noopener noreferrer" aria-label="{title}"></a>',
+                                unsafe_allow_html=True,
+                            )
 
     @staticmethod
     def _render_submissions_chart():

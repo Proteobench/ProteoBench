@@ -955,6 +955,43 @@ class ParseSettingsEntrapment:
         """
         self.modification_parser = parser
 
+    def _process_modifications(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Standardize the modified sequence column to ProForma-style bracket notation.
+
+        Tools report modifications differently (e.g. DIA-NN/FragPipe use
+        ``M(UniMod:35)``, AlphaDIA already reports ``M[Oxidation]``). The
+        entrapment mapping file is keyed on the bracketed, human-readable form
+        (e.g. ``M[Oxidation]``, ``C[Carbamidomethyl]``), so tools with a
+        ``[modifications_parser]`` section have their modified-sequence column
+        rewritten into that same notation before mapping. Tools without a
+        modification parser (i.e. already reporting that notation natively)
+        are left untouched.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame containing the modified sequence column.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with the modified sequence column standardized.
+        """
+        if self.modification_parser is None:
+            return df
+
+        mp = self.modification_parser
+        df[mp.modifications_parse_column] = df[mp.modifications_parse_column].apply(
+            get_proforma_bracketed,
+            before_aa=mp.modifications_before_aa,
+            isalpha=mp.modifications_isalpha,
+            isupper=mp.modifications_isupper,
+            pattern=mp.modifications_pattern,
+            modification_dict=mp.modifications_mapper,
+        )
+        return df
+
     def convert_to_standard_format(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Convert a software tool output into a generic format supported by the module.
@@ -986,7 +1023,7 @@ class ParseSettingsEntrapment:
         # df = self._fix_colnames(df)
         # df = self._mark_contaminants(df)
         # df = self._process_species_information(df)
-        # df = self._process_modifications(df)
+        df = self._process_modifications(df)
         # df_melted = self._handle_data_format(df)
         # df_melted = self._filter_zero_intensities(df_melted)
         return df  # self._format_by_analysis_level(df_melted), replicate_to_raw

@@ -409,6 +409,10 @@ def extract_params(
     else:
         all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
 
+    # Normalize AlphaDIA's "no-cleave" enzyme setting to the standard label
+    if all_parameters.get("enzyme") == "no-cleave":
+        all_parameters["enzyme"] = "No digestion"
+
     # Normalization method
     if "abundance_normalization_ions" in all_parameters:
         all_parameters["abundance_normalization_ions"] = (

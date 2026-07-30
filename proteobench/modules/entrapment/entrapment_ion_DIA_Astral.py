@@ -21,10 +21,48 @@ from proteobench.exceptions import (
     ParseSettingsError,
     EntrapmentError,
 )
-from proteobench.io.parsing.parse_ion import _load_alphadia_entrapment, load_input_file
+from proteobench.io.parsing.parse_ion import (
+    _load_alphadia_entrapment,
+    _load_peaks_entrapment,
+    load_input_file,
+)
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.entrapment.entrapment_base_module import EntrapmentModule
+
+DEFAULT_PRECURSOR_FDR = 0.01
+
+
+def _declared_precursor_fdr(user_input: dict, default: float = DEFAULT_PRECURSOR_FDR) -> float:
+    """
+    Read the precursor/PSM FDR threshold declared by the user in the submission form.
+
+    Used for tools that filter their output before export without writing a
+    per-precursor q-value (PEAKS). Values of 1 or above are interpreted as
+    percentages (``1`` -> ``0.01``), since an FDR of 100% is not a meaningful
+    threshold. Unparseable, missing, or non-positive values fall back to ``default``.
+
+    Parameters
+    ----------
+    user_input : dict
+        User-provided parameters from the upload form.
+    default : float, optional
+        Value returned when no usable FDR was provided, by default 0.01.
+
+    Returns
+    -------
+    float
+        The declared FDR threshold as a fraction.
+    """
+    try:
+        fdr = float(user_input.get("ident_fdr_psm"))
+    except (TypeError, ValueError):
+        return default
+    if fdr <= 0:
+        return default
+    if fdr >= 1:
+        fdr /= 100
+    return fdr
 
 
 class DIAEntrapmentIonModuleAstral(EntrapmentModule):
@@ -125,6 +163,11 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
         try:
             if input_format == "AlphaDIA":
                 input_df = _load_alphadia_entrapment(input_file)
+            elif input_format == "PEAKS":
+                # PEAKS exports precursors already filtered at the precursor FDR applied
+                # during the search and reports no per-precursor q-value, so the FDR
+                # declared in the submission form is used as the reported threshold.
+                input_df = _load_peaks_entrapment(input_file, reported_fdr=_declared_precursor_fdr(user_input))
             else:
                 input_df = load_input_file(input_file, input_format, input_file_secondary)
         except pd.errors.ParserError as e:

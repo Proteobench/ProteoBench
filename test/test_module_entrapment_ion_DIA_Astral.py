@@ -4,13 +4,17 @@ import tomllib
 import pandas as pd
 import pytest
 
-from proteobench.io.parsing.parse_ion import load_input_file
+from proteobench.io.parsing.parse_ion import _load_peaks_entrapment, load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.entrapment.entrapment_base_module import EntrapmentModule
+from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
+    _declared_precursor_fdr,
+)
 from proteobench.score.entrapmentscores import EntrapmentScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/entrapment")
 TESTDATA_FILE = os.path.join(TESTDATA_DIR, "entrapment_test_subset.parquet")
+PEAKS_TESTDATA_FILE = os.path.join(TESTDATA_DIR, "peaks_dia_db_precursor_subset.csv")
 PARSE_SETTINGS_DIR = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
@@ -111,3 +115,73 @@ class TestEntrapmentFDPCalculation:
         expected = (NR_ENTRAPMENTS + nr_e_s_t + 2 * nr_e_t_s) / (NR_TARGETS + NR_ENTRAPMENTS)
         assert paired_fdp == pytest.approx(expected)
         assert paired_fdp == pytest.approx(0.21)
+
+
+class TestPeaksEntrapmentParsing:
+    """PEAKS DIA database search precursor export (`dia_db.precursor.csv`)."""
+
+    def test_loader_adds_stripped_sequence_pep_and_qvalue(self):
+        df = _load_peaks_entrapment(PEAKS_TESTDATA_FILE, reported_fdr=0.05)
+
+        # PEAKS writes the modified sequence in "Peptide"; the mapping file is keyed
+        # on the unmodified sequence, so a stripped copy must be added.
+        modified = df[df["Peptide"].str.contains(r"\(", regex=True)]
+        assert not modified.empty
+        assert not modified["Stripped Peptide"].str.contains(r"[()+]", regex=True).any()
+        unmodified = df[~df["Peptide"].str.contains(r"\(", regex=True)]
+        assert (unmodified["Stripped Peptide"] == unmodified["Peptide"]).all()
+
+        # -10lgP = -10 * log10(P), so PEP is the underlying p-value and lower is better.
+        assert df["PEP"].tolist() == pytest.approx((10 ** (-df["-10LgP"] / 10)).tolist())
+        assert (df["Q-Value"] == 0.05).all()
+
+    def test_standard_format_has_the_columns_the_scorer_needs(self):
+        df = _load_peaks_entrapment(PEAKS_TESTDATA_FILE)
+        parse_settings = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="entrapment_DIA_ion_Astral"
+        ).build_parser("PEAKS")
+        standard_format = parse_settings.convert_to_standard_format(df)
+
+        for column in ("Peptide", "Sequence", "Charge", "Q-Value", "PEP", "Protein Group", "Raw file"):
+            assert column in standard_format.columns
+
+    def test_intermediate_ranks_precursors_by_peaks_score(self):
+        df = _load_peaks_entrapment(PEAKS_TESTDATA_FILE)
+        parse_settings = ParseSettingsBuilder(
+            parse_settings_dir=PARSE_SETTINGS_DIR, module_id="entrapment_DIA_ion_Astral"
+        ).build_parser("PEAKS")
+        standard_format = parse_settings.convert_to_standard_format(df)
+
+        # The mapping file is not needed to check the ranking, so label everything as
+        # target and give each peptide its own pair index.
+        standard_format["Target or Entrapment"] = "target"
+        standard_format["peptide_pair_index"] = standard_format.groupby("Peptide").ngroup()
+
+        intermediate = EntrapmentScores().generate_intermediate(standard_format)
+
+        # One row per precursor, ranked so that Score 1 is the best-scoring precursor.
+        assert not intermediate.duplicated(subset=["Peptide", "Sequence", "Charge"]).any()
+        assert intermediate["Score"].tolist() == list(range(1, len(intermediate) + 1))
+        assert intermediate["PEP"].is_monotonic_increasing
+
+
+class TestDeclaredPrecursorFDR:
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            ("0.01", 0.01),
+            ("0.05", 0.05),
+            (0.01, 0.01),
+            ("1", 0.01),  # given as a percentage
+            ("5", 0.05),  # given as a percentage
+            ("", 0.01),  # not filled in
+            (None, 0.01),
+            ("not a number", 0.01),
+            ("0", 0.01),
+        ],
+    )
+    def test_declared_fdr_is_normalised_to_a_fraction(self, value, expected):
+        assert _declared_precursor_fdr({"ident_fdr_psm": value}) == pytest.approx(expected)
+
+    def test_missing_key_falls_back_to_the_default(self):
+        assert _declared_precursor_fdr({}) == pytest.approx(0.01)

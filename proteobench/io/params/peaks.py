@@ -310,8 +310,14 @@ def extract_params(
                 None,
             )
             precursor_charge_between = charge_match.groups() if charge_match else (None, None)
-    params.min_precursor_charge = int(precursor_charge_between[0])
-    params.max_precursor_charge = int(precursor_charge_between[1])
+    # Some exports (e.g. the DIA database search used by the entrapment module) do not
+    # report a precursor charge range at all.
+    if precursor_charge_between[0] is None:
+        params.min_precursor_charge = None
+        params.max_precursor_charge = None
+    else:
+        params.min_precursor_charge = int(precursor_charge_between[0])
+        params.max_precursor_charge = int(precursor_charge_between[1])
 
     try:
         precursor_mz_between = extract_value(lines, "Precursor M/Z between:").split(",")

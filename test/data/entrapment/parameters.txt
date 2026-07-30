@@ -1,0 +1,28 @@
+Project:
+* Name: entrapment_proteobench
+* Description: 
+* Owner: rodvrees
+* Created At: 2026-07-30 09:30:31
++ analyse_entrapment_1
+  Description: 
+  Created At: 2026-07-30 09:30:31
+  Database Search Parameters:
+    Precursor Mass Error Tolerance: Auto Detected
+    Fragment Mass Error Tolerance: Auto Detected
+    Enzyme: None
+    Digest Mode: NO_DIGESTION
+    Missed Cleavage: 0
+    Target Database: ProteoBench_entrapment
+    Taxonomy: all species
+    Peptide Length: 7 to 30
+    Fixed Modifications: 
+    - Carbamidomethylation
+    Variable Modifications: 
+    Max Variable PTM Per Peptide: 1
+  Peptide Filter:
+    Peptide FDR(%): 1.00
+  Precursor Filter:
+    Precursor FDR(%): 1.00
+  Protein Filter:
+    Proteins -10lgP>=: 0.0000
+    Proteins Unique Peptides >= 1

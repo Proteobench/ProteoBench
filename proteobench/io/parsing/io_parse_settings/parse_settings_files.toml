@@ -115,3 +115,4 @@
 "FragPipe (DIA-NN quant)" = "parse_settings_fragpipe_diann_quant.toml"
 "FragPipe" = "parse_settings_fragpipe_DIA.toml"
 "AlphaDIA" = "parse_settings_alphadia.toml"
+"PEAKS" = "parse_settings_peaks.toml"

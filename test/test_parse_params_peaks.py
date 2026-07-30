@@ -9,7 +9,14 @@ import proteobench.io.params.peaks as peaks_params
 TESTDATA_DIR = Path(__file__).parent / "params"
 
 
-fnames = ["PEAKS_parameters.txt", "PEAKS_parameters_DDA.txt", "PEAKS_parameters_project_135.txt"]
+fnames = [
+    "PEAKS_parameters.txt",
+    "PEAKS_parameters_DDA.txt",
+    "PEAKS_parameters_project_135.txt",
+    # DIA database search export used by the entrapment module: no precursor charge
+    # range, no m/z ranges, and no PEAKS version line.
+    "PEAKS_parameters_DIA_entrapment.txt",
+]
 
 fnames = [TESTDATA_DIR / f for f in fnames]
 

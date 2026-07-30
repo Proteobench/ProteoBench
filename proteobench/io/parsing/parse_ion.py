@@ -884,6 +884,45 @@ def _load_peaks(input_csv: str) -> pd.DataFrame:
     return df
 
 
+def _load_peaks_entrapment(input_csv: str, reported_fdr: float = 0.01) -> pd.DataFrame:
+    """
+    Load a PEAKS DIA database search precursor export for the entrapment module.
+
+    This is a different file than the one used by the quantification modules: the
+    entrapment module reads the precursor-level identification export
+    (``dia_db.precursor.csv``) instead of the LFQ feature table. Two derived columns
+    are added because PEAKS does not report them directly:
+
+    - ``Stripped Peptide``: the sequence without the mass annotations that PEAKS
+      writes into the ``Peptide`` column (e.g. ``AAAC(+57.02)LDK``). The entrapment
+      mapping file is keyed on the unmodified sequence.
+    - ``PEP``: the p-value underlying the PEAKS ``-10LgP`` score
+      (``-10LgP = -10 * log10(P)``), used as the ranking score by
+      ``EntrapmentScores.generate_intermediate`` (lower is better).
+    - ``Q-Value``: PEAKS applies its precursor FDR filter before exporting and does
+      not write a per-precursor q-value, so every exported precursor is assigned
+      ``reported_fdr``, the FDR threshold that was applied during the search.
+
+    Parameters
+    ----------
+    input_csv : str
+        Path to the PEAKS ``dia_db.precursor.csv`` file.
+    reported_fdr : float, optional
+        Precursor FDR threshold applied during the PEAKS search, by default 0.01.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe with the ``Stripped Peptide``, ``PEP``, and ``Q-Value``
+        columns added.
+    """
+    df = pd.read_csv(input_csv, low_memory=False, sep=",")
+    df["Stripped Peptide"] = df["Peptide"].str.replace(r"\([^()]*\)", "", regex=True)
+    df["PEP"] = 10 ** (-df["-10LgP"] / 10)
+    df["Q-Value"] = float(reported_fdr)
+    return df
+
+
 def _load_quantms(input_csv: str) -> pd.DataFrame:
     """
     Load a QuantMS output file.

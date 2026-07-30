@@ -51,13 +51,13 @@ The entrapment FASTA (`ProteoBenchFASTA_Entrapment_Human_with_contaminants_entra
 
 ProteoBench reads the search engine output, maps runs to samples, and classifies each precursor identification as either a **target** or an **entrapment** hit based on the tag in the fasta.
 
-The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold (inferred from the output file).
+The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold. This threshold is inferred from the output file for tools that report a per-precursor q-value, and taken from the `FDR psm` field of the upload form for tools that do not (see the PEAKS section).
 
 ## How to use
 
 ### Suggested parameters
 
-The module currently accepts DIA-NN, FragPipe, FragPipe with DIA-NN quantification, and AlphaDIA output. Use the suggested parameters in Table 1 for a fair comparison between tools.
+The module currently accepts DIA-NN, FragPipe, FragPipe with DIA-NN quantification, AlphaDIA, and PEAKS output. Use the suggested parameters in Table 1 for a fair comparison between tools.
 
 **Table 1. Suggested parameters**
 
@@ -83,8 +83,10 @@ You will receive a link to a GitHub pull request. Save it — it contains your r
 | Tool | Input file | Parsed FDR Column | Parameter file |
 |---|---|---|---|
 | DIA-NN | `report.tsv` or `report.parquet` | Lib.Q.Value | `report.log.txt` |
-| FragPipe (DIA-NN quant) | `report.tsv` or `report.parquet` | Q.Value | FragPipe `.workflow` |
+| FragPipe | `ion.tsv` | Qvalue | FragPipe `.workflow` |
+| FragPipe (DIA-NN quant) | `report.tsv` or `report.parquet` | Global.Q.Value | FragPipe `.workflow` |
 | AlphaDIA | `precursors.parquet` | qval | AlphaDIA `log.txt` |
+| PEAKS | `dia_db.precursor.csv` | none (see below) | `parameters.txt` |
 
 ## Tool-specific settings
 
@@ -124,6 +126,21 @@ AlphaDIA submissions are parsed from precursor-level output. The entrapment modu
 3. Keep variable modifications disabled. Use Carbamidomethylation (C) as the fixed modification if alkylation was applied.
 4. Upload `precursors.parquet` for metric calculation.
 5. Upload the AlphaDIA `log.txt` file for public submission.
+
+### [PEAKS](https://www.bioinfor.com/)
+
+PEAKS submissions are parsed from the DIA database search precursor export. **This is a different file than the one used by the quantification modules**, which read the LFQ feature table (`lfq-features.csv`). The entrapment module needs precursor-level identifications, so upload `dia_db.precursor.csv` from the DIA DB search export instead.
+
+1. Use the ProteoBench entrapment FASTA as the target database. Do not add a contaminant database.
+2. Set `Digest Mode` to `NO_DIGESTION` and `Enzyme` to `None`, so no in-silico digestion is applied to the pre-digested FASTA.
+3. Keep variable modifications empty. Use Carbamidomethylation as the fixed modification if alkylation was applied.
+4. Set the precursor FDR to 1% in the `Precursor Filter` settings.
+5. Upload `dia_db.precursor.csv` for metric calculation.
+6. Upload the PEAKS parameter export (`parameters.txt`) for public submission.
+
+**Reported FDR threshold for PEAKS.** PEAKS applies its precursor FDR filter before writing `dia_db.precursor.csv` and does not report a per-precursor q-value in that file. ProteoBench therefore takes the reported FDR threshold from the **FDR psm** field of the upload form and assigns it to every exported precursor. Fill this field in with the precursor FDR you applied in the search (for example `0.01`); if it is left empty, 0.01 is assumed. A consequence is that PEAKS submissions produce a single point on the FDP-versus-threshold curve rather than a full curve.
+
+For ranking within the run, ProteoBench converts the PEAKS `-10LgP` score back to its underlying p-value (`-10LgP = -10 * log10(P)`). This ranking is used for the paired FDP calculation.
 
 ## Result description
 

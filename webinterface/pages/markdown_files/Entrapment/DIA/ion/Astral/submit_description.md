@@ -11,6 +11,7 @@ Use the following parameter files:
 - FragPipe (DIA-NN quant): FragPipe `.workflow`
 - FragPipe: FragPipe `.workflow`
 - AlphaDIA: `log.txt`
+- PEAKS: `parameters.txt`
 
 In this module, we keep track of the following parameters, if you feel
 that some important information is missing, please add it in the

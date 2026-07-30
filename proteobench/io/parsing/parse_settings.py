@@ -14,6 +14,7 @@ import toml
 from psm_utils import Peptidoform
 
 from .parse_ion import get_proforma_bracketed
+from .run_name_matching import RunNameMatch, match_run_names
 
 # IMPORTANT: it is defined here, but filled in after defining the classes
 # new classes need to be filled in there too!!!
@@ -183,6 +184,13 @@ class ParseSettingsQuant:
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
         self.modification_parser = None
+
+        # Opt-in, best-effort matching of run/sample names. Only
+        # tools where the user must manually type sample names before export
+        # (currently PEAKS) enable this via `[general].run_name_fuzzy_match`
+        # in their TOML.
+        self._fuzzy_run_name_match = bool(parse_settings["general"].get("run_name_fuzzy_match", False))
+        self.run_name_corrections: List[RunNameMatch] = []
 
         # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
         # Can be overridden per-tool in the TOML [general] section
@@ -373,8 +381,7 @@ class ParseSettingsQuant:
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
                 " Please check input file and selected software tool."
             )
-        df.rename(columns=self.mapper, inplace=True)
-        return df
+        return df.rename(columns=self.mapper)
 
     def _create_replicate_mapping(self) -> Dict[int, List[str]]:
         """
@@ -389,6 +396,57 @@ class ParseSettingsQuant:
         for k, v in self.condition_mapper.items():
             replicate_to_raw[v].append(k)
         return replicate_to_raw
+
+    def _resolve_run_names(self, candidates: set, expected: set) -> Dict[str, str]:
+        """
+        Best-effort match unresolved names against still-missing expected names.
+
+        Only called when `[general].run_name_fuzzy_match` is enabled in the
+        tool's TOML (currently PEAKS only). Confident matches are recorded on
+        `self.run_name_corrections` and returned as a rename map; if any
+        expected name still can't be resolved, raises a `ValueError` with an
+        actionable message (including near-miss suggestions) instead of
+        silently guessing.
+
+        Parameters
+        ----------
+        candidates : set
+            Observed names (df columns, or unique "Raw file" values) not
+            already an exact match for an expected name.
+        expected : set
+            Expected (TOML `condition_mapper`) keys not already satisfied by
+            an exact match.
+
+        Returns
+        -------
+        Dict[str, str]
+            Mapping of observed name -> matched expected name, for confident
+            corrections only. Empty if there was nothing to resolve.
+        """
+        missing = expected - candidates
+        if not missing:
+            return {}
+
+        result = match_run_names(candidates - expected, missing)
+        self.run_name_corrections.extend(result.matches)
+
+        if result.unmatched_expected:
+            lines = ["Sample name mismatch: could not match all expected sample/run names."]
+            lines.append("Missing expected name(s):")
+            for exp in result.unmatched_expected:
+                lines.append(f"  - {exp!r}")
+                near = result.near_misses.get(exp, [])
+                if near:
+                    shown = ", ".join(f"{obs!r} ({score:.0%} similar)" for obs, score in near)
+                    lines.append(f"    Closest name(s) found in your file: {shown}")
+            lines.append(
+                "ProteoBench automatically corrects small naming differences (case, spacing, minor "
+                "typos), but could not confidently resolve the name(s) above. Please rename the "
+                "sample(s) to match exactly, or check the module documentation for the required names."
+            )
+            raise ValueError("\n".join(lines))
+
+        return {m.observed: m.expected for m in result.matches}
 
     def _handle_data_format(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -407,6 +465,12 @@ class ParseSettingsQuant:
         # If "Raw file" is in mapper values, data is already in long format - skip melting
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
+
+            if self._fuzzy_run_name_match:
+                rename_map = self._resolve_run_names(set(df.columns), set(melt_vars))
+                if rename_map:
+                    df = df.rename(columns=rename_map)
+
             df_melted = df.melt(
                 id_vars=list(set(df.columns).difference(set(melt_vars))),
                 value_vars=melt_vars,
@@ -419,6 +483,11 @@ class ParseSettingsQuant:
         # Clean run names in the "Raw file" column (strip extensions, paths, suffixes)
         # so they match the condition_mapper keys (see #827, #876)
         df_melted["Raw file"] = df_melted["Raw file"].apply(self._clean_run_name)
+
+        if self._fuzzy_run_name_match:
+            rename_map = self._resolve_run_names(set(df_melted["Raw file"].unique()), set(self.condition_mapper.keys()))
+            if rename_map:
+                df_melted["Raw file"] = df_melted["Raw file"].replace(rename_map)
 
         df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
         return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)
@@ -941,8 +1010,7 @@ class ParseSettingsEntrapment:
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
                 " Please check input file and selected software tool."
             )
-        df.rename(columns=self.mapper, inplace=True)
-        return df
+        return df.rename(columns=self.mapper)
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         """

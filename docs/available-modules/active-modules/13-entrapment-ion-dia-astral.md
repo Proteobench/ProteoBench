@@ -51,7 +51,7 @@ The entrapment FASTA (`ProteoBenchFASTA_Entrapment_Human_with_contaminants_entra
 
 ProteoBench reads the search engine output, maps runs to samples, and classifies each precursor identification as either a **target** or an **entrapment** hit based on the tag in the fasta.
 
-The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold. This threshold is inferred from the output file for tools that report a per-precursor q-value, and taken from the `FDR psm` field of the upload form for tools that do not (see the PEAKS section).
+The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold, which is inferred from the q-value column of the output file. PEAKS reports no q-value column, so one is derived from its score (see the PEAKS section).
 
 ## How to use
 
@@ -83,10 +83,9 @@ You will receive a link to a GitHub pull request. Save it — it contains your r
 | Tool | Input file | Parsed FDR Column | Parameter file |
 |---|---|---|---|
 | DIA-NN | `report.tsv` or `report.parquet` | Lib.Q.Value | `report.log.txt` |
-| FragPipe | `ion.tsv` | Qvalue | FragPipe `.workflow` |
 | FragPipe (DIA-NN quant) | `report.tsv` or `report.parquet` | Global.Q.Value | FragPipe `.workflow` |
 | AlphaDIA | `precursors.parquet` | qval | AlphaDIA `log.txt` |
-| PEAKS | `dia_db.precursor.csv` | none (see below) | `parameters.txt` |
+| PEAKS | `dia_db.precursor.csv` | derived from -10LgP (see below) | `parameters.txt` |
 
 ## Tool-specific settings
 
@@ -138,9 +137,53 @@ PEAKS submissions are parsed from the DIA database search precursor export. **Th
 5. Upload `dia_db.precursor.csv` for metric calculation.
 6. Upload the PEAKS parameter export (`parameters.txt`) for public submission.
 
-**Reported FDR threshold for PEAKS.** PEAKS applies its precursor FDR filter before writing `dia_db.precursor.csv` and does not report a per-precursor q-value in that file. ProteoBench therefore takes the reported FDR threshold from the **FDR psm** field of the upload form and assigns it to every exported precursor. Fill this field in with the precursor FDR you applied in the search (for example `0.01`); if it is left empty, 0.01 is assumed. A consequence is that PEAKS submissions produce a single point on the FDP-versus-threshold curve rather than a full curve.
+**Reported FDR threshold for PEAKS.** `dia_db.precursor.csv` has no q-value column. ProteoBench derives one by back-transforming the PEAKS score, `q = 10 ** (-(-10LgP) / 10)`, and uses it exactly as the q-value of the other tools: to infer the reported FDR threshold, to rank precursors for the paired FDP, and to build the FDP-versus-threshold curve.
 
-For ranking within the run, ProteoBench converts the PEAKS `-10LgP` score back to its underlying p-value (`-10LgP = -10 * log10(P)`). This ranking is used for the paired FDP calculation.
+The back-transform is the inverse of the definition PEAKS uses. As described in the [PEAKS database search scoring documentation](https://www.bioinfor.com/dbscoring-tutorial/) and in [Zhang et al., 2012](https://doi.org/10.1074/mcp.M111.010587), PEAKS converts its internal LDF score to a P-value and reports `-10lgP = -10 * log10(P)`. The important detail is how that P-value is defined: it is the probability that a **false identification** scores above the observed score, not the probability that an individual random peptide matches the spectrum. PEAKS documents this distinction explicitly, on the grounds that a false identification arises from the many random peptides in the database rather than from a single one. Because the definition is taken over the distribution of false identifications, it already absorbs the size of the search space and lands on the same scale as a global precursor q-value.
+
+Two observations on the ProteoBench entrapment data are consistent with this:
+
+- The entrapment-derived false discovery proportion tracks the derived q-value within a constant factor over the accessible range (1e-3 to 1e-2), rather than diverging from it.
+- The precursor FDR filter sets the floor of the export. On the reference data, a 1% precursor FDR filter floors both the precursor and the peptide export at exactly `-10LgP = 20.0000`, that is `q = 0.010000`, so the maximum derived q-value reproduces the threshold that was applied.
+
+#### How the derived value differs from a target-decoy q-value
+
+The PEAKS P-value and a conventional q-value share the same numerator, the expected number of false identifications scoring above the threshold `x`. They differ in what that numerator is divided by:
+
+| Quantity | Denominator | Reads as |
+|---|---|---|
+| PEAKS P-value | `m0`, the total number of false identifications in the search | "1% of all false identifications score better than this" |
+| Target-decoy q-value | `R(x)`, the number of identifications accepted at this threshold | "1% of what I accepted is false" |
+
+Written out, `P(x) = E[V(x)] / m0` and `FDR(x) = E[V(x)] / R(x)`, so the two are related by
+
+```
+q(x) ~ P(x) * m0 / R(x)
+```
+
+They coincide only when `m0` is close to `R(x)`, which is not generally the case. This is why a P-value threshold is not an FDR threshold even though both lie in `[0, 1]` and both are quoted as percentages.
+
+The entrapment measurement recovers that `m0 / R(x)` correction factor directly. On the reference dataset:
+
+| Derived q (= P) | Accepted IDs `R(t)` | Lower bound FDP | Ratio | Combined FDP | Ratio |
+|---|---|---|---|---|---|
+| 1e-3 | 40 698 | 0.00135 | 1.35 | 0.00270 | 2.70 |
+| 3e-3 | 44 689 | 0.00405 | 1.35 | 0.00810 | 2.70 |
+| 5e-3 | 46 448 | 0.00670 | 1.34 | 0.01339 | 2.68 |
+| 1e-2 | 48 983 | 0.01286 | 1.29 | 0.02572 | 2.57 |
+
+The combined estimate, which corrects for the 1:1 entrapment ratio, puts the true FDR at roughly 2.6 times the PEAKS P-value across the whole range. Two further differences follow from the definitions:
+
+- **Dependence on sample composition.** `P(x)` depends only on the modelled distribution of false match scores, so two searches of the same database return the same `P` for the same score. `q(x)` also depends on how many correct identifications were made, so the same score maps to a different q-value on a clean sample than on a poor one. This module is particularly exposed to the difference, because searching a pre-digested database of 2.8 million peptides without enzymatic cleavage makes `m0` large.
+- **Estimation method and resolution.** `P(x)` is parametric: PEAKS fits the false match score distribution, so `P` is continuous and can be arbitrarily small. A target-decoy q-value is a ratio of counts, so its smallest non-zero step corresponds to a single decoy hit, about `1 / R`. See the second caveat below.
+
+#### Caveats
+
+**The reported threshold is only verified at 1%.** Because `-10lgP = -10 * log10(P)`, a P-value of 0.05 maps to 13.01, 0.01 maps to 20.00, and 0.001 maps to 30.00. On the reference run the 1% precursor FDR filter produced a floor of exactly `-10lgP = 20.0000`, so the derived q-value reproduces the applied threshold at that setting. Note that this is also the point where PEAKS' conventional `-10lgP >= 20` default cutoff sits, and other precursor FDR settings have not yet been checked against ProteoBench. If you submit a run filtered at a different precursor FDR, **check that the reported FDR threshold shown for your run matches the value you set**, and report a mismatch as a [GitHub issue](https://github.com/Proteobench/ProteoBench/issues/new). A threshold read too low would compare the empirical FDP against too strict a value, which can produce a false `invalid` verdict but not a false `valid` one.
+
+**The high-confidence tail is finer-grained than any FDR estimate can be.** On the reference dataset the derived value takes 4 529 distinct values across 48 983 precursors, spaced 0.01 apart on the `-10lgP` scale, so it is effectively continuous rather than a step function. The resolution floor of a decoy-counted q-value here would be `1 / 48 983 = 2.0e-5`, and 45% of precursors fall below it, down to a minimum of `2.4e-11`. A rate of `2.4e-11` would require on the order of 4e10 identifications before a single false one is expected, so it cannot be read as an FDR estimate.
+
+This does not affect any reported metric. Every threshold the module uses is 1e-3 or larger, and in that region there are tens of thousands of identifications and hundreds of entrapment hits, so the derived value carries genuine FDR-scale information. Below that region it serves only to order precursors, which is all the module requires there: the `Score` column of the intermediate result is a rank rather than a value, the paired FDP compares ranks, and no threshold is ever placed in the tail.
 
 ## Result description
 

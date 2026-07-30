@@ -5,7 +5,6 @@
 "Accession" = "Protein Group"
 "Source File" = "Raw file"
 "Q-Value" = "Q-Value"
-"PEP" = "PEP"
 
 [modifications_parser]
 "parse_column" = "Sequence"
@@ -25,6 +24,6 @@
 
 [upload_info]
 "datapoint_file" = "dia_db.precursor.csv"
-"datapoint_file_description" = "Upload the PEAKS `dia_db.precursor.csv` file from the DIA database search export. **Note that this is a different file than the one used for the quantification modules** (which use the LFQ feature table). PEAKS does not report a per-precursor q-value, so fill in the **FDR psm** field below with the precursor FDR you applied in the search (e.g. `0.01`); it is used as the reported FDR threshold for this run."
+"datapoint_file_description" = "Upload the PEAKS `dia_db.precursor.csv` file from the DIA database search export. **Note that this is a different file than the one used for the quantification modules** (which use the LFQ feature table). PEAKS reports no q-value column, so ProteoBench derives one from the `-10LgP` score; check that the reported FDR threshold shown for your run matches the precursor FDR you set in the search."
 "params_file" = "parameters.txt"
 "params_file_description" = "Upload the PEAKS parameter export file (`parameters.txt`)."

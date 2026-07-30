@@ -884,7 +884,11 @@ def _load_peaks(input_csv: str) -> pd.DataFrame:
     return df
 
 
+<<<<<<< Updated upstream
 def _load_peaks_entrapment(input_csv: str) -> pd.DataFrame:
+=======
+def _load_peaks_entrapment(input_csv: str, reported_fdr: float = 0.01) -> pd.DataFrame:
+>>>>>>> Stashed changes
     """
     Load a PEAKS DIA database search precursor export for the entrapment module.
 
@@ -896,6 +900,7 @@ def _load_peaks_entrapment(input_csv: str) -> pd.DataFrame:
     - ``Stripped Peptide``: the sequence without the mass annotations that PEAKS
       writes into the ``Peptide`` column (e.g. ``AAAC(+57.02)LDK``). The entrapment
       mapping file is keyed on the unmodified sequence.
+<<<<<<< Updated upstream
     - ``Q-Value``: ``10 ** (-"-10LgP" / 10)``, the back-transform of the PEAKS score.
       PEAKS reports no q-value column, but ``-10LgP`` is defined as ``-10 * log10(P)``
       where ``P`` is the PEAKS DB search P-value, that is, the probability that a *false
@@ -914,20 +919,43 @@ def _load_peaks_entrapment(input_csv: str) -> pd.DataFrame:
       ``q = 0.010000``. Note that in the high-scoring tail the back-transform drops
       below the smallest q-value decoy counting can produce, where it only acts as a
       ranking.
+=======
+    - ``PEP``: the p-value underlying the PEAKS ``-10LgP`` score
+      (``-10LgP = -10 * log10(P)``), used as the ranking score by
+      ``EntrapmentScores.generate_intermediate`` (lower is better).
+    - ``Q-Value``: PEAKS applies its precursor FDR filter before exporting and does
+      not write a per-precursor q-value, so every exported precursor is assigned
+      ``reported_fdr``, the FDR threshold that was applied during the search.
+>>>>>>> Stashed changes
 
     Parameters
     ----------
     input_csv : str
         Path to the PEAKS ``dia_db.precursor.csv`` file.
+<<<<<<< Updated upstream
+=======
+    reported_fdr : float, optional
+        Precursor FDR threshold applied during the PEAKS search, by default 0.01.
+>>>>>>> Stashed changes
 
     Returns
     -------
     pd.DataFrame
+<<<<<<< Updated upstream
         The loaded dataframe with the ``Stripped Peptide`` and ``Q-Value`` columns added.
     """
     df = pd.read_csv(input_csv, low_memory=False, sep=",")
     df["Stripped Peptide"] = df["Peptide"].str.replace(r"\([^()]*\)", "", regex=True)
     df["Q-Value"] = 10 ** (-df["-10LgP"] / 10)
+=======
+        The loaded dataframe with the ``Stripped Peptide``, ``PEP``, and ``Q-Value``
+        columns added.
+    """
+    df = pd.read_csv(input_csv, low_memory=False, sep=",")
+    df["Stripped Peptide"] = df["Peptide"].str.replace(r"\([^()]*\)", "", regex=True)
+    df["PEP"] = 10 ** (-df["-10LgP"] / 10)
+    df["Q-Value"] = float(reported_fdr)
+>>>>>>> Stashed changes
     return df
 
 

@@ -7,6 +7,9 @@ import pytest
 from proteobench.io.parsing.parse_ion import _load_peaks_entrapment, load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.entrapment.entrapment_base_module import EntrapmentModule
+from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
+    _declared_precursor_fdr,
+)
 from proteobench.score.entrapmentscores import EntrapmentScores
 
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/entrapment")
@@ -117,8 +120,13 @@ class TestEntrapmentFDPCalculation:
 class TestPeaksEntrapmentParsing:
     """PEAKS DIA database search precursor export (`dia_db.precursor.csv`)."""
 
+<<<<<<< Updated upstream
     def test_loader_adds_stripped_sequence_and_derived_qvalue(self):
         df = _load_peaks_entrapment(PEAKS_TESTDATA_FILE)
+=======
+    def test_loader_adds_stripped_sequence_pep_and_qvalue(self):
+        df = _load_peaks_entrapment(PEAKS_TESTDATA_FILE, reported_fdr=0.05)
+>>>>>>> Stashed changes
 
         # PEAKS writes the modified sequence in "Peptide"; the mapping file is keyed
         # on the unmodified sequence, so a stripped copy must be added.
@@ -128,11 +136,17 @@ class TestPeaksEntrapmentParsing:
         unmodified = df[~df["Peptide"].str.contains(r"\(", regex=True)]
         assert (unmodified["Stripped Peptide"] == unmodified["Peptide"]).all()
 
+<<<<<<< Updated upstream
         # PEAKS reports no q-value; it is derived from -10LgP = -10 * log10(q).
         assert df["Q-Value"].tolist() == pytest.approx((10 ** (-df["-10LgP"] / 10)).tolist())
         # The export is filtered at 1% precursor FDR, which is the -10LgP >= 20 floor.
         assert df["-10LgP"].min() == pytest.approx(20.0)
         assert df["Q-Value"].max() == pytest.approx(0.01)
+=======
+        # -10lgP = -10 * log10(P), so PEP is the underlying p-value and lower is better.
+        assert df["PEP"].tolist() == pytest.approx((10 ** (-df["-10LgP"] / 10)).tolist())
+        assert (df["Q-Value"] == 0.05).all()
+>>>>>>> Stashed changes
 
     def test_standard_format_has_the_columns_the_scorer_needs(self):
         df = _load_peaks_entrapment(PEAKS_TESTDATA_FILE)
@@ -141,7 +155,11 @@ class TestPeaksEntrapmentParsing:
         ).build_parser("PEAKS")
         standard_format = parse_settings.convert_to_standard_format(df)
 
+<<<<<<< Updated upstream
         for column in ("Peptide", "Sequence", "Charge", "Q-Value", "Protein Group", "Raw file"):
+=======
+        for column in ("Peptide", "Sequence", "Charge", "Q-Value", "PEP", "Protein Group", "Raw file"):
+>>>>>>> Stashed changes
             assert column in standard_format.columns
 
     def test_intermediate_ranks_precursors_by_peaks_score(self):
@@ -161,5 +179,31 @@ class TestPeaksEntrapmentParsing:
         # One row per precursor, ranked so that Score 1 is the best-scoring precursor.
         assert not intermediate.duplicated(subset=["Peptide", "Sequence", "Charge"]).any()
         assert intermediate["Score"].tolist() == list(range(1, len(intermediate) + 1))
+<<<<<<< Updated upstream
         assert intermediate["Q-Value"].is_monotonic_increasing
 
+=======
+        assert intermediate["PEP"].is_monotonic_increasing
+
+
+class TestDeclaredPrecursorFDR:
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            ("0.01", 0.01),
+            ("0.05", 0.05),
+            (0.01, 0.01),
+            ("1", 0.01),  # given as a percentage
+            ("5", 0.05),  # given as a percentage
+            ("", 0.01),  # not filled in
+            (None, 0.01),
+            ("not a number", 0.01),
+            ("0", 0.01),
+        ],
+    )
+    def test_declared_fdr_is_normalised_to_a_fraction(self, value, expected):
+        assert _declared_precursor_fdr({"ident_fdr_psm": value}) == pytest.approx(expected)
+
+    def test_missing_key_falls_back_to_the_default(self):
+        assert _declared_precursor_fdr({}) == pytest.approx(0.01)
+>>>>>>> Stashed changes

@@ -51,7 +51,7 @@ The entrapment FASTA (`ProteoBenchFASTA_Entrapment_Human_with_contaminants_entra
 
 ProteoBench reads the search engine output, maps runs to samples, and classifies each precursor identification as either a **target** or an **entrapment** hit based on the tag in the fasta.
 
-The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold, which is inferred from the q-value column of the output file. PEAKS reports no q-value column, so one is derived from its score (see the PEAKS section).
+The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold. This threshold is inferred from the output file for tools that report a per-precursor q-value, and taken from the `FDR psm` field of the upload form for tools that do not (see the PEAKS section).
 
 ## How to use
 

@@ -89,6 +89,85 @@ MOCK_PARSE_SETTINGS_SHORT = {
 
 MOCK_MODULE_SETTINGS = {"general": {"min_count_multispec": 1, "level": "ion"}, "species_expected_ratio": 1.0}
 
+# Mock parse settings mirroring a PEAKS TOML: wide format, with the fuzzy
+# run-name-matching opt-in enabled.
+MOCK_PARSE_SETTINGS_PEAKS = {
+    "mapper": {
+        "Sequence": "Sequence",
+        "Proteins": "Proteins",
+        "Modified sequence": "Modified sequence",
+        "Charge": "Charge",
+        "Reverse": "Reverse",
+        "Contaminant": "Contaminant",
+    },
+    "condition_mapper": {
+        "LFQ_ttSCP_diaPASEF_Condition_A_Sample_01 Normalized Area": "A",
+        "LFQ_ttSCP_diaPASEF_Condition_B_Sample_01 Normalized Area": "B",
+    },
+    "run_mapper": {
+        "LFQ_ttSCP_diaPASEF_Condition_A_Sample_01 Normalized Area": "Condition_A_Sample_01",
+        "LFQ_ttSCP_diaPASEF_Condition_B_Sample_01 Normalized Area": "Condition_B_Sample_01",
+    },
+    "species_mapper": {"_YEAST": "YEAST", "_ECOLI": "ECOLI", "_HUMAN": "HUMAN"},
+    "general": {"decoy_flag": True, "contaminant_flag": "Cont_", "run_name_fuzzy_match": True},
+}
+
+
+def _peaks_wide_df(condition_a_col, condition_b_col):
+    return pd.DataFrame(
+        {
+            "Sequence": ["PEPTIDE", "PEPTIDEK"],
+            "Proteins": ["PROTEIN1_YEAST", "PROTEIN2_ECOLI"],
+            "Modified sequence": ["PEPTIDE", "PEPTIDEK"],
+            "Charge": [2, 3],
+            condition_a_col: [100.0, 150.0],
+            condition_b_col: [200.0, 250.0],
+            "Reverse": [False, False],
+            "Contaminant": [False, False],
+        }
+    )
+
+
+class TestFuzzyRunNameMatchingPeaksOnly:
+    """
+    Only PEAKS TOMLs set `run_name_fuzzy_match = true`; every other tool's
+    behavior must be completely unchanged (a mismatched column still raises
+    pandas' own KeyError from `df.melt`, exactly as before this feature).
+    """
+
+    @pytest.fixture
+    def parse_settings_peaks(self):
+        return ParseSettingsQuant(MOCK_PARSE_SETTINGS_PEAKS, MOCK_MODULE_SETTINGS)
+
+    @pytest.fixture
+    def parse_settings_short(self):
+        return ParseSettingsQuant(MOCK_PARSE_SETTINGS_SHORT, MOCK_MODULE_SETTINGS)
+
+    def test_typo_in_column_name_is_auto_corrected(self, parse_settings_peaks):
+        df = _peaks_wide_df(
+            "LFQ_timstofSCP_diaPASEF_Condition_A_Sample_01 Normalized Area",
+            "LFQ_timstofSCP_diaPASEF_Condition_B_Sample_01 Normalized Area",
+        )
+        result = parse_settings_peaks._handle_data_format(df)
+        assert set(result["replicate"]) == {"A", "B"}
+        assert len(parse_settings_peaks.run_name_corrections) == 2
+
+    def test_unresolvable_column_raises_actionable_error(self, parse_settings_peaks):
+        df = _peaks_wide_df(
+            "totally_unrelated_name_1",
+            "totally_unrelated_name_2",
+        )
+        with pytest.raises(ValueError, match="Sample name mismatch:"):
+            parse_settings_peaks._handle_data_format(df)
+
+    def test_non_peaks_tool_is_unaffected_by_typo(self, parse_settings_short):
+        # MOCK_PARSE_SETTINGS_SHORT has no run_name_fuzzy_match flag: a typo'd
+        # column must still fail exactly as it did before this feature (a
+        # bare pandas KeyError from df.melt), proving the opt-in scoping.
+        df = TEST_DATA["short_format"].copy().rename(columns={"file1": "file1_typo"})
+        with pytest.raises(KeyError):
+            parse_settings_short._handle_data_format(df)
+
 
 class TestParseSettingsQuant:
     @pytest.fixture
@@ -113,6 +192,34 @@ class TestParseSettingsQuant:
     def test_create_replicate_mapping(self, parse_settings_long, parse_settings_short):
         replicate_to_raw = parse_settings_long._create_replicate_mapping()
         assert replicate_to_raw == {"A": ["file1"], "B": ["file2"]}
+
+    def test_validate_and_rename_columns_does_not_mutate_input(self):
+        # Regression test: renaming must not mutate the caller's DataFrame in
+        # place. `convert_to_standard_format` is called more than once on the
+        # same object in production (once during upload, again when
+        # submission validation re-parses the DataFrame from session state);
+        # an in-place rename here would make the second call fail with
+        # "Columns ... not found" because the columns were already renamed.
+        # Uses a mapper with an actual rename ("Accession" -> "Proteins"),
+        # unlike the identity mappers in MOCK_PARSE_SETTINGS_LONG/SHORT, so a
+        # regression would actually be observable.
+        parse_settings = {
+            "mapper": {"Accession": "Proteins", "Peptide": "Sequence"},
+            "condition_mapper": {},
+            "run_mapper": {},
+            "species_mapper": {},
+            "general": {"decoy_flag": True, "contaminant_flag": "Cont_"},
+        }
+        parser = ParseSettingsQuant(parse_settings, MOCK_MODULE_SETTINGS)
+        df = pd.DataFrame({"Accession": ["P1"], "Peptide": ["PEPTIDE"]})
+        original_columns = list(df.columns)
+
+        parser._validate_and_rename_columns(df)
+        assert list(df.columns) == original_columns
+
+        # Calling it again on the same, still-unmutated object must succeed.
+        result = parser._validate_and_rename_columns(df)
+        assert list(result.columns) == ["Proteins", "Sequence"]
 
     def test_filter_decoys(self, parse_settings_long, parse_settings_short):
         df = TEST_DATA["long_format"].copy()

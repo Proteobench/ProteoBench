@@ -51,7 +51,7 @@ def _load_fasta_reference(fasta_url: str, fasta_filename: Optional[str]) -> Fast
     return FastaReference.from_url(fasta_url, member_filename=fasta_filename)
 
 
-def _build_standard_dataframe(ionmodule: Any, input_format: str, input_df: pd.DataFrame) -> pd.DataFrame:
+def _build_standard_dataframe(ionmodule: Any, input_format: str, input_df: pd.DataFrame):
     """
     Re-derive the standardized result DataFrame by reusing the module parser.
 
@@ -66,15 +66,19 @@ def _build_standard_dataframe(ionmodule: Any, input_format: str, input_df: pd.Da
 
     Returns
     -------
-    pandas.DataFrame
-        The standardized result DataFrame.
+    tuple[pandas.DataFrame, list]
+        The standardized result DataFrame, and any best-effort sample/run-name
+        corrections the parser applied along the way (see
+        ``ParseSettingsQuant.run_name_corrections`` - currently only populated
+        for PEAKS). Re-parsing here deterministically rediscovers the same
+        corrections the original upload applied.
     """
     parser = ParseSettingsBuilder(
         parse_settings_dir=ionmodule.parse_settings_dir,
         module_id=ionmodule.module_id,
     ).build_parser(input_format)
     standard_df, _ = parser.convert_to_standard_format(input_df)
-    return standard_df
+    return standard_df, getattr(parser, "run_name_corrections", [])
 
 
 def _resolve_input_df(variables):
@@ -199,7 +203,7 @@ def run_submission_validation(variables, ionmodule, user_input, params) -> Valid
 
     # Re-derive the standardized DataFrame (reuses existing parsing; no duplication).
     try:
-        standard_df = _build_standard_dataframe(ionmodule, input_format, input_df)
+        standard_df, run_name_corrections = _build_standard_dataframe(ionmodule, input_format, input_df)
     except Exception as exc:  # noqa: BLE001 - never block submission on a validation infra error
         report.add_warning(
             "standardization_failed",
@@ -208,6 +212,23 @@ def run_submission_validation(variables, ionmodule, user_input, params) -> Valid
             "input",
         )
         return report
+
+    # Surface any best-effort sample/run-name auto-corrections (currently PEAKS
+    # only) as a warning, so the submitter and the PR reviewer both see exactly
+    # which name(s) were auto-matched and can reject the submission if a match
+    # looks wrong. Warning (not info) so it's included in report.summary() by
+    # default, which is what gets embedded in the pull-request description.
+    for correction in run_name_corrections:
+        report.add_warning(
+            "run_name_auto_corrected",
+            f"Sample name '{correction.observed}' did not exactly match the expected name; "
+            f"ProteoBench auto-matched it to '{correction.expected}' ({correction.score:.0%} similarity). "
+            "Please verify this is the correct sample.",
+            "run_name_matching",
+            field="Raw file",
+            observed=correction.observed,
+            expected=correction.expected,
+        )
 
     config = _build_config(ionmodule, input_format)
     fasta = _acquire_fasta(config, report)

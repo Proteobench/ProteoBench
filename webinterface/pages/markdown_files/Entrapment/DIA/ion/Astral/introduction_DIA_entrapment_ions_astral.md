@@ -4,4 +4,4 @@ The benchmark uses three technical replicates of a human plasma digest acquired 
 
 ProteoBench classifies each identified precursor as target or entrapment, maps entrapment peptides to their paired target peptides, and reports lower-bound, combined, and paired false discovery proportion (FDP) estimates. These estimates are compared with the FDR threshold parsed from the submitted tool output.
 
-The module accepts DIA-NN, FragPipe, FragPipe (DIA-NN quant), and AlphaDIA outputs. For a valid comparison, keep the raw file names unchanged, use the ProteoBench entrapment FASTA, disable in-silico digestion, and do not add variable modifications other than methionine oxidation. Any other modification present in the identified sequences causes metric calculation to fail with an error.
+The module accepts DIA-NN and AlphaDIA outputs. For a valid comparison, keep the raw file names unchanged, use the ProteoBench entrapment FASTA, disable in-silico digestion, and do not add variable modifications other than methionine oxidation. Any other modification present in the identified sequences causes metric calculation to fail with an error.

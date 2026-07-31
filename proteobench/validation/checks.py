@@ -394,6 +394,12 @@ def check_peptide_length(
     """
     Validate that peptide lengths fall within the parsed peptide-length range.
 
+    Length is computed from the ``proforma`` column (the modification-normalized
+    sequence produced during standard-format conversion) with all bracketed
+    modification annotations stripped first, so tool-specific modification
+    notation embedded in the sequence (e.g. ``M[Oxidation]`` or UniMod
+    accessions) is never counted as extra amino acids.
+
     Parameters
     ----------
     df : pandas.DataFrame
@@ -426,18 +432,19 @@ def check_peptide_length(
         )
         return report.issues
 
-    if config.sequence_column not in df.columns:
+    if config.proforma_column not in df.columns:
         report.add_warning(
-            "sequence_column_missing",
-            f"Sequence column '{config.sequence_column}' not found in the standardized results; "
+            "proforma_column_missing",
+            f"'{config.proforma_column}' column not found in the standardized results; "
             "peptide-length validation was skipped.",
             check,
-            field=config.sequence_column,
+            field=config.proforma_column,
         )
         return report.issues
 
-    sequences = df[config.sequence_column].astype(str)
-    lengths = sequences.str.count(r"[A-Za-z]")
+    proforma = df[config.proforma_column].astype(str)
+    bare_sequences = proforma.str.replace(_PROFORMA_MOD, "", regex=True)
+    lengths = bare_sequences.str.count(r"[A-Za-z]")
 
     mask = pd.Series(False, index=df.index)
     if min_len is not None:
@@ -447,14 +454,14 @@ def check_peptide_length(
 
     n_offending = int(mask.sum())
     if n_offending > 0:
-        examples = sequences[mask].unique().tolist()[:MAX_ROW_EXAMPLES]
+        examples = proforma[mask].unique().tolist()[:MAX_ROW_EXAMPLES]
         offending_lengths = sorted({int(length) for length in lengths[mask].unique()})
         report.add_error(
             "peptide_length_out_of_range",
             f"{n_offending} result row(s) have a peptide length outside the searched range "
             f"{_format_range(min_len, max_len)} (observed lengths: {offending_lengths}).",
             check,
-            field=config.sequence_column,
+            field=config.proforma_column,
             observed=offending_lengths,
             expected=_format_range(min_len, max_len),
             examples=examples,

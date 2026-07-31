@@ -135,7 +135,16 @@ def generate_submitter_identity(user_input) -> None:
     user = get_current_user()
     if user:
         provider_label = "GitHub" if user["provider"] == "github" else "ORCID"
-        st.info(f"Submitting as **{user['name']}** ({provider_label}: `{user['id']}`)", icon=":material/person:")
+        shared_details = (
+            "your GitHub username and display name" if user["provider"] == "github" else "your ORCID iD and name"
+        )
+        st.info(
+            f"Submitting as **{user['name']}** ({provider_label}: `{user['id']}`)\n\n"
+            f"By submitting this point, you agree to have {shared_details} "
+            f"(`{user['id']}`, \"{user['name']}\") attached to it and shown publicly "
+            "on the ProteoBench leaderboard.",
+            icon=":material/person:",
+        )
         user_input["submitter_id"] = user["id"]
         user_input["submitter_name"] = user["name"]
         user_input["submitter_provider"] = user["provider"]
@@ -433,6 +442,23 @@ def create_pull_request(
     submitter_provider = user_input.get("submitter_provider", "")
     if submitter_id:
         user_comments += f"\n\nSubmitter: {submitter_name} ({submitter_provider}: {submitter_id})"
+
+    # The datapoint row was created back in Tab 2 at upload time (see
+    # tab2_upload_results.execute_proteobench -> ionmodule.benchmarking), before the
+    # submitter's identity was known -- generate_submitter_identity only runs here in
+    # Tab 6, right before the actual submission. That left the row's submitter_id/
+    # submitter_name/submitter_provider permanently empty even when signed in, since
+    # nothing ever wrote the identity back into the already-created row. Stamp the
+    # current identity onto the new row now, before ionmodule.clone_pr (which submits
+    # this same DataFrame's last "new" row -- see QuantModule.clone_pr) writes it out.
+    submission_df = st.session_state[variables.all_datapoints_submission]
+    if submission_df is not None and "old_new" in submission_df.columns:
+        new_rows = submission_df.index[submission_df["old_new"] == "new"]
+        if len(new_rows):
+            last_new_idx = new_rows[-1]
+            submission_df.loc[last_new_idx, "submitter_id"] = submitter_id
+            submission_df.loc[last_new_idx, "submitter_name"] = submitter_name
+            submission_df.loc[last_new_idx, "submitter_provider"] = submitter_provider
 
     changed_params_str = compare_dictionaries(params_from_file, params.__dict__)
 

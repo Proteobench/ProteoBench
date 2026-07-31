@@ -120,6 +120,16 @@ class StreamlitPage(ABC):
                 height: 2.5rem;
                 white-space: nowrap;
             }
+            /* The sign-in widget's fragment wrapper (data-testid="stLayoutWrapper") defaults to
+               100% width, unlike the other buttons here which size to their content. At narrow
+               widths, once it wraps onto its own flex line, centering that full-width block does
+               nothing for the button rendered inside it -- the button itself stays left-aligned
+               within the block. Sizing the wrapper to its content makes it behave like a normal
+               flex item, so it centers correctly on its own line same as everything else. */
+            .st-key-hero_cta_row [data-testid="stLayoutWrapper"] {
+                width: fit-content;
+                flex: 0 0 auto;
+            }
             </style>
             """,
             unsafe_allow_html=True,

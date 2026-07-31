@@ -628,7 +628,7 @@ def render_oauth_success_banner() -> None:
     headline = f"You're signed in{f' as {name}' if name else ''} via {provider_label}." if user else "Sign-in complete."
     st.success(
         f"**{headline}** You can return to the tab you were working in -- it will show you "
-        "signed in within a few seconds. You can then safely close this tab.",
+        "signed in within a few seconds. You may need to move to another part of the website for the change to be reflected, but it should update automatically. You can safely close this tab.",
         icon=":material/check_circle:",
     )
 

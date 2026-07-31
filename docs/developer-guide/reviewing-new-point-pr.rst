@@ -4,7 +4,7 @@ Reviewing the submission of new data point
 
 1. Go to the PR page on Proteobot.
 
-2. Check in the user comments if they contain any warning or information for the reviewer.
+2. Check in the user comments if they contain any warning or information for the reviewer. If the submitter was signed in, the comments also include a ``Submitter: <name> (<provider>: <id>)`` line -- see :doc:`submitter-identity` for details.
 
 3. Check the parameter changes detected. If empty fields were filled in manually because they were not specified in the parameter file, this is ok. If a value was changed, this should be justified.
 

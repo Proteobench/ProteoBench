@@ -11,6 +11,7 @@ Developer guide
     local-usage
     modifying-module
     reviewing-new-point-pr
+    submitter-identity
     changelog
 
 .. toctree:: 

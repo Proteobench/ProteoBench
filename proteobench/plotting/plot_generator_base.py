@@ -69,6 +69,22 @@ class PlotGeneratorBase(ABC):
         """
         pass
 
+    def get_metrics_help_markdown(self) -> Optional[str]:
+        """
+        Return a Markdown explanation of how the metrics of the main plot are calculated.
+
+        The web interface renders this text in a "How are the metrics calculated?" popover at the
+        top of every module page. Because the explanation describes the axes and encodings of the
+        main plot, it lives next to the code that produces that plot.
+
+        Returns
+        -------
+        str or None
+            The Markdown explanation, or None when the module does not provide one. In that case
+            the web interface hides the popover.
+        """
+        return None
+
     @abstractmethod
     def plot_main_metric(self, result_df: pd.DataFrame, hide_annot: bool = False, **kwargs) -> go.Figure:
         """

@@ -96,6 +96,65 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             "ma_plot": "MA plot calculated from the performance data",
         }
 
+    def get_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the metrics of the main plot are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover.
+        """
+        return f"""
+            Each point is one benchmark run. Both axes are recomputed whenever the
+            **Minimal precursor quantifications** slider is moved, so every metric refers to the
+            subset of features that is quantified in at least that many raw files.
+
+            **X-axis** - the quantification error, expressed as the absolute deviation between the
+            measured and the expected log2 fold change. Per feature (precursor ion or peptidoform)
+            the deviation is called epsilon:
+
+            `epsilon = log2(mean intensity in A / mean intensity in B) - log2(expected ratio A/B)`
+
+            The expected ratio is the known mixing ratio of the species the feature belongs to, so
+            only species-specific features are used. The absolute epsilon values are then
+            aggregated over the selected feature set. A value closer to zero means the measured
+            fold changes are closer to the ground truth.
+
+            **Y-axis** - {self.y_axis_title.lower()}. This is the plain count of features that
+            passed the slider threshold, and it reflects the identification and quantification
+            depth of the workflow.
+
+            A workflow in the **upper left corner** therefore quantifies many features with a small
+            fold-change error.
+
+            **Select metric** - how the absolute epsilon values are aggregated:
+
+            - **Median** - the median absolute epsilon. Robust against a small number of strongly
+              deviating features.
+            - **Mean** - the mean absolute epsilon. More sensitive to outliers, so it penalises a
+              tail of badly quantified features more strongly.
+
+            **Select metric calculation approach** - how the species are weighted:
+
+            - **Species-weighted** - the absolute epsilon is aggregated per species first, and those
+              per-species values are then averaged with equal weight. Every species contributes
+              equally, regardless of how many features were quantified for it.
+            - **Global** - all selected features are aggregated as one population. Species with many
+              quantified features therefore dominate the value.
+
+            The two approaches can rank workflows differently when the number of quantified features
+            is unbalanced across the species. Benchmark runs submitted before the species-weighted
+            metric existed are hidden in that mode, because the value cannot be recomputed from the
+            stored results.
+
+            **Select label** - annotates each point with the value of the chosen search parameter,
+            which makes it easier to see how a single setting affects the results.
+
+            **Colorblind Mode** - distinguishes the software tools by marker shape in addition to
+            colour.
+            """
+
     def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
         """
         Get the appropriate metric column names based on metric type and calculation mode.

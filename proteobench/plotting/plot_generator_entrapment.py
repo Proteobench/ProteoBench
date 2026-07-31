@@ -85,6 +85,68 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             ),
         }
 
+    def get_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the metrics of the main plot are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover.
+        """
+        return r"""
+            Each point is one benchmark run. Entrapment sequences from organisms that are absent
+            from the sample are added to the search database, so every entrapment identification is
+            a false positive by construction. Their frequency is used to estimate the false
+            discovery proportion (FDP) that the workflow actually reached, which can then be
+            compared to the FDR threshold the workflow declared.
+
+            **X-axis** - the estimated FDP bound, calculated at the selected Q-value threshold.
+            Workflows further to the left estimated their FDR more accurately.
+
+            **Y-axis** - the number of identified features at that same threshold, which reflects
+            the sensitivity of the workflow.
+
+            The two axes represent a trade-off: a workflow can identify more features by accepting a
+            higher true error rate, so a point should never be judged on one axis alone.
+
+            **Select metric to show in x axis** - which bound of the estimated FDP interval is shown:
+
+            - **Estimated lower FDP bound** - the fraction of identified entrapment peptides among
+              all identifications, `N_E / (N_T + N_E)`. It is a lower bound because entrapment
+              identifications that displaced their paired target are not counted.
+            - **Estimated upper FDP bound - Paired method** - additionally counts entrapment
+              peptides that have no identified paired target, and counts pairs in which the
+              entrapment outscores the target twice.
+
+            Here `N_E` is the number of identified entrapment peptides and `N_T` the number of
+            identified target peptides. The full formulas are given in the "Quick Intro" panel of
+            this module.
+
+            **Q-value threshold** - the confidence threshold at which both axes are evaluated. The
+            stored FDP curve is re-read at the selected value, so moving it changes both the
+            estimated FDP and the number of identified features. "Maximum reported" uses the highest
+            threshold that the workflow reported.
+
+            **Point colour** - the software tool.
+
+            **Marker shape** - the verdict obtained by comparing the estimated FDP interval to the
+            FDR threshold that the workflow declared:
+
+            - circle, **valid** - both estimated bounds are below the declared threshold, so FDR
+              control holds (and is conservative).
+            - triangle, **inconclusive** - the estimated interval contains the declared threshold,
+              so the data neither confirm nor reject the FDR calculation.
+            - cross, **invalid** - both estimated bounds exceed the declared threshold, so the
+              reported FDR is underestimated.
+
+            Runs without a declared FDR threshold are evaluated against a fallback of 0.01 so that
+            they are still displayed.
+
+            **Colorblind Mode** - reassigns the marker shape to the software tool, so the verdict is
+            then no longer encoded in the shape.
+            """
+
     def _plot_qq_plot(
         self, performance_data: pd.DataFrame, fdp_curve: dict = None, mapping_file: str = None
     ) -> go.Figure:

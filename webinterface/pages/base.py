@@ -1,6 +1,7 @@
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
+from pages.base_pages.utils.metrics_help import render_metrics_help
 
 # The guided tour is an optional driver.js overlay. Importing it can fail when the
 # installed streamlit_tour is incompatible with the streamlit version (e.g.
@@ -42,10 +43,10 @@ class BaseStreamlitUI:
         self.uiobjects = uiobjects(self.variables, self.ionmodule, self.parsesettingsbuilder, page_name=page_name)
 
     def _render_tab_header(self) -> None:
-        """Render common tab header elements: title, documentation link, and banner."""
+        """Render common tab header elements: title, documentation link, metrics help, and banner."""
         st.title(self.variables.title)
         raw_data_url = getattr(self.variables, "raw_data_url", None)
-        doc_col, download_col = st.columns(2)
+        doc_col, download_col, metrics_col = st.columns(3)
         with doc_col:
             st.link_button(
                 "Module documentation",
@@ -63,6 +64,8 @@ class BaseStreamlitUI:
                     icon="⬇️",
                     help="Download the raw input files used to benchmark this module",
                 )
+        with metrics_col:
+            render_metrics_help(self.ionmodule, self.variables)
         display_banner(self.variables)
 
     def get_tab_config(self) -> list:

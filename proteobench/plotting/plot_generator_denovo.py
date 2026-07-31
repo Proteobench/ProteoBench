@@ -400,6 +400,58 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             "species_overview": "Breakdown of precision across different species in the dataset.",
         }
 
+    def get_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the metrics of the main plot are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover.
+        """
+        return """
+            Each point is one benchmark run. The predicted peptidoforms are compared against the
+            ground-truth peptidoforms of the benchmark dataset, and both axes show the same metric
+            at two different levels of granularity.
+
+            **X-axis** - the metric at **peptide level**: a prediction counts as correct only when
+            the whole peptidoform is considered a match.
+
+            **Y-axis** - the metric at **amino-acid level**: the individual amino acids that are
+            correctly predicted are counted, so partially correct sequences still contribute.
+
+            A tool in the **upper right corner** therefore performs well at both levels. A point
+            that sits high but not far to the right predicts many individual amino acids correctly
+            without getting whole sequences right.
+
+            **Select the classification metric** - which metric is shown on both axes:
+
+            - **Precision** - the fraction of the reported predictions that is correct:
+              `precision = correct predictions / reported predictions`. It describes how reliable
+              the reported sequences are.
+            - **Recall** - the fraction of the spectra that received a correct prediction:
+              `recall = correct predictions / total spectra`. It describes the coverage of the
+              dataset.
+
+            The two differ whenever a tool does not report a prediction for every spectrum: a tool
+            can reach a high precision by only reporting its confident predictions, while its recall
+            stays low.
+
+            **Select the stringency of evaluation** - when a prediction counts as correct:
+
+            - **Exact** - the predicted sequence must match the ground truth exactly, including the
+              modifications and their positions. This is the strictest criterion.
+            - **Mass-based** - a prediction also counts as correct when it matches the ground truth
+              through the longest mass-matching prefix and suffix, using a cumulative mass tolerance
+              of 50 ppm and an individual amino-acid tolerance of 20 ppm. This accepts
+              interpretations that cannot be distinguished by mass, such as isobaric amino acids
+              (for example I and L). Mass-based numbers are therefore always equal to or higher than
+              the exact numbers.
+
+            **Colorblind Mode** - distinguishes the software tools by marker shape in addition to
+            colour.
+            """
+
     def plot_ptm_overview(
         self,
         benchmark_metrics_df: pd.DataFrame,

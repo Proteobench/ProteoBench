@@ -51,6 +51,18 @@ class DIAQuantIonModulePlasma(QuantModule):
     module_id: str = "quant_lfq_DIA_ion_plasma"
     y_axis_title: str = "Number of quantified spike-in precursors"
 
+    #: Plasma-specific top-level columns that are refreshed when the cutoff slider moves, mapped
+    #: to the corresponding key in the nested ``results`` dictionary.
+    PLASMA_COLUMN_TO_METRIC = {
+        "median_abs_log2_fc_error_spike_ins": "median_abs_log2_fc_error_spike_ins",
+        "nr_quantified_spike_ins": "nr_quantified_spike_ins",
+        "nr_quantified_HUMAN": "nr_quantified_HUMAN",
+        "nr_quantified_YEAST": "nr_quantified_YEAST",
+        "nr_quantified_ECOLI": "nr_quantified_ECOLI",
+        "dynamic_range_human_plasma": "dynamic_range_human_plasma_mean",
+        "median_abs_epsilon_human_plasma": "median_abs_epsilon_human_plasma",
+    }
+
     def __init__(
         self,
         token: str,
@@ -191,6 +203,80 @@ class DIAQuantIonModulePlasma(QuantModule):
             all_datapoints,
             input_df,
         )
+
+    @staticmethod
+    def filter_data_point(all_datapoints: pd.DataFrame, default_val_slider: int = 3) -> pd.DataFrame:
+        """
+        Filter the data points and refresh the plasma-specific columns at the selected cutoff.
+
+        On top of the generic filtering, the plasma-specific top-level columns (the per-species
+        identification counts, the spike-in error, the plasma dynamic range and the plasma
+        accuracy) are re-read from the nested ``results`` dictionary at the selected
+        ``min_nr_observed`` level. Without this, those columns would keep the value of the cutoff
+        that was used at submission time and would disagree with the overview plot.
+
+        Parameters
+        ----------
+        all_datapoints : pd.DataFrame
+            All data points.
+        default_val_slider : int, optional
+            The minimum number of observations for filtering. Defaults to 3.
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing the filtered data points.
+        """
+        all_datapoints = QuantModule.filter_data_point(all_datapoints, default_val_slider)
+
+        if len(all_datapoints) == 0 or "results" not in all_datapoints.columns:
+            return all_datapoints
+
+        for column, metric_key in DIAQuantIonModulePlasma.PLASMA_COLUMN_TO_METRIC.items():
+            values = [
+                DIAQuantIonModulePlasma._get_metric_at_cutoff(results, default_val_slider, metric_key)
+                for results in all_datapoints["results"]
+            ]
+            # Only overwrite when at least one datapoint carries the metric, so datapoints
+            # submitted before the metric existed keep whatever they already have.
+            if any(value is not None for value in values):
+                all_datapoints[column] = [
+                    value if value is not None else existing
+                    for value, existing in zip(values, all_datapoints.get(column, [None] * len(values)))
+                ]
+
+        return all_datapoints
+
+    @staticmethod
+    def _get_metric_at_cutoff(results: dict, cutoff: int, metric_key: str):
+        """
+        Read a single metric from a nested results dictionary at the given cutoff level.
+
+        Parameters
+        ----------
+        results : dict
+            The nested results dictionary of a datapoint. Keys may be integers (in-process) or
+            strings (loaded from JSON).
+        cutoff : int
+            The min_nr_observed level to read.
+        metric_key : str
+            The name of the metric to read.
+
+        Returns
+        -------
+        Any
+            The metric value, or None when it is not available.
+        """
+        if not isinstance(results, dict):
+            return None
+
+        metrics = results.get(cutoff)
+        if not isinstance(metrics, dict):
+            metrics = results.get(str(cutoff))
+        if not isinstance(metrics, dict):
+            return None
+
+        return metrics.get(metric_key)
 
     def get_plot_generator(self, y_axis_title: str = None):
         """Return the plot generator for the module.

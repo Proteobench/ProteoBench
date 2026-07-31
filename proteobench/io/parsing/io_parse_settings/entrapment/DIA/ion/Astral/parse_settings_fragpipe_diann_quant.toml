@@ -4,7 +4,7 @@
 "Protein.Ids" = "Proteins"
 "Precursor.Charge" = "Charge"
 "Stripped.Sequence" = "Peptide"
-"Q.Value" = "Q-Value"
+"Global.Q.Value" = "Q-Value"
 "Protein.Group" = "Protein Group"
 
 [modifications_parser]

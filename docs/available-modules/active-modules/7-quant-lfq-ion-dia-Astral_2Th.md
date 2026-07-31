@@ -133,6 +133,8 @@ When starting a new project and selecting the .RAW files for analysis, you will 
 -LFQ_Astral_DIA_15min_50ng_Condition_B_REP2
 -LFQ_Astral_DIA_15min_50ng_Condition_B_REP3
 
+ProteoBench automatically corrects small naming differences (case, spacing, minor typos) in PEAKS sample names, but anything it can't confidently resolve will still fail with a message telling you which name(s) didn't match. Exact names are still the safest bet.
+
 Make sure to set Enzyme as trypsin, Instrument as Orbitrap (Astral), Fragment as HCD and Acquisition as DIA.
 In workflow section use the Quantification option. While we do not propose to use a custom spectral library, one could define one in the "Spectral library" tab. Define the different search parameters in the tab "DB search". 
 In the tab "Quantification" use the "Label Free" option, followed by either adding all samples individually or grouping samples according to their respective condition. In the "Report" tab, make sure both Precursor or Peptide FDR and Protein Group FDR are set to 1%. 

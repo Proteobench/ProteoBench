@@ -305,12 +305,16 @@ def get_proforma_bracketed(
         if idx in pos_mod_dict:
             if idx == 0:
                 new_seq += f"[{pos_mod_dict[idx]}]-"
-            elif idx == len(stripped_seq):
-                new_seq += f"-[{pos_mod_dict[idx]}]"
             else:
                 new_seq += f"[{pos_mod_dict[idx]}]"
         if not before_aa:
             new_seq += aa
+
+    # A modification on the last residue (before_aa=False, i.e. bracket after the
+    # residue) is recorded at idx == len(stripped_seq), which the loop above never
+    # reaches (idx only ranges 0..len(stripped_seq)-1), so it must be appended here.
+    if len(stripped_seq) in pos_mod_dict:
+        new_seq += f"[{pos_mod_dict[len(stripped_seq)]}]"
 
     return new_seq
 
@@ -381,7 +385,13 @@ def _load_sage(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+    df = pd.read_csv(input_csv, sep="\t", low_memory=False)
+    # Strip .raw or .mzML suffixes from the run column of long-format output
+    # (e.g. "Sample.mzML" -> "Sample"), mirroring the wide-format column cleanup.
+    for run_column in ("filename", "Raw file"):
+        if run_column in df.columns:
+            df[run_column] = df[run_column].str.replace(r"\.(raw|mzML)(\.gz)?(?=\s|$)", "", regex=True, case=False)
+    return df
 
 
 def _load_fragpipe(input_csv: str) -> pd.DataFrame:

@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import pytest
 
-from proteobench.exceptions import DatapointGenerationError
+from proteobench.exceptions import DatapointGenerationError, DatasetAlreadyExistsOnServerError
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
@@ -209,3 +209,28 @@ class TestDDAQuantIonModule:
 
         assert first_software_tool == second_software_tool
         assert len(all_datapoints) == 1
+
+    def test_check_new_unique_hash_raises_on_duplicate(self):
+        # A previously submitted run (same intermediate_hash) must raise the dedicated
+        # exception so the web layer can surface it, rather than calling into Streamlit.
+        module = DDAQuantIonModuleQExactive("")
+        datapoints = pd.DataFrame(
+            {
+                "old_new": ["old", "new"],
+                "intermediate_hash": ["dup_hash", "dup_hash"],
+                "id": ["Existing tool (v1)", "New tool (v1)"],
+            }
+        )
+        with pytest.raises(DatasetAlreadyExistsOnServerError):
+            module.check_new_unique_hash(datapoints)
+
+    def test_check_new_unique_hash_returns_true_when_unique(self):
+        module = DDAQuantIonModuleQExactive("")
+        datapoints = pd.DataFrame(
+            {
+                "old_new": ["old", "new"],
+                "intermediate_hash": ["hash_a", "hash_b"],
+                "id": ["Existing tool (v1)", "New tool (v1)"],
+            }
+        )
+        assert module.check_new_unique_hash(datapoints) is True

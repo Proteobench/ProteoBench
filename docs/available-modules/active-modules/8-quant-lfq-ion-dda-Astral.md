@@ -27,7 +27,9 @@ The mass spectrometer was operated in positive ionization mode with data-depende
 
 The files are currently not yet uploaded to the ProteomeXchange repository, but we are working on this to make them accessible in the near future.
 
-For now, you can download the raw files from the ProteoBench server here:
+You can download the raw files from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DDA-astral/) here:
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DDA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DDA-astral/all_data_LFQ_Quant_DDA_Astral.tar.gz).
 
 - [LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP1.raw)
 - [LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_A_REP2.raw)
@@ -35,8 +37,6 @@ For now, you can download the raw files from the ProteoBench server here:
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP1.raw)
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP2.raw)
 - [LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw](https://proteobench.cubimed.rub.de/raws/DDA-astral/LFQ_Astral_DDA_15min_50ng_Condition_B_REP3.raw)
-
-All files can be found here [proteobench.cubimed.rub.de/raws/DDA-astral/](https://proteobench.cubimed.rub.de/raws/DDA-astral/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -55,22 +55,6 @@ The total number of unique precursor ions is reported on the vertical axis, and 
 
 Click [here](https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral) if you want to submit your results or when you want to explore the DDA quantification module.
 
-### Input data for private visualisation of your benchmark run(s)
-
-The module is flexible in terms of what workflow the participants can run. However, to ensure a fair comparison of the different processing tools, we suggest using the parameters listed in Table 1.
-
-**Table 1. Suggested parameters for module 2**
-|Parameter|Value|
-|---------|-----|
-|Maximum number of missed cleavages|2|
-|PSM FDR|0.01|
-|Endopeptidase|Trypsin/P|
-|Fixed modifications|Carbamidomethylation (C)|
-|Variable modifications|Oxidation (M), Acetyl (Protein N-term)|
-|Precursor mass tolerance|10 ppm|
-|Fragment mass tolerance|20 ppm|
-|Minimum peptide length|7 residues|
-
 ### Submit your run for public usage
 
 When you have successfully uploaded and visualized a benchmark run, we strongly encourage you to add the result to the online repository. This way, your run will be available to the entire community and can be compared to all other uploaded benchmark runs. By doing so, your workflow outputs, parameters and calculated metrics will be stored and publicly available.
@@ -84,7 +68,7 @@ After upload, you will get a link to a Github pull request associated with your 
 ## Important Tool-specific settings
 Table 2 provides an overview of the required input files for public submission. More detailed instructions are provided for each individual tool in the following section.
 
-**Table 2. Overview of input files required for metric caluclation and public submission**
+**Table 2. Overview of input files required for metric calculation and public submission**
 | Tool | Input file | Parameter File |
 |---|---|---|
 | AlphaPept | *.csv | results.yaml |

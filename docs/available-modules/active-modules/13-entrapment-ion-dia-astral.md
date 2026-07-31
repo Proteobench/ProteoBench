@@ -29,17 +29,19 @@ Each workflow submission is classified as:
 
 > **Use the pre-digested entrapment FASTA — do not enable in-silico digestion.** The entrapment FASTA already contains peptide sequences (not full proteins). Enabling digestion in your search engine will lead to identified peptides without matched entrapments, which makes FDP calculation less accurate.
 
-> **Do not add any variable modifications.**
+> **Only methionine oxidation is supported as a variable modification.** The entrapment mapping enumerates every combination of methionine oxidation and cysteine carbamidomethylation. Enabling any other modification (variable, or an additional fixed modification) causes metric calculation to fail with an error, because the target/entrapment pairing cannot be resolved for it.
 
 ## Data set
 
-The benchmark dataset consists of three technical replicates of a human plasma digest acquired on an Orbitrap Astral (Thermo Fisher Scientific) in DIA mode with a 15-minute gradient.
+The benchmark dataset consists of three technical replicates of a 50ng HeLa digest acquired on an Orbitrap Astral (Thermo Fisher Scientific) in DIA mode with a 15-minute gradient. The mass spectrometer was operated in positive ionization mode with data-independent acquisition, with a full MS scans over a mass range of m/z 380-980 with detection in the Orbitrap at a resolution of 240,000. In each cycle of data-independent acquisition, 300 windows of 2 Th were used to isolate and fragment all precursor ions from 380 to 980 m/z. A normalized collision energy of 25% was used for HCD fragmentation. MS2 scan range was set from 150 to 2000 m/z with detection in the Astral with a maximum injection time of 3 ms. Full details on the dataset can be found in [this preprint](https://www.biorxiv.org/content/10.64898/2026.01.29.702266v2)
 
-Download the raw files from the ProteoBench server:
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/):
 
-- `LFQ_Astral_DIA_15min_50ng_Human_01`
-- `LFQ_Astral_DIA_15min_50ng_Human_02`
-- `LFQ_Astral_DIA_15min_50ng_Human_03`
+- Single archive with FASTA: [all_data_Entrapment_DIA_Astral.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz).
+
+- [LFQ_Astral_DIA_15min_50ng_Human_01.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_01.raw)
+- [LFQ_Astral_DIA_15min_50ng_Human_02.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_02.raw)
+- [LFQ_Astral_DIA_15min_50ng_Human_03.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/LFQ_Astral_DIA_15min_50ng_Human_03.raw)
 
 **It is imperative not to rename the files once downloaded.**
 
@@ -51,11 +53,15 @@ ProteoBench reads the search engine output, maps runs to samples, and classifies
 
 The three FDP estimates are computed from the resulting set and compared to the reported FDR threshold (inferred from the output file).
 
+### Modification support
+
+Precursor identifications are matched to the entrapment mapping file using their exact modified sequence, not the stripped peptide. The mapping file enumerates every combination of variable methionine oxidation and fixed cysteine carbamidomethylation, so an identification built only from those two modifications is paired correctly, down to the specific set of oxidized methionines. Any other modification present in the reported sequence is not recognized, and metric calculation fails with an error rather than silently ignoring it.
+
 ## How to use
 
-### Input data for private visualisation
+### Suggested parameters
 
-The module currently accepts DIA-NN output (`report.tsv` or `report.parquet`). Use the suggested parameters in Table 1 for a fair comparison between tools.
+The module currently accepts DIA-NN, FragPipe, FragPipe with DIA-NN quantification, and AlphaDIA output. Use the suggested parameters in Table 1 for a fair comparison between tools.
 
 **Table 1. Suggested parameters**
 
@@ -65,7 +71,7 @@ The module currently accepts DIA-NN output (`report.tsv` or `report.parquet`). U
 | Spectral library | Predicted from entrapment FASTA |
 | Digestion | **None** (FASTA is pre-digested) |
 | Fixed modifications | Carbamidomethylation (C) |
-| Variable modifications | **None** |
+| Variable modifications | Methionine oxidation (M), optional. No other variable modification is supported. |
 | Precursor charge range | 1–5 |
 | Precursor m/z range | 400–1000 |
 | Fragment m/z range | 100–1800 |
@@ -81,6 +87,8 @@ You will receive a link to a GitHub pull request. Save it — it contains your r
 | Tool | Input file | Parsed FDR Column | Parameter file |
 |---|---|---|---|
 | DIA-NN | `report.tsv` or `report.parquet` | Lib.Q.Value | `report.log.txt` |
+| FragPipe (DIA-NN quant) | `report.tsv` or `report.parquet` | Q.Value | FragPipe `.workflow` |
+| AlphaDIA | `precursors.parquet` | qval | AlphaDIA `log.txt` |
 
 ## Tool-specific settings
 
@@ -89,13 +97,28 @@ You will receive a link to a GitHub pull request. Save it — it contains your r
 1. Import the raw `.raw` files.
 2. Add the entrapment FASTA. Do not enable "Contaminants" — contaminants are already included in the FASTA.
 3. **Disable in-silico digestion.** The FASTA is pre-digested; use '--cut ' in the additional parameter fields to disable enzymatic cleavage.
-4. Enable library-free search / FASTA-based library generation (activates deep-learning prediction of spectra, RTs, and IMs).
-5. Do not set verbosity / log level higher than 1, otherwise parameter parsing will fail.
-6. Upload `report.tsv` or `report.parquet` for metric calculation, and `report.log.txt` for public submission.
+4. Variable modifications are limited to methionine oxidation (optional); disable all other variable modifications. Carbamidomethylation (C) can be used as a fixed modification.
+5. Enable library-free search / FASTA-based library generation (activates deep-learning prediction of spectra, RTs, and IMs).
+6. Do not set verbosity / log level higher than 1, otherwise parameter parsing will fail.
+7. Upload `report.tsv` or `report.parquet` for metric calculation, and `report.log.txt` for public submission.
+
+### FragPipe with DIA-NN quantification
+
+FragPipe is currently not supported as the decoy generation is not compatible with the predigested module fasta (see [here](https://github.com/Nesvilab/FragPipe/issues/2847)). 
+
+### [AlphaDIA](https://github.com/MannLabs/alphadia)
+
+AlphaDIA submissions are parsed from precursor-level output. The entrapment module currently expects AlphaDIA 2.x-style precursor output.
+
+1. Use the ProteoBench entrapment FASTA and disable additional contaminants.
+2. Configure AlphaDIA for a no-enzyme / pre-digested FASTA search: set "no-cleave" as the enzyme parameter.
+3. Variable modifications are limited to methionine oxidation; keep all other variable modifications disabled. Use Carbamidomethylation (C) as the fixed modification if alkylation was applied.
+4. Upload `precursors.parquet` for metric calculation.
+5. Upload the AlphaDIA `log.txt` file for public submission.
 
 ## Result description
 
-After uploading, you will see the FDP bounds plotted against the FDR estimates by the search engine. A valid (conservative) FDR calculation shows as both the upper and lower bound being higher than the FDR estimation.
+After uploading, you will see the FDP bounds plotted against the FDR estimate reported by the search engine. A valid (conservative) FDR calculation has the empirical upper bound below the declared FDR threshold.
 
 You can also compare the results with other submissions in the 'View Public + New Results' Tab. The following plots are shown:
 

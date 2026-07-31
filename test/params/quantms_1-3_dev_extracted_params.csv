@@ -21,4 +21,6 @@ min_precursor_charge,2
 max_precursor_charge,4
 quantification_method,feature_intensity
 protein_inference,aggregation
-abundance_normalization_ions,
+abundance_normalization_ions,False
+postprocessing_performed,False
+postprocessing_description,

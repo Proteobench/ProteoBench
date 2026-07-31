@@ -73,6 +73,7 @@ def extract_params(
         parameters["enable_match_between_runs"] = True
     else:
         parameters["enable_match_between_runs"] = False
+    parameters["predictors_library"] = params_dict["Prediction Model"]
 
     params = ProteoBenchParameters(**parameters, filename=json_file)
     params.fill_none()

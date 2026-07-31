@@ -20,12 +20,16 @@ Normalization rules (applied by ``normalize()`` / ``normalize_dataframe_columns`
   ``min/max_precursor_charge``, ``max_mods``,
   ``min/max_precursor_mz``, ``min/max_fragment_mz``,
   ``n_beams``, ``n_peaks``, ``min_mz``, ``max_mz`` → int
-- ``enable_match_between_runs`` → bool
+- ``enable_match_between_runs``, ``postprocessing_performed`` → bool
 - ``enzyme`` → canonical name via ``_ENZYME_MAP``
   (e.g. ``"trypsin"`` → ``"Trypsin"``, ``"kr|p,true"`` → ``"Trypsin"``)
 - ``precursor_mass_tolerance``, ``fragment_mass_tolerance`` → mapped to
   ``"Automatic calibration"`` when a known auto-calibration sentinel is
   detected (e.g. ``"dynamic"``, ``"0 ppm"``)
+- Any parameter parsed as a ``dict`` (e.g. ``predictors_library``,
+  ``quantification_method``) → flattened to a human-readable string via
+  ``_flatten_dict()``: the common value if all sub-values are identical,
+  otherwise ``"key: value"`` pairs joined by ``", "``
 
 NOT normalized (kept as-is from parsers, parsers should homogenize themselves):
 
@@ -40,6 +44,7 @@ NOT normalized (kept as-is from parsers, parsers should homogenize themselves):
 - ``tokens`` — string, semicolon-separated amino acids/modifications
 - ``isotope_error_range`` — string (e.g. ``"[0, 2]"``)
 - ``decoding_strategy``, ``checkpoint`` — string, tool-specific
+- ``postprocessing_description`` — free-text string, describes any postprocessing applied
 
 Classes
 -------
@@ -92,7 +97,9 @@ _ENZYME_MAP = {
 }
 
 # Tolerance values (lowercase) that indicate automatic calibration.
-_AUTO_CALIBRATION_SENTINELS = frozenset({"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]"})
+_AUTO_CALIBRATION_SENTINELS = frozenset(
+    {"dynamic", "auto detected", "0", 0, "0 ppm", "[-0.0 ppm, 0.0 ppm]", "[-0 ppm, 0 ppm]"}
+)
 _AUTO_CALIBRATION_LABEL = "Automatic calibration"
 
 # Tolerance fields to which the auto-calibration mapping applies.
@@ -104,28 +111,32 @@ _SEARCH_ENGINE_MAP = {
 }
 
 
-def _flatten_predictors(val) -> str:
-    """Convert a predictors dict to a human-readable string.
+def _flatten_dict(val: dict) -> str:
+    """Convert a dict-valued parameter to a human-readable string.
 
     Parameters
     ----------
     val : dict
-        Mapping of prediction target (RT, IM, MS2_int) to predictor name.
+        Mapping of sub-setting name to value (e.g. predictors per target,
+        or quantification sub-settings).
 
     Returns
     -------
     str
-        If all values are identical, returns that value.
+        If all values are identical, returns that value (as a string).
         Otherwise returns ``"key: value"`` pairs joined by ``", "``.
     """
     unique = set(val.values())
     if len(unique) == 1:
-        return next(iter(unique))
+        return str(next(iter(unique)))
     return ", ".join(f"{k}: {v}" for k, v in val.items())
 
 
 # Fields that must be coerced to float (FDR values, decimal 0-1).
 _FLOAT_FIELDS = ("ident_fdr_psm", "ident_fdr_peptide", "ident_fdr_protein")
+
+# Fields that must be coerced to bool.
+_BOOL_FIELDS = ("enable_match_between_runs", "postprocessing_performed")
 
 # Fields that must be coerced to int.
 _INT_FIELDS = (
@@ -281,21 +292,19 @@ class ProteoBenchParameters:
                 setattr(self, fld, np.nan)
 
         # D. Boolean coercion
-        val = getattr(self, "enable_match_between_runs", None)
-        if val is not None and not (isinstance(val, float) and np.isnan(val)):
+        for fld in _BOOL_FIELDS:
+            val = getattr(self, fld, None)
+            if val is None or (isinstance(val, float) and np.isnan(val)):
+                continue
             if isinstance(val, bool):
-                pass  # already correct
+                continue  # already correct
             elif isinstance(val, str):
-                setattr(
-                    self,
-                    "enable_match_between_runs",
-                    val.strip().lower() in ("true", "1", "yes"),
-                )
+                setattr(self, fld, val.strip().lower() in ("true", "1", "yes"))
             else:
                 try:
-                    setattr(self, "enable_match_between_runs", bool(val))
+                    setattr(self, fld, bool(val))
                 except (ValueError, TypeError):
-                    setattr(self, "enable_match_between_runs", np.nan)
+                    setattr(self, fld, np.nan)
 
         # --- E. Enzyme name normalization -----------------------------------
         val = getattr(self, "enzyme", None)
@@ -322,10 +331,10 @@ class ProteoBenchParameters:
                 if canonical is not None:
                     setattr(self, "search_engine", canonical)
 
-        # --- H. Flatten predictors_library dict to string --------------------
-        val = getattr(self, "predictors_library", None)
-        if isinstance(val, dict):
-            setattr(self, "predictors_library", _flatten_predictors(val))
+        # --- H. Flatten any dict-valued parameter to a string -----------------
+        for key, val in list(self.__dict__.items()):
+            if isinstance(val, dict):
+                setattr(self, key, _flatten_dict(val))
 
 
 # Note: this should be able to be removed when we have resubmitted all points again.
@@ -357,8 +366,9 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
         df[col] = pd.to_numeric(df[col], errors="coerce").round().astype("Int64")
 
     # D. Boolean coercion
-    if "enable_match_between_runs" in df.columns:
-        col = "enable_match_between_runs"
+    for col in _BOOL_FIELDS:
+        if col not in df.columns:
+            continue
         df[col] = df[col].apply(
             lambda v: (
                 v
@@ -391,11 +401,13 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
             lambda v: (_SEARCH_ENGINE_MAP.get(v.strip().lower(), v) if isinstance(v, str) and pd.notna(v) else v)
         )
 
-    # H. Flatten predictors_library dict to string
-    if "predictors_library" in df.columns:
-        df["predictors_library"] = df["predictors_library"].apply(
-            lambda v: _flatten_predictors(v) if isinstance(v, dict) else v
-        )
+    # H. Flatten any dict-valued cell to a string (skip the nested "results" column,
+    # whose values are dicts-of-dicts of benchmark metrics, not parameter sub-settings)
+    for col in df.columns:
+        if col == "results":
+            continue
+        if df[col].apply(lambda v: isinstance(v, dict)).any():
+            df[col] = df[col].apply(lambda v: _flatten_dict(v) if isinstance(v, dict) else v)
 
     return df
 

@@ -305,12 +305,16 @@ def get_proforma_bracketed(
         if idx in pos_mod_dict:
             if idx == 0:
                 new_seq += f"[{pos_mod_dict[idx]}]-"
-            elif idx == len(stripped_seq):
-                new_seq += f"-[{pos_mod_dict[idx]}]"
             else:
                 new_seq += f"[{pos_mod_dict[idx]}]"
         if not before_aa:
             new_seq += aa
+
+    # A modification on the last residue (before_aa=False, i.e. bracket after the
+    # residue) is recorded at idx == len(stripped_seq), which the loop above never
+    # reaches (idx only ranges 0..len(stripped_seq)-1), so it must be appended here.
+    if len(stripped_seq) in pos_mod_dict:
+        new_seq += f"[{pos_mod_dict[len(stripped_seq)]}]"
 
     return new_seq
 
@@ -381,7 +385,13 @@ def _load_sage(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    return pd.read_csv(input_csv, sep="\t", low_memory=False)
+    df = pd.read_csv(input_csv, sep="\t", low_memory=False)
+    # Strip .raw or .mzML suffixes from the run column of long-format output
+    # (e.g. "Sample.mzML" -> "Sample"), mirroring the wide-format column cleanup.
+    for run_column in ("filename", "Raw file"):
+        if run_column in df.columns:
+            df[run_column] = df[run_column].str.replace(r"\.(raw|mzML)(\.gz)?(?=\s|$)", "", regex=True, case=False)
+    return df
 
 
 def _load_fragpipe(input_csv: str) -> pd.DataFrame:
@@ -902,6 +912,56 @@ def _load_quantms(input_csv: str) -> pd.DataFrame:
     )
     input_data_frame["Sequence"] = input_data_frame["PeptideSequence"].str.replace(r"\(([^)]+)\)", r"", regex=True)
     return input_data_frame
+
+
+def _load_alphadia_entrapment(input_csv: str) -> pd.DataFrame:
+    """
+    Load AlphaDIA v2 precursors.parquet for the entrapment module.
+
+    Keeps long format so per-precursor Q-value is preserved for FDP computation.
+
+    Parameters
+    ----------
+    input_csv : str
+        Path to the AlphaDIA precursors.parquet file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe with ProForma-style modified sequences.
+    """
+    if isinstance(input_csv, str) and input_csv.lower().endswith(".parquet"):
+        df = pd.read_parquet(input_csv)
+    else:
+        try:
+            df = pd.read_csv(input_csv, low_memory=False, sep="\t")
+        except UnicodeDecodeError:
+            df = pd.read_parquet(input_csv)
+
+    mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")
+    mapper_df = pd.read_csv(mapper_path).set_index("gene_name")
+    mapper = mapper_df["description"].to_dict()
+    gene_column = "pg.genes" if "pg.genes" in df.columns else "genes"
+    df["genes"] = df[gene_column].map(
+        lambda x: ";".join([mapper.get(p, p) for p in x.split(";")]) if isinstance(x, str) else x
+    )
+
+    df = df.rename(
+        columns={
+            "precursor.sequence": "sequence",
+            "precursor.mods": "mods",
+            "precursor.mod_sites": "mod_sites",
+            "precursor.charge": "charge",
+            "precursor.qval": "qval",
+            "raw.name": "run",
+        }
+    )
+
+    df["proforma"] = df.apply(
+        lambda x: aggregate_modification_sites_column(x.sequence, x.mods, x.mod_sites),
+        axis=1,
+    )
+    return df
 
 
 _LOAD_FUNCTIONS = {

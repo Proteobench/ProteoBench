@@ -87,7 +87,7 @@ Available ProteoBench modules
 
         :bdg-info:`in development`
         ^^^
-        
+        Benchmark FDR Validation of workflows for DIA acquisitions using FDRBench entrapment on an Astral.
         +++
         `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/>`__
 
@@ -97,7 +97,7 @@ Available ProteoBench modules
 
         :bdg-info:`in development`
         ^^^
-        Benchmark identification and quantification workflows for low-input and single-cell proteomics using DIA acquisitions.
+        Benchmark identification and quantification workflows for low-input proteomics (close to single cell level) using DIA acquisitions.
         +++
         `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-lowinput/>`__
 
@@ -107,7 +107,7 @@ Available ProteoBench modules
 
         :bdg-info:`in development`
         ^^^
-        Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample.
+        Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample aquired on a timsTOF.
         +++
         `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/>`__
 

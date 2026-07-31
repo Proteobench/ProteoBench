@@ -11,13 +11,13 @@ from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_feature,
 )
+from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
 from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
@@ -268,7 +268,12 @@ class DeNovoModule:
         Returns
         -------
         bool
-            Whether the new data point has a unique hash.
+            True if the new data point has a unique hash.
+
+        Raises
+        ------
+        DatasetAlreadyExistsOnServerError
+            If the run was previously submitted (its hash overlaps an existing data point).
         """
         current_datapoint = datapoints[datapoints["old_new"] == "new"]
         all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
@@ -280,10 +285,9 @@ class DeNovoModule:
 
         if len(overlap) > 0:
             overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
-            st.error(
+            raise DatasetAlreadyExistsOnServerError(
                 f"The run you want to submit has been previously submitted under the identifier: {str(overlap_name)}"
             )
-            return False
         return True
 
     def clone_pr(
@@ -333,9 +337,8 @@ class DeNovoModule:
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
 
-        if not self.check_new_unique_hash(all_datapoints):
-            logging.error("The run was previously submitted. Will not submit.")
-            return False
+        # Raises DatasetAlreadyExistsOnServerError if this run was already submitted.
+        self.check_new_unique_hash(all_datapoints)
 
         # Create a new branch for the pull request with a unique branch name, this unique
         # branch name is important for batch resubmission to avoid clashes. We do guarentee

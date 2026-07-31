@@ -25,5 +25,5 @@ max_fragment_mz
 quantification_method	MS2 Area (Quan in all files)
 protein_inference	
 abundance_normalization_ions	
-predictors_library	
+predictors_library	INFERYS® 4.7.0
 scan_window	

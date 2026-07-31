@@ -12,8 +12,9 @@ from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
     VariablesDDAQuant,
 )
 
+from pages.utils.submission_source import get_submission_source, is_official_server
+
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
-from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (

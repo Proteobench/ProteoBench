@@ -1,0 +1,43 @@
+Project:
+* Name: Astral_ProteoBench
+* Description: 
+* Owner: rodvrees
+* Created At: 2026-07-29 14:38:37
++ analyse_1
+  Description: Think im doing good.
+  Created At: 2026-07-29 14:38:38
+  Database Search Parameters:
+    Precursor Mass Error Tolerance: 3.00PPM
+    Fragment Mass Error Tolerance: 10.00PPM
+    Enzyme: Trypsin/P
+    Digest Mode: Specific
+    Missed Cleavage: 1
+    Target Database: ProteoBench
+    Taxonomy: all species
+    Peptide Length: 6 to 30
+    Fixed Modifications: 
+    - Carbamidomethylation
+    Variable Modifications: 
+    - Oxidation (M)
+    Max Variable PTM Per Peptide: 1
+  Peptide Filter:
+    Peptide FDR(%): 1.00
+  Precursor Filter:
+    Precursor FDR(%): 1.00
+  Protein Filter:
+    Proteins -10lgP>=: 0.0000
+    Proteins Unique Peptides >= 1
+  Label Free Quantification Parameters:
+    Q Method: ID-directed LFQ
+    Increased Sensitivity: Enabled
+    FDR Threshold(%): 0.0000
+    RT Range: 0.0000 <= RT <= Max
+    Peptide Feature: Avg. area>=0.000000, Quality>=0.000000, 1<=charge<=5,  and Detected in at least 0 samples per a group
+    Protein: Significance Method ANOVA, Modified Form Exclusion, Min Significance 0.0000, 0.0000<=fold change<=64.0000, at least 1 peptide used
+    Normalization: TIC
+    Normalization Strategy: RT Dependent
+    Groups:
+    Group Name: Condition A
+    Samples: LFQ_Astral_DIA_15min_50ng_Condition_A_REP1,LFQ_Astral_DIA_15min_50ng_Condition_A_REP2,LFQ_Astral_DIA_15min_50ng_Condition_A_REP3
+    Group Name: Condition B
+    Samples: LFQ_Astral_DIA_15min_50ng_Condition_B_REP1,LFQ_Astral_DIA_15min_50ng_Condition_B_REP2,LFQ_Astral_DIA_15min_50ng_Condition_B_REP3

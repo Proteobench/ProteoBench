@@ -316,6 +316,7 @@ def extract_params(
         params.ident_fdr_psm, params.ident_fdr_peptide, params.ident_fdr_protein = parse_phi_report_filters(
             phi_report_cmd
         )
+        params.abundance_normalization_ions = False if fragpipe_params.loc["ionquant.normalization"] == "0" else True
 
     # Precursor charge settings
     if fragpipe_params.loc["msfragger.override_charge"] == "true":
@@ -350,10 +351,20 @@ def extract_params(
             4: "Robust LC (high precision)",
         }
         params.enable_match_between_runs = (
-            "diann.fragpipe.cmd-opts" in fragpipe_params.index
-            and "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]
-        ) or ("diann.cmd-opts" in fragpipe_params.index and "--reanalyse" in fragpipe_params.loc["diann.cmd-opts"])
+            (
+                "diann.fragpipe.cmd-opts" in fragpipe_params.index
+                and "--reanalyse" in fragpipe_params.loc["diann.fragpipe.cmd-opts"]
+            )
+            or ("diann.cmd-opts" in fragpipe_params.index and "--reanalyse" in fragpipe_params.loc["diann.cmd-opts"])
+            or ("diann.mbr" in fragpipe_params.index and fragpipe_params.loc["diann.mbr"] == "true")
+        )
         params.quantification_method = diann_quant_dict[int(fragpipe_params.loc["diann.quantification-strategy"])]
+
+        if "diann.library" in fragpipe_params.index:
+            if fragpipe_params.loc["diann.library"]:
+                params.predictors_library = "User defined speclib"
+            else:
+                params.predictors_library = "DIANN"
 
     # Protein inference settings
     if fragpipe_params.loc["protein-prophet.run-protein-prophet"] == "true":
@@ -374,6 +385,7 @@ if __name__ == "__main__":
         "../../../test/params/fragpipe_fdr_test.workflow",
         "../../../test/params/fragpipe-version.workflow",
         "../../../test/params/fragpipe_v23_noMBR.workflow",
+        "../../../test/params/fragpipe_diann.workflow",
     ]
 
     for file_path in files:
@@ -383,7 +395,12 @@ if __name__ == "__main__":
         df = pd.DataFrame.from_records(data, columns=Parameter._fields).set_index(Parameter._fields[0])
         df.to_csv(file.with_suffix(".csv"))
         with open(file, "rb") as f:
-            params = extract_params(f)
+            if not "diann" in file_path:
+                params = extract_params(f)
+            else:
+                params = extract_params(
+                    f, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DIA_ion.json")
+                )
         series = pd.Series(params.__dict__)
         print(series)
         print("\n")

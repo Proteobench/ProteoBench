@@ -1,20 +1,25 @@
 """Tests for the parameter-based filtering logic in tab1_view_public_results."""
 
-import importlib
 import sys
-from unittest.mock import MagicMock
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
 
-# The webinterface package has transitive imports (streamlit_utils, streamlit)
-# that are not available in the test environment. Mock them before importing.
-sys.modules.setdefault("streamlit", MagicMock())
-sys.modules.setdefault("streamlit_utils", MagicMock())
+# Importing the parameter_filters helpers pulls in webinterface code that imports
+# streamlit. Skip this module when the web stack is not installed (core-only env),
+# and use the REAL streamlit so we never replace it in sys.modules with a mock,
+# which would shadow it for other tests (e.g. the AppTest webinterface tests that
+# import streamlit.testing).
+pytest.importorskip("streamlit", reason="parameter-filter tests require the streamlit web stack")
 
-# Now we can import the pure-logic helpers from the module.
-from webinterface.pages.base_pages.utils.parameter_filters import (
+# Make webinterface/ importable so streamlit_utils and pages.* resolve if needed.
+_WEB_DIR = Path(__file__).resolve().parent.parent / "webinterface"
+if str(_WEB_DIR) not in sys.path:
+    sys.path.insert(0, str(_WEB_DIR))
+
+from webinterface.pages.base_pages.utils.parameter_filters import (  # noqa: E402
     _NOT_SPECIFIED,
     _get_unique_values,
     apply_parameter_filters,

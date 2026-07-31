@@ -18,6 +18,8 @@ from typing import Optional
 
 import pandas as pd
 import streamlit as st
+
+from pages.base_pages.utils.general import prepare_df_for_display
 import streamlit_utils
 from plotly import graph_objects as go
 
@@ -209,7 +211,7 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
                         st.caption(f"Data source: {public_id}")
 
                 # Display plot
-                st.plotly_chart(plots[plot_name], use_container_width=True)
+                st.plotly_chart(plots[plot_name])
 
         # Add separator after each section (except last)
         if section != layout_config[-1] and len(section["plots"]) > 0:
@@ -249,7 +251,7 @@ def display_performance_table(
         unsafe_allow_html=True,
     )
     with st.container(key="single_result_preview_table"):
-        st.dataframe(performance_data.head(100))
+        st.dataframe(prepare_df_for_display(performance_data.head(100)))
 
     # Generate sample name (used for user-facing filenames)
     if public_id == "Uploaded dataset":
@@ -276,7 +278,8 @@ def display_performance_table(
         icon=":material/download:",
     )
 
-    display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name, cache_key=cache_key)
+    if getattr(variables, "enable_pmultiqc", True):
+        display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name, cache_key=cache_key)
 
 
 def generate_sample_name(input_format: str) -> str:

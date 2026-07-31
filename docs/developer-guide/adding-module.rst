@@ -712,7 +712,9 @@ Your variables dataclass must include these fields for the module registry to di
         
         # Module metadata (required)
         title: str = "DDA Quantification - Precursor Level - Astral"
-        doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/quant_lfq_DDA_ion_Astral.html"
+        doc_url: str = (
+            "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/"
+        )
 
 **Sidebar Configuration Details:**
 

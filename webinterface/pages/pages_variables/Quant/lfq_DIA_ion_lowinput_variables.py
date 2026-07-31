@@ -49,7 +49,11 @@ class VariablesDIAQuantLI:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion Low Input"
-    documentation_description: str = "Benchmark identification and quantification workflows for low-input and single-cell proteomics using DIA acquisitions."
+    homepage_title: str = "LFQ Quantification for Low-Input"
+    graphical_abstract: str = "Graphical_abstract_low_input.png"
+    documentation_description: str = (
+        "Benchmark identification and quantification workflows for low-input proteomics (close to single cell level) using DIA acquisitions."
+    )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_lowinput"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
@@ -122,6 +126,7 @@ class VariablesDIAQuantLI:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-lowinput/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/all_data_LFQ_Quant_DIA_SC.tar.gz"
 
     title: str = "DIA Precursor quantification - Low Input"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

@@ -1,9 +1,11 @@
-The raw files used for this module were acquired on an Astral (ThermoScientific). They can be downloaded from the
-proteomeXchange repository (TBD) or you can download them from the ProteoBench server here: TBD
+The raw files used for this module were acquired on an Orbitrap Astral (Thermo Fisher Scientific) in DIA mode. Download the three raw files from the ProteoBench server:
 
-**It is imperative not to rename the files once downloaded!**
+- `LFQ_Astral_DIA_15min_50ng_Human_01`
+- `LFQ_Astral_DIA_15min_50ng_Human_02`
+- `LFQ_Astral_DIA_15min_50ng_Human_03`
 
-Download the zipped FASTA file here: [ProteoBenchFASTA_MixedSpecies_HYE.zip](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip).
-The fasta file provided for this module contains the three species
-present in the samples **and contaminant proteins**.
-([Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145))
+**It is imperative not to rename the files once downloaded.**
+
+Use the ProteoBench entrapment FASTA, `ProteoBenchFASTA_Entrapment_Human_with_contaminants_entrapment_pep.txt`. The FASTA contains human peptide sequences, contaminant peptide sequences, and matched entrapment peptide sequences.
+
+This FASTA is pre-digested. Configure your search engine for no enzymatic digestion and do not add another contaminant database.

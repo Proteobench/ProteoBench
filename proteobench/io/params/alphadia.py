@@ -44,6 +44,7 @@ CONFIG_KEY_MAPPER = {
     "quantification_method": "quantification_method",
     "inference_strategy": "protein_inference",
     "predictors_library": "predictors_library",
+    "normalization_method": "abundance_normalization_ions",
 }
 
 
@@ -408,6 +409,18 @@ def extract_params(
     else:
         all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
 
+    # Normalize AlphaDIA's "no-cleave" enzyme setting to the standard label
+    if all_parameters.get("enzyme") == "no-cleave":
+        all_parameters["enzyme"] = "No digestion"
+
+    # Normalization method
+    if "abundance_normalization_ions" in all_parameters:
+        all_parameters["abundance_normalization_ions"] = (
+            "DirectLFQ"
+            if all_parameters["abundance_normalization_ions"] == "directlfq"
+            else all_parameters["abundance_normalization_ions"]
+        )
+
     params = ProteoBenchParameters(**all_parameters, filename=json_file)
     params.fill_none()
     return params
@@ -423,6 +436,7 @@ if __name__ == "__main__":
         "../../../test/params/log_alphadia_1.12MBR.txt",
         "../../../test/params/alphadia_weird_lengths.txt",
         "../../../test/params/AlphaDIA_wrong_mod_parse.txt",
+        "../../../test/params/AlphaDIA_ranges_weird.txt",
     ]:
         file = pathlib.Path(fname)
         pb_params = extract_params(file)

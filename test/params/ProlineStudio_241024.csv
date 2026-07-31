@@ -20,5 +20,7 @@ max_mods,
 min_precursor_charge,2
 max_precursor_charge,3
 quantification_method,
-protein_inference,
+protein_inference,razor_and_specific
 abundance_normalization_ions,
+postprocessing_performed,False
+postprocessing_description,

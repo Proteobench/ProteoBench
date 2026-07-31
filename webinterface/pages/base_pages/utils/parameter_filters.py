@@ -135,6 +135,10 @@ _PARAMETER_FILTERS = [
     },
     {"col": "isotope_error_range", "label": "Isotope error range", "type": "multiselect"},
     {"col": "decoding_strategy", "label": "Decoding strategy", "type": "multiselect"},
+    # Entrapment specific filters (only shown when columns exist with 2+ unique values)
+    {"col": "reported_fdr_parsed_from_input", "label": "Reported FDR (parsed from input)", "type": "max_slider"},
+    {"col": "category_combined", "label": "FDR validity (combined method)", "type": "multiselect"},
+    {"col": "category_paired", "label": "FDR validity (paired method)", "type": "multiselect"},
     {"col": "open_source", "label": "Open source", "type": "radio_open_source"},
 ]
 

@@ -2,21 +2,26 @@
 
 To do so, you need to provide the parameter file that corresponds to
 your analysis. You can upload it in the drag and drop area below.
-See [here](https://proteobench.readthedocs.io/en/stable/available-modules/8-quant-lfq-ion-dda-astral/)
+See [here](https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/)
 for all compatible parameter files.
+
+Use the following parameter files:
+
+- DIA-NN: `report.log.txt`
+- FragPipe (DIA-NN quant): FragPipe `.workflow`
+- FragPipe: FragPipe `.workflow`
+- AlphaDIA: `log.txt`
+
 In this module, we keep track of the following parameters, if you feel
 that some important information is missing, please add it in the
 `Comments for submission` field.
 - software tool name and version
 - search engine name and version
-- FDR threshold for PSM, peptide and protein level
-- match between run (or not)
+- FDR threshold for PSM / precursor, peptide, and protein level
 - precursor mass tolerance
-- enzyme (although for these data it should be Trypsin)
-- number of missed-cleavages
-- minimum and maximum peptide length
+- fragment mass tolerance
+- enzyme (for these data it should be None / no enzyme)
 - fixed and variable modifications
-- maximum number of modifications
 - minimum and maximum precursor charge
 
 Once you confirm that the metadata is correct (and corresponds to the

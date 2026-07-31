@@ -52,6 +52,31 @@ class StreamlitUI:
 
         self._main_page()
 
+    def _render_header(self) -> None:
+        """Render the shared title, documentation link, download link, and beta warning."""
+        st.title(self.variables_dia_quant.title)
+        doc_col, download_col = st.columns(2)
+        with doc_col:
+            st.link_button(
+                "Module documentation",
+                url=self.variables_dia_quant.doc_url,
+                type="secondary",
+                icon="📖",
+                help="link to the module documentation",
+            )
+        with download_col:
+            st.link_button(
+                "Download input files",
+                url=self.variables_dia_quant.raw_data_url,
+                type="secondary",
+                icon="⬇️",
+                help="Download the raw input files used to benchmark this module",
+            )
+        if self.variables_dia_quant.beta_warning:
+            st.warning(
+                "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
+            )
+
     def _main_page(self) -> None:
         """
         Set up the main page layout for the Streamlit application.
@@ -75,78 +100,28 @@ class StreamlitUI:
 
         # Tab 1: View Public Results
         with tab_results_all:
-            st.title(self.variables_dia_quant.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables_dia_quant.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            self._render_header()
             self.quant_uiobjects.display_all_data_results_main()
 
         # Tab 2: Upload New Results (Private)
         with tab_submission_details:
-            st.title(self.variables_dia_quant.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables_dia_quant.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            self._render_header()
             self.quant_uiobjects.display_submission_form()
 
         # Tab 3: View Single Result
         with tab_indepth_plots:
-            st.title(self.variables_dia_quant.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables_dia_quant.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            self._render_header()
 
             self.quant_uiobjects.display_indepth_plots()
 
         # Tab 4: View Public + New Results
         with tab_results_new:
-            st.title(self.variables_dia_quant.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables_dia_quant.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            self._render_header()
             self.quant_uiobjects.display_all_data_results_submitted()
 
         # Tab 5: Submit New Results
         with tab_public_submission:
-            st.title(self.variables_dia_quant.title)
-            st.link_button(
-                "Go to module documentation",
-                url=self.variables_dia_quant.doc_url,
-                type="secondary",
-                help="link to the module documentation",
-            )
-            if self.variables_dia_quant.beta_warning:
-                st.warning(
-                    "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-                )
+            self._render_header()
             self.quant_uiobjects.display_public_submission_ui()
 
 

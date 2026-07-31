@@ -18,6 +18,7 @@ def test_notebooks(session: nox.Session) -> None:
     """
 
     session.install(".[dev]")
+    session.run("jupyter", "nbconvert", "--to", "notebook", "--execute", "examples/local_usage_walkthrough.ipynb")
     session.run("jupyter", "nbconvert", "--to", "notebook", "--execute", "jupyter_notebooks/*.ipynb")
 
 

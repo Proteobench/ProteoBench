@@ -20,8 +20,8 @@ min_precursor_charge,1
 max_precursor_charge,5
 min_precursor_mz,
 max_precursor_mz,
-min_fragment_mz,
-max_fragment_mz,
+min_fragment_mz,150
+max_fragment_mz,2000
 quantification_method,MS2
 protein_inference,IDPicker
 abundance_normalization_ions,True

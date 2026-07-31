@@ -209,6 +209,29 @@ def extract_mass_tolerance_v2(lines: List[str]) -> Optional[Tuple[str, str]]:
     return None
 
 
+def extract_fragment_mz_range(lines: List[str]) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Extract the fragment ion m/z filter range (Min/Max) from the 'Fragment Ions' result-filter
+    block, if the filter is enabled ('m/z :' is True).
+    """
+    try:
+        idx = next(i for i, line in enumerate(lines) if line.startswith("m/z :"))
+    except StopIteration:
+        return None, None
+
+    if clean_text(lines[idx].split(":", 1)[1]) != "True":
+        return None, None
+
+    min_mz = max_mz = None
+    for line in lines[idx + 1 : idx + 3]:
+        if line.startswith("Max:"):
+            max_mz = clean_text(line.split(":", 1)[1])
+        elif line.startswith("Min:"):
+            min_mz = clean_text(line.split(":", 1)[1])
+
+    return min_mz, max_mz
+
+
 def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
     """
     Extract the value associated with a search term using regular expressions.
@@ -301,8 +324,9 @@ def read_spectronaut_settings(
         params.min_precursor_charge = None
         params.max_precursor_charge = None
 
-    params.min_fragment_mz = None  # Spectronaut does not provide this information
-    params.max_fragment_mz = None  # Spectronaut does not provide this information
+    _min_fragment_mz, _max_fragment_mz = extract_fragment_mz_range(lines)
+    params.min_fragment_mz = int(_min_fragment_mz) if _min_fragment_mz is not None else None
+    params.max_fragment_mz = int(_max_fragment_mz) if _max_fragment_mz is not None else None
     params.max_precursor_mz = None  # Spectronaut does not provide this information
     params.min_precursor_mz = None  # Spectronaut does not provide this information
 

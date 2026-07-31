@@ -434,12 +434,10 @@ class StreamlitPageHome(StreamlitPage):
 
 def _render_leaderboard():
     """Render the top submitters leaderboard section."""
-    import pandas as pd
-
-    # TODO: Remove mock data once real submissions exist
     from pages.base_pages.utils.leaderboard import get_leaderboard_data
+
     leaderboard = get_leaderboard_data()
-    
+
     if leaderboard.empty:
         return
 

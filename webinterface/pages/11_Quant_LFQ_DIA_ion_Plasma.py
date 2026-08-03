@@ -7,6 +7,7 @@ from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
+from pages.base_pages.banner import display_banner
 from pages.base_pages.quant import QuantUIObjects
 from pages.pages_variables.Quant.lfq_DIA_ion_Plasma_variables import (
     VariablesDIAQuantPlasma,
@@ -53,7 +54,7 @@ class StreamlitUI:
         self._main_page()
 
     def _render_header(self) -> None:
-        """Render the shared title, documentation link, download link, and beta warning."""
+        """Render the shared title, documentation link, download link, and status warning banner."""
         st.title(self.variables_dia_quant.title)
         doc_col, download_col = st.columns(2)
         with doc_col:
@@ -72,10 +73,7 @@ class StreamlitUI:
                 icon="⬇️",
                 help="Download the raw input files used to benchmark this module",
             )
-        if self.variables_dia_quant.beta_warning:
-            st.warning(
-                "This module is in BETA phase. The figure presented below and the metrics calculation may change in the near future."
-            )
+        display_banner(self.variables_dia_quant)
 
     def _main_page(self) -> None:
         """

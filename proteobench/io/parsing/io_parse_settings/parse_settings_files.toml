@@ -113,3 +113,4 @@
 [entrapment_DIA_ion_Astral]
 "DIA-NN" = "parse_settings_diann.toml"
 "AlphaDIA" = "parse_settings_alphadia.toml"
+"Custom" = "parse_settings_custom.toml"

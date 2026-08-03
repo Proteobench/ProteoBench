@@ -964,6 +964,23 @@ def _load_alphadia_entrapment(input_csv: str) -> pd.DataFrame:
     return df
 
 
+def _load_custom_entrapment(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Custom-format output file for the entrapment module.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the tab-delimited custom-format output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    return pd.read_csv(input_csv, low_memory=False, sep="\t")
+
+
 _LOAD_FUNCTIONS = {
     "MaxQuant": _load_maxquant,
     "AlphaPept": _load_alphapept,

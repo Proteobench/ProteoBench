@@ -164,14 +164,10 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
             if input_format == "AlphaDIA":
                 input_df = _load_alphadia_entrapment(input_file)
             elif input_format == "PEAKS":
-<<<<<<< Updated upstream
-                input_df = _load_peaks_entrapment(input_file)
-=======
                 # PEAKS exports precursors already filtered at the precursor FDR applied
                 # during the search and reports no per-precursor q-value, so the FDR
                 # declared in the submission form is used as the reported threshold.
                 input_df = _load_peaks_entrapment(input_file, reported_fdr=_declared_precursor_fdr(user_input))
->>>>>>> Stashed changes
             else:
                 input_df = load_input_file(input_file, input_format, input_file_secondary)
         except pd.errors.ParserError as e:

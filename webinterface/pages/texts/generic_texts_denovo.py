@@ -55,8 +55,8 @@ class WebpageTexts:
             for more details.
             """
 
-        warning_alpha = """This module is in ALPHA phase. It has not yet passed peer review 
-            and should be used with caution.
+        warning_alpha = """This module is in ALPHA phase. It  remains to be fully discussed 
+            with experts and should be used with caution.
             """
 
         warning_beta = """This module is in BETA phase. The figure presented below and 
@@ -154,6 +154,8 @@ class WebpageTexts:
         """
 
     class Description:
+        """Descriptions for de novo in-depth plots and evaluation views."""
+
         ptm_overview = """
         This plot shows the **precision of predicted post-translational modifications (PTMs)** for each de novo sequencing tool. Each point represents a modification present in the dataset with its precision on the Y-axis.
 

@@ -2,7 +2,7 @@
 
 This module uses entrapment peptides to assess whether the false discovery rate (FDR) reported by a DIA search engine is reliable. It is based on the entrapment approach described in [Wen et al., 2025](https://www.nature.com/articles/s41592-025-02719-x).
 
-> **This module is in alpha stage. Results and interfaces may change.**
+> **This module is in beta stage. Results and interfaces may change.**
 
 ## Purpose
 

@@ -133,3 +133,11 @@ class BaseUIModule(ABC):
     def display_public_submission_ui(self) -> None:
         """Tab 5 - Display the public submission section of the page"""
         pass
+
+    def display_parameter_performance(self) -> None:
+        """Last tab - Explore how parameter choices relate to benchmarking performance."""
+        from pages.base_pages.tabs import tab7_parameter_performance
+
+        tab7_parameter_performance.display_parameter_performance(
+            variables=self.variables, ionmodule=self.ionmodule
+        )

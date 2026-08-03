@@ -1,6 +1,7 @@
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
+from pages.base_pages.tabs.tab1_view_public_results import initialize_main_data_points
 
 # The guided tour is an optional driver.js overlay. Importing it can fail when the
 # installed streamlit_tour is incompatible with the streamlit version (e.g.
@@ -65,12 +66,15 @@ class BaseStreamlitUI:
                 )
         display_banner(self.variables)
 
+    _MIN_DATAPOINTS_FOR_POSTHOC = 20
+
     def get_tab_config(self) -> list:
         """Return tab configuration as list of (tab_name, method_name) tuples.
 
         Override this method in subclasses to customize tabs.
+        The "Post-hoc analysis" tab is included only when >= 20 datapoints are loaded.
         """
-        return [
+        tabs = [
             ("View Public Results", "display_all_data_results_main"),
             ("Upload New Results (Private)", "display_submission_form"),
             ("View Single Result", "display_indepth_plots"),
@@ -78,6 +82,13 @@ class BaseStreamlitUI:
             ("Compare Two Results", "display_workflow_comparison"),
             ("Submit New Results", "display_public_submission_ui"),
         ]
+        all_dp_key = getattr(self.variables, "all_datapoints", None)
+        if all_dp_key is not None:
+            all_dp = st.session_state.get(all_dp_key)
+            n = len(all_dp) if all_dp is not None and hasattr(all_dp, "__len__") else 0
+            if n >= self._MIN_DATAPOINTS_FOR_POSTHOC:
+                tabs.append(("Post-hoc analysis", "display_parameter_performance"))
+        return tabs
 
     def main_page(self) -> None:
         """
@@ -101,6 +112,12 @@ class BaseStreamlitUI:
                 "</style>",
                 unsafe_allow_html=True,
             )
+
+        # Pre-load datapoints so get_tab_config() can make visibility decisions
+        # (e.g. the post-hoc analysis tab requires >= 20 datapoints).
+        # initialize_main_data_points is idempotent: it returns immediately if data
+        # is already in session state, so the subsequent Tab 1 render is a no-op.
+        initialize_main_data_points(self.variables, self.ionmodule)
 
         # Get tab configuration
         tab_config = self.get_tab_config()

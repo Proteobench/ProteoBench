@@ -55,7 +55,6 @@ class EntrapmentScores(ScoreBase):
             "Sequence",
             "Charge",
             "Q-Value",
-            "Protein Group",
             "Target or Entrapment",
             "peptide_pair_index",
         ]
@@ -98,7 +97,6 @@ class EntrapmentScores(ScoreBase):
                 "Q-Value",
                 "Score",
                 "PEP",
-                "Protein Group",
                 "Target or Entrapment",
                 "peptide_pair_index",
             ]

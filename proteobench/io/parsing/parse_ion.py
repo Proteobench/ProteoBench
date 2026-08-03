@@ -30,13 +30,11 @@ def load_input_file(input_csv: str, input_format: str, input_csv_secondary: str 
     """
     try:
         if input_format == "MaxQuant":
-            warnings.warn(
-                """
+            warnings.warn("""
                 WARNING: MaxQuant proforma parsing does not take into account fixed modifications\n
                 because they are implicit. Only after providing the appropriate parameter file,\n
                 fixed modifications will be added correctly.
-                """
-            )
+                """)
         load_function = _LOAD_FUNCTIONS[input_format]
     except KeyError as e:
         raise ValueError(f"Invalid input format: {input_format}") from e
@@ -962,6 +960,23 @@ def _load_alphadia_entrapment(input_csv: str) -> pd.DataFrame:
         axis=1,
     )
     return df
+
+
+def _load_custom_entrapment(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Custom-format output file for the entrapment module.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the tab-delimited custom-format output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    return pd.read_csv(input_csv, low_memory=False, sep="\t")
 
 
 _LOAD_FUNCTIONS = {

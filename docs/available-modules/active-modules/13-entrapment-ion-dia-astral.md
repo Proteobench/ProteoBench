@@ -116,6 +116,19 @@ AlphaDIA submissions are parsed from precursor-level output. The entrapment modu
 4. Upload `precursors.parquet` for metric calculation.
 5. Upload the AlphaDIA `log.txt` file for public submission.
 
+### Custom format
+
+Upload a tab-delimited file with the following columns:
+
+| Column | Description |
+|---|---|
+| `Peptide` | Stripped peptide sequence (no modifications). |
+| `Sequence` | Modified peptide sequence, already in ProForma-style bracket notation (e.g. `M[Oxidation]`, `C[Carbamidomethyl]`). No further conversion is applied, so other notations (e.g. `M(UniMod:35)`) are not recognized. |
+| `Charge` | Precursor charge. |
+| `Q-Value` | Global Precursor-level FDR value. |
+
+Example file: [`custom_format_entrapment.csv`](https://github.com/Proteobench/ProteoBench/blob/main/test/data/entrapment/custom_format_entrapment.csv).
+
 ## Result description
 
 After uploading, you will see the FDP bounds plotted against the FDR estimate reported by the search engine. A valid (conservative) FDR calculation has the empirical upper bound below the declared FDR threshold.

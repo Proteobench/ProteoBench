@@ -254,8 +254,12 @@ def extract_params(
 
     params.ident_fdr_peptide = peptide_fdr
     params.ident_fdr_psm = psm_fdr
-    # peaks uses  Proteins -10LgP >= 15.0  instead of FDR
+    # Older exports use  Proteins -10LgP >= 15.0  instead of FDR
     protein_fdr = extract_value(lines, "Protein Group FDR:")
+    if not protein_fdr:
+        # Newer versions: "Protein FDR(%): 1.00" under "Protein Filter:" (distinct from the
+        # achieved "Proteins FDR(%):" reported under a second "Protein Filter:" block)
+        protein_fdr = extract_value(lines, "Protein FDR(%):")
     if protein_fdr:
         protein_fdr = protein_fdr.replace("%", "").strip()
     params.ident_fdr_protein = protein_fdr

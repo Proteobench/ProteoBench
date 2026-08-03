@@ -11,6 +11,7 @@ TESTDATA_DIR = Path(__file__).parent / "params"
 
 fnames = [
     "spectronaut_Experiment1_ExperimentSetupOverview_BGS_Factory_Settings.txt",
+    "spectronaut_v21_SettingsSchema_BGS_Factory_Settings.txt",
 ]
 
 fnames = [TESTDATA_DIR / f for f in fnames]

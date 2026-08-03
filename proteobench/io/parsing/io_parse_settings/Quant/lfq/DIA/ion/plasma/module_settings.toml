@@ -18,7 +18,7 @@
 [reference_database]
 # Reference protein database used to validate uploaded protein identifiers.
 # Read by proteobench.validation (ModuleValidationConfig).
-"fasta_url" = "https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_Distler_PYE.zip"
+"fasta_url" = "https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip"
 
 [validation]
 # Validation profile applied to submissions for this module.

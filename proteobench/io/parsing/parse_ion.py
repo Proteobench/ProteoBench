@@ -305,12 +305,16 @@ def get_proforma_bracketed(
         if idx in pos_mod_dict:
             if idx == 0:
                 new_seq += f"[{pos_mod_dict[idx]}]-"
-            elif idx == len(stripped_seq):
-                new_seq += f"-[{pos_mod_dict[idx]}]"
             else:
                 new_seq += f"[{pos_mod_dict[idx]}]"
         if not before_aa:
             new_seq += aa
+
+    # A modification on the last residue (before_aa=False, i.e. bracket after the
+    # residue) is recorded at idx == len(stripped_seq), which the loop above never
+    # reaches (idx only ranges 0..len(stripped_seq)-1), so it must be appended here.
+    if len(stripped_seq) in pos_mod_dict:
+        new_seq += f"[{pos_mod_dict[len(stripped_seq)]}]"
 
     return new_seq
 
@@ -958,6 +962,23 @@ def _load_alphadia_entrapment(input_csv: str) -> pd.DataFrame:
         axis=1,
     )
     return df
+
+
+def _load_custom_entrapment(input_csv: str) -> pd.DataFrame:
+    """
+    Load a Custom-format output file for the entrapment module.
+
+    Parameters
+    ----------
+    input_csv : str
+        The path to the tab-delimited custom-format output file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe.
+    """
+    return pd.read_csv(input_csv, low_memory=False, sep="\t")
 
 
 _LOAD_FUNCTIONS = {

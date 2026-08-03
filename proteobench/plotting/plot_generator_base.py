@@ -74,14 +74,30 @@ class PlotGeneratorBase(ABC):
         Return a Markdown explanation of how the metrics of the main plot are calculated.
 
         The web interface renders this text in a "How are the metrics calculated?" popover at the
-        top of every module page. Because the explanation describes the axes and encodings of the
-        main plot, it lives next to the code that produces that plot.
+        top of the tabs that show the main plot. Because the explanation describes the axes and
+        encodings of that plot, it lives next to the code that produces it.
 
         Returns
         -------
         str or None
             The Markdown explanation, or None when the module does not provide one. In that case
             the web interface hides the popover.
+        """
+        return None
+
+    def get_in_depth_metrics_help_markdown(self) -> Optional[str]:
+        """
+        Return a Markdown explanation of how the in-depth plots are calculated.
+
+        The web interface renders this text in the "How are the metrics calculated?" popover on the
+        tab that shows the in-depth plots of a single benchmark run. That tab does not display the
+        main plot, so the main-plot explanation would not apply there.
+
+        Returns
+        -------
+        str or None
+            The Markdown explanation, or None when the module does not provide one. In that case
+            the web interface hides the popover on the in-depth tab.
         """
         return None
 

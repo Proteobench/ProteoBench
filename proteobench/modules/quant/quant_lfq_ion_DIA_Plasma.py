@@ -129,7 +129,7 @@ class DIAQuantIonModulePlasma(QuantModule):
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
         max_nr_observed : int, optional
-            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 12 for plasma).
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 6 for plasma).
 
         Returns
         -------

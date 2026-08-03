@@ -155,6 +155,63 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             colour.
             """
 
+    def get_in_depth_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the in-depth plots are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover on the
+            in-depth tab.
+        """
+        return """
+            The plots on this tab describe **one single benchmark run** instead of comparing runs,
+            and every point in them is one feature (precursor ion or peptidoform) rather than one
+            workflow. They are computed from the intermediate table shown further down this page,
+            which can be downloaded for your own analysis.
+
+            All of them start from the same per-feature quantities. For each condition, the
+            intensities of a feature over the raw files of that condition are summarised as:
+
+            - `Intensity_mean` and `Intensity_std` - mean and standard deviation of the raw
+              intensities.
+            - `log_Intensity_mean` - mean of the log2-transformed intensities. Note this is the mean
+              of the logs, not the log of the mean.
+            - `CV = Intensity_std / Intensity_mean` - the coefficient of variation, computed on the
+              raw (not log-transformed) intensities.
+            - `nr_observed` - in how many raw files the feature was quantified. Missing values are
+              never imputed, they are simply left out of these summaries.
+
+            The measured fold change is then the difference of the two condition means on the log2
+            scale, and the deviation from the ground truth is epsilon:
+
+            `log2_A_vs_B = log_Intensity_mean_A - log_Intensity_mean_B`
+
+            `epsilon = log2_A_vs_B - log2(expected ratio A/B)`
+
+            **Log2 fold change distribution** - a kernel density estimate of `log2_A_vs_B`, drawn
+            separately per species over a fixed x-range of -4 to 4. The dashed vertical lines mark the
+            expected ratio of each species. A curve that is shifted away from its line indicates a
+            systematic bias, and a broad curve indicates poor reproducibility. Because the curves are
+            densities, each is normalised to an area of one, so their heights say nothing about how
+            many features each species contributed.
+
+            **Coefficient of variation** - a violin plot of the `CV_A` and `CV_B` values, with the
+            embedded box showing the quartiles. Infinite values (a feature quantified in one run of a
+            condition, so without a defined standard deviation) are dropped. This measures the
+            technical reproducibility within a condition, independently of the ground truth.
+
+            **MA plot** - each feature is drawn with its measured fold change `log2_A_vs_B` on the
+            x-axis and its mean abundance on the y-axis, calculated as the average of
+            `log_Intensity_mean_A` and `log_Intensity_mean_B`. The dashed vertical lines again mark
+            the expected ratios. This shows whether the quantification error depends on abundance,
+            which is typically the case at the low-abundance end.
+
+            Unlike the main plot, these plots use all features of the run: they are not filtered by
+            the minimal-quantifications slider.
+            """
+
     def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
         """
         Get the appropriate metric column names based on metric type and calculation mode.

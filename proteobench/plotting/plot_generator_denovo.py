@@ -452,6 +452,76 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             colour.
             """
 
+    def get_in_depth_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the in-depth plots are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover on the
+            in-depth tab.
+        """
+        return """
+            The plots on this tab break the overall performance down by properties of the peptide or
+            the spectrum, instead of reducing each run to a single pair of numbers as the main plot
+            does. They are all derived from the same per-PSM comparison between the predicted and the
+            ground-truth peptidoform.
+
+            Each PSM is classified into one **match type** by aligning the prediction against the
+            ground truth from both termini:
+
+            - **exact** - the predicted sequence matches the ground truth exactly, including the
+              modifications and their positions.
+            - **mass** - not an exact match, but the prediction matches through its longest
+              mass-matching prefix and suffix, within a cumulative mass tolerance of 50 ppm and an
+              individual amino-acid tolerance of 20 ppm. This covers interpretations that cannot be
+              distinguished by mass, such as isobaric amino acids (for example I and L).
+            - **mismatch** - neither of the above.
+
+            The alignment also records for each individual amino acid whether it was matched, which is
+            what the PTM plots below are based on.
+
+            **PTM plots** - restricted to the PSMs whose peptidoform carries the modification in
+            question, and reported for six modifications: oxidation of M, deamidation of Q and of N,
+            and N-terminal acetylation, carbamylation and ammonia loss. Per modification the fraction
+            of modified residues that was matched exactly is computed twice:
+
+            - over the modifications present in the **ground truth** - did the tool find the
+              modification that is really there?
+            - over the modifications the tool **predicted** - was a predicted modification real?
+
+            The overview plot puts the first on the x-axis and the second on the y-axis, so the two
+            failure modes are separated: a tool low on the x-axis misses modifications that are there,
+            while a tool low on the y-axis reports modifications that are not.
+
+            **Spectrum feature plots** - the PSMs are binned by a spectrum or peptide property, and
+            within each bin the fraction of correctly predicted PSMs is computed per tool. The upper
+            panel draws that fraction as a line per tool. The lower panel is a grey bar chart of the
+            number of spectra per bin, so a line can be read together with how much data supports it:
+            the extreme bins are usually sparse, and their values are correspondingly noisy. Hovering
+            a bar lists the per-tool spectrum counts. Three properties are available:
+
+            - **Missing fragmentation sites** - the number of backbone positions with no supporting
+              fragment ion, binned from 0 to 30. De novo sequencing needs contiguous fragment
+              coverage, so accuracy is expected to drop as this rises.
+            - **Peptide length** - binned from 5 to 30 residues. Longer peptides offer more
+              opportunity for a single wrong residue to break an exact match.
+            - **% explained intensity** - the fraction of the spectrum intensity that the annotation
+              accounts for, binned in 3% steps. It is a proxy for spectrum quality.
+
+            **Species overview** - the same two-panel layout, with the source organism of the
+            ground-truth peptide on the x-axis, over the nine species in the benchmark dataset.
+            Because most models are trained predominantly on human data, this exposes how well a model
+            generalises to organisms it has seen less of.
+
+            The spectrum feature plots and the species overview each have an **Exact evaluation
+            mode** toggle. It switches between counting only exact matches and counting exact plus
+            mass matches as correct, so it changes which match types are treated as correct rather
+            than the underlying classification. The PTM plots have no such toggle: they are always
+            evaluated on exact residue-level matches.
+            """
+
     def plot_ptm_overview(
         self,
         benchmark_metrics_df: pd.DataFrame,

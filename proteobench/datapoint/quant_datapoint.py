@@ -714,9 +714,9 @@ class QuantDatapointPYE(QuantDatapointHYE):
         """
         plasma_metrics = {}
 
-        # Use provided max_nr_observed or default to 12 for the plasma module
+        # Use provided max_nr_observed or default to 6 for the plasma module
         if max_nr_observed is None:
-            max_nr_observed = 12
+            max_nr_observed = 6
 
         # Compute metrics for each min_nr_observed level up to the maximum
         for min_nr_obs in range(1, int(max_nr_observed) + 1):

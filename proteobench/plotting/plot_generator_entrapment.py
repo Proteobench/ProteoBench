@@ -147,6 +147,59 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
             then no longer encoded in the shape.
             """
 
+    def get_in_depth_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the in-depth plots are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover on the
+            in-depth tab.
+        """
+        return r"""
+            This tab shows **one single benchmark run** across all of its Q-value thresholds, whereas
+            the main plot reduces each run to one threshold at a time. The calibration curve is
+            therefore the same estimate seen at every threshold at once, and the point plotted for
+            this run in the main plot is one vertical slice of it.
+
+            The curve is built by walking over the Q-value thresholds reported by the workflow. At
+            each threshold, only the identifications with a Q-value at or below it are retained, and
+            the entrapment identifications among them are counted. Three estimates are then computed
+            from those counts:
+
+            - **Estimated lower FDP bound** - `N_E / (N_T + N_E)`, the fraction of identified
+              entrapment peptides among all identifications.
+            - **Estimated upper FDP bound (paired)** - additionally counts entrapment peptides that
+              have no identified paired target, and counts pairs in which the entrapment outscores its
+              paired target twice.
+            - **Estimated upper FDP bound (combined)** - the more conservative upper estimate, used as
+              the top of the uncertainty band.
+
+            Here `N_E` is the number of identified entrapment peptides and `N_T` the number of
+            identified target peptides. The full formulas are given in the "Quick Intro" panel of this
+            module.
+
+            **X-axis** - the Q-value threshold, that is, the FDR the workflow declared at that point.
+
+            **Left y-axis** - the three estimated FDP values at that threshold.
+
+            **Right y-axis** - the number of identified features retained at that threshold, which
+            always increases as the threshold is relaxed.
+
+            **Grey diagonal** - perfect calibration, where the estimated FDP equals the declared FDR.
+            A curve running **below** the diagonal means the workflow is conservative: the true error
+            rate is lower than declared. A curve **above** it means the reported FDR is
+            underestimated, so more false positives are accepted than claimed. Where the curve crosses
+            the diagonal marks the threshold beyond which FDR control breaks down.
+
+            **Shaded band** - the interval between the estimated lower bound and the combined upper
+            bound. It is an uncertainty interval, not a confidence interval: it reflects that the
+            entrapment counts constrain the true FDP only from below and above rather than pinpointing
+            it. A wide band means the entrapment evidence is not sufficient to decide, which is what
+            produces the "inconclusive" verdict in the main plot.
+            """
+
     def _plot_qq_plot(
         self, performance_data: pd.DataFrame, fdp_curve: dict = None, mapping_file: str = None
     ) -> go.Figure:

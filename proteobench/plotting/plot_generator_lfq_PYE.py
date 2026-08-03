@@ -196,6 +196,83 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             set rather than an absolute scale. The hover text always reports the raw values.
             """
 
+    def get_in_depth_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the in-depth plots are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover on the
+            in-depth tab.
+        """
+        return """
+            The plots on this tab describe **one single benchmark run** instead of comparing runs,
+            and every point in them is one precursor ion rather than one workflow. They are computed
+            from the intermediate table shown further down this page, which can be downloaded for
+            your own analysis.
+
+            All of them start from the same per-precursor quantities. For each condition, the
+            intensities of a precursor over the six raw files of that condition are summarised as:
+
+            - `Intensity_mean` and `Intensity_std` - mean and standard deviation of the raw
+              intensities.
+            - `log_Intensity_mean` - mean of the log2-transformed intensities.
+            - `CV = Intensity_std / Intensity_mean` - the coefficient of variation, computed on the
+              raw (not log-transformed) intensities.
+            - `nr_observed` - in how many of the 12 raw files the precursor was quantified. Missing
+              values are never imputed, they are simply left out of these summaries.
+
+            The measured fold change is then the difference of the two condition means on the log2
+            scale, and the deviation from the ground truth is epsilon:
+
+            `log2_A_vs_B = log_Intensity_mean_A - log_Intensity_mean_B`
+
+            `epsilon = log2_A_vs_B - log2(expected ratio A/B)`
+
+            The expected ratios are 1:1 for HUMAN plasma, 1:3 for YEAST (log2FC = -1.585) and 2:1 for
+            ECOLI (log2FC = 1).
+
+            **Abundance range per species** - precursors are ranked by their mean intensity over both
+            conditions, and their intensity is normalised against the highest intensity over all
+            species. The rank is assigned within the species selected in the dropdown, so the x-axis
+            runs from 1 to the number of precursors quantified for that species. The dashed line on
+            the right-hand axis is the rolling median of the absolute epsilon over that ranking, which
+            shows how the quantification error grows towards the low-abundance end. This is the plot
+            behind the dynamic-range metric encoded in the marker size of the overview plot.
+
+            **Missing values distribution** - HUMAN precursors ranked by mean abundance against their
+            percentage of missing values, computed as `(1 - nr_observed / 12) * 100`. The solid line
+            is the rolling median. In a plasma background missingness concentrates at the
+            low-abundance end, so this shows how deep into the background a workflow quantifies
+            consistently.
+
+            **Log2 fold change distribution** - a kernel density estimate of `log2_A_vs_B` per
+            species, shown over a fixed x-range of -4 to 4, with dashed vertical lines at the expected
+            ratios. Because these are densities, each is normalised to an area of one, so the curve
+            heights say nothing about how many precursors each species contributed.
+
+            **Coefficient of variation** - a violin plot of the `CV_A` and `CV_B` values, with the
+            embedded box showing the quartiles. Infinite values (a precursor quantified in only one
+            run of a condition, so without a defined standard deviation) are dropped. This measures
+            technical reproducibility within a condition, independently of the ground truth.
+
+            **Signed epsilon** - the same epsilon values as above, but keeping their sign instead of
+            taking the absolute value, shown per species as a violin with an embedded box plot and a
+            reference line at zero. Negative values mean the log2 fold change is underestimated,
+            positive values that it is overestimated. Each species is annotated with its median signed
+            epsilon and the percentage of precursors on either side of zero. Note that ratio
+            compression moves the two spike-in species in opposite directions, because YEAST is
+            expected below zero and ECOLI above zero.
+
+            **MA plot** - each precursor is drawn with its measured fold change on the x-axis and its
+            mean abundance on the y-axis, calculated as the average of `log_Intensity_mean_A` and
+            `log_Intensity_mean_B`. This shows whether the quantification error depends on abundance.
+
+            Unlike the overview plot, these plots use all precursors of the run: they are not filtered
+            by the minimal-quantifications slider.
+            """
+
     def _plot_fold_change_histogram(
         self, performance_data: pd.DataFrame, species_expected_ratio: Dict[str, Dict[str, Union[float, str]]]
     ) -> go.Figure:

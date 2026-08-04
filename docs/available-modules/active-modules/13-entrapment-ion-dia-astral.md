@@ -116,6 +116,19 @@ AlphaDIA submissions are parsed from precursor-level output. The entrapment modu
 4. Upload `precursors.parquet` for metric calculation.
 5. Upload the AlphaDIA `log.txt` file for public submission.
 
+### [Spectronaut](https://biognosys.com/software/spectronaut/?gad_source=1&gclid=CjwKCAjwreW2BhBhEiwAavLwfBvsoFvzw54UAATBCaHN6kn8T0vmcdo1ZLhPUH0t90yM-XGo9_fNOhoCsuUQAvD_BwE)
+
+1. Set up a new cleavage rule without any cleavage
+2. Configure the proteobench fasta by importing the fasta provided in this module in the "Databases" tab using uniprot parsing rule
+3. In the "Analysis" tab, select "Set up a DirectDIA Analysis from folder"
+4. Select the folder containting the raw files in order to load the raw files
+5. Once loaded, you optionally can change the name of the project
+6. In the next tab select the proteobench fasta as the database, set Protein ID to "Accession", and use the new no cleavage rule
+7. In the modifications tab, you can add carbamidomethylation as fixed and/or methionine oxidation as variable. No other modifications are supported.
+8. After the search is finished go to the "Report" tab, select "BGS factory Report" and go for "export Report", name the file"..._Report" and select .tsv format
+9. Upload the "..._Report.tsv" for private submission and "...Report.setup.txt" (which is in the same folder as the report.tsv file) for public submission to Proteobench
+
+
 ### Custom format
 
 Upload a tab-delimited file with the following columns:

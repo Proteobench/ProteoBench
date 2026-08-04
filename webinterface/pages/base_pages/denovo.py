@@ -159,6 +159,10 @@ class DeNovoUIObjects(BaseUIModule):
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
+        from pages.base_pages.utils.auth import render_upload_tab_signin_reminder
+
+        render_upload_tab_signin_reminder()
+
         # Display software selector and AlphaDIA info outside the form so it updates immediately
         tab2_quant.show_software_selector_and_alphadia_info(
             variables=self.variables,
@@ -605,6 +609,9 @@ class DeNovoUIObjects(BaseUIModule):
             variables=self.variables,
             user_input=self.user_input,
         )
+        tab5_quant.generate_submitter_identity(
+                user_input=self.user_input,
+            )
         tab5_quant.generate_comments_section(
             variables=self.variables,
             user_input=self.user_input,

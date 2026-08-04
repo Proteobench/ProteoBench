@@ -227,3 +227,55 @@ def test_tab6_full_submission_via_ui(monkeypatch):
     assert clone_pr.called, "clone_pr (pull-request creation) was not called"
     submitted_df = clone_pr.call_args.args[0]
     assert (submitted_df["old_new"] == "new").any(), "submitted frame has no newly benchmarked datapoint"
+
+
+def test_tab6_submission_stamps_signed_in_submitter(monkeypatch):
+    """A signed-in user's identity ends up on the submitted datapoint row.
+
+    Regression test: the datapoint row is created back in Tab 2 at upload time
+    (ionmodule.benchmarking), before generate_submitter_identity ever runs (it
+    only runs in Tab 6, right before the final submit). Setting submitter_id/
+    submitter_name/submitter_provider on the live ``user_input`` dict in Tab 6
+    has no effect on that already-created row unless something writes the
+    identity back into it -- previously nothing did, so every submission went
+    out with an empty submitter regardless of sign-in state. See
+    create_pull_request's identity-stamping step.
+    """
+    res_content = Path(MAXQUANT_FILE).read_bytes()
+    params_content = Path(MAXQUANT_PARAMS_FILE).read_bytes()
+    clone_pr = mock.Mock(return_value="https://github.com/Proteobot/Results_quant_ion_DDA/pull/778")
+    empty_report = mock.Mock(summary=lambda: "")
+    signed_in_user = {"provider": "github", "id": "rodvrees", "name": "Robbin Bouwmeester", "avatar_url": None}
+
+    extra = [
+        mock.patch.object(DDAQuantIonModuleQExactive, "clone_pr", clone_pr),
+        mock.patch("pages.base_pages.tabs.tab6_submit_results.run_submission_validation", lambda **k: empty_report),
+        mock.patch("pages.base_pages.tabs.tab6_submit_results.render_validation_report", lambda report: None),
+        mock.patch("pages.base_pages.utils.auth.get_current_user", lambda: signed_in_user),
+    ]
+    with mocked_backend(extra_patches=extra):
+        app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
+        app_test.run()
+
+        app_test.selectbox(key="software_tool_selector").set_value("MaxQuant").run()
+        app_test.file_uploader[0].upload("MaxQuant_evidence_sample.txt", res_content)
+        next(b for b in app_test.button if b.label == "Parse and bench").click().run()
+        assert not app_test.exception, f"benchmark step raised: {[e.message for e in app_test.exception]}"
+
+        meta_uploader = next(u for u in app_test.file_uploader if u.label == "Meta data for searches")
+        meta_uploader.upload("mqpar.xml", params_content).run()
+        assert not app_test.exception, f"metadata upload raised: {[e.message for e in app_test.exception]}"
+
+        confirm = next(c for c in app_test.checkbox if "confirm that the metadata is correct" in c.label)
+        confirm.set_value(True).run()
+        assert not app_test.exception
+
+        next(b for b in app_test.button if "really want to upload" in b.label).click().run()
+
+    assert not app_test.exception, f"submission raised: {[e.message for e in app_test.exception]}"
+    assert clone_pr.called, "clone_pr (pull-request creation) was not called"
+    submitted_df = clone_pr.call_args.args[0]
+    new_row = submitted_df[submitted_df["old_new"] == "new"].iloc[-1]
+    assert new_row["submitter_id"] == "rodvrees"
+    assert new_row["submitter_name"] == "Robbin Bouwmeester"
+    assert new_row["submitter_provider"] == "github"

@@ -41,12 +41,18 @@ class BaseStreamlitUI:
 
         self.uiobjects = uiobjects(self.variables, self.ionmodule, self.parsesettingsbuilder, page_name=page_name)
 
-    def _render_tab_header(self) -> None:
-        """Render common tab header elements: title, documentation link, and banner."""
+    def _render_tab_header(self, key_suffix: str = "") -> None:
+        """Render common tab header elements: title, documentation link, and banner.
+
+        ``key_suffix`` (e.g. the tab name) must be unique per call, since this is
+        called once per tab within the same script run and the sign-in widget
+        it embeds uses explicit widget keys.
+        """
+        from pages.base_pages.utils.auth import render_auth_status
+
         st.title(self.variables.title)
         raw_data_url = getattr(self.variables, "raw_data_url", None)
-        doc_col, download_col = st.columns(2)
-        with doc_col:
+        with st.container(horizontal=True, gap="small"):
             st.link_button(
                 "Module documentation",
                 url=self.variables.doc_url,
@@ -54,8 +60,7 @@ class BaseStreamlitUI:
                 icon="📖",
                 help="link to the module documentation",
             )
-        if raw_data_url:
-            with download_col:
+            if raw_data_url:
                 st.link_button(
                     "Download input files",
                     url=raw_data_url,
@@ -63,6 +68,7 @@ class BaseStreamlitUI:
                     icon="⬇️",
                     help="Download the raw input files used to benchmark this module",
                 )
+            render_auth_status(key_suffix=key_suffix)
         display_banner(self.variables)
 
     def get_tab_config(self) -> list:
@@ -113,7 +119,7 @@ class BaseStreamlitUI:
         # Render each tab
         for tab, (tab_name, method_name) in zip(tabs, tab_config):
             with tab:
-                self._render_tab_header()
+                self._render_tab_header(key_suffix=f"_{tab_name}")
                 # Call the appropriate method on uiobjects
                 getattr(self.uiobjects, method_name)()
 

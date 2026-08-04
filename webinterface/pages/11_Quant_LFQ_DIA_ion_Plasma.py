@@ -53,11 +53,17 @@ class StreamlitUI:
 
         self._main_page()
 
-    def _render_header(self) -> None:
-        """Render the shared title, documentation link, download link, and status warning banner."""
+    def _render_header(self, key_suffix: str = "") -> None:
+        """Render the shared title, documentation link, download link, and beta warning.
+
+        ``key_suffix`` (e.g. the tab name) must be unique per call, since this is
+        called once per tab within the same script run and the sign-in widget
+        it embeds uses explicit widget keys.
+        """
+        from pages.base_pages.utils.auth import render_auth_status
+
         st.title(self.variables_dia_quant.title)
-        doc_col, download_col = st.columns(2)
-        with doc_col:
+        with st.container(horizontal=True, gap="small"):
             st.link_button(
                 "Module documentation",
                 url=self.variables_dia_quant.doc_url,
@@ -65,7 +71,6 @@ class StreamlitUI:
                 icon="📖",
                 help="link to the module documentation",
             )
-        with download_col:
             st.link_button(
                 "Download input files",
                 url=self.variables_dia_quant.raw_data_url,
@@ -98,28 +103,28 @@ class StreamlitUI:
 
         # Tab 1: View Public Results
         with tab_results_all:
-            self._render_header()
+            self._render_header(key_suffix="_results_all")
             self.quant_uiobjects.display_all_data_results_main()
 
         # Tab 2: Upload New Results (Private)
         with tab_submission_details:
-            self._render_header()
+            self._render_header(key_suffix="_submission_details")
             self.quant_uiobjects.display_submission_form()
 
         # Tab 3: View Single Result
         with tab_indepth_plots:
-            self._render_header()
+            self._render_header(key_suffix="_indepth_plots")
 
             self.quant_uiobjects.display_indepth_plots()
 
         # Tab 4: View Public + New Results
         with tab_results_new:
-            self._render_header()
+            self._render_header(key_suffix="_results_new")
             self.quant_uiobjects.display_all_data_results_submitted()
 
         # Tab 5: Submit New Results
         with tab_public_submission:
-            self._render_header()
+            self._render_header(key_suffix="_public_submission")
             self.quant_uiobjects.display_public_submission_ui()
 
 

@@ -18,6 +18,7 @@ import pandas as pd
 
 import proteobench
 from proteobench.datapoint.datapoint_base import DatapointBase
+from proteobench.score.denovoscores import AMBIGUITY_COMBOS, get_ambiguity_suffix
 
 
 def calculate_prc(scores_correct, scores_all, n_spectra, threshold=None):
@@ -42,30 +43,58 @@ def calculate_prc(scores_correct, scores_all, n_spectra, threshold=None):
     return {"precision": precision, "recall": recall, "coverage": coverage}
 
 
-def get_prc_curve(t, n_spectra):
-    prs = []
-    recs = []
-    covs = []
+def get_prc_curve(scores_correct, scores_all, n_spectra) -> pd.DataFrame:
+    """
+    Sweep score thresholds and return the resulting precision-vs-coverage curve
+    (used to compute the AUC/average-precision main-plot metric).
+    """
+    scores_all = np.asarray(scores_all, dtype=float)
+    scores_correct = np.asarray(scores_correct, dtype=float)
 
-    for threshold in np.linspace(t.score.max(), t.score.min()):
+    precisions, coverages = [], []
+    if len(scores_all) == 0:
+        return pd.DataFrame({"precision": precisions, "coverage": coverages})
+
+    for threshold in np.linspace(scores_all.max(), scores_all.min()):
         if np.isnan(threshold):
             continue
 
+        # A threshold with nothing above it (e.g. the sweep's own starting point, the max
+        # score) would divide by zero in calculate_prc's precision/coverage; skip it.
+        ci = int((scores_all > threshold).sum())
+        if ci == 0:
+            continue
+
         prc_dict = calculate_prc(
-            scores_correct=t[t.match].score.to_numpy(),
-            scores_all=t.score.to_numpy(),
+            scores_correct=scores_correct,
+            scores_all=scores_all,
             n_spectra=n_spectra,
             threshold=threshold,
         )
-        pr, rec, cov = prc_dict["precision"], prc_dict["recall"], prc_dict["coverage"]
-        prs.append(pr)
-        recs.append(rec)
-        covs.append(cov)
+        precisions.append(prc_dict["precision"])
+        coverages.append(prc_dict["coverage"])
 
-    return pd.DataFrame({"precision": prs, "recall": recs, "coverage": covs})
+    return pd.DataFrame({"precision": precisions, "coverage": coverages})
 
 
-def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str):
+def calculate_auc(scores_correct, scores_all, n_spectra) -> float:
+    """
+    Area under the precision-vs-coverage curve (average precision), reported as the
+    "AUC" main-plot metric. Returns NaN when the curve has fewer than two points (e.g.
+    a tool whose per-token scores are all identical, which happens for tools that don't
+    provide real per-residue scores and get a broadcast peptide score instead).
+    """
+    curve = get_prc_curve(scores_correct, scores_all, n_spectra)
+    if len(curve) < 2:
+        return float("nan")
+    curve = curve.sort_values("coverage")
+    # np.trapezoid replaces np.trapz as of numpy 2.0 (removed outright in later numpy);
+    # the project's numpy floor predates that, so pick whichever is available.
+    trapezoid = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
+    return float(trapezoid(curve["precision"], curve["coverage"]))
+
+
+def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str, exact_dn_column: str = "aa_exact_dn"):
     df_aa = {}
 
     if evaluation_type == "mass":
@@ -73,7 +102,7 @@ def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str):
         df_aa["aa_match"] = list(chain(*df["aa_matches_dn"].tolist()))
     elif evaluation_type == "exact":
         df_aa["aa_score"] = list(chain(*df["aa_scores"].tolist()))
-        df_aa["aa_match"] = list(chain(*df["aa_exact_dn"].tolist()))
+        df_aa["aa_match"] = list(chain(*df[exact_dn_column].tolist()))
     else:
         raise Exception("Evaluation type should be mass or exact, but {} was provided.".format(evaluation_type))
 
@@ -218,6 +247,21 @@ class DenovoDatapoint(DatapointBase):
                     self=DenovoDatapoint(), df=intermediate, level=l, evaluation=e_type
                 )
 
+            # Ambiguity-toggle variants (I/L, deamidated Q/N vs E/D) only affect exact-mode
+            # matching -- mass mode already can't distinguish these (I/L are isomeric,
+            # deamidated Q/N are isobaric with E/D), so its metrics are identical regardless
+            # and aren't recomputed per combination. Precomputed here (once, at benchmarking
+            # time) rather than at plot time, since only the aggregated `results` dict -- not
+            # the raw intermediate dataframe -- is persisted for a submitted datapoint.
+            results[l]["exact"]["ambiguity"] = {}
+            for suffix, flags in AMBIGUITY_COMBOS.items():
+                if not suffix:
+                    continue  # baseline combination; already stored as results[l]["exact"]
+                combo_key = suffix.lstrip("_")
+                results[l]["exact"]["ambiguity"][combo_key] = DenovoDatapoint.get_metrics(
+                    self=DenovoDatapoint(), df=intermediate, level=l, evaluation="exact", **flags
+                )
+
         results["in_depth"] = DenovoDatapoint.get_indepth_metrics(self=DenovoDatapoint(), df=intermediate)
         result_datapoint.results = results
         result_datapoint.precision_peptide = result_datapoint.results["peptide"][evaluation_type]["precision"]
@@ -228,28 +272,51 @@ class DenovoDatapoint(DatapointBase):
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
         return results_series
 
-    def get_metrics(self, df: pd.DataFrame, level: str, evaluation: str):
+    def get_metrics(
+        self,
+        df: pd.DataFrame,
+        level: str,
+        evaluation: str,
+        allow_il: bool = False,
+        allow_deamidation: bool = False,
+    ):
         """
         Compute various statistical metrics from the provided DataFrame for the benchmark.
+
+        Parameters
+        ----------
+        allow_il : bool
+            Only meaningful when `evaluation="exact"`: read the match/exactness columns
+            computed with I/L treated as equivalent. Ignored for `evaluation="mass"`,
+            since mass-based matching can't distinguish I/L regardless.
+        allow_deamidation : bool
+            Only meaningful when `evaluation="exact"`: read the match/exactness columns
+            computed with deamidated Q/N treated as equivalent to E/D. Ignored for
+            `evaluation="mass"` for the same reason as `allow_il`.
         """
 
         if evaluation == "mass":
             evaluation_list = ["mass", "exact"]
+            match_col = "match_type"
+            exact_dn_column = "aa_exact_dn"
         elif evaluation == "exact":
             evaluation_list = ["exact"]
+            suffix = get_ambiguity_suffix(allow_il, allow_deamidation)
+            match_col = f"match_type{suffix}"
+            exact_dn_column = f"aa_exact_dn{suffix}"
         else:
             raise Exception("Only `exact` and `mass` evaluation types are supported. Should never happen.")
 
         if level == "peptide":
             n = len(df)
             df_filtered = df.dropna(subset="peptidoform")
-            scores_correct = df_filtered.loc[df_filtered["match_type"].isin(evaluation_list), "score"].tolist()
+            scores_correct = df_filtered.loc[df_filtered[match_col].isin(evaluation_list), "score"].tolist()
             scores_all = df_filtered["score"].tolist()
 
         elif level == "aa":
             n_aa = df["aa_matches_gt"].apply(len).sum()
             df_filtered = df.dropna(subset="peptidoform")
-            df_aa = collapse_aa_scores(df_filtered, evaluation_type=evaluation)
+            df_aa = collapse_aa_scores(df_filtered, evaluation_type=evaluation, exact_dn_column=exact_dn_column)
             scores_correct = df_aa.loc[df_aa["aa_match"], "aa_score"].tolist()
             scores_all = df_aa["aa_score"].tolist()
             n = n_aa
@@ -260,6 +327,7 @@ class DenovoDatapoint(DatapointBase):
             )
 
         res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
+        res["auc"] = calculate_auc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n)
         return res
 
     def get_indepth_metrics(self, df: pd.DataFrame):

@@ -186,9 +186,20 @@ class StreamlitPage(ABC):
         """
         st.space("large")
         with st.container(horizontal_alignment="center"):
-            st.caption("Supported by")
+            st.caption("Supported by", text_alignment="center")
             st.image(
                 _resolve_asset("logos/logo_participants/proteobench-contributing-institutes.png"),
+                width=700,
+            )
+            st.space("medium")
+            st.caption("Funded by", text_alignment="center")
+            st.image("logos/logo_funding/proteobench-funding.png", width=700)
+            st.caption(
+                "Through EuBIC-MS, ProteoBench is continuously supported by the European Proteomics "
+                "Association (EuPA). For specific events, such as the ProteoBench hackathon, ProteoBench "
+                "has received funding from the Danish Data Science Academy (DDSA), the Research Foundation "
+                "- Flanders (FWO), and Core For Life.",
+                text_alignment="center",
                 width=700,
             )
             st.caption(

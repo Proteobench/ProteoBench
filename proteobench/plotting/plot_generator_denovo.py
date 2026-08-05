@@ -806,6 +806,26 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors: Dict[str, str] = SOFTWARE_COLORS,
     ):
         fig = go.Figure()
+
+        # Same continuous corner gradient as the main plot (light -> dark towards (1, 1)):
+        # this plot's diagonal has the same "good" orientation -- top-right is strong
+        # performance, bottom-left is poor -- per Description.ptm_specific below.
+        grid_coords = np.linspace(0.0, 1.0, 60)
+        grid_z = [[(x + y) / 2 for x in grid_coords] for y in grid_coords]
+        fig.add_trace(
+            go.Heatmap(
+                x=grid_coords,
+                y=grid_coords,
+                z=grid_z,
+                zmin=0,
+                zmax=1,
+                colorscale=QUADRANT_COLORSCALE,
+                showscale=False,
+                opacity=0.45,
+                hoverinfo="skip",
+            )
+        )
+
         for i, row in benchmark_metrics_df.iterrows():
             ptm_data = row["results"]["in_depth"]["PTM"]
 
@@ -816,11 +836,30 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             tool = row["software_name"]
             fig.add_trace(go.Scatter(x=[x], y=[y], name=tool, marker=dict(color=software_colors[tool])))
 
+        # Short corner descriptions, condensed from Description.ptm_specific's
+        # "How to interpret the plot" section.
+        for x, y, xanchor, yanchor, text in (
+            (0.97, 0.97, "right", "top", "<b>Strong performance</b><br>frequent & correct"),
+            (0.03, 0.97, "left", "top", "<b>Conservative</b><br>rare but correct"),
+            (0.03, 0.03, "left", "bottom", "<b>Poor performance</b><br>rare & incorrect"),
+            (0.97, 0.03, "right", "bottom", "<b>Overprediction</b><br>frequent but incorrect"),
+        ):
+            fig.add_annotation(
+                x=x,
+                y=y,
+                xanchor=xanchor,
+                yanchor=yanchor,
+                text=text,
+                showarrow=False,
+                align=xanchor,
+                font=dict(size=10, color="rgba(60,60,60,0.85)"),
+            )
+
         fig.update_layout(
             width=500,
             height=500,
-            xaxis=dict(title="Precision (Ground-truth)", color="black", gridwidth=2),
-            yaxis=dict(title="Precision (denovo)", color="black", gridwidth=2),
+            xaxis=dict(title="Precision (Ground-truth)", color="black", gridwidth=2, range=[0, 1]),
+            yaxis=dict(title="Precision (denovo)", color="black", gridwidth=2, range=[0, 1]),
         )
 
         return fig

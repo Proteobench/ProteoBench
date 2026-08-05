@@ -390,21 +390,47 @@ def display_download_section(variables, sort_by: str = "id") -> None:
         )
 
 
-def display_existing_results(
+def load_and_filter_main_data(variables, ionmodule, use_slider: bool = True) -> pd.DataFrame:
+    """
+    Load, slider/parameter-filter, and open-source-annotate the main (public) datapoints
+    table for Tab 1 -- the data-loading half of `display_existing_results`, exposed
+    separately so a caller can render more than one view (e.g. a plot *and* an alternative
+    plot behind a tab switcher) off the same filtered selection without loading it twice.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys and configuration.
+    ionmodule : object
+        The module instance (Quant, De Novo, etc.).
+    use_slider : bool, optional
+        Whether to use slider-based filtering (default True for Quant).
+
+    Returns
+    -------
+    pd.DataFrame
+        The filtered dataframe (empty if there's nothing to show yet).
+    """
+    initialize_main_data_points(variables, ionmodule)
+    filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
+    filtered_data = add_open_source_column(filtered_data)
+    # Apply parameter-based filters (key_prefix must be unique per module page)
+    filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
+    return filtered_data
+
+
+def render_main_plot(
     variables,
     ionmodule,
     plot_params: Dict[str, Any],
-    use_slider: bool = True,
-    table_style: str = "aggrid",
-    column_config: Optional[Dict] = None,
+    filtered_data: pd.DataFrame,
     render_forest_plot=None,
-) -> Optional[pd.DataFrame]:
+) -> None:
     """
-    Main orchestration function for Tab 1: plot + interactive table with bidirectional
-    highlight synchronisation.
-
-    Clicking a point in the scatter plot highlights the matching row in the table.
-    Clicking a row in the table highlights the matching point in the scatter plot.
+    Render Tab 1's main scatter/metric plot, with click-to-highlight against the table
+    rendered separately by `render_results_table` (both read/write the same highlight
+    session-state key, so they stay in sync even when rendered in different containers,
+    e.g. one inside a tab switcher and the other outside it).
 
     Parameters
     ----------
@@ -415,36 +441,12 @@ def display_existing_results(
     plot_params : Dict[str, Any]
         Module-specific plotting parameters passed straight through to render_metric_plot
         (and on to plot_main_metric). alpha_warning and beta_warning are consumed here.
-    use_slider : bool, optional
-        Whether to use slider-based filtering (default True for Quant).
-    table_style : str, optional
-        Reserved; AgGrid is always used.
-    column_config : Optional[Dict], optional
-        Reserved for future st.dataframe column configuration.
+    filtered_data : pd.DataFrame
+        The dataframe to plot, as returned by `load_and_filter_main_data`.
     render_forest_plot : callable, optional
         Optional callable that renders an additional plot (e.g. a forest plot)
-        between the scatter plot and the results table.
-
-    Returns
-    -------
-    Optional[pd.DataFrame]
-        The filtered dataframe used to render the plot and table (after slider/parameter
-        filtering), so a caller can reuse it for an alternative view of the same selection
-        (e.g. de novo's precision-coverage-curve tab). `None` if nothing has been rendered yet.
+        directly below the main plot.
     """
-    initialize_main_data_points(variables, ionmodule)
-    filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
-
-    filtered_data = add_open_source_column(filtered_data)
-
-    # Apply parameter-based filters (key_prefix must be unique per module page)
-    filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
-
-    if filtered_data.empty:
-        st.info("No results available yet.", icon="ℹ️")
-        return filtered_data
-
-    # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # --- Session state keys for bidirectional selection ---
@@ -501,7 +503,28 @@ def display_existing_results(
     if render_forest_plot is not None:
         render_forest_plot()
 
-    # --- Render table via shared utilities ---
+
+def render_results_table(variables, filtered_data: pd.DataFrame) -> None:
+    """
+    Render Tab 1's "Benchmark Results" table and download section, using whichever ID is
+    currently highlighted (set by `render_main_plot` or by a row click here) -- kept as its
+    own function so it can be rendered once regardless of how many alternative plots a page
+    switches between (see `render_main_plot`'s docstring).
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys and configuration.
+    filtered_data : pd.DataFrame
+        The dataframe to display, as returned by `load_and_filter_main_data`.
+    """
+    highlight_key = f"{variables.fig_metric}_tab1_highlight_id"
+    agrid_key_id = f"{variables.fig_metric}_tab1_aggrid_key"
+
+    if agrid_key_id not in st.session_state:
+        st.session_state[agrid_key_id] = uuid.uuid4()
+    highlight_id = st.session_state.get(highlight_key, None)
+
     with st.container(key="tour_results_table"):
         st.subheader("Benchmark Results")
         df_display = prepare_display_dataframe(filtered_data, highlight_id)
@@ -534,5 +557,62 @@ def display_existing_results(
     # Display download section
     with st.container(key="tour_download_section"):
         display_download_section(variables)
+
+
+def display_existing_results(
+    variables,
+    ionmodule,
+    plot_params: Dict[str, Any],
+    use_slider: bool = True,
+    table_style: str = "aggrid",
+    column_config: Optional[Dict] = None,
+    render_forest_plot=None,
+) -> Optional[pd.DataFrame]:
+    """
+    Main orchestration function for Tab 1: plot + interactive table with bidirectional
+    highlight synchronisation.
+
+    Clicking a point in the scatter plot highlights the matching row in the table.
+    Clicking a row in the table highlights the matching point in the scatter plot.
+
+    A thin wrapper around `load_and_filter_main_data` + `render_main_plot` +
+    `render_results_table` -- callers that need the plot and table in separate containers
+    (e.g. de novo's Scatter/Precision-Coverage-Curves tab switcher, where only the plot
+    should swap and the table should stay put) can call those three directly instead.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys and configuration.
+    ionmodule : object
+        The module instance (Quant, De Novo, etc.).
+    plot_params : Dict[str, Any]
+        Module-specific plotting parameters passed straight through to render_metric_plot
+        (and on to plot_main_metric). alpha_warning and beta_warning are consumed here.
+    use_slider : bool, optional
+        Whether to use slider-based filtering (default True for Quant).
+    table_style : str, optional
+        Reserved; AgGrid is always used.
+    column_config : Optional[Dict], optional
+        Reserved for future st.dataframe column configuration.
+    render_forest_plot : callable, optional
+        Optional callable that renders an additional plot (e.g. a forest plot)
+        between the scatter plot and the results table.
+
+    Returns
+    -------
+    Optional[pd.DataFrame]
+        The filtered dataframe used to render the plot and table (after slider/parameter
+        filtering), so a caller can reuse it for an alternative view of the same selection
+        (e.g. de novo's precision-coverage-curve tab). `None` if nothing has been rendered yet.
+    """
+    filtered_data = load_and_filter_main_data(variables, ionmodule, use_slider)
+
+    if filtered_data.empty:
+        st.info("No results available yet.", icon="ℹ️")
+        return filtered_data
+
+    render_main_plot(variables, ionmodule, plot_params, filtered_data, render_forest_plot=render_forest_plot)
+    render_results_table(variables, filtered_data)
 
     return filtered_data

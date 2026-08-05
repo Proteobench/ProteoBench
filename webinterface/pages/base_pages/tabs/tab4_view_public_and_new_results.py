@@ -163,6 +163,98 @@ def render_submitted_results_table(data: pd.DataFrame, variables) -> None:
     )
 
 
+def load_and_filter_submitted_data(variables, ionmodule) -> pd.DataFrame:
+    """
+    Load, slider/parameter-filter, and open-source-annotate the submitted (public + new)
+    datapoints table for Tab 4 -- the data-loading half of `display_submitted_results`,
+    exposed separately so a caller can render more than one view (e.g. a plot *and* an
+    alternative plot behind a tab switcher) off the same filtered selection without loading
+    it twice.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys and configuration.
+    ionmodule : object
+        The module instance (Quant, De Novo, etc.).
+
+    Returns
+    -------
+    pd.DataFrame
+        The filtered dataframe, with the newly-submitted row (if any) pinned so it survives
+        all filters.
+    """
+    initialize_submitted_data_points(variables, ionmodule)
+
+    filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
+    filtered_data = add_open_source_column(filtered_data)
+
+    # Pin the newly submitted row so it survives all filters
+    pinned = (
+        filtered_data.index[filtered_data.get("old_new", pd.Series(dtype=str)) == "new"]
+        if "old_new" in filtered_data.columns
+        else None
+    )
+    filtered_data = generate_parameter_filters(
+        filtered_data,
+        key_prefix=f"param_filter_{variables.all_datapoints_submitted}",
+        pinned_indices=pinned,
+    )
+    return filtered_data
+
+
+def render_submitted_main_plot(
+    variables,
+    ionmodule,
+    plot_params: Dict[str, Any],
+    filtered_data: pd.DataFrame,
+    render_forest_plot=None,
+) -> None:
+    """
+    Render Tab 4's main scatter/metric plot, kept separate from `render_submitted_results_table`
+    so a caller can put them in different containers (e.g. one inside a tab switcher and the
+    other outside it).
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys and configuration.
+    ionmodule : object
+        The module instance (Quant, De Novo, etc.).
+    plot_params : Dict[str, Any]
+        Module-specific plotting parameters.
+    filtered_data : pd.DataFrame
+        The dataframe to plot, as returned by `load_and_filter_submitted_data`.
+    render_forest_plot : callable, optional
+        Optional callable that renders an additional plot (e.g. a forest plot)
+        directly below the main plot.
+    """
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
+
+    fig_key = variables.fig_metric_submitted if hasattr(variables, "fig_metric_submitted") else "submitted_plot"
+    if fig_key not in st.session_state:
+        st.session_state[fig_key] = uuid.uuid4()
+    plot_uuid = st.session_state[fig_key]
+
+    with st.container(key="tour_submitted_plot"):
+        try:
+            fig = plot_generator.plot_main_metric(
+                result_df=filtered_data,
+                hide_annot=plot_params.get("hide_annot", False),
+                **plot_params,
+            )
+            st.plotly_chart(fig, key=plot_uuid)
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            import traceback
+
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
+
+    if render_forest_plot is not None:
+        render_forest_plot()
+
+
 def display_submitted_results(
     variables,
     ionmodule,
@@ -175,6 +267,11 @@ def display_submitted_results(
     Display submitted benchmark results with plot and table.
 
     This is the main entry point for Tab 4, working across all module types.
+
+    A thin wrapper around `load_and_filter_submitted_data` + `render_submitted_main_plot` +
+    `render_submitted_results_table` -- callers that need the plot and table in separate
+    containers (e.g. de novo's Scatter/Precision-Coverage-Curves tab switcher, where only the
+    plot should swap and the table should stay put) can call those three directly instead.
 
     Parameters
     ----------
@@ -199,52 +296,9 @@ def display_submitted_results(
         for an alternative view of the same selection (e.g. de novo's precision-coverage-curve
         tab).
     """
-    # Initialize submitted data
-    initialize_submitted_data_points(variables, ionmodule)
+    filtered_data = load_and_filter_submitted_data(variables, ionmodule)
 
-    # Filter data using slider if applicable
-    filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
-    filtered_data = add_open_source_column(filtered_data)
-
-    # Pin the newly submitted row so it survives all filters
-    pinned = (
-        filtered_data.index[filtered_data.get("old_new", pd.Series(dtype=str)) == "new"]
-        if "old_new" in filtered_data.columns
-        else None
-    )
-    filtered_data = generate_parameter_filters(
-        filtered_data,
-        key_prefix=f"param_filter_{variables.all_datapoints_submitted}",
-        pinned_indices=pinned,
-    )
-
-    # Get plot generator from module
-    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
-
-    # Prepare plot key
-    fig_key = variables.fig_metric_submitted if hasattr(variables, "fig_metric_submitted") else "submitted_plot"
-    if fig_key not in st.session_state:
-        st.session_state[fig_key] = uuid.uuid4()
-    plot_uuid = st.session_state[fig_key]
-
-    with st.container(key="tour_submitted_plot"):
-        try:
-            # Generate plot using plot_generator interface
-            fig = plot_generator.plot_main_metric(
-                result_df=filtered_data,
-                hide_annot=plot_params.get("hide_annot", False),
-                **plot_params,
-            )
-            st.plotly_chart(fig, key=plot_uuid)
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-            import traceback
-
-            with st.expander("Error details"):
-                st.code(traceback.format_exc())
-
-    if render_forest_plot is not None:
-        render_forest_plot()
+    render_submitted_main_plot(variables, ionmodule, plot_params, filtered_data, render_forest_plot=render_forest_plot)
 
     # Render results table (same styled grid as Tab 1)
     render_submitted_results_table(filtered_data, variables)

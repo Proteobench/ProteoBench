@@ -177,24 +177,36 @@ class DeNovoUIObjects(BaseUIModule):
             st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
         ]
 
+        filtered_data = tab1.load_and_filter_main_data(
+            variables=self.variables, ionmodule=self.ionmodule, use_slider=False
+        )
+
+        if filtered_data.empty:
+            st.info("No results available yet.", icon="ℹ️")
+            return
+
+        plot_params = {
+            "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+            "level": self.level_mapping[
+                st.session_state.get(st.session_state.get(self.variables.radio_level_id_uuid, ""), "Precision")
+            ],
+            "evaluation_type": evaluation_type,
+            "allow_il": allow_il,
+            "allow_deamidation": allow_deamidation,
+            "colorblind_mode": colorblind_mode,
+            "alpha_warning": getattr(self.variables, "alpha_warning", False),
+            "beta_warning": getattr(self.variables, "beta_warning", False),
+        }
+
+        # Only the figure switches between these two tabs -- the results table below is
+        # shared and stays visible regardless of which one is selected.
         view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
         with view_tabs[0]:
-            filtered_data = tab1.display_existing_results(
+            tab1.render_main_plot(
                 variables=self.variables,
                 ionmodule=self.ionmodule,
-                plot_params={
-                    "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
-                    "level": self.level_mapping[
-                        st.session_state.get(st.session_state.get(self.variables.radio_level_id_uuid, ""), "Precision")
-                    ],
-                    "evaluation_type": evaluation_type,
-                    "allow_il": allow_il,
-                    "allow_deamidation": allow_deamidation,
-                    "colorblind_mode": colorblind_mode,
-                    "alpha_warning": getattr(self.variables, "alpha_warning", False),
-                    "beta_warning": getattr(self.variables, "beta_warning", False),
-                },
-                use_slider=False,
+                plot_params=plot_params,
+                filtered_data=filtered_data,
             )
         with view_tabs[1]:
             self._display_precision_coverage_curves(
@@ -204,6 +216,8 @@ class DeNovoUIObjects(BaseUIModule):
                 allow_deamidation=allow_deamidation,
                 fig_key_uuid=self.variables.fig_pc_curve,
             )
+
+        tab1.render_results_table(variables=self.variables, filtered_data=filtered_data)
 
     def _display_precision_coverage_curves(
         self,
@@ -563,20 +577,26 @@ class DeNovoUIObjects(BaseUIModule):
             st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_submitted_uuid, ""), "Exact")
         ]
 
-        # Plot the datapoints
+        # Load once, then only the figure switches between the two tabs below -- the
+        # results table stays outside the switcher, visible regardless of which is selected.
+        filtered_data = tab4.load_and_filter_submitted_data(variables=self.variables, ionmodule=self.ionmodule)
+
+        plot_params = {
+            "label": label,
+            "level": level,
+            "evaluation_type": evaluation_type,
+            "allow_il": allow_il,
+            "allow_deamidation": allow_deamidation,
+            "colorblind_mode": colorblind_mode,
+        }
+
         view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
         with view_tabs[0]:
-            filtered_data = tab4.display_submitted_results(
-                self.variables,
-                self.ionmodule,
-                plot_params={
-                    "label": label,
-                    "level": level,
-                    "evaluation_type": evaluation_type,
-                    "allow_il": allow_il,
-                    "allow_deamidation": allow_deamidation,
-                    "colorblind_mode": colorblind_mode,
-                },
+            tab4.render_submitted_main_plot(
+                variables=self.variables,
+                ionmodule=self.ionmodule,
+                plot_params=plot_params,
+                filtered_data=filtered_data,
             )
         with view_tabs[1]:
             self._display_precision_coverage_curves(
@@ -586,6 +606,8 @@ class DeNovoUIObjects(BaseUIModule):
                 allow_deamidation=allow_deamidation,
                 fig_key_uuid=self.variables.fig_pc_curve_submitted,
             )
+
+        tab4.render_submitted_results_table(filtered_data, self.variables)
 
         st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
         st.data_editor(

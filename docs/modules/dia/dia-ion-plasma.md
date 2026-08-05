@@ -155,8 +155,8 @@ If your tool isn't listed above, upload a tab-delimited table with:
 | `Modified sequence` | Sequence with localized modifications, [ProForma](https://www.psidev.info/proforma) format |
 | `Proteins` | `;`-separated identifiers, must contain species flags (`_HUMAN`, `_YEAST`, `_ECOLI`) |
 | `Charge` | Precursor charge state |
-| `A9_G_DIA_nLC_tTOF_R1`…`R6` | Intensity values, condition A replicates |
-| `B9_G_DIA_nLC_tTOF_R1`…`R6` | Intensity values, condition B replicates |
+| `LFQ_Plasma_Condition_A_Sample_Alpha_01`…`06` | Intensity values, condition A replicates |
+| `LFQ_Plasma_Condition_B_Sample_Alpha_01`…`06` | Intensity values, condition B replicates |
 
 The table should contain only validated ions, with no contaminant sequences or non-specific
 peptides.

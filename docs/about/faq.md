@@ -1,7 +1,7 @@
 (faq)=
 # Frequently asked questions
 
-For "what is ProteoBench" and "who is it for", see the [Overview](index.md). This page covers
+For "What is ProteoBench" and "Who is it for", see the [Overview](index.md). This page covers
 more specific questions.
 
 ## How do I use ProteoBench?
@@ -19,7 +19,7 @@ Depending on your goal:
 
 ## My upload fails
 
-Check if you have the correct file uploaded.
+Check if you have the correct file uploaded. If the problem persists, please [open a GitHub issue](https://github.com/Proteobench/ProteoBench/issues) including the error message and if possible, the first few rows of the uploaded file.
 
 ## Do I need to run my workflow on a predefined dataset?
 

@@ -9,7 +9,12 @@ import proteobench.io.params.peaks as peaks_params
 TESTDATA_DIR = Path(__file__).parent / "params"
 
 
-fnames = ["PEAKS_parameters.txt", "PEAKS_parameters_DDA.txt"]
+fnames = [
+    "PEAKS_parameters.txt",
+    "PEAKS_parameters_DDA.txt",
+    "PEAKS_parameters_project_135.txt",
+    "PEAKS_parameters_project_astral_proteinFDR.txt",
+]
 
 fnames = [TESTDATA_DIR / f for f in fnames]
 

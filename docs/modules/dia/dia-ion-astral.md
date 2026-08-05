@@ -149,6 +149,10 @@ Upload `evidence.txt` for scoring and `mqpar.xml` for public submission.
 Rename samples (Sample 1→6) to match the raw file names exactly:
 `LFQ_Astral_DIA_15min_50ng_Condition_A_REP1`–`REP3`, `..._Condition_B_REP1`–`REP3`.
 
+ProteoBench automatically corrects small naming differences (case, spacing, minor typos) in PEAKS
+sample names, but anything it can't confidently resolve will still fail with a message telling you
+which name(s) didn't match. Exact names are still the safest bet.
+
 Set Enzyme = trypsin, Instrument = Orbitrap (Astral), Fragment = HCD, Acquisition = DIA. In the
 workflow, use the Quantification option; define search parameters in "DB search". In
 "Quantification" use "Label Free" (individually or grouped by condition); in "Report" set both

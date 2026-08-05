@@ -143,6 +143,10 @@ Upload `evidence.txt` for scoring and `mqpar.xml` for public submission.
 Rename samples to match the raw file names exactly (`LFQ_ttSCP_diaPASEF_Condition_A_Sample_Alpha_01`
 … `_03`, and the equivalent for condition B).
 
+ProteoBench automatically corrects small naming differences (case, spacing, minor typos) in PEAKS
+sample names, but anything it can't confidently resolve will still fail with a message telling you
+which name(s) didn't match. Exact names are still the safest bet.
+
 Set Enzyme = trypsin, Instrument = timsTOF, Fragment = CID, Acquisition = DIA. In the workflow, use
 the Quantification option; define search parameters in "DB search". In "Quantification" use "Label
 Free" (individually or grouped by condition); in "Report", set both Precursor and Peptide FDR to 1%.

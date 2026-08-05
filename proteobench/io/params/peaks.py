@@ -18,6 +18,29 @@ MODIFICATION_MAPPING = {
     "Acetylation (Protein N-term) (+42.01)": "Protein N-term[Acetylation]",
 }
 
+# Some PEAKS export layouts omit the mass annotation from modification names
+# (e.g. "Carbamidomethylation" instead of "Carbamidomethylation (+57.02)").
+MODIFICATION_MAPPING_NO_MASS = {re.sub(r"\s*\(\+[\d.]+\)$", "", k): v for k, v in MODIFICATION_MAPPING.items()}
+
+
+def map_modification(mod: str) -> str:
+    """
+    Map a PEAKS modification name to its ProForma notation, with or without a mass annotation.
+
+    Parameters
+    ----------
+    mod : str
+        The modification name as reported by PEAKS.
+
+    Returns
+    -------
+    str
+        The mapped ProForma modification, or the original name if unmapped.
+    """
+    if mod in MODIFICATION_MAPPING:
+        return MODIFICATION_MAPPING[mod]
+    return MODIFICATION_MAPPING_NO_MASS.get(mod, mod)
+
 
 def clean_text(text: str) -> str:
     """
@@ -60,6 +83,32 @@ def extract_value(lines: List[str], search_term: str) -> Optional[str]:
     return None
 
 
+def _homogenize_tolerance(value: Optional[str]) -> Optional[str]:
+    """
+    Homogenize a PEAKS tolerance value to a symmetric range string.
+
+    Parameters
+    ----------
+    value : Optional[str]
+        A tolerance value such as "3.00PPM" or "0.02Da". Non-numeric values
+        (e.g. "Auto Detected") are returned unchanged.
+
+    Returns
+    -------
+    Optional[str]
+        Format: "[-X unit, X unit]" where X is the tolerance value and unit
+        is either "ppm" or "Da", or the original value if it isn't numeric.
+    """
+    if not value:
+        return value
+    match = re.fullmatch(r"([\d.]+)\s*(ppm|da)", value, re.IGNORECASE)
+    if not match:
+        return value
+    tolerance_value, tolerance_unit = match.groups()
+    unit_homogenized = "ppm" if tolerance_unit.lower() == "ppm" else "Da"
+    return f"[-{tolerance_value} {unit_homogenized}, {tolerance_value} {unit_homogenized}]"
+
+
 def extract_mass_tolerance(lines: List[str], search_term: str) -> Optional[str]:
     """
     Extract the mass tolerance value associated with a search term, with special handling for "System Default".
@@ -74,11 +123,12 @@ def extract_mass_tolerance(lines: List[str], search_term: str) -> Optional[str]:
     Returns
     -------
     Optional[str]
-        The extracted mass tolerance value, or None if the search term is not found.
+        The extracted mass tolerance value, homogenized to "[-X unit, X unit]", or None if the search term is
+        not found.
     """
     value = next((clean_text(line.split(search_term)[1]) for line in lines if search_term in line), None)
-    value = "40 ppm" if value == "System Default" else value
-    return value
+    value = "40ppm" if value == "System Default" else value
+    return _homogenize_tolerance(value)
 
 
 def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
@@ -188,10 +238,14 @@ def extract_params(
 
     psm_fdr = extract_value(lines, "Precursor FDR:")
 
-    # Its either "Precursor FDR:" (DIA) or "PSM FDR:" (DDA)
+    # Its either "Precursor FDR:" (DIA), "PSM FDR:" (DDA), or "Precursor FDR(%):" (newer versions)
     if not psm_fdr:
         psm_fdr = extract_value(lines, "PSM FDR:")
+    if not psm_fdr:
+        psm_fdr = extract_value(lines, "Precursor FDR(%):")
     peptide_fdr = extract_value(lines, "Peptide FDR:")
+    if not peptide_fdr:
+        peptide_fdr = extract_value(lines, "Peptide FDR(%):")
 
     if psm_fdr:
         psm_fdr = psm_fdr.replace("%", "").strip()
@@ -200,8 +254,12 @@ def extract_params(
 
     params.ident_fdr_peptide = peptide_fdr
     params.ident_fdr_psm = psm_fdr
-    # peaks uses  Proteins -10LgP >= 15.0  instead of FDR
+    # Older exports use  Proteins -10LgP >= 15.0  instead of FDR
     protein_fdr = extract_value(lines, "Protein Group FDR:")
+    if not protein_fdr:
+        # Newer versions: "Protein FDR(%): 1.00" under "Protein Filter:" (distinct from the
+        # achieved "Proteins FDR(%):" reported under a second "Protein Filter:" block)
+        protein_fdr = extract_value(lines, "Protein FDR(%):")
     if protein_fdr:
         protein_fdr = protein_fdr.replace("%", "").strip()
     params.ident_fdr_protein = protein_fdr
@@ -210,24 +268,52 @@ def extract_params(
     params.fragment_mass_tolerance = extract_mass_tolerance(lines, "Fragment Mass Error Tolerance:")
     params.enzyme = extract_value(lines, "Enzyme:")
     params.semi_enzymatic = extract_value(lines, "Digest Mode:") != "Specific"
-    params.allowed_miscleavages = int(extract_value(lines, "Max Missed Cleavage:"))
+
+    # "Max Missed Cleavage:" in most exports, "Missed Cleavage:" in the newer versions
+    miscleavages = extract_value(lines, "Max Missed Cleavage:")
+    if not miscleavages:
+        miscleavages = extract_value(lines, "Missed Cleavage:")
+    params.allowed_miscleavages = int(miscleavages)
+
     try:
         peptide_length_range = extract_value(lines, "Peptide Length between:").split(",")
     except AttributeError:
-        peptide_length_range = extract_value(lines, "Peptide Length Range:").split(" - ")
+        try:
+            peptide_length_range = extract_value(lines, "Peptide Length Range:").split(" - ")
+        except AttributeError:
+            # Newer versions: "Peptide Length: 6 to 30"
+            peptide_length_range = extract_value(lines, "Peptide Length:").split(" to ")
     params.max_peptide_length = int(peptide_length_range[1])
     params.min_peptide_length = int(peptide_length_range[0])
     fixed = get_items_between(lines, "Fixed Modifications:", "Variable Modifications:", only_last=True)
-    params.fixed_mods = ", ".join(MODIFICATION_MAPPING.get(m, m) for m in fixed)
+    params.fixed_mods = ", ".join(map_modification(m) for m in fixed)
     varmods = get_items_between(lines, "Variable Modifications:", "Database:", only_last=True)
-    params.variable_mods = ", ".join(MODIFICATION_MAPPING.get(m, m) for m in varmods)
-    params.max_mods = int(extract_value(lines, "Max Variable PTM per Peptide:"))
+    params.variable_mods = ", ".join(map_modification(m) for m in varmods)
+
+    # "Max Variable PTM per Peptide:" in most exports, "Max Variable PTM Per Peptide:" in the newer versions
+    max_mods = extract_value(lines, "Max Variable PTM per Peptide:")
+    if not max_mods:
+        max_mods = extract_value(lines, "Max Variable PTM Per Peptide:")
+    params.max_mods = int(max_mods)
+
     try:
         precursor_charge_between = extract_value(lines, "Precursor Charge between:").split(",")
     except AttributeError:
-        precursor_charge_between = (
-            extract_value(lines, "Charge between:").replace("[", "").replace("]", "").split(" - ")
-        )
+        try:
+            precursor_charge_between = (
+                extract_value(lines, "Charge between:").replace("[", "").replace("]", "").split(" - ")
+            )
+        except AttributeError:
+            # Newer versions: charge range embedded in "Peptide Feature: ... 1<=charge<=5 ..."
+            charge_match = next(
+                (
+                    m
+                    for m in (re.search(r"(\d+)\s*<=\s*charge\s*<=\s*(\d+)", line, re.IGNORECASE) for line in lines)
+                    if m
+                ),
+                None,
+            )
+            precursor_charge_between = charge_match.groups() if charge_match else (None, None)
     params.min_precursor_charge = int(precursor_charge_between[0])
     params.max_precursor_charge = int(precursor_charge_between[1])
 
@@ -246,12 +332,15 @@ def extract_params(
 
     params.scan_window = None
 
-    params.quantification_method = extract_value(
-        lines, "LFQ Method:"
-    )  # "Quantity MS Level:" or "Protein LFQ Method:" or "Quantity Type:"
+    # "Q Method:" is the newer versions export's name for this field
+    params.quantification_method = extract_value(lines, "LFQ Method:")
+    if not params.quantification_method:
+        params.quantification_method = extract_value(lines, "Q Method:")
     params.protein_inference = None
     params.predictors_library = None
     params.abundance_normalization_ions = extract_value(lines, "Normalization Method:")
+    if not params.abundance_normalization_ions:
+        params.abundance_normalization_ions = extract_value(lines, "Normalization:")
     params.fill_none()
     return params
 
@@ -266,6 +355,7 @@ if __name__ == "__main__":
         "../../../test/params/PEAKS_parameters_DIA.txt",
         "../../../test/params/PEAKS_parameters_DDA_new.txt",
         "../../../test/params/PEAKS_diaPASEF.txt",
+        "../../../test/params/PEAKS_parameters_project_135.txt",
     ]
 
     for file in fnames:

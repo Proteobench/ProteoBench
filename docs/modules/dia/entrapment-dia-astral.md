@@ -1,12 +1,12 @@
 # DIA ion entrapment (Astral)
 
-{bdg-success}`alpha` {bdg-primary-line}`FDR validation` — DIA, Orbitrap Astral, global precursor-ion FDR
+{bdg-info}`beta` {bdg-primary-line}`FDR validation` — DIA, Orbitrap Astral, global precursor-ion FDR
 
 Uses entrapment peptides to assess whether the false discovery rate (FDR) reported by a DIA search
 engine is reliable. Based on the entrapment approach in
 [Wen et al., 2025](https://www.nature.com/articles/s41592-025-02719-x).
 
-```{admonition} Alpha stage
+```{admonition} Beta stage
 :class: warning
 Results and interfaces may change.
 ```
@@ -55,12 +55,15 @@ Each submission is classified as:
 - **Use the pre-digested entrapment FASTA; do not enable in-silico digestion.** The FASTA already
   contains peptide sequences, not full proteins. Enabling digestion leads to identified peptides
   without matched entrapments, which makes FDP calculation less accurate.
-- **Do not add any variable modifications.**
+- **Only methionine oxidation is supported as a variable modification.** The entrapment mapping
+  enumerates every combination of methionine oxidation and cysteine carbamidomethylation. Enabling
+  any other modification (variable, or an additional fixed modification) causes metric calculation
+  to fail with an error, because the target/entrapment pairing cannot be resolved for it.
 ```
 
 ## Dataset
 
-Three technical replicates of a human plasma digest acquired on an Orbitrap Astral in DIA mode with
+Three technical replicates of a 50ng HeLa digest acquired on an Orbitrap Astral in DIA mode with
 a 15-minute gradient. Full MS scans over m/z 380–980 at 240,000 resolution (Orbitrap); 300 windows
 of 2 Th isolating and fragmenting precursors from 380–980 m/z; 25% normalized collision energy
 (HCD); MS2 over m/z 150–2000 (Astral), 3 ms maximum injection time. Full dataset details are in
@@ -87,10 +90,17 @@ identification as a **target** or an **entrapment** hit based on the FASTA tag. 
 estimates are computed from the resulting set and compared to the reported FDR threshold (inferred
 from the output file).
 
+Precursor identifications are matched to the entrapment mapping file using their exact modified
+sequence, not the stripped peptide. The mapping file enumerates every combination of variable
+methionine oxidation and fixed cysteine carbamidomethylation, so an identification built only from
+those two modifications is paired correctly, down to the specific set of oxidized methionines. Any
+other modification present in the reported sequence is not recognized, and metric calculation fails
+with an error rather than silently ignoring it.
+
 ## Run your workflow
 
-The module currently accepts DIA-NN, FragPipe, FragPipe with DIA-NN quantification, and AlphaDIA
-output. Use the suggested parameters below for a fair comparison between tools, then follow
+The module currently accepts DIA-NN, AlphaDIA, and Spectronaut output (or a Custom tab-delimited
+format). Use the suggested parameters below for a fair comparison between tools, then follow
 [Your First Submission](../../your-first-submission/index.md) to upload, inspect, and (if you'd
 like) submit your results publicly.
 
@@ -102,7 +112,7 @@ like) submit your results publicly.
 | Spectral library | Predicted from entrapment FASTA |
 | Digestion | **None** (FASTA is pre-digested) |
 | Fixed modifications | Carbamidomethylation (C) |
-| Variable modifications | **None** |
+| Variable modifications | Methionine oxidation (M), optional. No other variable modification is supported. |
 | Precursor charge range | 1–5 |
 | Precursor m/z range | 400–1000 |
 | Fragment m/z range | 100–1800 |
@@ -114,40 +124,26 @@ like) submit your results publicly.
 | Tool | Input file | Parsed FDR column | Parameter file |
 |---|---|---|---|
 | AlphaDIA | `precursors.parquet` | qval | `log.txt` |
+| Custom | `custom_format.csv` | Q-Value | — |
 | DIA-NN | `report.tsv or report.parquet` | Lib.Q.Value | `report.log.txt` |
-| FragPipe | `ion.tsv` | Qvalue | `fragpipe.workflow` |
-| FragPipe (DIA-NN quant) | `report.tsv or report.parquet` | Q.Value | `fragpipe.workflow` |
+| Spectronaut | `*.tsv` | EG.LibraryQvalue | `ExperimentSetupOverview.txt` |
+
+```{note}
+FragPipe (native search) is not currently supported: its decoy generation is not compatible with
+the pre-digested entrapment FASTA (see
+[this FragPipe issue](https://github.com/Nesvilab/FragPipe/issues/2847)).
+```
 
 :::{dropdown} DIA-NN
 1. Import the raw `.raw` files.
 2. Add the entrapment FASTA. Do not enable "Contaminants" (already included).
 3. **Disable in-silico digestion** — use `--cut ` in additional parameters, since the FASTA is
    pre-digested.
-4. Enable library-free search / FASTA-based library generation.
-5. Do not set verbosity/log level above 1, or parameter parsing will fail.
-6. Upload `report.tsv` or `report.parquet` for scoring and `report.log.txt` for public submission.
-:::
-
-:::{dropdown} FragPipe with DIA-NN quantification
-Submitted as **FragPipe (DIA-NN quant)**. ProteoBench parses precursor identifications from the
-DIA-NN-style report and workflow metadata from the FragPipe `.workflow` file.
-
-1. Use the entrapment FASTA as the sequence database; do not add a second contaminant database.
-2. Configure the search without enzymatic digestion throughout the FragPipe/DIA-NN workflow.
-   MSFragger Protein Digestion settings:
-
-   ```
-   Load Rules:    nocleavage
-   Cuts 1:        @
-   No cuts 1:     @
-   ```
-
-   Via the GUI: MSFragger tab → Protein Digestion → Load Rules = "nocleavage"; Cuts 1 = "@"; No
-   cuts 1 = "@".
-3. Keep variable modifications disabled; carbamidomethylation (C) may be used as the fixed
-   modification.
-4. Use the DIA-NN report generated by FragPipe (`report.tsv` or `report.parquet`) for scoring.
-5. Upload the FragPipe `.workflow` file for public submission (not the DIA-NN log).
+4. Variable modifications are limited to methionine oxidation (optional); disable all other
+   variable modifications. Carbamidomethylation (C) can be used as a fixed modification.
+5. Enable library-free search / FASTA-based library generation.
+6. Do not set verbosity/log level above 1, or parameter parsing will fail.
+7. Upload `report.tsv` or `report.parquet` for scoring and `report.log.txt` for public submission.
 :::
 
 :::{dropdown} AlphaDIA
@@ -156,9 +152,40 @@ precursor output.
 
 1. Use the entrapment FASTA and disable additional contaminants.
 2. Configure a no-enzyme / pre-digested-FASTA search: set "no-cleave" as the enzyme parameter.
-3. Keep variable modifications disabled; use carbamidomethylation (C) as the fixed modification if
-   alkylation was applied.
+3. Variable modifications are limited to methionine oxidation; keep all other variable
+   modifications disabled. Use carbamidomethylation (C) as the fixed modification if alkylation
+   was applied.
 4. Upload `precursors.parquet` for scoring and the AlphaDIA `log.txt` for public submission.
+:::
+
+:::{dropdown} Spectronaut
+1. Set up a new cleavage rule without any cleavage.
+2. Import the entrapment FASTA in the "Databases" tab (Proteins) using the UniProt parsing rule.
+3. In the "Analysis" tab, select "Set up a DirectDIA Analysis from folder" and select the folder
+   containing the raw files.
+4. Select the entrapment FASTA as the database, set Protein ID to "Accession", and use the new
+   no-cleavage rule.
+5. In the modifications tab, add carbamidomethylation as a fixed modification and/or methionine
+   oxidation as variable. No other modifications are supported.
+6. Once the search is finished, go to the "Report" tab, select "BGS Factory Report", and export
+   the report as `.tsv`.
+7. Upload the report `.tsv` for scoring and the accompanying `...Report.setup.txt` (in the same
+   folder) for public submission.
+:::
+
+:::{dropdown} Custom format
+If your tool isn't listed above, upload a tab-delimited table with:
+
+- `Peptide` — stripped peptide sequence (no modifications)
+- `Sequence` — modified peptide sequence, already in
+  [ProForma](https://www.psidev.info/proforma)-style bracket notation (e.g. `M[Oxidation]`,
+  `C[Carbamidomethyl]`); no further conversion is applied, so other notations (e.g. `M(UniMod:35)`)
+  are not recognized
+- `Charge` — precursor charge
+- `Q-Value` — global precursor-level FDR value
+
+Example file:
+[`custom_format_entrapment.csv`](https://github.com/Proteobench/ProteoBench/blob/main/test/data/entrapment/custom_format_entrapment.csv).
 :::
 
 ## Result columns

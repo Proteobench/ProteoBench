@@ -148,6 +148,10 @@ Rename samples (Sample 1→6) to match the `.wiff` file names exactly:
 `LFQ_ZenoTOF8600_ZenoSWATH_85VW_15min_Nano_50ng_Condition_A_REP1`–`REP3`,
 `..._Condition_B_REP1`–`REP3`.
 
+ProteoBench automatically corrects small naming differences (case, spacing, minor typos) in PEAKS
+sample names, but anything it can't confidently resolve will still fail with a message telling you
+which name(s) didn't match. Exact names are still the safest bet.
+
 Set Enzyme = trypsin, Instrument = ZenoTOF, Fragment = CID, Acquisition = DIA. In the workflow, use
 the Quantification option; define search parameters in "DB search". In "Quantification" use "Label
 Free" (individually or grouped by condition); in "Report" set both Precursor/Peptide FDR and

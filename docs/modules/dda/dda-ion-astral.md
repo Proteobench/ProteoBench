@@ -85,7 +85,7 @@ is where you upload results and, later, submit them for public review.
 | MetaMorpheus | `AllQuantifiedPeaks.tsv` | `search_task_config.toml + version_result.txt` |
 | PEAKS | `lfq.features.csv` | `*.txt` |
 | ProlineStudio | `*.xlsx` | `*.xlsx` |
-| Sage | `*.sage.tsv` | `*.json` |
+| Sage | `lfq.tsv` | `*.json` |
 | WOMBAT | `*.csv` | `config.yaml` |
 | i2MassChroQ | `*.tsv` | `*.tsv` |
 | quantms | `*.csv` | `*.json` |

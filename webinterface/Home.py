@@ -24,7 +24,11 @@ from UI_utils import (
 
 _MODULE_CARD_ICON = "../img/icons/module.svg"
 _MODULE_CARD_FALLBACK_DESCRIPTION = "Benchmark this workflow and compare your results with the community."
-_MODULE_CARD_IMAGE_HEIGHT = 230
+# Graphical abstracts are already tightly cropped to their content (no baked-in margin) and
+# range from ~2.8:1 to ~4.1:1. This matches the median/mean aspect ratio across the current
+# set, so most abstracts render with little to no letterboxing at a fixed height; only the
+# squarer ones (e.g. the LFQ quant overview) show a small side margin instead of being cropped.
+_MODULE_CARD_IMAGE_ASPECT_RATIO = 3.5
 
 _ABSTRACT_DIR = "../img/module_graphical_abstracts"
 _GRAPHICAL_ABSTRACT_DISCLAIMER = (
@@ -186,7 +190,7 @@ class StreamlitPageHome(StreamlitPage):
             }}
             .st-key-tour_module_grid [data-testid="stImage"] {{
                 width: 100%;
-                height: {_MODULE_CARD_IMAGE_HEIGHT}px;
+                aspect-ratio: {_MODULE_CARD_IMAGE_ASPECT_RATIO};
                 overflow: hidden;
                 display: flex;
                 align-items: center;
@@ -194,15 +198,38 @@ class StreamlitPageHome(StreamlitPage):
             }}
             .st-key-tour_module_grid [data-testid="stImageContainer"] {{
                 width: 100%;
-                height: {_MODULE_CARD_IMAGE_HEIGHT}px;
+                height: 100%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }}
             .st-key-tour_module_grid [data-testid="stImage"] img {{
                 width: 100% !important;
-                height: {_MODULE_CARD_IMAGE_HEIGHT}px !important;
+                height: 100% !important;
                 object-fit: contain;
+            }}
+            /* Make the whole card clickable: stretch the page_link's anchor over
+               the entire card via ::after, anchored to the card container (the
+               nearest positioned ancestor) rather than the anchor itself, so the
+               visible title/icon stay in their normal spot. Streamlit gives the
+               page_link's own .stElementContainer `position: relative` by default,
+               which would otherwise "steal" the containing block and shrink the
+               overlay back down to just that element - override it back to static. */
+            .st-key-tour_module_grid [class*="st-key-module_card_"] {{
+                position: relative;
+            }}
+            .st-key-tour_module_grid [class*="st-key-module_card_"] .stElementContainer:has([data-testid="stPageLink"]) {{
+                position: static !important;
+            }}
+            .st-key-tour_module_grid [class*="st-key-module_card_"] [data-testid="stPageLink"] a {{
+                position: static !important;
+            }}
+            .st-key-tour_module_grid [class*="st-key-module_card_"] [data-testid="stPageLink"] a::after {{
+                content: "";
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+                cursor: pointer;
             }}
             </style>
             """,
@@ -277,39 +304,74 @@ class StreamlitPageHome(StreamlitPage):
                 "Active modules",
                 get_n_modules(),
                 "Modules with a public benchmark you can explore or submit to today.",
+                "https://proteobench.readthedocs.io/en/stable/available-modules/",
             ),
             (
                 f"{_ICON_DIR}/module-construction.svg",
                 "In development",
                 get_n_modules_proposed(),
                 "Modules currently in discussion or under active development.",
+                "https://github.com/orgs/Proteobench/discussions",
             ),
             (
                 f"{_ICON_DIR}/workflow-run.svg",
                 "Supported workflows",
                 get_n_supported_tools(),
                 "Software tools with parameter parsing support in ProteoBench.",
+                "https://proteobench.readthedocs.io/en/stable/available-modules/"
+                "12-parsed-parameters-for-public-submission/",
             ),
             (
                 f"{_ICON_DIR}/scatter-plot.svg",
                 "Submitted points",
                 get_n_submitted_points(),
                 "Public benchmark runs submitted by the community so far.",
+                "https://proteobench.cubimed.rub.de/datasets/",
             ),
             (
                 f"{_ICON_DIR}/user.svg",
                 "Monthly visits",
                 self._get_monthly_visits(),
                 "Visits to the ProteoBench web server over the last 30 days.",
+                None,
             ),
         ]
+        # Same "stretch an overlay anchor over the whole card" trick used for the
+        # module quicklinks above, adapted to a plain <a> (these are external
+        # links, not st.page_link targets).
+        st.markdown(
+            """
+            <style>
+            .st-key-tour_stats_area [class*="st-key-stat_card_"] {
+                position: relative;
+            }
+            .st-key-tour_stats_area [class*="st-key-stat_card_"] .stElementContainer:has(.stat-card-link) {
+                position: static !important;
+            }
+            .st-key-tour_stats_area [class*="st-key-stat_card_"] .stat-card-link {
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+                cursor: pointer;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
         with st.container(key="tour_stats_area"):
             st.subheader("Platform at a glance", anchor=False)
             with st.container(horizontal=True):
-                for icon, title, value, help_text in stats:
-                    with st.container(border=True):
+                for icon, title, value, help_text, url in stats:
+                    slug = title.lower().replace(" ", "_")
+                    with st.container(border=True, key=f"stat_card_{slug}"):
                         st.image(icon, width=48)
                         st.metric(title, value, help=help_text)
+                        if url:
+                            st.markdown(
+                                f'<a class="stat-card-link" href="{url}" target="_blank" '
+                                f'rel="noopener noreferrer" aria-label="{title}"></a>',
+                                unsafe_allow_html=True,
+                            )
 
     @staticmethod
     def _render_submissions_chart():

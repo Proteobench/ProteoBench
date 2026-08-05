@@ -145,17 +145,31 @@ class EntrapmentModule:
         Filter unmapped peptides, assign target/entrapment labels, and merge pair index.
 
         Reads ``self.mapping_file`` (TSV with ``sequence``, ``peptide_pair_index``,
-        and ``peptide_type`` columns).  Peptides absent from the mapping are removed;
-        if more than ``max_missing_fraction`` of unique peptides are absent an
-        ``EntrapmentError`` is raised.  The caller receives a DataFrame with two extra
-        columns: ``"Target or Entrapment"`` (from ``peptide_type``) and
-        ``"peptide_pair_index"``.
+        and ``peptide_type`` columns). The mapping file may contain both bare peptide
+        stems and modification-specific variants (methionine oxidation and/or cysteine
+        carbamidomethylation, in any combination) that share their stem's identity but
+        have their own ``sequence`` and ``peptide_pair_index`` values. Peptides absent
+        from the mapping are removed; if more than ``max_missing_fraction`` of unique
+        peptides are absent an ``EntrapmentError`` is raised.  The caller receives a
+        DataFrame with two extra columns: ``"Target or Entrapment"`` (from
+        ``peptide_type``) and ``"peptide_pair_index"``.
+
+        Matching is done exactly against the modified ``"Sequence"`` column - there is
+        no fallback to the stripped ``"Peptide"`` stem. ``"Sequence"`` is expected to
+        already be standardized to ProForma-style bracket notation (e.g.
+        ``"M[Oxidation]"``, ``"C[Carbamidomethyl]"``) by the parser's
+        ``[modifications_parser]`` step (see ``ParseSettingsEntrapment._process_modifications``),
+        which normalizes each tool's native notation (e.g. DIA-NN's ``"M(UniMod:35)"``)
+        to that common form. Any modification other than methionine oxidation
+        (``Oxidation``) and/or cysteine carbamidomethylation (``Carbamidomethyl``) is
+        therefore not supported and raises an ``EntrapmentError`` up front, rather than
+        silently collapsing to a mod-agnostic stem match.
 
         Parameters
         ----------
         standard_format : pd.DataFrame
             Standardised input DataFrame (output of ``convert_to_standard_format``).
-            Must contain a ``"Peptide"`` column.
+            Must contain ``"Peptide"`` and ``"Sequence"`` columns.
         max_missing_fraction : float
             Maximum tolerated fraction of unmatched peptides. Defaults to 0.03.
 
@@ -167,11 +181,27 @@ class EntrapmentModule:
         Raises
         ------
         EntrapmentError
-            If the fraction of unmatched peptides exceeds ``max_missing_fraction``.
+            If the fraction of unmatched peptides exceeds ``max_missing_fraction``, if
+            any identified sequence carries a modification other than methionine
+            oxidation or cysteine carbamidomethylation, or if a sequence built only from
+            those two modifications is still absent from the mapping file.
         """
+        import re
+
         from proteobench.exceptions import EntrapmentError
 
+        allowed_modifications = {"carbamidomethyl", "oxidation"}
+        modification_pattern = re.compile(r"\[([^\[\]]*)\]")
+
+        def unsupported_modifications(sequence: str) -> List[str]:
+            return [
+                mod
+                for mod in modification_pattern.findall(sequence)
+                if mod.strip().lower() not in allowed_modifications
+            ]
+
         mapping_df = pd.read_csv(self.mapping_file, sep="\t", index_col=False)
+        mapping_df = mapping_df.drop_duplicates(subset=["sequence"], keep="first")
         all_peptides = set(standard_format["Peptide"])
         missing_peptides = all_peptides - set(mapping_df["sequence"])
         missing_fraction = len(missing_peptides) / len(all_peptides) if all_peptides else 0.0
@@ -195,12 +225,47 @@ class EntrapmentModule:
         if missing_peptides:
             df = df[~df["Peptide"].isin(missing_peptides)].reset_index(drop=True)
 
+        sequences_with_unsupported_mods = {
+            sequence: mods
+            for sequence in df["Sequence"].unique()
+            for mods in (unsupported_modifications(sequence),)
+            if mods
+        }
+        if sequences_with_unsupported_mods:
+            n_bad = len(sequences_with_unsupported_mods)
+            examples = ", ".join(
+                f"{seq} ({'/'.join(mods)})" for seq, mods in list(sequences_with_unsupported_mods.items())[:5]
+            )
+            raise EntrapmentError(
+                f"{n_bad} identified sequence(s) carry a modification other than methionine oxidation "
+                f"(Oxidation) and/or cysteine carbamidomethylation (Carbamidomethyl). The entrapment mapping "
+                f"file only supports those two modifications.\n\n"
+                f"First {min(5, n_bad)} examples: {examples}"
+            )
+
+        mapping_cols = mapping_df[["sequence", "peptide_pair_index", "peptide_type"]]
+
         df = df.merge(
-            mapping_df[["sequence", "peptide_pair_index", "peptide_type"]],
+            mapping_cols.rename(columns={"sequence": "_mapped_sequence"}),
             how="left",
-            left_on="Peptide",
-            right_on="sequence",
-        ).drop(columns=["sequence"])
+            left_on="Sequence",
+            right_on="_mapped_sequence",
+        ).drop(columns=["_mapped_sequence"])
+
+        unmatched = df["peptide_pair_index"].isna()
+        if unmatched.any():
+            n_unmatched = int(unmatched.sum())
+            examples = ", ".join(sorted(df.loc[unmatched, "Sequence"].unique())[:5])
+            raise EntrapmentError(
+                f"{n_unmatched} identified sequence(s) use only methionine oxidation and/or cysteine "
+                f"carbamidomethylation, but their exact modified form is absent from the entrapment "
+                f"mapping file. This should not happen and likely indicates a gap in the mapping file "
+                f"generation; please report this as a bug.\n\n"
+                f"First {min(5, n_unmatched)} examples: {examples}"
+            )
+
+        df["peptide_pair_index"] = df["peptide_pair_index"].astype("Int64")
+
         df["Target or Entrapment"] = df["peptide_type"].replace("p_target", "entrapment")
         df = df.drop(columns=["peptide_type"])
 

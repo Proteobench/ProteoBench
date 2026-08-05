@@ -9,6 +9,7 @@ import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
 from pages.base_pages.quant import QuantUIObjects
+from pages.base_pages.utils.metrics_help import context_for_tab_method, render_metrics_help
 from pages.pages_variables.Quant.lfq_DIA_ion_Plasma_variables import (
     VariablesDIAQuantPlasma,
 )
@@ -53,10 +54,17 @@ class StreamlitUI:
 
         self._main_page()
 
-    def _render_header(self) -> None:
-        """Render the shared title, documentation link, download link, and status warning banner."""
+    def _render_header(self, method_name: str = None) -> None:
+        """Render the shared title, documentation link, download link, and status warning banner.
+
+        Parameters
+        ----------
+        method_name : str, optional
+            Name of the UIObjects method rendering this tab. It selects which metrics explanation
+            the popover shows, because the in-depth tab does not display the main plot.
+        """
         st.title(self.variables_dia_quant.title)
-        doc_col, download_col = st.columns(2)
+        doc_col, download_col, metrics_col = st.columns(3)
         with doc_col:
             st.link_button(
                 "Module documentation",
@@ -73,7 +81,13 @@ class StreamlitUI:
                 icon="⬇️",
                 help="Download the raw input files used to benchmark this module",
             )
+
+        with metrics_col:
+            render_metrics_help(
+                self.ionmodule, self.variables_dia_quant, context=context_for_tab_method(method_name)
+            )
         display_banner(self.variables_dia_quant)
+
 
     def _main_page(self) -> None:
         """
@@ -98,28 +112,28 @@ class StreamlitUI:
 
         # Tab 1: View Public Results
         with tab_results_all:
-            self._render_header()
+            self._render_header(method_name="display_all_data_results_main")
             self.quant_uiobjects.display_all_data_results_main()
 
         # Tab 2: Upload New Results (Private)
         with tab_submission_details:
-            self._render_header()
+            self._render_header(method_name="display_submission_form")
             self.quant_uiobjects.display_submission_form()
 
         # Tab 3: View Single Result
         with tab_indepth_plots:
-            self._render_header()
+            self._render_header(method_name="display_indepth_plots")
 
             self.quant_uiobjects.display_indepth_plots()
 
         # Tab 4: View Public + New Results
         with tab_results_new:
-            self._render_header()
+            self._render_header(method_name="display_all_data_results_submitted")
             self.quant_uiobjects.display_all_data_results_submitted()
 
         # Tab 5: Submit New Results
         with tab_public_submission:
-            self._render_header()
+            self._render_header(method_name="display_public_submission_ui")
             self.quant_uiobjects.display_public_submission_ui()
 
 

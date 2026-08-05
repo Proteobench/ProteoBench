@@ -90,6 +90,14 @@ identification as a **target** or an **entrapment** hit based on the FASTA tag. 
 estimates are computed from the resulting set and compared to the reported FDR threshold (inferred
 from the output file).
 
+```{note}
+`reported_fdr_parsed_from_input` (used for this comparison) is not always the same value as
+`ident_fdr_psm` (the FDR setting extracted from the parameter/log file for public submission).
+`reported_fdr_parsed_from_input` is computed as the maximum Q-value actually present among the
+rows in the uploaded result file, so it reflects what the file contains rather than what was
+configured. 
+```
+
 Precursor identifications are matched to the entrapment mapping file using their exact modified
 sequence, not the stripped peptide. The mapping file enumerates every combination of variable
 methionine oxidation and fixed cysteine carbamidomethylation, so an identification built only from

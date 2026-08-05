@@ -11,6 +11,7 @@ Every module page includes:
 
 - links to the raw data and (where relevant) the sequence database
 - which output files to upload, and any tool-specific setup required
+- a description of the custom format columns
 - suggested search parameters (a starting point — you don't have to match them exactly)
 - what the module is meant to measure, and how the metric is calculated
 - how to read the results

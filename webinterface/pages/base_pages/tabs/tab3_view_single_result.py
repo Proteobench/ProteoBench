@@ -9,6 +9,7 @@ import glob
 import logging
 import os
 import subprocess
+import textwrap
 import uuid
 import zipfile
 from datetime import datetime
@@ -161,6 +162,44 @@ def load_public_performance_data(public_hash: str) -> Optional[pd.DataFrame]:
         return None
 
 
+#: Rough characters-per-line at typical viewport widths, keyed by number of columns in the row.
+#: Used only to estimate wrapped-line counts so title/description blocks can be padded to equal
+#: height; not a pixel-exact layout measurement.
+_HEADER_CHARS_PER_LINE = {1: 100, 2: 55, 3: 38, 4: 28}
+_TITLE_LINE_HEIGHT_PX = 32
+_DESC_LINE_HEIGHT_PX = 24
+_CAPTION_HEIGHT_PX = 20
+
+
+def _estimate_header_block_height(title: str, description: str, has_caption: bool, columns: int) -> int:
+    """
+    Estimate the rendered pixel height of a plot's subheader/description/caption block.
+
+    Parameters
+    ----------
+    title : str
+        The subheader text shown above the plot.
+    description : str
+        The description text shown below the subheader.
+    has_caption : bool
+        Whether a "Data source" caption is also rendered.
+    columns : int
+        Number of columns in the row, used to approximate wrapped-line counts.
+
+    Returns
+    -------
+    int
+        Estimated height in pixels.
+    """
+    chars_per_line = _HEADER_CHARS_PER_LINE.get(columns, 28)
+    title_lines = len(textwrap.wrap(title, width=chars_per_line)) if title else 0
+    desc_lines = len(textwrap.wrap(description, width=chars_per_line)) if description else 0
+    height = title_lines * _TITLE_LINE_HEIGHT_PX + desc_lines * _DESC_LINE_HEIGHT_PX
+    if has_caption:
+        height += _CAPTION_HEIGHT_PX
+    return height
+
+
 def display_plots_with_layout(plots: dict, plot_generator, variables, public_id: str) -> None:
     """
     Display plots using the module's layout configuration.
@@ -187,6 +226,20 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
         # Create columns based on section configuration
         cols = st.columns(section["columns"])
 
+        # Estimate each plot's title/description block height so plots in the same row start
+        # at the same vertical offset, regardless of description length.
+        block_heights = {}
+        for plot_name in section["plots"]:
+            if plot_name not in plots:
+                continue
+            title = section.get("titles", {}).get(plot_name) or (
+                descriptions[plot_name].split(".")[0] if plot_name in descriptions else ""
+            )
+            block_heights[plot_name] = _estimate_header_block_height(
+                title, descriptions.get(plot_name, ""), has_caption=bool(public_id), columns=section["columns"]
+            )
+        row_height = max(block_heights.values(), default=0)
+
         # Display plots in columns
         for i, plot_name in enumerate(section["plots"]):
             if plot_name not in plots:
@@ -209,6 +262,11 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
                     st.markdown(f"{desc}")
                     if public_id:
                         st.caption(f"Data source: {public_id}")
+
+                # Pad shorter blocks so the plot below starts at the same height as its row siblings
+                gap = row_height - block_heights.get(plot_name, 0)
+                if gap > 0:
+                    st.markdown(f"<div style='height:{gap}px'></div>", unsafe_allow_html=True)
 
                 # Display plot
                 st.plotly_chart(plots[plot_name])

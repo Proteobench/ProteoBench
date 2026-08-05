@@ -71,6 +71,16 @@ Available ProteoBench modules
         +++
         `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-diapasef/>`__
 
+    .. grid-item-card:: Quant LFQ DIA ion Plasma
+        :columns: 6 6 4 4
+        :padding: 1
+
+        :bdg-success:`active`
+        ^^^
+        Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample aquired on a timsTOF.
+        +++
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/>`__
+
     .. grid-item-card:: Quant LFQ DIA ion ZenoTOF
         :columns: 6 6 4 4
         :padding: 1
@@ -100,16 +110,6 @@ Available ProteoBench modules
         Benchmark identification and quantification workflows for low-input proteomics (close to single cell level) using DIA acquisitions.
         +++
         `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-lowinput/>`__
-
-    .. grid-item-card:: Quant LFQ DIA ion Plasma
-        :columns: 6 6 4 4
-        :padding: 1
-
-        :bdg-info:`in development`
-        ^^^
-        Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample aquired on a timsTOF.
-        +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion AIF
         :columns: 6 6 4 4

@@ -214,7 +214,7 @@ Parameters for public submission are parsed from `versions.yml` and the `pipelin
 If your tool isn't listed above, upload a tab-delimited table with:
 
 - `Sequence` — unmodified peptide sequence
-- `Modified sequence` — sequence with localized modifications, ideally
+- `Modified sequence` — sequence with localized modifications, in
   [ProForma](https://www.psidev.info/proforma)
 - `Proteins` — `;`-separated identifiers, including the species flag (e.g. `_YEAST`)
 - `Charge` — precursor charge

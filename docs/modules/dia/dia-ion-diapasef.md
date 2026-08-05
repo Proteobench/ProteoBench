@@ -156,7 +156,7 @@ If your tool isn't listed above, upload a tab-delimited table with:
 - `Sequence` — unmodified peptide sequence
 - `Proteins` — `;`-separated identifiers, including the species flag (e.g. `_YEAST`)
 - `Charge` — precursor charge
-- `Modified sequence` — sequence with localized modifications, ideally
+- `Modified sequence` — sequence with localized modifications, in
   [ProForma](https://www.psidev.info/proforma)
 - one quantitative column per sample:
   `ttSCP_diaPASEF_Condition_A_Sample_Alpha_01_11494` … `ttSCP_diaPASEF_Condition_B_Sample_Alpha_03_11508`

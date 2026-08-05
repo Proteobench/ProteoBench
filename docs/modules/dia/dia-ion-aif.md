@@ -161,7 +161,7 @@ The custom tab-delimited format used the following columns:
 - `Sequence` — unmodified peptide sequence
 - `Proteins` — `;`-separated identifiers, including the species flag (e.g. `_YEAST`)
 - `Charge` — precursor charge
-- `Modified sequence` — sequence with localized modifications, ideally
+- `Modified sequence` — sequence with localized modifications, in
   [ProForma](https://www.psidev.info/proforma)
 - one quantitative column per sample:
   `LFQ_Orbitrap_AIF_Condition_A_Sample_Alpha_01` … `LFQ_Orbitrap_AIF_Condition_B_Sample_Alpha_03`

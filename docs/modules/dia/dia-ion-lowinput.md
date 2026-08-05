@@ -74,7 +74,7 @@ If your tool isn't listed above, upload a tab-delimited table with:
 - `Sequence` — unmodified peptide sequence
 - `Proteins` — `;`-separated identifiers, including the species flag (e.g. `_YEAST`)
 - `Charge` — precursor charge
-- `Modified sequence` — sequence with localized modifications, ideally
+- `Modified sequence` — sequence with localized modifications, in
   [ProForma](https://www.psidev.info/proforma)
 - one quantitative column per sample:
   `20231123_DIA_240k_20Th_40ms_FAIMSCV-48_gas3p8_240pg_10pg_H_Y_r1`–`r3` (condition A),

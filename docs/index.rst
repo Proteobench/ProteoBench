@@ -54,11 +54,27 @@ ProteoBench in 5 steps
 5. **Compare your workflow run** with validated benchmark runs
 
 
-.. button-link:: https://proteobench.cubimed.rub.de/
-    :class: sd-px-4
-    :color: primary
+.. grid::
+    :gutter: 2
 
-    ProteoBench Web App :fas:`external-link-alt`
+    .. grid-item::
+
+        .. button-link:: https://proteobench.cubimed.rub.de/
+            :class: sd-px-4
+            :color: primary
+            :expand:
+
+            ProteoBench Web App :fas:`external-link-alt`
+
+    .. grid-item::
+
+        .. button-ref:: your-first-submission/index
+            :ref-type: doc
+            :class: sd-px-4
+            :color: secondary
+            :expand:
+
+            Quickstart: Your First Submission
 
 
 

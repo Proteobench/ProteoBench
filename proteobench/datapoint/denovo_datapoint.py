@@ -21,70 +21,93 @@ from proteobench.datapoint.datapoint_base import DatapointBase
 from proteobench.score.denovoscores import AMBIGUITY_COMBOS, get_ambiguity_suffix
 
 
-def calculate_prc(scores_correct, scores_all, n_spectra, threshold=None):
-    if threshold is None:
-        c = len(scores_correct)
-        ci = len(scores_all)
-    else:
-        c = sum([score > threshold for score in scores_correct])
-        ci = sum([score > threshold for score in scores_all])
-
-    u = n_spectra - ci
-
-    # precision
-    precision = c / ci
-
-    # recall (This is an alternative definition and the line will stop at x=y)
-    recall = c / n_spectra
-
-    # coverage
-    coverage = ci / n_spectra
-
-    return {"precision": precision, "recall": recall, "coverage": coverage}
-
-
-def get_prc_curve(scores_correct, scores_all, n_spectra) -> pd.DataFrame:
+def calculate_prc(scores_all, is_correct, n_spectra) -> dict:
     """
-    Sweep score thresholds and return the resulting precision-vs-coverage curve
-    (used to compute the AUC/average-precision main-plot metric).
+    Single-point precision/recall/coverage over every prediction (no score threshold).
+    """
+    is_correct = np.asarray(is_correct, dtype=bool)
+    ci = len(scores_all)
+    c = int(is_correct.sum())
+
+    return {
+        "precision": c / ci,
+        "recall": c / n_spectra,
+        "coverage": ci / n_spectra,
+    }
+
+
+def get_prc_curve(scores_all, is_correct, n_spectra) -> pd.DataFrame:
+    """
+    Full-resolution precision-vs-coverage curve, with one point per DISTINCT score value
+    rather than one per prediction. Ties are common (many tools emit coarse or repeated
+    confidence scores), and a threshold can never split a tied group -- either all of a
+    group's predictions clear it, or none do -- so the only well-defined curve vertices are
+    "coverage/precision immediately after including an entire tied-score group." Collapsing
+    to those vertices also makes the within-tie ordering irrelevant to the result (the
+    cumulative count after a full group is the same regardless of the arbitrary order ties
+    were processed in), and, as a side effect, shrinks the curve for any tool whose scores
+    are heavily quantized. Both the AUC integration and the stored/plotted curve (after
+    `downsample_curve`) are derived from this same result.
     """
     scores_all = np.asarray(scores_all, dtype=float)
-    scores_correct = np.asarray(scores_correct, dtype=float)
+    is_correct = np.asarray(is_correct, dtype=bool)
 
-    precisions, coverages = [], []
     if len(scores_all) == 0:
-        return pd.DataFrame({"precision": precisions, "coverage": coverages})
+        return pd.DataFrame({"precision": [], "coverage": []})
 
-    for threshold in np.linspace(scores_all.max(), scores_all.min()):
-        if np.isnan(threshold):
-            continue
+    order = np.argsort(-scores_all)
+    sorted_scores = scores_all[order]
+    sorted_correct = is_correct[order]
 
-        # A threshold with nothing above it (e.g. the sweep's own starting point, the max
-        # score) would divide by zero in calculate_prc's precision/coverage; skip it.
-        ci = int((scores_all > threshold).sum())
-        if ci == 0:
-            continue
+    rank = np.arange(1, len(scores_all) + 1)
+    cum_correct = np.cumsum(sorted_correct)
+    precision = cum_correct / rank
+    coverage = rank / n_spectra
 
-        prc_dict = calculate_prc(
-            scores_correct=scores_correct,
-            scores_all=scores_all,
-            n_spectra=n_spectra,
-            threshold=threshold,
-        )
-        precisions.append(prc_dict["precision"])
-        coverages.append(prc_dict["coverage"])
+    # Keep only the last (highest-rank) row of each run of equal scores -- the sole point in
+    # that run where "included" actually changes as the threshold crosses this score value.
+    is_last_in_group = np.append(sorted_scores[:-1] != sorted_scores[1:], True)
 
-    return pd.DataFrame({"precision": precisions, "coverage": coverages})
+    return pd.DataFrame({"precision": precision[is_last_in_group], "coverage": coverage[is_last_in_group]})
 
 
-def calculate_auc(scores_correct, scores_all, n_spectra) -> float:
+# Stored/plotted curves are capped at a fixed number of points, sampled at evenly-spaced
+# COVERAGE values (not evenly-spaced row positions -- ties can leave the deduplicated curve's
+# rows very unevenly spaced in coverage, e.g. one huge tied group followed by many distinct
+# scores close together, so only sampling by coverage value itself gives a genuinely even
+# spread). Capping by a fixed count, rather than a fixed stride, is what actually bounds
+# storage: a stride scales with the size of the ground truth (e.g. ~780k spectra), which is
+# exactly what made this unscalable across many tools' worth of curves loaded at once; a fixed
+# count does not, regardless of how large the dataset or how many tools are being compared.
+# AUC is always integrated over the full-resolution curve in `get_prc_curve`, before this
+# runs, so downsampling only affects how many points the plotted line has, never any metric.
+CURVE_STORAGE_MAX_POINTS = 500
+
+
+def downsample_curve(curve: pd.DataFrame, max_points: int = CURVE_STORAGE_MAX_POINTS) -> pd.DataFrame:
     """
-    Area under the precision-vs-coverage curve (average precision), reported as the
-    "AUC" main-plot metric. Returns NaN when the curve has fewer than two points (e.g.
+    Sample at most `max_points` rows of a curve at evenly-spaced coverage values, always
+    including the first and last point.
+    """
+    if len(curve) <= max_points:
+        return curve.reset_index(drop=True)
+
+    coverage = curve["coverage"].to_numpy()
+    targets = np.linspace(coverage[0], coverage[-1], max_points)
+    # For each evenly-spaced target coverage, the row that was actually "current" at that
+    # coverage level: the last row at or before it.
+    idx = np.searchsorted(coverage, targets, side="right") - 1
+    idx = np.unique(np.clip(idx, 0, len(curve) - 1))
+    return curve.iloc[idx].reset_index(drop=True)
+
+
+def calculate_auc(curve: pd.DataFrame) -> float:
+    """
+    Area under an already-computed precision-vs-coverage curve (average precision), reported
+    as the "AUC" main-plot metric. Returns NaN when the curve has fewer than two points (e.g.
     a tool whose per-token scores are all identical, which happens for tools that don't
     provide real per-residue scores and get a broadcast peptide score instead).
     """
-    curve = get_prc_curve(scores_correct, scores_all, n_spectra)
     if len(curve) < 2:
         return float("nan")
     curve = curve.sort_values("coverage")
@@ -310,15 +333,15 @@ class DenovoDatapoint(DatapointBase):
         if level == "peptide":
             n = len(df)
             df_filtered = df.dropna(subset="peptidoform")
-            scores_correct = df_filtered.loc[df_filtered[match_col].isin(evaluation_list), "score"].tolist()
             scores_all = df_filtered["score"].tolist()
+            is_correct = df_filtered[match_col].isin(evaluation_list).tolist()
 
         elif level == "aa":
             n_aa = df["aa_matches_gt"].apply(len).sum()
             df_filtered = df.dropna(subset="peptidoform")
             df_aa = collapse_aa_scores(df_filtered, evaluation_type=evaluation, exact_dn_column=exact_dn_column)
-            scores_correct = df_aa.loc[df_aa["aa_match"], "aa_score"].tolist()
             scores_all = df_aa["aa_score"].tolist()
+            is_correct = df_aa["aa_match"].tolist()
             n = n_aa
 
         else:
@@ -326,8 +349,11 @@ class DenovoDatapoint(DatapointBase):
                 "Only `aa` and `peptide` levels for accuracy calculation are supported. Should never happen."
             )
 
-        res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
-        res["auc"] = calculate_auc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n)
+        res = calculate_prc(scores_all=scores_all, is_correct=is_correct, n_spectra=n)
+        full_curve = get_prc_curve(scores_all=scores_all, is_correct=is_correct, n_spectra=n)
+        res["auc"] = calculate_auc(full_curve)
+        stored_curve = downsample_curve(full_curve)
+        res["curve"] = {"coverage": stored_curve["coverage"].tolist(), "precision": stored_curve["precision"].tolist()}
         return res
 
     def get_indepth_metrics(self, df: pd.DataFrame):

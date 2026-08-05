@@ -198,6 +198,51 @@ def display_colorblindmode_selector(variables, use_submitted: bool = False) -> s
     )
 
 
+def generate_forced_toggle(
+    toggle_id_uuid: str,
+    label: str,
+    default: bool,
+    force_value: Optional[bool] = None,
+    help: Optional[str] = None,
+) -> bool:
+    """Render a toggle widget that can be forced to a fixed value and disabled.
+
+    Parameters
+    ----------
+    toggle_id_uuid : str
+        Session-state key holding this widget's UUID (created on first use).
+    label : str
+        Widget label.
+    default : bool
+        Default (first-render) checked state.
+    force_value : Optional[bool], optional
+        If not None, the widget is shown at this value and disabled, overriding whatever
+        the user previously set -- used when the toggle is meaningless under the current
+        mode (e.g. an ambiguity toggle while Mass-based evaluation is selected).
+    help : str, optional
+        Widget help/tooltip text.
+
+    Returns
+    -------
+    bool
+        The toggle's current (possibly forced) value.
+    """
+    if toggle_id_uuid not in st.session_state.keys():
+        st.session_state[toggle_id_uuid] = uuid.uuid4()
+    widget_key = st.session_state[toggle_id_uuid]
+
+    if force_value is not None:
+        st.session_state[widget_key] = force_value
+
+    return st.toggle(
+        label,
+        value=default,
+        help=help,
+        key=widget_key,
+        disabled=force_value is not None,
+    )
+
+
 def filter_data_if_applicable(variables, ionmodule, use_slider: bool = True) -> pd.DataFrame:
     """
     Filter data using module-specific filtering logic.
@@ -353,7 +398,7 @@ def display_existing_results(
     table_style: str = "aggrid",
     column_config: Optional[Dict] = None,
     render_forest_plot=None,
-) -> None:
+) -> Optional[pd.DataFrame]:
     """
     Main orchestration function for Tab 1: plot + interactive table with bidirectional
     highlight synchronisation.
@@ -379,6 +424,13 @@ def display_existing_results(
     render_forest_plot : callable, optional
         Optional callable that renders an additional plot (e.g. a forest plot)
         between the scatter plot and the results table.
+
+    Returns
+    -------
+    Optional[pd.DataFrame]
+        The filtered dataframe used to render the plot and table (after slider/parameter
+        filtering), so a caller can reuse it for an alternative view of the same selection
+        (e.g. de novo's precision-coverage-curve tab). `None` if nothing has been rendered yet.
     """
     initialize_main_data_points(variables, ionmodule)
     filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
@@ -390,7 +442,7 @@ def display_existing_results(
 
     if filtered_data.empty:
         st.info("No results available yet.", icon="ℹ️")
-        return
+        return filtered_data
 
     # Get plot generator from module
     plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
@@ -482,3 +534,5 @@ def display_existing_results(
     # Display download section
     with st.container(key="tour_download_section"):
         display_download_section(variables)
+
+    return filtered_data

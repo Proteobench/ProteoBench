@@ -2,7 +2,7 @@
 Module for plotting results of de novo models
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -13,6 +13,39 @@ from plotly.subplots import make_subplots
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
 EPSILON = 0.0001
+
+# Main-metric-plot quadrant treatment: fixed axes (padded slightly past 0/1 so points at the
+# edges aren't clipped), a boundary at the data midpoint splitting the plot into four named
+# regions, and a continuous background gradient (not four flat quadrant colors) since "how far
+# into the corner" is itself meaningful -- a point deep in Q1 is doing better than one just
+# past the boundary, even though both are "good performance."
+MAIN_PLOT_AXIS_RANGE = [-0.05, 1.1]
+QUADRANT_BOUNDARY = 0.5
+# Precision-coverage curve view: a smaller pad than the scatter's, just enough that a curve
+# endpoint sitting exactly at 0 or 1 isn't clipped by the axis border.
+PR_CURVE_AXIS_RANGE = [-0.03, 1.03]
+# Single sequential hue, light (low) to dark blue (high) -- a magnitude encoding ("how good"),
+# not a category or polarity one, so one hue avoids both a rainbow and a red/green pair that
+# would be indistinguishable to red-green colorblind users.
+QUADRANT_COLORSCALE = [
+    [0.0, "#f4efe4"],
+    [0.35, "#cfe0e8"],
+    [0.65, "#8fb9cf"],
+    [0.85, "#4d87ac"],
+    [1.0, "#1f5678"],
+]
+QUADRANT_LABELS = {
+    "good": {"text": "<b>Good performance</b>"},
+    "near_miss": {
+        "text": "<b>Near-miss</b><br><span style='font-size:10px'>Often suggests a very similar peptide</span>"
+    },
+    "low": {"text": "<b>Low performance</b>"},
+    "alt_candidate": {
+        "text": (
+            "<b>Alternative candidate</b><br>" "<span style='font-size:10px'>(Suggests fully different peptide)</span>"
+        )
+    },
+}
 
 SOFTWARE_COLORS = {
     "AdaNovo": "#88CCEE",
@@ -46,40 +79,84 @@ SOFTWARE_MARKERS = {
 }
 
 
-def flatten_results_column(df):
-    results = {
-        "engine": [],
-        "peptide_mass_precision": [],
-        "peptide_mass_recall": [],
-        "peptide_mass_coverage": [],
-        "peptide_exact_precision": [],
-        "peptide_exact_recall": [],
-        "peptide_exact_coverage": [],
-        "aa_mass_precision": [],
-        "aa_mass_recall": [],
-        "aa_mass_coverage": [],
-        "aa_exact_precision": [],
-        "aa_exact_recall": [],
-        "aa_exact_coverage": [],
-    }
-    for i, row in df.iterrows():
+_LEVELS = ("peptide", "aa")
+_EVALUATION_TYPES = ("mass", "exact")
+_METRICS = ("precision", "recall", "coverage", "auc")
+
+
+def _get_metrics_leaf(row: pd.Series, level: str, evaluation_type: str, ambiguity_combo: Optional[str] = None) -> dict:
+    """
+    Return the `{precision, recall, coverage, auc}` dict for one level/evaluation-type,
+    optionally reading an ambiguity-toggle combination instead of the baseline.
+
+    Ambiguity combinations only exist under exact-mode matching (mass-mode metrics are
+    identical regardless, since I/L are isomeric and deamidated Q/N are isobaric with E/D
+    either way), so `ambiguity_combo` is ignored for `evaluation_type == "mass"`.
+    """
+    leaf = row["results"][level][evaluation_type]
+    if evaluation_type == "exact" and ambiguity_combo:
+        return leaf["ambiguity"][ambiguity_combo]
+    return leaf
+
+
+def datapoint_has_required_fields(
+    results_dict: dict,
+    evaluation_type: str,
+    needs_auc: bool,
+    ambiguity_combo: Optional[str],
+    needs_curve: bool = False,
+) -> bool:
+    """
+    Check whether a datapoint's `results` dict has the fields the main plot needs for the
+    currently selected evaluation type, metric (precision or AUC), and ambiguity combination.
+
+    Used to silently hide datapoints submitted before a given field existed (e.g. `auc`,
+    `curve`, or the `ambiguity` sub-dict) rather than erroring, mirroring the HYE plot
+    generator's handling of legacy datapoints missing newer metric fields.
+    """
+    try:
+        for level in _LEVELS:
+            leaf = _get_metrics_leaf({"results": results_dict}, level, evaluation_type, ambiguity_combo)
+            if needs_auc and "auc" not in leaf:
+                return False
+            if needs_curve and "curve" not in leaf:
+                return False
+    except (TypeError, KeyError):
+        return False
+    return True
+
+
+def flatten_results_column(df: pd.DataFrame, ambiguity_combo: Optional[str] = None) -> pd.DataFrame:
+    """
+    Flatten each row's nested `results` dict into flat `{level}_{evaluation_type}_{metric}`
+    columns for plotting.
+
+    Parameters
+    ----------
+    ambiguity_combo : str, optional
+        One of `"il"`, `"deam"`, `"both"` to read the corresponding exact-mode ambiguity
+        combination instead of the baseline; `None` (default) reads the baseline. Ignored
+        for mass-mode fields, which don't have ambiguity combinations (see
+        `_get_metrics_leaf`).
+    """
+    results = {"engine": []}
+    for level in _LEVELS:
+        for evaluation_type in _EVALUATION_TYPES:
+            for metric in _METRICS:
+                results[f"{level}_{evaluation_type}_{metric}"] = []
+
+    for _, row in df.iterrows():
         results["engine"].append(row["software_name"])
+        for level in _LEVELS:
+            for evaluation_type in _EVALUATION_TYPES:
+                leaf = _get_metrics_leaf(row, level, evaluation_type, ambiguity_combo)
+                for metric in _METRICS:
+                    # `.get(..., nan)`, not `[...]`: a legacy datapoint may lack "auc" even
+                    # when it's not the metric currently being plotted (datapoint_has_
+                    # required_fields already decided visibility for the active selection;
+                    # this must not crash just because it computes every column eagerly).
+                    results[f"{level}_{evaluation_type}_{metric}"].append(leaf.get(metric, float("nan")))
 
-        results["peptide_mass_precision"].append(row["results"]["peptide"]["mass"]["precision"])
-        results["peptide_mass_recall"].append(row["results"]["peptide"]["mass"]["recall"])
-        results["peptide_mass_coverage"].append(row["results"]["peptide"]["mass"]["coverage"])
-
-        results["peptide_exact_precision"].append(row["results"]["peptide"]["exact"]["precision"])
-        results["peptide_exact_recall"].append(row["results"]["peptide"]["exact"]["recall"])
-        results["peptide_exact_coverage"].append(row["results"]["peptide"]["exact"]["coverage"])
-
-        results["aa_mass_precision"].append(row["results"]["aa"]["mass"]["precision"])
-        results["aa_mass_recall"].append(row["results"]["aa"]["mass"]["recall"])
-        results["aa_mass_coverage"].append(row["results"]["aa"]["mass"]["coverage"])
-
-        results["aa_exact_precision"].append(row["results"]["aa"]["exact"]["precision"])
-        results["aa_exact_recall"].append(row["results"]["aa"]["exact"]["recall"])
-        results["aa_exact_coverage"].append(row["results"]["aa"]["exact"]["coverage"])
     return pd.DataFrame(results)
 
 
@@ -99,8 +176,11 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             DataFrame containing the results to plot.
         **kwargs : dict
             Additional parameters:
-            - level: str (default "precision") - metric type ("precision" or "recall")
+            - level: str (default "precision") - metric type ("precision" or "auc")
             - evaluation_type: str (default "mass") - evaluation type ("mass" or "exact")
+            - allow_il: bool (default True) - under exact evaluation, treat I/L as equivalent
+            - allow_deamidation: bool (default False) - under exact evaluation, treat
+              deamidated Q/N as equivalent to E/D
             - colorblind_mode: bool (default False) - whether to use different shapes for software tools
             - software_colors: Dict[str, str] - color mapping for software tools
             - software_markers: Dict[str, str] - marker mapping for software tools (used when colorblind_mode is True)
@@ -116,6 +196,8 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # Extract parameters from kwargs with defaults
         level = kwargs.get("level", "precision")
         evaluation_type = kwargs.get("evaluation_type", "mass")
+        allow_il = kwargs.get("allow_il", True)
+        allow_deamidation = kwargs.get("allow_deamidation", False)
         colorblind_mode = kwargs.get("colorblind_mode", False)
         software_colors = kwargs.get(
             "software_colors",
@@ -129,15 +211,32 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         highlight_color = kwargs.get("highlight_color", "#d30067")
         label = kwargs.get("label", "None")
 
+        # Ambiguity combinations only exist under exact-mode matching; mass-mode metrics
+        # are identical regardless (I/L are isomeric, deamidated Q/N isobaric with E/D).
+        ambiguity_combo = None
+        if evaluation_type == "exact":
+            if allow_il and allow_deamidation:
+                ambiguity_combo = "both"
+            elif allow_il:
+                ambiguity_combo = "il"
+            elif allow_deamidation:
+                ambiguity_combo = "deam"
+
         # Use result_df as the main dataframe (renamed from benchmark_metrics_df)
-        benchmark_metrics_df = result_df
+        benchmark_metrics_df = result_df.reset_index(drop=True)
+
+        # Silently hide datapoints submitted before the selected field existed (AUC, or the
+        # ambiguity combination), rather than erroring on a missing key.
+        needs_auc = level == "auc"
+        benchmark_metrics_df = benchmark_metrics_df[
+            benchmark_metrics_df["results"].apply(
+                lambda r: datapoint_has_required_fields(r, evaluation_type, needs_auc, ambiguity_combo)
+            )
+        ].reset_index(drop=True)
 
         # Define layout
-        benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
-        results_df = flatten_results_column(benchmark_metrics_df)
+        results_df = flatten_results_column(benchmark_metrics_df, ambiguity_combo=ambiguity_combo)
         benchmark_metrics_df = pd.concat([benchmark_metrics_df, results_df], axis=1)
-        results_min = results_df.min()
-        results_max = results_df.max()
 
         # Add hover text with detailed information for each data point
         hover_texts = []
@@ -212,22 +311,90 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         else:
             benchmark_metrics_df["marker"] = "circle"
 
-        layout_xaxis_range = [
-            results_min[f"peptide_{evaluation_type}_{level}"]
-            - results_min[f"peptide_{evaluation_type}_{level}"] * 0.05,
-            results_max[f"peptide_{evaluation_type}_{level}"]
-            + results_max[f"peptide_{evaluation_type}_{level}"] * 0.05,
-        ]
-        layout_yaxis_range = [
-            results_min[f"aa_{evaluation_type}_{level}"] - results_min[f"aa_{evaluation_type}_{level}"] * 0.05,
-            results_max[f"aa_{evaluation_type}_{level}"] + results_max[f"aa_{evaluation_type}_{level}"] * 0.05,
-        ]
-        layout_xaxis_title = f"Peptide {level.capitalize()}"
-        layout_yaxis_title = f"Amino Acid {level.capitalize()}"
+        # Fixed axis range (not the data's own min/max): both precision and AUC are bounded
+        # in [0, 1], so a shared, fixed range keeps the quadrant boundary and background
+        # gradient below anchored to the same meaningful midpoint every time, and padding
+        # past 0/1 (rather than clipping exactly at them) keeps points at the edges visible.
+        layout_xaxis_range = list(MAIN_PLOT_AXIS_RANGE)
+        layout_yaxis_range = list(MAIN_PLOT_AXIS_RANGE)
+        level_title = "AUC" if level == "auc" else level.capitalize()
+        layout_xaxis_title = f"Peptide {level_title}"
+        layout_yaxis_title = f"Amino Acid {level_title}"
 
         fig = go.Figure(
             layout_yaxis_range=layout_yaxis_range,
             layout_xaxis_range=layout_xaxis_range,
+        )
+
+        # Continuous background gradient, lightest at the origin and deepest at (1, 1), so
+        # "how far into the corner" reads visually even within a single quadrant. Added first
+        # so the scatter markers below are drawn on top of it, not the other way around.
+        grid_coords = np.linspace(MAIN_PLOT_AXIS_RANGE[0], MAIN_PLOT_AXIS_RANGE[1], 60)
+        grid_z = [[(x + y) / 2 for x in grid_coords] for y in grid_coords]
+        fig.add_trace(
+            go.Heatmap(
+                x=grid_coords,
+                y=grid_coords,
+                z=grid_z,
+                zmin=0,
+                zmax=1,
+                colorscale=QUADRANT_COLORSCALE,
+                showscale=False,
+                opacity=0.45,
+                hoverinfo="skip",
+            )
+        )
+
+        # Dashed boundary lines at the data midpoint, splitting the plot into the four named
+        # regions (drawn above the gradient/markers so they stay crisp at any zoom).
+        fig.add_shape(
+            type="line",
+            x0=QUADRANT_BOUNDARY,
+            x1=QUADRANT_BOUNDARY,
+            y0=MAIN_PLOT_AXIS_RANGE[0],
+            y1=MAIN_PLOT_AXIS_RANGE[1],
+            line=dict(color="rgba(90,90,90,0.6)", width=1, dash="dash"),
+            layer="above",
+        )
+        fig.add_shape(
+            type="line",
+            x0=MAIN_PLOT_AXIS_RANGE[0],
+            x1=MAIN_PLOT_AXIS_RANGE[1],
+            y0=QUADRANT_BOUNDARY,
+            y1=QUADRANT_BOUNDARY,
+            line=dict(color="rgba(90,90,90,0.6)", width=1, dash="dash"),
+            layer="above",
+        )
+
+        # Quadrant labels, placed inside each region near its outer edge.
+        left_x = (MAIN_PLOT_AXIS_RANGE[0] + QUADRANT_BOUNDARY) / 2
+        right_x = (QUADRANT_BOUNDARY + MAIN_PLOT_AXIS_RANGE[1]) / 2
+        top_y = MAIN_PLOT_AXIS_RANGE[1] - 0.05
+        bottom_y = MAIN_PLOT_AXIS_RANGE[0] + 0.03
+        for x, y, quadrant_key in (
+            (right_x, top_y, "good"),
+            (left_x, top_y, "near_miss"),
+            (left_x, bottom_y, "low"),
+            (right_x, bottom_y, "alt_candidate"),
+        ):
+            fig.add_annotation(
+                x=x,
+                y=y,
+                text=QUADRANT_LABELS[quadrant_key]["text"],
+                showarrow=False,
+                font=dict(size=12, color="rgba(60,60,60,0.85)"),
+                align="center",
+            )
+
+        # Corner cue: further into the top-right is strictly better on both axes.
+        fig.add_annotation(
+            x=MAIN_PLOT_AXIS_RANGE[1],
+            y=MAIN_PLOT_AXIS_RANGE[1],
+            xanchor="right",
+            yanchor="top",
+            text="↗ better performance",
+            showarrow=False,
+            font=dict(size=11, color="#1f5678"),
         )
 
         # Get all unique color-software combinations (necessary for highlighting)
@@ -290,6 +457,90 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
 
         fig.update_layout(clickmode="event+select")
 
+        return fig
+
+    def plot_precision_coverage_curves(self, result_df: pd.DataFrame, **kwargs) -> go.Figure:
+        """
+        Generate the precision-vs-coverage curve view: peptide-level and amino-acid-level
+        curves side by side, one line per software tool. An alternative to `plot_main_metric`
+        showing the full threshold-swept curve behind a single-point precision/AUC value,
+        rather than a single-point summary of it.
+
+        Parameters
+        ----------
+        result_df : pd.DataFrame
+            DataFrame containing the results to plot.
+        **kwargs : dict
+            Additional parameters:
+            - evaluation_type: str (default "mass") - evaluation type ("mass" or "exact")
+            - allow_il: bool (default True) - under exact evaluation, treat I/L as equivalent
+            - allow_deamidation: bool (default False) - under exact evaluation, treat
+              deamidated Q/N as equivalent to E/D
+            - software_colors: Dict[str, str] - color mapping for software tools
+
+        Returns
+        -------
+        go.Figure
+            A 1x2 subplot figure: peptide-level curve (left), amino-acid-level curve (right).
+        """
+        evaluation_type = kwargs.get("evaluation_type", "mass")
+        allow_il = kwargs.get("allow_il", True)
+        allow_deamidation = kwargs.get("allow_deamidation", False)
+        software_colors = kwargs.get("software_colors", SOFTWARE_COLORS)
+
+        ambiguity_combo = None
+        if evaluation_type == "exact":
+            if allow_il and allow_deamidation:
+                ambiguity_combo = "both"
+            elif allow_il:
+                ambiguity_combo = "il"
+            elif allow_deamidation:
+                ambiguity_combo = "deam"
+
+        # Silently hide datapoints submitted before the stored curve existed, same as
+        # plot_main_metric does for `auc`/`ambiguity`.
+        benchmark_metrics_df = result_df.reset_index(drop=True)
+        benchmark_metrics_df = benchmark_metrics_df[
+            benchmark_metrics_df["results"].apply(
+                lambda r: datapoint_has_required_fields(
+                    r, evaluation_type, needs_auc=False, ambiguity_combo=ambiguity_combo, needs_curve=True
+                )
+            )
+        ].reset_index(drop=True)
+
+        fig = make_subplots(
+            rows=1,
+            cols=2,
+            subplot_titles=("Peptide-level", "Amino-acid-level"),
+            horizontal_spacing=0.12,
+        )
+
+        for col_idx, level in enumerate(_LEVELS, start=1):
+            for _, row in benchmark_metrics_df.iterrows():
+                curve = _get_metrics_leaf(row, level, evaluation_type, ambiguity_combo).get("curve")
+                if not curve or not curve.get("coverage"):
+                    continue  # degenerate curve (e.g. all-identical scores) or legacy datapoint
+                software = row["software_name"]
+                fig.add_trace(
+                    go.Scatter(
+                        x=curve["coverage"],
+                        y=curve["precision"],
+                        mode="lines",
+                        name=software,
+                        legendgroup=software,
+                        showlegend=(col_idx == 1),
+                        line=dict(color=software_colors.get(software, "gray")),
+                        hovertemplate=f"{software}<br>Coverage: %{{x:.3f}}<br>Precision: %{{y:.3f}}<extra></extra>",
+                    ),
+                    row=1,
+                    col=col_idx,
+                )
+
+        for col_idx in (1, 2):
+            fig.update_xaxes(title_text="Coverage", range=PR_CURVE_AXIS_RANGE, row=1, col=col_idx)
+            fig.update_yaxes(title_text="Precision", range=PR_CURVE_AXIS_RANGE, row=1, col=col_idx)
+
+        fig.update_layout(width=900, height=480)
         return fig
 
     def generate_in_depth_plots(
@@ -581,7 +832,12 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
 
         for mod_label in mod_labels:
             x.append(mod_label)
-            y.append(mod_dict[mod_label]["correct_gt"] / mod_dict[mod_label]["counts_gt"] + EPSILON)
+            # EPSILON must guard the denominator (as plot_ptm_specific does), not be added
+            # to the final ratio -- `a / b + EPSILON` is `(a / b) + EPSILON` in Python, which
+            # still raises ZeroDivisionError when counts_gt is 0 (a modification that never
+            # occurs in the ground truth for the current view, e.g. a rare PTM on a small
+            # per-species selection).
+            y.append(mod_dict[mod_label]["correct_gt"] / (mod_dict[mod_label]["counts_gt"] + EPSILON))
         return x, y
 
     def plot_spectrum_feature(

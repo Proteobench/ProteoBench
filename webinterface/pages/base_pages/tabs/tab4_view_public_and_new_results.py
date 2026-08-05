@@ -170,7 +170,7 @@ def display_submitted_results(
     table_style: str = "dataframe",
     column_config: Optional[Dict] = None,
     render_forest_plot=None,
-) -> None:
+) -> Optional[pd.DataFrame]:
     """
     Display submitted benchmark results with plot and table.
 
@@ -191,6 +191,13 @@ def display_submitted_results(
     render_forest_plot : callable, optional
         Optional callable that renders an additional plot (e.g. a forest plot)
         between the scatter plot and the results table.
+
+    Returns
+    -------
+    Optional[pd.DataFrame]
+        The filtered dataframe used to render the plot and table, so a caller can reuse it
+        for an alternative view of the same selection (e.g. de novo's precision-coverage-curve
+        tab).
     """
     # Initialize submitted data
     initialize_submitted_data_points(variables, ionmodule)
@@ -241,3 +248,5 @@ def display_submitted_results(
 
     # Render results table (same styled grid as Tab 1)
     render_submitted_results_table(filtered_data, variables)
+
+    return filtered_data

@@ -113,9 +113,10 @@ like) submit your results publicly.
 
 | Tool | Input file | Parsed FDR column | Parameter file |
 |---|---|---|---|
-| DIA-NN | `report.tsv` or `report.parquet` | Lib.Q.Value | `report.log.txt` |
-| FragPipe (DIA-NN quant) | `report.tsv` or `report.parquet` | Q.Value | FragPipe `.workflow` |
-| AlphaDIA | `precursors.parquet` | qval | AlphaDIA `log.txt` |
+| AlphaDIA | `precursors.parquet` | qval | `log.txt` |
+| DIA-NN | `report.tsv or report.parquet` | Lib.Q.Value | `report.log.txt` |
+| FragPipe | `ion.tsv` | Qvalue | `fragpipe.workflow` |
+| FragPipe (DIA-NN quant) | `report.tsv or report.parquet` | Q.Value | `fragpipe.workflow` |
 
 :::{dropdown} DIA-NN
 1. Import the raw `.raw` files.

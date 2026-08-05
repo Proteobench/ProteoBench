@@ -78,11 +78,11 @@ is where you upload results and, later, submit them for public review.
 |---|---|---|
 | AlphaPept | `*.csv` | `results.yaml` |
 | Custom | `*.tsv` | — |
-| DIA-NN | `report.tsv` or `report.parquet` | `report.log.txt` |
+| DIA-NN | `report.tsv or report.parquet` | `report.log.txt` |
 | FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
 | MSAngel | `*.xlsx` | `*.json` |
 | MaxQuant | `evidence.txt` | `mqpar.xml` |
-| MetaMorpheus | `AllQuantifiedPeaks.tsv` | `search_task_config.toml` + `version_result.txt` |
+| MetaMorpheus | `AllQuantifiedPeaks.tsv` | `search_task_config.toml + version_result.txt` |
 | PEAKS | `lfq.features.csv` | `*.txt` |
 | ProlineStudio | `*.xlsx` | `*.xlsx` |
 | Sage | `*.sage.tsv` | `*.json` |

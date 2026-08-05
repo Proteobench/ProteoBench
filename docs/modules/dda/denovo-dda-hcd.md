@@ -140,7 +140,7 @@ your results.
 | Pi-HelixNovo | `*.tsv` | `*.yaml` |
 | Pi-PrimeNovo | `*.tsv` | `*.yaml` |
 | PointNovo | `*.csv` | — |
-| SMSNet | results + results_prob (2 files) | — |
+| SMSNet | `results + results_prob (2 files)` | — |
 
 PepNet, DeepNovo, PointNovo, NovoB, and SMSNet don't have an easily parsable configuration file, so
 no parameter file is required for them; fill in the `Comments for submission` field as completely

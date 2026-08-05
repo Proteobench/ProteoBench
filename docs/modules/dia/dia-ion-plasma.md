@@ -91,10 +91,10 @@ and submit them for public review.
 
 | Tool | Input file | Parameter file |
 |---|---|---|
-| AlphaDIA | `precursors.parquet`/`.tsv` (v2+) or `precursor.matrix.tsv` + `precursors.tsv` (v1) | `log_alphadia.txt` |
+| AlphaDIA | `precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1)` | `log_alphadia.txt` |
 | Custom | `custom_input.tsv` | — |
-| DIA-NN | `report.tsv` or `report.parquet` | `report.log.txt` |
-| FragPipe (DIA-NN quant) | `report.tsv` or `report.parquet` | `fragpipe.workflow` |
+| DIA-NN | `report.tsv or report.parquet` | `report.log.txt` |
+| FragPipe (DIA-NN quant) | `report.tsv or report.parquet` | `fragpipe.workflow` |
 | PEAKS | `lfq.features.csv` | `*.txt` |
 | Spectronaut | `*.tsv` | `ExperimentSetupOverview.txt` |
 

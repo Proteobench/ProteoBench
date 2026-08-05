@@ -81,12 +81,15 @@ expected log2 fold change per species — that difference is epsilon.
 
 | Tool | Input file | Parameter file |
 |---|---|---|
-| AlphaDIA | `precursors.tsv` | `log.txt` |
-| DIA-NN | `*_report.tsv` | `*report.log.txt` |
-| FragPipe | `*_report.tsv` | `fragpipe.workflow` |
-| MaxDIA | `evidence.txt` | `mqpar.xml` |
-| Spectronaut | `*.tsv` | `*.txt` |
-| PEAKS | `lfq.dia.peptides.csv` | `parameters.txt` |
+| AlphaDIA | `precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1)` | `*.txt` |
+| Custom | `custom_input.tsv` | — |
+| DIA-NN | `report.tsv or report.parquet` | `report.log.txt` |
+| FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
+| FragPipe (DIA-NN quant) | `report.tsv or report.parquet` | `fragpipe.workflow` |
+| MSAID | `*.tsv` | `MSAID_params.csv` |
+| MaxQuant | `evidence.txt` | `mqpar.xml` |
+| PEAKS | `lfq.features.csv` | `*.txt` |
+| Spectronaut | `*.tsv` | `ExperimentSetupOverview.txt` |
 
 :::{dropdown} DIA-NN
 1. Import raw files.

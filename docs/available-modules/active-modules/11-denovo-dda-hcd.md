@@ -44,32 +44,35 @@ We recommend downloading the parsed and combined dataset from the ProteoBench se
 
 ## Metric calculation
 
-The performance is evaluated at both the amino acid and peptide level. As introduced by [DeepNovo](https://www.pnas.org/doi/10.1073/pnas.1705691114), a correct amino acid whose mass differs by less than 0.1 Da from the corresponding ground truth amino acid. Additionally, this predicted amino acid must have either a prefix or suffix that differs by no more than 0.5 Da in mass from the corresponding amino acid sequence in the ground truth peptide. Correct peptides are defined as sequences where all amino acid predictions meet these criteria, ensuring that only fully accurate predictions are considered correct at the peptide level. In the module, this mode of evaluation is called '**mass-based**'. However, a more strict evaluation mode can be selected and is termed '**exact mode**'. In this mode, the two sequences should be exactly the same, where also cases such as deamidated-Q and E are considered incorrect. Only isoleucine and leucine substitutions are allowed.
+The performance is evaluated at both the amino acid and peptide level. As introduced by [DeepNovo](https://www.pnas.org/doi/10.1073/pnas.1705691114), a correct amino acid whose mass differs by less than 0.1 Da from the corresponding ground truth amino acid. Additionally, this predicted amino acid must have either a prefix or suffix that differs by no more than 0.5 Da in mass from the corresponding amino acid sequence in the ground truth peptide. Correct peptides are defined as sequences where all amino acid predictions meet these criteria, ensuring that only fully accurate predictions are considered correct at the peptide level. In the module, this mode of evaluation is called '**mass-based**'. However, a more strict evaluation mode can be selected and is termed '**exact mode**'. In this mode, the two sequences should be exactly the same. However, you can specify to allow mistakes made between isoleucine-leucine and deamidated-DE - NQ.
 
 ### Main benchmarking plot
 
 The main accuracy plot provides a **global overview of de novo sequencing performance** across the evaluated tools. It visualizes the relationship between **peptide-level identification performance** and **amino-acid level sequence accuracy**. Each point in the plot corresponds to a de novo sequencing tool and shows the amino acid and peptide level accuracy. The plot combines two levels of evaluation:
 
 **X-axis – Peptide-level metric**  
-The x-axis displays either peptide-level **precision** or **recall**, depending on the selected setting.
+The x-axis displays either peptide-level **precision** or **AUC**, depending on the selected setting.
 
 **Y-axis – Amino-acid level metric**  
 The y-axis always shows the corresponding **amino-acid level metric**, measuring how accurately the individual residues in the predicted sequences match the ground truth.
 
 This design allows the plot to simultaneously capture both **identification reliability** and **sequence-level correctness**.
 
-The **Precision vs Recall** setting determines which peptide-level metric is shown on the x-axis.
+The **Precision vs AUC** setting determines which peptide-level metric is shown on the x-axis.
 Precision measures how many reported peptide predictions are correct:
 
     Precision = correct predictions ÷ predictions above threshold
 
 This view emphasizes the **reliability of reported identifications**. Tools that achieve high precision produce predictions that are more likely to be correct.
 
-Recall measures how many spectra were successfully identified:
+AUC is the **area under the precision-coverage curve**. This curve is constructed by ranking a tool's predictions by their reported confidence score and, at each score threshold, computing:
 
-    Recall = correct predictions ÷ total number of spectra
+    Coverage = (correct + incorrect) ÷ total spectra
+    Precision = correct ÷ (correct + incorrect)
 
-This view emphasizes the **coverage of the dataset**, indicating how many spectra a tool can successfully sequence.
+As the threshold is relaxed from the highest-confidence prediction to the lowest, coverage increases monotonically from 0 to 1, while precision typically decreases as lower-confidence predictions are included. AUC condenses this trade-off into a single value between 0 and 1: a tool that keeps precision high even as coverage approaches 1 will have an AUC close to 1, while a tool whose precision drops sharply as more predictions are included will have a lower AUC.
+
+This view emphasizes **overall sequencing performance across the full range of a tool's confidence in its predictions**, rather than reliability at a single, fixed threshold.
 
 The **evaluation mode** determines how predictions are classified as correct.
 

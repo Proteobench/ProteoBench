@@ -113,7 +113,7 @@ class VariablesDIAQuantZenoTOF:
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/10-quant-lfq-ion-dia-ZenoTOF/"
+        "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-zenotof/"
     )
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz"
 

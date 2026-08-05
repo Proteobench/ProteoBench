@@ -113,7 +113,7 @@ class VariablesDDAQuantAstral:
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/"
+        "https://proteobench.readthedocs.io/en/latest/modules/dda/dda-ion-astral/"
     )
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DDA-astral/all_data_LFQ_Quant_DDA_Astral.tar.gz"
 

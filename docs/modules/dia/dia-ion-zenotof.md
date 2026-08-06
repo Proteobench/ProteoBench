@@ -6,6 +6,13 @@ Compares label-free quantification (LFQ) accuracy and sensitivity for workflows 
 data-independent acquisition (DIA) data, namely Zeno SWATH DIA with 85 variable windows, on a
 ZenoTOF 8600 (SCIEX).
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

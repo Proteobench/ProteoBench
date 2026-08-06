@@ -11,6 +11,13 @@ engine is reliable. Based on the entrapment approach in
 Results and interfaces may change.
 ```
 
+```{button-link} https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

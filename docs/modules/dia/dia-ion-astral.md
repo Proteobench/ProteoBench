@@ -9,6 +9,13 @@ Fisher Scientific).
 For low-input / single-cell-scale data on the same instrument type, see
 [LFQ, low input](dia-ion-lowinput.md).
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

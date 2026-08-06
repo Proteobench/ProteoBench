@@ -21,6 +21,13 @@ sample and per condition, and the A-vs-B difference per precursor was calculated
 show: precursors with ≥1 oxidation (right); precursors sharing the stripped sequence of an oxidized
 one (middle); and all other same-species precursors (left).
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

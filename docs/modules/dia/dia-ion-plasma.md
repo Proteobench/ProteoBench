@@ -6,6 +6,13 @@ Compares the sensitivity and quantification accuracy of workflows for data-indep
 (DIA) data on human plasma samples spiked with yeast and *E. coli* (the PYE dataset:
 Plasma/Yeast/*E. coli*).
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

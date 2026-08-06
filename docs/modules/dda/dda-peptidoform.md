@@ -7,6 +7,13 @@ data-dependent acquisition (DDA) dataset as [LFQ, precursor ion (QExactive)](dda
 but scored at the **peptidoform level** (summarized from precursor-ion quantities) rather than the
 precursor-ion level.
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

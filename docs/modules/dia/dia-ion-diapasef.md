@@ -5,6 +5,13 @@
 Compares label-free quantification (LFQ) accuracy and sensitivity for workflows run on
 data-independent acquisition (DIA) data, namely dia-PASEF, on a timsTOF SCP (Bruker).
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

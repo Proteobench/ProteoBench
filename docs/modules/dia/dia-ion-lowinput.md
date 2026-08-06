@@ -7,6 +7,13 @@ data-independent acquisition (DIA) on an Astral at low sample input (single-cell
 
 For bulk sample analyses on the same instrument type, see [LFQ, precursor ion (Astral)](dia-ion-astral.md).
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

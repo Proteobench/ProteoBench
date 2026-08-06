@@ -12,6 +12,13 @@ biases the comparison. If you retrained any compatible model, describe the train
 procedure in the `Comments for submission` field before uploading.
 ```
 
+```{button-link} https://proteobench.cubimed.rub.de/denovo_DDA_HCD
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

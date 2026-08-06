@@ -5,6 +5,13 @@
 Compares label-free quantification (LFQ) accuracy and sensitivity for workflows run on
 data-dependent acquisition (DDA) data from an Orbitrap Astral (Thermo Fisher).
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

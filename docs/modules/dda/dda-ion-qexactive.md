@@ -8,6 +8,13 @@ reference module to start with if you're new to ProteoBench — see
 [Your First Submission](../../your-first-submission/index.md) for the full submission
 walkthrough.
 
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive
+:color: primary
+:class: sd-px-4
+
+Open in web app
+```
+
 ## At a glance
 
 | | |

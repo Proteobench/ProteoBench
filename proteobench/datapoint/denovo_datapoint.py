@@ -394,27 +394,27 @@ class DenovoDatapoint(DatapointBase):
         for mod_label, unimod_tag in mod_labels_gt.items():
             mod_count = 0
             correct = 0
-            for i, row in df[df[mod_label]].iterrows():
+            for row in df[df[mod_label]].itertuples():
                 mod_count, correct = self.evaluate_ptm(
                     mod_label=mod_label,
                     mod_tag=unimod_tag,
-                    peptidoform=row["peptidoform_ground_truth"],
-                    match_array=row["aa_exact_gt"],
+                    peptidoform=row.peptidoform_ground_truth,
+                    match_array=row.aa_exact_gt,
                 )
                 mod_counts[mod_label]["counts_gt"] += mod_count
                 mod_counts[mod_label]["correct_gt"] += correct
 
         # On predicted
+        df_filtered = df.dropna()  # Due to no predictions for certain spectra
         for mod_label, unimod_tag in mod_labels_dn.items():
-            df_filtered = df.dropna()  # Due to no predictions for certain spectra
             mod_count = 0
             correct = 0
-            for i, row in df_filtered[df_filtered[mod_label]].iterrows():
+            for row in df_filtered[df_filtered[mod_label]].itertuples():
                 mod_count, correct = self.evaluate_ptm(
                     mod_label=mod_label,
                     mod_tag=unimod_tag,
-                    peptidoform=row["peptidoform"],
-                    match_array=row["aa_exact_dn"],
+                    peptidoform=row.peptidoform,
+                    match_array=row.aa_exact_dn,
                 )
                 mod_counts[mod_label.split("(denovo)")[0].strip()]["counts_dn"] += mod_count
                 mod_counts[mod_label.split("(denovo)")[0].strip()]["correct_dn"] += correct

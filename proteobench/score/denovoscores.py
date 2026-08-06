@@ -85,25 +85,37 @@ class DenovoScores(ScoreBase):
     def generate_intermediate(self, filtered_df: pd.DataFrame, replicate_to_raw=None) -> pd.DataFrame:
         # TODO: Evaluate which PSMs match, and which don't and return new table
 
+        # Tokenize each row's peptidoforms once, not once per ambiguity combination --
+        # `convert_peptidoform` doesn't depend on the toggles, so re-running it 4x per row
+        # (once per entry in AMBIGUITY_COMBOS below) was pure waste. Extracting the two
+        # peptidoform columns to plain lists once also means the per-combo loop below runs
+        # as plain Python, not `.apply(axis=1)` (which boxes every row into its own `Series`
+        # just to pull two values back out of it).
+        ground_truths = filtered_df["peptidoform_ground_truth"].tolist()
+        de_novos = filtered_df["peptidoform"].tolist()
+        gt_tokens_list = [self.convert_peptidoform(gt) for gt in ground_truths]
+        dn_tokens_list = [self.convert_peptidoform(dn) for dn in de_novos]
+
         # Add match type label (exact, mass, mismatch) and the amino acid-level evaluations,
         # once per ambiguity toggle combination. `aa_matches_*`/`pep_match` are mass-based and
         # therefore identical across all combinations, so they're only stored for the baseline
         # ("") combination; `match_type`/`aa_exact_*` do depend on the toggles and are stored
         # per combination, suffixed accordingly (baseline keeps the original, unsuffixed names).
         for suffix, flags in AMBIGUITY_COMBOS.items():
-            match_dict = filtered_df.apply(
-                lambda x: self.evaluate_match(
-                    ground_truth=x["peptidoform_ground_truth"], de_novo=x["peptidoform"], **flags
-                ),
-                axis=1,
-            )
-            filtered_df[f"match_type{suffix}"] = match_dict.apply(lambda x: x["match_type"])
-            filtered_df[f"aa_exact_gt{suffix}"] = match_dict.apply(lambda x: x["aa_exact_gt"])
-            filtered_df[f"aa_exact_dn{suffix}"] = match_dict.apply(lambda x: x["aa_exact_dn"])
+            match_dicts = [
+                self.evaluate_match_tokenized(gt, dn, gt_tokens, dn_tokens, **flags)
+                for gt, dn, gt_tokens, dn_tokens in zip(ground_truths, de_novos, gt_tokens_list, dn_tokens_list)
+            ]
+            # One DataFrame construction instead of 3-6 separate `.apply(lambda x: x["key"])`
+            # passes over the whole column to pull each field out of the dicts above.
+            match_df = pd.DataFrame(match_dicts, index=filtered_df.index)
+            filtered_df[f"match_type{suffix}"] = match_df["match_type"]
+            filtered_df[f"aa_exact_gt{suffix}"] = match_df["aa_exact_gt"]
+            filtered_df[f"aa_exact_dn{suffix}"] = match_df["aa_exact_dn"]
             if suffix == "":
-                filtered_df["aa_matches_gt"] = match_dict.apply(lambda x: x["aa_matches_gt"])
-                filtered_df["aa_matches_dn"] = match_dict.apply(lambda x: x["aa_matches_dn"])
-                filtered_df["pep_match"] = match_dict.apply(lambda x: x["pep_match"])
+                filtered_df["aa_matches_gt"] = match_df["aa_matches_gt"]
+                filtered_df["aa_matches_dn"] = match_df["aa_matches_dn"]
+                filtered_df["pep_match"] = match_df["pep_match"]
         return filtered_df
 
     def evaluate_match(
@@ -125,32 +137,64 @@ class DenovoScores(ScoreBase):
             Treat deamidated Q/N as equivalent to E/D when deciding exactness
             (mass-based matching is unaffected: they're already isobaric).
         """
-        gt = self.convert_peptidoform(ground_truth)
-        dn = self.convert_peptidoform(de_novo)
+        gt_tokens = self.convert_peptidoform(ground_truth)
+        dn_tokens = self.convert_peptidoform(de_novo)
+        return self.evaluate_match_tokenized(
+            ground_truth, de_novo, gt_tokens, dn_tokens, allow_il=allow_il, allow_deamidation=allow_deamidation
+        )
 
-        if dn is None:
+    def evaluate_match_tokenized(
+        self,
+        ground_truth: Peptidoform,
+        de_novo: Peptidoform,
+        gt_tokens,
+        dn_tokens,
+        allow_il: bool = False,
+        allow_deamidation: bool = False,
+    ):
+        """
+        Same as `evaluate_match`, but takes already-tokenized peptidoforms (the output of
+        `convert_peptidoform`) instead of tokenizing internally. Tokenization doesn't depend
+        on the ambiguity toggles, so a caller comparing the same pair under multiple
+        combinations (as `generate_intermediate` does, once per entry in `AMBIGUITY_COMBOS`)
+        can tokenize once and reuse the result across all of them, rather than re-tokenizing
+        on every combination. `evaluate_match` is a thin wrapper around this for callers
+        comparing a single pair once.
+
+        Parameters
+        ----------
+        gt_tokens, dn_tokens
+            `convert_peptidoform(ground_truth)` / `convert_peptidoform(de_novo)`.
+        allow_il : bool
+            Treat I and L as equivalent when deciding per-residue and whole-peptide
+            exactness (mass-based matching is unaffected: I/L are already isomeric).
+        allow_deamidation : bool
+            Treat deamidated Q/N as equivalent to E/D when deciding exactness
+            (mass-based matching is unaffected: they're already isobaric).
+        """
+        if dn_tokens is None:
             return {
                 "match_type": "mismatch",
-                "aa_matches_gt": np.full(len(gt), False),
-                "aa_matches_dn": np.full(len(gt), False),
-                "aa_exact_gt": np.full(len(gt), False),
-                "aa_exact_dn": np.full(len(gt), False),
+                "aa_matches_gt": np.full(len(gt_tokens), False),
+                "aa_matches_dn": np.full(len(gt_tokens), False),
+                "aa_exact_gt": np.full(len(gt_tokens), False),
+                "aa_exact_dn": np.full(len(gt_tokens), False),
                 "pep_match": False,
             }
 
         if ground_truth == de_novo:
             return {
                 "match_type": "exact",
-                "aa_matches_gt": np.full(len(gt), True),
-                "aa_matches_dn": np.full(len(dn), True),
-                "aa_exact_gt": np.full(len(gt), True),
-                "aa_exact_dn": np.full(len(dn), True),
+                "aa_matches_gt": np.full(len(gt_tokens), True),
+                "aa_matches_dn": np.full(len(dn_tokens), True),
+                "aa_exact_gt": np.full(len(gt_tokens), True),
+                "aa_exact_dn": np.full(len(dn_tokens), True),
                 "pep_match": True,
             }
 
         aa_matches, pep_match, (aa_matches_1, aa_matches_2), (exact_match_1, exact_match_2) = self.aa_match(
-            gt,
-            dn,
+            gt_tokens,
+            dn_tokens,
             allow_il=allow_il,
             allow_deamidation=allow_deamidation,
         )

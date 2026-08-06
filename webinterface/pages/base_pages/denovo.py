@@ -609,12 +609,12 @@ class DeNovoUIObjects(BaseUIModule):
 
         tab4.render_submitted_results_table(filtered_data, self.variables)
 
-        st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
-        st.data_editor(
-            st.session_state[self.variables.all_datapoints_submitted],
-            key=st.session_state[self.variables.table_id_uuid],
-            on_change=self._handle_submitted_table_edits,
-        )
+        # st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
+        # st.data_editor(
+        #     st.session_state[self.variables.all_datapoints_submitted],
+        #     key=st.session_state[self.variables.table_id_uuid],
+        #     on_change=self._handle_submitted_table_edits,
+        # )
 
         st.title("Public submission")
         st.markdown(

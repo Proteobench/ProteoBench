@@ -2,7 +2,6 @@
 "spectrum_id" = "spectrum_id"
 "sequence" = "sequence"
 "score" = "score"
-"aa_scores" = "aa_scores"
 
 [spectrum_id_mapper]
 "pattern" = "scan=(\\d+)"

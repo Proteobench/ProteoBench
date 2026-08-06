@@ -692,33 +692,43 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             **Y-axis** - the metric at **amino-acid level**: the individual amino acids that are
             correctly predicted are counted, so partially correct sequences still contribute.
 
-            A tool in the **upper right corner** therefore performs well at both levels. A point
-            that sits high but not far to the right predicts many individual amino acids correctly
-            without getting whole sequences right.
+            The background is shaded from light (bottom-left) to dark (top-right): the further into
+            the top-right corner a point sits, the better it performs on both axes at once. Dashed
+            lines at the midpoint of each axis split the plot into four named regions:
+
+            - **Good performance** (top-right) - both the peptide- and amino-acid-level metrics are
+              high.
+            - **Near-miss** (top-left) - the peptide-level metric is low but the amino-acid-level
+              metric is high. Often just one or a few residues off from the true sequence.
+            - **Low performance** (bottom-left) - both metrics are low.
+            - **Alternative candidate** (bottom-right) - the peptide-level metric is high but the
+              amino-acid-level metric is low, suggesting a fully different peptide rather than a
+              near miss when the prediction is wrong. This region is expected to be sparse.
 
             **Select the classification metric** - which metric is shown on both axes:
 
-            - **Precision** - the fraction of the reported predictions that is correct:
-              `precision = correct predictions / reported predictions`. It describes how reliable
-              the reported sequences are.
-            - **Recall** - the fraction of the spectra that received a correct prediction:
-              `recall = correct predictions / total spectra`. It describes the coverage of the
-              dataset.
-
-            The two differ whenever a tool does not report a prediction for every spectrum: a tool
-            can reach a high precision by only reporting its confident predictions, while its recall
-            stays low.
+            - **Precision** - the fraction of the reported predictions that is correct, over every
+              prediction with no score threshold applied: `precision = correct predictions /
+              reported predictions`. Evaluates how reliable the reported sequences are at a tool's
+              single, fixed operating point.
+            - **AUC** - the area under the tool's precision-vs-coverage curve (average precision),
+              swept across every possible score threshold; the underlying curve is shown in the
+              adjacent "Precision-Coverage Curves" tab. Evaluates a tool's overall ranking quality
+              rather than one operating point, and is `N/A` for tools that don't report a real
+              per-residue confidence score.
 
             **Select the stringency of evaluation** - when a prediction counts as correct:
 
             - **Exact** - the predicted sequence must match the ground truth exactly, including the
-              modifications and their positions. This is the strictest criterion.
+              modifications and their positions. Two toggles relax this for ambiguities inherent to
+              the data: **allow I/L mismatches** (isoleucine and leucine are isobaric) and **allow
+              deamidation mismatches** (deamidated Q/N are essentially isobaric with E/D).
             - **Mass-based** - a prediction also counts as correct when it matches the ground truth
               through the longest mass-matching prefix and suffix, using a cumulative mass tolerance
-              of 50 ppm and an individual amino-acid tolerance of 20 ppm. This accepts
-              interpretations that cannot be distinguished by mass, such as isobaric amino acids
-              (for example I and L). Mass-based numbers are therefore always equal to or higher than
-              the exact numbers.
+              of 50 ppm and an individual amino-acid tolerance of 20 ppm. This already cannot
+              distinguish I/L or deamidation regardless of the toggles above, so both are forced on
+              and disabled. Mass-based numbers are therefore always equal to or higher than the
+              exact numbers.
 
             **Colorblind Mode** - distinguishes the software tools by marker shape in addition to
             colour.

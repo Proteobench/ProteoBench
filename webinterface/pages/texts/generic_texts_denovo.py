@@ -296,5 +296,19 @@ class WebpageTexts:
 
         Each species label corresponds to the organism from which the benchmark spectra were derived.
 
-        For a full description related to the source of the data for each species, see the full module description. 
+        For a full description related to the source of the data for each species, see the full module description.
+        """
+
+        in_fasta_overview = """
+        This plot shows, for each de novo sequencing tool, how its predictions break down into three categories:
+
+        - **Correct** -- the predicted peptide matches the ground-truth peptide exactly (allowing I/L ambiguity, since they cannot be distinguished by mass).
+        - **In FASTA** -- the prediction does not match the ground truth, but the predicted sequence (again allowing I/L ambiguity) is nonetheless found elsewhere in the proteome of the species the spectrum came from.
+        - **Not in FASTA** -- the prediction matches neither the ground truth nor any other protein in that species' proteome. This also includes spectra for which the tool made no prediction at all.
+
+        Each bar shows the **proportion of all spectra** in the dataset that fall into each category for that tool.
+
+        **How to interpret the plot**
+
+        A large **"In FASTA"** segment indicates that, even where a tool's prediction is wrong, it is often still calling a *real, existing* peptide from the correct organism -- suggesting the tool is finding a genuinely different but plausible peptide (e.g. a co-eluting or chimeric spectrum), rather than sequencing errors, only for peptides of at least 8 amino acids (below this, matches to the proteome by chance become likely, and are therefore not calculated). A large **"Not in FASTA"** segment instead points to predictions that are not just wrong, but not proteome-supported.
         """

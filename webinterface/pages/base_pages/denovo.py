@@ -462,6 +462,12 @@ class DeNovoUIObjects(BaseUIModule):
 
         st.plotly_chart(figs[evaluation_type], key=self.variables.fig_species_overview)
 
+    def _display_infasta_overview(self, figs) -> None:
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.in_fasta_overview)
+
+        st.plotly_chart(figs)
+
     def _display_indepth_plot(self, plot_name: str, figs) -> None:
         if plot_name == "ptm_overview":
             self._display_ptm_overview(figs)
@@ -471,6 +477,8 @@ class DeNovoUIObjects(BaseUIModule):
             self._display_spectrum_features(figs)
         elif plot_name == "species_overview":
             self._display_species_overview(figs)
+        elif plot_name == "in_fasta_overview":
+            self._display_infasta_overview(figs)
         else:
             raise Exception("Cannot display non-implemented in-depth plot.")
 

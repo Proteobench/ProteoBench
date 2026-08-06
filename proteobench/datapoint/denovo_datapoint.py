@@ -366,8 +366,21 @@ class DenovoDatapoint(DatapointBase):
 
         return extra_metrics
 
-    def get_infasta_metrics(self, df: pd.DataFrame):
-        # IMPLEMENT
+    def get_infasta_metrics(self, df: pd.DataFrame) -> dict:
+        """
+        Aggregate the per-PSM FASTA category (``correct`` / ``in_fasta`` / ``not_in_fasta``,
+        assigned once by `DenovoScores.add_fasta_category` at the end of
+        `generate_intermediate`) into counts and proportions for this single datapoint.
+        Precomputed here -- like every other in-depth metric -- so multiple datapoints can be
+        plotted together from their stored `results` dicts alone, without re-deriving anything
+        (e.g. via a live groupby) from each datapoint's raw intermediate dataframe, which isn't
+        persisted.
+        """
+        categories = ("correct", "in_fasta", "not_in_fasta")
+        n = len(df)
+        counts = df["category"].value_counts().reindex(categories, fill_value=0).astype(int).to_dict()
+        proportions = {cat: (counts[cat] / n if n else float("nan")) for cat in categories}
+        return {"counts": counts, "proportions": proportions, "n_spectra": n}
 
     def get_ptm_metrics(self, df: pd.DataFrame):
         mod_counts = {}

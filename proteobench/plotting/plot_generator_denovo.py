@@ -83,6 +83,21 @@ _LEVELS = ("peptide", "aa")
 _EVALUATION_TYPES = ("mass", "exact")
 _METRICS = ("precision", "recall", "coverage", "auc")
 
+# FASTA-category breakdown (correct / in_fasta / not_in_fasta), computed once per datapoint by
+# `DenovoDatapoint.get_infasta_metrics` from the "category" column `DenovoScores.add_fasta_category`
+# assigns during scoring. Colors match the exploratory notebook this feature was designed in.
+INFASTA_CATEGORIES = ("correct", "in_fasta", "not_in_fasta")
+INFASTA_COLORS = {
+    "correct": "#4C9A6D",  # muted green
+    "in_fasta": "#F2A541",  # muted amber
+    "not_in_fasta": "#D1495B",  # muted rose
+}
+INFASTA_LABELS = {
+    "correct": "Correct",
+    "in_fasta": "In FASTA",
+    "not_in_fasta": "Not in FASTA",
+}
+
 
 def _get_metrics_leaf(row: pd.Series, level: str, evaluation_type: str, ambiguity_combo: Optional[str] = None) -> dict:
     """
@@ -615,6 +630,9 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 performance_data, evaluation_type=evaluation_type, software_colors=software_colors
             )
 
+        # Generate FASTA-category overview plot
+        plots["in_fasta_overview"] = self.plot_infasta_overview(performance_data)
+
         return plots
 
     def get_in_depth_plot_layout(self) -> list:
@@ -630,6 +648,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             {"plots": ["ptm_overview", "ptm_specific"], "columns": 1, "title": "PTM Analysis"},
             {"plots": ["spectrum_feature"], "columns": 1, "title": "Spectrum Features"},
             {"plots": ["species_overview"], "columns": 1, "title": "Species Analysis"},
+            {"plots": ["in_fasta_overview"], "columns": 1, "title": "FASTA Analysis"},
         ]
 
     def get_in_depth_plot_descriptions(self) -> Dict[str, str]:
@@ -649,6 +668,8 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             "spectrum_feature": "Analysis of precision relative to spectrum features such as missing "
             "fragmentation sites, peptide length, or explained intensity.",
             "species_overview": "Breakdown of precision across different species in the dataset.",
+            "in_fasta_overview": "Breakdown of predictions into correctly sequenced, incorrect but present "
+            "elsewhere in the species' proteome, and not present in the proteome at all.",
         }
 
     def get_metrics_help_markdown(self) -> str:
@@ -1093,6 +1114,54 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             # ticktext=[v for v in sorted(set(df['y_bar']))],
             row=2,
             col=1,
+        )
+        return fig
+
+    def plot_infasta_overview(self, benchmark_metrics_df: pd.DataFrame) -> go.Figure:
+        """
+        Stacked bar chart of the FASTA-category breakdown (correct / in FASTA / not in FASTA)
+        for each datapoint, one bar per tool. Reads the per-datapoint proportions precomputed
+        by `DenovoDatapoint.get_infasta_metrics` at benchmarking time (stored under
+        `results["in_depth"]["in_FASTA"]`) -- never a live groupby over raw intermediate data,
+        which isn't persisted for a submitted datapoint in the first place.
+        """
+        fig = go.Figure()
+
+        tools = []
+        proportions_per_category = {category: [] for category in INFASTA_CATEGORIES}
+        for _, row in benchmark_metrics_df.iterrows():
+            try:
+                infasta = row["results"]["in_depth"]["in_FASTA"]
+            except (KeyError, TypeError):
+                # Legacy datapoint submitted before this metric existed -- silently skipped,
+                # matching how the main plot hides datapoints missing newer fields.
+                continue
+            tools.append(row["software_name"])
+            for category in INFASTA_CATEGORIES:
+                proportions_per_category[category].append(infasta["proportions"].get(category, 0.0))
+
+        for category in INFASTA_CATEGORIES:
+            fig.add_bar(
+                name=INFASTA_LABELS[category],
+                x=tools,
+                y=proportions_per_category[category],
+                marker_color=INFASTA_COLORS[category],
+                marker_line_width=0,
+                text=[f"{v:.0%}" if v >= 0.03 else "" for v in proportions_per_category[category]],
+                textposition="inside",
+                textfont=dict(color="white", size=13),
+                hovertemplate="%{y:.1%}<extra>%{fullData.name}</extra>",
+            )
+
+        fig.update_layout(
+            barmode="stack",
+            width=700,
+            height=450,
+            title=dict(text="De novo sequencing accuracy by tool", font=dict(size=16)),
+            yaxis=dict(title="Proportion of spectra", tickformat=".0%", range=[0, 1]),
+            xaxis=dict(title="Tool"),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title=None),
+            margin=dict(t=70, b=50, l=60, r=30),
         )
         return fig
 

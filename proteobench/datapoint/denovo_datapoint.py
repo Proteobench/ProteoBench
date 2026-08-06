@@ -359,11 +359,15 @@ class DenovoDatapoint(DatapointBase):
     def get_indepth_metrics(self, df: pd.DataFrame):
         extra_metrics = {}
 
+        extra_metrics["in_FASTA"] = self.get_infasta_metrics(df)
         extra_metrics["PTM"] = self.get_ptm_metrics(df)
         extra_metrics["Spectrum"] = self.get_spectrum_metrics(df)
         extra_metrics["Species"] = self.get_species_metrics(df)
 
         return extra_metrics
+
+    def get_infasta_metrics(self, df: pd.DataFrame):
+        # IMPLEMENT
 
     def get_ptm_metrics(self, df: pd.DataFrame):
         mod_counts = {}

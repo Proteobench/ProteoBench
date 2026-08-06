@@ -355,7 +355,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 zmax=1,
                 colorscale=QUADRANT_COLORSCALE,
                 showscale=False,
-                opacity=0.45,
+                opacity=0.28,
                 hoverinfo="skip",
             )
         )
@@ -852,7 +852,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                 zmax=1,
                 colorscale=QUADRANT_COLORSCALE,
                 showscale=False,
-                opacity=0.45,
+                opacity=0.28,
                 hoverinfo="skip",
             )
         )

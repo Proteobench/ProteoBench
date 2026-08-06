@@ -18,12 +18,7 @@ from proteobench.score.score_base import ScoreBase
 PEPTIDE_SETS_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/de_novo_peptide_sets"
 PEPTIDE_SETS_DIR_SERVER = "/mnt/data/proteobench/module_data/"
 PEPTIDE_SETS_DIR_LOCAL_DENOVO = os.path.join(
-    Path(__file__).resolve().parent,
-    "io_parse_settings",
-    "denovo",
-    "DDA",
-    "HCD",
-    "peptide_sets"
+    Path(__file__).resolve().parent, "io_parse_settings", "denovo", "DDA", "HCD", "peptide_sets"
 )
 
 # Ambiguity toggle combinations for exact-mode matching. Keys double as the column-name
@@ -132,30 +127,27 @@ class DenovoScores(ScoreBase):
                 filtered_df["aa_matches_gt"] = match_df["aa_matches_gt"]
                 filtered_df["aa_matches_dn"] = match_df["aa_matches_dn"]
                 filtered_df["pep_match"] = match_df["pep_match"]
-                
+
         species_sets = self.load_species_sets()
-        filtered_df = self.add_fasta_category(
-            df=filtered_df,
-            species_sets=species_sets
-        )
-                
+        filtered_df = self.add_fasta_category(df=filtered_df, species_sets=species_sets)
+
         return filtered_df
 
     def load_species_sets(self, path: Optional[str] = None) -> dict[str, set]:
         from proteobench.utils.server_io import download_file
+
         def _has_peptide_sets(directory: str) -> bool:
             """A directory counts as usable if it exists and already has at least one species file."""
             directory_path = Path(directory)
             return directory_path.is_dir() and any(directory_path.glob("*.txt.gz"))
+
         def _list_remote_peptide_set_files(url: str) -> list[str]:
             """Parse the server's directory listing for available peptide set filenames."""
             response = requests.get(url, timeout=30)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
-            return [
-                link["href"] for link in soup.find_all("a", href=True)
-                if link["href"].endswith(".txt.gz")
-            ]
+            return [link["href"] for link in soup.find_all("a", href=True) if link["href"].endswith(".txt.gz")]
+
         def _download_peptide_sets(url: str, local_dir: str) -> None:
             """Download every peptide set file listed at the server URL into local_dir."""
             os.makedirs(local_dir, exist_ok=True)
@@ -534,24 +526,21 @@ class DenovoScores(ScoreBase):
         return mz1 - mz2 if mode_is_da else (mz1 - mz2) / mz2 * 10**6
 
     def add_fasta_category(
-        self,
-        df: pd.DataFrame, 
-        species_sets: dict[str, set[str]], 
-        min_length: int = 8
+        self, df: pd.DataFrame, species_sets: dict[str, set[str]], min_length: int = 8
     ) -> pd.DataFrame:
         def normalize_for_fasta_match(peptidoform: Peptidoform) -> Optional[str]:
             if isinstance(peptidoform, Peptidoform):
-                return peptidoform.sequence.replace('I', 'L')
+                return peptidoform.sequence.replace("I", "L")
             return None
-        
+
         df = df.copy()
         df["bare"] = df["peptidoform"].map(normalize_for_fasta_match)
         df["category"] = "not_in_fasta"
-        
-        # Exact matching taken from IL allowed str matching
-        df.loc[df["match_type_il"]=='exact', "category"] = "correct"
 
-        incorrect = df.loc[~(df["category"]=='correct')]
+        # Exact matching taken from IL allowed str matching
+        df.loc[df["match_type_il"] == "exact", "category"] = "correct"
+
+        incorrect = df.loc[~(df["category"] == "correct")]
         for species, idx in incorrect.groupby("collection").groups.items():
             peptide_set = species_sets.get(species, set())
             bare = df.loc[idx, "bare"]

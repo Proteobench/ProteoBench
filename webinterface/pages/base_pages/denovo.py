@@ -335,7 +335,7 @@ class DeNovoUIObjects(BaseUIModule):
             options=dataset_options,
             key=st.session_state[self.variables.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
-            default=[dataset_options[0]],
+            default=dataset_options,
             help=self.variables.texts.Help.dataset_selection_indepth,
         )
 

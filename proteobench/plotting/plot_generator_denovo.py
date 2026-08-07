@@ -37,12 +37,12 @@ QUADRANT_COLORSCALE = [
 QUADRANT_LABELS = {
     "good": {"text": "<b>Good performance</b>"},
     "near_miss": {
-        "text": "<b>Near-miss</b><br><span style='font-size:10px'>Often suggests a very similar peptide</span>"
+        "text": "<b>Near-miss</b><br><span style='font-size:10px'>Often incorrect, but predictions are very similar to ground-truth peptide</span>"
     },
     "low": {"text": "<b>Low performance</b>"},
     "alt_candidate": {
         "text": (
-            "<b>Alternative candidate</b><br>" "<span style='font-size:10px'>(Suggests fully different peptide)</span>"
+            "<b>Alternative candidate</b><br>" "<span style='font-size:10px'>(Often correct, but when incorrect, suggest a completely different peptide)</span>"
         )
     },
 }

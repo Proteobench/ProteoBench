@@ -42,7 +42,8 @@ QUADRANT_LABELS = {
     "low": {"text": "<b>Low performance</b>"},
     "alt_candidate": {
         "text": (
-            "<b>Alternative candidate</b><br>" "<span style='font-size:10px'>(Often correct, but when incorrect, suggest a completely different peptide)</span>"
+            "<b>Alternative candidate</b><br>"
+            "<span style='font-size:10px'>(Often correct, but when incorrect, suggest a completely different peptide)</span>"
         )
     },
 }

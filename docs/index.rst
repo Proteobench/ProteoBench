@@ -6,15 +6,17 @@ Home
 #####
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 3
     :hidden:
-    :glob:
 
     Home <self>
-    Learn more <general-information/index.rst>
-    Benchmarking Modules <available-modules/index.rst>
-    Developer guide <developer-guide/index.rst>
-    Contributing <contributing.rst>
+    about/index
+    your-first-submission/index
+    about/faq
+    modules/index
+    concepts/index
+    contributing/index
+    contact
     Manuscript <https://doi.org/10.64898/2025.12.09.692895>
 
 .. div:: landing-title
@@ -38,13 +40,6 @@ Home
 
             ProteoBench is an open platform for benchmarking proteomics data analysis workflows.
 
-            .. button-link:: #proteobench-in-5-steps
-                :outline:
-                :color: white
-                :class: sd-px-4 sd-fs-5
-
-                Get Started
-
 
 ProteoBench in 5 steps
 =======================
@@ -59,11 +54,27 @@ ProteoBench in 5 steps
 5. **Compare your workflow run** with validated benchmark runs
 
 
-.. button-link:: https://proteobench.cubimed.rub.de/
-    :class: sd-px-4
-    :color: primary
+.. grid::
+    :gutter: 2
 
-    ProteoBench Web App :fas:`external-link-alt`
+    .. grid-item::
+
+        .. button-link:: https://proteobench.cubimed.rub.de/
+            :class: sd-px-4
+            :color: primary
+            :expand:
+
+            ProteoBench Web App :fas:`external-link-alt`
+
+    .. grid-item::
+
+        .. button-ref:: your-first-submission/index
+            :ref-type: doc
+            :class: sd-px-4
+            :color: secondary
+            :expand:
+
+            Quickstart: Your First Submission
 
 
 

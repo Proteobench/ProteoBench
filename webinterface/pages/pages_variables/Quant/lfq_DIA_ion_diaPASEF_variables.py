@@ -115,7 +115,7 @@ class VariablesDIAQuantdiaPASEF:
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-diapasef/"
+        "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-diapasef/"
     )
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/diaPASEF/all_data_LFQ_Quant_DIA_diaPASEF.tar.gz"
 

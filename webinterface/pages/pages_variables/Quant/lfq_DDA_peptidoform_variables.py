@@ -119,7 +119,7 @@ class VariablesDDAQuant:
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/3-quant-lfq-peptidoform-dda/"
+        "https://proteobench.readthedocs.io/en/latest/modules/dda/dda-peptidoform/"
     )
     title: str = "DDA peptidoform quantification"
     y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"

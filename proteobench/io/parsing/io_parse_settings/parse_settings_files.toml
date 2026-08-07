@@ -108,6 +108,7 @@
 "NovoB" = "parse_settings_novob.toml"
 "PointNovo" = "parse_settings_pointnovo.toml"
 "SMSNet" = "parse_settings_smsnet.toml"
+"PEAKS" = "parse_settings_peaks.toml"
 "Custom" = "parse_settings_custom.toml"
 
 [entrapment_DIA_ion_Astral]

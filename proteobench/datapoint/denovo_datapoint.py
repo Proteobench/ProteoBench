@@ -18,54 +18,106 @@ import pandas as pd
 
 import proteobench
 from proteobench.datapoint.datapoint_base import DatapointBase
+from proteobench.score.denovoscores import AMBIGUITY_COMBOS, get_ambiguity_suffix
 
 
-def calculate_prc(scores_correct, scores_all, n_spectra, threshold=None):
-    if threshold is None:
-        c = len(scores_correct)
-        ci = len(scores_all)
-    else:
-        c = sum([score > threshold for score in scores_correct])
-        ci = sum([score > threshold for score in scores_all])
+def calculate_prc(scores_all, is_correct, n_spectra) -> dict:
+    """
+    Single-point precision/recall/coverage over every prediction (no score threshold).
+    """
+    is_correct = np.asarray(is_correct, dtype=bool)
+    ci = len(scores_all)
+    c = int(is_correct.sum())
 
-    u = n_spectra - ci
-
-    # precision
-    precision = c / ci
-
-    # recall (This is an alternative definition and the line will stop at x=y)
-    recall = c / n_spectra
-
-    # coverage
-    coverage = ci / n_spectra
-
-    return {"precision": precision, "recall": recall, "coverage": coverage}
+    return {
+        "precision": c / ci,
+        "recall": c / n_spectra,
+        "coverage": ci / n_spectra,
+    }
 
 
-def get_prc_curve(t, n_spectra):
-    prs = []
-    recs = []
-    covs = []
+def get_prc_curve(scores_all, is_correct, n_spectra) -> pd.DataFrame:
+    """
+    Full-resolution precision-vs-coverage curve, with one point per DISTINCT score value
+    rather than one per prediction. Ties are common (many tools emit coarse or repeated
+    confidence scores), and a threshold can never split a tied group -- either all of a
+    group's predictions clear it, or none do -- so the only well-defined curve vertices are
+    "coverage/precision immediately after including an entire tied-score group." Collapsing
+    to those vertices also makes the within-tie ordering irrelevant to the result (the
+    cumulative count after a full group is the same regardless of the arbitrary order ties
+    were processed in), and, as a side effect, shrinks the curve for any tool whose scores
+    are heavily quantized. Both the AUC integration and the stored/plotted curve (after
+    `downsample_curve`) are derived from this same result.
+    """
+    scores_all = np.asarray(scores_all, dtype=float)
+    is_correct = np.asarray(is_correct, dtype=bool)
 
-    for threshold in np.linspace(t.score.max(), t.score.min()):
-        if np.isnan(threshold):
-            continue
+    if len(scores_all) == 0:
+        return pd.DataFrame({"precision": [], "coverage": []})
 
-        prc_dict = calculate_prc(
-            scores_correct=t[t.match].score.to_numpy(),
-            scores_all=t.score.to_numpy(),
-            n_spectra=n_spectra,
-            threshold=threshold,
-        )
-        pr, rec, cov = prc_dict["precision"], prc_dict["recall"], prc_dict["coverage"]
-        prs.append(pr)
-        recs.append(rec)
-        covs.append(cov)
+    order = np.argsort(-scores_all)
+    sorted_scores = scores_all[order]
+    sorted_correct = is_correct[order]
 
-    return pd.DataFrame({"precision": prs, "recall": recs, "coverage": covs})
+    rank = np.arange(1, len(scores_all) + 1)
+    cum_correct = np.cumsum(sorted_correct)
+    precision = cum_correct / rank
+    coverage = rank / n_spectra
+
+    # Keep only the last (highest-rank) row of each run of equal scores -- the sole point in
+    # that run where "included" actually changes as the threshold crosses this score value.
+    is_last_in_group = np.append(sorted_scores[:-1] != sorted_scores[1:], True)
+
+    return pd.DataFrame({"precision": precision[is_last_in_group], "coverage": coverage[is_last_in_group]})
 
 
-def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str):
+# Stored/plotted curves are capped at a fixed number of points, sampled at evenly-spaced
+# COVERAGE values (not evenly-spaced row positions -- ties can leave the deduplicated curve's
+# rows very unevenly spaced in coverage, e.g. one huge tied group followed by many distinct
+# scores close together, so only sampling by coverage value itself gives a genuinely even
+# spread). Capping by a fixed count, rather than a fixed stride, is what actually bounds
+# storage: a stride scales with the size of the ground truth (e.g. ~780k spectra), which is
+# exactly what made this unscalable across many tools' worth of curves loaded at once; a fixed
+# count does not, regardless of how large the dataset or how many tools are being compared.
+# AUC is always integrated over the full-resolution curve in `get_prc_curve`, before this
+# runs, so downsampling only affects how many points the plotted line has, never any metric.
+CURVE_STORAGE_MAX_POINTS = 500
+
+
+def downsample_curve(curve: pd.DataFrame, max_points: int = CURVE_STORAGE_MAX_POINTS) -> pd.DataFrame:
+    """
+    Sample at most `max_points` rows of a curve at evenly-spaced coverage values, always
+    including the first and last point.
+    """
+    if len(curve) <= max_points:
+        return curve.reset_index(drop=True)
+
+    coverage = curve["coverage"].to_numpy()
+    targets = np.linspace(coverage[0], coverage[-1], max_points)
+    # For each evenly-spaced target coverage, the row that was actually "current" at that
+    # coverage level: the last row at or before it.
+    idx = np.searchsorted(coverage, targets, side="right") - 1
+    idx = np.unique(np.clip(idx, 0, len(curve) - 1))
+    return curve.iloc[idx].reset_index(drop=True)
+
+
+def calculate_auc(curve: pd.DataFrame) -> float:
+    """
+    Area under an already-computed precision-vs-coverage curve (average precision), reported
+    as the "AUC" main-plot metric. Returns NaN when the curve has fewer than two points (e.g.
+    a tool whose per-token scores are all identical, which happens for tools that don't
+    provide real per-residue scores and get a broadcast peptide score instead).
+    """
+    if len(curve) < 2:
+        return float("nan")
+    curve = curve.sort_values("coverage")
+    # np.trapezoid replaces np.trapz as of numpy 2.0 (removed outright in later numpy);
+    # the project's numpy floor predates that, so pick whichever is available.
+    trapezoid = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
+    return float(trapezoid(curve["precision"], curve["coverage"]))
+
+
+def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str, exact_dn_column: str = "aa_exact_dn"):
     df_aa = {}
 
     if evaluation_type == "mass":
@@ -73,7 +125,7 @@ def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str):
         df_aa["aa_match"] = list(chain(*df["aa_matches_dn"].tolist()))
     elif evaluation_type == "exact":
         df_aa["aa_score"] = list(chain(*df["aa_scores"].tolist()))
-        df_aa["aa_match"] = list(chain(*df["aa_exact_dn"].tolist()))
+        df_aa["aa_match"] = list(chain(*df[exact_dn_column].tolist()))
     else:
         raise Exception("Evaluation type should be mass or exact, but {} was provided.".format(evaluation_type))
 
@@ -218,6 +270,21 @@ class DenovoDatapoint(DatapointBase):
                     self=DenovoDatapoint(), df=intermediate, level=l, evaluation=e_type
                 )
 
+            # Ambiguity-toggle variants (I/L, deamidated Q/N vs E/D) only affect exact-mode
+            # matching -- mass mode already can't distinguish these (I/L are isomeric,
+            # deamidated Q/N are isobaric with E/D), so its metrics are identical regardless
+            # and aren't recomputed per combination. Precomputed here (once, at benchmarking
+            # time) rather than at plot time, since only the aggregated `results` dict -- not
+            # the raw intermediate dataframe -- is persisted for a submitted datapoint.
+            results[l]["exact"]["ambiguity"] = {}
+            for suffix, flags in AMBIGUITY_COMBOS.items():
+                if not suffix:
+                    continue  # baseline combination; already stored as results[l]["exact"]
+                combo_key = suffix.lstrip("_")
+                results[l]["exact"]["ambiguity"][combo_key] = DenovoDatapoint.get_metrics(
+                    self=DenovoDatapoint(), df=intermediate, level=l, evaluation="exact", **flags
+                )
+
         results["in_depth"] = DenovoDatapoint.get_indepth_metrics(self=DenovoDatapoint(), df=intermediate)
         result_datapoint.results = results
         result_datapoint.precision_peptide = result_datapoint.results["peptide"][evaluation_type]["precision"]
@@ -228,30 +295,53 @@ class DenovoDatapoint(DatapointBase):
         results_series = pd.Series(dataclasses.asdict(result_datapoint))
         return results_series
 
-    def get_metrics(self, df: pd.DataFrame, level: str, evaluation: str):
+    def get_metrics(
+        self,
+        df: pd.DataFrame,
+        level: str,
+        evaluation: str,
+        allow_il: bool = False,
+        allow_deamidation: bool = False,
+    ):
         """
         Compute various statistical metrics from the provided DataFrame for the benchmark.
+
+        Parameters
+        ----------
+        allow_il : bool
+            Only meaningful when `evaluation="exact"`: read the match/exactness columns
+            computed with I/L treated as equivalent. Ignored for `evaluation="mass"`,
+            since mass-based matching can't distinguish I/L regardless.
+        allow_deamidation : bool
+            Only meaningful when `evaluation="exact"`: read the match/exactness columns
+            computed with deamidated Q/N treated as equivalent to E/D. Ignored for
+            `evaluation="mass"` for the same reason as `allow_il`.
         """
 
         if evaluation == "mass":
             evaluation_list = ["mass", "exact"]
+            match_col = "match_type"
+            exact_dn_column = "aa_exact_dn"
         elif evaluation == "exact":
             evaluation_list = ["exact"]
+            suffix = get_ambiguity_suffix(allow_il, allow_deamidation)
+            match_col = f"match_type{suffix}"
+            exact_dn_column = f"aa_exact_dn{suffix}"
         else:
             raise Exception("Only `exact` and `mass` evaluation types are supported. Should never happen.")
 
         if level == "peptide":
             n = len(df)
             df_filtered = df.dropna(subset="peptidoform")
-            scores_correct = df_filtered.loc[df_filtered["match_type"].isin(evaluation_list), "score"].tolist()
             scores_all = df_filtered["score"].tolist()
+            is_correct = df_filtered[match_col].isin(evaluation_list).tolist()
 
         elif level == "aa":
             n_aa = df["aa_matches_gt"].apply(len).sum()
             df_filtered = df.dropna(subset="peptidoform")
-            df_aa = collapse_aa_scores(df_filtered, evaluation_type=evaluation)
-            scores_correct = df_aa.loc[df_aa["aa_match"], "aa_score"].tolist()
+            df_aa = collapse_aa_scores(df_filtered, evaluation_type=evaluation, exact_dn_column=exact_dn_column)
             scores_all = df_aa["aa_score"].tolist()
+            is_correct = df_aa["aa_match"].tolist()
             n = n_aa
 
         else:
@@ -259,17 +349,38 @@ class DenovoDatapoint(DatapointBase):
                 "Only `aa` and `peptide` levels for accuracy calculation are supported. Should never happen."
             )
 
-        res = calculate_prc(scores_correct=scores_correct, scores_all=scores_all, n_spectra=n, threshold=None)
+        res = calculate_prc(scores_all=scores_all, is_correct=is_correct, n_spectra=n)
+        full_curve = get_prc_curve(scores_all=scores_all, is_correct=is_correct, n_spectra=n)
+        res["auc"] = calculate_auc(full_curve)
+        stored_curve = downsample_curve(full_curve)
+        res["curve"] = {"coverage": stored_curve["coverage"].tolist(), "precision": stored_curve["precision"].tolist()}
         return res
 
     def get_indepth_metrics(self, df: pd.DataFrame):
         extra_metrics = {}
 
+        extra_metrics["in_FASTA"] = self.get_infasta_metrics(df)
         extra_metrics["PTM"] = self.get_ptm_metrics(df)
         extra_metrics["Spectrum"] = self.get_spectrum_metrics(df)
         extra_metrics["Species"] = self.get_species_metrics(df)
 
         return extra_metrics
+
+    def get_infasta_metrics(self, df: pd.DataFrame) -> dict:
+        """
+        Aggregate the per-PSM FASTA category (``correct`` / ``in_fasta`` / ``not_in_fasta``,
+        assigned once by `DenovoScores.add_fasta_category` at the end of
+        `generate_intermediate`) into counts and proportions for this single datapoint.
+        Precomputed here -- like every other in-depth metric -- so multiple datapoints can be
+        plotted together from their stored `results` dicts alone, without re-deriving anything
+        (e.g. via a live groupby) from each datapoint's raw intermediate dataframe, which isn't
+        persisted.
+        """
+        categories = ("correct", "in_fasta", "not_in_fasta")
+        n = len(df)
+        counts = df["category"].value_counts().reindex(categories, fill_value=0).astype(int).to_dict()
+        proportions = {cat: (counts[cat] / n if n else float("nan")) for cat in categories}
+        return {"counts": counts, "proportions": proportions, "n_spectra": n}
 
     def get_ptm_metrics(self, df: pd.DataFrame):
         mod_counts = {}
@@ -300,27 +411,27 @@ class DenovoDatapoint(DatapointBase):
         for mod_label, unimod_tag in mod_labels_gt.items():
             mod_count = 0
             correct = 0
-            for i, row in df[df[mod_label]].iterrows():
+            for row in df[df[mod_label]].itertuples():
                 mod_count, correct = self.evaluate_ptm(
                     mod_label=mod_label,
                     mod_tag=unimod_tag,
-                    peptidoform=row["peptidoform_ground_truth"],
-                    match_array=row["aa_exact_gt"],
+                    peptidoform=row.peptidoform_ground_truth,
+                    match_array=row.aa_exact_gt,
                 )
                 mod_counts[mod_label]["counts_gt"] += mod_count
                 mod_counts[mod_label]["correct_gt"] += correct
 
         # On predicted
+        df_filtered = df.dropna()  # Due to no predictions for certain spectra
         for mod_label, unimod_tag in mod_labels_dn.items():
-            df_filtered = df.dropna()  # Due to no predictions for certain spectra
             mod_count = 0
             correct = 0
-            for i, row in df_filtered[df_filtered[mod_label]].iterrows():
+            for row in df_filtered[df_filtered[mod_label]].itertuples():
                 mod_count, correct = self.evaluate_ptm(
                     mod_label=mod_label,
                     mod_tag=unimod_tag,
-                    peptidoform=row["peptidoform"],
-                    match_array=row["aa_exact_dn"],
+                    peptidoform=row.peptidoform,
+                    match_array=row.aa_exact_dn,
                 )
                 mod_counts[mod_label.split("(denovo)")[0].strip()]["counts_dn"] += mod_count
                 mod_counts[mod_label.split("(denovo)")[0].strip()]["correct_dn"] += correct

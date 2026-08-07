@@ -35,6 +35,16 @@ Analyze the downloaded files with your own tool, using whatever parameters you'd
 modules suggest a starting set of parameters for a fair baseline comparison, but you are not
 required to match them exactly.
 
+```{admonition} Automate this step with ProteoRunners
+:class: tip
+[ProteoRunners](https://github.com/Proteobench/ProteoRunners) is a Nextflow pipeline that runs
+several search engines (DIA-NN, AlphaDIA, Sage, FragPipe, MaxQuant, MetaMorpheus) on ProteoBench
+benchmark datasets inside Docker containers, so no manual tool installation is needed. It is
+useful if you want to benchmark multiple tools at once or reproduce a baseline run. Start it with:
+`nextflow run ProteoBench/ProteoRunners -r v1.0.0`. The pipeline's outputs are already structured
+for direct upload in step 4 below.
+```
+
 ## 4. Upload and inspect your results privately
 
 Open the module's web app page and use the "Upload New Results" tab. Upload the specific output

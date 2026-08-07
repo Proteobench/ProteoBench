@@ -70,6 +70,11 @@ You download the benchmark data, run it through your own software or pipeline lo
 the resulting files. This is what lets ProteoBench support commercial software, in-house pipelines,
 and tools still under development.
 
+If you want to automate running several open-source search engines (DIA-NN, AlphaDIA, Sage,
+FragPipe, MaxQuant, MetaMorpheus) on ProteoBench benchmark datasets, see
+[ProteoRunners](https://github.com/Proteobench/ProteoRunners), a separate Nextflow pipeline that
+runs them in Docker containers and produces output already structured for ProteoBench submission.
+
 ## Where do I find the input data for a module?
 
 Every module page links directly to its raw MS files, search database (where relevant), and any

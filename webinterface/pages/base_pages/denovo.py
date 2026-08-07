@@ -278,6 +278,7 @@ class DeNovoUIObjects(BaseUIModule):
             # Clear any previously uploaded parameter file and widget state so Tab 5
             # starts fresh for the new tool/file combination.
             st.session_state[self.variables.params_file_dict] = {}
+            st.session_state.pop(self.variables.params_file_dict + "__seeded_for", None)
             # Erase the old file uploader's stored file before cycling the UUID,
             # so the uploader cannot resurrect the old file even if the key persists.
             _old_meta_uuid = st.session_state.get(self.variables.meta_file_uploader_uuid)
@@ -672,12 +673,31 @@ class DeNovoUIObjects(BaseUIModule):
 
         # Parse parameter file if uploaded so parsed values pre-populate the fields below.
         # If no file is provided the fields render with schema defaults for manual entry.
-        if self.user_input[self.variables.meta_data]:
-            params_from_file = tab5_quant.load_user_parameters(
-                variables=self.variables,
-                ionmodule=self.ionmodule,
-                user_input=self.user_input,
-            )
+        #
+        # The seeding below (both the parsed-file values and the schema-default fallback)
+        # must run only once per uploaded file or tool switch, not on every rerun.
+        # `display_public_submission_ui` is not an @st.fragment, so it reruns in full on
+        # every widget interaction on the page, including the user editing one of the
+        # parameter fields rendered below. Re-seeding unconditionally would overwrite that
+        # edit with the originally parsed/default value before the widget is even redrawn,
+        # since Streamlit ignores a widget's `value=` argument once its `key` already holds
+        # a value in session state.
+        uploaded_files = self.user_input[self.variables.meta_data]
+        upload_fingerprint = tuple(sorted((f.name, f.size) for f in uploaded_files)) if uploaded_files else None
+        seed_state_key = self.variables.params_file_dict + "__seeded_for"
+        current_seed = (upload_fingerprint, self.user_input.get("input_format"))
+        needs_seeding = st.session_state.get(seed_state_key) != current_seed
+
+        if needs_seeding:
+            if uploaded_files:
+                params_from_file = tab5_quant.load_user_parameters(
+                    variables=self.variables,
+                    ionmodule=self.ionmodule,
+                    user_input=self.user_input,
+                )
+            else:
+                params_from_file = None
+
             if params_from_file is not None:
                 st.session_state[self.variables.params_file_dict] = params_from_file.__dict__
                 self.params_file_dict_copy = copy.deepcopy(params_from_file.__dict__)
@@ -699,62 +719,65 @@ class DeNovoUIObjects(BaseUIModule):
                         sanitized = val
                     st.session_state[self.variables.prefix_params + key] = sanitized
             else:
+                st.session_state[self.variables.params_file_dict] = {}
                 self.params_file_dict_copy = {}
-        else:
+
+            # Write every parameter widget's session state to the desired starting value
+            # (parsed value if available, otherwise the JSON schema default for the current
+            # tool), for fields not covered above. Only runs as part of this seeding pass,
+            # so it never clobbers a value the user has since typed into a field.
+            with open(self.variables.additional_params_json, encoding="utf-8") as _schema_f:
+                _param_schema = json.load(_schema_f)
+            _file_dict = st.session_state.get(self.variables.params_file_dict, {})
+            for _field_key, _field_schema in _param_schema.items():
+                _is_checkbox = _field_schema.get("type") == "checkbox"
+                if _field_key in _file_dict:
+                    _val = _file_dict[_field_key]
+                    if _is_checkbox:
+                        # Checkbox fields (e.g. postprocessing_performed) carry a scalar bool
+                        # default, not a dict — keep them as real bool, not a stringified one.
+                        _val = bool(_val) if pd.notna(_val) else bool(_field_schema.get("value", False))
+                    else:
+                        # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
+                        # np.nan is a float and cannot be serialized by Streamlit's protobuf for
+                        # text_input; convert to "" (empty). Non-string non-missing values are
+                        # stringified to match what st.text_input expects.
+                        try:
+                            _is_missing = pd.isna(_val)
+                        except (TypeError, ValueError):
+                            _is_missing = False
+                        if _is_missing:
+                            _val = ""
+                        elif not isinstance(_val, str):
+                            _val = str(_val)
+                    st.session_state[self.variables.prefix_params + _field_key] = _val
+                else:
+                    _schema_value = _field_schema.get("value")
+                    if _is_checkbox:
+                        _default = bool(_schema_value) if _schema_value is not None else False
+                    else:
+                        # Text-like fields store their per-tool default under "value" as a
+                        # dict keyed by input_format (tool name); fall back to the schema
+                        # value itself if it isn't a dict.
+                        _default = (
+                            _schema_value.get(self.user_input.get("input_format", ""), None)
+                            if isinstance(_schema_value, dict)
+                            else _schema_value
+                        )
+                        _default = _default if _default is not None else ""
+                    st.session_state[self.variables.prefix_params + _field_key] = _default
+
+            st.session_state[seed_state_key] = current_seed
+        elif self.variables.params_file_dict not in st.session_state:
+            st.session_state[self.variables.params_file_dict] = {}
             self.params_file_dict_copy = {}
+        else:
+            self.params_file_dict_copy = copy.deepcopy(st.session_state[self.variables.params_file_dict])
 
         # Always override software_name with the active input_format. This must come after
         # the parameter file re-application above, which does a full dict replacement and
         # would otherwise overwrite this value.
         st.session_state[self.variables.params_file_dict]["software_name"] = self.user_input["input_format"]
-
-        # Explicitly write every parameter widget's session state to the desired value
-        # (YAML-parsed value if available, otherwise JSON default for the current tool).
-        # This is necessary because generate_additional_parameters_fields_submission contains
-        # `on_change=func(args)` — Python evaluates these arguments immediately on every render,
-        # reading stale browser-sent session state and rewriting params_file_dict with old values.
-        # By explicitly owning the session state keys here, before the widgets render, we
-        # prevent any browser-side stale value from slipping through.
-        with open(self.variables.additional_params_json, encoding="utf-8") as _schema_f:
-            _param_schema = json.load(_schema_f)
-        _file_dict = st.session_state.get(self.variables.params_file_dict, {})
-        for _field_key, _field_schema in _param_schema.items():
-            _is_checkbox = _field_schema.get("type") == "checkbox"
-            if _field_key in _file_dict:
-                _val = _file_dict[_field_key]
-                if _is_checkbox:
-                    # Checkbox fields (e.g. postprocessing_performed) carry a scalar bool
-                    # default, not a dict — keep them as real bool, not a stringified one.
-                    _val = bool(_val) if pd.notna(_val) else bool(_field_schema.get("value", False))
-                else:
-                    # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
-                    # np.nan is a float and cannot be serialized by Streamlit's protobuf for
-                    # text_input; convert to "" (empty). Non-string non-missing values are
-                    # stringified to match what st.text_input expects.
-                    try:
-                        _is_missing = pd.isna(_val)
-                    except (TypeError, ValueError):
-                        _is_missing = False
-                    if _is_missing:
-                        _val = ""
-                    elif not isinstance(_val, str):
-                        _val = str(_val)
-                st.session_state[self.variables.prefix_params + _field_key] = _val
-            else:
-                _schema_value = _field_schema.get("value")
-                if _is_checkbox:
-                    _default = bool(_schema_value) if _schema_value is not None else False
-                else:
-                    # Text-like fields store their per-tool default under "value" as a
-                    # dict keyed by input_format (tool name); fall back to the schema
-                    # value itself if it isn't a dict.
-                    _default = (
-                        _schema_value.get(self.user_input.get("input_format", ""), None)
-                        if isinstance(_schema_value, dict)
-                        else _schema_value
-                    )
-                    _default = _default if _default is not None else ""
-                st.session_state[self.variables.prefix_params + _field_key] = _default
 
         # Always show parameter fields, comments, and confirmation checkbox.
         tab5_quant.generate_additional_parameters_fields_submission(

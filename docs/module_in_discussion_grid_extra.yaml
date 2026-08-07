@@ -24,3 +24,7 @@ modules:
   - label: "Feature finding algorithms for MALDI MS imaging "
     url: "https://github.com/orgs/Proteobench/discussions/1072"
     description: "Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides."
+
+  - label: "Crosslink FDR validation with advanced entrapment database"
+    url: "https://github.com/orgs/Proteobench/discussions/1095"
+    description: "Estimation of false identification errors in the context of crosslinking experiments in bottom-up DDA."

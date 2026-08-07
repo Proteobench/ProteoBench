@@ -427,7 +427,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             return st.selectbox(
                 "Q-value threshold",
-                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                ["0.001", "0.01", "0.05", "0.1", "1.0"],
                 index=1,
                 key=st.session_state[key],
             )
@@ -442,9 +442,9 @@ class EntrapmentUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
-        threshold_str = results[2] if len(results) > 3 else "Maximum reported"
+        threshold_str = results[2] if len(results) > 3 else "0.01"
         colorblind_mode = results[3] if len(results) > 2 else False
-        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
+        threshold = float(threshold_str)
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
@@ -524,7 +524,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             return st.selectbox(
                 "Q-value threshold",
-                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                ["0.001", "0.01", "0.05", "0.1", "1.0"],
                 index=1,
                 key=st.session_state[key],
             )
@@ -539,26 +539,25 @@ class EntrapmentUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
-        threshold_str = results[2] if len(results) > 2 else "Maximum reported"
+        threshold_str = results[2] if len(results) > 2 else "0.01"
         colorblind_mode = results[3] if len(results) > 3 else False
-        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
+        threshold = float(threshold_str)
 
         # Warn when the newly uploaded datapoint's max Q-value is below the selected threshold,
         # which means it won't appear in the plot at the current setting.
-        if threshold is not None:
-            all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
-            if all_dp is not None and not all_dp.empty and "old_new" in all_dp.columns:
-                new_rows = all_dp[all_dp["old_new"] == "new"]
-                if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
-                    max_q = float(new_rows.iloc[0]["reported_fdr_parsed_from_input"])
-                    if max_q < threshold:
-                        available = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
-                        suggestion = f"Try selecting **{max(available):.3f}** or lower." if available else ""
-                        st.warning(
-                            f"🚨 The uploaded data has a maximum Q-value of **{max_q:.4f}**, which is below "
-                            f"the selected threshold of **{threshold}**. "
-                            f"The uploaded datapoint is not shown at this threshold. {suggestion} 🚨"
-                        )
+        all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
+        if all_dp is not None and not all_dp.empty and "old_new" in all_dp.columns:
+            new_rows = all_dp[all_dp["old_new"] == "new"]
+            if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
+                max_q = float(new_rows.iloc[0]["reported_fdr_parsed_from_input"])
+                if max_q < threshold:
+                    available = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
+                    suggestion = f"Try selecting **{max(available):.3f}** or lower." if available else ""
+                    st.warning(
+                        f"🚨 The uploaded data has a maximum Q-value of **{max_q:.4f}**, which is below "
+                        f"the selected threshold of **{threshold}**. "
+                        f"The uploaded datapoint is not shown at this threshold. {suggestion} 🚨"
+                    )
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")

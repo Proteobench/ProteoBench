@@ -79,7 +79,7 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample aquired on a timsTOF.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-plasma/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion ZenoTOF
         :columns: 6 6 4 4

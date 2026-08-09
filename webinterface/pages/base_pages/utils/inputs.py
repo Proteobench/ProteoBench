@@ -48,14 +48,18 @@ def generate_input_widget(
         return _generate_checkbox(variables_quant, content=content, key=key, editable=editable)
 
 
-# ToDo: make function accecpt a session state key if that is what is only needed
 def update_parameters_submission_form(
     variables_quant,
     field,
-    value,
+    widget_key,
 ) -> None:
     """
-    Update the session state dictionary with the specified field and value.
+    Update the session state dictionary with the current value of a widget.
+
+    Registered as a widget's `on_change` callback, so it only runs when Streamlit
+    detects that the widget's value actually changed; `widget_key` is looked up at
+    that time via `args=`, rather than being pre-computed at render time (which
+    would run on every script rerun regardless of whether the widget changed).
 
     Parameters
     ----------
@@ -63,9 +67,10 @@ def update_parameters_submission_form(
         The variables quantification dataclass containing the session state keys used.
     field : str
         The field to update.
-    value : Any
-        The value to update the field with.
+    widget_key : str
+        The session state key of the widget holding the new value.
     """
+    value = st.session_state.get(widget_key)
     session_state_key = variables_quant.params_file_dict
     try:
         st.session_state[session_state_key][field] = value
@@ -140,9 +145,8 @@ def _generate_text_input(
         placeholder=placeholder,
         key=variables_quant.prefix_params + key,
         value=value,
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
 
@@ -181,9 +185,8 @@ def _generate_number_input(
         format=content["format"],
         min_value=content["min_value"],
         max_value=content["max_value"],
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
 
@@ -226,9 +229,8 @@ def _generate_selectbox(
         options,
         key=variables_quant.prefix_params + key,
         index=index,
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
 
@@ -258,9 +260,8 @@ def _generate_checkbox(variables_quant, content: dict, key: str = "", editable: 
         content["label"],
         key=variables_quant.prefix_params + key,
         value=value,
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
 

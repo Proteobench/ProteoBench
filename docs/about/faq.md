@@ -32,7 +32,7 @@ ProteoBench is modular by design specifically so it can grow with new use cases.
 
 ## Do I need to use the same workflow parameters as other users?
 
-No. Yu're free to submit results from your own parameter choices. 
+No. You're free to submit results from your own parameter choices. 
 Every public submission's parameters are collected and
 downloadable, so others can interpret performance differences in light of software version,
 settings, and search database. If you're deliberately testing one specific parameter, mention that

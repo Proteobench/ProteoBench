@@ -29,6 +29,6 @@ modules:
     url: "https://github.com/orgs/Proteobench/discussions/1095"
     description: "Benchmark FDR evaluation on cross-linked peptides using a specific entrapment database."
 
-  - label: "peptide detectability predictors"
+  - label: "Peptide detectability predictors"
     url: "https://github.com/orgs/Proteobench/discussions/971"
     description: "Benchmark the performance of peptide detectability predictors."

@@ -6,7 +6,7 @@
 "token_log_probs" = "aa_scores"
 
 [spectrum_id_mapper]
-"pattern" = "(\\d+)$"
+"pattern" = ":(\\d+)$"
 
 [sequence_mapper]
 

@@ -1,7 +1,7 @@
 (faq)=
 # Frequently asked questions
 
-For "What is ProteoBench" and "Who is it for", see the [Overview](index.md). This page covers
+The answers to "What is ProteoBench?" and "Who is it for?" are in the section [About](index.md). This page covers
 more specific questions.
 
 ## How do I use ProteoBench?

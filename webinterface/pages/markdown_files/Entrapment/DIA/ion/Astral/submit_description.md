@@ -2,7 +2,7 @@
 
 To do so, you need to provide the parameter file that corresponds to
 your analysis. You can upload it in the drag and drop area below.
-See [here](https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/)
+See [here](https://proteobench.readthedocs.io/en/latest/modules/dia/entrapment-dia-astral/)
 for all compatible parameter files.
 
 Use the following parameter files:

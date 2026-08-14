@@ -70,7 +70,7 @@ class WebpageTexts:
 
         input_file = """
             Output file of the software tool. More information on the accepted format can
-            be found [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/)
+            be found [here](https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-aif/)
             """
 
         pull_req = """
@@ -80,7 +80,7 @@ class WebpageTexts:
         input_format = """
             Please select the software you used to generate the results. If it is not yet
             implemented in ProteoBench, you can use a tab-delimited format that is described
-            further [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/)
+            further [here](https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-aif/)
         """
 
         parse_button = """
@@ -89,7 +89,7 @@ class WebpageTexts:
 
         meta_data_file = """
             Please add a file with meta data that contains all relevant information about
-            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/available-modules/4-quant-lfq-ion-dia-aif/)
+            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-aif/)
             for all compatible parameter files.
         """
 

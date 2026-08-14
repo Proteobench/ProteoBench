@@ -385,9 +385,7 @@ def display_download_section(variables, sort_by: str = "id") -> None:
                 icon="⚠️",
             )
     elif selected_hash is not None:
-        st.info(
-            "Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️"
-        )
+        st.info("Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️")
 
 
 def load_and_filter_main_data(variables, ionmodule, use_slider: bool = True) -> pd.DataFrame:

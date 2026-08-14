@@ -2,6 +2,13 @@
 
 {bdg-success}`alpha` {bdg-primary-line}`Identification` — DDA, HCD fragmentation, peptide/amino-acid level
 
+```{admonition} This module is in alpha stage
+:class: warning
+This module is still in active development. Its scope, metrics, or dataset may change as we refine
+it based on community feedback. Submissions are welcome, but please be aware that comparisons may
+shift in future versions.
+```
+
 Compares the peptide-sequencing accuracy of *de novo* sequencing models and algorithms on
 data-dependent acquisition (DDA) data acquired with HCD fragmentation on Orbitrap instruments.
 
@@ -80,10 +87,10 @@ The performance is evaluated at both the amino acid and peptide level. As introd
 
 The main accuracy plot provides a **global overview of de novo sequencing performance** across the evaluated tools. It visualizes the relationship between **peptide-level identification performance** and **amino-acid level sequence accuracy**. Each point in the plot corresponds to a de novo sequencing tool and shows the amino acid and peptide level accuracy. The plot combines two levels of evaluation:
 
-**X-axis – Peptide-level metric**  
+**X-axis – Peptide-level metric**
 The x-axis displays either peptide-level **precision** or **AUC**, depending on the selected setting.
 
-**Y-axis – Amino-acid level metric**  
+**Y-axis – Amino-acid level metric**
 The y-axis always shows the corresponding **amino-acid level metric**, measuring how accurately the individual residues in the predicted sequences match the ground truth.
 
 This design allows the plot to simultaneously capture both **identification reliability** and **sequence-level correctness**.
@@ -109,7 +116,7 @@ The **evaluation mode** determines how predictions are classified as correct.
 In **exact** evaluation mode, a prediction is considered correct only if the predicted peptide sequence **exactly matches the ground-truth sequence**, including both amino acids and modifications. This represents the **strictest accuracy definition**. This exact matching can be relaxed by allowing 2 specific ambiguities: Isoleucine-leucine ambiguity and deamidated-DE - NQ ambiguity. In **mass-based** evaluation mode, predictions are considered correct when they match the ground-truth sequence based on **cumulative fragment masses**, even if the exact amino-acid sequence differs.
 The algorithm identifies the longest **mass-matching prefix and suffix** between the predicted and reference peptide sequences. Two mass tolerances are used during this process:
 
-- **Cumulative mass threshold** – maximum allowed difference between cumulative fragment masses (50 ppm)  
+- **Cumulative mass threshold** – maximum allowed difference between cumulative fragment masses (50 ppm)
 - **Individual mass threshold** – maximum allowed difference between individual amino-acid masses (20 ppm)
 
 This evaluation accounts for typical ambiguities in mass spectrometry data. Match-based evaluation therefore counts both **exact matches and mass-equivalent matches**, while exact evaluation only counts **perfect sequence matches** (while optionally allowing two specific commonly occuring ambiguities).
@@ -223,7 +230,7 @@ From `results.mztab`, ProteoBench reads `spectra_ref` (spectrum ID, from `index=
 :::
 
 :::{dropdown} Casanovo
-Set up [Casanovo](https://casanovo.readthedocs.io/en/latest/) and run it on the ground-truth MGF. **Be sure not to change the file name or the spectrum identifiers**. 
+Set up [Casanovo](https://casanovo.readthedocs.io/en/latest/) and run it on the ground-truth MGF. **Be sure not to change the file name or the spectrum identifiers**.
 Upload `results.mztab` for scoring and `config.yaml` for public submission.
 
 From `results.mztab`, ProteoBench reads `spectra_ref` (spectrum ID, from `index=<number>`),
@@ -231,7 +238,7 @@ From `results.mztab`, ProteoBench reads `spectra_ref` (spectrum ID, from `index=
 :::
 
 :::{dropdown} ContraNovo
-Set up [ContraNovo](https://github.com/BEAM-Labs/ContraNovo) and run it on the ground-truth MGF. **Be sure not to change the file name or the spectrum identifiers**. 
+Set up [ContraNovo](https://github.com/BEAM-Labs/ContraNovo) and run it on the ground-truth MGF. **Be sure not to change the file name or the spectrum identifiers**.
 Upload `results.mztab` for scoring and `config.yaml` for public submission.
 
 From `results.mztab`, ProteoBench reads `spectra_ref` (spectrum ID, from `scan=<number>`),

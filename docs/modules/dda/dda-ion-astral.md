@@ -2,6 +2,12 @@
 
 {bdg-info}`beta` {bdg-primary-line}`Quantification` — DDA, Orbitrap Astral, precursor-ion level
 
+```{admonition} This module is in beta stage
+:class: note
+This module has been validated and is suitable for submissions. However, metrics or thresholds may
+be refined as we gather more community results and feedback.
+```
+
 Compares label-free quantification (LFQ) accuracy and sensitivity for workflows run on
 data-dependent acquisition (DDA) data from an Orbitrap Astral (Thermo Fisher).
 

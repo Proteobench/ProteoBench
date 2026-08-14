@@ -1,58 +1,14 @@
 # About
 
-## What is ProteoBench?
+[ProteoBench](https://proteobench.cubimed.rub.de/) is an open and collaborative platform for community-curated benchmarks for proteomics data analysis pipelines. Our goal is to allow a continuous, easy, and controlled comparison of proteomics data analysis workflows.
 
-[ProteoBench](https://proteobench.cubimed.rub.de/) is an open, community-curated platform for
-benchmarking proteomics data analysis workflows. It lets anyone compare how different tools,
-versions, and parameter choices perform on the same standardized datasets — continuously, and
-without needing to run every tool yourself.
+ProteoBench provides a centralized web platform for developers and end-users to compare proteomics data analysis pipelines. This community-curated effort will allow for an easy and controlled comparison of tools developed or used by the participants to other state-of-the-art pipelines for specific applications. The goal is not to select a single best one-fits-all data analysis workflow, but to allow:
 
-You download a set of input files for a data type you care about, analyze them with your own
-workflow, and upload the results. ProteoBench then computes a standard set of metrics from your
-output and shows them alongside every other public result for that same benchmark, so differences
-in performance reflect differences in workflows, not differences in data.
+- end-users to identify a good workflow to fulfill their specific needs
+- developers to identify the specific strengths and weaknesses in their workflows, guiding the development process
+- the field to easily position a newly published workflow within the context of the existing state-of-the-art
 
-```{button-ref} /modules/index
-:color: primary
-:class: sd-mr-2
-
-Browse the benchmarking modules
-```
-```{button-ref} /your-first-submission/index
-:color: secondary
-:outline:
-
-Submit your first result
-```
-
-## Who is it for?
-
-- **End-users** — researchers and core facilities who want to pick a workflow that fits their data,
-  or check how their routine analysis compares to the state of the art.
-- **Developers** — people building or maintaining analysis software who want to see exactly where
-  their tool is strong or weak, and track that over versions.
-- **The wider community** — anyone who wants to see how a newly published workflow stacks up
-  against existing ones, with the full parameters behind every result available to inspect.
-
-## What ProteoBench is — and isn't
-
-ProteoBench:
-
-- Makes it easy to compare existing data analysis workflows, in a controlled way
-- Gives newly developed workflows a frame of reference
-- Documents benchmarks that each highlight specific strengths or weaknesses of a workflow (or a
-  step within it)
-- Grows continuously as the community adds new modules, datasets, and use cases
-
-ProteoBench deliberately **does not**:
-
-- Point to a single "best" workflow for every use case
-- Provide evidence for sweeping claims about a workflow's general performance
-- Serve as the sole performance measure for a tool under active development
-
-A tool that performs well on one module, dataset, or metric may not be the best choice for a
-different instrument, acquisition method, or biological question. Treat ProteoBench as
-transparent, reproducible decision support — not a leaderboard.
+Participants (both end-users and developers) can download a set of input files (e.g., raw MS files, search databases, or spectral libraries) tailored to specific benchmark metrics. They can then analyze the data with any workflow, and upload the results in a homogenized format. A set of metrics will be retrieved or calculated from these results and can be visualized alongside all the other metrics calculated from the results of other participants (or of curated benchmark runs).
 
 ## Need more help?
 

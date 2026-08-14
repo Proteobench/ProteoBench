@@ -119,9 +119,7 @@ class VariablesDIAEntrapmentAstral:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/entrapment/DIA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/modules/dia/entrapment-dia-astral/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/entrapment-dia-astral/"
     raw_data_url: str = (
         "https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz"
     )

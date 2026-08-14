@@ -85,6 +85,5 @@ which builds the package and publishes it to PyPI; the Bioconda automation then 
 Bioconda package (the conda recipe needs a manual update if dependencies changed).
 
 ## Contributors
-
-See the full list of people who contributed to ProteoBench on the {doc}`Contributors <contributors>`
+If you contributed to ProteoBench, please add your name to the {doc}`Contributors <contributors>`
 page.

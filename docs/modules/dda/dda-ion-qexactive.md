@@ -2,6 +2,12 @@
 
 {bdg-info}`beta` {bdg-primary-line}`Quantification` — DDA, Q Exactive HF-X Orbitrap, precursor-ion level
 
+```{admonition} This module is in beta stage
+:class: note
+This module has been validated and is suitable for submissions. However, metrics or thresholds may
+be refined as we gather more community results and feedback.
+```
+
 Compares label-free quantification (LFQ) accuracy and sensitivity for workflows run on
 data-dependent acquisition (DDA) data from a Q Exactive HF-X Orbitrap (Thermo Fisher). This is the
 reference module to start with if you're new to ProteoBench — see

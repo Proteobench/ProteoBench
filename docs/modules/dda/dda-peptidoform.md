@@ -2,6 +2,12 @@
 
 {bdg-info}`beta` {bdg-primary-line}`Quantification` — DDA, Q Exactive HF-X Orbitrap, peptidoform level
 
+```{admonition} This module is in beta stage
+:class: note
+This module has been validated and is suitable for submissions. However, metrics or thresholds may
+be refined as we gather more community results and feedback.
+```
+
 Compares label-free quantification (LFQ) accuracy and sensitivity for workflows run on the same
 data-dependent acquisition (DDA) dataset as [LFQ, precursor ion (QExactive)](dda-ion-qexactive.md),
 but scored at the **peptidoform level** (summarized from precursor-ion quantities) rather than the

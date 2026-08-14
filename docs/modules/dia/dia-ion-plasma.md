@@ -2,6 +2,12 @@
 
 {bdg-success}`beta` {bdg-primary-line}`Quantification` — DIA, timsTOF, human plasma background (PYE)
 
+```{admonition} This module is in beta stage
+:class: note
+This module has been validated and is suitable for submissions. However, metrics or thresholds may
+be refined as we gather more community results and feedback.
+```
+
 Compares the sensitivity and quantification accuracy of workflows for data-independent acquisition
 (DIA) data on human plasma samples spiked with yeast and *E. coli* (the PYE dataset:
 Plasma/Yeast/*E. coli*).

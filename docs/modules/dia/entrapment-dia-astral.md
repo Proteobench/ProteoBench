@@ -2,14 +2,15 @@
 
 {bdg-info}`beta` {bdg-primary-line}`FDR validation` — DIA, Orbitrap Astral, global precursor-ion FDR
 
+```{admonition} This module is in beta stage
+:class: note
+This module has been validated and is suitable for submissions. However, metrics or thresholds may
+be refined as we gather more community results and feedback.
+```
+
 Uses entrapment peptides to assess whether the false discovery rate (FDR) reported by a DIA search
 engine is reliable. Based on the entrapment approach in
 [Wen et al., 2025](https://www.nature.com/articles/s41592-025-02719-x).
-
-```{admonition} Beta stage
-:class: warning
-Results and interfaces may change.
-```
 
 ```{button-link} https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral
 :color: primary
@@ -102,7 +103,7 @@ from the output file).
 `ident_fdr_psm` (the FDR setting extracted from the parameter/log file for public submission).
 `reported_fdr_parsed_from_input` is computed as the maximum Q-value actually present among the
 rows in the uploaded result file, so it reflects what the file contains rather than what was
-configured. 
+configured.
 ```
 
 Precursor identifications are matched to the entrapment mapping file using their exact modified
@@ -203,7 +204,7 @@ Example file:
 [`custom_format_entrapment.csv`](https://github.com/Proteobench/ProteoBench/blob/main/test/data/entrapment/custom_format_entrapment.csv).
 :::
 
-## Result columns
+## Result plots
 
 After uploading, you'll see the FDP bounds plotted against the FDR estimate reported by the search
 engine. A valid (conservative) FDR calculation has the empirical upper bound below the declared FDR

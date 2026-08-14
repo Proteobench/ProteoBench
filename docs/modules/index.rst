@@ -1,6 +1,6 @@
-#######
-Modules
-#######
+####################
+Benchmarking Modules
+####################
 
 A benchmark module compares data analysis workflows on one specific task, using a fixed input
 dataset and a fixed set of metrics. Because each module defines exactly what goes in and how

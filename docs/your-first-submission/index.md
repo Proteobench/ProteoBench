@@ -84,7 +84,7 @@ sanitize paths before submitting.
 
 ## 6. Submit for public review
 
-Confirm the metadata is correct, then press **"I really want to upload it"**. ProteoBench will run a couple of automatic validation steps, which might throw warnings. 
+Confirm the metadata is correct, then press **"I really want to upload it"**. ProteoBench will run a couple of automatic validation steps, which might throw warnings.
 After a brief moment and a couple of celebratory balloons, you will see a link to the Pull request opened with your submission — save it. That link contains your submission's unique
 identifier, lets you track its status, and lets you leave comments for the ProteoBench maintainers.
 
@@ -98,7 +98,7 @@ identifier, lets you track its status, and lets you leave comments for the Prote
    from a local install without the data being uploaded won't be accepted.
 
 This usually takes a few working days. If something needs fixing, the reviewer will comment on your
-PR.
+PR. For further information, see [Submission validation](../contributing/submission-validation).
 
 ## 7. Your run goes public
 
@@ -107,6 +107,6 @@ alongside every other validated run for that module — visible to the whole com
 that way as new submissions arrive.
 
 ## Questions?
-
-[Open an issue](https://github.com/Proteobench/ProteoBench/issues/new) or
+[Check the FAQ](../about/faq.md) or
+[open an issue](https://github.com/Proteobench/ProteoBench/issues/new) or
 [email us](mailto:proteobench@eubic-ms.org?subject=ProteoBench_query).

@@ -33,10 +33,10 @@ ProteoBench is modular by design specifically so it can grow with new use cases.
 ## Do I need to use the same workflow parameters as other users?
 
 No. You're free to submit results from your own parameter choices. There are only a few exceptions
-such as digestion parameters for the entrapment module, and specific FASTA files for most modules. 
+such as digestion parameters for the entrapment module, and specific FASTA files for most modules.
 Those exceptions are explicitely mentioned in each module documentation page.
-Every public submission's parameters are collected and downloadable, so others can interpret performance differences 
-in light of software version, settings, and search database. If you're deliberately testing 
+Every public submission's parameters are collected and downloadable, so others can interpret performance differences
+in light of software version, settings, and search database. If you're deliberately testing
 one specific parameter, mention that in the comments field when you submit.
 
 ## Do I need a specific FASTA database?
@@ -50,7 +50,9 @@ Yes, as long as its output can be parsed directly or converted into one of the m
 formats (see that module's "Tool-specific setup" section, or use the
 [custom format](../your-first-submission/index.md#if-your-tool-isnt-supported) if there's no
 parser yet).
-Users and developers are encouraged to contact the ProteoBench developers if they want a new parser to be added for a specific software package. You can [open an issue (https://github.com/Proteobench/ProteoBench/issues) or [propose a new parser](../contributing/adding-a-module).
+Users and developers are encouraged to contact the ProteoBench developers if they want a
+new parser to be added for a specific software package.
+You can [open an issue] (https://github.com/Proteobench/ProteoBench/issues) or [propose a new parser](../contributing/adding-a-module).
 
 ## What should I do if my tool isn't directly supported?
 
@@ -64,7 +66,8 @@ that involves. If you'd like native support instead,
 
 Manual review is a quality check: it catches incomplete submissions, wrong file types, a mismatched
 module, missing metadata, or results that can't be meaningfully compared to what's already public.
-The submission process is done on GitHub, and you can contact the core ProteoBench team if you have any question and/or wants to provide more information on the benchmark run that you want to make public.
+The submission process is done on GitHub, and you can contact the core ProteoBench team if you have
+ any question and/or wants to provide more information on the benchmark run that you want to make public.
 
 ## Does ProteoBench run my workflow automatically?
 
@@ -102,7 +105,10 @@ inference, and quantification strategy are all treated as part of the workflow b
 report them in your submission's parameter file. Where ProteoBench itself does perform some
 processing, the relevant module page says so explicitly.
 
-We advise against applying any form of post-processing to the workflow output that you want to submit to ProteoBench. If you do perform post-processing, you should indicate it when you upload your workflow parameters in the Public Submission tab. A check box and a free-text field are present to this effect.
+We advise against applying any form of post-processing to the workflow output that you want to
+ submit to ProteoBench. If you do perform post-processing, you should indicate it when you
+  upload your workflow parameters in the Public Submission tab. A check box and a free-text
+   field are present to this effect.
 
 ## How do I interpret differences between benchmark runs?
 
@@ -114,9 +120,9 @@ and the submitted parameters before drawing conclusions.
 ## Does ProteoBench validate FDR independently?
 
 Where appropriate datasets exist, yes — see the entrapment-based modules (e.g.
-[DIA Ion Entrapment - Astral](../modules/dia/entrapment-dia-astral.md)), which spike in peptides
-that cannot be legitimately identified to estimate the true false discovery proportion independent
-of what the search engine reports.
+[DIA Ion Entrapment - Astral](../modules/dia/entrapment-dia-astral.md)), which add peptides
+into the FASTA that cannot be legitimately identified to estimate the true false discovery
+proportion independent of what the search engine reports.
 
 ## How should I read the main plot on a module page?
 

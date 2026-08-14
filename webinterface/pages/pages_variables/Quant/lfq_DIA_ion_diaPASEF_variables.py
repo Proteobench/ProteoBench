@@ -52,7 +52,9 @@ class VariablesDIAQuantdiaPASEF:
     sidebar_label: str = "Quant LFQ DIA ion diaPASEF"
     homepage_title: str = "LFQ Quantification on a timsTOF (diaPASEF)"
     graphical_abstract: str = "Graphical_abstract_Quant_timsTOF.png"
-    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a multi-species (HYE) sample on a timsTOF instrument."
+    documentation_description: str = (
+        "Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a multi-species (HYE) sample on a timsTOF instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_diaPASEF"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
@@ -114,9 +116,7 @@ class VariablesDIAQuantdiaPASEF:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-diapasef/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-diapasef/"
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/diaPASEF/all_data_LFQ_Quant_DIA_diaPASEF.tar.gz"
 
     title: str = "DIA Precursor quantification - diaPASEF"

@@ -2,6 +2,13 @@
 
 {bdg-success}`alpha` {bdg-primary-line}`Quantification` — DIA, Orbitrap Astral, low sample input
 
+```{admonition} This module is in alpha stage
+:class: warning
+This module is still in active development. Its scope, metrics, or dataset may change as we refine
+it based on community feedback. Submissions are welcome, but please be aware that comparisons may
+shift in future versions.
+```
+
 Compares the sensitivity and quantification accuracy of workflows for data acquired with
 data-independent acquisition (DIA) on an Astral at low sample input (single-cell-scale amounts).
 

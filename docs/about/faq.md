@@ -42,7 +42,7 @@ one specific parameter, mention that in the comments field when you submit.
 ## Do I need a specific FASTA database?
 
 Where the choice of database affects the benchmark outcome, the module page specifies the required
-or recommended FASTA. Using the same database keeps submissions comparable.
+or recommended FASTA. Using the same database keeps benchmark runs comparable.
 
 ## Can I benchmark commercial software?
 

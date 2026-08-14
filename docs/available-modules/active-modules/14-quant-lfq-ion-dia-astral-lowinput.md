@@ -16,7 +16,7 @@ Other modules will be more suited to explore further post-pocessing steps.
 
 ## Data set
 
-An [Astral dataset with low input three-proteome mixture samples](https://www.biorxiv.org/content/10.64898/2026.07.13.738155v1.full.pdf) containing two distinct abundance ratio's of tryptic digest each injected at a total of 200 pg protein amount, which correspond to logarithmic fold changes (log2FCs) of 0, −1 and 2 for respectively Human, E.coli and Yeast. The human mixture was sourced from Pierce Hela Protein Digest Standard (Thermo Fisher Scientific, #88328). Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
+An [Astral dataset with low input three-proteome mixture samples](https://www.biorxiv.org/content/10.64898/2026.07.13.738155v1.full.pdf) containing two distinct abundance ratio's of tryptic digest each injected at a total of 200 pg protein amount, which correspond to logarithmic fold changes (log2FCs) of 0, −2 and 1 for respectively Human, E.coli and Yeast. The human mixture was sourced from Pierce Hela Protein Digest Standard (Thermo Fisher Scientific, #88328). Please refer to the original publication for the full description of sample preparation ([Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6)). 
 
 
 <details>

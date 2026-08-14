@@ -48,6 +48,26 @@ def _set_if_present(params: ProteoBenchParameters, attr: str, value: Any) -> Non
         setattr(params, attr, value)
 
 
+def _extract_precursor_mass_tolerance(config: dict[str, Any]) -> Any:
+    """Read the precursor mass tolerance, keeping its unit where the key implies one.
+
+    InstaNovo spells this differently across config generations:
+
+    * ``precursor_mass_tol`` -- older configs, documented in ppm but unit-less in the value
+    * ``filter_precursor_ppm`` -- the inference-config key from v1.2.2 onwards
+
+    The submission form asks for the unit ("Precursor mass tolerance (including unit ppm,
+    PPM or Da)"), so when the key itself names ppm the unit is carried into the value. The
+    unit-less keys are returned unchanged so previously parsed values keep their form.
+    """
+    tolerance = _get_first(config, "precursor_mass_tol", "precursor_mass_tolerance")
+    if tolerance is not None:
+        return tolerance
+
+    ppm = _get_first(config, "filter_precursor_ppm")
+    return f"{ppm} ppm" if ppm is not None else None
+
+
 def extract_params(file_path: str) -> ProteoBenchParameters:
     """
     Extract parameters from the config file.
@@ -78,9 +98,7 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
     n_beams = _get_first(file, "num_beams", "n_beams")
     _set_if_present(params, "n_beams", n_beams)
     _set_if_present(params, "n_peaks", _get_first(file, "n_peaks"))
-    _set_if_present(
-        params, "precursor_mass_tolerance", _get_first(file, "precursor_mass_tol", "precursor_mass_tolerance")
-    )
+    _set_if_present(params, "precursor_mass_tolerance", _extract_precursor_mass_tolerance(file))
     _set_if_present(params, "min_peptide_length", _get_first(file, "min_peptide_len", "min_length"))
     _set_if_present(params, "max_peptide_length", _get_first(file, "max_length"))
     _set_if_present(params, "min_mz", _get_first(file, "min_mz"))

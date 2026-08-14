@@ -71,7 +71,7 @@ ProteoBench in 5 steps
         .. button-ref:: your-first-submission/index
             :ref-type: doc
             :class: sd-px-4
-            :color: secondary
+            :color: success
             :expand:
 
             Quickstart: Your First Submission
@@ -85,17 +85,18 @@ Join the ProteoBench community
 ===============================
 
 .. grid::
+    :gutter: 3
 
     .. grid-item-card::
         :columns: 12 4 4 4
         :img-top: ./_static/img/icons/workflow-run-validated-with-padding.svg
         :img-alt: A check-marked shield in an encircled gear
-        :class-card: sd-border-0
-        :class-footer: sd-border-0
-        :shadow: none
+        :shadow: md
         :text-align: center
 
-        Submit your results as a validated benchmark run to be shared with the community.
+        **Submit your results**
+
+        Share a validated benchmark run with the community and compare your workflow performance.
         +++
         .. button-link:: https://proteobench.cubimed.rub.de/
             :color: primary
@@ -107,12 +108,12 @@ Join the ProteoBench community
         :columns: 12 4 4 4
         :img-top: ./_static/img/icons/discussion-with-padding.svg
         :img-alt: Two speech bubbles
-        :class-card: sd-border-0
-        :class-footer: sd-border-0
-        :shadow: none
+        :shadow: md
         :text-align: center
 
-        Discuss modules, benchmarking runs, and comparisons with the community.
+        **Join discussions**
+
+        Connect with the community to discuss modules, benchmark runs, and analysis strategies.
         +++
         .. button-link:: https://github.com/orgs/Proteobench/discussions/
             :color: primary
@@ -124,12 +125,12 @@ Join the ProteoBench community
         :columns: 12 4 4 4
         :img-top: ./_static/img/icons/contribute-with-padding.svg
         :img-alt: A user with a development symbol (</>)
-        :class-card: sd-border-0
-        :class-footer: sd-border-0
-        :shadow: none
+        :shadow: md
         :text-align: center
 
-        Contribute to ProteoBench by developing new modules or improving existing ones.
+        **Contribute to development**
+
+        Help build ProteoBench by adding new modules or improving existing ones on GitHub.
         +++
         .. button-link:: https://github.com/Proteobench/ProteoBench
             :color: primary

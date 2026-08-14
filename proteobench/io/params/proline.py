@@ -150,6 +150,11 @@ def extract_params(
     sheet = excel.parse(sheet_name, dtype="object", index_col=0)
     enable_match_between_runs = sheet.index.str.contains("cross assignment").any()
     params.enable_match_between_runs = bool(enable_match_between_runs)
+    # Find the value where the index contains "peptides selection method"
+    peptide_selection_method_row = sheet.index[sheet.index.str.contains("peptides selection method")].tolist()
+    params.protein_inference = (
+        sheet.loc[peptide_selection_method_row[0]].iloc[0].lower() if peptide_selection_method_row else None
+    )
 
     # Try to extract software version from "Dataset statistics and infos" sheet
     try:

@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import tempfile
@@ -229,8 +230,9 @@ def run_benchmarking_process(variables, ionmodule, user_input):
 
     # Get slider value if module uses sliders (e.g., quant module)
     if hasattr(variables, "slider_id_submitted_uuid") and hasattr(variables, "default_val_slider"):
-        if st.session_state[variables.slider_id_submitted_uuid] in st.session_state.keys():
-            set_slider_val = st.session_state[st.session_state[variables.slider_id_submitted_uuid]]
+        slider_uuid_key = st.session_state.get(variables.slider_id_submitted_uuid)
+        if slider_uuid_key is not None and slider_uuid_key in st.session_state:
+            set_slider_val = st.session_state[slider_uuid_key]
         else:
             set_slider_val = variables.default_val_slider
     else:
@@ -262,6 +264,15 @@ def run_benchmarking_process(variables, ionmodule, user_input):
 
     if max_nr_observed is not None:
         benchmark_kwargs["max_nr_observed"] = max_nr_observed
+
+    # Not every module's benchmarking() accepts every optional kwarg above
+    # (e.g. the entrapment module has no cutoff/max_nr_observed parameters).
+    # Only forward the ones the target method actually declares, unless it
+    # accepts **kwargs itself.
+    signature = inspect.signature(ionmodule.benchmarking)
+    accepts_var_kwargs = any(param.kind == inspect.Parameter.VAR_KEYWORD for param in signature.parameters.values())
+    if not accepts_var_kwargs:
+        benchmark_kwargs = {key: value for key, value in benchmark_kwargs.items() if key in signature.parameters}
 
     return ionmodule.benchmarking(user_input_tmp, **benchmark_kwargs)
 

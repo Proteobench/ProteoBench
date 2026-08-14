@@ -712,7 +712,9 @@ Your variables dataclass must include these fields for the module registry to di
         
         # Module metadata (required)
         title: str = "DDA Quantification - Precursor Level - Astral"
-        doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/quant_lfq_DDA_ion_Astral.html"
+        doc_url: str = (
+            "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/"
+        )
 
 **Sidebar Configuration Details:**
 
@@ -749,7 +751,7 @@ based on warning flags in your variables file. The badge is determined by this p
 .. code-block:: python
 
     @dataclass
-    class VariablesDIAQuantSingleCell:
+    class VariablesDIAQuantLowInput:
         # ... other fields ...
         
         # Release stage flags
@@ -757,11 +759,11 @@ based on warning flags in your variables file. The badge is determined by this p
         beta_warning: bool = False
         
         # Sidebar metadata
-        sidebar_label: str = "Quant LFQ DIA ion Single Cell"
-        sidebar_path: str = "/Quant_LFQ_DIA_ion_singlecell"
+        sidebar_label: str = "Quant LFQ DIA ion Low Input"
+        sidebar_path: str = "/Quant_LFQ_DIA_ion_lowinput"
         sidebar_category: str = "DIA"
         keywords: List[str] = field(
-            default_factory=lambda: ["DIA", "quantification", "single cell", "Astral"]
+            default_factory=lambda: ["DIA", "quantification", "low input", "Astral"]
         )
 
 **Important Notes:**

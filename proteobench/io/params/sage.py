@@ -139,6 +139,7 @@ def extract_params(
     params.min_precursor_charge = int(data["precursor_charge"][0])
     params.max_precursor_charge = int(data["precursor_charge"][1])
     params.enable_match_between_runs = True
+    params.quantification_method = data["quant"]["lfq_settings"]
 
     params.fill_none()
     return params

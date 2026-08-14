@@ -11,13 +11,13 @@ from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-import streamlit as st
 from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_feature,
 )
+from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
 from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
@@ -268,7 +268,12 @@ class DeNovoModule:
         Returns
         -------
         bool
-            Whether the new data point has a unique hash.
+            True if the new data point has a unique hash.
+
+        Raises
+        ------
+        DatasetAlreadyExistsOnServerError
+            If the run was previously submitted (its hash overlaps an existing data point).
         """
         current_datapoint = datapoints[datapoints["old_new"] == "new"]
         all_datapoints_old = datapoints[datapoints["old_new"] == "old"]
@@ -280,10 +285,9 @@ class DeNovoModule:
 
         if len(overlap) > 0:
             overlap_name = all_datapoints_old.loc[all_datapoints_old["intermediate_hash"] == list(overlap)[0], "id"]
-            st.error(
+            raise DatasetAlreadyExistsOnServerError(
                 f"The run you want to submit has been previously submitted under the identifier: {str(overlap_name)}"
             )
-            return False
         return True
 
     def clone_pr(
@@ -333,9 +337,8 @@ class DeNovoModule:
 
         all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
 
-        if not self.check_new_unique_hash(all_datapoints):
-            logging.error("The run was previously submitted. Will not submit.")
-            return False
+        # Raises DatasetAlreadyExistsOnServerError if this run was already submitted.
+        self.check_new_unique_hash(all_datapoints)
 
         # Create a new branch for the pull request with a unique branch name, this unique
         # branch name is important for batch resubmission to avoid clashes. We do guarentee
@@ -409,7 +412,7 @@ class DeNovoModule:
 
     def write_intermediate_raw(
         self,
-        dir: str,
+        directory: str,
         ident: str,
         input_file_obj: Any,
         result_performance: pd.DataFrame,
@@ -417,27 +420,30 @@ class DeNovoModule:
         comment: str,
         extension_input_file: str = ".txt",
         extension_input_parameter_file: str = ".txt",
+        input_file_secondary_obj: Any = None,
     ) -> None:
         """
         Write intermediate and raw data to a directory in zipped form.
 
         Parameters
         ----------
-        dir : str
+        directory : str
             Directory to write to.
         ident : str
             Identifier to create a subdirectory for this submission.
         input_file_obj : Any
             File-like object representing the raw input file.
         result_performance : pd.DataFrame
-            The result performance DataFrame.
+            The result performance DataFrame (intermediate data).
         param_loc : List[Any]
             List of paths to parameter files that need to be copied.
         comment : str
             User comment for the submission.
+        input_file_secondary_obj : Any, optional
+            File-like object representing a secondary input file (e.g., for AlphaDIA).
         """
         # Create the target directory
-        path_write = os.path.join(dir, ident)
+        path_write = os.path.join(directory, ident)
         try:
             os.makedirs(path_write, exist_ok=True)
         except OSError as e:
@@ -452,6 +458,11 @@ class DeNovoModule:
                 input_file_obj.seek(0)
                 zf.writestr(f"input_file{extension_input_file}", input_file_obj.read())
 
+                # Save the secondary input file if provided
+                if input_file_secondary_obj is not None:
+                    input_file_secondary_obj.seek(0)
+                    zf.writestr(f"input_file_secondary{extension_input_file}", input_file_secondary_obj.read())
+
                 # Save the result performance DataFrame as a CSV in the zip file
                 result_csv = result_performance.to_csv(index=False)
                 zf.writestr("result_performance.csv", result_csv)
@@ -465,7 +476,7 @@ class DeNovoModule:
                 # Save the user comment in the zip file
                 zf.writestr("comment.txt", comment)
 
-            logging.info(f"Zipped data saved to {zip_file_path}")
+            logging.info(f"Data saved to {zip_file_path}")
         except Exception as e:
             logging.error(f"Failed to create zip file at {zip_file_path}. Error: {e}")
 

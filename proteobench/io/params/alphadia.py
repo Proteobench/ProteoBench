@@ -44,6 +44,7 @@ CONFIG_KEY_MAPPER = {
     "quantification_method": "quantification_method",
     "inference_strategy": "protein_inference",
     "predictors_library": "predictors_library",
+    "normalization_method": "abundance_normalization_ions",
 }
 
 
@@ -370,9 +371,13 @@ def extract_params(
 
         # Rewrite modifications
         if "fixed_modifications" in cleaned_line:
-            all_parameters["fixed_mods"] = homogenize_modification_string(cleaned_line.split(":", 1)[1].strip())
+            mod_value = cleaned_line.split(":", 1)[1].strip()
+            mod_value = re.sub(r"\s*\[user defined[^\]]*\]", "", mod_value, flags=re.IGNORECASE).strip()
+            all_parameters["fixed_mods"] = homogenize_modification_string(mod_value)
         if "variable_modifications" in cleaned_line:
-            all_parameters["variable_mods"] = homogenize_modification_string(cleaned_line.split(":", 1)[1].strip())
+            mod_value = cleaned_line.split(":", 1)[1].strip()
+            mod_value = re.sub(r"\s*\[user defined[^\]]*\]", "", mod_value, flags=re.IGNORECASE).strip()
+            all_parameters["variable_mods"] = homogenize_modification_string(mod_value)
 
     # Remove raw modification keys so map_keys_to_desired_format doesn't
     # overwrite the homogenized fixed_mods / variable_mods values.
@@ -385,13 +390,17 @@ def extract_params(
     # Format some values
     all_parameters["precursor_mass_tolerance"] = (
         "[-"
-        + all_parameters["precursor_mass_tolerance"]
-        + "ppm, "
-        + all_parameters["precursor_mass_tolerance"]
-        + "ppm]"
+        + all_parameters["precursor_mass_tolerance"].strip()
+        + " ppm, "
+        + all_parameters["precursor_mass_tolerance"].strip()
+        + " ppm]"
     )
     all_parameters["fragment_mass_tolerance"] = (
-        "[-" + all_parameters["fragment_mass_tolerance"] + "ppm, " + all_parameters["fragment_mass_tolerance"] + "ppm]"
+        "[-"
+        + all_parameters["fragment_mass_tolerance"].strip()
+        + " ppm, "
+        + all_parameters["fragment_mass_tolerance"].strip()
+        + " ppm]"
     )
 
     # 'True' and 'False' to boolean
@@ -399,6 +408,18 @@ def extract_params(
         all_parameters["enable_match_between_runs"] = all_parameters["enable_match_between_runs"].strip() == "True"
     else:
         all_parameters["enable_match_between_runs"] = bool(all_parameters["enable_match_between_runs"])
+
+    # Normalize AlphaDIA's "no-cleave" enzyme setting to the standard label
+    if all_parameters.get("enzyme") == "no-cleave":
+        all_parameters["enzyme"] = "No digestion"
+
+    # Normalization method
+    if "abundance_normalization_ions" in all_parameters:
+        all_parameters["abundance_normalization_ions"] = (
+            "DirectLFQ"
+            if all_parameters["abundance_normalization_ions"] == "directlfq"
+            else all_parameters["abundance_normalization_ions"]
+        )
 
     params = ProteoBenchParameters(**all_parameters, filename=json_file)
     params.fill_none()
@@ -414,6 +435,8 @@ if __name__ == "__main__":
         "../../../test/params/log_alphadia_1.12.txt",
         "../../../test/params/log_alphadia_1.12MBR.txt",
         "../../../test/params/alphadia_weird_lengths.txt",
+        "../../../test/params/AlphaDIA_wrong_mod_parse.txt",
+        "../../../test/params/AlphaDIA_ranges_weird.txt",
     ]:
         file = pathlib.Path(fname)
         pb_params = extract_params(file)

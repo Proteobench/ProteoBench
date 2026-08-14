@@ -9,6 +9,7 @@ import glob
 import logging
 import os
 import subprocess
+import textwrap
 import uuid
 import zipfile
 from datetime import datetime
@@ -18,6 +19,8 @@ from typing import Optional
 
 import pandas as pd
 import streamlit as st
+
+from pages.base_pages.utils.general import prepare_df_for_display
 import streamlit_utils
 from plotly import graph_objects as go
 
@@ -36,6 +39,7 @@ def generate_indepth_plots(
     metric: str = "Median",
     mode: str = "Species-weighted",
     colorblind_mode: bool = False,
+    **plot_kwargs,
 ) -> Optional[go.Figure]:
     """
     Generate and display in-depth plots for the selected dataset.
@@ -98,6 +102,7 @@ def generate_indepth_plots(
             metric=metric,
             mode=mode,
             colorblind_mode=colorblind_mode,
+            **plot_kwargs,
         )
     except Exception as e:
         st.error(f"Error generating in-depth plots: {e}", icon="🚨")
@@ -157,6 +162,44 @@ def load_public_performance_data(public_hash: str) -> Optional[pd.DataFrame]:
         return None
 
 
+#: Rough characters-per-line at typical viewport widths, keyed by number of columns in the row.
+#: Used only to estimate wrapped-line counts so title/description blocks can be padded to equal
+#: height; not a pixel-exact layout measurement.
+_HEADER_CHARS_PER_LINE = {1: 100, 2: 55, 3: 38, 4: 28}
+_TITLE_LINE_HEIGHT_PX = 32
+_DESC_LINE_HEIGHT_PX = 24
+_CAPTION_HEIGHT_PX = 20
+
+
+def _estimate_header_block_height(title: str, description: str, has_caption: bool, columns: int) -> int:
+    """
+    Estimate the rendered pixel height of a plot's subheader/description/caption block.
+
+    Parameters
+    ----------
+    title : str
+        The subheader text shown above the plot.
+    description : str
+        The description text shown below the subheader.
+    has_caption : bool
+        Whether a "Data source" caption is also rendered.
+    columns : int
+        Number of columns in the row, used to approximate wrapped-line counts.
+
+    Returns
+    -------
+    int
+        Estimated height in pixels.
+    """
+    chars_per_line = _HEADER_CHARS_PER_LINE.get(columns, 28)
+    title_lines = len(textwrap.wrap(title, width=chars_per_line)) if title else 0
+    desc_lines = len(textwrap.wrap(description, width=chars_per_line)) if description else 0
+    height = title_lines * _TITLE_LINE_HEIGHT_PX + desc_lines * _DESC_LINE_HEIGHT_PX
+    if has_caption:
+        height += _CAPTION_HEIGHT_PX
+    return height
+
+
 def display_plots_with_layout(plots: dict, plot_generator, variables, public_id: str) -> None:
     """
     Display plots using the module's layout configuration.
@@ -183,6 +226,20 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
         # Create columns based on section configuration
         cols = st.columns(section["columns"])
 
+        # Estimate each plot's title/description block height so plots in the same row start
+        # at the same vertical offset, regardless of description length.
+        block_heights = {}
+        for plot_name in section["plots"]:
+            if plot_name not in plots:
+                continue
+            title = section.get("titles", {}).get(plot_name) or (
+                descriptions[plot_name].split(".")[0] if plot_name in descriptions else ""
+            )
+            block_heights[plot_name] = _estimate_header_block_height(
+                title, descriptions.get(plot_name, ""), has_caption=bool(public_id), columns=section["columns"]
+            )
+        row_height = max(block_heights.values(), default=0)
+
         # Display plots in columns
         for i, plot_name in enumerate(section["plots"]):
             if plot_name not in plots:
@@ -206,8 +263,13 @@ def display_plots_with_layout(plots: dict, plot_generator, variables, public_id:
                     if public_id:
                         st.caption(f"Data source: {public_id}")
 
+                # Pad shorter blocks so the plot below starts at the same height as its row siblings
+                gap = row_height - block_heights.get(plot_name, 0)
+                if gap > 0:
+                    st.markdown(f"<div style='height:{gap}px'></div>", unsafe_allow_html=True)
+
                 # Display plot
-                st.plotly_chart(plots[plot_name], use_container_width=True)
+                st.plotly_chart(plots[plot_name])
 
         # Add separator after each section (except last)
         if section != layout_config[-1] and len(section["plots"]) > 0:
@@ -247,7 +309,7 @@ def display_performance_table(
         unsafe_allow_html=True,
     )
     with st.container(key="single_result_preview_table"):
-        st.dataframe(performance_data.head(100))
+        st.dataframe(prepare_df_for_display(performance_data.head(100)))
 
     # Generate sample name (used for user-facing filenames)
     if public_id == "Uploaded dataset":
@@ -274,7 +336,8 @@ def display_performance_table(
         icon=":material/download:",
     )
 
-    display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name, cache_key=cache_key)
+    if getattr(variables, "enable_pmultiqc", True):
+        display_pmultiqc_report(performance_data=performance_data, sample_name=sample_name, cache_key=cache_key)
 
 
 def generate_sample_name(input_format: str) -> str:

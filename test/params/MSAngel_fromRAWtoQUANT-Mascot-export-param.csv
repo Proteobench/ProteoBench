@@ -7,7 +7,7 @@ ident_fdr_psm,0.01
 ident_fdr_peptide,
 ident_fdr_protein,
 enable_match_between_runs,True
-precursor_mass_tolerance,"[-10.0 ppm, +10.0 ppm]"
+precursor_mass_tolerance,"[-10.0 ppm, 10.0 ppm]"
 fragment_mass_tolerance,
 enzyme,Trypsin/P
 semi_enzymatic,False
@@ -17,9 +17,11 @@ max_peptide_length,
 fixed_mods,C[Carbamidomethyl]
 variable_mods,"M[Oxidation], Protein N-term[Acetyl]"
 max_mods,
-min_precursor_charge,
-max_precursor_charge,
-quantification_method,
+min_precursor_charge,2
+max_precursor_charge,4
+quantification_method,label_free
 protein_inference,
 abundance_normalization_ions,
 second_pass,False
+postprocessing_performed,False
+postprocessing_description,

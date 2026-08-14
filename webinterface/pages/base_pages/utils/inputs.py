@@ -3,6 +3,11 @@ from typing import Any, Optional
 
 import streamlit as st
 
+# Fields present in every module's parameter JSON that are never derived from a tool's
+# parameter/log file — the submitter always fills these in manually. See docs:
+# "Parameters that will never be parsed".
+NEVER_PARSED_KEYS = ("postprocessing_performed", "postprocessing_description")
+
 
 def generate_input_widget(
     variables_quant: dataclass,
@@ -43,14 +48,18 @@ def generate_input_widget(
         return _generate_checkbox(variables_quant, content=content, key=key, editable=editable)
 
 
-# ToDo: make function accecpt a session state key if that is what is only needed
 def update_parameters_submission_form(
     variables_quant,
     field,
-    value,
+    widget_key,
 ) -> None:
     """
-    Update the session state dictionary with the specified field and value.
+    Update the session state dictionary with the current value of a widget.
+
+    Registered as a widget's `on_change` callback, so it only runs when Streamlit
+    detects that the widget's value actually changed; `widget_key` is looked up at
+    that time via `args=`, rather than being pre-computed at render time (which
+    would run on every script rerun regardless of whether the widget changed).
 
     Parameters
     ----------
@@ -58,9 +67,10 @@ def update_parameters_submission_form(
         The variables quantification dataclass containing the session state keys used.
     field : str
         The field to update.
-    value : Any
-        The value to update the field with.
+    widget_key : str
+        The session state key of the widget holding the new value.
     """
+    value = st.session_state.get(widget_key)
     session_state_key = variables_quant.params_file_dict
     try:
         st.session_state[session_state_key][field] = value
@@ -135,9 +145,8 @@ def _generate_text_input(
         placeholder=placeholder,
         key=variables_quant.prefix_params + key,
         value=value,
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
 
@@ -176,9 +185,8 @@ def _generate_number_input(
         format=content["format"],
         min_value=content["min_value"],
         max_value=content["max_value"],
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
 
@@ -221,9 +229,8 @@ def _generate_selectbox(
         options,
         key=variables_quant.prefix_params + key,
         index=index,
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
 
@@ -253,8 +260,39 @@ def _generate_checkbox(variables_quant, content: dict, key: str = "", editable: 
         content["label"],
         key=variables_quant.prefix_params + key,
         value=value,
-        on_change=update_parameters_submission_form(
-            variables_quant, key, st.session_state.get(variables_quant.prefix_params + key, 0)
-        ),
+        on_change=update_parameters_submission_form,
+        args=(variables_quant, key, variables_quant.prefix_params + key),
         disabled=not editable,
     )
+
+
+def generate_never_parsed_fields_section(variables_quant, input_format: str, config: dict, user_input: dict) -> None:
+    """
+    Render the "never parsed" fields (e.g. postprocessing) in their own section.
+
+    These fields are present in every module's parameter JSON but are never derived
+    from a tool's parameter/log file — the submitter always fills them in manually.
+    Rendered separately, below the parsed-parameter grid, so it is clear they are not
+    part of the automatically parsed metadata.
+
+    Parameters
+    ----------
+    variables_quant : dataclass
+        The variables dataclass containing the session state keys used.
+    input_format : str
+        The selected software tool.
+    config : dict
+        The full parameter JSON config for the module.
+    user_input : dict
+        The dict collecting submitted form values; updated in place.
+    """
+    never_parsed_fields = {k: v for k, v in config.items() if k in NEVER_PARSED_KEYS}
+    if not never_parsed_fields:
+        return
+
+    st.markdown("##### Postprocessing")
+    st.caption("These fields are never derived from a tool's parameter or log file — " "please fill them in manually.")
+    columns = st.columns(len(never_parsed_fields))
+    for column, (key, content) in zip(columns, never_parsed_fields.items()):
+        with column:
+            user_input[key] = generate_input_widget(variables_quant, input_format, content, key, editable=True)

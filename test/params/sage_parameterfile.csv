@@ -19,6 +19,8 @@ variable_mods,"Protein N-term[Acetyl], M[Oxidation]"
 max_mods,3
 min_precursor_charge,1
 max_precursor_charge,7
-quantification_method,
+quantification_method,"peak_scoring: Hybrid, integration: Sum, spectral_angle: 0.7, ppm_tolerance: 10.0, combine_charge_states: True"
 protein_inference,
 abundance_normalization_ions,
+postprocessing_performed,False
+postprocessing_description,

@@ -153,9 +153,13 @@ jupyter_notebooks/analysis/
 testfolder
 .claude
 uv.lock
+test/mock_entrapment_datapoints
 
 # Large files
 *.gz
+jupyter_notebooks/
+testfolder/
+proteobench/score/static_files
 # Atomic-write / editor temp files
 *.tmp
 *.tmp.*

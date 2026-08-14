@@ -2,6 +2,7 @@
 Plot generator for LFQ PYE (Plasma-Yeast-Ecoli) quantification modules.
 """
 
+import textwrap
 from typing import Dict, List, Tuple, Union
 
 import numpy as np
@@ -11,6 +12,28 @@ import plotly.graph_objects as go
 from plotly.figure_factory import create_distplot
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+
+
+#: Species present in the PYE (Plasma/Yeast/E. coli) sample, plasma background first.
+PYE_SPECIES_ORDER = ("HUMAN", "YEAST", "ECOLI")
+
+#: Human-readable explanation of the human-plasma dynamic range metric. Used both as the
+#: tooltip of the main overview plot and in the in-depth plot descriptions.
+DYNAMIC_RANGE_EXPLANATION = (
+    "Dynamic range of the human plasma background: for each condition the log10-transformed "
+    "mean precursor intensities of the HUMAN precursors are taken, and the difference between "
+    "their 90th and 10th percentile is computed. The two condition-wise values (A and B) are "
+    "then averaged. The value is therefore expressed in orders of magnitude (log10 units): a "
+    "dynamic range of 3.0 means that the central 80% of the quantified plasma precursors span "
+    "three orders of magnitude in intensity. Larger values indicate that a workflow quantifies "
+    "both high-abundant and low-abundant plasma precursors."
+)
+
+#: Opacity range used to encode human-plasma quantification accuracy in the overview plot.
+#: The most accurate workflow in the loaded set is drawn fully opaque, the least accurate one
+#: at OPACITY_MIN, so differences remain visible regardless of the absolute error range.
+OPACITY_MIN = 0.2
+OPACITY_MAX = 1.0
 
 
 class LFQPYEPlotGenerator(PlotGeneratorBase):
@@ -62,6 +85,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
         plots["missing_values_plot"] = self._plot_missing_values(performance_data)
 
+        plots["signed_epsilon_plot"] = self._plot_signed_epsilon(performance_data, species_expected_ratio)
+
         return plots
 
     def get_in_depth_plot_layout(self) -> list:
@@ -78,7 +103,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 "plots": ["dynamic_range_plot", "missing_values_plot"],
                 "columns": 2,
                 "titles": {
-                    "dynamic_range_plot": "Dynamic Range in Condition A and B.",
+                    "dynamic_range_plot": "Abundance range per species (Condition A and B combined).",
                     "missing_values_plot": "Missing Values Distribution across runs.",
                 },
             },
@@ -88,6 +113,13 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 "titles": {
                     "logfc": "Log2 Fold Change distributions by species (Human plasma, Yeast, E. coli).",
                     "cv": "Coefficient of variation distribution in Condition A and B.",
+                },
+            },
+            {
+                "plots": ["signed_epsilon_plot"],
+                "columns": 1,
+                "titles": {
+                    "signed_epsilon_plot": "Over- and underestimation of the log2 fold change (signed epsilon).",
                 },
             },
             {
@@ -112,10 +144,134 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             "logfc": "log2 fold changes calculated from the intermediate data",
             "cv": "CVs calculated from the intermediate data",
             "ma_plot": "MA plot (M vs A plot) showing log2 fold changes against mean abundance",
-            # TODO: improve
-            "dynamic_range_plot": "Dynamic range of human precursor intensities in Condition A and B",
+            "dynamic_range_plot": (
+                "Precursor intensities ranked within each species, next to the rolling median of the "
+                "absolute epsilon. "
+            ),
             "missing_values_plot": "Distribution of missing values (%) of quantified human precursors",
+            "signed_epsilon_plot": (
+                "Distribution of the signed epsilon (measured minus expected log2 fold change) per species. "
+                "Values below zero indicate that the log2 fold change is underestimated, values above zero "
+                "that it is overestimated. A distribution centred on zero indicates an unbiased workflow. "
+                "Note that ratio compression shifts the two spike-in species in opposite directions, "
+                "because YEAST is expected below zero (log2FC = -1.585) and ECOLI above zero (log2FC = 1)."
+            ),
         }
+
+    def get_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the metrics of the main plot are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover.
+        """
+        return """
+            **X-axis** - absolute log2 fold-change error of the spike-ins (YEAST and ECOLI),
+            reported as median or mean, either globally or as an equally weighted average per
+            species.
+
+            **Y-axis** - number of quantified spike-in precursor ions (YEAST plus ECOLI). The
+            counts per individual species (HUMAN, YEAST, ECOLI) are listed in the hover text of
+            each point and in the results table.
+
+            **Marker size** - dynamic range of the human plasma background. For each condition
+            the mean intensities of the HUMAN precursors are log10-transformed, and the
+            difference between the 90th and the 10th percentile is calculated. The values of
+            condition A and B are then averaged:
+
+            `dynamic_range = mean( P90(log10 I_A) - P10(log10 I_A), P90(log10 I_B) - P10(log10 I_B) )`
+
+            The value is expressed in orders of magnitude: a dynamic range of 3.0 means that the
+            central 80% of the quantified plasma precursors span three orders of magnitude in
+            intensity. Larger markers therefore indicate that a workflow quantifies both
+            high-abundant and low-abundant plasma precursors.
+
+            **Marker opacity** - median or mean absolute epsilon of the HUMAN plasma precursors.
+            Darker markers indicate a more accurate quantification of the plasma background.
+
+            Marker size and marker opacity are min-max normalised over the datapoints that are
+            currently loaded, so the visual differences reflect the ranking within the displayed
+            set rather than an absolute scale. The hover text always reports the raw values.
+            """
+
+    def get_in_depth_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the in-depth plots are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover on the
+            in-depth tab.
+        """
+        return """
+            The plots on this tab describe **one single benchmark run** instead of comparing runs,
+            and every point in them is one precursor ion rather than one workflow. They are computed
+            from the intermediate table shown further down this page, which can be downloaded for
+            your own analysis.
+
+            All of them start from the same per-precursor quantities. For each condition, the
+            intensities of a precursor over the six raw files of that condition are summarised as:
+
+            - `Intensity_mean` and `Intensity_std` - mean and standard deviation of the raw
+              intensities.
+            - `log_Intensity_mean` - mean of the log2-transformed intensities.
+            - `CV = Intensity_std / Intensity_mean` - the coefficient of variation, computed on the
+              raw (not log-transformed) intensities.
+            - `nr_observed` - in how many of the 12 raw files the precursor was quantified. Missing
+              values are never imputed, they are simply left out of these summaries.
+
+            The measured fold change is then the difference of the two condition means on the log2
+            scale, and the deviation from the ground truth is epsilon:
+
+            `log2_A_vs_B = log_Intensity_mean_A - log_Intensity_mean_B`
+
+            `epsilon = log2_A_vs_B - log2(expected ratio A/B)`
+
+            The expected ratios are 1:1 for HUMAN plasma, 1:3 for YEAST (log2FC = -1.585) and 2:1 for
+            ECOLI (log2FC = 1).
+
+            **Abundance range per species** - precursors are ranked by their mean intensity over both
+            conditions, and their intensity is normalised against the highest intensity over all
+            species. The rank is assigned within the species selected in the dropdown, so the x-axis
+            runs from 1 to the number of precursors quantified for that species. The dashed line on
+            the right-hand axis is the rolling median of the absolute epsilon over that ranking, which
+            shows how the quantification error grows towards the low-abundance end. This is the plot
+            behind the dynamic-range metric encoded in the marker size of the overview plot.
+
+            **Missing values distribution** - HUMAN precursors ranked by mean abundance against their
+            percentage of missing values, computed as `(1 - nr_observed / 12) * 100`. The solid line
+            is the rolling median. In a plasma background missingness concentrates at the
+            low-abundance end, so this shows how deep into the background a workflow quantifies
+            consistently.
+
+            **Log2 fold change distribution** - a kernel density estimate of `log2_A_vs_B` per
+            species, shown over a fixed x-range of -4 to 4, with dashed vertical lines at the expected
+            ratios. Because these are densities, each is normalised to an area of one, so the curve
+            heights say nothing about how many precursors each species contributed.
+
+            **Coefficient of variation** - a violin plot of the `CV_A` and `CV_B` values, with the
+            embedded box showing the quartiles. Infinite values (a precursor quantified in only one
+            run of a condition, so without a defined standard deviation) are dropped. This measures
+            technical reproducibility within a condition, independently of the ground truth.
+
+            **Signed epsilon** - the same epsilon values as above, but keeping their sign instead of
+            taking the absolute value, shown per species as a violin with an embedded box plot and a
+            reference line at zero. Negative values mean the log2 fold change is underestimated,
+            positive values that it is overestimated. Each species is annotated with its median signed
+            epsilon and the percentage of precursors on either side of zero. Note that ratio
+            compression moves the two spike-in species in opposite directions, because YEAST is
+            expected below zero and ECOLI above zero.
+
+            **MA plot** - each precursor is drawn with its measured fold change on the x-axis and its
+            mean abundance on the y-axis, calculated as the average of `log_Intensity_mean_A` and
+            `log_Intensity_mean_B`. This shows whether the quantification error depends on abundance.
+
+            Unlike the overview plot, these plots use all precursors of the run: they are not filtered
+            by the minimal-quantifications slider.
+            """
 
     def _plot_fold_change_histogram(
         self, performance_data: pd.DataFrame, species_expected_ratio: Dict[str, Dict[str, Union[float, str]]]
@@ -339,18 +495,26 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
     def _plot_dynamic_range(self, performance_data: pd.DataFrame, species_expected_ratio: any) -> go.Figure:
         """
-        Generate dynamic range plot for both conditions A and B, with a smoothed
-        epsilon trend on a secondary y-axis.
+        Generate the abundance range plot, with a smoothed epsilon trend on a secondary y-axis.
+
+        Precursors are ranked by their mean intensity across conditions A and B. The rank is
+        assigned **within each species**, so the count axis of the selected species always runs
+        from 1 to the number of precursors quantified for that species. The intensities remain
+        normalised against the highest intensity over all species, so that the species can still
+        be compared on a common intensity scale.
 
         Parameters
         ----------
         performance_data : pd.DataFrame
-            Performance data containing dynamic range information
+            Performance data containing the mean intensities per condition, the species
+            annotation and the epsilon column.
+        species_expected_ratio : any
+            Expected ratios for each species and their colors, used for the trace colors.
 
         Returns
         -------
         go.Figure
-            Plotly figure with dynamic range plots for both conditions
+            Plotly figure with the abundance range per species and the epsilon trend.
         """
         fig = go.Figure()
 
@@ -369,7 +533,10 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                     performance_data_copy["mean_intensity"] / performance_data_copy["mean_intensity"].max() * 100
                 )
                 performance_data_copy = performance_data_copy.sort_values(by="normalized_intensity", ascending=False)
-                performance_data_copy["rank"] = range(1, len(performance_data_copy) + 1)
+                # Rank within species: only one species is shown at a time, so the count axis
+                # must run from 1 to the number of precursors of that species instead of
+                # carrying the ranks of the pooled set.
+                performance_data_copy["rank"] = performance_data_copy.groupby("species").cumcount() + 1
 
                 conditions_data.append(performance_data_copy[["rank", "normalized_intensity", "epsilon", "species"]])
 
@@ -386,62 +553,78 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             # Create figure with dropdown for species selection
             fig = go.Figure()
 
-            species_order = ["HUMAN", "YEAST", "ECOLI"]  # Human first as default
+            # Only keep the species that are actually present, plasma background first so that
+            # HUMAN is the default selection.
+            species_present = set(plot_df["species"].dropna())
+            species_order = [s for s in PYE_SPECIES_ORDER if s in species_present]
+            species_order += [s for s in sorted(species_present) if s not in PYE_SPECIES_ORDER]
 
-            # Create traces for each species (all hidden initially except first)
+            # Track which trace indices belong to which species, so the dropdown stays correct
+            # even when a species is absent from the data.
+            species_trace_indices = {}
+
             for idx, species in enumerate(species_order):
                 species_df = plot_df[plot_df["species"] == species].copy()
-                if len(species_df) > 0:
-                    # Add scatter trace for this species
-                    fig.add_trace(
-                        go.Scattergl(
-                            x=species_df["rank"],
-                            y=species_df["normalized_intensity"],
-                            mode="markers",
-                            marker=dict(
-                                color=color_map.get(species, "#000000"),
-                                size=6,
-                                opacity=0.3,
-                                line=dict(width=0.5, color="white"),
-                            ),
-                            name=f"{species} precursors",
-                            visible=(idx == 0),  # Only first (HUMAN) visible by default
-                            hovertemplate=f"<b>{species}</b><br>Rank: %{{x}}<br>Intensity: %{{y:.2f}}%<extra></extra>",
-                        )
-                    )
+                if len(species_df) == 0:
+                    continue
 
-                    # Calculate epsilon trend for this species
-                    eps_df = species_df[["rank", "epsilon"]].copy()
-                    eps_df["absolute_eps"] = eps_df["epsilon"].abs()
-                    eps_df = eps_df.sort_values("rank")
+                species_trace_indices[species] = [len(fig.data), len(fig.data) + 1]
 
-                    # window ~1% of points, minimum 5
-                    window = max(5, len(eps_df) // 10 if len(eps_df) >= 100 else 5)
-                    eps_df["epsilon_trend"] = (
-                        eps_df["absolute_eps"].rolling(window=window, center=True, min_periods=1).median()
+                # Add scatter trace for this species
+                fig.add_trace(
+                    go.Scattergl(
+                        x=species_df["rank"],
+                        y=species_df["normalized_intensity"],
+                        mode="markers",
+                        marker=dict(
+                            color=color_map.get(species, "#000000"),
+                            size=6,
+                            opacity=0.3,
+                            line=dict(width=0.5, color="white"),
+                        ),
+                        name=f"{species} precursors",
+                        visible=(idx == 0),  # Only first (HUMAN) visible by default
+                        hovertemplate=(
+                            f"<b>{species}</b><br>{species} rank: %{{x}}<br>Intensity: %{{y:.2f}}%<extra></extra>"
+                        ),
                     )
+                )
 
-                    # Add epsilon trend line for this species
-                    fig.add_trace(
-                        go.Scatter(
-                            x=eps_df["rank"],
-                            y=eps_df["epsilon_trend"],
-                            mode="lines",
-                            name=f"{species} epsilon trend",
-                            yaxis="y2",
-                            line=dict(dash="dash", color=color_map.get(species, "#000000"), width=2),
-                            visible=(idx == 0),  # Only first (HUMAN) visible by default
-                            hovertemplate=f"<b>{species} epsilon trend</b><br>Rank: %{{x}}<br>Epsilon: %{{y:.3f}}<extra></extra>",
-                        )
+                # Calculate epsilon trend for this species
+                eps_df = species_df[["rank", "epsilon"]].copy()
+                eps_df["absolute_eps"] = eps_df["epsilon"].abs()
+                eps_df = eps_df.sort_values("rank")
+
+                # window ~1% of points, minimum 5
+                window = max(5, len(eps_df) // 10 if len(eps_df) >= 100 else 5)
+                eps_df["epsilon_trend"] = (
+                    eps_df["absolute_eps"].rolling(window=window, center=True, min_periods=1).median()
+                )
+
+                # Add epsilon trend line for this species
+                fig.add_trace(
+                    go.Scatter(
+                        x=eps_df["rank"],
+                        y=eps_df["epsilon_trend"],
+                        mode="lines",
+                        name=f"{species} epsilon trend",
+                        yaxis="y2",
+                        line=dict(dash="dash", color=color_map.get(species, "#000000"), width=2),
+                        visible=(idx == 0),  # Only first (HUMAN) visible by default
+                        hovertemplate=(
+                            f"<b>{species} epsilon trend</b><br>{species} rank: %{{x}}<br>"
+                            "Epsilon: %{y:.3f}<extra></extra>"
+                        ),
                     )
+                )
 
             # Create dropdown buttons for species selection
             buttons = []
-            for idx, species in enumerate(species_order):
-                # Create visibility array: each species has 2 traces (scatter + epsilon line)
-                visibility = [False] * (len(species_order) * 2)
-                visibility[idx * 2] = True  # Show scatter for this species
-                visibility[idx * 2 + 1] = True  # Show epsilon line for this species
+            nr_traces = len(fig.data)
+            for species, trace_indices in species_trace_indices.items():
+                visibility = [False] * nr_traces
+                for trace_index in trace_indices:
+                    visibility[trace_index] = True
 
                 buttons.append(
                     dict(
@@ -452,7 +635,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 )
 
             fig.update_xaxes(
-                title="Intensity Rank (1 = highest intensity)",
+                title="Intensity rank within species (1 = highest intensity of the selected species)",
                 gridcolor="lightgray",
                 showgrid=True,
             )
@@ -464,9 +647,10 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 showgrid=True,
             )
 
-            # Update layout with dropdown menu
-            epsilon_q85 = plot_df["epsilon"].quantile(0.85)
-            if pd.isna(epsilon_q85) or epsilon_q85 == 0:
+            # Update layout with dropdown menu. The secondary axis shows the absolute epsilon,
+            # so its range is derived from the absolute values.
+            epsilon_q85 = plot_df["epsilon"].abs().quantile(0.85)
+            if pd.isna(epsilon_q85) or epsilon_q85 <= 0:
                 epsilon_q85 = 1.0
 
             fig.update_layout(
@@ -625,6 +809,156 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             showlegend=True,
             legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.8)"),
             margin=dict(l=60, r=20, t=20, b=60),  # Reduce margins to fill space
+        )
+
+        return fig
+
+    def _plot_signed_epsilon(
+        self, performance_data: pd.DataFrame, species_expected_ratio: Dict[str, Dict[str, Union[float, str]]]
+    ) -> go.Figure:
+        """
+        Generate a signed epsilon plot showing over- and underestimation of the log2 fold change.
+
+        For each species the distribution of the signed epsilon (measured minus expected log2
+        fold change) is shown as a horizontal violin with an embedded box plot. Values below
+        zero mean that the log2 fold change is underestimated, values above zero that it is
+        overestimated. The fraction of precursors on either side of zero is annotated per
+        species so that a systematic bias is directly visible.
+
+        Parameters
+        ----------
+        performance_data : pd.DataFrame
+            Intermediate data containing the ``epsilon`` and ``species`` columns.
+        species_expected_ratio : Dict[str, Dict[str, Union[float, str]]]
+            Expected ratios for each species and their colors.
+
+        Returns
+        -------
+        go.Figure
+            Plotly figure with the signed epsilon distributions per species.
+        """
+        fig = go.Figure()
+
+        if "epsilon" not in performance_data.columns or "species" not in performance_data.columns:
+            fig.add_annotation(
+                text="No epsilon data available for the signed epsilon plot",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+            )
+            return fig
+
+        color_map = {species: data.get("color", "#000000") for species, data in (species_expected_ratio or {}).items()}
+
+        # Keep the plasma background first, then the spike-ins, and append any other species.
+        species_present = [s for s in PYE_SPECIES_ORDER if s in set(performance_data["species"].dropna())]
+        species_present += [s for s in sorted(set(performance_data["species"].dropna())) if s not in PYE_SPECIES_ORDER]
+
+        annotations = []
+        plotted_any = False
+
+        for species in species_present:
+            epsilon = performance_data.loc[performance_data["species"] == species, "epsilon"]
+            epsilon = epsilon.replace([np.inf, -np.inf], np.nan).dropna()
+            if len(epsilon) == 0:
+                continue
+
+            plotted_any = True
+            color = color_map.get(species, "#000000")
+
+            fig.add_trace(
+                go.Violin(
+                    x=epsilon,
+                    y=[species] * len(epsilon),
+                    orientation="h",
+                    name=species,
+                    box_visible=True,
+                    meanline_visible=True,
+                    points=False,
+                    spanmode="hard",
+                    line_color=color,
+                    fillcolor=color,
+                    opacity=0.5,
+                    hovertemplate=(f"<b>{species}</b><br>Signed epsilon: %{{x:.3f}}<extra></extra>"),
+                )
+            )
+
+            # Annotate the direction of the bias: fraction of precursors above / below zero
+            # and the median signed epsilon.
+            fraction_over = (epsilon > 0).mean() * 100
+            fraction_under = (epsilon < 0).mean() * 100
+            annotations.append(
+                dict(
+                    xref="paper",
+                    yref="y",
+                    x=1.0,
+                    xanchor="right",
+                    y=species,
+                    yanchor="bottom",
+                    text=(
+                        f"median {epsilon.median():+.3f} | " f"{fraction_under:.0f}% under / {fraction_over:.0f}% over"
+                    ),
+                    showarrow=False,
+                    font=dict(size=10, color="gray"),
+                )
+            )
+
+        if not plotted_any:
+            fig.add_annotation(
+                text="No epsilon data available for the signed epsilon plot",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+            )
+            return fig
+
+        # Symmetric x-range based on the bulk of the data, so single outliers do not
+        # compress the informative part of the distributions.
+        epsilon_all = performance_data["epsilon"].replace([np.inf, -np.inf], np.nan).dropna()
+        limit = np.nanmax(np.abs(epsilon_all.quantile([0.01, 0.99]).values)) if len(epsilon_all) > 0 else 1.0
+        if not np.isfinite(limit) or limit <= 0:
+            limit = 1.0
+        limit *= 1.1
+
+        fig.add_vline(x=0, line_dash="dash", line_color="black", line_width=1)
+
+        fig.update_layout(
+            xaxis=dict(
+                title="Signed epsilon (measured - expected log2 fold change)",
+                range=[-limit, limit],
+                gridcolor="lightgray",
+                showgrid=True,
+                zeroline=False,
+            ),
+            yaxis=dict(title="Species", gridcolor="lightgray", showgrid=False),
+            annotations=annotations,
+            showlegend=False,
+            hovermode="closest",
+            margin=dict(l=80, r=20, t=40, b=60),
+        )
+
+        # Label the two halves of the plot so the direction of the bias is unambiguous.
+        fig.add_annotation(
+            xref="paper",
+            yref="paper",
+            x=0.02,
+            y=1.06,
+            text="← underestimated log2 fold change",
+            showarrow=False,
+            font=dict(size=11, color="gray"),
+        )
+        fig.add_annotation(
+            xref="paper",
+            yref="paper",
+            x=0.98,
+            y=1.06,
+            text="overestimated log2 fold change →",
+            showarrow=False,
+            font=dict(size=11, color="gray"),
         )
 
         return fig
@@ -807,7 +1141,12 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         - X-axis: Absolute log2 fold-change error for yeast and E. coli spike-ins (median or mean based on metric)
         - Y-axis: Number of quantified yeast and E. coli spike-in precursors
         - Dot size: Dynamic range of human plasma precursors (quantification breadth)
-        - Dot opacity: Quantification accuracy for human plasma (alpha based on error, median or mean)
+        - Dot opacity: Quantification accuracy for human plasma (median or mean absolute epsilon)
+
+        Both dot size and dot opacity are min-max normalised over the datapoints that are
+        currently loaded, so that the available visual range is used in full and small
+        differences between workflows remain distinguishable. The hover text reports the raw
+        values, together with the number of quantified precursors per species.
 
         Parameters
         ----------
@@ -856,19 +1195,31 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         # Human plasma metrics don't have mode variants (single species)
         opacity_metric_key = f"{metric_lower}_abs_epsilon_human_plasma"
 
-        # Pre-pass: collect raw dynamic-range values for data-driven size normalization.
-        # This ensures the full [8, 40] marker-size range is used regardless of where
-        # values cluster, maximising visual separation for small differences.
+        # Pre-pass: collect raw dynamic-range and human-plasma accuracy values for
+        # data-driven normalization of marker size and marker opacity. This ensures the
+        # full visual range is used regardless of where the values cluster, maximising
+        # visual separation for small differences.
         raw_size_vals = []
+        raw_opacity_vals = []
         for _, row in result_df.iterrows():
             m = self._get_metrics_at_cutoff(row.get("results"), default_cutoff_min_feature)
             if m is not None:
                 sv = m.get("dynamic_range_human_plasma_mean", 0.0)
                 if sv > 0:
                     raw_size_vals.append(sv)
+                ov = m.get(opacity_metric_key)
+                if ov is not None and not pd.isna(ov):
+                    raw_opacity_vals.append(ov)
         size_min = min(raw_size_vals) if raw_size_vals else 0.0
         size_max = max(raw_size_vals) if raw_size_vals else 1.0
         size_data_range = size_max - size_min if size_max > size_min else 1.0
+
+        # Opacity is min-max normalised over the loaded datapoints and inverted (lowest
+        # human-plasma error = fully opaque), so that the contrast between workflows is as
+        # pronounced as the data allows instead of being compressed by a fixed slope.
+        opacity_min_val = min(raw_opacity_vals) if raw_opacity_vals else 0.0
+        opacity_max_val = max(raw_opacity_vals) if raw_opacity_vals else 1.0
+        opacity_data_range = opacity_max_val - opacity_min_val
 
         # Create scatter plot with all four visual dimensions
         # Group by software to create separate traces (allows colorblind markers)
@@ -897,7 +1248,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
             y_val = metrics.get("nr_quantified_spike_ins", 0)
             size_val = metrics.get("dynamic_range_human_plasma_mean", 0.0)
-            opacity_val = metrics.get(opacity_metric_key, 0.0)
+            opacity_val = metrics.get(opacity_metric_key)
 
             software_data[software]["x"].append(x_val)
             software_data[software]["y"].append(y_val)
@@ -910,8 +1261,13 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                 normalized_size = 8
             software_data[software]["sizes"].append(normalized_size)
 
-            # Opacity: lower error = higher opacity (higher alpha)
-            opacity = max(0.2, 0.9 - (opacity_val * 0.7))
+            # Opacity: lower error = higher opacity (higher alpha). Min-max normalised over
+            # the loaded datapoints so the full [OPACITY_MIN, OPACITY_MAX] range is used.
+            if opacity_val is None or pd.isna(opacity_val) or opacity_data_range <= 0:
+                opacity = OPACITY_MAX
+            else:
+                relative_error = (opacity_val - opacity_min_val) / opacity_data_range
+                opacity = OPACITY_MAX - relative_error * (OPACITY_MAX - OPACITY_MIN)
             software_data[software]["opacities"].append(opacity)
 
             # Get software color
@@ -924,14 +1280,25 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             marker = software_markers.get(software, "circle")
             software_data[software]["markers"].append(marker)
 
-            # Build hover text
+            # Build hover text, including the per-species identification counts so that
+            # plasma-background and spike-in depth can be inspected separately.
             mode_label = "global" if mode == "Global" else "species-weighted"
+            opacity_text = "not available" if opacity_val is None or pd.isna(opacity_val) else f"{opacity_val:.3f}"
+            species_count_lines = ""
+            for species in PYE_SPECIES_ORDER:
+                species_count = metrics.get(f"nr_quantified_{species}")
+                if species_count is not None:
+                    species_count_lines += f"&nbsp;&nbsp;{species}: {species_count}<br>"
+            if species_count_lines:
+                species_count_lines = "Quantified precursors per species:<br>" + species_count_lines
+
             hover_text = (
                 f"<b>{software} {row['software_version']}</b><br>"
                 f"Spike-in error ({metric_lower}, {mode_label}): {x_val:.3f}<br>"
                 f"Quantified spike-ins: {y_val}<br>"
-                f"Plasma dynamic range: {size_val:.2f}<br>"
-                f"Plasma accuracy error ({metric_lower}): {opacity_val:.3f}<br>"
+                f"{species_count_lines}"
+                f"Plasma dynamic range (log10 P90-P10, mean of A and B): {size_val:.2f}<br>"
+                f"Plasma accuracy error ({metric_lower}): {opacity_text}<br>"
                 f"ProteoBench ID: {row['id']}"
             )
             software_data[software]["hover_texts"].append(hover_text)
@@ -980,11 +1347,11 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             ),
         )
 
-        # Add annotation explaining visual dimensions
-        # TODO: improve
+        # Add annotation explaining the visual dimensions. The annotation carries a tooltip
+        # with the full definition of the dynamic range metric (hover the text to read it).
         annotation_text = (
-            "Dot size = dynamic range of quantified human precursors in plasma | "
-            "Opacity = plasma quantification accuracy (darker = better)"
+            "Dot size = dynamic range of quantified human precursors in plasma "
+            "(hover for definition) | Opacity = plasma quantification accuracy (darker = better)"
         )
         fig.add_annotation(
             text=annotation_text if not hide_annot else "",
@@ -994,6 +1361,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
             y=-0.15,
             showarrow=False,
             font=dict(size=10, color="gray"),
+            hovertext=self._wrap_tooltip_text(DYNAMIC_RANGE_EXPLANATION),
+            hoverlabel=dict(bgcolor="white", bordercolor="gray", font=dict(size=11, color="black")),
         )
 
         fig.add_annotation(
@@ -1009,6 +1378,25 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
         fig.update_layout(clickmode="event+select")
 
         return fig
+
+    @staticmethod
+    def _wrap_tooltip_text(text: str, width: int = 70) -> str:
+        """
+        Wrap a long text into HTML line breaks for use in a plotly tooltip.
+
+        Parameters
+        ----------
+        text : str
+            The text to wrap.
+        width : int, optional
+            Maximum number of characters per line. Defaults to 70.
+
+        Returns
+        -------
+        str
+            The text with ``<br>`` inserted at the line breaks.
+        """
+        return "<br>".join(textwrap.wrap(text, width=width))
 
     @staticmethod
     def _get_metrics_at_cutoff(results: dict, cutoff: int) -> dict | None:

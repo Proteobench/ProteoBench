@@ -20,11 +20,13 @@ min_precursor_charge,
 max_precursor_charge,
 min_precursor_mz,
 max_precursor_mz,
-min_fragment_mz,
-max_fragment_mz,
+min_fragment_mz,200
+max_fragment_mz,3000
 quantification_method,MS2
 protein_inference,IDPicker
 abundance_normalization_ions,True
 predictors_library,
 scan_window,Dynamic
-semi_specific,False
+postprocessing_performed,False
+postprocessing_description,
+semi_enzymatic,False

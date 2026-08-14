@@ -21,7 +21,7 @@ The module-specific standardized table that ProteoBench computes from a workflow
 
 (open-source-software)=
 ## Open source software
-We consider a tool open source if the code is available in its latest version, we consider the tool open source, whatever the licence.
+We consider a tool open source if the code is publicly available in its latest version, whatever the licence.
 
 ## Workflow
 A combination of data analysis tools with associated parameters that takes workflow input files (provided by a benchmark module) and generates workflow output files. Based on the workflow output files, metrics can be calculated describing the workflow performance.

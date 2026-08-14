@@ -90,7 +90,7 @@ Join the ProteoBench community
             :color: primary
             :expand:
 
-            :fas:`upload` Upload your results
+            :fas:`upload` Web App
 
     .. grid-item-card::
         :columns: 12 4 4 4

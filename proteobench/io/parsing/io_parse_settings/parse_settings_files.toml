@@ -40,7 +40,7 @@
 "Custom" = "parse_settings_custom.toml"
 "PEAKS" = "parse_settings_peaks.toml"
 
-[quant_lfq_DIA_ion_singlecell]
+[quant_lfq_DIA_ion_lowinput]
 "DIA-NN" = "parse_settings_diann.toml"
 "MaxQuant" = "parse_settings_maxdia.toml"
 "FragPipe (DIA-NN quant)" = "parse_settings_diann.toml"
@@ -108,4 +108,11 @@
 "NovoB" = "parse_settings_novob.toml"
 "PointNovo" = "parse_settings_pointnovo.toml"
 "SMSNet" = "parse_settings_smsnet.toml"
+"PEAKS" = "parse_settings_peaks.toml"
 "Custom" = "parse_settings_custom.toml"
+
+[entrapment_DIA_ion_Astral]
+"DIA-NN" = "parse_settings_diann.toml"
+"AlphaDIA" = "parse_settings_alphadia.toml"
+"Custom" = "parse_settings_custom.toml"
+"Spectronaut" = "parse_settings_spectronaut.toml"

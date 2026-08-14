@@ -20,8 +20,9 @@ import streamlit_utils
 from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
 from streamlit_extras.let_it_rain import rain
 
+from pages.utils.submission_source import get_submission_source, is_official_server
+
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
-from proteobench.github.gh import get_submission_source, is_official_server
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
@@ -79,8 +80,8 @@ class DeNovoUIObjects(BaseUIModule):
         )
 
         # Specific to the 'de novo' module.
-        self.level_mapping = {"Precision": "precision", "Recall": "recall"}
-        self.level_mapping_submitted = {"Precision": "precision", "Recall": "recall"}
+        self.level_mapping = {"Precision": "precision", "AUC": "auc"}
+        self.level_mapping_submitted = {"Precision": "precision", "AUC": "auc"}
         self.evaluation_type_mapping = {"Exact": "exact", "Mass-based": "mass"}
 
     @st.fragment
@@ -94,7 +95,7 @@ class DeNovoUIObjects(BaseUIModule):
             default_value="None",
         )
 
-        # Radio for level (Precision or Recall)
+        # Radio for level (Precision or AUC)
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_uuid, default_value=self.variables.default_level
         )
@@ -104,6 +105,12 @@ class DeNovoUIObjects(BaseUIModule):
             radio_id_uuid=self.variables.radio_evaluation_id_uuid, default_value=self.variables.default_evaluation
         )
 
+        def current_evaluation_type() -> str:
+            evaluation_choice = st.session_state.get(
+                st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), self.variables.default_evaluation
+            )
+            return self.evaluation_type_mapping[evaluation_choice]
+
         # Define callbacks for plot options
         def render_selectbox():
             tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
@@ -112,7 +119,7 @@ class DeNovoUIObjects(BaseUIModule):
             tab1.generate_main_radio(
                 radio_id_uuid=self.variables.radio_level_id_uuid,
                 description="Select the classification metric",
-                options=["Precision", "Recall"],
+                options=["Precision", "AUC"],
                 help=self.variables.texts.Help.radio_level,
             )
 
@@ -127,34 +134,121 @@ class DeNovoUIObjects(BaseUIModule):
         def render_colorblind_selector():
             return tab1.display_colorblindmode_selector(self.variables)
 
+        def render_il_toggle():
+            is_mass_mode = current_evaluation_type() == "mass"
+            return tab1.generate_forced_toggle(
+                toggle_id_uuid=self.variables.il_toggle_id_uuid,
+                label="Allow I/L mismatches",
+                default=True,
+                force_value=True if is_mass_mode else None,
+                help=self.variables.texts.Help.toggle_il,
+            )
+
+        def render_deamidation_toggle():
+            is_mass_mode = current_evaluation_type() == "mass"
+            return tab1.generate_forced_toggle(
+                toggle_id_uuid=self.variables.deamidation_toggle_id_uuid,
+                label="Allow deamidation mismatches (Q↔E, N↔D)",
+                default=False,
+                force_value=True if is_mass_mode else None,
+                help=self.variables.texts.Help.toggle_deamidation,
+            )
+
         # Render plot options expander
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
-            selector_callbacks=[render_level_radio, render_evaluation_radio, render_colorblind_selector],
+            selector_callbacks=[
+                render_level_radio,
+                render_evaluation_radio,
+                render_colorblind_selector,
+                render_il_toggle,
+                render_deamidation_toggle,
+            ],
             filter_cols_spec=1,
-            selector_cols_spec=[1, 1, 1, 1],
+            selector_cols_spec=[1, 1, 1, 1, 1],
         )
 
-        # Extract colorblind mode from results
+        # Extract toggle values from results (index 0 is the filter/selectbox callback,
+        # which returns None; indices 1-5 are the selector callbacks in the order above).
         colorblind_mode = results[3] if len(results) > 3 else False
+        allow_il = results[4] if len(results) > 4 else True
+        allow_deamidation = results[5] if len(results) > 5 else False
+        evaluation_type = self.evaluation_type_mapping[
+            st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
+        ]
 
-        tab1.display_existing_results(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
-            plot_params={
-                "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
-                "level": self.level_mapping[
-                    st.session_state.get(st.session_state.get(self.variables.radio_level_id_uuid, ""), "Precision")
-                ],
-                "evaluation_type": self.evaluation_type_mapping[
-                    st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
-                ],
-                "colorblind_mode": colorblind_mode,
-                "alpha_warning": getattr(self.variables, "alpha_warning", False),
-                "beta_warning": getattr(self.variables, "beta_warning", False),
-            },
-            use_slider=False,
+        filtered_data = tab1.load_and_filter_main_data(
+            variables=self.variables, ionmodule=self.ionmodule, use_slider=False
         )
+
+        if filtered_data.empty:
+            st.info("No results available yet.", icon="ℹ️")
+            return
+
+        plot_params = {
+            "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
+            "level": self.level_mapping[
+                st.session_state.get(st.session_state.get(self.variables.radio_level_id_uuid, ""), "Precision")
+            ],
+            "evaluation_type": evaluation_type,
+            "allow_il": allow_il,
+            "allow_deamidation": allow_deamidation,
+            "colorblind_mode": colorblind_mode,
+            "alpha_warning": getattr(self.variables, "alpha_warning", False),
+            "beta_warning": getattr(self.variables, "beta_warning", False),
+        }
+
+        # Only the figure switches between these two tabs -- the results table below is
+        # shared and stays visible regardless of which one is selected.
+        view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
+        with view_tabs[0]:
+            tab1.render_main_plot(
+                variables=self.variables,
+                ionmodule=self.ionmodule,
+                plot_params=plot_params,
+                filtered_data=filtered_data,
+            )
+        with view_tabs[1]:
+            self._display_precision_coverage_curves(
+                filtered_data=filtered_data,
+                evaluation_type=evaluation_type,
+                allow_il=allow_il,
+                allow_deamidation=allow_deamidation,
+                fig_key_uuid=self.variables.fig_pc_curve,
+            )
+
+        tab1.render_results_table(variables=self.variables, filtered_data=filtered_data)
+
+    def _display_precision_coverage_curves(
+        self,
+        filtered_data: Optional[pd.DataFrame],
+        evaluation_type: str,
+        allow_il: bool,
+        allow_deamidation: bool,
+        fig_key_uuid: str,
+    ) -> None:
+        """
+        Render the peptide-level/amino-acid-level precision-coverage curve view, sharing the
+        same filtered dataset and evaluation/ambiguity selections as the scatter view in the
+        adjacent tab.
+        """
+        if filtered_data is None or filtered_data.empty:
+            st.info("No results available yet.", icon="ℹ️")
+            return
+
+        try:
+            plot_generator = self.ionmodule.get_plot_generator()
+            fig = plot_generator.plot_precision_coverage_curves(
+                result_df=filtered_data,
+                evaluation_type=evaluation_type,
+                allow_il=allow_il,
+                allow_deamidation=allow_deamidation,
+            )
+            if fig_key_uuid not in st.session_state:
+                st.session_state[fig_key_uuid] = uuid.uuid4()
+            st.plotly_chart(fig, key=st.session_state[fig_key_uuid])
+        except Exception as e:
+            st.error(f"Unable to plot the precision-coverage curves: {e}", icon="🚨")
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
@@ -184,6 +278,7 @@ class DeNovoUIObjects(BaseUIModule):
             # Clear any previously uploaded parameter file and widget state so Tab 5
             # starts fresh for the new tool/file combination.
             st.session_state[self.variables.params_file_dict] = {}
+            st.session_state.pop(self.variables.params_file_dict + "__seeded_for", None)
             # Erase the old file uploader's stored file before cycling the UUID,
             # so the uploader cannot resurrect the old file even if the key persists.
             _old_meta_uuid = st.session_state.get(self.variables.meta_file_uploader_uuid)
@@ -241,12 +336,11 @@ class DeNovoUIObjects(BaseUIModule):
             options=dataset_options,
             key=st.session_state[self.variables.dataset_selector_id_uuid],
             format_func=lambda x: x[0],
-            default=[dataset_options[0]],
+            default=dataset_options,
             help=self.variables.texts.Help.dataset_selection_indepth,
         )
 
         # Use default values for plot rendering (no user controls on this tab)
-        levels = ["precision", "recall"]
         evaluation_types = ["exact", "mass"]
         colorblind_mode = False
 
@@ -282,7 +376,6 @@ class DeNovoUIObjects(BaseUIModule):
             plot_kwargs = {
                 "mod_labels": modifications,
                 "feature": feature_names,
-                "level": levels,
                 "evaluation_type": evaluation_types,
                 "colorblind_mode": colorblind_mode,
             }
@@ -302,7 +395,7 @@ class DeNovoUIObjects(BaseUIModule):
                             if plot_name in descriptions:
                                 st.caption(descriptions[plot_name])
                             self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
-                            # st.plotly_chart(plots[plot_name], use_container_width=True)
+                            # st.plotly_chart(plots[plot_name])
 
             except Exception as e:
                 st.error(f"Error generating in-depth plots: {e}", icon="🚨")
@@ -318,7 +411,7 @@ class DeNovoUIObjects(BaseUIModule):
         with st.expander("Description"):
             st.markdown(self.variables.texts.Description.ptm_overview)
 
-        st.plotly_chart(figs, use_container_width=True)
+        st.plotly_chart(figs)
 
     def _display_ptm_specific(self, figs) -> None:
         # Specific PTM plots
@@ -334,7 +427,6 @@ class DeNovoUIObjects(BaseUIModule):
                 st.plotly_chart(
                     figs[mod_label],
                     key=f"ptm_plot_{mod_label}",
-                    use_container_width=True,
                 )
 
     def _display_spectrum_features(self, figs) -> None:
@@ -355,7 +447,7 @@ class DeNovoUIObjects(BaseUIModule):
         for feature_name, tab in tab_dict.items():
             with tab:
                 st.header(feature_name)
-                st.plotly_chart(figs[feature_name][evaluation_type], use_container_width=True)
+                st.plotly_chart(figs[feature_name][evaluation_type])
 
     def _display_species_overview(self, figs) -> None:
         with st.expander("Description"):
@@ -369,7 +461,13 @@ class DeNovoUIObjects(BaseUIModule):
         else:
             evaluation_type = "mass"
 
-        st.plotly_chart(figs[evaluation_type], use_container_width=True, key=self.variables.fig_species_overview)
+        st.plotly_chart(figs[evaluation_type], key=self.variables.fig_species_overview)
+
+    def _display_infasta_overview(self, figs) -> None:
+        with st.expander("Description"):
+            st.markdown(self.variables.texts.Description.in_fasta_overview)
+
+        st.plotly_chart(figs)
 
     def _display_indepth_plot(self, plot_name: str, figs) -> None:
         if plot_name == "ptm_overview":
@@ -380,6 +478,8 @@ class DeNovoUIObjects(BaseUIModule):
             self._display_spectrum_features(figs)
         elif plot_name == "species_overview":
             self._display_species_overview(figs)
+        elif plot_name == "in_fasta_overview":
+            self._display_infasta_overview(figs)
         else:
             raise Exception("Cannot display non-implemented in-depth plot.")
 
@@ -394,7 +494,7 @@ class DeNovoUIObjects(BaseUIModule):
             default_value="None",
         )
 
-        # Radio one for precision or recall
+        # Radio one for precision or AUC
         tab1.initialize_radio(
             radio_id_uuid=self.variables.radio_level_id_submitted_uuid, default_value=self.variables.default_level
         )
@@ -404,6 +504,13 @@ class DeNovoUIObjects(BaseUIModule):
             radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
             default_value=self.variables.default_evaluation,
         )
+
+        def current_evaluation_type() -> str:
+            evaluation_choice = st.session_state.get(
+                st.session_state.get(self.variables.radio_evaluation_id_submitted_uuid, ""),
+                self.variables.default_evaluation,
+            )
+            return self.evaluation_type_mapping[evaluation_choice]
 
         # Define callbacks for plot options
         def render_selectbox():
@@ -415,7 +522,7 @@ class DeNovoUIObjects(BaseUIModule):
             tab1.generate_main_radio(
                 radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
                 description="Select the classification metric",
-                options=["Precision", "Recall"],
+                options=["Precision", "AUC"],
                 help=self.variables.texts.Help.radio_level,
             )
 
@@ -430,16 +537,45 @@ class DeNovoUIObjects(BaseUIModule):
         def render_colorblind_selector():
             return tab1.display_colorblindmode_selector(self.variables, use_submitted=True)
 
+        def render_il_toggle():
+            is_mass_mode = current_evaluation_type() == "mass"
+            return tab1.generate_forced_toggle(
+                toggle_id_uuid=self.variables.il_toggle_id_submitted_uuid,
+                label="Allow I/L mismatches",
+                default=True,
+                force_value=True if is_mass_mode else None,
+                help=self.variables.texts.Help.toggle_il,
+            )
+
+        def render_deamidation_toggle():
+            is_mass_mode = current_evaluation_type() == "mass"
+            return tab1.generate_forced_toggle(
+                toggle_id_uuid=self.variables.deamidation_toggle_id_submitted_uuid,
+                label="Allow deamidation mismatches (Q↔E, N↔D)",
+                default=False,
+                force_value=True if is_mass_mode else None,
+                help=self.variables.texts.Help.toggle_deamidation,
+            )
+
         # Render plot options expander
         results = self.render_plot_options_expander(
             filter_callbacks=[render_selectbox],
-            selector_callbacks=[render_level_radio, render_evaluation_radio, render_colorblind_selector],
+            selector_callbacks=[
+                render_level_radio,
+                render_evaluation_radio,
+                render_colorblind_selector,
+                render_il_toggle,
+                render_deamidation_toggle,
+            ],
             filter_cols_spec=1,
-            selector_cols_spec=[1, 1, 1, 1],
+            selector_cols_spec=[1, 1, 1, 1, 1],
         )
 
-        # Extract colorblind mode from results
+        # Extract toggle values from results (index 0 is the filter/selectbox callback,
+        # which returns None; indices 1-5 are the selector callbacks in the order above).
         colorblind_mode = results[3] if len(results) > 3 else False
+        allow_il = results[4] if len(results) > 4 else True
+        allow_deamidation = results[5] if len(results) > 5 else False
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
@@ -450,23 +586,44 @@ class DeNovoUIObjects(BaseUIModule):
             st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_submitted_uuid, ""), "Exact")
         ]
 
-        # Plot the datapoints
-        tab4.display_submitted_results(
-            self.variables,
-            self.ionmodule,
-            plot_params={
-                "label": label,
-                "level": level,
-                "evaluation_type": evaluation_type,
-                "colorblind_mode": colorblind_mode,
-            },
-        )
-        st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
-        st.data_editor(
-            st.session_state[self.variables.all_datapoints_submitted],
-            key=st.session_state[self.variables.table_id_uuid],
-            on_change=self._handle_submitted_table_edits,
-        )
+        # Load once, then only the figure switches between the two tabs below -- the
+        # results table stays outside the switcher, visible regardless of which is selected.
+        filtered_data = tab4.load_and_filter_submitted_data(variables=self.variables, ionmodule=self.ionmodule)
+
+        plot_params = {
+            "label": label,
+            "level": level,
+            "evaluation_type": evaluation_type,
+            "allow_il": allow_il,
+            "allow_deamidation": allow_deamidation,
+            "colorblind_mode": colorblind_mode,
+        }
+
+        view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
+        with view_tabs[0]:
+            tab4.render_submitted_main_plot(
+                variables=self.variables,
+                ionmodule=self.ionmodule,
+                plot_params=plot_params,
+                filtered_data=filtered_data,
+            )
+        with view_tabs[1]:
+            self._display_precision_coverage_curves(
+                filtered_data=filtered_data,
+                evaluation_type=evaluation_type,
+                allow_il=allow_il,
+                allow_deamidation=allow_deamidation,
+                fig_key_uuid=self.variables.fig_pc_curve_submitted,
+            )
+
+        tab4.render_submitted_results_table(filtered_data, self.variables)
+
+        # st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
+        # st.data_editor(
+        #     st.session_state[self.variables.all_datapoints_submitted],
+        #     key=st.session_state[self.variables.table_id_uuid],
+        #     on_change=self._handle_submitted_table_edits,
+        # )
 
         st.title("Public submission")
         st.markdown(
@@ -516,12 +673,31 @@ class DeNovoUIObjects(BaseUIModule):
 
         # Parse parameter file if uploaded so parsed values pre-populate the fields below.
         # If no file is provided the fields render with schema defaults for manual entry.
-        if self.user_input[self.variables.meta_data]:
-            params_from_file = tab5_quant.load_user_parameters(
-                variables=self.variables,
-                ionmodule=self.ionmodule,
-                user_input=self.user_input,
-            )
+        #
+        # The seeding below (both the parsed-file values and the schema-default fallback)
+        # must run only once per uploaded file or tool switch, not on every rerun.
+        # `display_public_submission_ui` is not an @st.fragment, so it reruns in full on
+        # every widget interaction on the page, including the user editing one of the
+        # parameter fields rendered below. Re-seeding unconditionally would overwrite that
+        # edit with the originally parsed/default value before the widget is even redrawn,
+        # since Streamlit ignores a widget's `value=` argument once its `key` already holds
+        # a value in session state.
+        uploaded_files = self.user_input[self.variables.meta_data]
+        upload_fingerprint = tuple(sorted((f.name, f.size) for f in uploaded_files)) if uploaded_files else None
+        seed_state_key = self.variables.params_file_dict + "__seeded_for"
+        current_seed = (upload_fingerprint, self.user_input.get("input_format"))
+        needs_seeding = st.session_state.get(seed_state_key) != current_seed
+
+        if needs_seeding:
+            if uploaded_files:
+                params_from_file = tab5_quant.load_user_parameters(
+                    variables=self.variables,
+                    ionmodule=self.ionmodule,
+                    user_input=self.user_input,
+                )
+            else:
+                params_from_file = None
+
             if params_from_file is not None:
                 st.session_state[self.variables.params_file_dict] = params_from_file.__dict__
                 self.params_file_dict_copy = copy.deepcopy(params_from_file.__dict__)
@@ -543,44 +719,65 @@ class DeNovoUIObjects(BaseUIModule):
                         sanitized = val
                     st.session_state[self.variables.prefix_params + key] = sanitized
             else:
+                st.session_state[self.variables.params_file_dict] = {}
                 self.params_file_dict_copy = {}
-        else:
+
+            # Write every parameter widget's session state to the desired starting value
+            # (parsed value if available, otherwise the JSON schema default for the current
+            # tool), for fields not covered above. Only runs as part of this seeding pass,
+            # so it never clobbers a value the user has since typed into a field.
+            with open(self.variables.additional_params_json, encoding="utf-8") as _schema_f:
+                _param_schema = json.load(_schema_f)
+            _file_dict = st.session_state.get(self.variables.params_file_dict, {})
+            for _field_key, _field_schema in _param_schema.items():
+                _is_checkbox = _field_schema.get("type") == "checkbox"
+                if _field_key in _file_dict:
+                    _val = _file_dict[_field_key]
+                    if _is_checkbox:
+                        # Checkbox fields (e.g. postprocessing_performed) carry a scalar bool
+                        # default, not a dict — keep them as real bool, not a stringified one.
+                        _val = bool(_val) if pd.notna(_val) else bool(_field_schema.get("value", False))
+                    else:
+                        # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
+                        # np.nan is a float and cannot be serialized by Streamlit's protobuf for
+                        # text_input; convert to "" (empty). Non-string non-missing values are
+                        # stringified to match what st.text_input expects.
+                        try:
+                            _is_missing = pd.isna(_val)
+                        except (TypeError, ValueError):
+                            _is_missing = False
+                        if _is_missing:
+                            _val = ""
+                        elif not isinstance(_val, str):
+                            _val = str(_val)
+                    st.session_state[self.variables.prefix_params + _field_key] = _val
+                else:
+                    _schema_value = _field_schema.get("value")
+                    if _is_checkbox:
+                        _default = bool(_schema_value) if _schema_value is not None else False
+                    else:
+                        # Text-like fields store their per-tool default under "value" as a
+                        # dict keyed by input_format (tool name); fall back to the schema
+                        # value itself if it isn't a dict.
+                        _default = (
+                            _schema_value.get(self.user_input.get("input_format", ""), None)
+                            if isinstance(_schema_value, dict)
+                            else _schema_value
+                        )
+                        _default = _default if _default is not None else ""
+                    st.session_state[self.variables.prefix_params + _field_key] = _default
+
+            st.session_state[seed_state_key] = current_seed
+        elif self.variables.params_file_dict not in st.session_state:
+            st.session_state[self.variables.params_file_dict] = {}
             self.params_file_dict_copy = {}
+        else:
+            self.params_file_dict_copy = copy.deepcopy(st.session_state[self.variables.params_file_dict])
 
         # Always override software_name with the active input_format. This must come after
         # the parameter file re-application above, which does a full dict replacement and
         # would otherwise overwrite this value.
         st.session_state[self.variables.params_file_dict]["software_name"] = self.user_input["input_format"]
-
-        # Explicitly write every parameter widget's session state to the desired value
-        # (YAML-parsed value if available, otherwise JSON default for the current tool).
-        # This is necessary because generate_additional_parameters_fields_submission contains
-        # `on_change=func(args)` — Python evaluates these arguments immediately on every render,
-        # reading stale browser-sent session state and rewriting params_file_dict with old values.
-        # By explicitly owning the session state keys here, before the widgets render, we
-        # prevent any browser-side stale value from slipping through.
-        with open(self.variables.additional_params_json, encoding="utf-8") as _schema_f:
-            _param_schema = json.load(_schema_f)
-        _file_dict = st.session_state.get(self.variables.params_file_dict, {})
-        for _field_key, _field_schema in _param_schema.items():
-            if _field_key in _file_dict:
-                _val = _file_dict[_field_key]
-                # Sanitize: params_from_file.__dict__ may contain np.nan for missing fields.
-                # np.nan is a float and cannot be serialized by Streamlit's protobuf for
-                # text_input; convert to "" (empty). Non-string non-missing values are
-                # stringified to match what st.text_input expects.
-                try:
-                    _is_missing = pd.isna(_val)
-                except (TypeError, ValueError):
-                    _is_missing = False
-                if _is_missing:
-                    _val = ""
-                elif not isinstance(_val, str):
-                    _val = str(_val)
-                st.session_state[self.variables.prefix_params + _field_key] = _val
-            else:
-                _default = _field_schema.get("value", {}).get(self.user_input.get("input_format", ""), None)
-                st.session_state[self.variables.prefix_params + _field_key] = _default if _default is not None else ""
 
         # Always show parameter fields, comments, and confirmation checkbox.
         tab5_quant.generate_additional_parameters_fields_submission(
@@ -653,13 +850,25 @@ class DeNovoUIObjects(BaseUIModule):
             # Get plot generator from module (following Quant pattern)
             plot_generator = self.ionmodule.get_plot_generator()
 
-            # Get colorblind mode from session state
+            # Get colorblind mode and ambiguity toggle states from session state
             colorblind_key = self.variables.colorblind_mode_selector_uuid
             if colorblind_key in st.session_state:
                 colorblind_mode_id = st.session_state[colorblind_key]
                 colorblind_mode = st.session_state.get(colorblind_mode_id, False)
             else:
                 colorblind_mode = False
+
+            il_key = self.variables.il_toggle_id_uuid
+            allow_il = (
+                st.session_state.get(st.session_state.get(il_key, ""), True) if il_key in st.session_state else True
+            )
+
+            deamidation_key = self.variables.deamidation_toggle_id_uuid
+            allow_deamidation = (
+                st.session_state.get(st.session_state.get(deamidation_key, ""), False)
+                if deamidation_key in st.session_state
+                else False
+            )
 
             fig_metric = plot_generator.plot_main_metric(
                 result_df=st.session_state[self.variables.all_datapoints],
@@ -669,6 +878,8 @@ class DeNovoUIObjects(BaseUIModule):
                 evaluation_type=self.evaluation_type_mapping[
                     st.session_state[st.session_state[self.variables.radio_evaluation_id_uuid]]
                 ],
+                allow_il=allow_il,
+                allow_deamidation=allow_deamidation,
                 colorblind_mode=colorblind_mode,
             )
         except Exception as e:

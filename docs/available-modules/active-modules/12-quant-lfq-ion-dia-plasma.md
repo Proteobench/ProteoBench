@@ -49,7 +49,11 @@ Full acquisition details and analytical procedures are available in the [origina
 
 ### Downloading the data
 
-The files can be downloaded from the proteomeXchange repository [JPST003358](https://repository.jpostdb.org/entry/JPST003358):
+The files can be downloaded from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-plasma/):
+
+- Single archive with FASTA: [all_data_LFQ_Quant_DIA_Plasma.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-plasma/all_data_LFQ_Quant_DIA_Plasma.tar.gz).
+
+Alternatively, the files can be downloaded from the proteomeXchange repository [JPST003358](https://repository.jpostdb.org/entry/JPST003358):
 
 - [A9_G_DIA_nLC_tTOF_R1.d](https://storage.jpostdb.org/JPST003358/A9_G_DIA_nLC_tTOF_R1.d.zip)
 - [A9_G_DIA_nLC_tTOF_R2.d](https://storage.jpostdb.org/JPST003358/A9_G_DIA_nLC_tTOF_R2.d.zip)
@@ -63,8 +67,6 @@ The files can be downloaded from the proteomeXchange repository [JPST003358](htt
 - [B9_G_DIA_nLC_tTOF_R4.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R4.d.zip)
 - [B9_G_DIA_nLC_tTOF_R5.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R5.d.zip)
 - [B9_G_DIA_nLC_tTOF_R6.d](https://storage.jpostdb.org/JPST003358/B9_G_DIA_nLC_tTOF_R6.d.zip)
-
-Alternatively, you can download them from the ProteoBench server here: [proteobench.cubimed.rub.de/raws/DIA-plasma/](https://proteobench.cubimed.rub.de/raws/DIA-plasma/)
 
 **It is imperative not to rename the files once downloaded!**
 
@@ -86,8 +88,42 @@ Quantification values are log2-transformed, and the mean signal per condition is
 
 - **X-axis**: absolute log2 fold-change error for spike-ins (YEAST + ECOLI), displayed as Median or Mean
 - **Y-axis**: number of quantified spike-in precursor ions
-- **Dot size**: dynamic range of HUMAN plasma precursors (mean of condition-wise log10 90th-10th percentile spread)
+- **Dot size**: dynamic range of HUMAN plasma precursors (see [Dynamic range calculation](#dynamic-range-calculation))
 - **Dot opacity**: HUMAN plasma quantification accuracy (absolute epsilon; darker coloring = better accuracy)
+
+Dot size and dot opacity are min-max normalised over the benchmark runs that are currently displayed. The full visual range is therefore always used, so that small differences between workflows remain distinguishable. The consequence is that both encode the ranking within the displayed set rather than an absolute scale. The raw values are always reported in the hover text of each point, together with the identification counts per species.
+
+### Dynamic range calculation
+
+The dynamic range summarises over how many orders of magnitude a workflow quantifies the human plasma background. It is calculated on the HUMAN precursor ions only, and for each condition separately:
+
+1. Take the mean intensity of each HUMAN precursor ion in that condition (`Intensity_mean_A` or `Intensity_mean_B` in the intermediate table).
+2. Log10-transform these mean intensities.
+3. Subtract the 10th percentile from the 90th percentile of the resulting distribution.
+
+The values of condition A and condition B are then averaged:
+
+```
+dynamic_range = mean( P90(log10 I_A) - P10(log10 I_A),
+                      P90(log10 I_B) - P10(log10 I_B) )
+```
+
+Because the values are log10-transformed, the dynamic range is expressed in orders of magnitude. A dynamic range of 3.0 means that the central 80% of the quantified plasma precursor ions span three orders of magnitude in intensity. A larger value indicates that the workflow quantifies both high-abundant and low-abundant plasma precursor ions, whereas a smaller value indicates that quantification is restricted to a narrower abundance window.
+
+The 10th and 90th percentiles are used instead of the minimum and maximum so that the metric is not determined by single extreme precursor ions. The dynamic range is recomputed for every value of the cutoff slider, and the condition-wise values (`dynamic_range_human_plasma_A` and `dynamic_range_human_plasma_B`) are stored next to the averaged value in the submitted datapoint. The same explanation is available as a tooltip in the web interface: hover over the caption below the overview plot, or open the "How are the metrics calculated?" panel at the top of the page.
+
+### Identification counts
+
+The number of quantified precursor ions is reported both for the spike-ins combined and for each species separately:
+
+| Metric | Description |
+|---|---|
+| `nr_quantified_spike_ins` | YEAST plus ECOLI precursor ions (the y-axis of the overview plot) |
+| `nr_quantified_HUMAN` | HUMAN plasma background precursor ions |
+| `nr_quantified_YEAST` | YEAST spike-in precursor ions |
+| `nr_quantified_ECOLI` | ECOLI spike-in precursor ions |
+
+The per-species counts are stored for every cutoff level and are shown in the hover text of the overview plot as well as in the benchmark results table. They allow the identification depth in the complex plasma background to be assessed separately from the depth reached for the spike-in species, which is relevant because the two behave differently in a high dynamic range matrix.
 
 ### Calculation modes:
 
@@ -98,6 +134,17 @@ Two error calculation modes are available:
 Both modes are available in **Mean** and **Median** variants.
 
 A cutoff slider allows filtering of precursors by the minimum number of runs in which the precursor is observed.
+
+## In-depth plots
+
+For a single benchmark run the following plots are available in the "View Single Result" tab:
+
+- **Abundance range plot**: the normalised precursor intensity against the intensity rank, with the rolling median of the absolute epsilon on the secondary y-axis. A species is selected with the dropdown menu; the rank is assigned within the selected species, so the count axis runs from 1 to the number of precursor ions quantified for that species. The intensities remain normalised against the highest intensity over all species, so that the species can be compared on a common intensity scale.
+- **Missing values plot**: distribution of the percentage of missing values of the quantified HUMAN precursor ions against their intensity rank.
+- **Log2 fold change distributions**: density of the measured log2 fold changes per species, with the expected ratios indicated.
+- **Coefficient of variation**: CV distribution in condition A and B.
+- **Signed epsilon plot**: distribution of the signed epsilon (measured minus expected log2 fold change) per species, shown as a violin plot with an embedded box plot and a reference line at zero. Values below zero indicate that the log2 fold change is underestimated, values above zero that it is overestimated. The median signed epsilon and the percentage of precursor ions on either side of zero are annotated per species. A distribution centred on zero indicates an unbiased workflow. Note that ratio compression shifts the two spike-in species in opposite directions, because YEAST is expected below zero (log2FC = -1.585) and ECOLI above zero (log2FC = 1).
+- **MA plot**: measured log2 fold change against the mean abundance, coloured by species.
 
 ## How to use
 
@@ -114,22 +161,6 @@ The module supports multiple data formats to maximize flexibility. Users can pro
 - PEAKS
 - FragPipe (DIA-NN Quant)
 - Custom (tab-delimited format)
-
-### Suggested parameters
-
-To ensure fair comparison between different processing workflows, we suggest using the parameters listed below:
-
-| Parameter | Value |
-|-----------|-------|
-| Maximum number of missed cleavages | 1 |
-| PSM/Precursor FDR | 0.01 |
-| Spectral Library | Predicted spectral library from FASTA |
-| Precursor charge state | 1-5 |
-| Fixed modifications | Carbamidomethylation (C) |
-| Variable modifications | Oxidation (M), Acetyl (Protein N-term) |
-| Minimum peptide length | 6-7 residues |
-
-These parameters represent a standardized configuration to evaluate the intrinsic performance of different analysis tools without the confounding effects of non-standard parameter choices.
 
 ### Important Tool-specific settings
 

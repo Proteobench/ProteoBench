@@ -55,8 +55,8 @@ class WebpageTexts:
             for more details.
             """
 
-        warning_alpha = """This module is in ALPHA phase. It has not yet passed peer review 
-            and should be used with caution.
+        warning_alpha = """This module is in ALPHA phase. It  remains to be fully discussed 
+            with experts and should be used with caution.
             """
 
         warning_beta = """This module is in BETA phase. The figure presented below and 
@@ -94,53 +94,101 @@ class WebpageTexts:
         """
 
         radio_level = """
-        **Precision vs Recall**
+        **Precision vs AUC**
 
         This setting determines which metric is shown on the **x-axis** of the accuracy plot. The **y-axis always shows the amino-acid level metric**, while the x-axis represents the peptide-level metric.
 
-        **Precision**  
-        Precision measures how many of the reported identifications are correct. A high precision means that most predictions above the selected score threshold are accurate.
+        **Precision**
+        Precision measures how many of the reported identifications are correct, considering every prediction
+        (no score threshold applied). A high precision means that most reported sequences are accurate.
 
-        *Precision = correct predictions ÷ predictions above threshold*
+        *Precision = correct predictions ÷ all predictions*
 
-        This option is useful when you want to evaluate the **reliability of reported sequences**.
+        This option is useful when you want to evaluate the **reliability of reported sequences** at a single,
+        fixed operating point.
 
-        **Recall**  
-        Recall measures how many of the total spectra were correctly identified. A high recall means that a large fraction of spectra receive a correct prediction.
+        **AUC**
+        AUC (average precision) is the area under the tool's precision-vs-coverage curve, swept across every
+        possible score threshold. A high AUC means the tool stays precise even as more of its lower-confidence
+        predictions are included, not just at its single default operating point.
 
-        *Recall = correct predictions ÷ total spectra*
+        This option is useful when you want to evaluate a tool's **overall ranking quality** rather than one
+        specific threshold. It can be `N/A` for tools that don't report a real per-residue confidence score.
 
-        This option is useful when you want to evaluate the **identification coverage of the dataset**.
-
-        **Note:**  
+        **Note:**
         Both metrics can be calculated at the **peptide level** or **amino-acid level**. In the plot, the selected peptide-level metric is displayed on the **x-axis**, while the corresponding amino-acid metric is shown on the **y-axis**.
+
+        **Reading the four background regions**
+
+        The plot background is shaded from light (bottom-left) to dark (top-right): the further
+        into the top-right corner a point sits, the better it's performing on both axes at once.
+        The dashed lines at the midpoint of each axis also split the plot into four named regions:
+
+        - **Good performance** (top-right): both peptide- and amino-acid-level metrics are high.
+        - **Near-miss** (top-left): peptide-level is low but amino-acid-level is high. Often
+          suggests a very similar peptide -- usually only one or a few residues off from the
+          true sequence.
+        - **Low performance** (bottom-left): both metrics are low.
+        - **Alternative candidate** (bottom-right): peptide-level is high but amino-acid-level
+          is low. Suggests a fully different peptide when wrong, rather than a near match --
+          this can indicate an alternative candidate that a database search might miss, or that
+          the spectrum quality was too low to call any part of the sequence correctly. This
+          region is expected to be sparse: amino-acid-level correctness dominates the tally in
+          most realistic cases, so most tools land at or above the diagonal rather than below it.
         """
 
         radio_evaluation = """
-        **Exact vs Match-based evaluation**
+        **Exact vs Mass-based evaluation**
 
         This setting determines how predicted peptide sequences are considered **correct** when computing accuracy metrics.
 
-        **Exact**  
-        Only predictions that match the ground-truth peptide sequence exactly are considered correct.  
+        **Exact**
+        Only predictions that match the ground-truth peptide sequence exactly are considered correct.
         This requires the **same amino acids and modifications in the same order**.
 
-        This option provides the most **strict evaluation of de novo sequencing accuracy**.
+        This option provides the most **strict evaluation of de novo sequencing accuracy**. Two toggles let you
+        relax this strictness for ambiguities that are inherent to the data (see below).
 
-        **Match-based**  
-        Predictions are considered correct if they match the ground-truth sequence based on **cumulative fragment masses**.  
+        **Mass-based**
+        Predictions are considered correct if they match the ground-truth sequence based on **cumulative fragment masses**.
         The algorithm identifies the longest **mass-matching prefix and suffix** between the predicted and reference sequence.
 
-        Two mass tolerances are used during matching:  
-        *Cumulative mass threshold* – maximum allowed mass difference (50ppm) between cumulative fragment masses.  
+        Two mass tolerances are used during matching:
+        *Cumulative mass threshold* – maximum allowed mass difference (50ppm) between cumulative fragment masses.
         *Individual mass threshold* – maximum allowed mass difference (20ppm) between individual amino acids.
 
         This allows equivalent interpretations such as **isobaric amino acids (e.g. I/L)** or small sequence shifts that preserve peptide mass.
 
         This option provides a more **tolerant evaluation reflecting ambiguity in mass spectrometry data**.
 
-        **Note:**  
-        Match-based evaluation counts both **exact matches and mass-equivalent matches**, while exact evaluation only counts **perfect sequence matches**.
+        **Note:**
+        Mass-based evaluation counts both **exact matches and mass-equivalent matches**, while exact evaluation only counts **perfect sequence matches**
+        (subject to the ambiguity toggles below).
+        """
+
+        toggle_il = """
+        **Allow I/L mismatches**
+
+        Isoleucine (I) and Leucine (L) have identical mass, so a de novo model cannot distinguish
+        them from the spectrum alone -- many tools only ever predict one of the two. When this
+        toggle is on, a predicted I is counted as correct for a ground-truth L (and vice versa)
+        under **Exact** evaluation.
+
+        This toggle is forced on and disabled under **Mass-based** evaluation, since mass-based
+        matching already can't tell I and L apart regardless of this setting.
+        """
+
+        toggle_deamidation = """
+        **Allow deamidation mismatches (Q↔E, N↔D)**
+
+        Deamidation converts glutamine (Q) to a residue that is essentially identical in mass to
+        glutamate (E), and asparagine (N) to one essentially identical in mass to aspartate (D).
+        A de novo model may therefore predict the plain acidic residue (E or D) where the ground
+        truth has the deamidated amide (Q or N). When this toggle is on, such a prediction is
+        counted as correct under **Exact** evaluation.
+
+        This toggle is forced on and disabled under **Mass-based** evaluation, since mass-based
+        matching already can't tell these apart regardless of this setting.
         """
 
         dataset_selection_indepth = """
@@ -154,6 +202,8 @@ class WebpageTexts:
         """
 
     class Description:
+        """Descriptions for de novo in-depth plots and evaluation views."""
+
         ptm_overview = """
         This plot shows the **precision of predicted post-translational modifications (PTMs)** for each de novo sequencing tool. Each point represents a modification present in the dataset with its precision on the Y-axis.
 
@@ -246,5 +296,19 @@ class WebpageTexts:
 
         Each species label corresponds to the organism from which the benchmark spectra were derived.
 
-        For a full description related to the source of the data for each species, see the full module description. 
+        For a full description related to the source of the data for each species, see the full module description.
+        """
+
+        in_fasta_overview = """
+        This plot shows, for each de novo sequencing tool, how its predictions break down into three categories:
+
+        - **Correct** -- the predicted peptide matches the ground-truth peptide exactly (allowing I/L ambiguity, since they cannot be distinguished by mass).
+        - **In FASTA** -- the prediction does not match the ground truth, but the predicted sequence (again allowing I/L ambiguity) is nonetheless found elsewhere in the proteome of the species the spectrum came from.
+        - **Not in FASTA** -- the prediction matches neither the ground truth nor any other protein in that species' proteome. This also includes spectra for which the tool made no prediction at all.
+
+        Each bar shows the **proportion of all spectra** in the dataset that fall into each category for that tool.
+
+        **How to interpret the plot**
+
+        A large **"In FASTA"** segment indicates that, even where a tool's prediction is wrong, it is often still calling a *real, existing* peptide from the correct organism -- suggesting the tool is finding a genuinely different but plausible peptide (e.g. a co-eluting or chimeric spectrum), rather than sequencing errors, only for peptides of at least 8 amino acids (below this, matches to the proteome by chance become likely, and are therefore not calculated). A large **"Not in FASTA"** segment instead points to predictions that are not just wrong, but not proteome-supported.
         """

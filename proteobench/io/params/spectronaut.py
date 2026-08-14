@@ -159,6 +159,79 @@ def extract_mass_tolerance(lines: List[str], system="Thermo Orbitrap") -> Option
     return None
 
 
+def extract_mass_tolerance_v2(lines: List[str]) -> Optional[Tuple[str, str]]:
+    """
+    Extract mass tolerances from the 'Main Search Tolerances' section used by newer Spectronaut
+    versions (schema >= 21), which report MS1/MS2 strategy and tolerance directly instead of
+    breaking them down per vendor/system.
+    """
+    try:
+        start = next(i for i, line in enumerate(lines) if line.startswith("Main Search Tolerances:"))
+    except StopIteration:
+        return None
+
+    ms1_strategy = ms2_strategy = None
+    ms1_tol = ms2_tol = None
+    current = None
+
+    for line in lines[start + 1 :]:
+        if line.startswith("MS1 Mass Tolerance Strategy:"):
+            ms1_strategy = clean_text(line.split(":", 1)[1])
+            current = "MS1"
+        elif line.startswith("MS2 Mass Tolerance Strategy:"):
+            ms2_strategy = clean_text(line.split(":", 1)[1])
+            current = "MS2"
+        elif line.startswith("Tolerance (Th):") or line.startswith("Tolerance (ppm):"):
+            unit = "Th" if line.startswith("Tolerance (Th):") else "ppm"
+            value = clean_text(line.split(":", 1)[1])
+            if current == "MS1":
+                ms1_tol = (value, unit)
+            elif current == "MS2":
+                ms2_tol = (value, unit)
+        else:
+            continue
+
+        if ms1_strategy and ms2_strategy and (ms1_strategy != "Dynamic" and ms2_strategy != "Dynamic"):
+            if ms1_tol and ms2_tol:
+                break
+
+    if ms1_strategy == "Dynamic" or ms2_strategy == "Dynamic":
+        return "Dynamic", "Dynamic"
+
+    if ms1_tol and ms2_tol:
+        ms1_val, ms1_unit = ms1_tol
+        ms2_val, ms2_unit = ms2_tol
+        return (
+            f"[-{ms1_val} {ms1_unit}, {ms1_val} {ms1_unit}]",
+            f"[-{ms2_val} {ms2_unit}, {ms2_val} {ms2_unit}]",
+        )
+
+    return None
+
+
+def extract_fragment_mz_range(lines: List[str]) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Extract the fragment ion m/z filter range (Min/Max) from the 'Fragment Ions' result-filter
+    block, if the filter is enabled ('m/z :' is True).
+    """
+    try:
+        idx = next(i for i, line in enumerate(lines) if line.startswith("m/z :"))
+    except StopIteration:
+        return None, None
+
+    if clean_text(lines[idx].split(":", 1)[1]) != "True":
+        return None, None
+
+    min_mz = max_mz = None
+    for line in lines[idx + 1 : idx + 3]:
+        if line.startswith("Max:"):
+            max_mz = clean_text(line.split(":", 1)[1])
+        elif line.startswith("Min:"):
+            min_mz = clean_text(line.split(":", 1)[1])
+
+    return min_mz, max_mz
+
+
 def extract_value_regex(lines: List[str], search_term: str) -> Optional[str]:
     """
     Extract the value associated with a search term using regular expressions.
@@ -232,29 +305,28 @@ def read_spectronaut_settings(
     params.ident_fdr_peptide = None
     params.ident_fdr_protein = float(extract_value(lines, "Protein Qvalue Cutoff (Experiment):").replace(",", "."))
     params.enable_match_between_runs = False  # https://x.com/OliverMBernhar1/status/1656220095553601537
-    params.precursor_mass_tolerance, params.fragment_mass_tolerance = extract_mass_tolerance(lines, system=system)
+    tolerances = extract_mass_tolerance(lines, system=system) or extract_mass_tolerance_v2(lines)
+    if tolerances is None:
+        raise ValueError("Could not determine mass tolerances from the Spectronaut settings file.")
+    params.precursor_mass_tolerance, params.fragment_mass_tolerance = tolerances
     params.enzyme = extract_value(lines, "Enzymes / Cleavage Rules:")
-    params.semi_specific = extract_value(lines, "Digest Type:") != "Specific"
+    params.semi_enzymatic = extract_value(lines, "Digest Type:") != "Specific"
     params.allowed_miscleavages = int(extract_value(lines, "Missed Cleavages:"))
     params.max_peptide_length = int(extract_value(lines, "Max Peptide Length:"))
     params.min_peptide_length = int(extract_value(lines, "Min Peptide Length:"))
     params.fixed_mods = _homogenize_mods(extract_value(lines, "Fixed Modifications:"))
     params.variable_mods = _homogenize_mods(extract_value_regex(lines, "^Variable Modifications:"))
     params.max_mods = int(extract_value(lines, "Max Variable Modifications:"))
-    _min_precursor_charge = extract_value(lines, "Peptide Charge:")
-    if _min_precursor_charge == "False":
+    if extract_value(lines, "Peptide Charge:") == "True":
+        params.min_precursor_charge = int(extract_value(lines, "Min Charge:"))
+        params.max_precursor_charge = int(extract_value(lines, "Max Charge:"))
+    else:
         params.min_precursor_charge = None
-    else:
-        params.min_precursor_charge = int(_min_precursor_charge)
-
-    _max_precursor_charge = extract_value(lines, "Peptide Charge:")
-    if _max_precursor_charge == "False":
         params.max_precursor_charge = None
-    else:
-        params.max_precursor_charge = int(_max_precursor_charge)
 
-    params.min_fragment_mz = None  # Spectronaut does not provide this information
-    params.max_fragment_mz = None  # Spectronaut does not provide this information
+    _min_fragment_mz, _max_fragment_mz = extract_fragment_mz_range(lines)
+    params.min_fragment_mz = int(_min_fragment_mz) if _min_fragment_mz is not None else None
+    params.max_fragment_mz = int(_max_fragment_mz) if _max_fragment_mz is not None else None
     params.max_precursor_mz = None  # Spectronaut does not provide this information
     params.min_precursor_mz = None  # Spectronaut does not provide this information
 

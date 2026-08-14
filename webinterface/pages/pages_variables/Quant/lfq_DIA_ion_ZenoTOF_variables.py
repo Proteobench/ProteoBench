@@ -50,6 +50,8 @@ class VariablesDIAQuantZenoTOF:
 
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion ZenoTOF"
+    homepage_title: str = "LFQ Quantification on a ZenoTOF"
+    graphical_abstract: str = "Graphical_abstract_Quant_zenoTOF.png"
     documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA (Zeno SWATH) workflows using a multi-species (HYE) sample on a ZenoTOF 8600 instrument."
     sidebar_path: str = "/Quant_LFQ_DIA_ion_ZenoTOF"
     sidebar_category: str = "DIA"
@@ -113,6 +115,7 @@ class VariablesDIAQuantZenoTOF:
     doc_url: str = (
         "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/10-quant-lfq-ion-dia-ZenoTOF/"
     )
+    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz"
 
     title: str = "DIA Precursor ion quantification - ZenoTOF"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

@@ -14,6 +14,7 @@ import toml
 from psm_utils import Peptidoform
 
 from .parse_ion import get_proforma_bracketed
+from .run_name_matching import RunNameMatch, match_run_names
 
 # IMPORTANT: it is defined here, but filled in after defining the classes
 # new classes need to be filled in there too!!!
@@ -183,6 +184,13 @@ class ParseSettingsQuant:
         self.analysis_level = parse_settings_module["general"]["level"]
         self._species_expected_ratio = parse_settings_module["species_expected_ratio"]
         self.modification_parser = None
+
+        # Opt-in, best-effort matching of run/sample names. Only
+        # tools where the user must manually type sample names before export
+        # (currently PEAKS) enable this via `[general].run_name_fuzzy_match`
+        # in their TOML.
+        self._fuzzy_run_name_match = bool(parse_settings["general"].get("run_name_fuzzy_match", False))
+        self.run_name_corrections: List[RunNameMatch] = []
 
         # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
         # Can be overridden per-tool in the TOML [general] section
@@ -373,8 +381,7 @@ class ParseSettingsQuant:
                 f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
                 " Please check input file and selected software tool."
             )
-        df.rename(columns=self.mapper, inplace=True)
-        return df
+        return df.rename(columns=self.mapper)
 
     def _create_replicate_mapping(self) -> Dict[int, List[str]]:
         """
@@ -389,6 +396,57 @@ class ParseSettingsQuant:
         for k, v in self.condition_mapper.items():
             replicate_to_raw[v].append(k)
         return replicate_to_raw
+
+    def _resolve_run_names(self, candidates: set, expected: set) -> Dict[str, str]:
+        """
+        Best-effort match unresolved names against still-missing expected names.
+
+        Only called when `[general].run_name_fuzzy_match` is enabled in the
+        tool's TOML (currently PEAKS only). Confident matches are recorded on
+        `self.run_name_corrections` and returned as a rename map; if any
+        expected name still can't be resolved, raises a `ValueError` with an
+        actionable message (including near-miss suggestions) instead of
+        silently guessing.
+
+        Parameters
+        ----------
+        candidates : set
+            Observed names (df columns, or unique "Raw file" values) not
+            already an exact match for an expected name.
+        expected : set
+            Expected (TOML `condition_mapper`) keys not already satisfied by
+            an exact match.
+
+        Returns
+        -------
+        Dict[str, str]
+            Mapping of observed name -> matched expected name, for confident
+            corrections only. Empty if there was nothing to resolve.
+        """
+        missing = expected - candidates
+        if not missing:
+            return {}
+
+        result = match_run_names(candidates - expected, missing)
+        self.run_name_corrections.extend(result.matches)
+
+        if result.unmatched_expected:
+            lines = ["Sample name mismatch: could not match all expected sample/run names."]
+            lines.append("Missing expected name(s):")
+            for exp in result.unmatched_expected:
+                lines.append(f"  - {exp!r}")
+                near = result.near_misses.get(exp, [])
+                if near:
+                    shown = ", ".join(f"{obs!r} ({score:.0%} similar)" for obs, score in near)
+                    lines.append(f"    Closest name(s) found in your file: {shown}")
+            lines.append(
+                "ProteoBench automatically corrects small naming differences (case, spacing, minor "
+                "typos), but could not confidently resolve the name(s) above. Please rename the "
+                "sample(s) to match exactly, or check the module documentation for the required names."
+            )
+            raise ValueError("\n".join(lines))
+
+        return {m.observed: m.expected for m in result.matches}
 
     def _handle_data_format(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -407,6 +465,12 @@ class ParseSettingsQuant:
         # If "Raw file" is in mapper values, data is already in long format - skip melting
         if "Raw file" not in self.mapper.values():
             melt_vars = self.condition_mapper.keys()
+
+            if self._fuzzy_run_name_match:
+                rename_map = self._resolve_run_names(set(df.columns), set(melt_vars))
+                if rename_map:
+                    df = df.rename(columns=rename_map)
+
             df_melted = df.melt(
                 id_vars=list(set(df.columns).difference(set(melt_vars))),
                 value_vars=melt_vars,
@@ -419,6 +483,11 @@ class ParseSettingsQuant:
         # Clean run names in the "Raw file" column (strip extensions, paths, suffixes)
         # so they match the condition_mapper keys (see #827, #876)
         df_melted["Raw file"] = df_melted["Raw file"].apply(self._clean_run_name)
+
+        if self._fuzzy_run_name_match:
+            rename_map = self._resolve_run_names(set(df_melted["Raw file"].unique()), set(self.condition_mapper.keys()))
+            if rename_map:
+                df_melted["Raw file"] = df_melted["Raw file"].replace(rename_map)
 
         df_melted["replicate"] = df_melted["Raw file"].map(self.condition_mapper)
         return pd.concat([df_melted, pd.get_dummies(df_melted["Raw file"])], axis=1)
@@ -844,15 +913,200 @@ class ParseSettingsDeNovo:
         return df
 
 
+class ParseSettingsEntrapment:
+    """
+    Structure that contains all the parameters used to parse
+    the given benchmark run output depending on the software tool used.
+
+    Parameters
+    ----------
+    parse_settings : Dict[str, Any]
+        The settings for parsing, typically loaded from a TOML file.
+    parse_settings_module : Dict[str, Any]
+        Module-specific settings, typically loaded from a TOML file.
+    """
+
+    def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
+        """
+        Initialize the ParseSettings object with the parameters from the TOML files.
+
+        Parameters
+        ----------
+        parse_settings : Dict[str, Any]
+            The settings for parsing, typically loaded from a TOML file.
+        parse_settings_module : Dict[str, Any]
+            Module-specific settings, typically loaded from a TOML file.
+        """
+        self.mapper = parse_settings["mapper"]
+        self.run_mapper = parse_settings["run_mapper"]
+        self.decoy_flag = parse_settings["general"]["decoy_flag"]
+        self.modification_parser = None
+
+        # Regex pattern for cleaning run names (strips extensions, suffixes, paths)
+        # Can be overridden per-tool in the TOML [general] section
+        cleanup_pattern = parse_settings["general"].get("run_name_cleanup", "")
+        if cleanup_pattern:
+            try:
+                self._run_name_cleanup = re.compile(cleanup_pattern)
+            except re.error as exc:
+                raise ValueError(
+                    f"Invalid regex in [general].run_name_cleanup: {cleanup_pattern!r}. "
+                    f"Please fix the pattern in the TOML configuration. Details: {exc}"
+                ) from exc
+        else:
+            # Default: strip common MS file extensions and known suffixes
+            self._run_name_cleanup = re.compile(r"(?:\.mzML\.gz|\.mzML|\.raw|\.RAW|\.d|\.wiff|_uncalibrated)$")
+
+        # Normalize the condition_mapper and run_mapper keys using the same cleanup
+        # so that keys like "file.mzML" and column names like "file.mzML" both
+        # resolve to "file" after cleaning (see #827, #876)
+        self.run_mapper = {self._clean_run_name(k): v for k, v in self.run_mapper.items()}
+
+    def _clean_run_name(self, name: str) -> str:
+        """
+        Clean a run/file name by removing extensions and known suffixes.
+
+        Strips path prefixes (e.g., ``/path/to/file.mzML`` -> ``file``)
+        and applies the run_name_cleanup regex to remove extensions like
+        ``.raw``, ``.mzML``, ``.mzML.gz``, ``.d``, ``.wiff``, and
+        tool-specific suffixes like ``_uncalibrated`` (FragPipe DIA-NN, see #827).
+
+        Parameters
+        ----------
+        name : str
+            The raw file name or column name to clean.
+
+        Returns
+        -------
+        str
+            The cleaned name.
+        """
+        if not isinstance(name, str):
+            return name
+        # Strip path prefix (some tools include full paths)
+        name = name.replace("\\", "/")
+        if "/" in name:
+            name = name.rsplit("/", 1)[-1]
+        # Apply the cleanup regex
+        name = self._run_name_cleanup.sub("", name)
+        return name
+
+    def _validate_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Validate and rename columns according to the mapper.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame with original column names.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with validated and renamed columns.
+        """
+        if not all(k in df.columns for k in self.mapper.keys()):
+            raise ValueError(
+                f"Columns {set(self.mapper.keys()).difference(set(df.columns))} not found in input dataframe."
+                " Please check input file and selected software tool."
+            )
+        return df.rename(columns=self.mapper)
+
+    def add_modification_parser(self, parser: ParseModificationSettings):
+        """
+        Add a modification parser to the settings.
+
+        Parameters
+        ----------
+        parser : object
+            The modification parser to add.
+        """
+        self.modification_parser = parser
+
+    def _process_modifications(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Standardize the modified sequence column to ProForma-style bracket notation.
+
+        Tools report modifications differently (e.g. DIA-NN/FragPipe use
+        ``M(UniMod:35)``, AlphaDIA already reports ``M[Oxidation]``). The
+        entrapment mapping file is keyed on the bracketed, human-readable form
+        (e.g. ``M[Oxidation]``, ``C[Carbamidomethyl]``), so tools with a
+        ``[modifications_parser]`` section have their modified-sequence column
+        rewritten into that same notation before mapping. Tools without a
+        modification parser (i.e. already reporting that notation natively)
+        are left untouched.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Input DataFrame containing the modified sequence column.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with the modified sequence column standardized.
+        """
+        if self.modification_parser is None:
+            return df
+
+        mp = self.modification_parser
+        df[mp.modifications_parse_column] = df[mp.modifications_parse_column].apply(
+            get_proforma_bracketed,
+            before_aa=mp.modifications_before_aa,
+            isalpha=mp.modifications_isalpha,
+            isupper=mp.modifications_isupper,
+            pattern=mp.modifications_pattern,
+            modification_dict=mp.modifications_mapper,
+        )
+        return df
+
+    def convert_to_standard_format(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert a software tool output into a generic format supported by the module.
+
+        Steps:
+        1. Validate and rename columns
+        2. Create replicate mapping
+        3. Filter decoys
+        4. Fix column names
+        5. Mark contaminants
+        6. Process species information
+        7. Handle data format (long vs short)
+        8. Process modifications if needed
+        9. Format based on analysis level
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The input DataFrame to convert.
+
+        Returns
+        -------
+        pd.DataFrame
+            The converted DataFrame.
+        """
+        df = self._validate_and_rename_columns(df)
+        # replicate_to_raw = self._create_replicate_mapping()
+        # df = self._filter_decoys(df)
+        # df = self._fix_colnames(df)
+        # df = self._mark_contaminants(df)
+        # df = self._process_species_information(df)
+        df = self._process_modifications(df)
+        # df_melted = self._handle_data_format(df)
+        # df_melted = self._filter_zero_intensities(df_melted)
+        return df  # self._format_by_analysis_level(df_melted), replicate_to_raw
+
+
 MODULE_TO_CLASS = {
     "quant_lfq_DDA_ion_Astral": ParseSettingsQuant,
     "quant_lfq_DDA_ion_QExactive": ParseSettingsQuant,
     "quant_lfq_DDA_peptidoform": ParseSettingsQuant,
     "quant_lfq_DIA_ion_AIF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_diaPASEF": ParseSettingsQuant,
-    "quant_lfq_DIA_ion_singlecell": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_lowinput": ParseSettingsQuant,
     "quant_lfq_DIA_ion_Astral": ParseSettingsQuant,
     "denovo_DDA_HCD": ParseSettingsDeNovo,
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_plasma": ParseSettingsQuant,
+    "entrapment_DIA_ion_Astral": ParseSettingsEntrapment,
 }

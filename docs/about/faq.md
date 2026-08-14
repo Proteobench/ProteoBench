@@ -50,6 +50,7 @@ Yes, as long as its output can be parsed directly or converted into one of the m
 formats (see that module's "Tool-specific setup" section, or use the
 [custom format](../your-first-submission/index.md#if-your-tool-isnt-supported) if there's no
 parser yet).
+Users and developers are encouraged to contact the ProteoBench developers if they want a new parser to be added for a specific software package. You can [open an issue (https://github.com/Proteobench/ProteoBench/issues) or [propose a new parser](../contributing/adding-a-module).
 
 ## What should I do if my tool isn't directly supported?
 

@@ -102,6 +102,8 @@ inference, and quantification strategy are all treated as part of the workflow b
 report them in your submission's parameter file. Where ProteoBench itself does perform some
 processing, the relevant module page says so explicitly.
 
+We advise against applying any form of post-processing to the workflow output that you want to submit to ProteoBench. If you do perform post-processing, you should indicate it when you upload your workflow parameters in the Public Submission tab. A check box and a free-text field are present to this effect.
+
 ## How do I interpret differences between benchmark runs?
 
 Differences can come from many places: feature detection, spectral library generation,

@@ -165,7 +165,7 @@ Secondly, the ability of the tool to correctly predict spectra with specific cha
 
 - Missing fragmentation sites: The number of missing complementary (b and y) ions
 - Peptide length: Not specifically a spectrum characteristic, but reported to impact the performance of *de novo* tools
-- % Explained intensity: Serves as an inverse of the noise. Defined as the proportion of the intensity of annotated peaks over all peaks (TIC)
+- Percentage Explained intensity: Serves as an inverse of the noise. Defined as the proportion of the intensity of annotated peaks over all peaks (TIC)
 
 The precision is calculated on the peptide level as the proportion of correct peptides among the predictions made by the *de novo* tool
 

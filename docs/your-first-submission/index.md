@@ -34,6 +34,7 @@ replicates; renamed files will fail to parse correctly.
 Analyze the downloaded files with your own tool, using whatever parameters you'd like to test. Most
 modules suggest a starting set of parameters for a fair baseline comparison, but you are not
 required to match them exactly.
+Each module's documentation page provides a step-by-step description of how to set up the analysis for each tool. 
 
 ```{admonition} Automate this step with ProteoRunners
 :class: tip

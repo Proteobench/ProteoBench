@@ -114,9 +114,7 @@ class VariablesDIAQuanttimsTOFLowinput:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/15-quant-lfq-ion-dia-timsTOF-lowinput/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-timstof-lowinput/"
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-timstof-lowinput/all_data_LFQ_Quant_DIA_timsTOF_lowinput.tar.gz"
 
     title: str = "DIA Precursor quantification - timsTOF (low-input)"

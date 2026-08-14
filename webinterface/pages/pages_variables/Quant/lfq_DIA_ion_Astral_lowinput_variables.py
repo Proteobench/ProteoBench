@@ -112,9 +112,7 @@ class VariablesDIAQuantAstralLowinput:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/14-quant-lfq-ion-dia-astral-lowinput/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-astral-lowinput/"
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/all_data_LFQ_Quant_DIA_Astral_lowinput.tar.gz"
 
     title: str = "DIA Precursor ion quantification - Astral (low-input)"

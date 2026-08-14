@@ -1,21 +1,23 @@
-# LFQ, precursor ion (Astral)
+# LFQ, precursor ion (timsTOF, low input)
 
-{bdg-info}`beta` {bdg-primary-line}`Quantification` — DIA, Orbitrap Astral, precursor-ion level
+{bdg-success}`alpha` {bdg-primary-line}`Quantification` — DIA, timsTOF Ultra 2, low input (200 pg)
 
-```{admonition} This module is in beta stage
-:class: note
-This module has been validated and is suitable for submissions. However, metrics or thresholds may
-be refined as we gather more community results and feedback.
+```{admonition} This module is in alpha stage
+:class: warning
+This module is still in active development. Its scope, metrics, or dataset may change as we refine
+it based on community feedback. Submissions are welcome, but please be aware that comparisons may
+shift in future versions.
 ```
 
-Compares label-free quantification (LFQ) accuracy and sensitivity for workflows run on
-data-independent acquisition (DIA) data, namely narrow-window 2 Th, on an Orbitrap Astral (Thermo
-Fisher Scientific).
+Compares the sensitivity and quantification accuracy of workflows for data-independent acquisition
+(DIA) data acquired in dia-PASEF mode on a timsTOF Ultra 2 (Bruker), on low-input samples of
+approximately 200 pg protein amount.
 
-For low-input / single-cell-scale data on the same instrument type, see
-[LFQ, low input](dia-ion-lowinput.md) or [LFQ, precursor ion (Astral, low input)](dia-ion-astral-lowinput.md).
+For the equivalent low-input dataset on an Orbitrap Astral, see
+[LFQ, precursor ion (Astral, low input)](dia-ion-astral-lowinput.md); for bulk dia-PASEF data on a
+timsTOF SCP, see [LFQ, precursor ion (diaPASEF)](dia-ion-diapasef.md).
 
-```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
+```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_timsTOF_lowinput
 :color: primary
 :class: sd-px-4
 
@@ -26,8 +28,8 @@ Open in web app
 
 | | |
 |---|---|
-| Acquisition | DIA, 2 Th windows |
-| Instrument | Orbitrap Astral |
+| Acquisition | DIA (dia-PASEF) |
+| Instrument | timsTOF Ultra 2, low input (~200 pg) |
 | Level | Precursor ion (modified sequence + charge) |
 | Metric | Epsilon (quantification accuracy) |
 
@@ -41,24 +43,56 @@ This module is best suited to evaluate the impact of, among others:
 
 It is **not** designed to evaluate later-stage post-processing of quantitative data (e.g. missing
 value replacement or manual filtering); please upload data without that kind of post-processing.
+Other modules focus specifically on those steps.
 
 ## Dataset
 
-A not-yet-released Astral DIA dataset using the same sample composition (conditions "A" and "B") as
-described in [Van Puyvelde et al., 2022](https://www.nature.com/articles/s41597-022-01216-6):
-commercial peptide digest standards of *Escherichia coli*, yeast, and human, at logarithmic fold
-changes (log2FC) of 0, −1, and 2 respectively.
+A [timsTOF dataset with low-input three-proteome mixture samples](https://www.biorxiv.org/content/10.64898/2026.07.13.738155v1.full.pdf),
+with two distinct abundance ratios of tryptic digest, each injected at a total of 200 pg protein
+amount. This corresponds to logarithmic fold changes (log2FC) of 0, −2, and 1 for human, *E. coli*,
+and yeast respectively. The human proportion was sourced from Pierce™ HeLa Protein Digest Standard
+(Thermo Fisher Scientific, #88328).
 
-Peptides were loaded directly onto a 50 cm μPAC™ analytical column and separated by a
-reversed-phase gradient (96% to 60% buffer A over ~16 min, 750 nL/min then 250 nL/min). The mass
-spectrometer ran in positive-ionization DIA mode, full MS over m/z 380–980 at 240,000 resolution
-(Orbitrap), 300 windows of 2 Th spanning 380–980 m/z, 25% normalized collision energy (HCD), MS2
-over m/z 150–2000 (Astral), 3 ms maximum injection time.
+Chromatographic separation was carried out on a Vanquish Neo UHPLC system (Thermo
+Fisher Scientific) using a two-column setup: a PepMap C18 trapping column
+(5 mm × 300 μm, Thermo Fisher Scientific) for online desalting, coupled to an Ionopticks
+Aurora Series C18 analytical column (8 cm × 75 μm).
+The chromatographic gradient was initiated at 4% B (20% H2O, 79.9% acetonitrile, 0.1%
+FA) and a flow rate of 800 nL, ramped to 12% B within 0.075 min, followed by 18% within
+0.188 min, 35% in 0.8 min and 99% within 0.05 min. Held at 99% for 0.338 min, flow rate
+was decreased to 100 nL and held for 6.249 min afterwards increased to 800 nL and 4%
+B in 0.05 min.
+
+Acquisition on the timsTOF Ultra2 was performed in diaPASEF mode accumulating a
+ramping from 0.7-1.3 1/K0 in 100 ms with High Sensitivity Mode enabled and a collision
+energy slope of 0.6-1.6 starting for the IM range of 20-59. DIA PASEF windows were
+dynamically placed from 400-1000 m/z as follows:
+
+| Cycle Id | Start IM [1/K0] | End IM [1/K0] | Start Mass [m/z] | End Mass [m/z] |
+|----------|-----------------|---------------|-------------------|-----------------|
+| 1        | 0.97            | 1.45          | 722.28            | 767.38          |
+| 1        | 0.84            | 0.97          | 557.33            | 587.32          |
+| 1        | 0.64            | 0.84          | 400               | 434.58          |
+| 2        | 0.99            | 1.45          | 766.38            | 818.9           |
+| 2        | 0.89            | 0.99          | 586.32            | 617.81          |
+| 2        | 0.64            | 0.89          | 433.58            | 470.59          |
+| 3        | 1.01            | 1.45          | 817.9             | 882.96          |
+| 3        | 0.905           | 1.01          | 616.81            | 650.32          |
+| 3        | 0.64            | 0.905         | 469.59            | 501.26          |
+| 4        | 1.045           | 1.45          | 881.96            | 956.47          |
+| 4        | 0.925           | 1.045         | 649.32            | 684.39          |
+| 4        | 0.64            | 0.925         | 500.26            | 529.81          |
+| 5        | 1.11            | 1.45          | 955.47            | 1000            |
+| 5        | 0.955           | 1.11          | 683.39            | 723.28          |
+| 5        | 0.64            | 0.955         | 528.81            | 558.33          |
+
+```{note}
+Raw files are not yet on ProteomeXchange; the reserved identifier is PXD080610.
+```
 
 **Download:**
-- [All raw files + FASTA (single archive)](https://proteobench.cubimed.rub.de/raws/DIA-astral/all_data_LFQ_Quant_DIA_Astral.tar.gz)
-- Individual raw files (`REP1`–`REP3`, conditions A/B) from the
-  [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-astral/)
+- [All raw files + FASTA (single archive)](https://proteobench.cubimed.rub.de/raws/DIA-timstof-lowinput/all_data_LFQ_Quant_DIA_timsTOF_lowinput.tar.gz)
+- Individual `.d` folders from the [ProteoBench server](https://proteobench.cubimed.rub.de/raws/DIA-timstof-lowinput/)
 - [FASTA (HYE mixed species + contaminants)](https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip),
   contaminants from [Frankenfield et al., JPR](https://pubs.acs.org/doi/10.1021/acs.jproteome.2c00145)
 
@@ -102,7 +136,7 @@ like) submit your results publicly.
 Expand a tool below for setup details.
 
 :::{dropdown} DIA-NN
-1. Import raw files.
+1. Import `.d` files.
 2. Add the FASTA, but do not select "Contaminants" (already included).
 3. Turn on FASTA digest for library-free search / library generation.
 4. Do not set verbosity/log level above 1, or parameter parsing will fail.
@@ -111,7 +145,7 @@ Expand a tool below for setup details.
 :::
 
 :::{dropdown} AlphaDIA
-1. Select the FASTA and import `.raw` files in "Input files".
+1. Select the FASTA and import `.d` files in "Input files".
 2. Define search parameters in "Method settings".
 3. Turn on "Predict Library".
 4. Turn on "Precursor Level LFQ".
@@ -119,15 +153,11 @@ Expand a tool below for setup details.
    `precursor.matrix.tsv` (or use the
    [conversion notebook](https://github.com/Proteobench/ProteoBench/blob/main/jupyter_notebooks/submission/ProteoBench_input_conversion.ipynb));
    later versions need only `precursors.parquet`/`.tsv`.
-
-```{note}
-Version ≥1.10.4 is recommended for improved MS1-cycle checking.
-```
 :::
 
 :::{dropdown} FragPipe (DIA-NN quant)
 1. Load the DIA_SpecLib_Quant workflow.
-2. After importing raw files, assign experiments "by File Name".
+2. After importing `.d` files, assign experiments "by File Name".
 3. **Do not add contaminants when adding decoys to the database.**
 4. Upload `*report.tsv` for scoring and `fragpipe.workflow` for public submission.
 
@@ -166,11 +196,11 @@ ProteoBench automatically corrects small naming differences (case, spacing, mino
 sample names, but anything it can't confidently resolve will still fail with a message telling you
 which name(s) didn't match. Exact names are still the safest bet.
 
-Set Enzyme = trypsin, Instrument = Orbitrap (Astral), Fragment = HCD, Acquisition = DIA. In the
-workflow, use the Quantification option; define search parameters in "DB search". In
-"Quantification" use "Label Free" (individually or grouped by condition); in "Report" set both
-Precursor/Peptide FDR and Protein Group FDR to 1%. Check "All Search Parameters" and the "Feature
-Vector CSV" (Export tab) once finished.
+Set Enzyme = trypsin, Instrument = timsTOF, Fragment = CID, Acquisition = DIA. In the workflow, use
+the Quantification option; define search parameters in "DB search". In "Quantification" use "Label
+Free" (individually or grouped by condition); in "Report" set both Precursor/Peptide FDR and
+Protein Group FDR to 1%. Check "All Search Parameters" and the "Feature Vector CSV" (Export tab)
+once finished.
 :::
 
 :::{dropdown} Custom format

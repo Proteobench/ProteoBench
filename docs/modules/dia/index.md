@@ -41,6 +41,24 @@ Quantification accuracy and sensitivity for ZenoTOF 8600 ZenoSWATH data.
 Quantification accuracy and sensitivity for low-input / single-cell-scale DIA on an Astral.
 :::
 
+:::{grid-item-card} LFQ, precursor ion (Astral, low input)
+:link: dia-ion-astral-lowinput
+:link-type: doc
+
+{bdg-success}`alpha` {bdg-primary-line}`Quantification`
+
+Quantification accuracy and sensitivity for a 200 pg low-input DIA dataset on an Orbitrap Astral.
+:::
+
+:::{grid-item-card} LFQ, precursor ion (timsTOF, low input)
+:link: dia-ion-timstof-lowinput
+:link-type: doc
+
+{bdg-success}`alpha` {bdg-primary-line}`Quantification`
+
+Quantification accuracy and sensitivity for a 200 pg low-input dia-PASEF dataset on a timsTOF Ultra 2.
+:::
+
 :::{grid-item-card} LFQ, human plasma
 :link: dia-ion-plasma
 :link-type: doc
@@ -80,6 +98,8 @@ dia-ion-diapasef
 dia-ion-astral
 dia-ion-zenotof
 dia-ion-lowinput
+dia-ion-astral-lowinput
+dia-ion-timstof-lowinput
 dia-ion-plasma
 entrapment-dia-astral
 dia-ion-aif

@@ -9,7 +9,7 @@ more specific questions.
 Depending on your goal:
 
 - **Looking for a workflow recommendation?** Open the [module](../modules/index.rst) that matches
-  your data type in the web app, and compare which workflow performs best on the metric that
+  your data type and application in the web app, and compare which workflow performs best on the metric that
   matters to you (e.g. quantification accuracy).
 - **Want to compare your own workflow?** See [Your First Submission](../your-first-submission/index.md)
   for the full walkthrough.

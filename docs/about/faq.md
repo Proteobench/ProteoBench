@@ -17,7 +17,7 @@ Depending on your goal:
   [PyPI package](https://pypi.org/project/proteobench/); see
   [Using ProteoBench locally](../contributing/local-usage.md) for a runnable example notebook.
 
-## My upload fails
+## Why does my upload fail?
 
 Check if you have the correct file uploaded. If the problem persists, please [open a GitHub issue](https://github.com/Proteobench/ProteoBench/issues) including the error message and if possible, the first few rows of the uploaded file.
 

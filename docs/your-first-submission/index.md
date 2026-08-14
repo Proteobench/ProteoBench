@@ -65,7 +65,7 @@ your tool added instead.
 
 ## 5. Fill in the metadata
 
-In the `Meta data for searches` field, upload the parameter file your search tool produced (again,
+To publicly submit your workflow run, go to the tab "Submit New Results". In the `Meta data for searches` field, upload the parameter file your search tool produced (again,
 see the module page's "Tool-specific setup" for which file). ProteoBench parses what it can
 automatically; add anything it couldn't extract — or anything you think is important context — in
 the `Comments for submission` field. In case you did any post-processing such as filtering, tick `Was any postprocessing applied?`, and describe the steps in the field below.

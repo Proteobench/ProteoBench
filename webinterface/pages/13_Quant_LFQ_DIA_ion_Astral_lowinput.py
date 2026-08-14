@@ -15,7 +15,9 @@ from pages.pages_variables.Quant.lfq_DIA_ion_Astral_lowinput_variables import (
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DIA_Astral_lowinput import DIAQuantIonModuleAstralLowInput
+from proteobench.modules.quant.quant_lfq_ion_DIA_Astral_lowinput import (
+    DIAQuantIonModuleAstralLowInput,
+)
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)

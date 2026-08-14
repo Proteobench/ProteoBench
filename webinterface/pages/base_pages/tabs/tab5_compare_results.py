@@ -10,8 +10,8 @@ from typing import Dict, List, Optional
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-
 from pages.base_pages.utils.general import prepare_df_for_display
+
 from proteobench.plotting.plot_workflow_comparison import plot_accuracy_vs_abundance
 
 # Module IDs for which the "Quantification Accuracy vs Abundance" comparison tab is shown.
@@ -35,15 +35,13 @@ def display_workflow_comparison(variables, ionmodule) -> None:
         Module for accessing data and methods.
     """
     st.header("Workflow Comparison")
-    st.markdown(
-        """
+    st.markdown("""
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
         - **Precursor overlap**: Bar plot showing number of shared and unique precursors
         - **Parameter differences**: Table highlighting what differs between workflows
-        """
-    )
+        """)
 
     # Initialize data
     _initialize_comparison_data(variables, ionmodule)
@@ -336,7 +334,10 @@ def _display_precursor_overlap(
         "MaxQuant" in workflow_2_id and workflow_2_data["metadata"]["old_new"] == "new"
     ):
         st.warning(
-            "⚠️ Precursor overlaps calculated on private MaxQuant data might be inaccurate. If you want to benchmark local MaxQuant workflows, please submit them in a public submission. Reason: Fixed modifications are not included in MaxQuant output and are parsed from the parameter file during submission."
+            "⚠️ Precursor overlaps calculated on private MaxQuant data might be inaccurate. If you want to "
+            "benchmark local MaxQuant workflows, please submit them in a public submission. Reason: Fixed "
+            "modifications are not included in MaxQuant output and are parsed from the parameter file during "
+            "submission."
         )
 
     perf_1 = workflow_1_data["performance_data"]

@@ -51,12 +51,24 @@ class VariablesDIAQuanttimsTOFLowinput:
     # Sidebar metadata
     sidebar_label: str = "Quant LFQ DIA ion timsTOF (low-input)"
     homepage_title: str = "LFQ Quantification on a timsTOF Ultra 2 on low-input (200 pg)"
-    graphical_abstract: str = "Graphical_abstract_Quant_timsTOF.png" # TODO change!
-    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a low-input (200pg) multi-species (HYE) sample on a timsTOF instrument."
+    graphical_abstract: str = "Graphical_abstract_Quant_timsTOF.png"  # TODO change!
+    documentation_description: str = (
+        "Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a low-input (200pg) multi-species (HYE) sample on a timsTOF instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_timsTOF_lowinput"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
-        default_factory=lambda: ["DIA", "quantification", "timsTOF", "precursor", "ion", "LFQ", "PASEF", "single-cell", "low-input"]
+        default_factory=lambda: [
+            "DIA",
+            "quantification",
+            "timsTOF",
+            "precursor",
+            "ion",
+            "LFQ",
+            "PASEF",
+            "single-cell",
+            "low-input",
+        ]
     )
     selectbox_id_submitted_uuid: str = "selectbox_id_submitted_dia_quant_timsTOF_lowinput"
     selectbox_id_uuid: str = "selectbox_id_dia_quant_timsTOF_lowinput"
@@ -79,7 +91,9 @@ class VariablesDIAQuanttimsTOFLowinput:
         "metric_calc_approach_selector_submitted_uuid_dia_quant_timsTOF_lowinput"
     )
     metric_calc_approach_selector_uuid: str = "metric_calc_approach_selector_uuid_dia_quant_timsTOF_lowinput"
-    metric_calc_approach_selector_indepth_uuid: str = "metric_calc_approach_selector_indepth_uuid_dia_quant_timsTOF_lowinput"
+    metric_calc_approach_selector_indepth_uuid: str = (
+        "metric_calc_approach_selector_indepth_uuid_dia_quant_timsTOF_lowinput"
+    )
 
     metric_plot_labels: List[str] = field(
         default_factory=lambda: [
@@ -115,7 +129,9 @@ class VariablesDIAQuanttimsTOFLowinput:
     texts: Type[WebpageTexts] = WebpageTexts
 
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-timstof-lowinput/"
-    raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-timstof-lowinput/all_data_LFQ_Quant_DIA_timsTOF_lowinput.tar.gz"
+    raw_data_url: str = (
+        "https://proteobench.cubimed.rub.de/raws/DIA-timstof-lowinput/all_data_LFQ_Quant_DIA_timsTOF_lowinput.tar.gz"
+    )
 
     title: str = "DIA Precursor quantification - timsTOF (low-input)"
     y_axis_title: str = "Total number of precursor ions quantified in the selected number of raw files"

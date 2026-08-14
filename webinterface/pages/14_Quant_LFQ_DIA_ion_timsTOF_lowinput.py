@@ -15,7 +15,9 @@ from pages.pages_variables.Quant.lfq_DIA_ion_timsTOF_lowinput_variables import (
 from pages.texts.generic_texts import WebpageTexts
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DIA_timsTOF_lowinput import DIAQuantIonModuletimsTOFLowInput
+from proteobench.modules.quant.quant_lfq_ion_DIA_timsTOF_lowinput import (
+    DIAQuantIonModuletimsTOFLowInput,
+)
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)

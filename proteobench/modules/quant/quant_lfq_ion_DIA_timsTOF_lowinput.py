@@ -35,9 +35,11 @@ class DIAQuantIonModuletimsTOFLowInput(QuantModule):
     token : str
         GitHub token for the user.
     proteobot_repo_name : str, optional
-        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_timsTOF_lowinput".
+        Name of the repository for pull requests and where new points are added, by default
+        "Proteobot/Results_quant_ion_DIA_timsTOF_lowinput".
     proteobench_repo_name : str, optional
-        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_timsTOF_lowinput".
+        Name of the repository where the benchmarking results will be stored, by default
+        "Proteobench/Results_quant_ion_DIA_timsTOF_lowinput".
 
     Attributes
     ----------
@@ -64,9 +66,11 @@ class DIAQuantIonModuletimsTOFLowInput(QuantModule):
         token : str
             GitHub token for the user.
         proteobot_repo_name : str, optional
-            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_timsTOF_lowinput".
+            Name of the repository for pull requests and where new points are added, by default
+            "Proteobot/Results_quant_ion_DIA_timsTOF_lowinput".
         proteobench_repo_name : str, optional
-            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_timsTOF_lowinput".
+            Name of the repository where the benchmarking results will be stored, by default
+            "Proteobench/Results_quant_ion_DIA_timsTOF_lowinput".
         branch : Optional[str], optional
             Branch of the Proteobench repo to check out for result display.
         """
@@ -129,7 +133,8 @@ class DIAQuantIonModuletimsTOFLowInput(QuantModule):
             input_df = load_input_file(input_file, input_format, input_file_secondary)
         except pd.errors.ParserError as e:
             raise ParseError(
-                f"Error parsing {input_format} file, please ensure the format is correct and the correct software tool is chosen: {e}"
+                f"Error parsing {input_format} file, please ensure the format is correct and the correct "
+                f"software tool is chosen: {e}"
             )
         except Exception as e:
             raise ParseSettingsError(f"Error parsing the input file: {e}")

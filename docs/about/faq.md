@@ -107,7 +107,7 @@ We advise against applying any form of post-processing to the workflow output th
 ## How do I interpret differences between benchmark runs?
 
 Differences can come from many places: feature detection, spectral library generation,
-identification scoring, FDR control, match-between-runs, normalization, missing-value handling, and
+identification scoring, FDR control, match between runs, normalization, missing-value handling, and
 software defaults. Treat results as workflow-level comparisons, and check both the software version
 and the submitted parameters before drawing conclusions.
 

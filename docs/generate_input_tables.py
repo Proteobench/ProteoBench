@@ -10,76 +10,45 @@ import toml
 
 SETTINGS_ROOT = Path(__file__).resolve().parent.parent / "proteobench" / "io" / "parsing" / "io_parse_settings"
 PARSE_SETTINGS_FILES_TOML = SETTINGS_ROOT / "parse_settings_files.toml"
-DOCS_ROOT = Path(__file__).resolve().parent / "available-modules" / "active-modules"
+DOCS_ROOT = Path(__file__).resolve().parent / "modules"
+
+DEFAULT_MARKER = "**Table: input files required for metric calculation and public submission**"
 
 # Relative paths under SETTINGS_ROOT — mirrors proteobench/modules/constants.py
 _MODULE_SETTINGS_SUBDIRS = {
     "quant_lfq_DDA_ion_QExactive": "Quant/lfq/DDA/ion/QExactive",
     "quant_lfq_DDA_ion_Astral": "Quant/lfq/DDA/ion/Astral",
     "quant_lfq_DDA_peptidoform": "Quant/lfq/DDA/peptidoform",
+    "quant_lfq_DIA_ion_AIF": "Quant/lfq/DIA/ion/AIF",
     "quant_lfq_DIA_ion_diaPASEF": "Quant/lfq/DIA/ion/diaPASEF",
     "quant_lfq_DIA_ion_Astral": "Quant/lfq/DIA/ion/Astral",
     "quant_lfq_DIA_ion_ZenoTOF": "Quant/lfq/DIA/ion/ZenoTOF",
     "quant_lfq_DIA_ion_lowinput": "Quant/lfq/DIA/ion/lowinput",
     "quant_lfq_DIA_ion_plasma": "Quant/lfq/DIA/ion/plasma",
     "denovo_DDA_HCD": "denovo/DDA/HCD",
+    "entrapment_DIA_ion_Astral": "entrapment/DIA/ion/Astral",
 }
 
+# doc_file is relative to DOCS_ROOT (docs/modules/). table_marker defaults to
+# DEFAULT_MARKER; only the archived AIF page uses different wording ("used" instead
+# of "required", matching its "(historical reference)" section heading).
 MODULE_DOC_CONFIG = {
-    "quant_lfq_DDA_ion_QExactive": {
-        "doc_file": "2-quant-lfq-ion-dda.md",
-        "table_marker": "Table 2. Overview of input files",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
+    "quant_lfq_DDA_ion_QExactive": {"doc_file": "dda/dda-ion-qexactive.md"},
+    "quant_lfq_DDA_ion_Astral": {"doc_file": "dda/dda-ion-astral.md"},
+    "quant_lfq_DDA_peptidoform": {"doc_file": "dda/dda-peptidoform.md"},
+    "quant_lfq_DIA_ion_AIF": {
+        "doc_file": "dia/dia-ion-aif.md",
+        "table_marker": "**Table: input files used for metric calculation and public submission**",
     },
-    "quant_lfq_DDA_ion_Astral": {
-        "doc_file": "8-quant-lfq-ion-dda-Astral.md",
-        "table_marker": "Table 2. Overview of input files",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
-    },
-    "quant_lfq_DDA_peptidoform": {
-        "doc_file": "3-quant-lfq-peptidoform-dda.md",
-        "table_marker": "Table 2. Overview of input files",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
-    },
-    "quant_lfq_DIA_ion_diaPASEF": {
-        "doc_file": "5-quant-lfq-ion-dia-diapasef.md",
-        "table_marker": "Table 2. Overview of input files",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
-    },
-    "quant_lfq_DIA_ion_Astral": {
-        "doc_file": "7-quant-lfq-ion-dia-Astral_2Th.md",
-        "table_marker": "Table 2. Overview of input files",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
-    },
-    "quant_lfq_DIA_ion_ZenoTOF": {
-        "doc_file": "10-quant-lfq-ion-dia-ZenoTOF.md",
-        "table_marker": "Table 2. Overview of input files",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
-    },
-    "quant_lfq_DIA_ion_lowinput": {
-        "doc_file": "9-quant-lfq-ion-dia-lowinput.md",
-        "table_marker": "Table 2. Overview of input files",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
-    },
-    "quant_lfq_DIA_ion_plasma": {
-        "doc_file": "12-quant-lfq-ion-dia-plasma.md",
-        "table_marker": "Tool-specific input files",
-        "col_input": "Quantification input",
-        "col_params": "Metadata / parameter file",
-    },
-    "denovo_DDA_HCD": {
-        "doc_file": "11-denovo-dda-hcd.md",
-        "table_marker": "Table 3. Overview of input files required for metric calculation and public submission",
-        "col_input": "Input file",
-        "col_params": "Parameter File",
-    },
+    "quant_lfq_DIA_ion_diaPASEF": {"doc_file": "dia/dia-ion-diapasef.md"},
+    "quant_lfq_DIA_ion_Astral": {"doc_file": "dia/dia-ion-astral.md"},
+    "quant_lfq_DIA_ion_ZenoTOF": {"doc_file": "dia/dia-ion-zenotof.md"},
+    "quant_lfq_DIA_ion_lowinput": {"doc_file": "dia/dia-ion-lowinput.md"},
+    "quant_lfq_DIA_ion_plasma": {"doc_file": "dia/dia-ion-plasma.md"},
+    "denovo_DDA_HCD": {"doc_file": "dda/denovo-dda-hcd.md"},
+    # Entrapment has an extra "Parsed FDR column" between Input file and Parameter file —
+    # the raw column each tool reports Q-values in, i.e. the [mapper] key renamed to "Q-Value".
+    "entrapment_DIA_ion_Astral": {"doc_file": "dia/entrapment-dia-astral.md", "extra_column": "Parsed FDR column"},
 }
 
 
@@ -90,10 +59,27 @@ def get_upload_info(tool_name: str, toml_path: Path) -> dict:
     return {**base, **override}
 
 
-def generate_table(tools_data: list, col_input: str, col_params: str) -> str:
-    header = f"| Tool | {col_input} | {col_params} |"
-    separator = "|---|---|---|"
-    rows = [f"| {name} | {inp} | {par} |" for name, inp, par in tools_data if inp]
+def get_parsed_fdr_column(toml_path: Path) -> str:
+    """Return the raw [mapper] source column renamed to "Q-Value" (entrapment modules only)."""
+    data = toml.load(toml_path)
+    mapper = data.get("mapper", {})
+    return next((src for src, dst in mapper.items() if dst == "Q-Value"), "")
+
+
+def _cell(value: str) -> str:
+    """Backtick-wrap a non-empty cell value; render missing values as an em dash."""
+    return f"`{value}`" if value else "—"
+
+
+def generate_table(tools_data: list, extra_column: str = None) -> str:
+    if extra_column:
+        header = f"| Tool | Input file | {extra_column} | Parameter file |"
+        separator = "|---|---|---|---|"
+        rows = [f"| {name} | {_cell(inp)} | {extra} | {_cell(par)} |" for name, inp, extra, par in tools_data if inp]
+    else:
+        header = "| Tool | Input file | Parameter file |"
+        separator = "|---|---|---|"
+        rows = [f"| {name} | {_cell(inp)} | {_cell(par)} |" for name, inp, par in tools_data if inp]
     return "\n".join([header, separator] + rows)
 
 
@@ -125,19 +111,25 @@ def main() -> None:
     for module_id, config in MODULE_DOC_CONFIG.items():
         tool_to_toml = parse_settings_files.get(module_id, {})
         settings_dir = SETTINGS_ROOT / _MODULE_SETTINGS_SUBDIRS[module_id]
+        extra_column = config.get("extra_column")
 
         tools_data = []
         for tool_name in sorted(tool_to_toml.keys()):
             toml_filename = tool_to_toml[tool_name]
             toml_path = settings_dir / toml_filename
             info = get_upload_info(tool_name, toml_path)
-            tools_data.append((tool_name, info.get("datapoint_file", ""), info.get("params_file", "")))
+            if extra_column:
+                extra_value = get_parsed_fdr_column(toml_path)
+                tools_data.append((tool_name, info.get("datapoint_file", ""), extra_value, info.get("params_file", "")))
+            else:
+                tools_data.append((tool_name, info.get("datapoint_file", ""), info.get("params_file", "")))
 
-        new_table = generate_table(tools_data, config["col_input"], config["col_params"])
+        new_table = generate_table(tools_data, extra_column=extra_column)
 
         doc_path = DOCS_ROOT / config["doc_file"]
+        table_marker = config.get("table_marker", DEFAULT_MARKER)
         original = doc_path.read_text(encoding="utf-8")
-        updated = replace_table_in_markdown(original, config["table_marker"], new_table)
+        updated = replace_table_in_markdown(original, table_marker, new_table)
 
         if updated != original:
             doc_path.write_text(updated, encoding="utf-8")

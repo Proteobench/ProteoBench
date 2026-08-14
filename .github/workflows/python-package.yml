@@ -80,7 +80,7 @@ jobs:
         run: |
           cd docs
           python generate_input_tables.py
-          if git diff -- available-modules/active-modules/*.md | grep .; then
+          if git diff -- modules/dda/*.md modules/dia/*.md | grep .; then
             echo "Error: Input files tables not updated, run: cd docs && python generate_input_tables.py"
             exit 1
           fi

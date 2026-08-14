@@ -235,7 +235,7 @@ def main() -> None:
 
     # Button linking to the full module descriptions page
     parts.append(
-        ".. button-ref:: available-modules/index\n"
+        ".. button-ref:: modules/index\n"
         "    :ref-type: doc\n"
         "    :class: sd-px-4\n"
         "    :color: primary\n"

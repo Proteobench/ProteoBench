@@ -52,7 +52,9 @@ class VariablesDIAQuantAstral:
     sidebar_label: str = "Quant LFQ DIA ion Astral"
     homepage_title: str = "LFQ Quantification on an Astral"
     graphical_abstract: str = "Graphical_abstract_Quant_astral.png"
-    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DIA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
+    documentation_description: str = (
+        "Benchmark ion-level label-free quantification accuracy of DIA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_Astral"
     sidebar_category: str = "DIA"
     keywords: List[str] = field(
@@ -112,9 +114,7 @@ class VariablesDIAQuantAstral:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-astral/"
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-astral/all_data_LFQ_Quant_DIA_Astral.tar.gz"
 
     title: str = "DIA Precursor ion quantification - Astral 2 Th"

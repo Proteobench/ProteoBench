@@ -56,18 +56,18 @@ You can download the raw files from the [ProteoBench server](https://proteobench
 
 - Single archive with FASTA: single archive: [all_data_LFQ_Quant_DIA_Astral_lowinput.tar.gz](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/all_data_LFQ_Quant_DIA_Astral_lowinput.tar.gz).
 
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B13_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B13_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B14_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B14_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B15_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B15_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B17_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B17_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B18_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B18_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B20_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B20_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O2_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O2_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O3_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O3_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O5_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O5_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O6_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O6_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O7_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O7_2uL.raw)
-- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O8_2uL.raw](https://proteobench.cubimed.rub.de/raw/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O8_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B13_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B13_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B14_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B14_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B15_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B15_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B17_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B17_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B18_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B18_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B20_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B20_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O2_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O2_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O3_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O3_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O5_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O5_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O6_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O6_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O7_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O7_2uL.raw)
+- [20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O8_2uL.raw](https://proteobench.cubimed.rub.de/raws/DIA-astral-lowinput/20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_O8_2uL.raw)
 
 **It is imperative not to rename the files once downloaded!**
 

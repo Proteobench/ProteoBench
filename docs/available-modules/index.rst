@@ -155,6 +155,29 @@ Are you looking for...
       `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · :doc:`Documentation <active-modules/12-quant-lfq-ion-dia-plasma>`
 
 
+   .. grid-item-card:: Low Input LFQ, DIA (Astral)
+      :columns: 6 6 6 6
+      :padding: 1
+      :class-card: sd-mb-4
+
+      :bdg-success:`alpha`
+      ^^^
+      +++
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral_lowinput>`__ · :doc:`Documentation <active-modules/13-quant-lfq-ion-dia-astral-lowinput>`
+
+
+   .. grid-item-card:: Low Input LFQ, DIA (timsTOF)
+      :columns: 6 6 6 6
+      :padding: 1
+      :class-card: sd-mb-4
+
+      :bdg-success:`alpha`
+      ^^^
+      +++
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_timsTOF_lowinput>`__ · :doc:`Documentation <active-modules/14-quant-lfq-ion-dia-timsTOF-lowinput>`
+
+
+
 ...an archived module?
 -----
 

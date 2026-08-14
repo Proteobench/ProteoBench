@@ -10,3 +10,5 @@ DIA Active Modules
     10-quant-lfq-ion-dia-ZenoTOF
     12-quant-lfq-ion-dia-plasma
     13-entrapment-ion-dia-astral
+    14-quant-lfq-ion-dia-astral-lowinput
+    15-quant-lfq-ion-dia-timstof-lowinput

@@ -64,6 +64,7 @@ that involves. If you'd like native support instead,
 
 Manual review is a quality check: it catches incomplete submissions, wrong file types, a mismatched
 module, missing metadata, or results that can't be meaningfully compared to what's already public.
+The submission process is done on GitHub, and you can contact the core ProteoBench team if you have any question and/or wants to provide more information on the benchmark run that you want to make public.
 
 ## Does ProteoBench run my workflow automatically?
 

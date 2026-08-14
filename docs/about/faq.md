@@ -146,4 +146,4 @@ Submitting your own workflow's results is the most common contribution — see
 [Your First Submission](../your-first-submission/index.md). Beyond that, you can report issues,
 improve the documentation, propose a new module, contribute a parser for an unsupported tool, or
 join the discussion. See [Contributing](../contributing/index.md) for the code/module side of
-things.
+things, and [contact us](mailto:proteobench@eubic-ms.org) if you want more information.

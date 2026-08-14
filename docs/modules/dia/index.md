@@ -32,15 +32,6 @@ Quantification accuracy and sensitivity for DIA data acquired on an Orbitrap Ast
 Quantification accuracy and sensitivity for ZenoTOF 8600 ZenoSWATH data.
 :::
 
-:::{grid-item-card} LFQ, low input
-:link: dia-ion-lowinput
-:link-type: doc
-
-{bdg-success}`alpha` {bdg-primary-line}`Quantification`
-
-Quantification accuracy and sensitivity for low-input / single-cell-scale DIA on an Astral.
-:::
-
 :::{grid-item-card} LFQ, precursor ion (Astral, low input)
 :link: dia-ion-astral-lowinput
 :link-type: doc
@@ -86,6 +77,15 @@ Checks whether a DIA search engine's reported FDR is reliable, using entrapment 
 Superseded by the diaPASEF/Astral/ZenoTOF modules above; kept for reference.
 :::
 
+:::{grid-item-card} LFQ, low input
+:link: dia-ion-lowinput
+:link-type: doc
+
+{bdg-dark}`archived` {bdg-primary-line}`Quantification`
+
+Superseded by the Astral and timsTOF low-input (200 pg) modules above; submissions remain open.
+:::
+
 ::::
 
 See [Modules](../index.rst) for what a module documentation page covers, or jump to
@@ -97,10 +97,10 @@ See [Modules](../index.rst) for what a module documentation page covers, or jump
 dia-ion-diapasef
 dia-ion-astral
 dia-ion-zenotof
-dia-ion-lowinput
 dia-ion-astral-lowinput
 dia-ion-timstof-lowinput
 dia-ion-plasma
 entrapment-dia-astral
 dia-ion-aif
+dia-ion-lowinput
 ```

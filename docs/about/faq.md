@@ -34,7 +34,7 @@ ProteoBench is modular by design specifically so it can grow with new use cases.
 
 No. You're free to submit results from your own parameter choices. There are only a few exceptions
 such as digestion parameters for the entrapment module, and specific FASTA files for most modules.
-Those exceptions are explicitely mentioned in each module documentation page.
+Those exceptions are explicitly mentioned in each module documentation page.
 Every public submission's parameters are collected and downloadable, so others can interpret performance differences
 in light of software version, settings, and search database. If you're deliberately testing
 one specific parameter, mention that in the comments field when you submit.

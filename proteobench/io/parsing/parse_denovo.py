@@ -2,12 +2,10 @@
 Module for parsing results data from various de novo sequencing engines.
 """
 
-import re
-from pathlib import Path
-
-import numpy as np
 import pandas as pd
+import numpy as np
 from pyteomics.mztab import MzTab
+import re
 
 
 def load_input_file(input_path: str, input_format: str, input_secondary: str = None) -> pd.DataFrame:
@@ -60,13 +58,13 @@ def _load_casanovo(input_mztab: str) -> pd.DataFrame:
     return input_data_frame
 
 
-def _load_instanovo(input_path: str) -> pd.DataFrame:
+def _load_instanovo(input_csv: str) -> pd.DataFrame:
     """
     Load an InstaNovo output file.
 
     Parameters
     ----------
-    input_path: str
+    input_csv: str
         The path to the InstaNovo output file.
 
     Returns
@@ -74,14 +72,7 @@ def _load_instanovo(input_path: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    if Path(input_path).suffix.lower() == ".mztab":
-        input_data_frame = MzTab(input_path)
-        return input_data_frame.spectrum_match_table
-
-    input_data_frame = pd.read_csv(input_path, low_memory=False)
-    if "spectrum_id" not in input_data_frame.columns and "scan_number" in input_data_frame.columns:
-        input_data_frame["spectrum_id"] = input_data_frame["scan_number"]
-    return input_data_frame
+    return pd.read_csv(input_csv, low_memory=False)
 
 
 def _load_pepnet(input_csv: str) -> pd.DataFrame:

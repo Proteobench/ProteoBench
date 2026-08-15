@@ -25,7 +25,7 @@ def test_extract_params_v1_2_2_config():
 
 
 def test_extract_params_legacy_flat_config():
-    actual = instanovo_params.extract_params(TESTDATA_DIR / "data/denovo/configs/instanovo/config.yaml")
+    actual = instanovo_params.extract_params(TESTDATA_DIR / "params/denovo/instanovo/config.yaml")
 
     assert actual.software_name == "InstaNovo"
     assert actual.n_beams == 5

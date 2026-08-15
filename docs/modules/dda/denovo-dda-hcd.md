@@ -260,18 +260,7 @@ Set up [InstaNovo](https://instanovo.ai/) and run it on the ground-truth MGF. **
 for scoring and `config.yaml` for public submission.
 
 From `results.csv`, ProteoBench reads `spectrum_id` (trailing number after the last colon, e.g.
-`filename:1234` → `1234`), `predictions`, `log_probs`, and `token_log_probs` (precision-coverage curve
-support not yet implemented).
-
-The public checkpoints report training on ProteomeTools Part I ([PXD004732](https://www.ebi.ac.uk/pride/archive/projects/PXD004732)), Part II
-([PXD010595](https://www.ebi.ac.uk/pride/archive/projects/PXD010595)), and Part III ([PXD021013](https://www.ebi.ac.uk/pride/archive/projects/PXD021013)); the PRIDE projects [PXD000666](https://www.ebi.ac.uk/pride/archive/projects/PXD000666), [PXD000867](https://www.ebi.ac.uk/pride/archive/projects/PXD000867), [PXD001839](https://www.ebi.ac.uk/pride/archive/projects/PXD001839), [PXD003155](https://www.ebi.ac.uk/pride/archive/projects/PXD003155), [PXD004364](https://www.ebi.ac.uk/pride/archive/projects/PXD004364), [PXD004612](https://www.ebi.ac.uk/pride/archive/projects/PXD004612), [PXD005230](https://www.ebi.ac.uk/pride/archive/projects/PXD005230), [PXD006692](https://www.ebi.ac.uk/pride/archive/projects/PXD006692), [PXD011360](https://www.ebi.ac.uk/pride/archive/projects/PXD011360), [PXD011536](https://www.ebi.ac.uk/pride/archive/projects/PXD011536), [PXD013543](https://www.ebi.ac.uk/pride/archive/projects/PXD013543), [PXD015928](https://www.ebi.ac.uk/pride/archive/projects/PXD015928), [PXD016793](https://www.ebi.ac.uk/pride/archive/projects/PXD016793), [PXD017671](https://www.ebi.ac.uk/pride/archive/projects/PXD017671), [PXD019431](https://www.ebi.ac.uk/pride/archive/projects/PXD019431), [PXD019852](https://www.ebi.ac.uk/pride/archive/projects/PXD019852), [PXD026910](https://www.ebi.ac.uk/pride/archive/projects/PXD026910), and [PXD027772](https://www.ebi.ac.uk/pride/archive/projects/PXD027772), aggregated on
-Hugging Face as
-[InstaDeepAI/CompOmics_PRIDE](https://huggingface.co/datasets/InstaDeepAI/CompOmics_PRIDE);
-[Massive-KB v1](https://massive.ucsd.edu/ProteoSAFe/static/massive-kb-libraries.jsp); and a
-phosphorylation dataset,
-[InstaDeepAI/InstaNovo-P](https://huggingface.co/datasets/InstaDeepAI/InstaNovo-P), described in the
-[InstaNovo-P preprint](https://www.biorxiv.org/content/10.1101/2025.05.14.654049v1). State in
-`Comments for submission` whether a public checkpoint was used as-is or retrained.
+`filename:1234` → `1234`), `predictions`, `log_probs`, and `token_log_probs`.
 :::
 
 :::{dropdown} NovoB

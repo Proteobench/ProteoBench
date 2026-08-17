@@ -56,7 +56,7 @@ class VariablesDIAQuantLI:
         "Orbitrap Astral. Superseded by the Astral and timsTOF low-input (200 pg) modules."
     )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_lowinput"
-    sidebar_category: str = "DIA"
+    sidebar_category: str = "Archived"
     keywords: List[str] = field(
         default_factory=lambda: [
             "DIA",

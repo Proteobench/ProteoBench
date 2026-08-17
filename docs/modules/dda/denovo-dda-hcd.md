@@ -260,8 +260,7 @@ Set up [InstaNovo](https://instanovo.ai/) and run it on the ground-truth MGF. **
 for scoring and `config.yaml` for public submission.
 
 From `results.csv`, ProteoBench reads `spectrum_id` (trailing number after the last colon, e.g.
-`filename:1234` → `1234`), `predictions`, `log_probs`, and `token_log_probs` (precision-coverage curve
-support not yet implemented).
+`filename:1234` → `1234`), `predictions`, `log_probs`, and `token_log_probs`.
 :::
 
 :::{dropdown} NovoB

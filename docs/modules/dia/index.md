@@ -68,28 +68,11 @@ Quantification accuracy and dynamic range for human plasma DIA data.
 Checks whether a DIA search engine's reported FDR is reliable, using entrapment peptides.
 :::
 
-:::{grid-item-card} LFQ, precursor ion (AIF)
-:link: dia-ion-aif
-:link-type: doc
-
-{bdg-dark}`archived` {bdg-primary-line}`Quantification`
-
-Superseded by the diaPASEF/Astral/ZenoTOF modules above; kept for reference.
-:::
-
-:::{grid-item-card} LFQ, low input
-:link: dia-ion-lowinput
-:link-type: doc
-
-{bdg-dark}`archived` {bdg-primary-line}`Quantification`
-
-Superseded by the Astral and timsTOF low-input (200 pg) modules above; submissions remain open.
-:::
-
 ::::
 
-See [Modules](../index.rst) for what a module documentation page covers, or jump to
-[DDA modules](../dda/index.md) instead.
+See [Modules](../index.rst) for what a module documentation page covers, jump to
+[DDA modules](../dda/index.md), or see [Archived modules](../archived/index.md) for modules that
+have been superseded (LFQ precursor ion AIF, LFQ low input).
 
 ```{toctree}
 :hidden:
@@ -101,6 +84,4 @@ dia-ion-astral-lowinput
 dia-ion-timstof-lowinput
 dia-ion-plasma
 entrapment-dia-astral
-dia-ion-aif
-dia-ion-lowinput
 ```

@@ -327,9 +327,12 @@ class QuantDatapointHYE(DatapointBase):
         """
         Generate a unique ID for the benchmark run by combining the software name and a timestamp.
 
-        This ID is used to uniquely identify each run of the benchmark.
+        This ID is used to uniquely identify each run of the benchmark. The timestamp carries
+        microseconds because datapoints are also generated in batches -- the resubmission
+        script regenerates many in a loop -- where whole-second resolution hands several runs
+        the same ID.
         """
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.id = "_".join([self.software_name, str(time_stamp)])
         logging.info(f"Assigned the following ID to this run: {self.id}")
 

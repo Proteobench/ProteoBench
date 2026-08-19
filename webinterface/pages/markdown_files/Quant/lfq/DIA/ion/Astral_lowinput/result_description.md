@@ -7,7 +7,7 @@ It contains the following columns:
 - **Intensity_std_{condition}**: standard deviations calculated for the intensity values in condition A and B
 - **CV_{condition}**: coefficient of variation (CV) for condition A and B
 - **log2_A_vs_B**: differences of the mean log2-transformed values between condition A and B
-- **LFQ_Orbitrap_AIF_Condition_{}\_Sample\_Alpha\_{}**: MS signal from the input table
+- **20251014_LSMBO_CC_Astral_IO08_140SPD_HYE{}\_QC\_{}_2uL**: MS signal from the input table
 - **nr_observed**: number of runs with non-missing values
 - **YEAST/ECOLI/HUMAN**: species the sequence matches to
 - **unique**: TRUE if the sequence is species-specific

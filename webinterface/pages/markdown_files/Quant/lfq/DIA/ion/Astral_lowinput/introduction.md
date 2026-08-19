@@ -8,7 +8,7 @@ ratios (condition A and condition B), with three replicates of each
 condition. With these samples, we calculate three metrics:
 - To estimate the sensitivity of the workflows, we report the
 number of unique precursors (charged modified sequence) quantified
-in a minimum of 1 to 6 runs.
+in a minimum of 1 to 12 runs.
 - To estimate the accuracy of the workflows, we report the mean 
 absolute difference between measured and expected log2-transformed 
 fold changes between conditions for proteins of the same species.

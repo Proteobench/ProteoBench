@@ -1109,4 +1109,6 @@ MODULE_TO_CLASS = {
     "quant_lfq_DIA_ion_ZenoTOF": ParseSettingsQuant,
     "quant_lfq_DIA_ion_plasma": ParseSettingsQuant,
     "entrapment_DIA_ion_Astral": ParseSettingsEntrapment,
+    "quant_lfq_DIA_ion_Astral_lowinput": ParseSettingsQuant,
+    "quant_lfq_DIA_ion_timsTOF_lowinput": ParseSettingsQuant,
 }

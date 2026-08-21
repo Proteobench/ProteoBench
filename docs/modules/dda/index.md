@@ -44,8 +44,8 @@ Peptide sequencing accuracy for *de novo* models and algorithms on HCD-fragmente
 
 ::::
 
-See [Modules](../index.rst) for what a module documentation page covers, or jump to
-[DIA modules](../dia/index.md) instead.
+See [Modules](../index.rst) for what a module documentation page covers, jump to
+[DIA modules](../dia/index.md), or see [Archived modules](../archived/index.md).
 
 ```{toctree}
 :hidden:

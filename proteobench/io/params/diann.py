@@ -485,8 +485,10 @@ def extract_params(
                 parameters[proteobench_setting] = parse_setting(proteobench_setting, cmdline_dict[cmd_setting])
 
     # Parse cut parameter to standard enzyme name
-    if "enzyme" not in parameters.keys():  # This happens when running fragpipe-diann or if kept as default in the GUI
+    if "enzyme" not in parameters.keys():  # This happens when running fragpipe-diann
         parameters["enzyme"] = "Trypsin/P"
+    elif parameters["enzyme"] is True:  # bare --cut flag with no value = no-digestion mode
+        parameters["enzyme"] = "No digestion"
     elif parameters["enzyme"] == "K*,R*":
         parameters["enzyme"] = "Trypsin/P"
     elif parameters["enzyme"] == "K*,R*,!P":

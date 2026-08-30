@@ -20,3 +20,7 @@ modules:
   - label: "Identification with DDA"
     url: "https://github.com/orgs/Proteobench/discussions/373"
     description: "Benchmark the identification sensitivity and specificity of data dependent acquisition workflows using an entrapment strategy."
+
+  - label: "Feature finding algorithms for MALDI MS imaging "
+    url: "https://github.com/orgs/Proteobench/discussions/1072"
+    description: "Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides."

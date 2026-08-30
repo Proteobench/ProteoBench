@@ -25,5 +25,5 @@ max_fragment_mz,1800
 quantification_method,QuantUMS high-precision
 protein_inference,Genes
 abundance_normalization_ions,
-predictors_library,"{'RT': 'DIANN', 'IM': 'DIANN', 'MS2_int': 'DIANN'}"
+predictors_library,DIANN
 scan_window,13

@@ -1,4 +1,4 @@
-# DIA quantification - precursor ion level - Single Cell
+# DIA quantification - precursor ion level - Low input
 
 > **Using ProteoBench for the first time?** Check out our [Quick Start guide](../../general-information/1-quickstart.md) to help you get started!
 

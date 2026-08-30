@@ -43,6 +43,34 @@ def _homogenize_mods(raw_mods: str, sep: str = ";") -> str:
     return ", ".join(mapped)
 
 
+def _homogenize_tolerance_string_sage(raw_tol: str) -> str:
+    """Convert Sage tolerance string to ProteoBench format.
+
+    Sage uses a space-separated format like "-10 10 ppm" or "-0.02 0.02 da".
+    This function converts it to the format: "[-10 ppm, 10 ppm]" or "[-0.02 Da, 0.02 Da]".
+    """
+    if raw_tol is None:
+        return ""
+    raw_tol = str(raw_tol).strip()
+    if not raw_tol or raw_tol.lower() in {"nan", "none"}:
+        return ""
+
+    parts = raw_tol.split()
+    if len(parts) != 3:
+        raise ValueError(f"Unexpected Sage tolerance format: {raw_tol}")
+
+    lower, upper, unit = parts
+    unit_norm = unit.strip().lower()
+    if unit_norm == "ppm":
+        unit = "ppm"
+    elif unit_norm == "da":
+        unit = "Da"
+    else:
+        raise ValueError(f"Unsupported Sage tolerance unit: {unit}")
+
+    return f"[{lower} {unit}, {upper} {unit}]"
+
+
 def _extract_xtandem_params(
     params: pd.Series, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
@@ -145,9 +173,11 @@ def _extract_sage_params(
     """
     # Construct tolerance strings for fragment and parent mass errors
     fragment_mass_tolerance = params.loc["sage_fragment_tol"]  # e.g '-0.02 0.02 da'
+    fragment_mass_tolerance = _homogenize_tolerance_string_sage(fragment_mass_tolerance)
 
     # Construct tolerance strings for parent mass error
     precursor_mass_tolerance = params.loc["sage_precursor_tol"]  # e.g. "-10 10 ppm"
+    precursor_mass_tolerance = _homogenize_tolerance_string_sage(precursor_mass_tolerance)
 
     # Max missed cleavage sites, either from scoring or refinement
     max_cleavage = int(params.loc["sage_database_enzyme_missed_cleavages"])  # e.g. "2"

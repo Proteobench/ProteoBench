@@ -7,8 +7,8 @@ ident_fdr_psm,0.005999419143
 ident_fdr_peptide,0.008561447245
 ident_fdr_protein,0.009234643907
 enable_match_between_runs,True
-precursor_mass_tolerance,-10 10 ppm
-fragment_mass_tolerance,-0.02 0.02 da
+precursor_mass_tolerance,"[-10 ppm, 10 ppm]"
+fragment_mass_tolerance,"[-0.02 Da, 0.02 Da]"
 enzyme,Trypsin
 semi_enzymatic,False
 allowed_miscleavages,2

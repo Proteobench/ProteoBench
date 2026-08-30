@@ -11,6 +11,22 @@ from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.params.msangel import _homogenize_mod_xtandem
 
 
+def _homogenize_tolerance(tol_str: str) -> str:
+    """
+    Homogenizes the tolerance string to a standard format.
+
+    Args:
+        tol_str (str): The tolerance string to homogenize. Of format "X unit"
+
+    Returns:
+        str: The homogenized tolerance string. Format: "[-X unit, X unit]" where X is the tolerance value and unit is either "ppm" or "Da".
+    """
+    tolerance_value, tolerance_unit = tol_str.split()
+
+    unit_homogenized = "ppm" if tolerance_unit.lower() == "ppm" else "Da"
+    return f"[-{tolerance_value} {unit_homogenized}, {tolerance_value} {unit_homogenized}]"
+
+
 def extract_params(
     fname: pathlib.Path, json_file=os.path.join(os.path.dirname(__file__), "json/Quant/quant_lfq_DDA_ion.json")
 ) -> ProteoBenchParameters:
@@ -53,8 +69,8 @@ def extract_params(
     params.max_peptide_length = summary["max_peptide_length"]
 
     # Extract search parameters
-    params.precursor_mass_tolerance = summary["precursor_mass_tolerance"]
-    params.fragment_mass_tolerance = summary["fragment_mass_tolerance"]
+    params.precursor_mass_tolerance = _homogenize_tolerance(summary["precursor_mass_tolerance"])
+    params.fragment_mass_tolerance = _homogenize_tolerance(summary["fragment_mass_tolerance"])
     params.ident_fdr_protein = summary["ident_fdr_protein"]
     params.ident_fdr_peptide = summary["ident_fdr_peptide"]
     params.ident_fdr_psm = summary["ident_fdr_psm"]

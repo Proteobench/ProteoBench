@@ -1,5 +1,5 @@
 """
-DIA Quantification Module for precursor level Quantification for single cell data.
+DIA Quantification Module for precursor level Quantification for low input data.
 """
 
 from __future__ import annotations
@@ -19,9 +19,9 @@ class DIAQuantIonModulediaSC(QuantModule):
     token : str
         GitHub token for the user.
     proteobot_repo_name : str, optional
-        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_singlecell".
+        Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_lowinput".
     proteobench_repo_name : str, optional
-        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_singlecell".
+        Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_lowinput".
 
     Attributes
     ----------
@@ -31,13 +31,13 @@ class DIAQuantIonModulediaSC(QuantModule):
         Level of quantification.
     """
 
-    module_id: str = "quant_lfq_DIA_ion_singlecell"
+    module_id: str = "quant_lfq_DIA_ion_lowinput"
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_singlecell",
-        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_singlecell",
+        proteobot_repo_name: str = "Proteobot/Results_quant_ion_DIA_lowinput",
+        proteobench_repo_name: str = "Proteobench/Results_quant_ion_DIA_lowinput",
         branch: Optional[str] = None,
     ):
         """
@@ -48,9 +48,9 @@ class DIAQuantIonModulediaSC(QuantModule):
         token : str
             GitHub token for the user.
         proteobot_repo_name : str, optional
-            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_singlecell".
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DIA_lowinput".
         proteobench_repo_name : str, optional
-            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_singlecell".
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DIA_lowinput".
         """
         super().__init__(
             token,

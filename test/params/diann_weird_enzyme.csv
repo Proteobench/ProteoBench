@@ -9,7 +9,7 @@ ident_fdr_protein,
 enable_match_between_runs,True
 precursor_mass_tolerance,"[-29 ppm, 29 ppm]"
 fragment_mass_tolerance,"[-17 ppm, 17 ppm]"
-enzyme,
+enzyme,Trypsin/P
 allowed_miscleavages,
 min_peptide_length,7
 max_peptide_length,30
@@ -25,5 +25,5 @@ max_fragment_mz,1800
 quantification_method,QuantUMS high-precision
 protein_inference,Genes
 abundance_normalization_ions,
-predictors_library,"{'RT': 'User defined speclib', 'IM': 'User defined speclib', 'MS2_int': 'User defined speclib'}"
+predictors_library,User defined speclib
 scan_window,5

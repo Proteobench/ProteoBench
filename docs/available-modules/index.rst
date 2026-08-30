@@ -133,7 +133,7 @@ Are you looking for...
 
 .. grid::
 
-   .. grid-item-card:: Single cell LFQ, DIA
+   .. grid-item-card:: Low Input LFQ, DIA
       :columns: 6 6 6 6
       :padding: 1
       :class-card: sd-mb-4
@@ -141,7 +141,7 @@ Are you looking for...
       :bdg-success:`alpha`
       ^^^
       +++
-      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_singlecell>`__ · `Documentation <active-modules/9-quant-lfq-ion-dia-singlecell.html>`__
+      `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <active-modules/9-quant-lfq-ion-dia-lowinput.html>`__
 
 
    .. grid-item-card:: Human Plasma LFQ, DIA

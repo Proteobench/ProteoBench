@@ -175,17 +175,17 @@ def test_abstract_methods_implemented_in_denovo_uiobjects():
 def test_quant_uiobjects_inherits_from_base_ui_module():
     """QuantUIObjects must directly inherit from BaseUIModule."""
     bases = _get_class_direct_bases(UIOBJECTS_FILES["QuantUIObjects"], "QuantUIObjects")
-    assert KNOWN_BASE_CLASS in bases, (
-        f"QuantUIObjects does not directly inherit from {KNOWN_BASE_CLASS}. Found bases: {bases}"
-    )
+    assert (
+        KNOWN_BASE_CLASS in bases
+    ), f"QuantUIObjects does not directly inherit from {KNOWN_BASE_CLASS}. Found bases: {bases}"
 
 
 def test_denovo_uiobjects_inherits_from_base_ui_module():
     """DeNovoUIObjects must directly inherit from BaseUIModule."""
     bases = _get_class_direct_bases(UIOBJECTS_FILES["DeNovoUIObjects"], "DeNovoUIObjects")
-    assert KNOWN_BASE_CLASS in bases, (
-        f"DeNovoUIObjects does not directly inherit from {KNOWN_BASE_CLASS}. Found bases: {bases}"
-    )
+    assert (
+        KNOWN_BASE_CLASS in bases
+    ), f"DeNovoUIObjects does not directly inherit from {KNOWN_BASE_CLASS}. Found bases: {bases}"
 
 
 # ---------------------------------------------------------------------------
@@ -200,9 +200,9 @@ def test_default_tab_config_methods_exist_in_quant_uiobjects():
 
     implemented = _get_class_method_names(UIOBJECTS_FILES["QuantUIObjects"], "QuantUIObjects")
     missing = set(tab_methods) - implemented
-    assert not missing, (
-        f"Methods referenced in BaseStreamlitUI.get_tab_config() are not defined in QuantUIObjects: {sorted(missing)}"
-    )
+    assert (
+        not missing
+    ), f"Methods referenced in BaseStreamlitUI.get_tab_config() are not defined in QuantUIObjects: {sorted(missing)}"
 
 
 # ---------------------------------------------------------------------------

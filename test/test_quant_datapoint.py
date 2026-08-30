@@ -250,8 +250,8 @@ class TestQuantDatapointHYE:
         assert np.isnan(compute_roc_auc(single_class_df))
 
     def test_compute_roc_auc_two_species(self):
-        """Test compute_roc_auc with two species (like singlecell module)."""
-        # Simulate 2-species scenario (singlecell: HUMAN=1.2, YEAST=0.2)
+        """Test compute_roc_auc with two species (like low input module)."""
+        # Simulate 2-species scenario (low input: HUMAN=1.2, YEAST=0.2)
         data = {
             "log2_A_vs_B": [0.1, -0.05, 0.15, -1.5, -1.8, -1.2],
             "species": ["HUMAN", "HUMAN", "HUMAN", "YEAST", "YEAST", "YEAST"],
@@ -287,7 +287,7 @@ class TestQuantDatapointHYE:
         df = pd.DataFrame(data)
         assert _detect_unchanged_species(df) == "HUMAN"
 
-        # Singlecell 2-species: HUMAN=1.2, YEAST=0.2
+        # Low input 2-species: HUMAN=1.2, YEAST=0.2
         data_sc = {
             "species": ["HUMAN", "YEAST"],
             "log2_expectedRatio": [0.263, -2.322],  # log2(1.2), log2(0.2)

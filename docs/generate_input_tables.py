@@ -20,7 +20,7 @@ _MODULE_SETTINGS_SUBDIRS = {
     "quant_lfq_DIA_ion_diaPASEF": "Quant/lfq/DIA/ion/diaPASEF",
     "quant_lfq_DIA_ion_Astral": "Quant/lfq/DIA/ion/Astral",
     "quant_lfq_DIA_ion_ZenoTOF": "Quant/lfq/DIA/ion/ZenoTOF",
-    "quant_lfq_DIA_ion_singlecell": "Quant/lfq/DIA/ion/singlecell",
+    "quant_lfq_DIA_ion_lowinput": "Quant/lfq/DIA/ion/lowinput",
     "quant_lfq_DIA_ion_plasma": "Quant/lfq/DIA/ion/plasma",
     "denovo_DDA_HCD": "denovo/DDA/HCD",
 }
@@ -62,8 +62,8 @@ MODULE_DOC_CONFIG = {
         "col_input": "Input file",
         "col_params": "Parameter File",
     },
-    "quant_lfq_DIA_ion_singlecell": {
-        "doc_file": "9-quant-lfq-ion-dia-singlecell.md",
+    "quant_lfq_DIA_ion_lowinput": {
+        "doc_file": "9-quant-lfq-ion-dia-lowinput.md",
         "table_marker": "Table 2. Overview of input files",
         "col_input": "Input file",
         "col_params": "Parameter File",

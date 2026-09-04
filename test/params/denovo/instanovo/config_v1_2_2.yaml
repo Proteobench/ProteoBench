@@ -1,0 +1,30 @@
+data_path: spectra.mgf
+instanovo_model: instanovo-v1.2.0
+instanovo_plus_model: instanovoplus-v1.1.0
+output_path: predictions.csv
+denovo: true
+num_beams: 5
+max_length: 40
+max_charge: 10
+isotope_error_range: [0, 1]
+use_knapsack: false
+save_all_predictions: true
+refine: true
+prediction_tokenised_col: predictions_tokenised
+prediction_col: predictions
+log_probs_col: log_probs
+token_log_probs_col: token_log_probs
+batch_size: 128
+fp16: true
+filter_precursor_ppm: 20
+filter_confidence: 1e-4
+filter_fdr_threshold: 0.05
+residue_remapping:
+  "M(ox)": "M[UNIMOD:35]"
+  "M(+15.99)": "M[UNIMOD:35]"
+  "Q(+.98)": "Q[UNIMOD:7]"
+  "N(+.98)": "N[UNIMOD:7]"
+  "C(+57.02)": "C[UNIMOD:4]"
+  "(+42.01)": "[UNIMOD:1]"
+  "(+43.01)": "[UNIMOD:5]"
+  "(-17.03)": "[UNIMOD:385]"

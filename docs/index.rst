@@ -6,15 +6,17 @@ Home
 #####
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 3
     :hidden:
-    :glob:
 
     Home <self>
-    Learn more <general-information/index.rst>
-    Benchmarking Modules <available-modules/index.rst>
-    Developer guide <developer-guide/index.rst>
-    Contributing <contributing.rst>
+    about/index
+    your-first-submission/index
+    about/faq
+    modules/index
+    concepts/index
+    contributing/index
+    contact
     Manuscript <https://doi.org/10.64898/2025.12.09.692895>
 
 .. div:: landing-title
@@ -38,13 +40,6 @@ Home
 
             ProteoBench is an open platform for benchmarking proteomics data analysis workflows.
 
-            .. button-link:: #proteobench-in-5-steps
-                :outline:
-                :color: white
-                :class: sd-px-4 sd-fs-5
-
-                Get Started
-
 
 ProteoBench in 5 steps
 =======================
@@ -59,11 +54,27 @@ ProteoBench in 5 steps
 5. **Compare your workflow run** with validated benchmark runs
 
 
-.. button-link:: https://proteobench.cubimed.rub.de/
-    :class: sd-px-4
-    :color: primary
+.. grid::
+    :gutter: 2
 
-    ProteoBench Web App :fas:`external-link-alt`
+    .. grid-item::
+
+        .. button-link:: https://proteobench.cubimed.rub.de/
+            :class: sd-px-4
+            :color: primary
+            :expand:
+
+            ProteoBench Web App :fas:`external-link-alt`
+
+    .. grid-item::
+
+        .. button-ref:: your-first-submission/index
+            :ref-type: doc
+            :class: sd-px-4
+            :color: success
+            :expand:
+
+            Quickstart: Your First Submission
 
 
 
@@ -74,17 +85,18 @@ Join the ProteoBench community
 ===============================
 
 .. grid::
+    :gutter: 3
 
     .. grid-item-card::
         :columns: 12 4 4 4
         :img-top: ./_static/img/icons/workflow-run-validated-with-padding.svg
         :img-alt: A check-marked shield in an encircled gear
-        :class-card: sd-border-0
-        :class-footer: sd-border-0
-        :shadow: none
+        :shadow: md
         :text-align: center
 
-        Submit your results as a validated benchmark run to be shared with the community.
+        **Submit your results**
+
+        Share a validated benchmark run with the community and compare your workflow performance.
         +++
         .. button-link:: https://proteobench.cubimed.rub.de/
             :color: primary
@@ -96,12 +108,12 @@ Join the ProteoBench community
         :columns: 12 4 4 4
         :img-top: ./_static/img/icons/discussion-with-padding.svg
         :img-alt: Two speech bubbles
-        :class-card: sd-border-0
-        :class-footer: sd-border-0
-        :shadow: none
+        :shadow: md
         :text-align: center
 
-        Discuss modules, benchmarking runs, and comparisons with the community.
+        **Join discussions**
+
+        Connect with the community to discuss modules, benchmark runs, and analysis strategies.
         +++
         .. button-link:: https://github.com/orgs/Proteobench/discussions/
             :color: primary
@@ -113,12 +125,12 @@ Join the ProteoBench community
         :columns: 12 4 4 4
         :img-top: ./_static/img/icons/contribute-with-padding.svg
         :img-alt: A user with a development symbol (</>)
-        :class-card: sd-border-0
-        :class-footer: sd-border-0
-        :shadow: none
+        :shadow: md
         :text-align: center
 
-        Contribute to ProteoBench by developing new modules or improving existing ones.
+        **Contribute to development**
+
+        Help build ProteoBench by adding new modules or improving existing ones on GitHub.
         +++
         .. button-link:: https://github.com/Proteobench/ProteoBench
             :color: primary

@@ -83,11 +83,8 @@ class StreamlitUI:
             )
 
         with metrics_col:
-            render_metrics_help(
-                self.ionmodule, self.variables_dia_quant, context=context_for_tab_method(method_name)
-            )
+            render_metrics_help(self.ionmodule, self.variables_dia_quant, context=context_for_tab_method(method_name))
         display_banner(self.variables_dia_quant)
-
 
     def _main_page(self) -> None:
         """

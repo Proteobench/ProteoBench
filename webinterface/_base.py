@@ -139,11 +139,6 @@ class StreamlitPage(ABC):
                     st.session_state["start_home_tour"] = True
                     st.session_state["_tour_opted_in"] = True
                 st.link_button(
-                    "Browse modules",
-                    "#jump-into-a-module",
-                    icon=":material/dashboard:",
-                )
-                st.link_button(
                     "Documentation",
                     "https://proteobench.readthedocs.io/",
                     icon=":material/menu_book:",

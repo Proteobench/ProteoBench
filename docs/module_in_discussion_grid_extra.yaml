@@ -9,9 +9,9 @@
 #   description – one-sentence description (optional)
 
 modules:
-  - label: "benchmark with Dynamic Organellar Mapping"
+  - label: "Quantification Benchmarking via Dynamic Organellar Mapping"
     url: "https://github.com/orgs/Proteobench/discussions/404"
-    description: "Single-species benchmark using spatial proteomics."
+    description: "Single-species quantification benchmark using spatial proteomics."
 
   - label: "DDA identification - phosphopeptides"
     url: "https://github.com/orgs/Proteobench/discussions/625"

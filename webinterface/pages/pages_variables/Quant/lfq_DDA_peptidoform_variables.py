@@ -97,7 +97,9 @@ class VariablesDDAQuant:
     sidebar_label: str = "Quant LFQ DDA peptidoform"
     homepage_title: str = "LFQ Quantification at the Peptidoform Level"
     graphical_abstract: str = "Graphical_abstract_Quant_QExactive.png"
-    documentation_description: str = "Benchmark peptidoform-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument."
+    documentation_description: str = (
+        "Benchmark peptidoform-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DDA_peptidoform"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(
@@ -118,9 +120,7 @@ class VariablesDDAQuant:
 
     texts: Type[WebpageTexts] = WebpageTexts
 
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/3-quant-lfq-peptidoform-dda/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dda/dda-peptidoform/"
     title: str = "DDA peptidoform quantification"
     y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
 

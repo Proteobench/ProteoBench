@@ -57,10 +57,9 @@ dev = [
 docs = [
   "sphinx",
   "sphinx-design",
-  "sphinx-rtd-theme",
   "sphinx-autobuild",
   "myst-parser>=0.3.0",
-  "pydata-sphinx-theme",
+  "shibuya",
   "sphinx_new_tab_link",
   "sphinx_copybutton",
 ]

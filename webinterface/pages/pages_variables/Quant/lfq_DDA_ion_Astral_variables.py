@@ -94,7 +94,9 @@ class VariablesDDAQuantAstral:
     sidebar_label: str = "Quant LFQ DDA ion Astral"
     homepage_title: str = "LFQ Quantification on an Astral"
     graphical_abstract: str = "Graphical_abstract_Quant_astral.png"
-    documentation_description: str = "Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
+    documentation_description: str = (
+        "Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument."
+    )
     sidebar_path: str = "/Quant_LFQ_DDA_ion_Astral"
     sidebar_category: str = "DDA"
     keywords: List[str] = field(
@@ -112,9 +114,7 @@ class VariablesDDAQuantAstral:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dda/dda-ion-astral/"
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DDA-astral/all_data_LFQ_Quant_DDA_Astral.tar.gz"
 
     additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_ion.json"

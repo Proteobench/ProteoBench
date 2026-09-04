@@ -19,7 +19,7 @@ Available ProteoBench modules
         ^^^
         Benchmark FDR Validation of workflows for DIA acquisitions using FDRBench entrapment on an Astral.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Entrapment_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/entrapment-dia-astral/>`__
 
     .. grid-item-card:: Quant LFQ DDA ion Astral
         :columns: 6 6 4 4
@@ -29,7 +29,7 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/8-quant-lfq-ion-dda-Astral/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dda/dda-ion-astral/>`__
 
     .. grid-item-card:: Quant LFQ DDA ion QExactive
         :columns: 6 6 4 4
@@ -39,7 +39,7 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/2-quant-lfq-ion-dda/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_ion_QExactive>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dda/dda-ion-qexactive/>`__
 
     .. grid-item-card:: Quant LFQ DDA peptidoform
         :columns: 6 6 4 4
@@ -49,7 +49,7 @@ Available ProteoBench modules
         ^^^
         Benchmark peptidoform-level label-free quantification accuracy of DDA workflows using a multi-species (HYE) sample on an Orbitrap QExactive instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/3-quant-lfq-peptidoform-dda/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DDA_peptidoform>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dda/dda-peptidoform/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion Astral
         :columns: 6 6 4 4
@@ -59,7 +59,7 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DIA workflows using a multi-species (HYE) sample on an Orbitrap Astral instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/7-quant-lfq-ion-dia-Astral_2Th/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-astral/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion diaPASEF
         :columns: 6 6 4 4
@@ -69,7 +69,7 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a multi-species (HYE) sample on a timsTOF instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/5-quant-lfq-ion-dia-diapasef/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_diaPASEF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-diapasef/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion Plasma
         :columns: 6 6 4 4
@@ -79,7 +79,7 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DIA workflows using a high dynamic range human plasma multi-species (PYE) sample aquired on a timsTOF.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/12-quant-lfq-ion-dia-plasma/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Plasma>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-plasma/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion ZenoTOF
         :columns: 6 6 4 4
@@ -89,7 +89,7 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DIA (Zeno SWATH) workflows using a multi-species (HYE) sample on a ZenoTOF 8600 instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/10-quant-lfq-ion-dia-ZenoTOF/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_ZenoTOF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-zenotof/>`__
 
     .. grid-item-card:: De novo DDA peptidoform
         :columns: 6 6 4 4
@@ -99,7 +99,7 @@ Available ProteoBench modules
         ^^^
         Benchmark the identification sensitivity and specificity of de novo sequencing workflows using DDA-HCD data.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-denovo-dda-hcd/>`__
+        `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dda/denovo-dda-hcd/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion Low Input
         :columns: 6 6 4 4
@@ -109,7 +109,7 @@ Available ProteoBench modules
         ^^^
         Benchmark identification and quantification workflows for low-input proteomics (close to single cell level) using DIA acquisitions.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-lowinput/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-lowinput/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion AIF
         :columns: 6 6 4 4
@@ -119,10 +119,10 @@ Available ProteoBench modules
         ^^^
         Benchmark ion-level label-free quantification accuracy of DIA (All-Ion Fragmentation) workflows using a multi-species (HYE) sample on an Orbitrap instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/available-modules/archived-modules/4-quant-lfq-ion-dia-aif/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-aif/>`__
 
 
-.. button-ref:: available-modules/index
+.. button-ref:: modules/index
     :ref-type: doc
     :class: sd-px-4
     :color: primary
@@ -132,7 +132,7 @@ Available ProteoBench modules
 Modules in discussion
 ----------------------
 
-* `benchmark with Dynamic Organellar Mapping <https://github.com/orgs/Proteobench/discussions/404>`__ — Single-species benchmark using spatial proteomics.
+* `Quantification Benchmarking via Dynamic Organellar Mapping <https://github.com/orgs/Proteobench/discussions/404>`__ — Single-species quantification benchmark using spatial proteomics.
 * `DDA identification - phosphopeptides <https://github.com/orgs/Proteobench/discussions/625>`__ — Benchmark phosphopeptide identification workflows and assess their identification and localization accuracy.
 * `Identification with DDA <https://github.com/orgs/Proteobench/discussions/373>`__ — Benchmark the identification sensitivity and specificity of data dependent acquisition workflows using an entrapment strategy.
 * `Feature finding algorithms for MALDI MS imaging  <https://github.com/orgs/Proteobench/discussions/1072>`__ — Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides.

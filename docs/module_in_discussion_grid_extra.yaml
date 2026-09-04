@@ -21,6 +21,10 @@ modules:
     url: "https://github.com/orgs/Proteobench/discussions/373"
     description: "Benchmark the identification sensitivity and specificity of data dependent acquisition workflows using an entrapment strategy."
 
-  - label: "Feature finding algorithms for MALDI MS imaging "
+  - label: "Feature finding algorithms for MALDI MS imaging"
     url: "https://github.com/orgs/Proteobench/discussions/1072"
     description: "Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides."
+    
+  - label: "Crosslink FDR validation with advanced entrapment database"
+    url: "https://github.com/orgs/Proteobench/discussions/1095"
+    description: "Benchmark FDR control for crosslinking mass spectrometry."

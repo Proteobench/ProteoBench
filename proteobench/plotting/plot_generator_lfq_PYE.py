@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.figure_factory import create_distplot
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.plotting.utils import create_kde_distribution_plot, fill_density_traces
 
 
 #: Species present in the PYE (Plasma/Yeast/E. coli) sample, plasma background first.
@@ -335,17 +335,7 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
 
         # Create distribution plot
         if hist_data:
-            fig = create_distplot(
-                hist_data,
-                group_labels,
-                show_hist=False,
-                show_rug=False,
-                colors=colors,
-            )
-
-            for trace in fig.data:
-                if trace.mode == "lines":
-                    trace.update(fill="tozeroy", opacity=0.4)
+            fig = fill_density_traces(create_kde_distribution_plot(hist_data, group_labels, colors))
 
             fig.update_layout(
                 xaxis=dict(

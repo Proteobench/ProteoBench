@@ -14,7 +14,7 @@ class VariablesDIAEntrapmentAstral:
     Variables for the DIA entrapment - precursor ions Astral module.
     """
 
-    all_datapoints: str = "all_datapoints_Astral"
+    all_datapoints: str = "all_datapoints_dia_entrapment_Astral"
     all_datapoints_submission: str = "all_datapoints_submission_dia_entrapment_Astral"
     input_df_submission: str = "input_df_submission_dia_entrapment_Astral"
     result_performance_submission: str = "result_performance_submission_dia_entrapment_Astral"

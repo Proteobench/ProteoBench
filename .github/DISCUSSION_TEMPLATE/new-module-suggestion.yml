@@ -1,0 +1,105 @@
+title: "[New Module]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## General
+
+        The questions in this section are required and help define the scope of the proposed benchmarking module.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What should this module benchmark?
+      description: Clearly describe the benchmarking question or objective.
+      placeholder: 'e.g. "Accuracy of DIA label-free quantification"'
+    validations:
+      required: true
+
+  - type: textarea
+    id: methods
+    attributes:
+      label: Which methods should this module benchmark?
+      description: Describe the types of methods or tools that should be supported.
+      placeholder: 'e.g. "Any search engine that supports LFQ, such as DIA-NN or Spectronaut"'
+    validations:
+      required: true
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Which benchmark metric(s) do you propose?
+      description: Please be as specific as possible. Describe how performance should be quantified and, where relevant, at which level.
+      placeholder: 'e.g. "Median difference between observed and expected log fold change at ion level"'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## In depth
+
+        The questions below are optional, but additional detail will make it easier to assess and implement the proposed module.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: If you would like, provide a more detailed description of the proposed module, its scope, and what you would like it to achieve.
+      placeholder: "Describe the module in more detail here."
+
+  - type: textarea
+    id: dataset
+    attributes:
+      label: Is there already a suitable benchmarking dataset?
+      description: If suitable data already exist, please describe the dataset and provide a link where possible.
+      placeholder: "e.g. PRIDE accession PXD..., dataset description, publication link"
+
+  - type: textarea
+    id: published-benchmarking
+    attributes:
+      label: Has this type of benchmarking already been published?
+      description: Please provide relevant references, such as publications describing the methods, the dataset, or previous benchmarking studies.
+      placeholder: "Add publication links, DOIs, or references here."
+
+  - type: textarea
+    id: user-workflow
+    attributes:
+      label: What would users need to do to submit results?
+      description: Describe the expected workflow for users who want to benchmark their own results with this module.
+      placeholder: 'e.g. "Run the search engine and upload the resulting quantification table"'
+
+  - type: textarea
+    id: main-plot
+    attributes:
+      label: Do you have a suggestion for the main performance plot?
+      description: Describe a visualization that would clearly summarize or compare method performance.
+      placeholder: 'e.g. "Scatter plot showing quantification error versus identification rate"'
+
+  - type: textarea
+    id: reviewers
+    attributes:
+      label: Who could externally review this module?
+      description: If you know researchers or domain experts who would be suitable external reviewers, please list them here.
+
+  - type: dropdown
+    id: implementation
+    attributes:
+      label: Would you be able to contribute to the implementation?
+      description: Would you be able to work on the coding of this module, with additional support from the ProteoBench maintainers?
+      options:
+        - "Yes"
+        - "No"
+        - "Possibly / depending on scope"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Additional information
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Anything else you would like to add?
+      description: Add any additional context, ideas, links, figures, example outputs, or other information that may help us evaluate the proposal.

@@ -1,4 +1,3 @@
-```yaml
 title: "[New Module]: "
 
 body:
@@ -97,4 +96,3 @@ body:
     attributes:
       label: Anything else you would like to add?
       description: Add any additional context, ideas, links, figures, example outputs, or other information that may help us evaluate the proposal.
-```

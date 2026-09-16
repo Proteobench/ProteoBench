@@ -42,7 +42,12 @@ body:
 
         The questions below are optional, but additional detail will make it easier to assess and implement the proposed module.
 
-- type: textarea id: description attributes: label: Description description: If you would like, provide a more detailed description of the proposed module, its scope, and what you would like it to achieve. placeholder: "Describe the module in more detail here."
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: If you would like, provide a more detailed description of the proposed module, its scope, and what you would like it to achieve.
+      placeholder: "Describe the module in more detail here."
 
   - type: textarea
     id: dataset

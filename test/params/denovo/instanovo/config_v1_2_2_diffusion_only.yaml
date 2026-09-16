@@ -1,0 +1,98 @@
+# InstaNovo v1.2.2 -- inference mode: diffusion_only
+#
+# Values below are the inference config this run actually resolved, taken from the
+# run's own log, with container paths and machine-shaped knobs removed.
+# Command: instanovo diffusion predict --denovo --no-refinement
+#
+# Added from outside the log: software_version (pip spec instanovo==1.2.2), residues
+# (v1.2.2 vocabulary -- without it the parser falls back to residue_remapping keys,
+# which are remap sources, not tokens), and the five spectrum-preprocessing values,
+# which inference reads from the checkpoint's model config rather than this file.
+#
+# This run used InstaNovo+ alone (`instanovo diffusion predict --no-refinement`),
+# starting the reverse process from a uniform sample. num_beams/use_knapsack/
+# instanovo_model sat at their defaults in the resolved config but no transformer
+# ran, so they are omitted here rather than reported as a five-beam search.
+
+instanovo_plus_model: instanovoplus-v1.1.0
+denovo: true
+max_length: 40
+max_charge: 10
+isotope_error_range:
+- 0
+- 1
+refine: false
+prediction_refine_col: predictions_tokenised
+prediction_confidence_col: log_probs
+refinement_id_col: spectrum_id
+dataset_id_col: spectrum_id
+refine_all: false
+refine_threshold: 0.9
+prediction_tokenised_col: predictions_tokenised
+prediction_col: predictions
+log_probs_col: log_probs
+token_log_probs_col: token_log_probs
+suppressed_residues:
+- (+25.98)
+disable_terminal_residues_anywhere: true
+filter_precursor_ppm: 20
+filter_confidence: 0.0001
+filter_fdr_threshold: 0.05
+residue_remapping:
+  M(ox): M[UNIMOD:35]
+  M(+15.99): M[UNIMOD:35]
+  S(p): S[UNIMOD:21]
+  T(p): T[UNIMOD:21]
+  Y(p): Y[UNIMOD:21]
+  S(+79.97): S[UNIMOD:21]
+  T(+79.97): T[UNIMOD:21]
+  Y(+79.97): Y[UNIMOD:21]
+  Q(+0.98): Q[UNIMOD:7]
+  N(+0.98): N[UNIMOD:7]
+  Q(+.98): Q[UNIMOD:7]
+  N(+.98): N[UNIMOD:7]
+  C(+57.02): C[UNIMOD:4]
+  R(+0.984016): R[UNIMOD:7]
+  P(+15.994915): P[UNIMOD:35]
+  (+42.01): '[UNIMOD:1]'
+  (+43.01): '[UNIMOD:5]'
+  (-17.03): '[UNIMOD:385]'
+software_version: 1.2.2
+n_peaks: 200
+min_mz: 50.0
+max_mz: 2500.0
+min_intensity: 0.01
+remove_precursor_tol: 2.0
+residues:
+  G: 57.021464
+  A: 71.037114
+  S: 87.032028
+  P: 97.052764
+  V: 99.068414
+  T: 101.04767
+  C: 103.009185
+  L: 113.084064
+  I: 113.084064
+  N: 114.042927
+  D: 115.026943
+  Q: 128.058578
+  K: 128.094963
+  E: 129.042593
+  M: 131.040485
+  H: 137.058912
+  F: 147.068414
+  R: 156.101111
+  Y: 163.063329
+  W: 186.079313
+  M[UNIMOD:35]: 147.0354
+  C[UNIMOD:4]: 160.030649
+  N[UNIMOD:7]: 115.026943
+  Q[UNIMOD:7]: 129.042594
+  R[UNIMOD:7]: 157.085127
+  P[UNIMOD:35]: 113.047679
+  S[UNIMOD:21]: 166.998028
+  T[UNIMOD:21]: 181.01367
+  Y[UNIMOD:21]: 243.029329
+  '[UNIMOD:1]': 42.010565
+  '[UNIMOD:5]': 43.005814
+  '[UNIMOD:385]': -17.026549

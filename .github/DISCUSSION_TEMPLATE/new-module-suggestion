@@ -1,0 +1,64 @@
+title: "[Module]: "
+labels: ["module suggestion"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new module!
+        Please provide some information below to help us understand the use case.
+
+  - type: input
+    id: module-name
+    attributes:
+      label: Module name
+      description: What would you call this module?
+      placeholder: "e.g. Protein-level differential expression"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What should this module do?
+      description: Briefly describe the intended functionality.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why would this be useful?
+      description: What problem would this module solve, and who would benefit from it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: input
+    attributes:
+      label: Expected input
+      description: What data or files should the module take as input?
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Expected output
+      description: What results, metrics, figures, or files should the module produce?
+
+  - type: textarea
+    id: existing-tools
+    attributes:
+      label: Existing tools or methods
+      description: Are there existing tools, packages, publications, or workflows that implement something similar?
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Example use case
+      description: Describe a concrete example of how you would use this module.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional information
+      description: Add any links, datasets, screenshots, mock-ups, or related discussions here.

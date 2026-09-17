@@ -80,7 +80,7 @@ body:
   - type: textarea
     id: external-experts
     attributes:
-      label: Name external experts who didn’t participate in the original module’s design and can give input on its design and development.
+      label: Do you have external experts in mind who didn’t participate in the original module’s design and can give input on its design and development?
       description: If you know researchers or domain experts who would be suitable external experts, please list them here.
 
   - type: dropdown

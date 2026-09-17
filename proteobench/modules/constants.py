@@ -21,4 +21,6 @@ MODULE_SETTINGS_DIRS = {
     "quant_lfq_DIA_ion_ZenoTOF": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "ZenoTOF").as_posix(),
     "quant_lfq_DIA_ion_plasma": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "plasma").as_posix(),
     "entrapment_DIA_ion_Astral": (ENTRAPMENT_SETTINGS_DIR / "DIA" / "ion" / "Astral").as_posix(),
+    "quant_lfq_DIA_ion_Astral_lowinput": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "Astral_lowinput").as_posix(),
+    "quant_lfq_DIA_ion_timsTOF_lowinput": (QUANT_LFQ_SETTINGS_DIR / "DIA" / "ion" / "timsTOF_lowinput").as_posix(),
 }

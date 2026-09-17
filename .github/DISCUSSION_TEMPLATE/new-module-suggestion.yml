@@ -78,10 +78,10 @@ body:
       placeholder: 'e.g. "Scatter plot showing quantification error versus identification rate"'
 
   - type: textarea
-    id: reviewers
+    id: external-experts
     attributes:
-      label: Who could externally review this module?
-      description: If you know researchers or domain experts who would be suitable external reviewers, please list them here.
+      label: Do you have external experts in mind who didn’t participate in the original module’s design and can give input on its design and development?
+      description: If you know researchers or domain experts who would be suitable external experts, please list them here.
 
   - type: dropdown
     id: implementation

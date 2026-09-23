@@ -1,11 +1,12 @@
 """UI settings for APB-backed HYE/HY quant modules.
 
-This is plot and upload metadata, not a vendor parser. Software choices are
-deliberately limited to result formats exercised with parameter-free APB rules.
+This is plot and upload metadata, not a vendor parser. The selected software is
+passed to APB as a hint; APB validates the result format at upload time.
 """
 
 from __future__ import annotations
 
+from apb2.api import get_rules
 from apb_proteobench.configuration.load import load_packaged_module
 
 
@@ -21,34 +22,28 @@ _MODULE_NAMES = {
 }
 APB_QUANT_MODULE_IDS = frozenset(_MODULE_NAMES)
 
-# Every entry has a real ProteoBench or APB corpus result that parsed and scored
-# with no parameter file. Add vendors here only with a matching regression.
-_VERIFIED_INPUTS = {
-    "dda_qexactive": ("Custom", "MaxQuant", "FragPipe", "MSAngel", "quantms", "WOMBAT"),
-    "dda_astral": ("FragPipe",),
-    "dda_peptidoform": ("WOMBAT",),
-    "dia_aif": ("AlphaDIA", "MaxQuant", "FragPipe"),
-    "dia_astral": ("AlphaDIA",),
-    "dia_diapasef": ("PEAKS",),
-    "dia_singlecell": ("AlphaDIA",),
-    "dia_zenotof": ("PEAKS",),
-}
+_DISPLAY_NAMES = {"pb_custom": "Custom"}
 
 
 class APBQuantSettingsBuilder:
-    """Expose APB module ratios and verified producers to the existing quant UI."""
+    """Expose APB module ratios and producer choices to the existing quant UI."""
 
     supports_secondary_result_upload = False  # No fixture verifies AlphaDIA v1's two-file output yet.
 
     def __init__(self, parse_settings_dir: str, module_id: str) -> None:
         del parse_settings_dir  # Shared UI constructor contract; APB has packaged settings.
         self.module = load_packaged_module(_MODULE_NAMES[module_id])
-        self.INPUT_FORMATS = list(_VERIFIED_INPUTS[self.module.source.name.removesuffix(".toml")])
+        category = self.module.source.name.split("_", 1)[0].upper()
+        level = self.module.settings.general.level
+        self.INPUT_FORMATS = sorted(
+            (_DISPLAY_NAMES.get(rule.software_name, rule.software_name) for rule in get_rules(category, level=level)),
+            key=str.casefold,
+        )
 
     def build_parser(self, input_format: str) -> APBQuantSettingsBuilder:
-        """Return plot settings for a producer already checked by the upload menu."""
+        """Return plot settings for a producer offered by the upload menu."""
         if input_format not in self.INPUT_FORMATS:
-            raise ValueError(f"{input_format!r} is not verified for this APB quant module")
+            raise ValueError(f"{input_format!r} is not offered for this APB quant module")
         return self
 
     def species_expected_ratio(self) -> dict[str, dict[str, str | float]]:

@@ -89,8 +89,12 @@ expected log2 fold change per species — that difference is epsilon.
 | Tool | Input file | Parameter file |
 |---|---|---|
 | AlphaDIA | `APB-detected quant result` | `Optional privately; required for public submission` |
+| Custom | `APB-detected quant result` | `Optional privately; required for public submission` |
+| DIA-NN | `APB-detected quant result` | `Optional privately; required for public submission` |
 | FragPipe | `APB-detected quant result` | `Optional privately; required for public submission` |
 | MaxQuant | `APB-detected quant result` | `Optional privately; required for public submission` |
+| PEAKS | `APB-detected quant result` | `Optional privately; required for public submission` |
+| Spectronaut | `APB-detected quant result` | `Optional privately; required for public submission` |
 
 :::{dropdown} DIA-NN
 1. Import raw files.

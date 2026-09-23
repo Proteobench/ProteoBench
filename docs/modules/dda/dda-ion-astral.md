@@ -89,7 +89,18 @@ is where you upload results and, later, submit them for public review.
 
 | Tool | Input file | Parameter file |
 |---|---|---|
+| AlphaPept | `APB-detected quant result` | `Optional privately; required for public submission` |
+| Custom | `APB-detected quant result` | `Optional privately; required for public submission` |
+| DIA-NN | `APB-detected quant result` | `Optional privately; required for public submission` |
 | FragPipe | `APB-detected quant result` | `Optional privately; required for public submission` |
+| MSAngel | `APB-detected quant result` | `Optional privately; required for public submission` |
+| MaxQuant | `APB-detected quant result` | `Optional privately; required for public submission` |
+| PEAKS | `APB-detected quant result` | `Optional privately; required for public submission` |
+| ProlineStudio | `APB-detected quant result` | `Optional privately; required for public submission` |
+| Sage | `APB-detected quant result` | `Optional privately; required for public submission` |
+| WOMBAT | `APB-detected quant result` | `Optional privately; required for public submission` |
+| i2MassChroQ | `APB-detected quant result` | `Optional privately; required for public submission` |
+| quantms | `APB-detected quant result` | `Optional privately; required for public submission` |
 
 Expand a tool below for setup details.
 

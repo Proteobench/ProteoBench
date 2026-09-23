@@ -49,6 +49,8 @@ you upload results and submit them for public review.
 
 | Tool | Input file | Parameter file |
 |---|---|---|
+| MaxQuant | `APB-detected quant result` | `Optional privately; required for public submission` |
+| Sage | `APB-detected quant result` | `Optional privately; required for public submission` |
 | WOMBAT | `APB-detected quant result` | `Optional privately; required for public submission` |
 
 ```{note}

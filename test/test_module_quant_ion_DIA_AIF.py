@@ -31,8 +31,8 @@ def test_upload_handoff_uses_apb(module: DIAQuantIonModuleAIF) -> None:
     assert datapoints.iloc[-1]["intermediate_hash"] == analysis.content_hash
 
 
-def test_menu_only_lists_verified_producers() -> None:
-    assert set(APBQuantSettingsBuilder("", "quant_lfq_DIA_ion_AIF").INPUT_FORMATS) == set(VERIFIED)
+def test_menu_retains_verified_producers() -> None:
+    assert set(VERIFIED) <= set(APBQuantSettingsBuilder("", "quant_lfq_DIA_ion_AIF").INPUT_FORMATS)
 
 
 def test_distinct_producers_add_distinct_datapoints(module: DIAQuantIonModuleAIF) -> None:

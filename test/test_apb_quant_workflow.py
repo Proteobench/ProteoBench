@@ -2,6 +2,7 @@
 
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 from zipfile import ZipFile
 
 import pandas as pd
@@ -30,6 +31,64 @@ def test_each_migrated_module_loads_apb_settings(module_id: str) -> None:
     settings = APBQuantSettingsBuilder("", module_id)
     assert settings.INPUT_FORMATS
     assert settings.module.settings.species_expected_ratio
+
+
+_DDA_ION_MENU = [
+    "AlphaPept",
+    "Custom",
+    "DIA-NN",
+    "FragPipe",
+    "i2MassChroQ",
+    "MaxQuant",
+    "MSAngel",
+    "PEAKS",
+    "ProlineStudio",
+    "quantms",
+    "Sage",
+    "WOMBAT",
+]
+_DIA_ION_MENU = ["AlphaDIA", "Custom", "DIA-NN", "FragPipe", "MaxQuant", "PEAKS", "Spectronaut"]
+_DDA_PEPTIDOFORM_MENU = ["MaxQuant", "Sage", "WOMBAT"]
+
+
+@pytest.mark.parametrize(
+    ("module_id", "expected"),
+    [
+        ("quant_lfq_DDA_ion_QExactive", _DDA_ION_MENU),
+        ("quant_lfq_DDA_ion_Astral", _DDA_ION_MENU),
+        ("quant_lfq_DDA_peptidoform", _DDA_PEPTIDOFORM_MENU),
+        ("quant_lfq_DIA_ion_AIF", _DIA_ION_MENU),
+        ("quant_lfq_DIA_ion_Astral", _DIA_ION_MENU),
+        ("quant_lfq_DIA_ion_diaPASEF", _DIA_ION_MENU),
+        ("quant_lfq_DIA_ion_lowinput", _DIA_ION_MENU),
+        ("quant_lfq_DIA_ion_ZenoTOF", _DIA_ION_MENU),
+    ],
+)
+def test_upload_menu_uses_apb2_rule_catalog(module_id: str, expected: list[str]) -> None:
+    assert APBQuantSettingsBuilder("", module_id).INPUT_FORMATS == expected
+
+
+@pytest.mark.parametrize(
+    ("module_id", "category", "level"),
+    [
+        ("quant_lfq_DDA_ion_QExactive", "DDA", "ion"),
+        ("quant_lfq_DIA_ion_Astral", "DIA", "ion"),
+        ("quant_lfq_DDA_peptidoform", "DDA", "peptidoform"),
+    ],
+)
+def test_upload_menu_queries_apb2_by_module_and_level(
+    monkeypatch: pytest.MonkeyPatch, module_id: str, category: str, level: str
+) -> None:
+    calls = []
+
+    def fake_get_rules(actual_category: str, *, level: str) -> list[SimpleNamespace]:
+        calls.append((actual_category, level))
+        return [SimpleNamespace(software_name="Example")]
+
+    monkeypatch.setattr("proteobench.modules.quant.apb_settings.get_rules", fake_get_rules)
+
+    assert APBQuantSettingsBuilder("", module_id).INPUT_FORMATS == ["Example"]
+    assert calls == [(category, level)]
 
 
 def test_custom_upload_uses_apb_parsing_and_scoring() -> None:
@@ -64,7 +123,7 @@ def test_quant_ui_settings_come_from_apb_module() -> None:
     assert not settings.supports_secondary_result_upload
     assert settings.build_parser("Custom") is settings
     assert settings.species_expected_ratio()["YEAST"]["color"] == "#88ccef"
-    with pytest.raises(ValueError, match="not verified"):
+    with pytest.raises(ValueError, match="not offered"):
         settings.build_parser("MetaMorpheus")
 
 

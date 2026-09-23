@@ -71,6 +71,12 @@ like) submit your results publicly.
 | Tool | Input file | Parameter file |
 |---|---|---|
 | AlphaDIA | `APB-detected quant result` | `Optional privately; required for public submission` |
+| Custom | `APB-detected quant result` | `Optional privately; required for public submission` |
+| DIA-NN | `APB-detected quant result` | `Optional privately; required for public submission` |
+| FragPipe | `APB-detected quant result` | `Optional privately; required for public submission` |
+| MaxQuant | `APB-detected quant result` | `Optional privately; required for public submission` |
+| PEAKS | `APB-detected quant result` | `Optional privately; required for public submission` |
+| Spectronaut | `APB-detected quant result` | `Optional privately; required for public submission` |
 
 For per-tool setup steps, see the [DIA Astral bulk module's tool-specific setup](dia-ion-astral.md#tool-specific-setup) — the same tools and general workflow apply here.
 

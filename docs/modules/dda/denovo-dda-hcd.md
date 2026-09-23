@@ -203,9 +203,11 @@ your results.
 | AdaNovo | `*.mzTab` | `*.yaml` |
 | Casanovo | `*.mztab` | `*.yaml` |
 | ContraNovo | `*.mztab` | `*.yaml` |
+| Custom | `*.csv` | — |
 | DeepNovo | `*.tab` | — |
 | InstaNovo | `*.csv` | `*.yaml` |
 | NovoB | `*.csv` | — |
+| PEAKS | `*.csv` | — |
 | PepNet | `*.tsv` | — |
 | Pi-HelixNovo | `*.tsv` | `*.yaml` |
 | Pi-PrimeNovo | `*.tsv` | `*.yaml` |

@@ -120,7 +120,7 @@ class VariablesDIAQuantLI:
     placeholder_dataset_selection_container: str = "placeholder_dataset_selection_container_dia_quant_lowinput"
     dataset_selector_id_uuid: str = "dataset_selector_id_dia_quant_lowinput"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/lowinput"
+    parse_settings_dir: str = ""  # APB owns quant rules and module settings.
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-lowinput/"

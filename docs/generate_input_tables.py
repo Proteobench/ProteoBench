@@ -1,4 +1,4 @@
-"""Generate input files tables in module documentation from [upload_info] TOML data.
+"""Generate input files tables from APB menus or legacy [upload_info] data.
 
 Run from the docs/ directory:
     python generate_input_tables.py
@@ -7,6 +7,7 @@ Run from the docs/ directory:
 from pathlib import Path
 
 import toml
+from proteobench.modules.quant.apb_settings import APB_QUANT_MODULE_IDS, APBQuantSettingsBuilder
 
 SETTINGS_ROOT = Path(__file__).resolve().parent.parent / "proteobench" / "io" / "parsing" / "io_parse_settings"
 PARSE_SETTINGS_FILES_TOML = SETTINGS_ROOT / "parse_settings_files.toml"
@@ -109,20 +110,28 @@ def main() -> None:
     parse_settings_files = toml.load(PARSE_SETTINGS_FILES_TOML)
 
     for module_id, config in MODULE_DOC_CONFIG.items():
-        tool_to_toml = parse_settings_files.get(module_id, {})
-        settings_dir = SETTINGS_ROOT / _MODULE_SETTINGS_SUBDIRS[module_id]
         extra_column = config.get("extra_column")
-
         tools_data = []
-        for tool_name in sorted(tool_to_toml.keys()):
-            toml_filename = tool_to_toml[tool_name]
-            toml_path = settings_dir / toml_filename
-            info = get_upload_info(tool_name, toml_path)
-            if extra_column:
-                extra_value = get_parsed_fdr_column(toml_path)
-                tools_data.append((tool_name, info.get("datapoint_file", ""), extra_value, info.get("params_file", "")))
-            else:
-                tools_data.append((tool_name, info.get("datapoint_file", ""), info.get("params_file", "")))
+        if module_id in APB_QUANT_MODULE_IDS:
+            settings = APBQuantSettingsBuilder("", module_id)
+            tools_data = [
+                (tool, "APB-detected quant result", "Optional privately; required for public submission")
+                for tool in sorted(settings.INPUT_FORMATS)
+            ]
+        else:
+            tool_to_toml = parse_settings_files.get(module_id, {})
+            settings_dir = SETTINGS_ROOT / _MODULE_SETTINGS_SUBDIRS[module_id]
+            for tool_name in sorted(tool_to_toml.keys()):
+                toml_filename = tool_to_toml[tool_name]
+                toml_path = settings_dir / toml_filename
+                info = get_upload_info(tool_name, toml_path)
+                if extra_column:
+                    extra_value = get_parsed_fdr_column(toml_path)
+                    tools_data.append(
+                        (tool_name, info.get("datapoint_file", ""), extra_value, info.get("params_file", ""))
+                    )
+                else:
+                    tools_data.append((tool_name, info.get("datapoint_file", ""), info.get("params_file", "")))
 
         new_table = generate_table(tools_data, extra_column=extra_column)
 

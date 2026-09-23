@@ -7,6 +7,11 @@ currently focused on quantification modules, where you only need to check and ma
 slightly modify some components. For entirely new module types, you will need
 to create a new version if it says 'check, modify or add' of a component.
 
+For new HYE/HY quant modules, use APB2 rules for input parsing and APB ProteoBench
+module configuration and scoring. The legacy parser, tool TOML, ``QuantScoresHYE``
+and ``QuantDatapointHYE`` instructions below apply only to unmigrated modules and
+historical data; do not add another HYE/HY scoring implementation here.
+
 
 Terms
 =====

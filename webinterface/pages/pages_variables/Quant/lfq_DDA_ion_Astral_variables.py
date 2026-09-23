@@ -111,7 +111,7 @@ class VariablesDDAQuantAstral:
     description_results_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/result_description.md"
     description_submission_md: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral/submit_description.md"
 
-    parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DDA/ion/Astral"
+    parse_settings_dir: str = ""  # APB owns quant rules and module settings.
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dda/dda-ion-astral/"

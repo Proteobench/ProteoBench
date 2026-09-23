@@ -15,9 +15,16 @@ classifiers = [
 ]
 
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dynamic = ["version"]
 dependencies = [
+  # Temporary, immutable Git pins for the APB integration branch. Replace with
+  # released package versions before merging into ProteoBench main/PyPI.
+  "apb2 @ git+https://github.com/anndata-omics-bridge/apb2.git@5f47211e1ea89e3fd695846e887ed35a725d1909",
+  "apb-proteobench @ git+https://github.com/anndata-omics-bridge/apb-proteobench.git@1aea5715cc50b2b383ada72a35a947998c7fe2af",
+  "apb-fasta @ git+https://github.com/anndata-omics-bridge/apb-fasta.git@86b1fc07c0351e49e3e313fcda8efba80f84306e",
+  "protein-fasta @ git+https://github.com/anndata-omics-bridge/protein-fasta.git@d7630105a67b09e12d044443cf1d4c04cf04d44b",
+  "prozor @ git+https://github.com/anndata-omics-bridge/prozor.git@4191a2a6e190a3f7671674593596d6b2baa4e3e1",
   "pandas[excel]",
   "openpyxl",
   "numpy>1.24.4",

@@ -89,19 +89,7 @@ is where you upload results and, later, submit them for public review.
 
 | Tool | Input file | Parameter file |
 |---|---|---|
-| AlphaPept | `*.csv` | `results.yaml` |
-| Custom | `*.tsv` | — |
-| DIA-NN | `report.tsv or report.parquet` | `report.log.txt` |
-| FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
-| MSAngel | `*.xlsx` | `*.json` |
-| MaxQuant | `evidence.txt` | `mqpar.xml` |
-| MetaMorpheus | `AllQuantifiedPeaks.tsv` | `search_task_config.toml + version_result.txt` |
-| PEAKS | `lfq.features.csv` | `*.txt` |
-| ProlineStudio | `*.xlsx` | `*.xlsx` |
-| Sage | `lfq.tsv` | `*.json` |
-| WOMBAT | `*.csv` | `config.yaml` |
-| i2MassChroQ | `*.tsv` | `*.tsv` |
-| quantms | `*.csv` | `*.json` |
+| FragPipe | `APB-detected quant result` | `Optional privately; required for public submission` |
 
 Expand a tool below for setup details.
 

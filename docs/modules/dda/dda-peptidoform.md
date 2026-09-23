@@ -49,9 +49,7 @@ you upload results and submit them for public review.
 
 | Tool | Input file | Parameter file |
 |---|---|---|
-| Custom | `custom_input.tsv` | — |
-| PEAKS | `lfq.features.csv` | `*.txt` |
-| WOMBAT | `*.csv` | `config.yaml` |
+| WOMBAT | `APB-detected quant result` | `Optional privately; required for public submission` |
 
 ```{note}
 Tool-specific setup instructions for this module are still being written. In the meantime, the

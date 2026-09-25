@@ -87,6 +87,8 @@ is where you upload results and, later, submit them for public review.
 
 **Table: input files required for metric calculation and public submission**
 
+Select the software in the upload form. The parameter file is optional for private benchmarking and needed for public submission when one is listed.
+
 | Tool | Input file | Parameter file |
 |---|---|---|
 | AlphaPept | `*.csv` | `results.yaml` |
@@ -95,7 +97,6 @@ is where you upload results and, later, submit them for public review.
 | FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
 | MSAngel | `*.xlsx` | `*.json` |
 | MaxQuant | `evidence.txt` | `mqpar.xml` |
-| MetaMorpheus | `AllQuantifiedPeaks.tsv` | `search_task_config.toml + version_result.txt` |
 | PEAKS | `lfq.features.csv` | `*.txt` |
 | ProlineStudio | `*.xlsx` | `*.xlsx` |
 | Sage | `lfq.tsv` | `*.json` |

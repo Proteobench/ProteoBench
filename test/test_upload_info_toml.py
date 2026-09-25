@@ -1,15 +1,14 @@
 """Tests that every non-custom tool parse settings TOML contains a valid [upload_info] section."""
 
 import os
-import re
 from pathlib import Path
-from urllib.parse import urlparse
 
 import pytest
 import toml
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
+from proteobench.modules.quant.apb_settings import APBQuantSettingsBuilder
 
 _SETTINGS_ROOT = Path(__file__).resolve().parent.parent / "proteobench" / "io" / "parsing" / "io_parse_settings"
 
@@ -60,19 +59,13 @@ def test_get_upload_info_returns_dict_for_known_tools(module_id, parse_dir):
         ), f"get_upload_info({input_format!r}) returned {type(result)} for module {module_id}"
 
 
-def test_get_upload_info_custom_contains_docs_link():
-    """get_upload_info for Custom includes a documentation URL in datapoint_file_description."""
+def test_apb_custom_upload_info_describes_parameter_free_scoring():
+    """APB describes its Custom upload without a legacy tool TOML."""
     module_id = "quant_lfq_DDA_ion_QExactive"
-    parse_dir = MODULE_SETTINGS_DIRS[module_id]
-    builder = ParseSettingsBuilder(parse_settings_dir=parse_dir, module_id=module_id)
+    builder = APBQuantSettingsBuilder("", module_id)
     result = builder.get_upload_info("Custom")
-    assert "datapoint_file_description" in result
-
-    description = result["datapoint_file_description"]
-    url_candidates = re.findall(r"https?://[^\s)]+", description)
-    assert any(
-        urlparse(candidate).hostname == "proteobench.readthedocs.io" for candidate in url_candidates
-    ), "Expected datapoint_file_description to contain a docs URL hosted on proteobench.readthedocs.io"
+    assert "APB selects its rule" in result["datapoint_file_description"]
+    assert "not required" in result["datapoint_file_description"]
 
 
 _DIA_MODULES_WITH_FRAGPIPE_DIANN_QUANT = [

@@ -22,6 +22,7 @@ import pandas as pd
 import streamlit as st
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.quant.apb_workflow import APBQuantAnalysis
 from proteobench.validation import (
     FastaReference,
     ModuleValidationConfig,
@@ -197,6 +198,15 @@ def run_submission_validation(variables, ionmodule, user_input, params) -> Valid
         report.add_warning(
             "no_input_dataframe",
             "Could not run submission validation because the parsed result data was not available in the session.",
+            "input",
+        )
+        return report
+
+    if isinstance(input_df, APBQuantAnalysis):
+        report.add_info(
+            "apb_quant_validated",
+            "APB2 parsed the result and APB ProteoBench aligned runs, mapped proteins, "
+            "and completed quantitative scoring. Legacy result standardization was not used.",
             "input",
         )
         return report

@@ -4,17 +4,13 @@ DDA Quantification Module for precursor level Quantification.
 
 from __future__ import annotations
 
-from typing import Dict, Optional, Tuple
-
-import pandas as pd
-from pandas import DataFrame
-
-from proteobench.modules.constants import MODULE_SETTINGS_DIRS
-from proteobench.modules.quant.benchmarking import run_benchmarking
-from proteobench.modules.quant.quant_base_module import QuantModule
+from typing import Optional
 
 
-class DDAQuantIonModuleQExactive(QuantModule):
+from proteobench.modules.quant.apb_module import APBQuantModule
+
+
+class DDAQuantIonModuleQExactive(APBQuantModule):
     """
     DDA Quantification Module for precursor level Quantification.
 
@@ -36,6 +32,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
     """
 
     module_id = "quant_lfq_DDA_ion_QExactive"
+    apb_module_name = "dda_qexactive"
 
     def __init__(
         self,
@@ -61,7 +58,7 @@ class DDAQuantIonModuleQExactive(QuantModule):
             token,
             proteobot_repo_name=proteobot_repo_name,
             proteobench_repo_name=proteobench_repo_name,
-            parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
+            parse_settings_dir="",
             module_id=self.module_id,
             branch=branch,
         )
@@ -77,53 +74,6 @@ class DDAQuantIonModuleQExactive(QuantModule):
             True if the module is fully implemented, False otherwise.
         """
         return True
-
-    def benchmarking(
-        self,
-        input_file_loc: any,
-        input_format: str,
-        user_input: dict,
-        all_datapoints: pd.DataFrame,
-        default_cutoff_min_feature: int = 3,
-        input_file_secondary: str = None,
-        max_nr_observed: int = None,
-    ) -> tuple[DataFrame, DataFrame, DataFrame]:
-        """
-        Main workflow of the module. Used to benchmark workflow results.
-
-        Parameters
-        ----------
-        input_file_loc : any
-            Path to the workflow output file.
-        input_format : str
-            Format of the workflow output file.
-        user_input : dict
-            User provided parameters for plotting.
-        all_datapoints : pd.DataFrame
-            DataFrame containing all datapoints from the proteobench repo.
-        default_cutoff_min_feature : int
-            Minimum number of runs a precursor ion has to be identified in.
-        input_file_secondary : str, optional
-            Path to a secondary input file (used for some formats like AlphaDIA).
-
-        Returns
-        -------
-        tuple[DataFrame, DataFrame, DataFrame]
-            Tuple containing the intermediate data structure, all datapoints, and the input DataFrame.
-        """
-        return run_benchmarking(
-            input_file=input_file_loc,
-            input_format=input_format,
-            user_input=user_input,
-            all_datapoints=all_datapoints,
-            parse_settings_dir=self.parse_settings_dir,
-            module_id=self.module_id,
-            precursor_column_name=self.precursor_column_name,
-            default_cutoff_min_feature=default_cutoff_min_feature,
-            add_datapoint_func=self.add_current_data_point,
-            input_file_secondary=input_file_secondary,
-            max_nr_observed=max_nr_observed,
-        )
 
     def get_plot_generator(self, y_axis_title: str = None):
         return super().get_plot_generator(y_axis_title=y_axis_title)

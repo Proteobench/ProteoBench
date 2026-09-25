@@ -10,6 +10,7 @@ from streamlit_extras.let_it_rain import rain
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
+from proteobench.modules.quant.apb_workflow import APBQuantAnalysis
 
 from ..utils.inputs import NEVER_PARSED_KEYS, generate_input_widget, generate_never_parsed_fields_section
 from ..utils.validation_ui import render_validation_report, run_submission_validation
@@ -210,7 +211,9 @@ def submit_to_repository(
     validation_summary = validation_report.summary()
 
     # MaxQuant fixed modification handling
-    if user_input["input_format"] == "MaxQuant":
+    if user_input["input_format"] == "MaxQuant" and not isinstance(
+        st.session_state.get(variables.input_df_submission), APBQuantAnalysis
+    ):
         st.session_state[variables.result_perf] = add_maxquant_fixed_modifications(
             params, st.session_state[variables.result_perf]
         )
@@ -278,7 +281,10 @@ def copy_dataframes_for_submission(variables) -> None:
             variables.all_datapoints_submitted
         ].copy()
     if st.session_state[variables.input_df] is not None:
-        st.session_state[variables.input_df_submission] = st.session_state[variables.input_df].copy()
+        input_data = st.session_state[variables.input_df]
+        st.session_state[variables.input_df_submission] = (
+            input_data.copy() if hasattr(input_data, "copy") else input_data
+        )
     if st.session_state[variables.result_perf] is not None:
         st.session_state[variables.result_performance_submission] = st.session_state[variables.result_perf].copy()
 
@@ -452,6 +458,10 @@ def save_intermediate_submission_data(variables, ionmodule, user_input) -> None:
         )[1]
         logger.info("Save intermediate raw")
         df_result_performance_submission = st.session_state[variables.result_performance_submission]
+        archive_kwargs = {}
+        scored = st.session_state.get(variables.input_df_submission)
+        if isinstance(scored, APBQuantAnalysis):
+            archive_kwargs["analysis"] = scored
         ionmodule.write_intermediate_raw(
             directory=st.secrets["storage"]["dir"],
             ident=_id,
@@ -462,4 +472,5 @@ def save_intermediate_submission_data(variables, ionmodule, user_input) -> None:
             extension_input_file=extension_input_file,
             extension_input_parameter_file=extension_input_parameter_file,
             input_file_secondary_obj=user_input.get("input_csv_secondary"),
+            **archive_kwargs,
         )

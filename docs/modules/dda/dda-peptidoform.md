@@ -47,11 +47,13 @@ you upload results and submit them for public review.
 
 **Table: input files required for metric calculation and public submission**
 
+Select the software in the upload form. The parameter file is optional for private benchmarking and needed for public submission when one is listed.
+
 | Tool | Input file | Parameter file |
 |---|---|---|
-| MaxQuant | `APB-detected quant result` | `Optional privately; required for public submission` |
-| Sage | `APB-detected quant result` | `Optional privately; required for public submission` |
-| WOMBAT | `APB-detected quant result` | `Optional privately; required for public submission` |
+| MaxQuant | `evidence.txt` | `mqpar.xml` |
+| Sage | `lfq.tsv` | `*.json` |
+| WOMBAT | `*.csv` | `config.yaml` |
 
 ```{note}
 Tool-specific setup instructions for this module are still being written. In the meantime, the

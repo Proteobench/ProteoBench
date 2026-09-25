@@ -1,4 +1,4 @@
-"""Generate input files tables from APB menus or legacy [upload_info] data.
+"""Generate input files tables from APB menus and upload hints or legacy [upload_info] data.
 
 Run from the docs/ directory:
     python generate_input_tables.py
@@ -50,6 +50,55 @@ MODULE_DOC_CONFIG = {
     # Entrapment has an extra "Parsed FDR column" between Input file and Parameter file —
     # the raw column each tool reports Q-values in, i.e. the [mapper] key renamed to "Q-Value".
     "entrapment_DIA_ion_Astral": {"doc_file": "dia/entrapment-dia-astral.md", "extra_column": "Parsed FDR column"},
+}
+
+# APB rules determine which tools the quant upload menus offer, but do not specify
+# user-facing export filenames. Keep those documentation hints here rather than
+# replacing them with the unhelpful "APB-detected quant result" placeholder.
+_APB_DDA_UPLOAD_HINTS = {
+    "AlphaPept": ("*.csv", "*.yaml"),
+    "Custom": ("custom_input.tsv", ""),
+    "DIA-NN": ("report.tsv or report.parquet", "report.log.txt"),
+    "FragPipe": ("combined_ion.tsv", "fragpipe.workflow"),
+    "MSAngel": ("*.xlsx", "*.json"),
+    "MaxQuant": ("evidence.txt", "mqpar.xml"),
+    "PEAKS": ("lfq.features.csv", "*.txt"),
+    "ProlineStudio": ("*.xlsx", "*.xlsx"),
+    "Sage": ("lfq.tsv", "*.json"),
+    "WOMBAT": ("*.csv", "*.yaml"),
+    "i2MassChroQ": ("*.tsv", "*.tsv"),
+    "quantms": ("*.csv", "*.json"),
+}
+_APB_DIA_UPLOAD_HINTS = {
+    "AlphaDIA": ("precursors.parquet or precursors.tsv (v2+)", "log_alphadia.txt"),
+    "Custom": ("custom_input.tsv", ""),
+    "DIA-NN": ("report.tsv or report.parquet", "report.log.txt"),
+    "FragPipe": ("combined_ion.tsv", "fragpipe.workflow"),
+    "MaxQuant": ("evidence.txt", "mqpar.xml"),
+    "PEAKS": ("lfq.features.csv", "*.txt"),
+    "Spectronaut": ("*.tsv", "ExperimentSetupOverview.txt"),
+}
+_APB_MODULE_UPLOAD_HINTS = {
+    "quant_lfq_DDA_ion_QExactive": _APB_DDA_UPLOAD_HINTS,
+    "quant_lfq_DDA_ion_Astral": {
+        **_APB_DDA_UPLOAD_HINTS,
+        "AlphaPept": ("*.csv", "results.yaml"),
+        "Custom": ("*.tsv", ""),
+        "WOMBAT": ("*.csv", "config.yaml"),
+    },
+    "quant_lfq_DDA_peptidoform": {**_APB_DDA_UPLOAD_HINTS, "WOMBAT": ("*.csv", "config.yaml")},
+    "quant_lfq_DIA_ion_AIF": {
+        **_APB_DIA_UPLOAD_HINTS,
+        "AlphaDIA": ("precursors.parquet or precursors.tsv (v2+)", "*.txt"),
+    },
+    "quant_lfq_DIA_ion_diaPASEF": _APB_DIA_UPLOAD_HINTS,
+    "quant_lfq_DIA_ion_Astral": {**_APB_DIA_UPLOAD_HINTS, "PEAKS": ("lfq-features.csv", "*.txt")},
+    "quant_lfq_DIA_ion_ZenoTOF": {
+        **_APB_DIA_UPLOAD_HINTS,
+        "PEAKS": ("PEAKS_lfq_features.csv", "PEAKS_parameters.txt"),
+        "Spectronaut": ("Spectronaut_report.tsv", "Spectronaut_ExperimentSetupOverview.txt"),
+    },
+    "quant_lfq_DIA_ion_lowinput": _APB_DIA_UPLOAD_HINTS,
 }
 
 
@@ -114,10 +163,8 @@ def main() -> None:
         tools_data = []
         if module_id in APB_QUANT_MODULE_IDS:
             settings = APBQuantSettingsBuilder("", module_id)
-            tools_data = [
-                (tool, "APB-detected quant result", "Optional privately; required for public submission")
-                for tool in sorted(settings.INPUT_FORMATS)
-            ]
+            hints = _APB_MODULE_UPLOAD_HINTS[module_id]
+            tools_data = [(tool, *hints[tool]) for tool in sorted(settings.INPUT_FORMATS)]
         else:
             tool_to_toml = parse_settings_files.get(module_id, {})
             settings_dir = SETTINGS_ROOT / _MODULE_SETTINGS_SUBDIRS[module_id]

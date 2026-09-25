@@ -87,20 +87,22 @@ is where you upload results and, later, submit them for public review.
 
 **Table: input files required for metric calculation and public submission**
 
+Select the software in the upload form. The parameter file is optional for private benchmarking and needed for public submission when one is listed.
+
 | Tool | Input file | Parameter file |
 |---|---|---|
-| AlphaPept | `APB-detected quant result` | `Optional privately; required for public submission` |
-| Custom | `APB-detected quant result` | `Optional privately; required for public submission` |
-| DIA-NN | `APB-detected quant result` | `Optional privately; required for public submission` |
-| FragPipe | `APB-detected quant result` | `Optional privately; required for public submission` |
-| MSAngel | `APB-detected quant result` | `Optional privately; required for public submission` |
-| MaxQuant | `APB-detected quant result` | `Optional privately; required for public submission` |
-| PEAKS | `APB-detected quant result` | `Optional privately; required for public submission` |
-| ProlineStudio | `APB-detected quant result` | `Optional privately; required for public submission` |
-| Sage | `APB-detected quant result` | `Optional privately; required for public submission` |
-| WOMBAT | `APB-detected quant result` | `Optional privately; required for public submission` |
-| i2MassChroQ | `APB-detected quant result` | `Optional privately; required for public submission` |
-| quantms | `APB-detected quant result` | `Optional privately; required for public submission` |
+| AlphaPept | `*.csv` | `results.yaml` |
+| Custom | `*.tsv` | — |
+| DIA-NN | `report.tsv or report.parquet` | `report.log.txt` |
+| FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
+| MSAngel | `*.xlsx` | `*.json` |
+| MaxQuant | `evidence.txt` | `mqpar.xml` |
+| PEAKS | `lfq.features.csv` | `*.txt` |
+| ProlineStudio | `*.xlsx` | `*.xlsx` |
+| Sage | `lfq.tsv` | `*.json` |
+| WOMBAT | `*.csv` | `config.yaml` |
+| i2MassChroQ | `*.tsv` | `*.tsv` |
+| quantms | `*.csv` | `*.json` |
 
 Expand a tool below for setup details.
 

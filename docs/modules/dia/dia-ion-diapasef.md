@@ -83,15 +83,17 @@ like) submit your results publicly.
 
 **Table: input files required for metric calculation and public submission**
 
+Select the software in the upload form. The parameter file is optional for private benchmarking and needed for public submission when one is listed.
+
 | Tool | Input file | Parameter file |
 |---|---|---|
-| AlphaDIA | `APB-detected quant result` | `Optional privately; required for public submission` |
-| Custom | `APB-detected quant result` | `Optional privately; required for public submission` |
-| DIA-NN | `APB-detected quant result` | `Optional privately; required for public submission` |
-| FragPipe | `APB-detected quant result` | `Optional privately; required for public submission` |
-| MaxQuant | `APB-detected quant result` | `Optional privately; required for public submission` |
-| PEAKS | `APB-detected quant result` | `Optional privately; required for public submission` |
-| Spectronaut | `APB-detected quant result` | `Optional privately; required for public submission` |
+| AlphaDIA | `precursors.parquet or precursors.tsv (v2+)` | `log_alphadia.txt` |
+| Custom | `custom_input.tsv` | — |
+| DIA-NN | `report.tsv or report.parquet` | `report.log.txt` |
+| FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
+| MaxQuant | `evidence.txt` | `mqpar.xml` |
+| PEAKS | `lfq.features.csv` | `*.txt` |
+| Spectronaut | `*.tsv` | `ExperimentSetupOverview.txt` |
 
 Expand a tool below for setup details.
 

@@ -775,7 +775,14 @@ def _load_fragpipe_diann_quant(input_csv: str) -> pd.DataFrame:
     pd.DataFrame
         The loaded dataframe.
     """
-    input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
+    if isinstance(input_csv, str):
+        filename = input_csv
+    else:  # streamlit OpenedFile
+        filename = input_csv.name
+    if filename.endswith(".parquet"):
+        input_data_frame = pd.read_parquet(input_csv)
+    else:
+        input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
     if "All Mapped Proteins" in input_data_frame.columns:
         input_data_frame["Protein.Ids"] = input_data_frame["All Mapped Proteins"]
     mapper_path = os.path.join(os.path.dirname(__file__), "io_parse_settings/mapper.csv")

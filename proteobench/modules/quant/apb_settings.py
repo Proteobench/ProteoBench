@@ -60,9 +60,10 @@ class APBQuantSettingsBuilder:
         return {
             "datapoint_file_description": (
                 f"Upload the {input_format} quantification result. APB selects its rule "
-                "from the software name and file structure; search parameters are not required."
+                "from the software name and file structure."
             ),
             "params_file_description": (
-                "Optional for private benchmarking; upload search parameters before public submission."
+                "For private benchmarking, oploading search parameters is not required."
+                " For public submission, upload search parameters."
             ),
         }

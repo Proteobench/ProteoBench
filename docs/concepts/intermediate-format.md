@@ -1,9 +1,9 @@
 # Intermediate format specification
 
-This page records the legacy intermediate format still used by plasma and historical submissions. The eight active HYE/HY quant upload paths now use APB2's `ParsedLevels` and APB ProteoBench scoring directly. Their `result_performance.csv` is a projection of completed APB diagnostics for plots and historical readers, while the scored H5AD is archived alongside it. New quant submissions use APB ProteoBench's versioned content hash, not a hash of the projected DataFrame.
+This page records the legacy intermediate format still used by plasma and historical submissions. The eight active HYE/HY quant upload paths APB parsing and scoring directly. Their `result_performance.csv` is a projection of completed APB diagnostics for plots and historical readers, while the scored H5AD is archived alongside it. New quant submissions use APB ProteoBench's versioned content hash, not a hash of the projected DataFrame.
 
 ```{note}
-Status: historical format version 1. The sections below do not specify the APB-backed HYE/HY upload path.
+Status: historical format version 1. The sections below do not specify the APB-backed HYE/HY upload path. ProteoBench 0.18 is the last version to use this format for HYE/HY quant modules.
 ```
 
 ## Scope

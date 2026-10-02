@@ -97,6 +97,7 @@ Select the software in the upload form. The parameter file is optional for priva
 | FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
 | MSAngel | `*.xlsx` | `*.json` |
 | MaxQuant | `evidence.txt` | `mqpar.xml` |
+| MetaMorpheus | `AllQuantifiedPeaks.tsv` | `search_task_config.toml + version_result.txt` |
 | PEAKS | `lfq.features.csv` | `*.txt` |
 | ProlineStudio | `*.xlsx` | `*.xlsx` |
 | Sage | `lfq.tsv` | `*.json` |

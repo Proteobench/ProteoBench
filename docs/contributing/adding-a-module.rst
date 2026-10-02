@@ -1035,7 +1035,10 @@ a new type of module:
 1. Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule` and replace
    the :func:`benchmarking` method with your own implementation. You can copy from other
    modules in the folder
-   `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_
+   `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_.
+   Set the class attribute ``PARAMS_JSON`` to the parameter template of the module, relative to
+   ``proteobench/io/params/json/``, and ``RAW_DATA_URL`` to the download link of the raw input files.
+   The web interface and the MCP server (see :doc:`mcp-server`) read them from there.
 2. Define the input formats using toml files in a new subfolder of
    `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_.
    Each tool TOML must include an ``[upload_info]`` section with four keys:

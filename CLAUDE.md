@@ -484,6 +484,7 @@ Separate workflow for the webinterface (`test-streamlit.yml`):
 ### Adding a new benchmark module
 
 1. Create a module class in `modules/quant/` inheriting `QuantModule`, setting `module_id`, the precursor column, and repo names
+   - Set `PARAMS_JSON` on the class (parameter template, relative to `io/params/json/`, joined with `PARAMS_JSON_DIR` from `proteobench.io.params`). Also set `RAW_DATA_URL` (download link of the raw input files) when the module has one. `BaseStreamlitUI` sets `variables.additional_params_json` from `PARAMS_JSON` and shows the download button from `RAW_DATA_URL`, and the MCP server (`proteobench/mcp/server.py`) uses it; the server auto-discovers modules and needs nothing else (`test/test_mcp_server.py` enforces it).
    - For submission validation (see the Submission Validation Layer section): add a `[reference_database] fasta_url = "..."` entry to the new module's `module_settings.toml` (if absent, protein-identifier validation is silently skipped). A quant module auto-resolves to the `quant_lfq` profile; a module of a new category should declare `[validation] profile = "<name>"` and register a matching profile in `proteobench/validation/profiles.py`.
 2. Add the settings directory to `MODULE_SETTINGS_DIRS` in `modules/constants.py`
 3. Register the parse settings class in `MODULE_TO_CLASS` in `parse_settings.py`
@@ -497,7 +498,7 @@ Separate workflow for the webinterface (`test-streamlit.yml`):
 
 ### Adding a new parameter JSON for submission forms
 
-Parameter field definitions are in `proteobench/io/params/json/`. Present files: `Quant/quant_lfq_DDA_ion.json`, `Quant/quant_lfq_DDA_peptidoform.json`, `Quant/quant_lfq_DIA_ion.json`, `Quant/quant_lfq_DIA_peptidoform.json`, and `denovo/denovo_DDA_HCD.json` (there is no proteingroup JSON). Each key defines a field with `type`, `label`, `value`/`placeholder`, and optional `options`. The Variables dataclass `additional_params_json` field points to the correct JSON for each module.
+Parameter field definitions are in `proteobench/io/params/json/`. Present files: `Quant/quant_lfq_DDA_ion.json`, `Quant/quant_lfq_DDA_peptidoform.json`, `Quant/quant_lfq_DIA_ion.json`, `Quant/quant_lfq_DIA_peptidoform.json`, and `denovo/denovo_DDA_HCD.json` (there is no proteingroup JSON). Each key defines a field with `type`, `label`, `value`/`placeholder`, and optional `options`. Each module class sets `PARAMS_JSON` to its template; `BaseStreamlitUI` (and the Plasma page) copy the absolute path to `variables.additional_params_json` at runtime.
 
 ## All Module Classes and Repositories
 

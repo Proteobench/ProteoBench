@@ -65,7 +65,7 @@ def test_apb_custom_upload_info_describes_parameter_free_scoring():
     builder = APBQuantSettingsBuilder("", module_id)
     result = builder.get_upload_info("Custom")
     assert "APB selects its rule" in result["datapoint_file_description"]
-    assert "not required" in result["datapoint_file_description"]
+    assert "not required" in result["params_file_description"]
 
 
 _DIA_MODULES_WITH_FRAGPIPE_DIANN_QUANT = [

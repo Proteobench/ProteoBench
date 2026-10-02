@@ -1,0 +1,245 @@
+MetaMorpheus: version 1.0.0+1a24210f00a21b27c9a270ec62aa9fc2baa9d78d
+Time to run task: 00:24:22.1929591
+
+--------------------------------------------------
+
+All target PSMs with q-value <= 0.01: 488179
+All target peptides with q-value <= 0.01: 50065
+All target protein groups with q-value <= 0.01 (1% FDR): 6459
+All Precursors: 1867279
+All MS2 Scans: 682880
+
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - Target PSMs with q-value <= 0.01: 76733
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - Target peptides with q-value <= 0.01: 34404
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - Target protein groups with q-value <= 0.01: 5125
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - Precursors: 297002
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_01 - MS2 Scans: 109507
+
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - Target PSMs with q-value <= 0.01: 81589
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - Target peptides with q-value <= 0.01: 35289
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - Target protein groups with q-value <= 0.01: 5286
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - Precursors: 302618
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_02 - MS2 Scans: 111413
+
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - Target PSMs with q-value <= 0.01: 85646
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - Target peptides with q-value <= 0.01: 36469
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - Target protein groups with q-value <= 0.01: 5505
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - Precursors: 316769
+LFQ_Orbitrap_DDA_Condition_A_Sample_Alpha_03 - MS2 Scans: 117880
+
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - Target PSMs with q-value <= 0.01: 80105
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - Target peptides with q-value <= 0.01: 34898
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - Target protein groups with q-value <= 0.01: 5125
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - Precursors: 307650
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_01 - MS2 Scans: 111088
+
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - Target PSMs with q-value <= 0.01: 80137
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - Target peptides with q-value <= 0.01: 33892
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - Target protein groups with q-value <= 0.01: 5080
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - Precursors: 319754
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_02 - MS2 Scans: 114818
+
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - Target PSMs with q-value <= 0.01: 84641
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - Target peptides with q-value <= 0.01: 36197
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - Target protein groups with q-value <= 0.01: 5263
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - Precursors: 323486
+LFQ_Orbitrap_DDA_Condition_B_Sample_Alpha_03 - MS2 Scans: 118174
+
+
+
+--------------------------------------------------
+
+Engine Results:
+
+Engine type: DatabaseLoadingEngine
+Time to run engine: 00:01:17.9871351
+Databases loaded:
+	ProteoBenchFASTA_MixedSpecies_HYE.fasta: 63778 Proteins
+		31889 Target Proteins 	 31889 Decoy Proteins
+Total Proteins loaded: 63778
+Total Proteins removed by sanitization: 0
+Total Proteins renamed by sanitization: 0
+Total decoy Proteins scrambled due to homology: 11219
+Total Proteins remaining: 63778
+
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:00:29.3636198
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:00:45.7970411
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:00:33.5779131
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:00:48.6768259
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:00:39.0330727
+
+Engine type: ClassicSearchEngine
+Time to run engine: 00:00:33.5512494
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:03:19.4876336
+PSMs within 1% FDR: 489664
+Delta Score Used for FDR Analysis: False
+
+************************************************************
+*       Metrics for Determination of PEP Using Binary Classification      
+*-----------------------------------------------------------
+*       Accuracy:  0.9910780837756267
+*       Area Under Curve:  0.9992014057179666
+*       Area under Precision recall Curve:  0.997849250296537
+*       F1Score:  0.9858102109628276
+*       LogLoss:  0.041825623557158326
+*       LogLossReduction:  0.9534435838126896
+*       PositivePrecision:  0.9864276640240882
+*       PositiveRecall:  0.9851941741229584
+*       NegativePrecision:  0.9932091065043893
+*       NegativeRecall:  0.9937782434418919
+*       Count of Ambiguous Peptides Removed:  4146
+*       Q-Value Cutoff for Training Targets:  0.005
+*       Targets Used for Training:  51201
+*       Decoys Used for Training:  111550
+************************************************************
+
+
+
+Engine type: DisambiguationEngine
+Time to run engine: 00:00:27.7080297
+Ambiguous Peptides removed QValueNotch: 80
+
+
+Engine type: ModificationAnalysisEngine
+Time to run engine: 00:00:00.8265678
+Localized mods seen below q-value 0.01:
+	Carbamidomethyl on C	9129
+(Approx) Additional localized but protein ambiguous mods seen below q-value 0.01:
+	Carbamidomethyl on C	619
+(Approx) Additional unlocalized mods seen below q-value 0.01:
+
+(Approx) Additional unlocalized modification formulas seen below q-value 0.01:
+
+
+All mods in database limited to peptides observed in the results:
+
+
+
+Engine type: ProteinParsimonyEngine
+Time to run engine: 00:00:09.8426782
+
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:09.3578981
+Number of proteins within 1% FDR: 6523
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:02.5137463
+PSMs within 1% FDR: 85901
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:02.5478847
+PSMs within 1% FDR: 80258
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:02.5004531
+PSMs within 1% FDR: 85106
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.7594622
+PSMs within 1% FDR: 80177
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:02.3340028
+PSMs within 1% FDR: 81865
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:10.1538778
+PSMs within 1% FDR: 76883
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.6149855
+peptides within 1% FDR: 36485
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.5699325
+peptides within 1% FDR: 34019
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.5947917
+peptides within 1% FDR: 36300
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.1359855
+peptides within 1% FDR: 35099
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.4797514
+peptides within 1% FDR: 35332
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: FdrAnalysisEngine
+Time to run engine: 00:00:01.3769426
+peptides within 1% FDR: 34521
+Delta Score Used for FDR Analysis: False
+
+
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:02.3767959
+Number of proteins within 1% FDR: 5560
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.6454718
+Number of proteins within 1% FDR: 5130
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.9371379
+Number of proteins within 1% FDR: 5315
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.1000817
+Number of proteins within 1% FDR: 5176
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.5044165
+Number of proteins within 1% FDR: 5338
+
+Engine type: ProteinScoringAndFdrEngine
+Time to run engine: 00:00:01.3450146
+Number of proteins within 1% FDR: 5176
+

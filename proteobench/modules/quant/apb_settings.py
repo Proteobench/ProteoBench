@@ -63,7 +63,7 @@ class APBQuantSettingsBuilder:
                 "from the software name and file structure."
             ),
             "params_file_description": (
-                "For private benchmarking, oploading search parameters is not required."
+                "For private benchmarking, uploading search parameters is not required."
                 " For public submission, upload search parameters."
             ),
         }

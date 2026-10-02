@@ -1,0 +1,62 @@
+TaskType = "Search"
+
+[SearchParameters]
+DoParsimony = true
+NoOneHitWonders = false
+ModPeptidesAreDifferent = false
+Normalize = true
+QuantifyPpmTol = 5.0
+MatchBetweenRuns = false
+DoLabelFreeQuantification = true
+WriteMzId = true
+WritePepXml = false
+WriteDecoys = true
+WriteContaminants = true
+MassDiffAcceptorType = "OneMM"
+WritePrunedDatabase = false
+KeepAllUniprotMods = true
+DoLocalizationAnalysis = true
+DoHistogramAnalysis = false
+SearchTarget = true
+DecoyType = "Reverse"
+MaxFragmentSize = 30000.0
+SearchType = "Classic"
+
+[CommonParameters]
+MaxThreadsToUsePerFile = 80
+ListOfModsFixed = "Common Fixed	Carbamidomethyl on C"
+ListOfModsVariable = ""
+DoPrecursorDeconvolution = true
+UseProvidedPrecursorInfo = true
+TotalPartitions = 1
+ProductMassTolerance = "±10.0000 PPM"
+PrecursorMassTolerance = "±5.0000 PPM"
+QValueThreshold = 0.01
+PepQValueThreshold = 1.0
+ReportAllAmbiguity = true
+TrimMs1Peaks = false
+TrimMsMsPeaks = true
+
+[CommonParameters.PrecursorDeconvolutionParameters]
+DeconvolutionType = "ClassicDeconvolution"
+MinAssumedChargeState = 1
+MaxAssumedChargeState = 5
+Polarity = "Positive"
+AverageResidueModel = "Averagine"
+
+[CommonParameters.ProductDeconvolutionParameters]
+DeconvolutionType = "ClassicDeconvolution"
+MinAssumedChargeState = 1
+MaxAssumedChargeState = 5
+Polarity = "Positive"
+AverageResidueModel = "Averagine"
+
+[CommonParameters.DigestionParams]
+MaxMissedCleavages = 1
+MinPeptideLength = 6
+MaxPeptideLength = 30
+MaxModificationIsoforms = 1024
+MaxModsForPeptide = 0
+Protease = "trypsin"
+SearchModeType = "Full"
+FragmentationTerminus = "Both"

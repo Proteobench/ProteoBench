@@ -14,6 +14,7 @@ VERIFIED = {
     "Custom": "CustomFormat_DDA_quant_ions_test.txt",
     "MaxQuant": "MaxQuant_evidence_sample.txt",
     "FragPipe": "FragPipe_MSFragger_combined_ion.tsv",
+    "MetaMorpheus": "MetaMorpheus_sample.tsv",
     "MSAngel": "MSAngel_DDA_quan_ions_subset.xlsx",
     "quantms": "sample_dda_quantms.sdrf_openms_design_msstats_in.csv",
     "WOMBAT": "WOMBAT_stand_ion_quant_mergedproline.csv",
@@ -33,6 +34,18 @@ def test_upload_handoff_uses_apb(module: DDAQuantIonModuleQExactive) -> None:
     assert not intermediate.empty
     assert analysis.result.selection.layer_names == ("Intensity",)
     assert datapoints.iloc[-1]["intermediate_hash"] == analysis.content_hash
+
+
+def test_metamorpheus_ions_are_unambiguous_and_residue_modified(module: DDAQuantIonModuleQExactive) -> None:
+    intermediate, _, _ = module.benchmarking(
+        str(DATA / VERIFIED["MetaMorpheus"]), "MetaMorpheus", {}, pd.DataFrame()
+    )
+    ions = intermediate["precursor ion"].astype(str)
+    # FlashLFQ's ambiguous "SEQA|SEQB" peaks are dropped, never concatenated.
+    assert "HIIVDGKVLNPPGGK/2" not in set(ions)
+    # A token after the final residue modifies that residue, not the C-terminus.
+    assert "IDLGEFVDDNTPLEHVC[Carbamidomethyl]/2" in set(ions)
+    assert not ions.str.contains("-[", regex=False).any()
 
 
 def test_menu_retains_verified_producers() -> None:

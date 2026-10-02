@@ -40,6 +40,7 @@ _DDA_ION_MENU = [
     "FragPipe",
     "i2MassChroQ",
     "MaxQuant",
+    "MetaMorpheus",
     "MSAngel",
     "PEAKS",
     "ProlineStudio",
@@ -112,19 +113,20 @@ def test_custom_upload_uses_apb_parsing_and_scoring() -> None:
 
 def test_unsupported_producer_has_no_legacy_parser_fallback() -> None:
     with pytest.raises(ValueError, match="software"):
-        analyze_quant_upload(_CUSTOM, software="metamorpheus", module="dda_qexactive")
+        analyze_quant_upload(_CUSTOM, software="msaid", module="dda_qexactive")
 
 
 def test_quant_ui_settings_come_from_apb_module() -> None:
     settings = APBQuantSettingsBuilder("", "quant_lfq_DDA_ion_QExactive")
 
     assert "Custom" in settings.INPUT_FORMATS
-    assert "MetaMorpheus" not in settings.INPUT_FORMATS
+    assert "MetaMorpheus" in settings.INPUT_FORMATS
+    assert "MSAID" not in settings.INPUT_FORMATS
     assert not settings.supports_secondary_result_upload
     assert settings.build_parser("Custom") is settings
     assert settings.species_expected_ratio()["YEAST"]["color"] == "#88ccef"
     with pytest.raises(ValueError, match="not offered"):
-        settings.build_parser("MetaMorpheus")
+        settings.build_parser("MSAID")
 
 
 def test_qexactive_module_uses_apb_upload(monkeypatch: pytest.MonkeyPatch) -> None:

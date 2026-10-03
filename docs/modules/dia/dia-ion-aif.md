@@ -86,14 +86,14 @@ expected log2 fold change per species — that difference is epsilon.
 
 **Table: input files used for metric calculation and public submission**
 
+Select the software in the upload form. The parameter file is optional for private benchmarking and needed for public submission when one is listed.
+
 | Tool | Input file | Parameter file |
 |---|---|---|
-| AlphaDIA | `precursors.parquet/.tsv (v2+) or precursor.matrix.tsv + precursors.tsv (v1)` | `*.txt` |
+| AlphaDIA | `precursors.parquet or precursors.tsv (v2+)` | `*.txt` |
 | Custom | `custom_input.tsv` | — |
 | DIA-NN | `report.tsv or report.parquet` | `report.log.txt` |
 | FragPipe | `combined_ion.tsv` | `fragpipe.workflow` |
-| FragPipe (DIA-NN quant) | `report.tsv or report.parquet` | `fragpipe.workflow` |
-| MSAID | `*.tsv` | `MSAID_params.csv` |
 | MaxQuant | `evidence.txt` | `mqpar.xml` |
 | PEAKS | `lfq.features.csv` | `*.txt` |
 | Spectronaut | `*.tsv` | `ExperimentSetupOverview.txt` |

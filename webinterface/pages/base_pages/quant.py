@@ -218,6 +218,8 @@ class QuantUIObjects(BaseUIModule):
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
             )
+            if params is None:
+                return
             st.session_state[self.variables.params_file_dict] = params.__dict__
             self.params_file_dict_copy = copy.deepcopy(params.__dict__)
 

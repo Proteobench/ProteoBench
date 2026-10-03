@@ -2,6 +2,7 @@
 Module for plotting results of de novo models
 """
 
+import re
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -34,6 +35,20 @@ QUADRANT_COLORSCALE = [
     [0.85, "#4d87ac"],
     [1.0, "#1f5678"],
 ]
+# Every curve from one tool is drawn in that tool's colour, so a tool submitted several times
+# -- one datapoint per decoding strategy, say -- would otherwise draw identically coloured,
+# identically named lines that no legend entry or hover text could tell apart. Label each line
+# by whatever actually differs between that tool's submissions, and vary the dash so the lines
+# stay separable even where the colour cannot change.
+DASH_CYCLE = ("solid", "dash", "dot", "dashdot", "longdash", "longdashdot")
+# Tried in order, most workflow-defining first, so the shortest label that disambiguates wins.
+WORKFLOW_LABEL_FIELDS = ("decoding_strategy", "n_beams", "checkpoint", "software_version")
+# A run refined by a second model records both checkpoints in one field, base model first.
+CHECKPOINT_SEPARATOR = ";"
+# Product names for refinement models, keyed by the leading token of their checkpoint name.
+# A refinement checkpoint that is not listed still gets its own clause, just unnamed.
+REFINEMENT_MODEL_NAMES = {"instanovoplus": "InstaNovo+"}
+
 QUADRANT_LABELS = {
     "good": {"text": "<b>Good performance</b>"},
     "near_miss": {
@@ -174,6 +189,196 @@ def flatten_results_column(df: pd.DataFrame, ambiguity_combo: Optional[str] = No
                     results[f"{level}_{evaluation_type}_{metric}"].append(leaf.get(metric, float("nan")))
 
     return pd.DataFrame(results)
+
+
+def _is_blank(value: object) -> bool:
+    """Whether a datapoint field carries no usable value."""
+    if value is None:
+        return True
+    if isinstance(value, float) and np.isnan(value):
+        return True
+    return str(value).strip() in ("", "nan", "None", "<NA>")
+
+
+def _format_label_field(field: str, value: object) -> str:
+    """Render one distinguishing field for use inside a workflow label."""
+    text = str(value).strip()
+    if field == "n_beams":
+        # A blank in any row makes the whole column float, which would read "10.0 beams".
+        try:
+            count = float(text)
+        except ValueError:
+            return f"{text} beams"
+        return f"{count:g} beam" if count == 1 else f"{count:g} beams"
+    if field == "software_version":
+        return f"v{text.lstrip('v')}"
+    return text
+
+
+def _split_checkpoint(value: object) -> tuple:
+    """
+    Split a checkpoint field into the base model and any refinement stages.
+
+    A run that post-processes its predictions with a second model records both, separated by
+    ``;`` -- the base model first. Reported separately so a refined run reads as a refinement
+    of its base rather than as an unrelated pair of checkpoints.
+    """
+    stages = [stage.strip() for stage in str(value).split(CHECKPOINT_SEPARATOR) if stage.strip()]
+    return (stages[0] if stages else ""), stages[1:]
+
+
+def _refinement_model_name(checkpoint: str) -> Optional[str]:
+    """The product name of a refinement model, from its checkpoint name."""
+    token = re.split(r"[-_ ]", checkpoint.strip(), maxsplit=1)[0].lower()
+    return REFINEMENT_MODEL_NAMES.get(token)
+
+
+def _refinement_clause(refinements: List[str]) -> str:
+    """Render the trailing "with ... refinement" clause for any post-processing stages."""
+    if not refinements:
+        return ""
+    rendered = []
+    for checkpoint in refinements:
+        name = _refinement_model_name(checkpoint)
+        rendered.append(f"{name} refinement ({checkpoint})" if name else f"refinement ({checkpoint})")
+    return " with " + " and ".join(rendered)
+
+
+def _display_software_name(software: str, checkpoint: object) -> str:
+    """
+    The name to show for a datapoint, which is not always its ``software_name``.
+
+    A run whose only checkpoint is a refinement model is that model working on its own rather
+    than the tool that usually calls it: InstaNovo+ diffusion sampling is recorded under
+    ``software_name`` "InstaNovo", but it is not InstaNovo. Only the displayed name changes --
+    colour, marker and grouping still follow ``software_name``, which keeps such a run with the
+    rest of its project's results and avoids inventing a tool name the palettes do not know.
+    """
+    if _is_blank(checkpoint):
+        return software
+    base, refinements = _split_checkpoint(checkpoint)
+    if refinements:
+        return software  # a base model that was refined; the base model still names the run
+    return _refinement_model_name(base) or software
+
+
+def _render_workflow_label(software: str, parts: List[str], suffix: str) -> str:
+    """Assemble a workflow label from the tool name, its distinguishing fields and any suffix."""
+    if not parts:
+        return f"{software}{suffix}"
+    return f"{software} ({', '.join(parts)}){suffix}"
+
+
+def build_workflow_labels(result_df: pd.DataFrame) -> pd.Series:
+    """
+    Build a display label per datapoint, unique within each software tool.
+
+    A tool that appears once keeps its plain name. A tool submitted several times gets the
+    fields that actually differ between its own submissions appended, so the label says what
+    makes each run distinct rather than repeating the tool name. Fields that are constant
+    across a tool's submissions are left out -- they would lengthen every label without
+    separating anything.
+
+    Parameters
+    ----------
+    result_df : pd.DataFrame
+        Datapoints to label. Must carry ``software_name``; any of
+        :data:`WORKFLOW_LABEL_FIELDS` and ``id`` are used when present.
+
+    Returns
+    -------
+    pd.Series
+        Labels aligned to ``result_df.index``.
+    """
+    if "software_name" not in result_df.columns or len(result_df) == 0:
+        return pd.Series([], dtype=str) if len(result_df) == 0 else pd.Series("", index=result_df.index)
+
+    software_names = result_df["software_name"].astype(str)
+    # Grouping stays on software_name -- runs of one project are compared against each other --
+    # but the name shown can differ per row, so a standalone refinement model is not mislabelled
+    # as the tool that usually drives it.
+    if "checkpoint" in result_df.columns:
+        display_names = pd.Series(
+            [
+                _display_software_name(name, checkpoint)
+                for name, checkpoint in zip(software_names, result_df["checkpoint"])
+            ],
+            index=result_df.index,
+            dtype=object,
+        )
+    else:
+        display_names = software_names.copy()
+    labels = display_names.copy()
+
+    for _, group in result_df.groupby(software_names, sort=False):
+        if len(group) < 2:
+            continue
+
+        parts: Dict[object, List[str]] = {idx: [] for idx in group.index}
+        suffixes: Dict[object, str] = {idx: "" for idx in group.index}
+        for field in WORKFLOW_LABEL_FIELDS:
+            if field not in group.columns:
+                continue
+            values = group[field]
+            # A field only earns a place in the label if this tool's own submissions differ
+            # on it; two distinct non-blank values is the minimum that can separate two rows.
+            if len({str(v).strip() for v in values if not _is_blank(v)}) < 2:
+                continue
+            for idx, value in values.items():
+                if _is_blank(value):
+                    continue
+                if field == "checkpoint":
+                    # The base model belongs with the other settings; refinement stages read
+                    # as a clause after them, so a refined run names what refined it.
+                    base, refinements = _split_checkpoint(value)
+                    if base:
+                        parts[idx].append(base)
+                    suffixes[idx] = _refinement_clause(refinements)
+                else:
+                    parts[idx].append(_format_label_field(field, value))
+            rendered = {_render_workflow_label(display_names.at[idx], parts[idx], suffixes[idx]) for idx in group.index}
+            if len(rendered) == len(group):
+                break  # already unique; more fields would only add noise
+
+        for idx in group.index:
+            if parts[idx] or suffixes[idx]:
+                labels.at[idx] = _render_workflow_label(display_names.at[idx], parts[idx], suffixes[idx])
+
+    # Whatever the recorded parameters could not separate, the ProteoBench ID always can.
+    duplicated = labels.duplicated(keep=False)
+    if duplicated.any() and "id" in result_df.columns:
+        labels[duplicated] = [
+            f"{label} [{point_id}]"
+            for label, point_id in zip(labels[duplicated], result_df.loc[duplicated, "id"].astype(str))
+        ]
+
+    return labels
+
+
+def build_curve_dashes(result_df: pd.DataFrame) -> pd.Series:
+    """
+    Assign a line dash per datapoint, cycling within each software tool.
+
+    Colour already encodes the tool, so the dash is what separates several submissions of the
+    same tool from one another.
+
+    Parameters
+    ----------
+    result_df : pd.DataFrame
+        Datapoints to assign dashes to. Must carry ``software_name``.
+
+    Returns
+    -------
+    pd.Series
+        Plotly dash names aligned to ``result_df.index``.
+    """
+    dashes = pd.Series(DASH_CYCLE[0], index=result_df.index, dtype=object)
+    if "software_name" not in result_df.columns or len(result_df) == 0:
+        return dashes
+    for _, group in result_df.groupby(result_df["software_name"].astype(str), sort=False):
+        for position, idx in enumerate(group.index):
+            dashes.at[idx] = DASH_CYCLE[position % len(DASH_CYCLE)]
+    return dashes
 
 
 class DeNovoPlotGenerator(PlotGeneratorBase):
@@ -531,22 +736,29 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             horizontal_spacing=0.12,
         )
 
+        # Labelled per datapoint rather than per tool, so several submissions of one tool are
+        # separable in the legend and hover; legendgroup follows the label so toggling a
+        # workflow hides both of its levels rather than every workflow from the same tool.
+        workflow_labels = build_workflow_labels(benchmark_metrics_df)
+        curve_dashes = build_curve_dashes(benchmark_metrics_df)
+
         for col_idx, level in enumerate(_LEVELS, start=1):
-            for _, row in benchmark_metrics_df.iterrows():
+            for idx, row in benchmark_metrics_df.iterrows():
                 curve = _get_metrics_leaf(row, level, evaluation_type, ambiguity_combo).get("curve")
                 if not curve or not curve.get("coverage"):
                     continue  # degenerate curve (e.g. all-identical scores) or legacy datapoint
                 software = row["software_name"]
+                label = workflow_labels.at[idx]
                 fig.add_trace(
                     go.Scatter(
                         x=curve["coverage"],
                         y=curve["precision"],
                         mode="lines",
-                        name=software,
-                        legendgroup=software,
+                        name=label,
+                        legendgroup=label,
                         showlegend=(col_idx == 1),
-                        line=dict(color=software_colors.get(software, "gray")),
-                        hovertemplate=f"{software}<br>Coverage: %{{x:.3f}}<br>Precision: %{{y:.3f}}<extra></extra>",
+                        line=dict(color=software_colors.get(software, "gray"), dash=curve_dashes.at[idx]),
+                        hovertemplate=f"{label}<br>Coverage: %{{x:.3f}}<br>Precision: %{{y:.3f}}<extra></extra>",
                     ),
                     row=1,
                     col=col_idx,

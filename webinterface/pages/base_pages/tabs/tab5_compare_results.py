@@ -10,8 +10,17 @@ from typing import Dict, List, Optional
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-
 from pages.base_pages.utils.general import prepare_df_for_display
+
+from proteobench.plotting.plot_workflow_comparison import plot_accuracy_vs_abundance
+
+# Module IDs for which the "Quantification Accuracy vs Abundance" comparison tab is shown.
+# Currently the low-input DIA ion modules, where distinguishing tools by accuracy at low
+# abundance is the primary use case for this module.
+_ACCURACY_VS_ABUNDANCE_MODULE_IDS = {
+    "quant_lfq_DIA_ion_Astral_lowinput",
+    "quant_lfq_DIA_ion_timsTOF_lowinput",
+}
 
 
 def display_workflow_comparison(variables, ionmodule) -> None:
@@ -26,15 +35,13 @@ def display_workflow_comparison(variables, ionmodule) -> None:
         Module for accessing data and methods.
     """
     st.header("Workflow Comparison")
-    st.markdown(
-        """
+    st.markdown("""
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
         - **Precursor overlap**: Bar plot showing number of shared and unique precursors
         - **Parameter differences**: Table highlighting what differs between workflows
-        """
-    )
+        """)
 
     # Initialize data
     _initialize_comparison_data(variables, ionmodule)
@@ -50,7 +57,7 @@ def display_workflow_comparison(variables, ionmodule) -> None:
     with st.container(key="tour_compare_results"):
         if len(selected_ids) == 2:
             st.markdown("---")
-            _compare_workflows(variables, selected_ids[0], selected_ids[1])
+            _compare_workflows(variables, ionmodule, selected_ids[0], selected_ids[1])
         else:
             st.markdown(
                 "_Select two workflows in the plot above to see precursor overlap and parameter differences here._"
@@ -205,7 +212,7 @@ def _display_selection_status(selected_ids: List[str]) -> None:
                 st.rerun()
 
 
-def _compare_workflows(variables, workflow_1_id: str, workflow_2_id: str) -> None:
+def _compare_workflows(variables, ionmodule, workflow_1_id: str, workflow_2_id: str) -> None:
     """
     Compare two workflows and display results.
 
@@ -213,6 +220,8 @@ def _compare_workflows(variables, workflow_1_id: str, workflow_2_id: str) -> Non
     ----------
     variables : object
         Variables object containing session state keys.
+    ionmodule : object
+        Module for accessing data and methods, used here to decide which comparison tabs apply.
     workflow_1_id : str
         ProteoBench ID of first workflow.
     workflow_2_id : str
@@ -228,14 +237,24 @@ def _compare_workflows(variables, workflow_1_id: str, workflow_2_id: str) -> Non
         st.error("❌ Could not load data for one or both workflows.")
         return
 
-    # Create comparison tabs
-    comp_tab1, comp_tab2 = st.tabs(["Precursor Overlap", "Parameter Differences"])
+    # Create comparison tabs. The accuracy-vs-abundance tab is only meaningful for modules
+    # where distinguishing tools at low abundance is the point of the module.
+    tab_labels = ["Precursor Overlap", "Parameter Differences"]
+    show_accuracy_tab = getattr(ionmodule, "module_id", None) in _ACCURACY_VS_ABUNDANCE_MODULE_IDS
+    if show_accuracy_tab:
+        tab_labels.append("Quantification Accuracy vs Abundance")
 
-    with comp_tab1:
+    tabs = st.tabs(tab_labels)
+
+    with tabs[0]:
         _display_precursor_overlap(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
 
-    with comp_tab2:
+    with tabs[1]:
         _display_parameter_differences(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
+
+    if show_accuracy_tab:
+        with tabs[2]:
+            _display_accuracy_vs_abundance(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
 
 
 def _load_workflow_data(variables, workflow_id: str) -> Optional[Dict]:
@@ -315,7 +334,10 @@ def _display_precursor_overlap(
         "MaxQuant" in workflow_2_id and workflow_2_data["metadata"]["old_new"] == "new"
     ):
         st.warning(
-            "⚠️ Precursor overlaps calculated on private MaxQuant data might be inaccurate. If you want to benchmark local MaxQuant workflows, please submit them in a public submission. Reason: Fixed modifications are not included in MaxQuant output and are parsed from the parameter file during submission."
+            "⚠️ Precursor overlaps calculated on private MaxQuant data might be inaccurate. If you want to "
+            "benchmark local MaxQuant workflows, please submit them in a public submission. Reason: Fixed "
+            "modifications are not included in MaxQuant output and are parsed from the parameter file during "
+            "submission."
         )
 
     perf_1 = workflow_1_data["performance_data"]
@@ -416,6 +438,47 @@ def _display_precursor_overlap(
     with col2:
         st.metric("Workflow 2 Total", len(precursors_2))
         st.metric(f"Unique to {workflow_2_id}", unique_2)
+
+
+def _display_accuracy_vs_abundance(
+    workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict
+) -> None:
+    """
+    Display quantification accuracy vs abundance for the two workflows' shared precursors.
+
+    Parameters
+    ----------
+    workflow_1_id : str
+        ProteoBench ID of first workflow.
+    workflow_1_data : Dict
+        Data dictionary of the first workflow, as returned by ``_load_workflow_data``.
+    workflow_2_id : str
+        ProteoBench ID of second workflow.
+    workflow_2_data : Dict
+        Data dictionary of the second workflow, as returned by ``_load_workflow_data``.
+    """
+    st.markdown("### Quantification Accuracy vs Abundance")
+    st.markdown(
+        "Restricted to the precursors both workflows identify, split by species: mean absolute "
+        "error vs abundance rank per workflow, and which workflow is most accurate in each "
+        "abundance bin."
+    )
+
+    precursor_col = "precursor ion"
+
+    def _normalize_precursor_ids(performance_data: pd.DataFrame) -> pd.DataFrame:
+        """Align legacy proforma charge-state notation with the current one before matching."""
+        performance_data = performance_data.copy()
+        performance_data[precursor_col] = performance_data[precursor_col].str.replace("|Z=", "/", regex=False)
+        return performance_data
+
+    intermediates = {
+        workflow_1_id: _normalize_precursor_ids(workflow_1_data["performance_data"]),
+        workflow_2_id: _normalize_precursor_ids(workflow_2_data["performance_data"]),
+    }
+
+    fig = plot_accuracy_vs_abundance(intermediates, precursor_column_name=precursor_col)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def _display_parameter_differences(

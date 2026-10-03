@@ -1,0 +1,63 @@
+[mapper]
+"Modified.Sequence" = "Sequence"
+"Run" = "Raw file"
+"Protein.Ids" = "Proteins"
+"Precursor.Charge" = "Charge"
+"Precursor.Normalised" = "Intensity"
+
+[condition_mapper]
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B13_2uL" = "A"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B14_2uL" = "A"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B15_2uL" = "A"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B17_2uL" = "A"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B18_2uL" = "A"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B20_2uL" = "A"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O2_2uL" = "B"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O3_2uL" = "B"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O5_2uL" = "B"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O6_2uL" = "B"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O7_2uL" = "B"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O8_2uL" = "B"
+
+[run_mapper]
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B13_2uL" = "HYEA_QC_B13"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B14_2uL" = "HYEA_QC_B14"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B15_2uL" = "HYEA_QC_B15"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B17_2uL" = "HYEA_QC_B17"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B18_2uL" = "HYEA_QC_B18"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEA_QC_B20_2uL" = "HYEA_QC_B20"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O2_2uL" = "HYEB_QC_O2"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O3_2uL" = "HYEB_QC_O3"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O5_2uL" = "HYEB_QC_O5"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O6_2uL" = "HYEB_QC_O6"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O7_2uL" = "HYEB_QC_O7"
+"20251014_LSMBO_CC_Astral_IO08_140SPD_HYEB_QC_O8_2uL" = "HYEB_QC_O8"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\(([^()]*)\\)"
+"modification_dict" = {"(unimod:35)" = "Oxidation", "(unimod:1)" = "Acetyl", "(unimod:4)" = "Carbamidomethyl"}
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true
+
+[upload_info]
+"datapoint_file" = "report.tsv or report.parquet"
+"datapoint_file_description" = "Upload the DIA-NN report file (`report.tsv` or `report.parquet`)."
+"params_file" = "report.log.txt"
+"params_file_description" = "Upload the DIA-NN log file (`report.log.txt`)."
+
+[upload_info_overrides."FragPipe (DIA-NN quant)"]
+"datapoint_file" = "report.tsv or report.parquet"
+"datapoint_file_description" = "Upload the DIA-NN report file found in the `dia-quant-output` folder (`report.tsv` or `report.parquet`)."
+"params_file" = "fragpipe.workflow"
+"params_file_description" = "Upload the FragPipe workflow file (.workflow)."

@@ -111,11 +111,25 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
     if isotope_error_range is not None:
         params.isotope_error_range = str(isotope_error_range)
 
-    residues = _get_first(file, "residues", "residue_remapping")
+    # Only `residues` names the model's tokens. `residue_remapping` was previously used as a
+    # fallback, but its keys are the *input* spellings that get rewritten ("M(ox)",
+    # "(+42.01)") rather than vocabulary entries, so a config carrying only the remapping --
+    # which is every v1.2.2-era inference config -- reported a token list the model does not
+    # have. Leaving the field unset is better than describing the wrong vocabulary.
+    residues = file.get("residues")
     if isinstance(residues, dict):
         params.tokens = "; ".join(list(residues.keys()))
 
-    if file.get("use_knapsack"):
+    # InstaNovo+ can run on its own (`instanovo diffusion predict`), where the reverse
+    # diffusion process starts from a uniform sample and no transformer beam search happens
+    # at all. Such a config names only the InstaNovo+ checkpoint. Checked before the beam
+    # branches because a diffusion run's config may still carry `num_beams` at its default,
+    # which would otherwise be reported as a beam search the run never performed.
+    diffusion_only = bool(file.get("diffusion_only")) or (instanovo_plus_model is not None and instanovo_model is None)
+
+    if diffusion_only:
+        params.decoding_strategy = "diffusion sampling"
+    elif file.get("use_knapsack"):
         params.decoding_strategy = "knapsack beam search"
     elif n_beams == 1:
         params.decoding_strategy = "greedy search"

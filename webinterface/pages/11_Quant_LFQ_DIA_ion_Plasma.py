@@ -96,6 +96,7 @@ class StreamlitUI:
             tab_submission_details,
             tab_indepth_plots,
             tab_results_new,
+            tab_compare,
             tab_public_submission,
         ) = st.tabs(
             [
@@ -103,6 +104,7 @@ class StreamlitUI:
                 "Upload New Results (Private)",
                 "View Single Result",
                 "View Public + New Results",
+                "Compare Two Results",
                 "Submit New Results",
             ]
         )
@@ -128,7 +130,12 @@ class StreamlitUI:
             self._render_header(method_name="display_all_data_results_submitted")
             self.quant_uiobjects.display_all_data_results_submitted()
 
-        # Tab 5: Submit New Results
+        # Tab 5: Compare Two Results
+        with tab_compare:
+            self._render_header(method_name="display_workflow_comparison")
+            self.quant_uiobjects.display_workflow_comparison()
+
+        # Tab 6: Submit New Results
         with tab_public_submission:
             self._render_header(method_name="display_public_submission_ui")
             self.quant_uiobjects.display_public_submission_ui()

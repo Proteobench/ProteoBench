@@ -1310,8 +1310,8 @@ class LFQPYEPlotGenerator(PlotGeneratorBase):
                         symbol=marker_symbol,
                         line=dict(width=1, color="white"),
                     ),
-                    text=data["hover_texts"],
-                    hovertemplate="%{text}<extra></extra>",
+                    hovertext=data["hover_texts"],
+                    hovertemplate="%{hovertext}<extra></extra>",
                     name=legend_name_map.get(software, software),
                 )
             )

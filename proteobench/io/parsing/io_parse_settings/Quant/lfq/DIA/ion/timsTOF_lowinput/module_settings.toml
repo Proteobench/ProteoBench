@@ -1,0 +1,26 @@
+[species_expected_ratio]
+[species_expected_ratio.YEAST]
+"A_vs_B" = 2.0
+"color" = "#88ccef"
+
+[species_expected_ratio.ECOLI]
+"A_vs_B" = 0.25
+"color" = "#cc6777"
+
+[species_expected_ratio.HUMAN]
+"A_vs_B" = 1.0
+"color" = "#ddcc77"
+
+[general]
+"min_count_multispec" = 1
+"level" = "ion"
+
+[reference_database]
+# Reference protein database used to validate uploaded protein identifiers.
+# Read by proteobench.validation (ModuleValidationConfig).
+"fasta_url" = "https://proteobench.cubimed.rub.de/fasta/ProteoBenchFASTA_MixedSpecies_HYE.zip"
+
+[validation]
+# Validation profile applied to submissions for this module.
+# Resolved by proteobench.validation (ModuleValidationConfig.from_parse_settings).
+"profile" = "quant_lfq"

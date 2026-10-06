@@ -21,7 +21,7 @@ dependencies = [
   "pandas[excel]",
   "openpyxl",
   "numpy>1.24.4",
-  "plotly>=6.0.0",
+  "plotly>=6.0.0,<7.0.0",
   "upsetplot",
   "seaborn",
   "scipy",

@@ -15,9 +15,16 @@ classifiers = [
 ]
 
 keywords = ['proteomics', 'peptides', 'retention time', 'mass spectrometry']
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dynamic = ["version"]
 dependencies = [
+  # Temporary, immutable Git pins for the APB integration branch. Replace with
+  # released package versions before merging into ProteoBench main/PyPI.
+  "apb2 @ git+https://github.com/anndata-omics-bridge/apb2.git@d25f2959f5b1350440cb3078ae79f4be2d598c31",
+  "apb-proteobench @ git+https://github.com/anndata-omics-bridge/apb-proteobench.git@1aea5715cc50b2b383ada72a35a947998c7fe2af",
+  "apb-fasta @ git+https://github.com/anndata-omics-bridge/apb-fasta.git@86b1fc07c0351e49e3e313fcda8efba80f84306e",
+  "protein-fasta @ git+https://github.com/anndata-omics-bridge/protein-fasta.git@d7630105a67b09e12d044443cf1d4c04cf04d44b",
+  "prozor @ git+https://github.com/anndata-omics-bridge/prozor.git@4191a2a6e190a3f7671674593596d6b2baa4e3e1",
   "pandas[excel]",
   "openpyxl",
   "numpy>1.24.4",
@@ -79,6 +86,15 @@ web = [
 [build-system]
 requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[tool.uv.sources]
+# Use the sibling integration checkouts for local uv runs; pip installs keep the
+# immutable Git pins above until the APB packages are released.
+apb2 = { path = "../apb2", editable = true }
+apb-proteobench = { path = "../apb-proteobench", editable = true }
+apb-fasta = { path = "../apb-fasta", editable = true }
+protein-fasta = { path = "../protein_fasta", editable = true }
+prozor = { path = "../prozor", editable = true }
 
 [tool.setuptools_scm]
 # https://setuptools-scm.readthedocs.io/

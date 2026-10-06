@@ -1,20 +1,14 @@
 # Intermediate format specification
 
-This page specifies the internal tabular formats ProteoBench produces while processing a benchmark
-submission. Scoring, plotting, datapoint generation, the submission-validation layer, and the
-`intermediate_hash` that identifies a dataset all depend on the column names, types, and semantics
-defined here. The intermediate format is specific to each module, though modules can share formats
-where applicable; anything module-specific below is purely illustrative.
+This page records the legacy intermediate format still used by plasma and historical submissions. The eight active HYE/HY quant upload paths now use APB2's `ParsedLevels` and APB ProteoBench scoring directly. Their `result_performance.csv` is a projection of completed APB diagnostics for plots and historical readers, while the scored H5AD is archived alongside it. New quant submissions use APB ProteoBench's versioned content hash, not a hash of the projected DataFrame.
 
 ```{note}
-Status: descriptive specification of current behavior (format version 1, implicit). It documents
-what the code produces today. Proposed changes (an explicit version field, a canonical
-serialization for hashing) are described under "Reproducibility and the intermediate hash" below.
+Status: historical format version 1. The sections below do not specify the APB-backed HYE/HY upload path.
 ```
 
 ## Scope
 
-There are two distinct tables:
+The legacy path has two distinct tables:
 
 | Artifact | Produced by | Persisted | Consumed by |
 |---|---|---|---|
@@ -55,7 +49,7 @@ metric calculation in a standardized fashion, but isn't limited to these columns
 more, even tool-specific ones. It does need defined (documented) and "normalized" (comparable
 across submissions) columns for metric calculation.
 
-For quantification modules, this is produced by `QuantScoresHYE.generate_intermediate()` in
+For legacy HYE quantification, this was produced by `QuantScoresHYE.generate_intermediate()` in
 `proteobench/score/quantscoresHYE.py`. One row per precursor (or peptidoform). Only
 **single-species** precursors are retained: `compute_epsilon()` keeps rows where exactly one
 species flag is set (`unique == 1`), so multi-species precursors don't appear.
@@ -91,8 +85,7 @@ species flag is set (`unique == 1`), so multi-species precursors don't appear.
 
 ## Reproducibility and the intermediate hash
 
-The dataset identity is `intermediate_hash`, computed in `proteobench/datapoint/quant_datapoint.py`
-as the SHA1 of the intermediate DataFrame rendered with `pandas.DataFrame.to_string()`.
+For historical submissions, the dataset identity was `intermediate_hash`, computed in `proteobench/datapoint/quant_datapoint.py` as the SHA1 of the intermediate DataFrame rendered with `pandas.DataFrame.to_string()`. New APB-backed HYE/HY submissions instead obtain this field from APB ProteoBench's content hash over the canonical quantified matrix, design, settings and protein mapping provenance.
 
 Because the hash is taken over the rendered text, it depends on:
 

@@ -86,8 +86,10 @@ class LFQLowInputPlotGenerator(LFQHYEPlotGenerator):
         """
         descriptions = super().get_comparison_plot_descriptions()
         descriptions["accuracy_vs_abundance"] = (
-            "Restricted to the precursors both workflows identify, split by species: mean "
-            "absolute error vs abundance rank per workflow, and which workflow is most "
-            "accurate in each abundance bin."
+            "Median absolute error vs abundance rank per workflow, split by species, and which "
+            "workflow is most accurate in each abundance bin. The dropdown on the figure "
+            "switches between comparing only the precursors both workflows identify and all "
+            "precursors each workflow quantified, and between binning on a shared precursor set "
+            "and binning each workflow on its own abundance rank."
         )
         return descriptions

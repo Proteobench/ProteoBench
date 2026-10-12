@@ -1,10 +1,12 @@
 """
-Shared plotting helpers.
+Thin helpers over plotly primitives, shared by every plot generator.
 
 Holds ``create_kde_distribution_plot``, a replacement for
 ``plotly.figure_factory.create_distplot``, which plotly 7.0.0 removed. Both fold-change
 distribution plots called it with ``show_hist=False, show_rug=False``, so the only part
-they used was the kernel density estimate; this reproduces that figure directly.
+they used was the kernel density estimate; this reproduces that figure directly. Alongside it
+sit the placeholder figure the plots fall back to when their input is unusable, and the colour
+conversion their shaded bands need.
 """
 
 from typing import List, Sequence

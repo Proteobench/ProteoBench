@@ -8,19 +8,34 @@ import zipfile
 from typing import Dict, List, Optional
 
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 from pages.base_pages.utils.general import prepare_df_for_display
 
-from proteobench.plotting.plot_workflow_comparison import plot_accuracy_vs_abundance
+#: Column identifying a feature in the intermediate tables this tab compares.
+_PRECURSOR_COLUMN = "precursor ion"
 
-# Module IDs for which the "Quantification Accuracy vs Abundance" comparison tab is shown.
-# Currently the low-input DIA ion modules, where distinguishing tools by accuracy at low
-# abundance is the primary use case for this module.
-_ACCURACY_VS_ABUNDANCE_MODULE_IDS = {
-    "quant_lfq_DIA_ion_Astral_lowinput",
-    "quant_lfq_DIA_ion_timsTOF_lowinput",
-}
+
+def _normalize_precursor_ids(performance_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Align legacy proforma charge-state notation with the current one before matching.
+
+    Until the server files are resubmitted with the current proforma notation, older
+    intermediate tables write the charge state as ``|Z=2`` where the current ones write ``/2``.
+    Precursors of the two workflows would otherwise never match.
+
+    Parameters
+    ----------
+    performance_data : pd.DataFrame
+        Intermediate table of a single workflow.
+
+    Returns
+    -------
+    pd.DataFrame
+        A copy with the precursor column rewritten to the current notation.
+    """
+    performance_data = performance_data.copy()
+    performance_data[_PRECURSOR_COLUMN] = performance_data[_PRECURSOR_COLUMN].str.replace("|Z=", "/", regex=False)
+    return performance_data
 
 
 def display_workflow_comparison(variables, ionmodule) -> None:
@@ -35,13 +50,15 @@ def display_workflow_comparison(variables, ionmodule) -> None:
         Module for accessing data and methods.
     """
     st.header("Workflow Comparison")
-    st.markdown("""
+    st.markdown(
+        """
         **Compare two workflows side-by-side:**
         - Click on points in the plot below to select workflows for comparison
         - Select exactly two points to see detailed comparison of results and parameters
         - **Precursor overlap**: Bar plot showing number of shared and unique precursors
         - **Parameter differences**: Table highlighting what differs between workflows
-        """)
+        """
+    )
 
     # Initialize data
     _initialize_comparison_data(variables, ionmodule)
@@ -221,7 +238,7 @@ def _compare_workflows(variables, ionmodule, workflow_1_id: str, workflow_2_id: 
     variables : object
         Variables object containing session state keys.
     ionmodule : object
-        Module for accessing data and methods, used here to decide which comparison tabs apply.
+        Module for accessing data and methods. Its plot generator specifies the comparison tabs.
     workflow_1_id : str
         ProteoBench ID of first workflow.
     workflow_2_id : str
@@ -237,24 +254,39 @@ def _compare_workflows(variables, ionmodule, workflow_1_id: str, workflow_2_id: 
         st.error("❌ Could not load data for one or both workflows.")
         return
 
-    # Create comparison tabs. The accuracy-vs-abundance tab is only meaningful for modules
-    # where distinguishing tools at low abundance is the point of the module.
-    tab_labels = ["Precursor Overlap", "Parameter Differences"]
-    show_accuracy_tab = getattr(ionmodule, "module_id", None) in _ACCURACY_VS_ABUNDANCE_MODULE_IDS
-    if show_accuracy_tab:
-        tab_labels.append("Quantification Accuracy vs Abundance")
+    # The module's plot generator fully specifies which tabs exist, their order, their titles
+    # and their descriptions, so there is no module-specific branching here.
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
+    layout = plot_generator.get_comparison_plot_layout()
+    descriptions = plot_generator.get_comparison_plot_descriptions()
 
-    tabs = st.tabs(tab_labels)
+    tabs = st.tabs([config["title"] for config in layout])
+    figures = None  # generated once, and only if a figure-backed tab is actually declared
 
-    with tabs[0]:
-        _display_precursor_overlap(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
+    for tab, config in zip(tabs, layout):
+        name = config["name"]
+        with tab:
+            st.markdown(f"### {config['title']}")
+            description = descriptions.get(name)
+            if description:
+                st.markdown(description)
 
-    with tabs[1]:
-        _display_parameter_differences(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
+            renderer = _TAB_RENDERERS.get(name)
+            if renderer is not None:
+                renderer(plot_generator, workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
+                continue
 
-    if show_accuracy_tab:
-        with tabs[2]:
-            _display_accuracy_vs_abundance(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data)
+            if figures is None:
+                figures = plot_generator.generate_comparison_plots(
+                    _build_intermediates(workflow_1_id, workflow_1_data, workflow_2_id, workflow_2_data),
+                    precursor_column_name=_PRECURSOR_COLUMN,
+                )
+
+            figure = figures.get(name)
+            if figure is None:
+                st.warning(f"⚠️ Plot '{name}' is not available for this module.")
+                continue
+            st.plotly_chart(figure, use_container_width=True)
 
 
 def _load_workflow_data(variables, workflow_id: str) -> Optional[Dict]:
@@ -324,12 +356,24 @@ def _load_performance_data_from_storage(intermediate_hash: str) -> Optional[pd.D
 
 
 def _display_precursor_overlap(
-    workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict
+    plot_generator, workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict
 ) -> None:
-    """Display precursor overlap using stacked bar chart."""
-    st.markdown("### Precursor Overlap")
-    st.markdown("Shows which precursors are shared or unique to each workflow.")
+    """
+    Display precursor overlap using a bar chart, plus summary metrics and a download.
 
+    Parameters
+    ----------
+    plot_generator : PlotGeneratorBase
+        Plot generator of the module, which builds the overlap figure.
+    workflow_1_id : str
+        ProteoBench ID of the first workflow.
+    workflow_1_data : Dict
+        Data dictionary of the first workflow, as returned by ``_load_workflow_data``.
+    workflow_2_id : str
+        ProteoBench ID of the second workflow.
+    workflow_2_data : Dict
+        Data dictionary of the second workflow, as returned by ``_load_workflow_data``.
+    """
     if ("MaxQuant" in workflow_1_id and workflow_1_data["metadata"]["old_new"] == "new") or (
         "MaxQuant" in workflow_2_id and workflow_2_data["metadata"]["old_new"] == "new"
     ):
@@ -340,67 +384,20 @@ def _display_precursor_overlap(
             "submission."
         )
 
-    perf_1 = workflow_1_data["performance_data"]
-    perf_2 = workflow_2_data["performance_data"]
+    perf_1 = _normalize_precursor_ids(workflow_1_data["performance_data"])
+    perf_2 = _normalize_precursor_ids(workflow_2_data["performance_data"])
 
-    # Find precursor column
-    precursor_col = "precursor ion"
+    precursors_1 = set(perf_1[_PRECURSOR_COLUMN].dropna().unique())
+    precursors_2 = set(perf_2[_PRECURSOR_COLUMN].dropna().unique())
 
-    precursors_1 = set(perf_1[precursor_col].dropna().unique())
-    precursors_2 = set(perf_2[precursor_col].dropna().unique())
-
-    # until the server files are resubmitted with correct proforma, we have to catch old strings here
-    precursors_1 = set(p.replace("|Z=", "/") for p in precursors_1)
-    precursors_2 = set(p.replace("|Z=", "/") for p in precursors_2)
-
-    # Calculate overlap statistics
-    overlap = len(precursors_1 & precursors_2)
-    unique_1 = len(precursors_1 - precursors_2)
-    unique_2 = len(precursors_2 - precursors_1)
-
-    # Create stacked bar chart using Plotly
-    fig = go.Figure()
-    fig.add_trace(
-        go.Bar(
-            name=f"Unique to {workflow_1_id}",
-            x=["Precursor Distribution"],
-            y=[unique_1],
-            text=[unique_1],
-            textposition="auto",
-        )
-    )
-    fig.add_trace(
-        go.Bar(
-            name="Shared",
-            x=["Precursor Distribution"],
-            y=[overlap],
-            text=[overlap],
-            textposition="auto",
-        )
-    )
-    fig.add_trace(
-        go.Bar(
-            name=f"Unique to {workflow_2_id}",
-            x=["Precursor Distribution"],
-            y=[unique_2],
-            text=[unique_2],
-            textposition="auto",
-        )
-    )
-
-    fig.update_layout(
-        title="Precursor Overlap Distribution",
-        barmode="group",
-        yaxis_title="Number of Precursors",
-        showlegend=True,
-    )
+    fig = plot_generator.plot_precursor_overlap(workflow_1_id, precursors_1, workflow_2_id, precursors_2)
     st.plotly_chart(fig)
 
     # create a merged table for download
     merged_precursors = pd.merge(
         perf_1,
         perf_2,
-        on=precursor_col,
+        on=_PRECURSOR_COLUMN,
         how="outer",
         suffixes=(f"_{workflow_1_id}", f"_{workflow_2_id}"),
         indicator="source",
@@ -427,69 +424,63 @@ def _display_precursor_overlap(
     st.markdown("#### Summary Statistics")
     col1, col2 = st.columns(2)
 
-    overlap = len(precursors_1 & precursors_2)
-    unique_1 = len(precursors_1 - precursors_2)
-    unique_2 = len(precursors_2 - precursors_1)
-
     with col1:
         st.metric("Workflow 1 Total", len(precursors_1))
-        st.metric(f"Unique to {workflow_1_id}", unique_1)
+        st.metric(f"Unique to {workflow_1_id}", len(precursors_1 - precursors_2))
 
     with col2:
         st.metric("Workflow 2 Total", len(precursors_2))
-        st.metric(f"Unique to {workflow_2_id}", unique_2)
+        st.metric(f"Unique to {workflow_2_id}", len(precursors_2 - precursors_1))
 
 
-def _display_accuracy_vs_abundance(
+def _build_intermediates(
     workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict
-) -> None:
+) -> Dict[str, pd.DataFrame]:
     """
-    Display quantification accuracy vs abundance for the two workflows' shared precursors.
+    Collect the two workflows' intermediate tables in the form the plot generator expects.
 
     Parameters
     ----------
     workflow_1_id : str
-        ProteoBench ID of first workflow.
+        ProteoBench ID of the first workflow.
     workflow_1_data : Dict
         Data dictionary of the first workflow, as returned by ``_load_workflow_data``.
     workflow_2_id : str
-        ProteoBench ID of second workflow.
+        ProteoBench ID of the second workflow.
     workflow_2_data : Dict
         Data dictionary of the second workflow, as returned by ``_load_workflow_data``.
+
+    Returns
+    -------
+    Dict[str, pd.DataFrame]
+        Mapping of workflow ID to its intermediate table, with precursor identifiers normalized.
     """
-    st.markdown("### Quantification Accuracy vs Abundance")
-    st.markdown(
-        "Restricted to the precursors both workflows identify, split by species: mean absolute "
-        "error vs abundance rank per workflow, and which workflow is most accurate in each "
-        "abundance bin."
-    )
-
-    precursor_col = "precursor ion"
-
-    def _normalize_precursor_ids(performance_data: pd.DataFrame) -> pd.DataFrame:
-        """Align legacy proforma charge-state notation with the current one before matching."""
-        performance_data = performance_data.copy()
-        performance_data[precursor_col] = performance_data[precursor_col].str.replace("|Z=", "/", regex=False)
-        return performance_data
-
-    intermediates = {
+    return {
         workflow_1_id: _normalize_precursor_ids(workflow_1_data["performance_data"]),
         workflow_2_id: _normalize_precursor_ids(workflow_2_data["performance_data"]),
     }
 
-    fig = plot_accuracy_vs_abundance(intermediates, precursor_column_name=precursor_col)
-    st.plotly_chart(fig, use_container_width=True)
-
 
 def _display_parameter_differences(
-    workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict
+    plot_generator, workflow_1_id: str, workflow_1_data: Dict, workflow_2_id: str, workflow_2_data: Dict
 ) -> None:
-    """Display parameter differences between workflows."""
-    st.markdown("### Parameter Differences")
-    st.markdown(
-        "Parameter comparison for new points is possible after uploading the parameter files in a public submission."
-    )
+    """
+    Display parameter and metric differences between the two workflows.
 
+    Parameters
+    ----------
+    plot_generator : PlotGeneratorBase
+        Plot generator of the module. Unused here, present so that every tab renderer shares one
+        signature and can be dispatched uniformly.
+    workflow_1_id : str
+        ProteoBench ID of the first workflow.
+    workflow_1_data : Dict
+        Data dictionary of the first workflow, as returned by ``_load_workflow_data``.
+    workflow_2_id : str
+        ProteoBench ID of the second workflow.
+    workflow_2_data : Dict
+        Data dictionary of the second workflow, as returned by ``_load_workflow_data``.
+    """
     metadata_1 = workflow_1_data["metadata"]
     metadata_2 = workflow_2_data["metadata"]
 
@@ -610,3 +601,13 @@ def _extract_metric(metadata: pd.Series, key: str) -> Optional[float]:
             return float(results[3][key])
 
     return None
+
+
+#: Comparison tabs the web interface renders itself, because they combine a figure with
+#: Streamlit widgets rather than being a plain figure from the plot generator. Keyed by the
+#: ``name`` of the entry in ``get_comparison_plot_layout``; every other name is looked up in
+#: ``generate_comparison_plots``. All renderers share one signature.
+_TAB_RENDERERS = {
+    "precursor_overlap": _display_precursor_overlap,
+    "parameter_differences": _display_parameter_differences,
+}

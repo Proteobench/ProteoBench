@@ -23,6 +23,7 @@ from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.quant.quant_base_module import QuantModule
+from proteobench.plotting.plot_generator_lfq_lowinput import LFQLowInputPlotGenerator
 from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
@@ -197,5 +198,23 @@ class DIAQuantIonModuleAstralLowInput(QuantModule):
             input_df,
         )
 
-    def get_plot_generator(self, y_axis_title: str = None):
-        return super().get_plot_generator(y_axis_title=y_axis_title)
+    def get_plot_generator(self, y_axis_title: str = None) -> LFQLowInputPlotGenerator:
+        """
+        Get the plot generator for the module.
+
+        Low-input modules use the HYE plots plus the cross-workflow accuracy-vs-abundance
+        comparison plot, so they use ``LFQLowInputPlotGenerator`` instead of the HYE generator
+        returned by ``QuantModule``.
+
+        Parameters
+        ----------
+        y_axis_title : str, optional
+            Override the default y-axis title. If None, the class default is used.
+
+        Returns
+        -------
+        LFQLowInputPlotGenerator
+            The plot generator instance.
+        """
+        title = y_axis_title if y_axis_title is not None else self.y_axis_title
+        return LFQLowInputPlotGenerator(y_axis_title=title)

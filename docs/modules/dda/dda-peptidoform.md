@@ -47,10 +47,12 @@ you upload results and submit them for public review.
 
 **Table: input files required for metric calculation and public submission**
 
+Select the software in the upload form. The parameter file is optional for private benchmarking and needed for public submission when one is listed.
+
 | Tool | Input file | Parameter file |
 |---|---|---|
-| Custom | `custom_input.tsv` | — |
-| PEAKS | `lfq.features.csv` | `*.txt` |
+| MaxQuant | `evidence.txt` | `mqpar.xml` |
+| Sage | `lfq.tsv` | `*.json` |
 | WOMBAT | `*.csv` | `config.yaml` |
 
 ```{note}

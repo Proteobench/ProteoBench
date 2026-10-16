@@ -15,10 +15,8 @@ from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-from pandas import DataFrame
 
 from proteobench.datapoint.quant_datapoint import (
-    QuantDatapointHYE,
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_feature,
 )
@@ -47,11 +45,8 @@ from proteobench.io.params.spectronaut import (
     read_spectronaut_settings as extract_params_spectronaut,
 )
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
-from proteobench.score.quantscoresHYE import QuantScoresHYE
 
 
 class QuantModule:
@@ -273,66 +268,6 @@ class QuantModule:
         ]
 
         return all_datapoints
-
-    def benchmarking(
-        self,
-        input_file: str,
-        input_format: str,
-        user_input: dict,
-        all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_feature: int = 3,
-        input_file_secondary: str = None,
-        max_nr_observed: int = None,
-    ) -> tuple[DataFrame, DataFrame, DataFrame]:
-        """
-        Main workflow of the module. Used to benchmark workflow results.
-
-        Parameters
-        ----------
-        input_file : str
-            Path to the workflow output file.
-        input_format : str
-            Format of the workflow output file.
-        user_input : dict
-            User-provided parameters for plotting.
-        all_datapoints : Optional[pd.DataFrame]
-            DataFrame containing all datapoints from the ProteoBench repo.
-        default_cutoff_min_feature : int, optional
-            Minimum number of runs a feature has to be identified in. Defaults to 3.
-        input_file_secondary : str, optional
-            Path to a secondary input file (used for some formats like AlphaDIA).
-        max_nr_observed : int, optional
-            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 6).
-
-        Returns
-        -------
-        tuple[DataFrame, DataFrame, DataFrame]
-            A tuple containing the intermediate data structure, all data points, and the input DataFrame.
-        """
-        # Parse user config
-        input_df = load_input_file(input_file, input_format, input_file_secondary)
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
-        ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(
-            input_df
-        )  # Get quantification data
-        quant_score = QuantScoresHYE(
-            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
-        )
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
-
-        current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure,
-            input_format,
-            user_input,
-            default_cutoff_min_feature=default_cutoff_min_feature,
-            max_nr_observed=max_nr_observed,
-        )
-
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
-
-        return intermediate_metric_structure, all_datapoints, input_df
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """

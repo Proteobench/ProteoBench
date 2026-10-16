@@ -234,12 +234,12 @@ def get_module_submission_data() -> Dict[str, Dict[str, int]]:
     headers = {}
     try:
         token = st.secrets["gh"]["token"]
-        headers["Authorization"] = f"token {token}"
     except Exception:
-        logger.warning(
-            "Could not obtain GitHub token, proceeding with unauthenticated requests which may be rate-limited."
-        )
-        pass
+        token = None
+    if isinstance(token, str) and token.strip():
+        headers["Authorization"] = f"token {token.strip()}"
+    else:
+        logger.info("No GitHub token configured; fetching public results without authentication.")
 
     repo_names = [
         module.results_repo for modules in modules_by_category.values() for module in modules if module.results_repo

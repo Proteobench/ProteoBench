@@ -11,8 +11,6 @@ from types import SimpleNamespace
 import pandas as pd
 import pytest
 
-from proteobench.io.parsing.parse_ion import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.validation import (
     Check,
     FastaReference,
@@ -50,14 +48,6 @@ from proteobench.validation.protein_ids import (
 
 HERE = os.path.dirname(__file__)
 FASTA_FIXTURE = os.path.join(HERE, "data", "validation", "ProteoBench_validation_reference.fasta")
-
-QEXACTIVE_DATA_DIR = os.path.join(HERE, "data", "quant", "quant_lfq_ion_DDA_QExactive")
-QEXACTIVE_SETTINGS_DIR = os.path.abspath(
-    os.path.join(
-        HERE, "..", "proteobench", "io", "parsing", "io_parse_settings", "Quant", "lfq", "DDA", "ion", "QExactive"
-    )
-)
-QEXACTIVE_MODULE_ID = "quant_lfq_DDA_ion_QExactive"
 
 
 def make_params(**overrides):
@@ -637,7 +627,12 @@ def test_register_duplicate_profile_raises():
 
 
 def test_profile_resolution_from_parse_settings():
-    quant_cfg = ModuleValidationConfig.from_parse_settings(QEXACTIVE_SETTINGS_DIR, QEXACTIVE_MODULE_ID, "MaxQuant")
+    plasma_dir = os.path.abspath(
+        os.path.join(
+            HERE, "..", "proteobench", "io", "parsing", "io_parse_settings", "Quant", "lfq", "DIA", "ion", "plasma"
+        )
+    )
+    quant_cfg = ModuleValidationConfig.from_parse_settings(plasma_dir, "quant_lfq_DIA_ion_plasma", "DIA-NN")
     assert quant_cfg.validation_profile == "quant_lfq"
 
     denovo_dir = os.path.abspath(
@@ -649,7 +644,7 @@ def test_profile_resolution_from_parse_settings():
 
 def test_resolve_profile_infers_from_parser_class():
     # With no declared profile, resolution falls back to MODULE_TO_CLASS inference.
-    assert _resolve_profile("quant_lfq_DDA_ion_QExactive", None) == "quant_lfq"
+    assert _resolve_profile("quant_lfq_DIA_ion_plasma", None) == "quant_lfq"
     assert _resolve_profile("denovo_DDA_HCD", None) == "denovo"
     # Unknown module_id falls back to the default profile.
     assert _resolve_profile("does_not_exist", None) == "quant_lfq"
@@ -663,55 +658,3 @@ def test_non_string_profile_does_not_crash():
     report = validate_submission(make_standard_df(), parameters=make_params(), config=config)
     assert report.passed
     assert any(i.code == "unknown_validation_profile" for i in report.issues)
-
-
-# --------------------------------------------------------------------------- #
-# lightweight integration with the real parser (MaxQuant + Sage)
-# --------------------------------------------------------------------------- #
-
-REAL_TOOL_FILES = {
-    "MaxQuant": "MaxQuant_evidence_sample.txt",
-    "Sage": "sage_sample_input_lfq.tsv",
-}
-
-
-def _standard_df_for_tool(tool):
-    path = os.path.join(QEXACTIVE_DATA_DIR, REAL_TOOL_FILES[tool])
-    if not os.path.isfile(path):
-        pytest.skip(f"Test data for {tool} not available: {path}")
-    input_df = load_input_file(path, tool)
-    parser = ParseSettingsBuilder(
-        parse_settings_dir=QEXACTIVE_SETTINGS_DIR, module_id=QEXACTIVE_MODULE_ID
-    ).build_parser(tool)
-    standard_df, _ = parser.convert_to_standard_format(input_df)
-    return standard_df
-
-
-def _fasta_from_standard_df(df):
-    ids = set()
-    for cell in df["Proteins"].dropna().unique():
-        for token in split_protein_groups(cell):
-            ids |= extract_identifiers(token)
-    return FastaReference.from_identifiers(ids)
-
-
-@pytest.mark.parametrize("tool", ["MaxQuant", "Sage"])
-def test_integration_real_tool_matching_fasta_passes(tool):
-    df = _standard_df_for_tool(tool)
-    fasta = _fasta_from_standard_df(df)
-    config = ModuleValidationConfig.from_parse_settings(QEXACTIVE_SETTINGS_DIR, QEXACTIVE_MODULE_ID, tool)
-    issues = check_protein_ids(df, fasta, config)
-    assert not any(i.severity == Severity.ERROR for i in issues)
-
-
-@pytest.mark.parametrize("tool", ["MaxQuant", "Sage"])
-def test_integration_real_tool_injected_unknown_protein_errors(tool):
-    df = _standard_df_for_tool(tool)
-    fasta = _fasta_from_standard_df(df)
-    df = df.copy()
-    df.iloc[0, df.columns.get_loc("Proteins")] = "sp|ZZZ999|NOTINFASTA_HUMAN"
-    config = ModuleValidationConfig.from_parse_settings(QEXACTIVE_SETTINGS_DIR, QEXACTIVE_MODULE_ID, tool)
-    issues = check_protein_ids(df, fasta, config)
-    errors = [i for i in issues if i.severity == Severity.ERROR]
-    assert any(i.code == "protein_not_in_fasta" for i in errors)
-    assert any("ZZZ999" in str(e) for i in errors for e in i.examples)

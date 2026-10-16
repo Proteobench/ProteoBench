@@ -36,6 +36,10 @@ class DDAQuantIonModuleQExactive(QuantModule):
     """
 
     module_id = "quant_lfq_DDA_ion_QExactive"
+    # Parameter field template, relative to proteobench/io/params/json/.
+    PARAMS_JSON: str = "Quant/quant_lfq_DDA_ion.json"
+    # Raw input files of the benchmark, offered for download.
+    RAW_DATA_URL: str = "https://proteobench.cubimed.rub.de/raws/DDA/all_data_LFQ_Quant_DDA_QExactive.tar.gz"
 
     def __init__(
         self,

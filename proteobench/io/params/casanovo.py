@@ -4,6 +4,7 @@ Casanovo parameter parsing.
 
 from __future__ import annotations
 
+import os
 import pathlib
 
 import pandas as pd
@@ -28,11 +29,11 @@ def extract_params(file_path: str) -> ProteoBenchParameters:
     """
     params = ProteoBenchParameters(json_path="denovo/denovo_lfq_DDA_HCD.json")
 
-    try:
-        file = yaml.safe_load(file_path)
-    except:
+    if isinstance(file_path, (str, os.PathLike)):
         with open(file_path) as f:
-            file = yaml.load(f, yaml.SafeLoader)
+            file = yaml.safe_load(f)
+    else:
+        file = yaml.safe_load(file_path)
 
     params.software_name = "Casanovo"
     params.n_beams = file["n_beams"]

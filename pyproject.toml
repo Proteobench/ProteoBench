@@ -53,6 +53,7 @@ dev = [
   "flake8",
   "flake8-bugbear",
   "flake8-comprehensions",
+  "mcp>=2,<3",
 ]
 docs = [
   "sphinx",
@@ -71,6 +72,10 @@ web = [
   "streamlit-tour>=1.1.0",
   "pmultiqc>=0.0.33",
 ]
+mcp = ["mcp>=2,<3"]
+
+[project.scripts]
+proteobench-mcp = "proteobench.mcp.server:main"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/ProteoBench/ProteoBench/issues/"

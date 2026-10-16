@@ -1,5 +1,6 @@
 """Tests for the de novo plotting helpers that keep repeat submissions distinguishable."""
 
+import copy
 import re
 
 import numpy as np
@@ -20,8 +21,10 @@ from proteobench.plotting.plot_generator_denovo import (
     build_display_labels,
     build_workflow_labels,
     datapoint_score,
+    assign_datapoint_colors,
     rank_within_tools,
     resolve_coloured_datapoints,
+    resolve_emphasis,
     shade_within_tool,
 )
 
@@ -652,3 +655,213 @@ class TestPlotPrecisionCoverageCurves:
         instanovo = [t for t in panel_one if t.legendgroup == "InstaNovo"]
         assert len(instanovo) == 3
         assert all(t.line.color == MUTED_COLOR for t in instanovo)
+
+
+def _with_in_depth(point_id, software, auc, *, shift=0.0, **fields):
+    """A datapoint carrying all four in-depth blocks, as every current datapoint does."""
+    row = _plottable(point_id, software, auc, **fields)
+    mods = ["M-Oxidation", "Q-Deamidation", "N-Deamidation", "N-term Acetylation"]
+    row["results"]["in_depth"] = {
+        "PTM": {
+            mod: {"counts_gt": 1000, "correct_gt": int(700 * auc), "counts_dn": 900, "correct_dn": int(600 * auc)}
+            for mod in mods
+        },
+        "Spectrum": {
+            "Peptide Length": {
+                str(length): {"mass": min(1.0, auc + shift), "exact": auc * 0.8, "n_spectra": 100 * length}
+                for length in (7, 8, 9)
+            }
+        },
+        "Species": {
+            species: {"mass": min(1.0, auc + shift), "exact": auc * 0.8, "n_spectra": 500}
+            for species in ("H.-sapiens", "Mus-musculus")
+        },
+        "in_FASTA": {
+            "counts": {"correct": 700, "in_fasta": 100, "not_in_fasta": 200},
+            "proportions": {"correct": 0.7, "in_fasta": 0.1, "not_in_fasta": 0.2},
+            "n_spectra": 1000,
+        },
+    }
+    return row
+
+
+#: A cross-tool selection: one datapoint from each of three tools.
+CROSS_TOOL = pd.DataFrame(
+    [
+        _with_in_depth("i1", "InstaNovo", 0.95),
+        _with_in_depth("c1", "Casanovo", 0.90),
+        _with_in_depth("a1", "AdaNovo", 0.85),
+    ]
+)
+
+#: A tool-specific selection: three runs of one tool.
+ONE_TOOL = pd.DataFrame(
+    [
+        _with_in_depth("i1", "InstaNovo", 0.95, decoding="knapsack beam search", n_beams=10),
+        _with_in_depth("i2", "InstaNovo", 0.90, decoding="beam search", n_beams=10),
+        _with_in_depth("i3", "InstaNovo", 0.85, decoding="greedy search", n_beams=1),
+    ]
+)
+
+
+class TestAssignDatapointColors:
+    def test_across_tools_each_datapoint_takes_its_tool_colour(self):
+        # Hue is telling tools apart here, so shading would compete with that comparison.
+        colors = assign_datapoint_colors(CROSS_TOOL)
+        assert list(colors) == [SOFTWARE_COLORS[t] for t in CROSS_TOOL["software_name"]]
+
+    def test_within_one_tool_the_datapoints_are_shaded(self):
+        colors = assign_datapoint_colors(ONE_TOOL)
+        assert len(set(colors)) == len(ONE_TOOL)
+
+    def test_shading_is_ordered_best_darkest(self):
+        colors = assign_datapoint_colors(ONE_TOOL)
+        lightness = [_hex_to_hsl(c)[2] for c in colors]
+        assert lightness == sorted(lightness)
+
+    def test_shading_preserves_the_tools_hue(self):
+        base_hue = _hex_to_hsl(SOFTWARE_COLORS["InstaNovo"])[0]
+        for color in assign_datapoint_colors(ONE_TOOL):
+            assert _hex_to_hsl(color)[0] == pytest.approx(base_hue, abs=0.02)
+
+    def test_a_single_datapoint_keeps_the_plain_tool_colour(self):
+        colors = assign_datapoint_colors(ONE_TOOL.head(1))
+        assert list(colors) == [SOFTWARE_COLORS["InstaNovo"]]
+
+    def test_an_unregistered_tool_falls_back(self):
+        df = pd.DataFrame([_with_in_depth("x", "NotATool", 0.5)])
+        assert list(assign_datapoint_colors(df)) == ["gray"]
+
+    def test_empty_frame_returns_empty(self):
+        assert len(assign_datapoint_colors(pd.DataFrame())) == 0
+
+
+class TestResolveEmphasis:
+    def test_nothing_highlighted_emphasises_everything(self):
+        assert resolve_emphasis(CROSS_TOOL).all()
+
+    def test_across_tools_the_highlight_follows_the_software(self):
+        df = pd.concat([CROSS_TOOL, ONE_TOOL.tail(2)], ignore_index=True)
+        emphasised = resolve_emphasis(df, highlight_id="i1")
+        assert list(df.loc[emphasised, "software_name"].unique()) == ["InstaNovo"]
+        assert int(emphasised.sum()) == 3
+
+    def test_within_one_tool_the_highlight_narrows_to_the_datapoint(self):
+        # Raising every line of the software would raise the whole selection and say nothing.
+        emphasised = resolve_emphasis(ONE_TOOL, highlight_id="i2")
+        assert list(ONE_TOOL.loc[emphasised, "id"]) == ["i2"]
+
+    def test_an_unknown_id_emphasises_everything(self):
+        assert resolve_emphasis(CROSS_TOOL, highlight_id="nope").all()
+
+    def test_empty_frame_returns_empty(self):
+        assert len(resolve_emphasis(pd.DataFrame())) == 0
+
+
+class TestInDepthPlots:
+    def _plots(self, df, **kwargs):
+        return DeNovoPlotGenerator().generate_in_depth_plots(df, **kwargs)
+
+    def test_all_five_plots_are_produced(self):
+        plots = self._plots(CROSS_TOOL)
+        assert set(plots) == {
+            "ptm_overview",
+            "ptm_specific",
+            "spectrum_feature",
+            "species_overview",
+            "in_fasta_overview",
+        }
+
+    def test_traces_are_named_per_datapoint_not_per_tool(self):
+        plots = self._plots(ONE_TOOL)
+        names = [trace.name for trace in plots["ptm_overview"].data]
+        assert names == ["InstaNovo #1", "InstaNovo #2", "InstaNovo #3"]
+
+    def test_in_fasta_draws_one_bar_per_datapoint(self):
+        # The bug this guards: with the tool name on the x axis, several runs of one tool landed
+        # on the same category and Plotly summed their bars into a single stack above 100%.
+        plots = self._plots(ONE_TOOL)
+        bars = plots["in_fasta_overview"].data
+        assert len(bars[0].x) == len(ONE_TOOL)
+        assert len(set(bars[0].x)) == len(ONE_TOOL)
+        totals = [sum(trace.y[i] for trace in bars) for i in range(len(ONE_TOOL))]
+        assert all(total == pytest.approx(1.0) for total in totals)
+
+    def test_in_fasta_used_to_collapse_repeat_submissions(self):
+        # Directly: three runs of one tool must not produce one bar.
+        plots = self._plots(ONE_TOOL)
+        assert len(plots["in_fasta_overview"].data[0].x) != 1
+
+    def test_spectrum_feature_keeps_its_bins_in_data_order(self):
+        plots = self._plots(CROSS_TOOL)
+        fig = plots["spectrum_feature"]["Peptide Length"]["mass"]
+        lines = [t for t in fig.data if t.type == "scatter"]
+        assert list(lines[0].x) == ["7", "8", "9"]
+
+    def test_the_spectrum_count_panel_is_present_once(self):
+        plots = self._plots(CROSS_TOOL)
+        fig = plots["spectrum_feature"]["Peptide Length"]["mass"]
+        assert len([t for t in fig.data if t.type == "bar"]) == 1
+
+    def test_evaluation_type_selects_the_rate(self):
+        gen = DeNovoPlotGenerator()
+        mass = gen.plot_species_overview(CROSS_TOOL, evaluation_type="mass")
+        exact = gen.plot_species_overview(CROSS_TOOL, evaluation_type="exact")
+        mass_y = [t.y for t in mass.data if t.type == "scatter"][0]
+        exact_y = [t.y for t in exact.data if t.type == "scatter"][0]
+        assert mass_y != exact_y
+
+    def test_a_category_a_datapoint_lacks_breaks_its_line(self):
+        df = CROSS_TOOL.copy()
+        trimmed = copy.deepcopy(df.at[1, "results"])
+        del trimmed["in_depth"]["Species"]["Mus-musculus"]
+        df.at[1, "results"] = trimmed
+        fig = DeNovoPlotGenerator().plot_species_overview(df)
+        lines = [t for t in fig.data if t.type == "scatter"]
+        assert None in list(lines[1].y)
+        assert lines[1].connectgaps is False
+
+    def test_highlighting_dims_the_rest(self):
+        plots = self._plots(ONE_TOOL, highlight_id="i2")
+        opacities = [t.opacity for t in plots["ptm_overview"].data]
+        assert sum(1 for o in opacities if o > 0.9) == 1
+
+    def test_label_style_flows_into_every_plot(self):
+        plots = self._plots(ONE_TOOL, label_style="params")
+        names = [trace.name for trace in plots["ptm_overview"].data]
+        # The params style names the fields that differ within the tool, and stops as soon as the
+        # labels are unique: decoding strategy alone separates these three, so the beam count is
+        # left out rather than lengthening every label for nothing.
+        assert names == [
+            "InstaNovo (knapsack beam search)",
+            "InstaNovo (beam search)",
+            "InstaNovo (greedy search)",
+        ]
+        # The same labels reach the other figures, so one selection reads identically in all five.
+        assert list(plots["in_fasta_overview"].data[0].x) == names
+        species = [t for t in plots["species_overview"]["mass"].data if t.type == "scatter"]
+        assert [t.name for t in species] == names
+
+    def test_custom_labels_flow_into_every_plot(self):
+        plots = self._plots(ONE_TOOL, label_style="custom", custom_labels={0: "my run"})
+        assert plots["ptm_overview"].data[0].name == "my run"
+        assert plots["in_fasta_overview"].data[0].x[0] == "my run"
+
+    def test_an_empty_selection_builds_every_plot(self):
+        plots = self._plots(CROSS_TOOL.iloc[0:0])
+        assert len(plots) == 5
+
+    def test_a_datapoint_without_in_depth_blocks_is_skipped_not_fatal(self):
+        df = CROSS_TOOL.copy()
+        df.at[1, "results"] = {"peptide": {}, "aa": {}, "in_depth": {}}
+        plots = self._plots(df)
+        assert len(plots["ptm_overview"].data) == 2
+        assert len(plots["in_fasta_overview"].data[0].x) == 2
+
+    def test_a_modification_a_datapoint_never_recorded_is_skipped(self):
+        df = CROSS_TOOL.copy()
+        trimmed = copy.deepcopy(df.at[1, "results"])
+        del trimmed["in_depth"]["PTM"]["Q-Deamidation"]
+        df.at[1, "results"] = trimmed
+        plots = self._plots(df)
+        assert len(plots["ptm_overview"].data[1].x) == 3

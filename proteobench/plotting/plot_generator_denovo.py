@@ -636,6 +636,13 @@ MUTED_CURVE_OPACITY = 0.18
 #: Opacity of a datapoint belonging to a tool other than the one currently highlighted.
 DIMMED_OPACITY = 0.12
 
+#: Line and marker styling for the in-depth plots, keyed by whether the datapoint is emphasised.
+#: With nothing highlighted every datapoint is emphasised, so the figure reads as it did before.
+_IN_DEPTH_LINE_EMPHASIS = {
+    True: {"width": 2.6, "size": 7, "opacity": 0.95},
+    False: {"width": 1.2, "size": 5, "opacity": DIMMED_OPACITY + 0.06},
+}
+
 
 def resolve_coloured_datapoints(
     result_df: pd.DataFrame,
@@ -698,6 +705,109 @@ def resolve_coloured_datapoints(
             continue
         coloured.at[idx] = best_by_tool.get(tool) == idx
     return coloured
+
+
+def assign_datapoint_colors(
+    result_df: pd.DataFrame,
+    software_colors: Optional[Mapping[str, str]] = None,
+    ranks: Optional[pd.Series] = None,
+    evaluation_type: str = "mass",
+    ambiguity_combo: Optional[str] = None,
+) -> pd.Series:
+    """
+    Give every datapoint in a selection a colour, shading only where that helps.
+
+    Which rule applies follows from the selection itself, so no caller has to declare a mode:
+
+    - **Several tools selected.** Hue is doing its original job, telling tools apart, so each
+      datapoint simply takes its tool's colour. A shade per datapoint would compete with exactly
+      the comparison a cross-tool selection exists to make.
+    - **One tool selected.** Every mark belongs to that tool, so hue is free to carry the
+      datapoint instead: each run takes the tool's hue at a lightness set by its rank, best
+      darkest, via :func:`shade_within_tool`.
+
+    Parameters
+    ----------
+    result_df : pd.DataFrame
+        The selected datapoints. Must carry ``software_name``.
+    software_colors : Mapping, optional
+        Tool name to colour. Defaults to :data:`SOFTWARE_COLORS`.
+    ranks : pd.Series, optional
+        Precomputed ranks from :func:`rank_within_tools`, reused when the caller already has
+        them. Computed here when omitted.
+    evaluation_type : str
+        Evaluation type used when ranks have to be computed.
+    ambiguity_combo : str, optional
+        Exact-mode ambiguity combination used when ranks have to be computed.
+
+    Returns
+    -------
+    pd.Series
+        Colours aligned to ``result_df.index``.
+    """
+    palette = SOFTWARE_COLORS if software_colors is None else software_colors
+    if len(result_df) == 0:
+        return pd.Series([], dtype=str)
+    software = (
+        result_df["software_name"].astype(str)
+        if "software_name" in result_df.columns
+        else pd.Series("Custom", index=result_df.index)
+    )
+    base = pd.Series([palette.get(software.at[idx], "gray") for idx in result_df.index], index=result_df.index)
+    if software.nunique() != 1:
+        return base
+
+    if ranks is None:
+        ranks, _ = rank_within_tools(result_df, evaluation_type, ambiguity_combo)
+    ordered = sorted(result_df.index, key=lambda idx: (int(ranks.at[idx]) if idx in ranks.index else 0))
+    count = len(ordered)
+    return pd.Series(
+        {idx: shade_within_tool(base.at[idx], position, count) for position, idx in enumerate(ordered)},
+        dtype=object,
+    ).reindex(result_df.index)
+
+
+def resolve_emphasis(result_df: pd.DataFrame, highlight_id: Optional[str] = None) -> pd.Series:
+    """
+    Decide which datapoints are emphasised while one of them is highlighted.
+
+    The granularity follows the selection, matching :func:`assign_datapoint_colors`. Across
+    several tools, highlighting one mark raises every mark of that software, which is what a
+    cross-tool reader wants and what the main scatter does. Within a single tool that rule would
+    raise the whole selection and say nothing, so it narrows to the one datapoint.
+
+    Parameters
+    ----------
+    result_df : pd.DataFrame
+        The selected datapoints. Must carry ``software_name``; ``id`` is used when present.
+    highlight_id : str, optional
+        ProteoBench ID of the highlighted datapoint. ``None`` means nothing is highlighted.
+
+    Returns
+    -------
+    pd.Series
+        Boolean Series aligned to ``result_df.index``. All True when nothing is highlighted or
+        the ID is not found, so callers can dim on ``not emphasised`` unconditionally.
+    """
+    if len(result_df) == 0:
+        return pd.Series([], dtype=bool)
+    everything = pd.Series(True, index=result_df.index, dtype=bool)
+    if not highlight_id or "id" not in result_df.columns:
+        return everything
+
+    ids = result_df["id"].astype(str)
+    matches = ids == str(highlight_id)
+    if not matches.any():
+        return everything
+
+    software = (
+        result_df["software_name"].astype(str)
+        if "software_name" in result_df.columns
+        else pd.Series("Custom", index=result_df.index)
+    )
+    if software.nunique() == 1:
+        return matches
+    return software == software[matches].iloc[0]
 
 
 def _ambiguity_combo_for(evaluation_type: str, allow_il: bool, allow_deamidation: bool) -> Optional[str]:
@@ -1353,6 +1463,12 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             - mod_label: str - specific PTM label for detailed plot
             - feature: str - spectrum feature to plot
             - evaluation_type: str - evaluation type ("mass" or "exact")
+            - label_style: str - one of LABEL_STYLES, naming each datapoint. "index" is the tool
+              plus its rank within that tool, "params" spells out the fields that differ between
+              a tool's submissions, "custom" uses what the viewer typed.
+            - custom_labels: Mapping - index to label, for the "custom" style
+            - highlight_id: str - ProteoBench ID to emphasise. Across several tools this raises
+              every datapoint of that software; within one tool it raises just that datapoint.
 
         Returns
         -------
@@ -1379,16 +1495,23 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             "software_colors",
             SOFTWARE_COLORS,
         )
+        # Identity options, applied uniformly to every in-depth figure so one selection reads the
+        # same way whichever plot it is looked at in.
+        identity = {
+            "label_style": kwargs.get("label_style", "index"),
+            "custom_labels": kwargs.get("custom_labels"),
+            "highlight_id": kwargs.get("highlight_id"),
+        }
 
         # Generate PTM plots
         plots["ptm_overview"] = self.plot_ptm_overview(
-            performance_data, mod_labels=mod_labels, software_colors=software_colors
+            performance_data, mod_labels=mod_labels, software_colors=software_colors, **identity
         )
 
         plots["ptm_specific"] = {}
         for mod_label in mod_labels:
             plots["ptm_specific"][mod_label] = self.plot_ptm_specific(
-                performance_data, mod_label=mod_label, software_colors=software_colors
+                performance_data, mod_label=mod_label, software_colors=software_colors, **identity
             )
 
         # Generate spectrum feature plot
@@ -1397,18 +1520,22 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             plots["spectrum_feature"][feature] = {}
             for evaluation_type in evaluation_types:
                 plots["spectrum_feature"][feature][evaluation_type] = self.plot_spectrum_feature(
-                    performance_data, feature=feature, evaluation_type=evaluation_type, software_colors=software_colors
+                    performance_data,
+                    feature=feature,
+                    evaluation_type=evaluation_type,
+                    software_colors=software_colors,
+                    **identity,
                 )
 
         # Generate species plot
         plots["species_overview"] = {}
         for evaluation_type in evaluation_types:
             plots["species_overview"][evaluation_type] = self.plot_species_overview(
-                performance_data, evaluation_type=evaluation_type, software_colors=software_colors
+                performance_data, evaluation_type=evaluation_type, software_colors=software_colors, **identity
             )
 
         # Generate FASTA-category overview plot
-        plots["in_fasta_overview"] = self.plot_infasta_overview(performance_data)
+        plots["in_fasta_overview"] = self.plot_infasta_overview(performance_data, **identity)
 
         return plots
 
@@ -1581,19 +1708,100 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             evaluated on exact residue-level matches.
             """
 
+    @staticmethod
+    def _in_depth_styling(
+        benchmark_metrics_df: pd.DataFrame,
+        software_colors: Dict[str, str],
+        **kwargs,
+    ) -> Tuple[pd.Series, pd.Series, pd.Series]:
+        """
+        Labels, colours and emphasis for one in-depth figure.
+
+        Every in-depth plot identifies its marks the same way, so the three decisions are made
+        once here: what each datapoint is called, what colour it takes (shaded only when the
+        selection is a single tool), and which datapoints are emphasised while one is
+        highlighted.
+
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            The selected datapoints.
+        software_colors : Dict[str, str]
+            Colour per tool.
+        **kwargs : dict
+            ``label_style``, ``custom_labels``, ``highlight_id`` and ``evaluation_type``.
+
+        Returns
+        -------
+        tuple of (pd.Series, pd.Series, pd.Series)
+            Display labels, colours, and a boolean emphasis mask, all aligned to the frame's
+            index.
+        """
+        evaluation_type = kwargs.get("evaluation_type", "mass")
+        ranks, _ = rank_within_tools(benchmark_metrics_df, evaluation_type)
+        labels = build_display_labels(
+            benchmark_metrics_df,
+            style=kwargs.get("label_style", "index"),
+            ranks=ranks,
+            custom_labels=kwargs.get("custom_labels"),
+        )
+        colors = assign_datapoint_colors(benchmark_metrics_df, software_colors, ranks=ranks)
+        emphasised = resolve_emphasis(benchmark_metrics_df, kwargs.get("highlight_id"))
+        return labels, colors, emphasised
+
     def plot_ptm_overview(
         self,
         benchmark_metrics_df: pd.DataFrame,
         mod_labels: List[str],
         software_colors: Dict[str, str] = SOFTWARE_COLORS,
+        **kwargs,
     ):
+        """
+        Plot the correct share of each modification's ground-truth occurrences, per datapoint.
+
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            The selected datapoints.
+        mod_labels : List[str]
+            Modifications to plot, in display order.
+        software_colors : Dict[str, str]
+            Colour per tool.
+        **kwargs : dict
+            ``label_style``, ``custom_labels`` and ``highlight_id``, as documented on
+            :meth:`generate_in_depth_plots`.
+
+        Returns
+        -------
+        go.Figure
+            One line per datapoint over the modifications.
+        """
+        labels, colors, emphasised = self._in_depth_styling(benchmark_metrics_df, software_colors, **kwargs)
         fig = go.Figure()
-        for i, row in benchmark_metrics_df.iterrows():
-            x, y = self.get_modification_scores(row["results"]["in_depth"]["PTM"], mod_labels=mod_labels)
-            tool = row["software_name"]
+        for idx, row in benchmark_metrics_df.iterrows():
+            try:
+                ptm_data = row["results"]["in_depth"]["PTM"]
+            except (KeyError, TypeError):
+                # Legacy datapoint submitted before this metric existed, skipped the way
+                # plot_infasta_overview already skips it and the main plot hides datapoints
+                # missing newer fields.
+                continue
+            x, y = self.get_modification_scores(ptm_data, mod_labels=mod_labels)
+            style = _IN_DEPTH_LINE_EMPHASIS[bool(emphasised.at[idx])]
 
             fig.add_trace(
-                go.Scatter(x=x, y=y, mode="lines+markers", name=tool, marker=dict(color=software_colors[tool]))
+                go.Scatter(
+                    x=x,
+                    y=y,
+                    mode="lines+markers",
+                    name=labels.at[idx],
+                    legendgroup=str(row["software_name"]),
+                    line=dict(color=colors.at[idx], width=style["width"]),
+                    marker=dict(color=colors.at[idx], size=style["size"]),
+                    opacity=style["opacity"],
+                    customdata=[row.get("id")] * len(x) if "id" in benchmark_metrics_df.columns else None,
+                    hovertemplate=f"<b>{labels.at[idx]}</b><br>%{{x}}<br>Correct of ground truth: %{{y:.3f}}<extra></extra>",
+                )
             )
 
         fig.update_layout(
@@ -1612,6 +1820,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df,
         mod_label,
         software_colors: Dict[str, str] = SOFTWARE_COLORS,
+        **kwargs,
     ):
         fig = go.Figure()
 
@@ -1634,15 +1843,39 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             )
         )
 
-        for i, row in benchmark_metrics_df.iterrows():
-            ptm_data = row["results"]["in_depth"]["PTM"]
+        labels, colors, emphasised = self._in_depth_styling(benchmark_metrics_df, software_colors, **kwargs)
+        for idx, row in benchmark_metrics_df.iterrows():
+            try:
+                ptm_data = row["results"]["in_depth"]["PTM"]
+                mod_entry = ptm_data[mod_label]
+            except (KeyError, TypeError):
+                continue  # legacy datapoint, or a modification this one never recorded
 
             # To make division by 0 impossible
 
-            x = ptm_data[mod_label]["correct_gt"] / (ptm_data[mod_label]["counts_gt"] + EPSILON)
-            y = ptm_data[mod_label]["correct_dn"] / (ptm_data[mod_label]["counts_dn"] + EPSILON)
-            tool = row["software_name"]
-            fig.add_trace(go.Scatter(x=[x], y=[y], name=tool, marker=dict(color=software_colors[tool])))
+            x = mod_entry["correct_gt"] / (mod_entry["counts_gt"] + EPSILON)
+            y = mod_entry["correct_dn"] / (mod_entry["counts_dn"] + EPSILON)
+            style = _IN_DEPTH_LINE_EMPHASIS[bool(emphasised.at[idx])]
+            fig.add_trace(
+                go.Scatter(
+                    x=[x],
+                    y=[y],
+                    mode="markers",
+                    name=labels.at[idx],
+                    legendgroup=str(row["software_name"]),
+                    marker=dict(
+                        color=colors.at[idx],
+                        size=style["size"] + 6,
+                        line=dict(color="rgba(0,0,0,0.45)", width=1),
+                    ),
+                    opacity=style["opacity"],
+                    customdata=[row.get("id")] if "id" in benchmark_metrics_df.columns else None,
+                    hovertemplate=(
+                        f"<b>{labels.at[idx]}</b><br>Ground-truth precision: %{{x:.3f}}"
+                        "<br>De novo precision: %{y:.3f}<extra></extra>"
+                    ),
+                )
+            )
 
         # Short corner descriptions, condensed from Description.ptm_specific's
         # "How to interpret the plot" section.
@@ -1678,6 +1911,8 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         y = []
 
         for mod_label in mod_labels:
+            if mod_label not in mod_dict:
+                continue  # a modification this datapoint never recorded
             x.append(mod_label)
             # EPSILON must guard the denominator (as plot_ptm_specific does), not be added
             # to the final ratio -- `a / b + EPSILON` is `(a / b) + EPSILON` in Python, which
@@ -1687,250 +1922,278 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             y.append(mod_dict[mod_label]["correct_gt"] / (mod_dict[mod_label]["counts_gt"] + EPSILON))
         return x, y
 
+    def _plot_binned_in_depth(
+        self,
+        benchmark_metrics_df: pd.DataFrame,
+        block: str,
+        group: Optional[str],
+        x_title: str,
+        subplot_title: str,
+        evaluation_type: str,
+        software_colors: Dict[str, str],
+        **kwargs,
+    ) -> go.Figure:
+        """
+        Draw the precision-per-category view shared by the spectrum-feature and species plots.
+
+        Both are the same figure over different categories: one line per datapoint across the
+        categories, with the spectrum count per category underneath. Factored into one method so
+        the labelling and colouring rules cannot drift apart between them.
+
+        The per-datapoint dicts are read directly rather than melted through a DataFrame and
+        recovered with ``eval``, which is how this previously round-tripped its values through
+        strings. A category a datapoint has no entry for yields no point, so its line breaks
+        there instead of being drawn through zero.
+
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            The selected datapoints.
+        block : str
+            In-depth block to read, ``"Spectrum"`` or ``"Species"``.
+        group : str, optional
+            Sub-key within the block, the feature name for ``"Spectrum"``; ``None`` for
+            ``"Species"``, whose categories sit directly under the block.
+        x_title : str
+            Axis title for the category axis.
+        subplot_title : str
+            Title above the precision panel.
+        evaluation_type : str
+            ``"mass"`` or ``"exact"``, selecting which rate to plot.
+        software_colors : Dict[str, str]
+            Colour per tool.
+        **kwargs : dict
+            ``label_style``, ``custom_labels`` and ``highlight_id``.
+
+        Returns
+        -------
+        go.Figure
+            Two stacked panels: precision per category, and spectra per category.
+        """
+        fig = make_subplots(
+            rows=2,
+            cols=1,
+            shared_xaxes=True,
+            row_heights=[0.8, 0.2],
+            vertical_spacing=0,
+            subplot_titles=(subplot_title, None),
+        )
+
+        def entries_for(row: pd.Series) -> dict:
+            """The category dict of one datapoint, or empty when the block is absent."""
+            try:
+                node = row["results"]["in_depth"][block]
+            except (KeyError, TypeError):
+                return {}
+            if group is not None:
+                node = node.get(group, {}) if isinstance(node, dict) else {}
+            return node if isinstance(node, dict) else {}
+
+        # Categories in first-seen order across the selection, which is the order the previous
+        # DataFrame-of-dicts produced and the order the stored dicts are written in.
+        categories: List[str] = []
+        for _, row in benchmark_metrics_df.iterrows():
+            for key in entries_for(row):
+                if str(key) not in categories:
+                    categories.append(str(key))
+
+        if len(benchmark_metrics_df) == 0 or not categories:
+            fig.add_trace(go.Scatter())
+            fig.add_trace(go.Bar())
+            fig.update_layout(
+                height=600,
+                width=600,
+                xaxis=dict(title=None, color="black"),
+                yaxis=dict(title="Precision", color="black"),
+                xaxis2=dict(title=x_title, color="black"),
+                yaxis2=dict(title="Number of Spectra", color="black"),
+                margin=dict(t=50),
+            )
+            fig.update_yaxes(autorange="reversed", row=2, col=1)
+            return fig
+
+        labels, colors, emphasised = self._in_depth_styling(
+            benchmark_metrics_df, software_colors, evaluation_type=evaluation_type, **kwargs
+        )
+
+        counts_per_category: Dict[str, List[float]] = {category: [] for category in categories}
+        for idx, row in benchmark_metrics_df.iterrows():
+            entries = entries_for(row)
+            y_values: List[Optional[float]] = []
+            for category in categories:
+                entry = entries.get(category)
+                value = entry.get(evaluation_type) if isinstance(entry, dict) else None
+                y_values.append(
+                    float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+                )
+                if isinstance(entry, dict) and isinstance(entry.get("n_spectra"), (int, float)):
+                    counts_per_category[category].append(float(entry["n_spectra"]))
+
+            style = _IN_DEPTH_LINE_EMPHASIS[bool(emphasised.at[idx])]
+            fig.add_trace(
+                go.Scatter(
+                    x=categories,
+                    y=y_values,
+                    mode="lines+markers",
+                    name=labels.at[idx],
+                    legendgroup=str(row["software_name"]),
+                    line=dict(color=colors.at[idx], width=style["width"]),
+                    marker=dict(color=colors.at[idx], size=style["size"]),
+                    opacity=style["opacity"],
+                    connectgaps=False,
+                    customdata=[row.get("id")] * len(categories) if "id" in benchmark_metrics_df.columns else None,
+                    hovertemplate=f"<b>{labels.at[idx]}</b><br>%{{x}}<br>Precision: %{{y:.3f}}<extra></extra>",
+                ),
+                row=1,
+                col=1,
+            )
+
+        # Median spectrum count per category, as before. Note that this panel does not actually
+        # respond to the selection: the spectrum count is a property of the benchmark set, so it
+        # is identical for every datapoint, which the hover text now states rather than implying
+        # a per-tool breakdown.
+        bar_counts = [float(np.median(counts_per_category[c])) if counts_per_category[c] else 0.0 for c in categories]
+        hovertexts = [
+            f"{category}<br>Spectra in the benchmark set: {int(count)}<br>"
+            "Identical for every datapoint, so this panel does not change with the selection"
+            for category, count in zip(categories, bar_counts)
+        ]
+        fig.add_trace(
+            go.Bar(
+                x=categories,
+                y=bar_counts,
+                hovertext=hovertexts,
+                hoverinfo="text",
+                marker=dict(color="gray"),
+                showlegend=False,
+            ),
+            row=2,
+            col=1,
+        )
+
+        fig.update_layout(
+            height=600,
+            width=600,
+            xaxis=dict(title=None, color="black"),
+            yaxis=dict(title="Precision", color="black"),
+            xaxis2=dict(title=x_title, color="black"),
+            yaxis2=dict(title="Number of Spectra", color="black"),
+            margin=dict(t=50),
+        )
+        fig.update_yaxes(autorange="reversed", row=2, col=1)
+        return fig
+
     def plot_spectrum_feature(
         self,
         benchmark_metrics_df,
         feature,
         evaluation_type="mass",
         software_colors=SOFTWARE_COLORS,
+        **kwargs,
     ):
-        # Create a subplot with 2 rows, shared x-axis
-        fig = make_subplots(
-            rows=2,
-            cols=1,
-            shared_xaxes=True,
-            row_heights=[0.8, 0.2],
-            vertical_spacing=0,
-            subplot_titles=(f"{feature} vs Precision", None),
+        """
+        Plot precision across the bins of one spectrum feature, per datapoint.
+
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            The selected datapoints.
+        feature : str
+            Spectrum feature to plot, a key of ``results["in_depth"]["Spectrum"]``.
+        evaluation_type : str
+            ``"mass"`` or ``"exact"``.
+        software_colors : Dict[str, str]
+            Colour per tool.
+        **kwargs : dict
+            ``label_style``, ``custom_labels`` and ``highlight_id``.
+
+        Returns
+        -------
+        go.Figure
+            Precision per bin, with the spectrum count per bin underneath.
+        """
+        return self._plot_binned_in_depth(
+            benchmark_metrics_df,
+            block="Spectrum",
+            group=feature,
+            x_title=str(feature),
+            subplot_title=f"{feature} vs Precision",
+            evaluation_type=evaluation_type,
+            software_colors=software_colors,
+            **kwargs,
         )
-        if len(benchmark_metrics_df) == 0:
-            fig.add_trace(go.Scatter())
-            fig.add_trace(go.Bar())
-            fig.update_layout(
-                height=600,
-                width=600,
-                xaxis=dict(title=None, color="black"),
-                yaxis=dict(title="Precision", color="black"),
-                xaxis2=dict(title=f"{feature}", color="black"),
-                yaxis2=dict(title="Number of Spectra", color="black"),
-                margin=dict(t=50),
-            )
-            fig.update_yaxes(
-                autorange="reversed",
-                # tickvals=[-v for v in sorted(set(df['y_bar']))],
-                # ticktext=[v for v in sorted(set(df['y_bar']))],
-                row=2,
-                col=1,
-            )
-            return fig
-
-        ### Reformat df
-        benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
-
-        dtps_to_plot = [x["in_depth"]["Spectrum"][feature] for x in benchmark_metrics_df["results"].tolist()]
-        # Stringify the keys of the datapoint to plot and convert to dataframe
-        df = pd.DataFrame([{str(k): v for k, v in i.items()} for i in dtps_to_plot])
-
-        df = df.fillna(str({"exact": 0.0, "mass": 0.0, "n_spectra": 0}))
-        df = (
-            pd.concat([df, benchmark_metrics_df[["software_name", "id"]]], axis=1)
-            .melt(id_vars=["id", "software_name"])
-            .rename(columns={"variable": feature, "value": "metrics"})
-        )
-        df["metrics"] = df["metrics"].apply(lambda x: eval(x) if isinstance(x, str) else x)
-
-        ### Create the scatter-lineplot of the feature
-        for dtp_id in df["id"].unique():
-            df_dtp = df.loc[df["id"] == dtp_id]
-            tool = df_dtp.reset_index().loc[0, "software_name"]
-
-            fig.add_trace(
-                go.Scatter(
-                    x=df_dtp[feature].tolist(),
-                    y=df_dtp["metrics"].apply(lambda x: x[evaluation_type]).tolist(),
-                    name=tool,
-                    marker=dict(color=software_colors.get(tool, "gray")),
-                    mode="lines+markers",
-                ),
-                row=1,
-                col=1,
-            )
-
-        ### Create the bar chart
-        # Extract the counts as medians for all plotted points
-        bar_data = df.groupby(feature)["metrics"].apply(lambda x: np.median([i["n_spectra"] for i in x]))
-        bar_counts = bar_data.tolist()
-        bar_xaxis = bar_data.index.tolist()
-
-        # Construct hover text
-        def create_hovertext(df: pd.DataFrame):
-            text = "Number of spectra for each tool"
-            for i, (id, metric) in df[["id", "metrics"]].iterrows():
-                text += f'<br>{id}: {metric["n_spectra"]}'
-            return text
-
-        hovertexts = df.groupby(feature).apply(lambda x: create_hovertext(x)).tolist()
-
-        # Construct the barchart
-        fig.add_trace(
-            go.Bar(x=bar_xaxis, y=bar_counts, hovertext=hovertexts, marker=dict(color="gray"), showlegend=False),
-            row=2,
-            col=1,
-        )
-
-        fig.update_layout(
-            height=600,
-            width=600,
-            xaxis=dict(title=None, color="black"),
-            yaxis=dict(title="Precision", color="black"),
-            xaxis2=dict(title=f"{feature}", color="black"),
-            yaxis2=dict(title="Number of Spectra", color="black"),
-            margin=dict(t=50),
-        )
-        fig.update_yaxes(
-            autorange="reversed",
-            # tickvals=[-v for v in sorted(set(df['y_bar']))],
-            # ticktext=[v for v in sorted(set(df['y_bar']))],
-            row=2,
-            col=1,
-        )
-
-        return fig
 
     def plot_species_overview(
         self,
         benchmark_metrics_df,
         evaluation_type="mass",
         software_colors=SOFTWARE_COLORS,
+        **kwargs,
     ):
-        # Create a subplot with 2 rows, shared x-axis
-        fig = make_subplots(
-            rows=2,
-            cols=1,
-            shared_xaxes=True,
-            row_heights=[0.8, 0.2],
-            vertical_spacing=0,
-            subplot_titles=("Species vs Precision", None),
-        )
-        if len(benchmark_metrics_df) == 0:
-            fig.add_trace(go.Scatter())
-            fig.add_trace(go.Bar())
-            fig.update_layout(
-                height=600,
-                width=600,
-                xaxis=dict(title=None, color="black"),
-                yaxis=dict(title="Precision", color="black"),
-                xaxis2=dict(title="Species", color="black"),
-                yaxis2=dict(title="Number of Spectra", color="black"),
-                margin=dict(t=50),
-            )
-            fig.update_yaxes(
-                autorange="reversed",
-                # tickvals=[-v for v in sorted(set(df['y_bar']))],
-                # ticktext=[v for v in sorted(set(df['y_bar']))],
-                row=2,
-                col=1,
-            )
-            return fig
-
-        benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
-
-        df = (
-            pd.DataFrame([x["in_depth"]["Species"] for x in benchmark_metrics_df["results"].tolist()])
-            .fillna(str({"exact": 0.0, "mass": 0.0, "n_spectra": 0}))
-            .map(lambda x: eval(x) if isinstance(x, str) else x)
-        )
-        df = (
-            pd.concat([df, benchmark_metrics_df[["software_name", "id"]]], axis=1)
-            .melt(id_vars=["id", "software_name"])
-            .rename(columns={"variable": "Species", "value": "metrics"})
-        )
-        df["metrics"] = df["metrics"].apply(lambda x: eval(x) if isinstance(x, str) else x)
-
-        ### Create the scatter-lineplot of the feature
-        for dtp_id in df["id"].unique():
-            df_dtp = df.loc[df["id"] == dtp_id]
-            tool = df_dtp.reset_index().loc[0, "software_name"]
-
-            fig.add_trace(
-                go.Scatter(
-                    x=df_dtp["Species"].tolist(),
-                    y=df_dtp["metrics"].apply(lambda x: x[evaluation_type]).tolist(),
-                    name=tool,
-                    marker=dict(color=software_colors.get(tool, "gray")),
-                    mode="lines+markers",
-                ),
-                row=1,
-                col=1,
-            )
-
-        ### Create the bar chart
-        # Extract the counts as medians for all plotted points
-        bar_data = df.groupby("Species")["metrics"].apply(lambda x: np.median([i["n_spectra"] for i in x]))
-        bar_counts = bar_data.tolist()
-        bar_xaxis = bar_data.index.tolist()
-
-        # Construct hover text
-        def create_hovertext(df: pd.DataFrame):
-            text = "Number of spectra for each tool"
-            for i, (id, metric) in df[["id", "metrics"]].iterrows():
-                text += f'<br>{id}: {metric["n_spectra"]}'
-            return text
-
-        hovertexts = df.groupby("Species").apply(lambda x: create_hovertext(x)).tolist()
-
-        # Construct the barchart
-        fig.add_trace(
-            go.Bar(x=bar_xaxis, y=bar_counts, hovertext=hovertexts, marker=dict(color="gray"), showlegend=False),
-            row=2,
-            col=1,
-        )
-
-        fig.update_layout(
-            height=600,
-            width=600,
-            xaxis=dict(title=None, color="black"),
-            yaxis=dict(title="Precision", color="black"),
-            xaxis2=dict(title="Species", color="black"),
-            yaxis2=dict(title="Number of Spectra", color="black"),
-            margin=dict(t=50),
-        )
-        fig.update_yaxes(
-            autorange="reversed",
-            # tickvals=[-v for v in sorted(set(df['y_bar']))],
-            # ticktext=[v for v in sorted(set(df['y_bar']))],
-            row=2,
-            col=1,
-        )
-        return fig
-
-    def plot_infasta_overview(self, benchmark_metrics_df: pd.DataFrame) -> go.Figure:
         """
-        Stacked bar chart of the FASTA-category breakdown (correct / in FASTA / not in FASTA)
-        for each datapoint, one bar per tool. Reads the per-datapoint proportions precomputed
+        Plot precision per species, per datapoint.
+
+        Parameters
+        ----------
+        benchmark_metrics_df : pd.DataFrame
+            The selected datapoints.
+        evaluation_type : str
+            ``"mass"`` or ``"exact"``.
+        software_colors : Dict[str, str]
+            Colour per tool.
+        **kwargs : dict
+            ``label_style``, ``custom_labels`` and ``highlight_id``.
+
+        Returns
+        -------
+        go.Figure
+            Precision per species, with the spectrum count per species underneath.
+        """
+        return self._plot_binned_in_depth(
+            benchmark_metrics_df,
+            block="Species",
+            group=None,
+            x_title="Species",
+            subplot_title="Species vs Precision",
+            evaluation_type=evaluation_type,
+            software_colors=software_colors,
+            **kwargs,
+        )
+
+    def plot_infasta_overview(self, benchmark_metrics_df: pd.DataFrame, **kwargs) -> go.Figure:
+        """
+        Stacked bar chart of the FASTA-category breakdown (correct / in FASTA / not in FASTA),
+        one bar per datapoint. Reads the per-datapoint proportions precomputed
         by `DenovoDatapoint.get_infasta_metrics` at benchmarking time (stored under
         `results["in_depth"]["in_FASTA"]`) -- never a live groupby over raw intermediate data,
         which isn't persisted for a submitted datapoint in the first place.
         """
         fig = go.Figure()
 
-        tools = []
+        labels, _, _ = self._in_depth_styling(benchmark_metrics_df, SOFTWARE_COLORS, **kwargs)
+
+        # One bar per datapoint, labelled per datapoint. Previously the x value was the tool
+        # name, so two submissions of one tool landed on the same category and Plotly summed
+        # their bars: a tool with three runs produced a single stack adding to 300%, with no
+        # indication that it was not one result. Identity has to be per datapoint here for the
+        # figure to be correct, not merely for it to be readable.
+        bar_labels = []
         proportions_per_category = {category: [] for category in INFASTA_CATEGORIES}
-        for _, row in benchmark_metrics_df.iterrows():
+        for idx, row in benchmark_metrics_df.iterrows():
             try:
                 infasta = row["results"]["in_depth"]["in_FASTA"]
             except (KeyError, TypeError):
                 # Legacy datapoint submitted before this metric existed -- silently skipped,
                 # matching how the main plot hides datapoints missing newer fields.
                 continue
-            tools.append(row["software_name"])
+            bar_labels.append(labels.at[idx])
             for category in INFASTA_CATEGORIES:
                 proportions_per_category[category].append(infasta["proportions"].get(category, 0.0))
 
         for category in INFASTA_CATEGORIES:
             fig.add_bar(
                 name=INFASTA_LABELS[category],
-                x=tools,
+                x=bar_labels,
                 y=proportions_per_category[category],
                 marker_color=INFASTA_COLORS[category],
                 marker_line_width=0,
@@ -1946,7 +2209,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             height=450,
             title=dict(text="De novo sequencing accuracy by tool", font=dict(size=16)),
             yaxis=dict(title="Proportion of spectra", tickformat=".0%", range=[0, 1]),
-            xaxis=dict(title="Tool"),
+            xaxis=dict(title="Datapoint", automargin=True),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title=None),
             margin=dict(t=70, b=50, l=60, r=30),
         )

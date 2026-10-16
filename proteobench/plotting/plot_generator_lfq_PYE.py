@@ -10,7 +10,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
 from proteobench.plotting.utils import create_kde_distribution_plot, fill_density_traces
 
 
@@ -36,10 +36,16 @@ OPACITY_MIN = 0.2
 OPACITY_MAX = 1.0
 
 
-class LFQPYEPlotGenerator(PlotGeneratorBase):
+class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
     """
     Plot generator for LFQ PYE (Plasma-Yeast-Ecoli) quantification modules.
     Used by plasma benchmarking modules that use human plasma, yeast, and E. coli species.
+
+    PYE is the same mixed-species LFQ benchmark as HYE with plasma as the background instead of
+    a human cell lysate, so it shares the intermediate schema (precursor ion, species, epsilon,
+    log_Intensity_mean_A/B, CV_A/B) and inherits the workflow-comparison contract from
+    :class:`LFQHYEPlotGenerator`. Nearly every plot is overridden below, because the plasma
+    module reports different metrics.
     """
 
     def __init__(self, y_axis_title: str = "Number of quantified spike-in precursors"):

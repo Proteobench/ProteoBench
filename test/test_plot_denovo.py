@@ -22,6 +22,10 @@ from proteobench.plotting.plot_generator_denovo import (
     build_workflow_labels,
     datapoint_score,
     assign_datapoint_colors,
+    classify_datapoint_columns,
+    columns_varying_within_tool,
+    default_hidden_columns,
+    ordered_datapoint_columns,
     rank_within_tools,
     resolve_coloured_datapoints,
     resolve_emphasis,
@@ -865,3 +869,130 @@ class TestInDepthPlots:
         df.at[1, "results"] = trimmed
         plots = self._plots(df)
         assert len(plots["ptm_overview"].data[1].x) == 3
+
+
+class TestClassifyDatapointColumns:
+    def _frame(self):
+        # decoding_strategy differs within InstaNovo; software_version differs only between
+        # tools; precursor_mass_tolerance is the same everywhere; id is an identifier.
+        return pd.DataFrame(
+            [
+                {
+                    "id": "i1",
+                    "intermediate_hash": "h1",
+                    "software_name": "InstaNovo",
+                    "software_version": "1.2.2",
+                    "decoding_strategy": "beam search",
+                    "precursor_mass_tolerance": "20 ppm",
+                    "tokens": None,
+                },
+                {
+                    "id": "i2",
+                    "intermediate_hash": "h2",
+                    "software_name": "InstaNovo",
+                    "software_version": "1.2.2",
+                    "decoding_strategy": "greedy search",
+                    "precursor_mass_tolerance": "20 ppm",
+                    "tokens": None,
+                },
+                {
+                    "id": "c1",
+                    "intermediate_hash": "h3",
+                    "software_name": "Casanovo",
+                    "software_version": "4.2.0",
+                    "decoding_strategy": "beam search",
+                    "precursor_mass_tolerance": "20 ppm",
+                    "tokens": None,
+                },
+            ]
+        )
+
+    def test_a_column_differing_within_a_tool_is_discriminating(self):
+        classes = classify_datapoint_columns(self._frame())
+        assert "decoding_strategy" in classes["discriminating"]
+
+    def test_a_column_constant_within_every_tool_is_contextual(self):
+        classes = classify_datapoint_columns(self._frame())
+        assert "software_version" in classes["contextual"]
+
+    def test_a_column_with_one_value_everywhere_is_uniform(self):
+        classes = classify_datapoint_columns(self._frame())
+        assert "precursor_mass_tolerance" in classes["uniform"]
+
+    def test_identifiers_are_held_apart_from_the_ranking(self):
+        # They are unique by construction, so ranking them on discrimination would put the two
+        # widest and least informative columns first.
+        classes = classify_datapoint_columns(self._frame())
+        assert set(classes["identifier"]) == {"id", "intermediate_hash"}
+        assert "id" not in classes["discriminating"]
+
+    def test_a_column_empty_everywhere_is_dropped(self):
+        classes = classify_datapoint_columns(self._frame())
+        assert "tokens" not in ordered_datapoint_columns(classes)
+
+    def test_software_name_is_never_a_column(self):
+        classes = classify_datapoint_columns(self._frame())
+        assert "software_name" not in ordered_datapoint_columns(classes)
+
+    def test_metric_payloads_are_never_columns(self):
+        df = self._frame()
+        df["results"] = [{} for _ in range(len(df))]
+        df["peptide_mass_auc"] = 0.5
+        classes = classify_datapoint_columns(df)
+        assert "results" not in ordered_datapoint_columns(classes)
+        assert "peptide_mass_auc" not in ordered_datapoint_columns(classes)
+
+    def test_order_is_discriminating_then_context_then_uniform_then_identifiers(self):
+        classes = classify_datapoint_columns(self._frame())
+        order = ordered_datapoint_columns(classes)
+        assert order.index("decoding_strategy") < order.index("software_version")
+        assert order.index("software_version") < order.index("precursor_mass_tolerance")
+        assert order.index("precursor_mass_tolerance") < order.index("id")
+
+    def test_the_default_hides_everything_but_the_discriminating_columns(self):
+        classes = classify_datapoint_columns(self._frame())
+        hidden = default_hidden_columns(classes)
+        assert "decoding_strategy" not in hidden
+        assert {"software_version", "precursor_mass_tolerance", "id", "intermediate_hash"} <= set(hidden)
+
+    def test_explicit_columns_are_honoured(self):
+        classes = classify_datapoint_columns(self._frame(), columns=["decoding_strategy"])
+        assert ordered_datapoint_columns(classes) == ["decoding_strategy"]
+
+    def test_an_empty_frame_classifies_without_raising(self):
+        classes = classify_datapoint_columns(pd.DataFrame(), columns=["id", "decoding_strategy"])
+        assert classes["identifier"] == ["id"]
+        assert classes["uniform"] == ["decoding_strategy"]
+
+
+class TestColumnsVaryingWithinTool:
+    def test_only_columns_with_two_distinct_values_count(self):
+        df = pd.DataFrame(
+            [
+                {"software_name": "InstaNovo", "a": "x", "b": "same"},
+                {"software_name": "InstaNovo", "a": "y", "b": "same"},
+            ]
+        )
+        assert columns_varying_within_tool(df, "InstaNovo", ["a", "b"]) == ["a"]
+
+    def test_blanks_do_not_count_as_a_second_value(self):
+        df = pd.DataFrame(
+            [
+                {"software_name": "InstaNovo", "a": "x"},
+                {"software_name": "InstaNovo", "a": None},
+            ]
+        )
+        assert columns_varying_within_tool(df, "InstaNovo", ["a"]) == []
+
+    def test_other_tools_are_ignored(self):
+        df = pd.DataFrame(
+            [
+                {"software_name": "InstaNovo", "a": "x"},
+                {"software_name": "Casanovo", "a": "y"},
+            ]
+        )
+        assert columns_varying_within_tool(df, "InstaNovo", ["a"]) == []
+
+    def test_a_missing_column_is_skipped(self):
+        df = pd.DataFrame([{"software_name": "InstaNovo"}])
+        assert columns_varying_within_tool(df, "InstaNovo", ["nope"]) == []

@@ -158,3 +158,4 @@ Modules in discussion
 * `Feature finding algorithms for MALDI MS imaging <https://github.com/orgs/Proteobench/discussions/1072>`__ — Benchmark feature finding algorithms for MALDI mass spectrometry imaging (MALDI-MSI) of tryptic peptides.
 * `Crosslink FDR validation <https://github.com/orgs/Proteobench/discussions/1095>`__ — Benchmark FDR evaluation on cross-linked peptides using a specific entrapment database.
 * `Peptide detectability predictors <https://github.com/orgs/Proteobench/discussions/971>`__ — Benchmark the performance of peptide detectability predictors.
+* `MBR performance estimation (DDA data) <https://github.com/orgs/Proteobench/discussions/1168>`__ — Benchmark the performance of match between run on DDA data.

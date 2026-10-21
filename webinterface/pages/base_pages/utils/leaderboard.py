@@ -37,8 +37,8 @@ def _read_submitters_from_repo(clone_dir: str) -> list[dict]:
                         "submitter_provider": data.get("submitter_provider", ""),
                     }
                 )
-        except Exception:
-            continue
+        except (OSError, json.JSONDecodeError, AttributeError) as e:
+            logger.warning(f"Leaderboard: skipping unreadable datapoint {fpath}: {e}")
     return records
 
 
@@ -55,27 +55,41 @@ def get_leaderboard_data() -> pd.DataFrame:
     pd.DataFrame
         DataFrame with columns: submitter_id, submitter_name,
         submitter_provider, submissions — sorted descending.
+
+    Raises
+    ------
+    RuntimeError
+        If none of the results repositories could be cloned.
     """
     from pages.utils.module_registry import get_all_data_repo_urls
     from proteobench.github.gh import GithubProteobotRepo
 
     repo_urls = get_all_data_repo_urls()
     all_records = []
+    failed = []
 
-    for repo_url in repo_urls:
-        try:
+    # A fresh directory per refresh: GithubProteobotRepo reuses existing clones without
+    # pulling, so a persistent directory would serve stale data forever.
+    with tempfile.TemporaryDirectory(prefix="pb_leaderboard_") as tmp_dir:
+        for repo_url in repo_urls:
             repo_name = repo_url.split("/")[-1].replace(".git", "")
-            clone_dir = os.path.join(tempfile.gettempdir(), "pb_leaderboard", repo_name)
-            gh = GithubProteobotRepo(
-                token=st.secrets.get("gh", {}).get("token_read"),
-                clone_dir=clone_dir,
-                proteobench_repo_name=f"Proteobench/{repo_name}",
-            )
-            gh.clone_repo()
+            clone_dir = os.path.join(tmp_dir, repo_name)
+            try:
+                gh = GithubProteobotRepo(
+                    token=st.secrets.get("gh", {}).get("token_read"),
+                    clone_dir=clone_dir,
+                    proteobench_repo_name=f"Proteobench/{repo_name}",
+                )
+                gh.clone_repo()
+            except Exception as e:
+                logger.warning(f"Leaderboard: could not clone {repo_name}, its submissions are not counted: {e}")
+                failed.append(repo_name)
+                continue
             all_records.extend(_read_submitters_from_repo(clone_dir))
-        except Exception as e:
-            logger.debug(f"Could not read repo {repo_url}: {e}")
-            continue
+
+    # Raising (not returning empty) keeps st.cache_data from caching the outage for an hour.
+    if repo_urls and len(failed) == len(repo_urls):
+        raise RuntimeError(f"Leaderboard: could not clone any results repository ({', '.join(failed)})")
 
     if not all_records:
         return pd.DataFrame(columns=["submitter_id", "submitter_name", "submitter_provider", "submissions"])

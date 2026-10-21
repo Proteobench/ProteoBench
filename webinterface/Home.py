@@ -436,7 +436,11 @@ def _render_leaderboard():
     """Render the top submitters leaderboard section."""
     from pages.base_pages.utils.leaderboard import get_leaderboard_data
 
-    leaderboard = get_leaderboard_data()
+    try:
+        leaderboard = get_leaderboard_data()
+    except RuntimeError:
+        st.caption("The submitter leaderboard is temporarily unavailable.")
+        return
 
     if leaderboard.empty:
         return

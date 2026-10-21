@@ -85,8 +85,12 @@ each provider.
 5. **Leaderboard**: `get_leaderboard_data()` clones each module's public
    `Proteobench/Results_*` repo, reads `submitter_id` out of every JSON file, and
    aggregates submission counts per submitter. Anonymous submissions (empty
-   `submitter_id`) are skipped. The result is cached for one hour
-   (`@st.cache_data(ttl=3600)`).
+   `submitter_id`) are skipped. Repositories are cloned into a fresh temporary
+   directory on every refresh, so newly merged datapoints appear after the cache
+   expires. The result is cached for one hour (`@st.cache_data(ttl=3600)`).
+   Repositories that fail to clone and unreadable JSON files are logged as
+   warnings and skipped. If no repository can be cloned, an error is raised (and
+   not cached) and the Home page shows a short "temporarily unavailable" notice.
 
 ## For PR reviewers
 

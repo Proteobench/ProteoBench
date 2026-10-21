@@ -358,6 +358,30 @@ def _load_custom(input_path: str) -> pd.DataFrame:
     return pd.read_csv(input_path, low_memory=False)
 
 
+def _load_peaks(input_path: str) -> pd.DataFrame:
+    """
+    Load a de novo output file in PEAKS format.
+
+    Parameters
+    ----------
+    input_path: str
+        The path to the output file
+
+    Returns
+    -------
+    pd.DataFrame
+        The loaded dataframe
+    """
+    df = pd.read_csv(input_path, low_memory=False)
+    # Drop unmappable entries
+    df = df[df["Scan"] != "-"]
+
+    df["local confidence (%)"] = df["local confidence (%)"].apply(lambda x: [float(i) for i in x.split()])
+    df["ALC (%)"] = df["ALC (%)"].astype(float)
+    df["Scan"] = df["Scan"].astype(int)
+    return df
+
+
 _LOAD_FUNCTIONS = {
     "AdaNovo": _load_adanovo,
     "Casanovo": _load_casanovo,
@@ -371,4 +395,5 @@ _LOAD_FUNCTIONS = {
     "PointNovo": _load_pointnovo,
     "SMSNet": _load_smsnet,
     "Custom": _load_custom,
+    "PEAKS": _load_peaks,
 }

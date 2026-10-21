@@ -21,7 +21,11 @@ from proteobench.exceptions import (
     ParseSettingsError,
     EntrapmentError,
 )
-from proteobench.io.parsing.parse_ion import _load_alphadia_entrapment, load_input_file
+from proteobench.io.parsing.parse_ion import (
+    _load_alphadia_entrapment,
+    _load_custom_entrapment,
+    load_input_file,
+)
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.modules.entrapment.entrapment_base_module import EntrapmentModule
@@ -125,6 +129,8 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
         try:
             if input_format == "AlphaDIA":
                 input_df = _load_alphadia_entrapment(input_file)
+            elif input_format == "Custom":
+                input_df = _load_custom_entrapment(input_file)
             else:
                 input_df = load_input_file(input_file, input_format, input_file_secondary)
         except pd.errors.ParserError as e:

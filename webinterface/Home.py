@@ -304,7 +304,7 @@ class StreamlitPageHome(StreamlitPage):
                 "Active modules",
                 get_n_modules(),
                 "Modules with a public benchmark you can explore or submit to today.",
-                "https://proteobench.readthedocs.io/en/stable/available-modules/",
+                "https://proteobench.readthedocs.io/en/stable/modules/",
             ),
             (
                 f"{_ICON_DIR}/module-construction.svg",

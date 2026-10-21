@@ -1,0 +1,23 @@
+[mapper]
+"Scan" = "spectrum_id"
+"Peptide" = "sequence"
+"ALC (%)" = "score"
+"local confidence (%)" = "aa_scores"
+
+[spectrum_id_mapper]
+
+[sequence_mapper]
+
+[modification_parser]
+"parse_column" = "sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\(([^)]+)\\)"
+"modification_dict" = {"(+57.02)" = "UNIMOD:4", "(+15.99)" = "UNIMOD:35", "(+.98)" = "UNIMOD:7"}
+
+[upload_info]
+"datapoint_file" = "*.csv"
+"datapoint_file_description" = "Upload the PEAKS Studio de novo output (probably called -de novo peptides.csv-)"
+"params_file" = ""
+"params_file_description" = ""

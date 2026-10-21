@@ -119,9 +119,7 @@ class VariablesDIAQuant:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/AIF"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/archived-modules/4-quant-lfq-ion-dia-aif/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-aif/"
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA/all_data_LFQ_Quant_DIA_AIF.tar.gz"
 
     title: str = "DIA Precursor quantification - AIF"

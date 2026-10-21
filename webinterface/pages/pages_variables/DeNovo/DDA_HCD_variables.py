@@ -22,6 +22,7 @@ class VariablesDDADeNovo:
 
     # TAB 1
     fig_metric: str = "fig_metric_dda_hcd_denovo"
+    fig_pc_curve: str = "fig_pc_curve_dda_hcd_denovo"
     metric_plot_labels: List[str] = field(
         default_factory=lambda: ["None", "checkpoint", "n_beams", "precursor_mass_tolerance", "decoding_strategy"]
     )
@@ -37,6 +38,7 @@ class VariablesDDADeNovo:
 
     # Tab 4
     fig_metric_submitted: str = "fig_metric_dda_hcd_denovo_submitted"
+    fig_pc_curve_submitted: str = "fig_pc_curve_dda_hcd_denovo_submitted"
 
     # Tab 5
     uploaded_id: str = "Uploaded dataset"
@@ -71,6 +73,13 @@ class VariablesDDADeNovo:
     colorblind_mode_selector_indepth_uuid: str = "colorblind_mode_selector_indepth_dda_hcd_denovo"
     colorblind_mode_selector_submitted_uuid: str = "colorblind_mode_selector_submitted_dda_hcd_denovo"
 
+    # Ambiguity toggles (I/L mismatches, deamidation mismatches) for the main metric plot.
+    # Only meaningful under Exact evaluation; forced to "allow" and disabled under Mass-based.
+    il_toggle_id_uuid: str = "il_toggle_id_dda_hcd_denovo"
+    il_toggle_id_submitted_uuid: str = "il_toggle_id_submitted_dda_hcd_denovo"
+    deamidation_toggle_id_uuid: str = "deamidation_toggle_id_dda_hcd_denovo"
+    deamidation_toggle_id_submitted_uuid: str = "deamidation_toggle_id_submitted_dda_hcd_denovo"
+
     download_selector_id_uuid: str = "download_selector_id_dda_hcd_denovo"
     table_id_uuid: str = "table_id_dda_hcd_denovo"
 
@@ -103,7 +112,7 @@ class VariablesDDADeNovo:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/denovo/DDA/HCD"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/11-denovo-dda-hcd/"
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dda/denovo-dda-hcd/"
 
     additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_DDA_HCD.json"
     title: str = "De Novo Identification (DDA - HCD) Module"

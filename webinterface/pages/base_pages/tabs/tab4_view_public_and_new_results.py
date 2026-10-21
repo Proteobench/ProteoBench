@@ -163,18 +163,13 @@ def render_submitted_results_table(data: pd.DataFrame, variables) -> None:
     )
 
 
-def display_submitted_results(
-    variables,
-    ionmodule,
-    plot_params: Dict[str, Any],
-    table_style: str = "dataframe",
-    column_config: Optional[Dict] = None,
-    render_forest_plot=None,
-) -> None:
+def load_and_filter_submitted_data(variables, ionmodule) -> pd.DataFrame:
     """
-    Display submitted benchmark results with plot and table.
-
-    This is the main entry point for Tab 4, working across all module types.
+    Load, slider/parameter-filter, and open-source-annotate the submitted (public + new)
+    datapoints table for Tab 4 -- the data-loading half of `display_submitted_results`,
+    exposed separately so a caller can render more than one view (e.g. a plot *and* an
+    alternative plot behind a tab switcher) off the same filtered selection without loading
+    it twice.
 
     Parameters
     ----------
@@ -182,20 +177,15 @@ def display_submitted_results(
         Variables object containing session state keys and configuration.
     ionmodule : object
         The module instance (Quant, De Novo, etc.).
-    plot_params : Dict[str, Any]
-        Module-specific plotting parameters.
-    table_style : str, optional
-        Table rendering style ("dataframe" or "aggrid").
-    column_config : Optional[Dict], optional
-        Streamlit column configuration for dataframe display.
-    render_forest_plot : callable, optional
-        Optional callable that renders an additional plot (e.g. a forest plot)
-        between the scatter plot and the results table.
+
+    Returns
+    -------
+    pd.DataFrame
+        The filtered dataframe, with the newly-submitted row (if any) pinned so it survives
+        all filters.
     """
-    # Initialize submitted data
     initialize_submitted_data_points(variables, ionmodule)
 
-    # Filter data using slider if applicable
     filtered_data = filter_submitted_data_if_applicable(variables, ionmodule, use_slider=True)
     filtered_data = add_open_source_column(filtered_data)
 
@@ -210,11 +200,37 @@ def display_submitted_results(
         key_prefix=f"param_filter_{variables.all_datapoints_submitted}",
         pinned_indices=pinned,
     )
+    return filtered_data
 
-    # Get plot generator from module
+
+def render_submitted_main_plot(
+    variables,
+    ionmodule,
+    plot_params: Dict[str, Any],
+    filtered_data: pd.DataFrame,
+    render_forest_plot=None,
+) -> None:
+    """
+    Render Tab 4's main scatter/metric plot, kept separate from `render_submitted_results_table`
+    so a caller can put them in different containers (e.g. one inside a tab switcher and the
+    other outside it).
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys and configuration.
+    ionmodule : object
+        The module instance (Quant, De Novo, etc.).
+    plot_params : Dict[str, Any]
+        Module-specific plotting parameters.
+    filtered_data : pd.DataFrame
+        The dataframe to plot, as returned by `load_and_filter_submitted_data`.
+    render_forest_plot : callable, optional
+        Optional callable that renders an additional plot (e.g. a forest plot)
+        directly below the main plot.
+    """
     plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
-    # Prepare plot key
     fig_key = variables.fig_metric_submitted if hasattr(variables, "fig_metric_submitted") else "submitted_plot"
     if fig_key not in st.session_state:
         st.session_state[fig_key] = uuid.uuid4()
@@ -222,7 +238,6 @@ def display_submitted_results(
 
     with st.container(key="tour_submitted_plot"):
         try:
-            # Generate plot using plot_generator interface
             fig = plot_generator.plot_main_metric(
                 result_df=filtered_data,
                 hide_annot=plot_params.get("hide_annot", False),
@@ -239,5 +254,53 @@ def display_submitted_results(
     if render_forest_plot is not None:
         render_forest_plot()
 
+
+def display_submitted_results(
+    variables,
+    ionmodule,
+    plot_params: Dict[str, Any],
+    table_style: str = "dataframe",
+    column_config: Optional[Dict] = None,
+    render_forest_plot=None,
+) -> Optional[pd.DataFrame]:
+    """
+    Display submitted benchmark results with plot and table.
+
+    This is the main entry point for Tab 4, working across all module types.
+
+    A thin wrapper around `load_and_filter_submitted_data` + `render_submitted_main_plot` +
+    `render_submitted_results_table` -- callers that need the plot and table in separate
+    containers (e.g. de novo's Scatter/Precision-Coverage-Curves tab switcher, where only the
+    plot should swap and the table should stay put) can call those three directly instead.
+
+    Parameters
+    ----------
+    variables : object
+        Variables object containing session state keys and configuration.
+    ionmodule : object
+        The module instance (Quant, De Novo, etc.).
+    plot_params : Dict[str, Any]
+        Module-specific plotting parameters.
+    table_style : str, optional
+        Table rendering style ("dataframe" or "aggrid").
+    column_config : Optional[Dict], optional
+        Streamlit column configuration for dataframe display.
+    render_forest_plot : callable, optional
+        Optional callable that renders an additional plot (e.g. a forest plot)
+        between the scatter plot and the results table.
+
+    Returns
+    -------
+    Optional[pd.DataFrame]
+        The filtered dataframe used to render the plot and table, so a caller can reuse it
+        for an alternative view of the same selection (e.g. de novo's precision-coverage-curve
+        tab).
+    """
+    filtered_data = load_and_filter_submitted_data(variables, ionmodule)
+
+    render_submitted_main_plot(variables, ionmodule, plot_params, filtered_data, render_forest_plot=render_forest_plot)
+
     # Render results table (same styled grid as Tab 1)
     render_submitted_results_table(filtered_data, variables)
+
+    return filtered_data

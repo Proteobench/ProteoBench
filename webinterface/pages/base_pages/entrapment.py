@@ -274,103 +274,6 @@ class EntrapmentUIObjects(BaseUIModule):
                 pr_url=pr_url,
             )
 
-    def _render_fdp_ratio_plot(
-        self, session_key: str, metric: str, colorblind_mode: bool, is_public_only: bool = False
-    ) -> None:
-        """Render the FDP / reported-FDR ratio plot from the given session-state key."""
-        all_data = st.session_state.get(session_key)
-        if all_data is None or not isinstance(all_data, pd.DataFrame):
-            st.info("No data loaded yet — please wait for public results to load.", icon="ℹ️")
-            return
-
-        st.subheader("FDP / Reported FDR by Workflow")
-        st.markdown(
-            "Ratio of estimated false discovery proportion (FDP) to the FDR threshold "
-            "declared for each workflow. A ratio ≤ 1 means the estimated FDP does not "
-            "exceed the claimed FDR. Workflows are coloured by validity category: "
-            ":green[valid] (upper bound ≤ reported FDR), "
-            ":red[invalid] (lower bound > reported FDR), "
-            ":orange[inconclusive] (lower bound ≤ reported FDR < upper bound). "
-            "Newly uploaded results are shown with larger open markers (⬤)."
-        )
-
-        if is_public_only:
-            submitted_key = self.variables.all_datapoints_submitted
-            if submitted_key in st.session_state and isinstance(st.session_state[submitted_key], pd.DataFrame):
-                new_df = st.session_state[submitted_key]
-                if "old_new" in new_df.columns and (new_df["old_new"] == "new").any():
-                    st.info(
-                        "You have an uploaded result. Switch to **Tab 4 (View Public + New Results)** "
-                        "to see it in this plot.",
-                        icon="ℹ️",
-                    )
-
-        if all_data.empty:
-            st.info("No datapoints available to plot.", icon="ℹ️")
-            return
-
-        if "old_new" in all_data.columns:
-            new_rows = all_data[all_data["old_new"] == "new"]
-            if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
-                fdr_vals = pd.to_numeric(new_rows["reported_fdr_parsed_from_input"], errors="coerce")
-                missing = fdr_vals.isna() | (fdr_vals == 0)
-                if missing.any():
-                    st.warning(
-                        "Your uploaded result has no FDR threshold set — the plot uses 0.01 as a fallback. "
-                        "To see the correct ratio, re-upload and fill in the **FDR PSM** field in the form.",
-                        icon="⚠️",
-                    )
-
-        try:
-            fdp_ratio_fig = self.ionmodule.get_plot_generator().plot_fdp_ratio(
-                all_data,
-                metric=metric,
-                colorblind_mode=colorblind_mode,
-            )
-            st.plotly_chart(fdp_ratio_fig)
-        except Exception as e:
-            st.error(f"Could not render FDP ratio plot: {e}", icon="🚨")
-
-    def _render_category_strip(self, session_key: str) -> None:
-        """Render the category strip plot from the given session-state key."""
-        all_data = st.session_state.get(session_key)
-        if all_data is None or not isinstance(all_data, pd.DataFrame) or all_data.empty:
-            return
-
-        st.subheader("Identified Features by Validity Category")
-        st.markdown(
-            "Points are grouped into the three validity categories based on the estimated paired FDP bounds "
-            "vs each workflow's declared PSM-level FDR. "
-            "**Point colour** indicates the software tool. "
-            "Within each category, points are spread horizontally for readability and sorted "
-            "by number of identified features."
-        )
-        try:
-            fig = self.ionmodule.get_plot_generator().plot_category_strip(all_data)
-            st.plotly_chart(fig)
-        except Exception as e:
-            st.error(f"Could not render category strip plot: {e}", icon="🚨")
-
-    def _render_fdp_id_scatter(self, session_key: str) -> None:
-        """Render the FDP/FDR ratio vs number of IDs scatter from the given session-state key."""
-        all_data = st.session_state.get(session_key)
-        if all_data is None or not isinstance(all_data, pd.DataFrame) or all_data.empty:
-            return
-
-        st.subheader("FDP/FDR Ratio vs Identified Features")
-        st.markdown(
-            "Each point is one submitted workflow. "
-            "**Colour** indicates the software tool; **shape** indicates the validity category "
-            "(○ valid, △ inconclusive, ✕ invalid). "
-            "The x-axis shows the ratio of the estimated paired upper FDP bound to the declared PSM-level FDR; "
-            "a ratio below 1 (left of the dashed line) means the estimated FDP is within the claimed threshold."
-        )
-        try:
-            fig = self.ionmodule.get_plot_generator().plot_fdp_id_scatter(all_data)
-            st.plotly_chart(fig)
-        except Exception as e:
-            st.error(f"Could not render FDP/FDR scatter: {e}", icon="🚨")
-
     def _render_forest_plot(self, session_key: str) -> None:
         """Render the FDP interval forest plot from the given session-state key."""
         all_data = st.session_state.get(session_key)
@@ -440,6 +343,14 @@ class EntrapmentUIObjects(BaseUIModule):
                 "The approach is described in "
                 "[Wen et al. (2025), *Nature Methods*]"
                 "(https://www.nature.com/articles/s41592-025-02719-x)."
+            )
+            st.warning(
+                "**Modification localisation errors are not accounted for.** An identification is matched "
+                "to its target/entrapment pair by its reported modified sequence (e.g. which methionine is "
+                "oxidized). If a search engine places a modification on the wrong site within an otherwise "
+                "correct peptide, this module has no way to detect that — the identification is scored as if "
+                "the localisation were correct.",
+                icon="⚠️",
             )
             st.markdown("##### FDP estimates")
             st.markdown(
@@ -516,7 +427,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             return st.selectbox(
                 "Q-value threshold",
-                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                ["0.001", "0.01", "0.05", "0.1", "1.0"],
                 index=1,
                 key=st.session_state[key],
             )
@@ -531,9 +442,9 @@ class EntrapmentUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
-        threshold_str = results[2] if len(results) > 3 else "Maximum reported"
+        threshold_str = results[2] if len(results) > 3 else "0.01"
         colorblind_mode = results[3] if len(results) > 2 else False
-        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
+        threshold = float(threshold_str)
 
         tab1_view_public_results.display_existing_results(
             variables=self.variables,
@@ -548,16 +459,6 @@ class EntrapmentUIObjects(BaseUIModule):
             },
             render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints),
         )
-
-        with st.expander("Show more"):
-            self._render_fdp_id_scatter(session_key=self.variables.all_datapoints)
-            self._render_fdp_ratio_plot(
-                session_key=self.variables.all_datapoints,
-                metric=metric,
-                colorblind_mode=colorblind_mode,
-                is_public_only=True,
-            )
-            self._render_category_strip(session_key=self.variables.all_datapoints)
 
     @st.fragment
     def display_all_data_results_submitted(self) -> None:
@@ -623,7 +524,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             return st.selectbox(
                 "Q-value threshold",
-                ["0.001", "0.01", "0.05", "0.1", "1.0", "Maximum reported"],
+                ["0.001", "0.01", "0.05", "0.1", "1.0"],
                 index=1,
                 key=st.session_state[key],
             )
@@ -638,26 +539,25 @@ class EntrapmentUIObjects(BaseUIModule):
 
         # Extract returned values
         metric = results[1] if len(results) > 1 else "Estimated upper FDP bound - Paired method"
-        threshold_str = results[2] if len(results) > 2 else "Maximum reported"
+        threshold_str = results[2] if len(results) > 2 else "0.01"
         colorblind_mode = results[3] if len(results) > 3 else False
-        threshold = None if threshold_str == "Maximum reported" else float(threshold_str)
+        threshold = float(threshold_str)
 
         # Warn when the newly uploaded datapoint's max Q-value is below the selected threshold,
         # which means it won't appear in the plot at the current setting.
-        if threshold is not None:
-            all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
-            if all_dp is not None and not all_dp.empty and "old_new" in all_dp.columns:
-                new_rows = all_dp[all_dp["old_new"] == "new"]
-                if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
-                    max_q = float(new_rows.iloc[0]["reported_fdr_parsed_from_input"])
-                    if max_q < threshold:
-                        available = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
-                        suggestion = f"Try selecting **{max(available):.3f}** or lower." if available else ""
-                        st.warning(
-                            f"🚨 The uploaded data has a maximum Q-value of **{max_q:.4f}**, which is below "
-                            f"the selected threshold of **{threshold}**. "
-                            f"The uploaded datapoint is not shown at this threshold. {suggestion} 🚨"
-                        )
+        all_dp = st.session_state.get(self.variables.all_datapoints_submitted)
+        if all_dp is not None and not all_dp.empty and "old_new" in all_dp.columns:
+            new_rows = all_dp[all_dp["old_new"] == "new"]
+            if not new_rows.empty and "reported_fdr_parsed_from_input" in new_rows.columns:
+                max_q = float(new_rows.iloc[0]["reported_fdr_parsed_from_input"])
+                if max_q < threshold:
+                    available = [t for t in (0.001, 0.01, 0.05, 0.1, 1.0) if t <= max_q]
+                    suggestion = f"Try selecting **{max(available):.3f}** or lower." if available else ""
+                    st.warning(
+                        f"🚨 The uploaded data has a maximum Q-value of **{max_q:.4f}**, which is below "
+                        f"the selected threshold of **{threshold}**. "
+                        f"The uploaded datapoint is not shown at this threshold. {suggestion} 🚨"
+                    )
 
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
@@ -675,15 +575,6 @@ class EntrapmentUIObjects(BaseUIModule):
             },
             render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints_submitted),
         )
-
-        with st.expander("Show more"):
-            self._render_fdp_id_scatter(session_key=self.variables.all_datapoints_submitted)
-            self._render_fdp_ratio_plot(
-                session_key=self.variables.all_datapoints_submitted,
-                metric=metric,
-                colorblind_mode=colorblind_mode,
-            )
-            self._render_category_strip(session_key=self.variables.all_datapoints_submitted)
 
     def display_workflow_comparison(self) -> None:
         """Display the workflow comparison page in Tab 5."""

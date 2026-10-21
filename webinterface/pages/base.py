@@ -1,6 +1,7 @@
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
+from pages.base_pages.utils.metrics_help import context_for_tab_method, render_metrics_help
 
 # The guided tour is an optional driver.js overlay. Importing it can fail when the
 # installed streamlit_tour is incompatible with the streamlit version (e.g.
@@ -41,12 +42,15 @@ class BaseStreamlitUI:
 
         self.uiobjects = uiobjects(self.variables, self.ionmodule, self.parsesettingsbuilder, page_name=page_name)
 
-    def _render_tab_header(self, key_suffix: str = "") -> None:
-        """Render common tab header elements: title, documentation link, and banner.
+    def _render_tab_header(self, method_name: str = None) -> None:
+        """Render common tab header elements: title, documentation link, metrics help, sign-in, and banner.
 
-        ``key_suffix`` (e.g. the tab name) must be unique per call, since this is
-        called once per tab within the same script run and the sign-in widget
-        it embeds uses explicit widget keys.
+        Parameters
+        ----------
+        method_name : str, optional
+            Name of the UIObjects method rendering this tab. It selects which metrics explanation
+            the popover shows, because the in-depth tab does not display the main plot. It also
+            keys the sign-in widget, which needs a unique key per tab within the same script run.
         """
         from pages.base_pages.utils.auth import render_auth_status
 
@@ -68,7 +72,8 @@ class BaseStreamlitUI:
                     icon="⬇️",
                     help="Download the raw input files used to benchmark this module",
                 )
-            render_auth_status(key_suffix=key_suffix)
+            render_metrics_help(self.ionmodule, self.variables, context=context_for_tab_method(method_name))
+            render_auth_status(key_suffix=f"_{method_name}")
         display_banner(self.variables)
 
     def get_tab_config(self) -> list:
@@ -119,7 +124,7 @@ class BaseStreamlitUI:
         # Render each tab
         for tab, (tab_name, method_name) in zip(tabs, tab_config):
             with tab:
-                self._render_tab_header(key_suffix=f"_{tab_name}")
+                self._render_tab_header(method_name=method_name)
                 # Call the appropriate method on uiobjects
                 getattr(self.uiobjects, method_name)()
 

@@ -330,9 +330,12 @@ class QuantDatapointHYE(DatapointBase):
         """
         Generate a unique ID for the benchmark run by combining the software name and a timestamp.
 
-        This ID is used to uniquely identify each run of the benchmark.
+        This ID is used to uniquely identify each run of the benchmark. The timestamp carries
+        microseconds because datapoints are also generated in batches -- the resubmission
+        script regenerates many in a loop -- where whole-second resolution hands several runs
+        the same ID.
         """
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.id = "_".join([self.software_name, str(time_stamp)])
         logging.info(f"Assigned the following ID to this run: {self.id}")
 
@@ -593,13 +596,24 @@ class QuantDatapointPYE(QuantDatapointHYE):
         Inherits all attributes from QuantDatapointHYE.
         median_abs_log2_fc_error_spike_ins (float): Median absolute log2 fold-change error for yeast and E. coli spike-ins.
         nr_quantified_spike_ins (int): Number of quantified yeast and E. coli spike-in precursors (quantification depth).
+        nr_quantified_HUMAN (int): Number of quantified human plasma precursors.
+        nr_quantified_YEAST (int): Number of quantified yeast spike-in precursors.
+        nr_quantified_ECOLI (int): Number of quantified E. coli spike-in precursors.
         dynamic_range_human_plasma (float): Dynamic range of human plasma precursors (log10 difference between 90th and 10th percentile).
         median_abs_epsilon_human_plasma (float): Median absolute epsilon for human plasma precursors (quantification accuracy).
     """
 
+    #: Species present in the PYE (Plasma/Yeast/E. coli) sample.
+    PYE_SPECIES = ("HUMAN", "YEAST", "ECOLI")
+    #: Species spiked into the plasma background at a known ratio.
+    PYE_SPIKE_IN_SPECIES = ("YEAST", "ECOLI")
+
     # Add plasma-specific metric attributes
     median_abs_log2_fc_error_spike_ins: float = 0.0
     nr_quantified_spike_ins: int = 0
+    nr_quantified_HUMAN: int = 0
+    nr_quantified_YEAST: int = 0
+    nr_quantified_ECOLI: int = 0
     dynamic_range_human_plasma: float = 0.0
     median_abs_epsilon_human_plasma: float = 0.0
 
@@ -617,6 +631,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
         This method extends the parent implementation to compute plasma-specific metrics:
         - Median fold-change error for yeast and E. coli spike-ins (for x-axis)
         - Number of quantified spike-in precursors (for y-axis)
+        - Number of quantified precursors per species (HUMAN, YEAST, ECOLI)
         - Dynamic range of human plasma precursors (for dot size)
         - Quantification accuracy for human plasma (for transparency/opacity)
 
@@ -664,6 +679,10 @@ class QuantDatapointPYE(QuantDatapointHYE):
             result_dict["nr_quantified_spike_ins"] = plasma_metrics[default_cutoff_min_feature].get(
                 "nr_quantified_spike_ins", 0
             )
+            for species in QuantDatapointPYE.PYE_SPECIES:
+                result_dict[f"nr_quantified_{species}"] = plasma_metrics[default_cutoff_min_feature].get(
+                    f"nr_quantified_{species}", 0
+                )
             result_dict["dynamic_range_human_plasma"] = plasma_metrics[default_cutoff_min_feature].get(
                 "dynamic_range_human_plasma_mean", 0.0
             )
@@ -681,23 +700,32 @@ class QuantDatapointPYE(QuantDatapointHYE):
         """
         Compute plasma-specific metrics for each min_nr_observed threshold.
 
+        The dynamic range of the human plasma background is computed per condition as the
+        difference between the 90th and the 10th percentile of the log10-transformed mean
+        precursor intensity of that condition, and is then averaged over conditions A and B.
+        A value of, for example, 3.0 means that the central 80% of the quantified plasma
+        precursors span three orders of magnitude in intensity.
+
         Parameters
         ----------
         intermediate : pd.DataFrame
             The intermediate DataFrame containing benchmark results with species annotations.
         max_nr_observed : int, optional
-            Maximum nr_observed value to calculate metrics for. If None, defaults to 6.
+            Maximum nr_observed value to calculate metrics for. If None, defaults to 12.
 
         Returns
         -------
         dict[int, dict[str, float]]
-            Dictionary with min_nr_observed as keys and plasma metrics as values.
+            Dictionary with min_nr_observed as keys and plasma metrics as values. Besides the
+            spike-in error, dynamic range and human-plasma accuracy metrics, this includes
+            ``nr_quantified_spike_ins`` and the per-species counts ``nr_quantified_HUMAN``,
+            ``nr_quantified_YEAST`` and ``nr_quantified_ECOLI``.
         """
         plasma_metrics = {}
 
-        # Use provided max_nr_observed or default to 6
+        # Use provided max_nr_observed or default to 6 for the plasma module
         if max_nr_observed is None:
-            max_nr_observed = 12
+            max_nr_observed = 6
 
         # Compute metrics for each min_nr_observed level up to the maximum
         for min_nr_obs in range(1, int(max_nr_observed) + 1):
@@ -717,6 +745,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
                     "mean_abs_log2_fc_error_spike_ins_eq_species": 0.0,
                     # Common metrics
                     "nr_quantified_spike_ins": 0,
+                    **{f"nr_quantified_{species}": 0 for species in QuantDatapointPYE.PYE_SPECIES},
                     "dynamic_range_human_plasma_A": 0.0,
                     "dynamic_range_human_plasma_B": 0.0,
                     "dynamic_range_human_plasma_mean": 0.0,
@@ -726,7 +755,15 @@ class QuantDatapointPYE(QuantDatapointHYE):
                 continue
 
             # Compute spike-in metrics (yeast and E. coli combined)
-            spike_ins_df = df_slice[df_slice["species"].isin(["YEAST", "ECOLI"])]
+            spike_ins_df = df_slice[df_slice["species"].isin(QuantDatapointPYE.PYE_SPIKE_IN_SPECIES)]
+
+            # Number of quantified precursors per species, reported separately so that
+            # plasma-background and spike-in identification depth can be compared directly.
+            species_counts = df_slice["species"].value_counts()
+            nr_quantified_per_species = {
+                f"nr_quantified_{species}": int(species_counts.get(species, 0))
+                for species in QuantDatapointPYE.PYE_SPECIES
+            }
 
             # Global: Simple aggregation across all spike-ins
             median_abs_log2_fc_error_spike_ins_global = (
@@ -739,7 +776,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
             # Species-weighted: Calculate per species, then average
             median_per_species = []
             mean_per_species = []
-            for species in ["YEAST", "ECOLI"]:
+            for species in QuantDatapointPYE.PYE_SPIKE_IN_SPECIES:
                 species_df = df_slice[df_slice["species"] == species]
                 if len(species_df) > 0:
                     median_per_species.append(species_df["epsilon"].abs().median())
@@ -751,8 +788,10 @@ class QuantDatapointPYE(QuantDatapointHYE):
             # Compute number of quantified spike-in precursors
             nr_quantified_spike_ins = len(spike_ins_df)
 
-            # Compute dynamic range of human plasma precursors
-            human_plasma_df = df_slice[df_slice["species"] == "HUMAN"]
+            # Compute dynamic range of the human plasma background: per condition the
+            # log10(P90) - log10(P10) spread of the mean precursor intensity, averaged over
+            # conditions A and B.
+            human_plasma_df = df_slice[df_slice["species"] == "HUMAN"].copy()
 
             dynamic_ranges = {}
             for condition in ["A", "B"]:
@@ -787,6 +826,7 @@ class QuantDatapointPYE(QuantDatapointHYE):
                 "mean_abs_log2_fc_error_spike_ins_eq_species": mean_abs_log2_fc_error_spike_ins_eq_species,
                 # Common metrics
                 "nr_quantified_spike_ins": nr_quantified_spike_ins,
+                **nr_quantified_per_species,
                 "dynamic_range_human_plasma_A": dynamic_ranges.get("A", 0.0),
                 "dynamic_range_human_plasma_B": dynamic_ranges.get("B", 0.0),
                 "dynamic_range_human_plasma_mean": dynamic_range_human_plasma_mean if dynamic_ranges else 0.0,

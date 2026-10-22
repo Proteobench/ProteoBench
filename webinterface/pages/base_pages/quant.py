@@ -387,6 +387,7 @@ class QuantUIObjects(BaseUIModule):
                 "min_nr_observed": min_nr_observed,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
+                "archived_warning": getattr(self.variables, "archived_warning", False),
             },
         )
 
@@ -506,6 +507,7 @@ class QuantUIObjects(BaseUIModule):
                 "min_nr_observed": min_nr_observed,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
+                "archived_warning": getattr(self.variables, "archived_warning", False),
             },
         )
 

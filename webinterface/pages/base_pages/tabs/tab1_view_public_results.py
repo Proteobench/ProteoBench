@@ -295,7 +295,9 @@ def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params:
 
     # Build annotation text based on alpha/beta warnings
     annotation = ""
-    if plot_params.get("beta_warning", False):
+    if plot_params.get("archived_warning", False):
+        annotation = "-Archived-"
+    elif plot_params.get("beta_warning", False):
         annotation = "-Beta-"
     elif plot_params.get("alpha_warning", False):
         annotation = "-Alpha-"
@@ -472,10 +474,13 @@ def render_main_plot(
 
     # Build annotation and strip meta-keys before forwarding to render_metric_plot.
     annotation = ""
-    if plot_params.get("beta_warning"):
+    if plot_params.get("archived_warning"):
+        annotation = "-Archived-"
+    elif plot_params.get("beta_warning"):
         annotation = "-Beta-"
     elif plot_params.get("alpha_warning"):
         annotation = "-Alpha-"
+    
 
     consumed_keys = {"alpha_warning", "beta_warning", "metric", "mode", "label", "colorblind_mode"}
     extra_plot_kwargs = {k: v for k, v in plot_params.items() if k not in consumed_keys}

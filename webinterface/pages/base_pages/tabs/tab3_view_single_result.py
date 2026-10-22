@@ -480,21 +480,25 @@ def create_pmultiqc_report_section(performance_data: pd.DataFrame) -> str:
             df_intermediate_results.to_csv(tmp_data / "result_performance.csv", index=False)
             file_out = tmp_dir
             try:
-                ret_code = subprocess.run(
-                    [
-                        "multiqc",
-                        "--parse_proteobench",
-                        f"{tmp_data}",
-                        "-o",
-                        f"{file_out}",
-                        "-f",
-                        "--clean-up",
-                    ],
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                    timeout=500,  # Set a timeout to prevent hanging
-                )
+                # pMultiQC 0.0.39 uses an underscore; newer releases use a hyphen.
+                for plugin_flag in ("--proteobench_plugin", "--proteobench-plugin"):
+                    ret_code = subprocess.run(
+                        [
+                            "multiqc",
+                            plugin_flag,
+                            f"{tmp_data}",
+                            "-o",
+                            f"{file_out}",
+                            "-f",
+                            "--clean-up",
+                        ],
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=500,  # Set a timeout to prevent hanging
+                    )
+                    if ret_code.returncode == 0 or f"No such option: {plugin_flag}" not in ret_code.stderr:
+                        break
                 html_path = Path(file_out) / "multiqc_report.html"
                 if html_path.exists() and ret_code.returncode == 0:
                     with open(html_path, "r", encoding="utf-8") as f:

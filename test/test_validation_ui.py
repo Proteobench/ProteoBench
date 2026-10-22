@@ -25,6 +25,7 @@ if str(WEB_DIR) not in sys.path:
 
 from pages.base_pages.utils import validation_ui  # noqa: E402
 from proteobench.io.parsing.run_name_matching import RunNameMatch  # noqa: E402
+from proteobench.modules.quant.apb_workflow import analyze_quant_upload  # noqa: E402
 
 
 def _fake_variables():
@@ -86,3 +87,18 @@ def test_no_corrections_means_no_run_name_warnings(monkeypatch):
     )
 
     assert [i for i in report.issues if i.code == "run_name_auto_corrected"] == []
+
+
+def test_apb_quant_validation_never_reparses_with_legacy_settings(monkeypatch):
+    source = Path(__file__).parent / "data/quant/quant_lfq_ion_DDA_QExactive/CustomFormat_DDA_quant_ions_test.txt"
+    analysis = analyze_quant_upload(source, software="Custom", module="dda_qexactive")
+    variables = _fake_variables()
+    st.session_state[variables.input_df_submission] = analysis
+
+    def legacy_parser_must_not_run(*_args):
+        raise AssertionError("legacy quant parser was called")
+
+    monkeypatch.setattr(validation_ui, "_build_standard_dataframe", legacy_parser_must_not_run)
+    report = validation_ui.run_submission_validation(variables, SimpleNamespace(), {"input_format": "Custom"}, None)
+
+    assert [issue.code for issue in report.issues] == ["apb_quant_validated"]

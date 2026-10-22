@@ -1,7 +1,7 @@
 import inspect
 import json
-import os
 import tempfile
+from pathlib import Path
 
 import streamlit as st
 from streamlit_utils import display_error, get_error_suggestions
@@ -28,7 +28,7 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
     # Store selection in user_input for use in form
     user_input["input_format"] = selected_format
 
-    # Show per-tool upload guidance from [upload_info] in the parse settings TOML.
+    # Show guidance from APB module metadata or remaining legacy tool settings.
     get_upload_info = getattr(parsesettingsbuilder, "get_upload_info", None)
     upload_info = get_upload_info(selected_format) if get_upload_info is not None else {}
     datapoint_desc = upload_info.get("datapoint_file_description", "")
@@ -36,7 +36,14 @@ def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, us
         st.info(datapoint_desc)
 
     # Display AlphaDIA-specific information text only (file uploader will be shown after main uploader)
-    if selected_format == "AlphaDIA":
+    user_input["supports_secondary_result_upload"] = getattr(
+        parsesettingsbuilder, "supports_secondary_result_upload", True
+    )
+    if selected_format == "AlphaDIA" and not user_input["supports_secondary_result_upload"]:
+        st.info(
+            "Upload AlphaDIA v2+ precursors.parquet or precursors.tsv. The older two-file output is not yet verified in APB."
+        )
+    elif selected_format == "AlphaDIA":
         st.info(
             "ℹ️**If submitting AlphaDIA output from versions >= 2.0, please submit the precursors.parquet or precursors.tsv file only and ignore the secondary file uploader.**\n"
             "**If not, you have the following options:**\n\n"
@@ -60,7 +67,7 @@ def generate_input_fields(
     )
 
     # For AlphaDIA, show secondary file uploader after main uploader
-    if user_input.get("input_format") == "AlphaDIA":
+    if user_input.get("input_format") == "AlphaDIA" and user_input.get("supports_secondary_result_upload", True):
         user_input["input_csv_secondary"] = st.file_uploader(
             "Upload second AlphaDIA file (optional)",
             type=["tsv", "csv"],
@@ -117,7 +124,11 @@ def process_submission_form(
         return False
 
     # For AlphaDIA, inform about the two-file option but allow single merged file
-    if user_input["input_format"] == "AlphaDIA" and not user_input.get("input_csv_secondary"):
+    if (
+        user_input["input_format"] == "AlphaDIA"
+        and user_input.get("supports_secondary_result_upload", True)
+        and not user_input.get("input_csv_secondary")
+    ):
         # TODO: change the way two-file upload is handled so that it doesn't cause an error message when only one of the two is provided
         st.info(
             "Only for AlphaDIA v1: You can upload both AlphaDIA files (precursor.matrix.tsv and precursors.tsv) for automatic merging, "
@@ -207,27 +218,6 @@ def run_benchmarking_process(variables, ionmodule, user_input):
     Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
         The benchmarking results, all data points, and the input data frame.
     """
-    # Get file extension from uploaded file to preserve it in temp file
-    _, file_extension = os.path.splitext(user_input["input_csv"].name)
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as tmp_file:
-        tmp_file.write(user_input["input_csv"].getbuffer())
-        tmp_file.flush()
-
-    # For AlphaDIA, also create temporary file for secondary input
-    tmp_file_secondary_name = None
-    if user_input.get("input_csv_secondary"):
-        _, file_extension_secondary = os.path.splitext(user_input["input_csv_secondary"].name)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension_secondary) as tmp_file_secondary:
-            tmp_file_secondary.write(user_input["input_csv_secondary"].getbuffer())
-            tmp_file_secondary.flush()
-            tmp_file_secondary_name = tmp_file_secondary.name
-        user_input["input_csv_secondary"].seek(0)
-
-    # reload buffer: https://stackoverflow.com/a/64478151/9684872
-    user_input["input_csv"].seek(0)
-    user_input_tmp = tmp_file.name
-
     # Get slider value if module uses sliders (e.g., quant module)
     if hasattr(variables, "slider_id_submitted_uuid") and hasattr(variables, "default_val_slider"):
         slider_uuid_key = st.session_state.get(variables.slider_id_submitted_uuid)
@@ -258,23 +248,28 @@ def run_benchmarking_process(variables, ionmodule, user_input):
     if set_slider_val is not None:
         benchmark_kwargs["default_cutoff_min_feature"] = set_slider_val
 
-    # Only add secondary file if provided
-    if tmp_file_secondary_name:
-        benchmark_kwargs["input_file_secondary"] = tmp_file_secondary_name
-
     if max_nr_observed is not None:
         benchmark_kwargs["max_nr_observed"] = max_nr_observed
 
-    # Not every module's benchmarking() accepts every optional kwarg above
-    # (e.g. the entrapment module has no cutoff/max_nr_observed parameters).
-    # Only forward the ones the target method actually declares, unless it
-    # accepts **kwargs itself.
-    signature = inspect.signature(ionmodule.benchmarking)
-    accepts_var_kwargs = any(param.kind == inspect.Parameter.VAR_KEYWORD for param in signature.parameters.values())
-    if not accepts_var_kwargs:
-        benchmark_kwargs = {key: value for key, value in benchmark_kwargs.items() if key in signature.parameters}
-
-    return ionmodule.benchmarking(user_input_tmp, **benchmark_kwargs)
+    with tempfile.TemporaryDirectory(prefix="proteobench-upload-") as temporary:
+        uploaded = user_input["input_csv"]
+        result_path = Path(temporary) / Path(uploaded.name).name
+        result_path.write_bytes(uploaded.getbuffer())
+        uploaded.seek(0)
+        secondary = user_input.get("input_csv_secondary")
+        if secondary is not None:
+            secondary_path = Path(temporary) / Path(secondary.name).name
+            if secondary_path == result_path:
+                raise ValueError("The two uploaded result files must have distinct names")
+            secondary_path.write_bytes(secondary.getbuffer())
+            secondary.seek(0)
+            benchmark_kwargs["input_file_secondary"] = str(secondary_path)
+        # Other module types do not all accept the quant-specific options.
+        signature = inspect.signature(ionmodule.benchmarking)
+        accepts_var_kwargs = any(param.kind == inspect.Parameter.VAR_KEYWORD for param in signature.parameters.values())
+        if not accepts_var_kwargs:
+            benchmark_kwargs = {key: value for key, value in benchmark_kwargs.items() if key in signature.parameters}
+        return ionmodule.benchmarking(str(result_path), **benchmark_kwargs)
 
 
 def store_submission_keyword(variables, all_datapoints, user_input) -> None:

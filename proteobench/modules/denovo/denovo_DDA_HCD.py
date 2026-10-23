@@ -28,6 +28,10 @@ class DDAHCDDeNovoModule(DeNovoModule):
     """
 
     module_id = "denovo_DDA_HCD"
+    # Parameter field template, relative to proteobench/io/params/json/.
+    PARAMS_JSON: str = "denovo/denovo_DDA_HCD.json"
+    # Raw input files of the benchmark, offered for download.
+    RAW_DATA_URL: str = "https://proteobench.cubimed.rub.de/raws/DeNovo-HCD/nine_species_balanced_De_Novo.mgf.gz"
 
     def __init__(
         self,

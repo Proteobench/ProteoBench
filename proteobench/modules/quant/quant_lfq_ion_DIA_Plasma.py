@@ -49,6 +49,10 @@ class DIAQuantIonModulePlasma(QuantModule):
     """
 
     module_id: str = "quant_lfq_DIA_ion_plasma"
+    # Parameter field template, relative to proteobench/io/params/json/.
+    PARAMS_JSON: str = "Quant/quant_lfq_DIA_ion.json"
+    # Raw input files of the benchmark, offered for download.
+    RAW_DATA_URL: str = "https://proteobench.cubimed.rub.de/raws/DIA-plasma/all_data_LFQ_Quant_DIA_Plasma.tar.gz"
     y_axis_title: str = "Number of quantified spike-in precursors"
 
     #: Plasma-specific top-level columns that are refreshed when the cutoff slider moves, mapped

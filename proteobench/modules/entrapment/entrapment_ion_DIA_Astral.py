@@ -53,6 +53,12 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
     """
 
     module_id: str = "entrapment_DIA_ion_Astral"
+    # Parameter field template, relative to proteobench/io/params/json/.
+    PARAMS_JSON: str = "Entrapment/entrapment_DIA_ion.json"
+    # Raw input files of the benchmark, offered for download.
+    RAW_DATA_URL: str = (
+        "https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz"
+    )
 
     def __init__(
         self,

@@ -120,11 +120,7 @@ class VariablesDIAEntrapmentAstral:
 
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/entrapment-dia-astral/"
-    raw_data_url: str = (
-        "https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz"
-    )
 
-    additional_params_json: str = "../proteobench/io/params/json/Entrapment/entrapment_DIA_ion.json"
     title: str = "FDRBench - DIA Ion Entrapment (Astral)"
     prefix_params: str = "ion_dia_entrapment_Astral_"
     params_json_dict: str = "params_json_dict_lfq_ion_dia_entrapment_astral"

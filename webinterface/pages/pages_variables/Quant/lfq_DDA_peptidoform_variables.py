@@ -106,7 +106,6 @@ class VariablesDDAQuant:
         default_factory=lambda: ["DDA", "quantification", "peptidoform", "modified peptide", "LFQ", "QExactive"]
     )
 
-    additional_params_json: str = "../webinterface/configuration/dda_quant.json"
 
     description_module_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/introduction_DDA_quan_peptidoforms.md"
     description_files_md: str = "pages/markdown_files/Quant/lfq/DDA/peptidoform/file_description.md"
@@ -124,7 +123,6 @@ class VariablesDDAQuant:
     title: str = "DDA peptidoform quantification"
     y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
 
-    additional_params_json: str = "../proteobench/io/params/json/Quant/quant_lfq_DDA_peptidoform.json"
     prefix_params: str = "lfq_peptidoform_dda_quant_"
     params_json_dict: str = "params_json_dict_lfq_peptidoform_dda_quant"
     params_file_dict: str = "params_file_dict_lfq_peptidoform_dda_quant"

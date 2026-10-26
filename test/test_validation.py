@@ -228,12 +228,23 @@ def test_charge_missing_param_warns_not_errors():
 
 
 def test_peptide_length_out_of_range_errors():
-    df = make_standard_df(Sequence=["AAA", "A" * 40, "PEPTIDEK", "ELVISLIVESR"])
+    df = make_standard_df(proforma=["AAA", "A" * 40, "PEPTIDEK", "ELVISLIVESR"])
     issues = check_peptide_length(df, make_params(), ModuleValidationConfig())
     errors = [i for i in issues if i.severity == Severity.ERROR]
     assert len(errors) == 1
     assert errors[0].code == "peptide_length_out_of_range"
     assert "AAA" in errors[0].examples
+
+
+def test_peptide_length_ignores_modification_annotations():
+    # "VFR[Oxidation]RDTHK" is 8 residues once the bracketed modification is
+    # stripped, not 17 as a naive alpha-character count over the raw proforma
+    # string would suggest (see CompOmics/ProteoBench issue: modification
+    # notation inflating peptide length).
+    df = make_standard_df(proforma=["VFR[Oxidation]RDTHK", "PEPTIDEK", "ELVISLIVESR", "SAMPLERPEPK"])
+    params = make_params(min_peptide_length=6, max_peptide_length=11)
+    issues = check_peptide_length(df, params, ModuleValidationConfig())
+    assert not any(i.severity == Severity.ERROR for i in issues)
 
 
 def test_peptide_length_missing_param_warns():

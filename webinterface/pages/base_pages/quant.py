@@ -86,6 +86,10 @@ class QuantUIObjects(BaseUIModule):
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
+        from pages.base_pages.utils.auth import render_upload_tab_signin_reminder
+
+        render_upload_tab_signin_reminder()
+
         # Display software selector and AlphaDIA info outside the form so it updates immediately
         tab2_upload_results.show_software_selector_and_alphadia_info(
             variables=self.variables,
@@ -223,6 +227,9 @@ class QuantUIObjects(BaseUIModule):
 
             tab6_submit_results.generate_additional_parameters_fields_submission(
                 variables=self.variables,
+                user_input=self.user_input,
+            )
+            tab6_submit_results.generate_submitter_identity(
                 user_input=self.user_input,
             )
             tab6_submit_results.generate_comments_section(

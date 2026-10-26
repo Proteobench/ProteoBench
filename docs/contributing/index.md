@@ -16,6 +16,7 @@ parameter-homogenization
 repo-layout
 submission-validation
 reviewing-a-submission
+submitter-identity
 contributors
 changelog
 ```

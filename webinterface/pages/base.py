@@ -1,7 +1,11 @@
+import os
+
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
 from pages.base_pages.utils.metrics_help import context_for_tab_method, render_metrics_help
+
+from proteobench.io.params import PARAMS_JSON_DIR
 
 # The guided tour is an optional driver.js overlay. Importing it can fail when the
 # installed streamlit_tour is incompatible with the streamlit version (e.g.
@@ -36,6 +40,8 @@ class BaseStreamlitUI:
         except KeyError:
             token = ""
         self.ionmodule = ionmodule(token=token)
+        # The parameter template is defined once, on the module class.
+        self.variables.additional_params_json = os.path.join(PARAMS_JSON_DIR, self.ionmodule.PARAMS_JSON)
         self.parsesettingsbuilder = parsesettingsbuilder(
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables.parse_settings_dir
         )
@@ -52,7 +58,7 @@ class BaseStreamlitUI:
             the popover shows, because the in-depth tab does not display the main plot.
         """
         st.title(self.variables.title)
-        raw_data_url = getattr(self.variables, "raw_data_url", None)
+        raw_data_url = getattr(self.ionmodule, "RAW_DATA_URL", None)
         doc_col, download_col, metrics_col = st.columns(3)
         with doc_col:
             st.link_button(

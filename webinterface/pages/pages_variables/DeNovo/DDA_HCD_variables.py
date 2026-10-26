@@ -114,7 +114,6 @@ class VariablesDDADeNovo:
     texts: Type[WebpageTexts] = WebpageTexts
     doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dda/denovo-dda-hcd/"
 
-    additional_params_json: str = "../proteobench/io/params/json/denovo/denovo_DDA_HCD.json"
     title: str = "De Novo Identification (DDA - HCD) Module"
     prefix_params: str = "ion_dda_hcd_denovo_"
     params_json_dict: str = "params_json_dict_ion_dda_hcd_denovo"

@@ -10,6 +10,7 @@ or proposing changes. If you're looking to submit a **benchmark run** instead, s
 propose-a-module
 development-setup
 local-usage
+mcp-server
 adding-a-module
 modifying-a-module
 parameter-homogenization

@@ -715,44 +715,81 @@ class ParseSettingsDeNovo:
                 sequence = sequence.replace(key, value)
         return sequence
 
-    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length=False) -> List[float]:
+    def format_scores(self, aa_scores: Any, peptidoform: Peptidoform, fix_aa_length: bool = True) -> List[float]:
         """
-        Format the amino acid scores into a list of float numbers.
+        Format the amino acid scores into a list of float numbers, one per scored position.
 
         Parameters
         ----------
-        aa_scores : List[float]
-            The input list of scores.
+        aa_scores : Any
+            Per-position scores, either a list of floats or a string repr of one.
+        peptidoform : Peptidoform
+            The peptidoform the scores belong to, used to reconcile their length.
+        fix_aa_length : bool
+            Collapse surplus leading scores onto the N-terminal group (see below). On by
+            default: a length mismatch here surfaces much later as an opaque "All arrays must
+            be of the same length" from `collapse_aa_scores`.
 
         Returns
         -------
         List[float]
             The formatted list of scores.
         """
-        # Fix aa_score length as this modification is collapsed from 2 tokens to 1
-        if (
-            fix_aa_length
-            and isinstance(peptidoform.properties["n_term"], list)
-            and peptidoform.properties["n_term"][0].value == "H-2C1O1"
-        ):
-            aa_scores = list(np.mean(aa_scores[0:2])) + aa_scores[2:]
-
-        if isinstance(aa_scores, list) and all(isinstance(i, float) for i in aa_scores):
-            return aa_scores
-
         if isinstance(aa_scores, str):
             aa_scores = eval(aa_scores)
-            # aa_scores = aa_scores.split(",")  # TODO: make it cofigurable separator?
-            # aa_scores = [float(score) for score in aa_scores]
+
+        # A tool may report one score per N-terminal modification while ProteoBench scores the
+        # N-terminal group as a single position, which leaves aa_scores longer than the number
+        # of scored positions. Collapse the surplus leading scores into their mean, so the
+        # N-terminal score stays comparable in magnitude with single-token positions.
+        #
+        # Keyed on the length difference, not on the modification's identity. The previous
+        # version tested `n_term[0].value == "H-2C1O1"` -- the composition of carbamylation plus
+        # ammonia loss written as ONE ProForma tag -- which missed the same chemistry written as
+        # two tags, missed every other stacked pair, and depended on how the ProForma parser of
+        # the day reported the group. It was also unreachable (no caller passed
+        # fix_aa_length=True) and raised TypeError if it ever had been: `list(np.mean(...))`
+        # calls list() on a NumPy scalar.
+        if fix_aa_length and isinstance(aa_scores, list):
+            surplus = len(aa_scores) - self.get_length_peptidoform_with_nterm(peptidoform)
+            if surplus > 0 and peptidoform.properties["n_term"]:
+                aa_scores = [float(np.mean(aa_scores[: surplus + 1]))] + list(aa_scores[surplus + 1 :])
+
         return aa_scores
 
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
 
     def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
-        if peptidoform.properties["n_term"] is None:
+        """
+        Number of scored positions in a peptidoform: one per residue, plus one for the
+        N-terminus if it carries any modification at all.
+
+        The N-terminal group counts **once**, however many modifications are stacked on it,
+        because that is how `DenovoScores.convert_peptidoform` tokenizes it: it appends a
+        single ``("", n_mod)`` token holding the whole ``n_term`` list, and `get_token_str` /
+        `get_token_mass` fold every stacked modification onto that one token.
+
+        Counting one position per modification instead -- as this did -- made the two disagree
+        for any peptidoform with two or more N-terminal modifications. The per-residue match
+        arrays are built per token, so the broadcast `aa_scores` came out one element longer and
+        `collapse_aa_scores` raised "All arrays must be of the same length", killing a whole run
+        over a handful of rows. Seen first on a 133-residue InstaNovo vocabulary that emits
+        carbamylation and ammonia loss stacked on one terminus: 2 rows in 779,863.
+
+        Parameters
+        ----------
+        peptidoform : Peptidoform
+            The peptidoform to measure.
+
+        Returns
+        -------
+        int
+            Residue count, plus one if the N-terminus is modified.
+        """
+        if not peptidoform.properties["n_term"]:
             return len(peptidoform)
-        return len(peptidoform) + len(peptidoform.properties["n_term"])
+        return len(peptidoform) + 1
 
     def add_features(self, df: pd.DataFrame):
         columns_to_keep_gt = [

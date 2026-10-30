@@ -1,10 +1,12 @@
 """
-Shared plotting helpers.
+Thin helpers over plotly primitives, shared by every plot generator.
 
 Holds ``create_kde_distribution_plot``, a replacement for
 ``plotly.figure_factory.create_distplot``, which plotly 7.0.0 removed. Both fold-change
 distribution plots called it with ``show_hist=False, show_rug=False``, so the only part
-they used was the kernel density estimate; this reproduces that figure directly.
+they used was the kernel density estimate; this reproduces that figure directly. Alongside it
+sit the placeholder figure the plots fall back to when their input is unusable, and the colour
+conversion their shaded bands need.
 """
 
 from typing import List, Sequence
@@ -111,3 +113,55 @@ def fill_density_traces(fig: go.Figure, opacity: float = 0.4) -> go.Figure:
     for trace in traces:
         trace.update(fill="tozeroy", opacity=opacity)
     return fig
+
+
+def empty_figure(message: str) -> go.Figure:
+    """
+    Build a placeholder figure carrying an explanatory annotation.
+
+    Used by plots that cannot be drawn because their input is missing or insufficient, so the
+    web interface shows the reason instead of an empty plot area.
+
+    Parameters
+    ----------
+    message : str
+        Text shown in the center of the empty plot area.
+
+    Returns
+    -------
+    go.Figure
+        A figure with no traces and a centered annotation.
+    """
+    fig = go.Figure()
+    fig.add_annotation(
+        text=message,
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=0.5,
+        showarrow=False,
+    )
+    return fig
+
+
+def hex_to_rgba(color: str, alpha: float) -> str:
+    """
+    Convert a hex color string to an ``rgba(...)`` string with the given opacity.
+
+    Parameters
+    ----------
+    color : str
+        A ``#rrggbb`` hex color string. Any other format falls back to mid-gray.
+    alpha : float
+        Opacity between 0 and 1.
+
+    Returns
+    -------
+    str
+        A CSS-style ``rgba(r, g, b, a)`` color string.
+    """
+    color = color.lstrip("#")
+    if len(color) != 6:
+        return f"rgba(128, 128, 128, {alpha})"
+    r, g, b = bytes.fromhex(color)
+    return f"rgba({r}, {g}, {b}, {alpha})"

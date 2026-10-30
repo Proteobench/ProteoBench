@@ -161,6 +161,10 @@ People who contributed to ProteoBench, in alphabetical order:
     *Department of Genome Sciences, University of Washington*, Seattle, WA, USA*
 
 .. line-block::
+    **Jeroen Van Goey**
+    *InstaDeep Ltd, London, United Kingdom*
+
+.. line-block::
     **Jesper Velgaard Olsen**
     *Novo Nordisk Foundation Center for Protein Research, Department of Cellular and Molecular Medicine, Faculty of Health and Medical Sciences, University of Copenhagen, Denmark*
 

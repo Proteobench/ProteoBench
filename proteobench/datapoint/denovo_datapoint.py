@@ -21,22 +21,44 @@ from proteobench.datapoint.datapoint_base import DatapointBase
 from proteobench.score.denovoscores import AMBIGUITY_COMBOS, get_ambiguity_suffix
 
 
-def calculate_prc(scores_all, is_correct, n_spectra) -> dict:
+def calculate_prc(scores_all, is_correct, n_spectra, n_covered=None) -> dict:
     """
     Single-point precision/recall/coverage over every prediction (no score threshold).
+
+    Parameters
+    ----------
+    scores_all : sequence
+        The score of every scored item: one per prediction at peptide level, one per
+        predicted residue at amino-acid level.
+    is_correct : sequence of bool
+        Whether each scored item matched the ground truth.
+    n_spectra : int
+        Size of the ground truth the run is measured against: the number of spectra at
+        peptide level, the number of ground-truth residues at amino-acid level.
+    n_covered : int, optional
+        How much of that ground truth the tool attempted, in the same unit as
+        `n_spectra`. Defaults to `len(scores_all)`, which is only the same thing when
+        scored items and ground-truth items are counted in the same unit -- true at
+        peptide level, where one prediction belongs to one spectrum, and false at
+        amino-acid level, where the scored items are *predicted* residues while the
+        ground truth is counted in *reference* residues. Passing the two separately keeps
+        coverage a fraction of the ground truth rather than a ratio between two
+        independent counts, which could exceed 1 for a tool whose predicted peptides are
+        collectively longer than the reference.
     """
     is_correct = np.asarray(is_correct, dtype=bool)
     ci = len(scores_all)
     c = int(is_correct.sum())
+    covered = ci if n_covered is None else n_covered
 
     return {
         "precision": c / ci,
         "recall": c / n_spectra,
-        "coverage": ci / n_spectra,
+        "coverage": covered / n_spectra,
     }
 
 
-def get_prc_curve(scores_all, is_correct, n_spectra) -> pd.DataFrame:
+def get_prc_curve(scores_all, is_correct, n_spectra, n_covered=None) -> pd.DataFrame:
     """
     Full-resolution precision-vs-coverage curve, with one point per DISTINCT score value
     rather than one per prediction. Ties are common (many tools emit coarse or repeated
@@ -48,6 +70,17 @@ def get_prc_curve(scores_all, is_correct, n_spectra) -> pd.DataFrame:
     were processed in), and, as a side effect, shrinks the curve for any tool whose scores
     are heavily quantized. Both the AUC integration and the stored/plotted curve (after
     `downsample_curve`) are derived from this same result.
+
+    `n_covered` carries the same meaning as in `calculate_prc`: how much of the ground
+    truth the tool attempted, in the ground truth's own unit. The x-axis is the fraction
+    of *included* items scaled by that attempted fraction, so the curve ends exactly at
+    the single-point coverage and stays within [0, 1]. At peptide level `n_covered`
+    defaults to the number of scored items, which makes the scale factor 1 and the axis
+    `rank / n_spectra` as before. At amino-acid level the two counts are in different
+    units -- predicted residues versus reference residues -- so the scaling also spreads
+    the difference evenly over the included residues, which assumes they are
+    representative in reference length; that is an approximation, but a bounded and
+    monotone one, where the unscaled axis could run past 1.
     """
     scores_all = np.asarray(scores_all, dtype=float)
     is_correct = np.asarray(is_correct, dtype=bool)
@@ -62,7 +95,8 @@ def get_prc_curve(scores_all, is_correct, n_spectra) -> pd.DataFrame:
     rank = np.arange(1, len(scores_all) + 1)
     cum_correct = np.cumsum(sorted_correct)
     precision = cum_correct / rank
-    coverage = rank / n_spectra
+    covered = len(scores_all) if n_covered is None else n_covered
+    coverage = (rank / len(scores_all)) * (covered / n_spectra)
 
     # Keep only the last (highest-rank) row of each run of equal scores -- the sole point in
     # that run where "included" actually changes as the threshold crosses this score value.
@@ -338,6 +372,9 @@ class DenovoDatapoint(DatapointBase):
             df_filtered = df.dropna(subset="peptidoform")
             scores_all = df_filtered["score"].tolist()
             is_correct = df_filtered[match_col].isin(evaluation_list).tolist()
+            # One prediction belongs to one spectrum, so the number of scored items is
+            # already the number of spectra covered.
+            n_covered = len(scores_all)
 
         elif level == "aa":
             n_aa = df["aa_matches_gt"].apply(len).sum()
@@ -346,14 +383,22 @@ class DenovoDatapoint(DatapointBase):
             scores_all = df_aa["aa_score"].tolist()
             is_correct = df_aa["aa_match"].tolist()
             n = n_aa
+            # Coverage is the share of the reference the tool attempted, so it is counted
+            # in reference residues -- the residues of the spectra that kept a prediction.
+            # `len(scores_all)` counts *predicted* residues instead, which is a different
+            # population: a tool whose predicted peptides are collectively longer than the
+            # reference then reports a coverage above 1. Precision and recall are left
+            # alone; their denominators (predicted residues, reference residues) are each
+            # already the right one for what they measure.
+            n_covered = int(df_filtered["aa_matches_gt"].apply(len).sum())
 
         else:
             raise Exception(
                 "Only `aa` and `peptide` levels for accuracy calculation are supported. Should never happen."
             )
 
-        res = calculate_prc(scores_all=scores_all, is_correct=is_correct, n_spectra=n)
-        full_curve = get_prc_curve(scores_all=scores_all, is_correct=is_correct, n_spectra=n)
+        res = calculate_prc(scores_all=scores_all, is_correct=is_correct, n_spectra=n, n_covered=n_covered)
+        full_curve = get_prc_curve(scores_all=scores_all, is_correct=is_correct, n_spectra=n, n_covered=n_covered)
         res["auc"] = calculate_auc(full_curve)
         stored_curve = downsample_curve(full_curve)
         res["curve"] = {"coverage": stored_curve["coverage"].tolist(), "precision": stored_curve["precision"].tolist()}

@@ -785,6 +785,12 @@ def parse_peptidoform_or_none(proforma: Any) -> Peptidoform | None:
 
 
 class ParseSettingsDeNovo:
+    #: Fraction of PSMs that may be dropped for unalignable scores before the conversion is
+    #: refused outright. A handful of malformed rows is a tool quirk worth skipping; a large
+    #: share means the scores and the peptidoform tokens do not correspond at all, and scoring
+    #: whatever survives would publish a datapoint built on a silent subset of the submission.
+    max_unscorable_fraction = 0.01
+
     def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
         self.mapper = parse_settings["mapper"]
         self.spectrum_id_mapper = parse_settings["spectrum_id_mapper"]
@@ -887,6 +893,10 @@ class ParseSettingsDeNovo:
         stacking cannot explain. Such rows are dropped and counted, never padded to the expected
         length, which would invent scores.
 
+        Dropping is only safe while it stays rare. Past `max_unscorable_fraction` the scores and
+        the tokens do not correspond at all, and scoring the remainder would publish a datapoint
+        silently built on part of the submission -- so the conversion is refused instead.
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -896,30 +906,112 @@ class ParseSettingsDeNovo:
         -------
         pd.DataFrame
             The frame without the unscorable rows.
+
+        Raises
+        ------
+        ValueError
+            If more than `max_unscorable_fraction` of the PSMs cannot be aligned.
         """
         expected = df["peptidoform"].apply(self.get_length_peptidoform_with_nterm)
         supplied = df["aa_scores"].apply(lambda scores: len(scores) if hasattr(scores, "__len__") else -1)
         scorable = supplied == expected
 
         n_dropped = int((~scorable).sum())
-        if n_dropped:
-            examples = "; ".join(
-                f"{peptidoform.proforma} ({n_supplied} scores, {n_expected} positions)"
-                for peptidoform, n_supplied, n_expected in zip(
-                    df.loc[~scorable, "peptidoform"].head(3),
-                    supplied[~scorable].head(3),
-                    expected[~scorable].head(3),
-                )
-            )
-            logging.warning(
-                "Dropped %d of %d PSMs whose score count does not match their peptidoform's "
-                "scored positions; they would otherwise abort scoring. Examples: %s",
-                n_dropped,
-                len(df),
-                examples,
-            )
+        if not n_dropped:
+            return df
 
+        examples = "; ".join(
+            f"{peptidoform.proforma} ({n_supplied if n_supplied >= 0 else 'no'} scores,"
+            f" {n_expected} scored positions)"
+            for peptidoform, n_supplied, n_expected in zip(
+                df.loc[~scorable, "peptidoform"].head(3),
+                supplied[~scorable].head(3),
+                expected[~scorable].head(3),
+            )
+        )
+        message = (
+            f"The amino-acid scores could not be lined up with the peptidoform tokens for "
+            f"{n_dropped} of {len(df)} PSMs ({n_dropped / len(df):.1%}): the number of scores "
+            f"reported does not match the number of scored positions, so there is no way to tell "
+            f"which score belongs to which position. Examples: {examples}."
+        )
+
+        if n_dropped > self.max_unscorable_fraction * len(df):
+            logging.error(
+                "%s This is more than %.1f%% of the submission, so the scores and the tokens do "
+                "not correspond at all rather than a few rows being malformed. Refusing to score "
+                "the remainder, which would report metrics computed on a silent subset of the "
+                "data. Check that the per-residue score column holds one score per residue (plus "
+                "one for a modified N-terminus) for every PSM.",
+                message,
+                self.max_unscorable_fraction * 100,
+            )
+            raise ValueError(message)
+
+        logging.warning("%s Those PSMs were dropped; the rest were scored normally.", message)
         return df[scorable]
+
+    def fill_missing_aa_scores(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Fill in per-residue scores wherever the tool did not report any.
+
+        A column that is present but empty counts as not provided: InstaNovo's diffusion and
+        refinement paths emit ``token_log_probs`` as an empty field on every row, and testing
+        only for the column's presence left those rows holding a NaN that no later step can use.
+        Filled per row rather than per column, so a file that supplies scores for only some of
+        its PSMs is handled the same way.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Frame with ``peptidoform`` and ``score`` columns, and optionally ``aa_scores``.
+
+        Returns
+        -------
+        pd.DataFrame
+            The frame with ``aa_scores`` populated wherever a peptide score allowed it.
+        """
+        if "aa_scores" not in df.columns:
+            df["aa_scores"] = self.broadcast_peptide_score(df)
+            return df
+
+        missing = df["aa_scores"].apply(
+            lambda scores: scores is None
+            or (isinstance(scores, float) and np.isnan(scores))
+            or (isinstance(scores, str) and not scores.strip())
+        )
+        if missing.any():
+            # An all-missing column arrives as a float (or string) dtype that cannot hold lists;
+            # assigning into it raises "could not convert ... for dtype 'float64'" under pandas 3.
+            df["aa_scores"] = df["aa_scores"].astype(object)
+            df.loc[missing, "aa_scores"] = self.broadcast_peptide_score(df[missing])
+        return df
+
+    def broadcast_peptide_score(self, df: pd.DataFrame) -> pd.Series:
+        """
+        Spread each row's peptide-level score across its scored positions.
+
+        The stand-in for tools that report no per-residue confidence. A row whose peptide score
+        is itself missing gets no scores at all: a list of NaN would have the right length and
+        the wrong meaning, and `drop_unscorable_rows` should see it for what it is.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Frame with ``peptidoform`` and ``score`` columns.
+
+        Returns
+        -------
+        pd.Series
+            One list of scores per row, or None where the peptide score is missing.
+        """
+
+        def broadcast(row):
+            if pd.isna(row["score"]):
+                return None
+            return [row["score"]] * self.get_length_peptidoform_with_nterm(row["peptidoform"])
+
+        return df.apply(broadcast, axis=1)
 
     def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
         """
@@ -1067,11 +1159,13 @@ class ParseSettingsDeNovo:
             df["peptidoform"] = df["proforma"].apply(parse_peptidoform_or_none)
             df = df.dropna(subset="peptidoform")
 
-        # If AA scores are not provided, simulate them from peptide score
-        if "aa_scores" not in df.columns:
-            df["aa_scores"] = df.apply(
-                lambda row: [row["score"]] * self.get_length_peptidoform_with_nterm(row["peptidoform"]), axis=1
-            )
+        # If AA scores are not provided, simulate them from peptide score. A column that is
+        # present but empty counts as not provided: InstaNovo's diffusion and refinement paths
+        # emit `token_log_probs` as an empty field on every row, and testing only for the
+        # column's presence left those rows with a NaN that no later step can use. Done per row
+        # rather than per column so a file that supplies scores for only some of its PSMs is
+        # handled the same way.
+        df = self.fill_missing_aa_scores(df)
 
         df["aa_scores"] = df.apply(lambda x: self.format_scores(x["aa_scores"], x["peptidoform"]), axis=1)
         df = self.drop_unscorable_rows(df)

@@ -356,7 +356,15 @@ class TestEveryModificationMassResolves:
 
 
 class TestUnscorableRowsAreDropped:
-    """The last gate before scoring: one bad row must not abort the whole run."""
+    """The last gate before scoring: one bad row must not abort the whole run.
+
+    These exercise the drop mechanics on deliberately tiny frames, so the wholesale-misalignment
+    threshold is lifted; `TestWholesaleMisalignmentIsRefused` covers the threshold itself.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _allow_any_fraction(self, settings):
+        settings.max_unscorable_fraction = 1.0
 
     def _frame(self, rows):
         import pandas as pd
@@ -395,7 +403,8 @@ class TestUnscorableRowsAreDropped:
         frame = self._frame([(peptidoform, [0.9] * 3)])
         with caplog.at_level("WARNING"):
             settings.drop_unscorable_rows(frame)
-        assert "Dropped 1 of 1 PSMs" in caplog.text
+        assert "could not be lined up with the peptidoform tokens for 1 of 1 PSMs" in caplog.text
+        assert "Those PSMs were dropped" in caplog.text
 
     def test_collapse_survives_what_used_to_raise(self, settings, scorer):
         """End to end: a frame holding one bad row still flattens."""
@@ -411,3 +420,101 @@ class TestUnscorableRowsAreDropped:
             aa_exact_dn=[m["aa_exact_dn"] for m in matches],
         )
         assert len(collapse_aa_scores(kept, evaluation_type="mass")) == n
+
+
+class TestMissingPerResidueScoresFallBackToThePeptideScore:
+    """A present-but-empty score column must behave like an absent one.
+
+    InstaNovo's diffusion and refinement paths emit `token_log_probs` as an empty field on
+    every row, so testing only for the column's presence left those PSMs with a NaN that no
+    later step can use -- 779,879 of 779,879 rows dropped.
+    """
+
+    def _frame(self, scores, peptide_scores=None):
+        import pandas as pd
+
+        peptidoform = Peptidoform(SINGLE_MOD)
+        return pd.DataFrame(
+            {
+                "peptidoform": [peptidoform] * len(scores),
+                "score": peptide_scores if peptide_scores is not None else [-0.5] * len(scores),
+                "aa_scores": scores,
+            }
+        )
+
+    @pytest.mark.parametrize(
+        "scores",
+        [
+            [np.nan, np.nan],  # all missing: the column arrives as a float dtype
+            [np.nan, ""],  # a blank string counts as missing too
+            [np.nan, [0.1] * 16],  # only some rows missing
+        ],
+        ids=["all_missing", "blank_string", "partially_missing"],
+    )
+    def test_missing_scores_are_filled_whatever_the_column_dtype(self, settings, scores):
+        """A column of only missing values gets a float (or str) dtype that cannot hold lists,
+        so the fill has to cast to object first or pandas 3 refuses the assignment."""
+        frame = self._frame(scores)
+        n = settings.get_length_peptidoform_with_nterm(Peptidoform(SINGLE_MOD))
+        filled = settings.fill_missing_aa_scores(frame)
+        assert all(len(row) == n for row in filled["aa_scores"])
+        assert list(filled["aa_scores"].iloc[0]) == [-0.5] * n
+        assert len(settings.drop_unscorable_rows(filled)) == len(scores)
+
+    def test_supplied_scores_are_left_alone(self, settings):
+        n = settings.get_length_peptidoform_with_nterm(Peptidoform(SINGLE_MOD))
+        filled = settings.fill_missing_aa_scores(self._frame([[0.1] * n]))
+        assert list(filled["aa_scores"].iloc[0]) == [0.1] * n
+
+    def test_an_absent_column_is_filled_too(self, settings):
+        frame = self._frame([np.nan]).drop(columns="aa_scores")
+        n = settings.get_length_peptidoform_with_nterm(Peptidoform(SINGLE_MOD))
+        assert len(settings.fill_missing_aa_scores(frame)["aa_scores"].iloc[0]) == n
+
+    def test_a_missing_peptide_score_broadcasts_nothing(self, settings):
+        """A list of NaN would have the right length and the wrong meaning, and would sail
+        through the length gate into the precision-coverage curve."""
+        frame = self._frame([np.nan], peptide_scores=[np.nan])
+        assert settings.broadcast_peptide_score(frame).iloc[0] is None
+
+
+class TestWholesaleMisalignmentIsRefused:
+    """Dropping rows is only safe while it stays rare."""
+
+    def _frame(self, n_rows, n_scores):
+        import pandas as pd
+
+        peptidoform = Peptidoform(SINGLE_MOD)
+        return pd.DataFrame({"peptidoform": [peptidoform] * n_rows, "aa_scores": [[0.9] * n_scores] * n_rows})
+
+    def test_a_few_bad_rows_are_dropped(self, settings):
+        peptidoform = Peptidoform(SINGLE_MOD)
+        n = settings.get_length_peptidoform_with_nterm(peptidoform)
+        frame = self._frame(200, n)
+        frame.loc[0, "aa_scores"] = [0.9] * (n - 3)
+        assert len(settings.drop_unscorable_rows(frame)) == 199
+
+    def test_wholesale_misalignment_raises(self, settings):
+        frame = self._frame(200, 4)
+        with pytest.raises(ValueError, match="could not be lined up with the peptidoform tokens"):
+            settings.drop_unscorable_rows(frame)
+
+    def test_the_refusal_explains_itself(self, settings, caplog):
+        """The submitter has to be told what is wrong, not just that scoring stopped."""
+        frame = self._frame(200, 4)
+        with caplog.at_level("ERROR"):
+            with pytest.raises(ValueError):
+                settings.drop_unscorable_rows(frame)
+        assert "do not correspond at all" in caplog.text
+        assert "one score per residue" in caplog.text
+
+    def test_the_threshold_is_tunable(self, settings):
+        """Exposed so a module can relax it without editing the check."""
+        peptidoform = Peptidoform(SINGLE_MOD)
+        n = settings.get_length_peptidoform_with_nterm(peptidoform)
+        frame = self._frame(10, n)
+        frame.loc[0, "aa_scores"] = [0.9] * (n - 3)  # 10% unscorable
+        with pytest.raises(ValueError):
+            settings.drop_unscorable_rows(frame)
+        settings.max_unscorable_fraction = 0.5
+        assert len(settings.drop_unscorable_rows(frame)) == 9

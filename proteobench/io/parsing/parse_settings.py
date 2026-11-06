@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from collections import defaultdict
@@ -874,6 +875,52 @@ class ParseSettingsDeNovo:
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
 
+    def drop_unscorable_rows(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Drop rows whose scores cannot be lined up with their peptidoform's scored positions.
+
+        The last gate before scoring. `collapse_aa_scores` flattens ``aa_scores`` against
+        per-token match arrays and raises "All arrays must be of the same length" if any single
+        row disagrees, losing a whole run over a handful of rows. `format_scores` has already
+        reconciled the one reconcilable cause (a score per N-terminal modification), so anything
+        still mismatched is a genuine fault in the tool's output -- too few scores, or a surplus
+        stacking cannot explain. Such rows are dropped and counted, never padded to the expected
+        length, which would invent scores.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Standard-format frame with ``peptidoform`` and ``aa_scores`` columns.
+
+        Returns
+        -------
+        pd.DataFrame
+            The frame without the unscorable rows.
+        """
+        expected = df["peptidoform"].apply(self.get_length_peptidoform_with_nterm)
+        supplied = df["aa_scores"].apply(lambda scores: len(scores) if hasattr(scores, "__len__") else -1)
+        scorable = supplied == expected
+
+        n_dropped = int((~scorable).sum())
+        if n_dropped:
+            examples = "; ".join(
+                f"{peptidoform.proforma} ({n_supplied} scores, {n_expected} positions)"
+                for peptidoform, n_supplied, n_expected in zip(
+                    df.loc[~scorable, "peptidoform"].head(3),
+                    supplied[~scorable].head(3),
+                    expected[~scorable].head(3),
+                )
+            )
+            logging.warning(
+                "Dropped %d of %d PSMs whose score count does not match their peptidoform's "
+                "scored positions; they would otherwise abort scoring. Examples: %s",
+                n_dropped,
+                len(df),
+                examples,
+            )
+
+        return df[scorable]
+
     def get_length_peptidoform_with_nterm(self, peptidoform: Peptidoform):
         """
         Number of scored positions in a peptidoform: one per residue, plus one for the
@@ -1027,6 +1074,7 @@ class ParseSettingsDeNovo:
             )
 
         df["aa_scores"] = df.apply(lambda x: self.format_scores(x["aa_scores"], x["peptidoform"]), axis=1)
+        df = self.drop_unscorable_rows(df)
 
         columns_to_keep = ["spectrum_id", "proforma", "peptidoform", "score", "aa_scores"]
         df = df[columns_to_keep]

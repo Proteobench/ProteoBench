@@ -353,3 +353,61 @@ class TestEveryModificationMassResolves:
         peptidoform = parse_peptidoform_or_none("[UNIMOD:5][UNIMOD:385]-PEPC[UNIMOD:4]TIDEM[UNIMOD:35]K")
         for token in scorer.convert_peptidoform(peptidoform):
             assert isinstance(scorer.get_token_mass(token), float)
+
+
+class TestUnscorableRowsAreDropped:
+    """The last gate before scoring: one bad row must not abort the whole run."""
+
+    def _frame(self, rows):
+        import pandas as pd
+
+        return pd.DataFrame({"peptidoform": [p for p, _ in rows], "aa_scores": [sc for _, sc in rows]})
+
+    def test_mismatched_rows_are_dropped_and_good_ones_kept(self, settings):
+        good = Peptidoform(SINGLE_MOD)  # residues + 1 scored positions
+        n = settings.get_length_peptidoform_with_nterm(good)
+        frame = self._frame(
+            [
+                (good, [0.9] * n),  # correct
+                (good, [0.9] * (n - 2)),  # too few: a genuine fault
+                (good, [0.9] * (n + 3)),  # surplus stacking cannot explain
+                (Peptidoform(UNMODIFIED), [0.9] * len(Peptidoform(UNMODIFIED))),  # correct
+            ]
+        )
+        out = settings.drop_unscorable_rows(frame)
+        assert len(out) == 2
+        assert list(out.index) == [0, 3]
+
+    def test_a_clean_frame_is_untouched(self, settings):
+        peptidoform = Peptidoform(SINGLE_MOD)
+        n = settings.get_length_peptidoform_with_nterm(peptidoform)
+        frame = self._frame([(peptidoform, [0.9] * n)] * 3)
+        assert len(settings.drop_unscorable_rows(frame)) == 3
+
+    def test_unsized_scores_are_dropped(self, settings):
+        """A NaN `aa_scores` has no length at all and would raise on `chain(*)`."""
+        frame = self._frame([(Peptidoform(UNMODIFIED), np.nan)])
+        assert len(settings.drop_unscorable_rows(frame)) == 0
+
+    def test_the_drop_is_reported(self, settings, caplog):
+        """Dropping data silently would be its own bug; the count must reach the log."""
+        peptidoform = Peptidoform(SINGLE_MOD)
+        frame = self._frame([(peptidoform, [0.9] * 3)])
+        with caplog.at_level("WARNING"):
+            settings.drop_unscorable_rows(frame)
+        assert "Dropped 1 of 1 PSMs" in caplog.text
+
+    def test_collapse_survives_what_used_to_raise(self, settings, scorer):
+        """End to end: a frame holding one bad row still flattens."""
+        import pandas as pd
+
+        good = Peptidoform(SINGLE_MOD)
+        n = settings.get_length_peptidoform_with_nterm(good)
+        frame = self._frame([(good, [0.9] * n), (good, [0.9] * (n - 2))])
+        kept = settings.drop_unscorable_rows(frame)
+        matches = [scorer.evaluate_match(Peptidoform(UNMODIFIED), p) for p in kept["peptidoform"]]
+        kept = kept.assign(
+            aa_matches_dn=[m["aa_matches_dn"] for m in matches],
+            aa_exact_dn=[m["aa_exact_dn"] for m in matches],
+        )
+        assert len(collapse_aa_scores(kept, evaluation_type="mass")) == n

@@ -220,8 +220,7 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        The loaded dataframe, with invalid N-terminal modifications filtered out
-        and double N-terminal modification aa_scores collapsed.
+        The loaded dataframe, with invalid N-terminal modifications filtered out.
     """
     VALID_NTERM = {"+42.011", "+43.006", "-17.027", "+43.006-17.027"}
     VALID_DOUBLE_NTERM = {("+43.006", "-17.027"), ("-17.027", "+43.006")}
@@ -257,32 +256,9 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
             return tuple(nterm_tokens) not in VALID_DOUBLE_NTERM
         return True  # 3+ always invalid
 
-    def _fix_scores(row) -> str:
-        sequence = str(row["sequence"])
-        scores_str = row["opt_ms_run[1]_aa_scores"]
-        nterm_tokens, aa_tokens = tokenize(sequence)
-        scores = [float(x) for x in scores_str.split(",")]
-
-        # +43.006-17.027 matched as single token but was tokenized as two
-        if (
-            len(nterm_tokens) == 1
-            and nterm_tokens[0] == "+43.006-17.027"
-            and len(scores) == len(nterm_tokens) + 1 + len(aa_tokens)
-        ):
-            averaged = [(scores[0] + scores[1]) / 2] + scores[2:]
-            return ",".join(str(x) for x in averaged)
-
-        # -17.027+43.006 always two tokens
-        if len(nterm_tokens) == 2 and tuple(nterm_tokens) in VALID_DOUBLE_NTERM:
-            averaged = [(scores[0] + scores[1]) / 2] + scores[2:]
-            return ",".join(str(x) for x in averaged)
-
-        return scores_str
-
     df = _load_casanovo(input_mztab=input_mztab)
     df = df[df["sequence"].apply(len) != 0]
     df = df[~df["sequence"].apply(_is_invalid)]
-    df["opt_ms_run[1]_aa_scores"] = df.apply(_fix_scores, axis=1)
 
     return df
 

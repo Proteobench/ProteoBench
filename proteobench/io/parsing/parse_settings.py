@@ -661,6 +661,102 @@ class ParseModificationSettings:
             return df
 
 
+_NTERM_TAG = re.compile(r"^\[([^\]]+)\]")
+
+
+def split_nterm_tags(proforma: str) -> tuple[List[str], str]:
+    """
+    Split the run of N-terminal modification tags off the front of a ProForma string.
+
+    Both spellings are recognised: the canonical ``[A][B]-SEQ`` and the ``[A]-[B]-SEQ`` that
+    a ``[sequence_mapper]`` produces by replacing one token at a time.
+
+    Parameters
+    ----------
+    proforma : str
+        The ProForma string to split.
+
+    Returns
+    -------
+    tuple[List[str], str]
+        The tag bodies in written order (without their brackets), and the rest of the string.
+    """
+    tags: List[str] = []
+    rest = proforma
+    while True:
+        match = _NTERM_TAG.match(rest)
+        if match is None:
+            break
+        after = rest[match.end() :]
+        # A leading tag belongs to the N-terminus only if the run is ultimately closed by the
+        # "-" that separates it from the first residue; anything else is not ours to touch.
+        if after.startswith("-"):
+            tags.append(match.group(1))
+            rest = after[1:]
+        elif after.startswith("["):
+            tags.append(match.group(1))
+            rest = after
+        else:
+            return [], proforma
+    return tags, rest
+
+
+def parse_peptidoform_or_none(proforma: Any) -> Peptidoform | None:
+    """
+    Parse a ProForma string, returning None for anything that is not a real prediction.
+
+    Empty peptidoforms are filtered out.
+
+    Stacked N-terminal modifications are reattached by hand. pyteomics 4.7.5 parses
+    ``[UNIMOD:5]-[UNIMOD:385]-PEPTIDE`` without complaint but keeps only the LAST tag, and
+    ``[UNIMOD:5][UNIMOD:385]-PEPTIDE`` does not parse at all -- so a tool predicting carbamylation
+    stacked with ammonia loss silently lost one of the two, leaving the N-terminus with the mass
+    of whichever tag happened to come last (-17.027 instead of +25.979). `format_scores` still
+    produced the right score LENGTH, which is exactly what made the loss invisible: the surplus
+    score was collapsed onto an N-terminal group that no longer described the prediction.
+
+    Keeping every tag also matches how the rest of the module already treats the terminus:
+    `DenovoScores.convert_peptidoform` folds the whole ``n_term`` list onto one token and
+    `get_length_peptidoform_with_nterm` counts it once, so the extra modification changes the
+    mass and the token string without changing any length.
+
+    Parameters
+    ----------
+    proforma : Any
+        The ProForma string to parse; anything blank or unparsable yields None.
+
+    Returns
+    -------
+    Peptidoform | None
+        The parsed peptidoform, or None if there is no usable prediction.
+    """
+    if not isinstance(proforma, str) or not proforma.strip():
+        return None
+
+    try:
+        tags, rest = split_nterm_tags(proforma)
+        if len(tags) < 2:
+            return Peptidoform(proforma)
+
+        # Parse the last tag through the normal path, then prepend the ones pyteomics dropped.
+        # Each is resolved by the same parser, on a throwaway single-residue peptidoform.
+        peptidoform = Peptidoform(f"[{tags[-1]}]-{rest}")
+        earlier = [Peptidoform(f"[{tag}]-X").properties["n_term"][0] for tag in tags[:-1]]
+        peptidoform.properties["n_term"] = earlier + list(peptidoform.properties["n_term"])
+
+        # ProForma accepts a free-text tag such as "[not a modification]", and the mass lookup
+        # only fails later, inside `DenovoScores.get_token_mass`. For a single tag that is
+        # pre-existing behaviour, but "[A][B]-SEQ" used to be rejected by the parser outright,
+        # so admitting it here would newly let an unresolvable tag through to blow up mid-run.
+        # Resolve the masses now and drop the row instead, as an unparsable sequence already is.
+        for modification in peptidoform.properties["n_term"]:
+            modification.mass
+
+        return peptidoform
+    except Exception:
+        return None
+
+
 class ParseSettingsDeNovo:
     def __init__(self, parse_settings: Dict[str, Any], parse_settings_module: Dict[str, Any]):
         self.mapper = parse_settings["mapper"]
@@ -750,7 +846,12 @@ class ParseSettingsDeNovo:
         # the day reported the group. It was also unreachable (no caller passed
         # fix_aa_length=True) and raised TypeError if it ever had been: `list(np.mean(...))`
         # calls list() on a NumPy scalar.
-        if fix_aa_length and isinstance(aa_scores, list):
+        #
+        # Tuples count as well as lists: every mzTab/TSV tool stores its scores as a
+        # comma-separated string, and `eval("0.1,0.2,0.9")` is a *tuple*. Accepting only
+        # `list` made this branch dead code for Casanovo, AdaNovo, ContraNovo, DeepNovo and
+        # PointNovo -- precisely the tools that can report a score per N-terminal modification.
+        if fix_aa_length and isinstance(aa_scores, (list, tuple)):
             surplus = len(aa_scores) - self.get_length_peptidoform_with_nterm(peptidoform)
             if surplus > 0 and peptidoform.properties["n_term"]:
                 aa_scores = [float(np.mean(aa_scores[: surplus + 1]))] + list(aa_scores[surplus + 1 :])
@@ -908,14 +1009,8 @@ class ParseSettingsDeNovo:
         else:
             df["proforma"] = df["sequence"]
 
-        def convert_to_peptidoform(proforma):
-            try:
-                return Peptidoform(proforma)
-            except:
-                return None
-
         if "proforma" in df.columns:
-            df["peptidoform"] = df["proforma"].apply(lambda x: convert_to_peptidoform(x))
+            df["peptidoform"] = df["proforma"].apply(parse_peptidoform_or_none)
             df = df.dropna(subset="peptidoform")
 
         # If AA scores are not provided, simulate them from peptide score

@@ -1,3 +1,4 @@
+import inspect
 import io
 import json
 import os
@@ -9,6 +10,7 @@ import requests
 import toml
 from bs4 import BeautifulSoup
 
+from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule
 from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
 from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
     DDAQuantIonModuleQExactive,
@@ -42,7 +44,22 @@ MODULE_CLASSES = {
     "DIAQuantIonModulePlasma": DIAQuantIonModulePlasma,
     "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
     "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
+    "DDAHCDDeNovoModule": DDAHCDDeNovoModule,
 }
+
+# Keys a caller may place in a submission_settings dict that are forwarded to the module's
+# `benchmarking()` only when that module actually accepts them. The module families expose
+# deliberately different knobs -- quant takes `default_cutoff_min_feature` and
+# `max_nr_observed`, de novo takes `evaluation_type` -- so forwarding any of them
+# unconditionally raises TypeError for whichever family the caller is not using.
+OPTIONAL_BENCHMARKING_KEYS = (
+    "default_cutoff_min_feature",
+    "evaluation_type",
+    "max_nr_observed",
+    "input_file_secondary",
+)
+
+REQUIRED_SUBMISSION_KEYS = ("input_file", "input_type", "param_file")
 
 DATASETS_BASE_URL = "https://proteobench.cubimed.rub.de/datasets/"
 
@@ -229,45 +246,124 @@ def get_raw_data(df, base_url="https://proteobench.cubimed.rub.de/datasets/", ou
     return hash_vis_dir
 
 
-def make_submission(submission_files=[], token="", module_name=""):
-    for submission_settings in submission_files:
-        # TODO change to the correct module
-        # Dictionary mapping module name strings to their classes
-        if module_name not in MODULE_CLASSES:
-            raise ValueError(f"Module {module_name} not recognized. Available modules: {list(MODULE_CLASSES.keys())}")
+def _is_missing(value) -> bool:
+    """
+    Whether a parsed parameter value carries no information.
 
-        module_class = MODULE_CLASSES[module_name]
-        module_obj = module_class(token="")
-        results_df = module_obj.obtain_all_data_points(all_datapoints=None)
+    `ProteoBenchParameters` coerces the string "None" to `np.nan`, so an absent parameter can
+    arrive as either `None` or NaN. List-valued parameters (`isotope_error_range`) make
+    `pd.isna` return an array rather than a bool, hence the guard.
 
-        param_file = submission_settings["param_file"]
+    Parameters
+    ----------
+    value : Any
+        The parsed parameter value.
+
+    Returns
+    -------
+    bool
+        True when the value is None or NaN.
+    """
+    if value is None:
+        return True
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):
+        return False
+
+
+def make_submission(
+    submission_files=None,
+    token: str = "",
+    module_name: str = "",
+    submission_source: str = "resubmission-script",
+) -> list:
+    """
+    Run the full submission pipeline programmatically for one or more result files.
+
+    Parameters
+    ----------
+    submission_files : list of dict, optional
+        One dict per submission. Each must carry `input_file`, `input_type` and `param_file`.
+        `user_comments` is optional. Any of `default_cutoff_min_feature`, `evaluation_type`,
+        `max_nr_observed` or `input_file_secondary` is forwarded to `benchmarking()` only if
+        the target module accepts it (see `OPTIONAL_BENCHMARKING_KEYS`).
+    token : str
+        GitHub token, used both to read the results repo and to push the pull request branch.
+    module_name : str
+        Key into `MODULE_CLASSES`.
+    submission_source : str, optional
+        Origin recorded on the pull request, which decides its labels. Defaults to
+        "resubmission-script" (label `batch-resubmission`); "local" additionally applies
+        `do-not-merge`.
+
+    Returns
+    -------
+    list of str
+        The URL of every pull request created, in submission order.
+
+    Raises
+    ------
+    ValueError
+        If `module_name` is not a known module.
+    KeyError
+        If a submission dict is missing a required key.
+    """
+    if module_name not in MODULE_CLASSES:
+        raise ValueError(f"Module {module_name} not recognized. Available modules: {list(MODULE_CLASSES.keys())}")
+    module_class = MODULE_CLASSES[module_name]
+
+    pull_request_urls = []
+    for submission_settings in submission_files or []:
+        missing = [key for key in REQUIRED_SUBMISSION_KEYS if key not in submission_settings]
+        if missing:
+            raise KeyError(f"Submission is missing {missing}; got keys {sorted(submission_settings)}.")
+
         input_file = submission_settings["input_file"]
         input_type = submission_settings["input_type"]
-        default_cutoff_min_feature = submission_settings["default_cutoff_min_feature"]
-        user_comments = submission_settings["user_comments"]
+        user_comments = submission_settings.get("user_comments", "no comments")
 
-        user_config = defaultdict(lambda: "")
+        module_obj = module_class(token=token)
 
-        results_intermediates, results_df_new, parsed_input = module_obj.benchmarking(
+        # Parse the metadata file first and seed the user input from it. Doing this before
+        # benchmarking rather than after means the datapoint is built with its real software
+        # version, checkpoint and decoding strategy instead of empty strings. Those values go
+        # into the datapoint id and from there into the pull request branch name, so a
+        # submission made without them is hard to tell apart from any other run of the same
+        # tool -- which is exactly the case when submitting several decoding variants.
+        # Neither datapoint's `intermediate_hash` depends on this input, so seeding it does
+        # not change deduplication.
+        param_obj = module_obj.load_params_file([submission_settings["param_file"]], input_type)
+        user_input = defaultdict(
+            lambda: "",
+            {key: value for key, value in vars(param_obj).items() if not _is_missing(value)},
+        )
+        user_input["comments_for_plotting"] = user_comments
+
+        accepted = inspect.signature(module_obj.benchmarking).parameters
+        benchmarking_kwargs = {
+            key: submission_settings[key]
+            for key in OPTIONAL_BENCHMARKING_KEYS
+            if key in submission_settings and key in accepted
+        }
+
+        all_datapoints = module_obj.obtain_all_data_points(all_datapoints=None)
+        _, all_datapoints, _ = module_obj.benchmarking(
             input_file,
             input_type,
-            user_config,
-            results_df,
-            default_cutoff_min_feature=default_cutoff_min_feature,
+            user_input,
+            all_datapoints,
+            **benchmarking_kwargs,
         )
 
-        results_df_new.tail(5)
-
-        try:
-            param_obj = module_obj.load_params_file([param_file], input_type)
-        except:
-            continue
-
-        pr_url = module_obj.clone_pr(
-            results_df_new,
-            param_obj,
-            remote_git="",
-            submission_comments=user_comments,
+        pull_request_urls.append(
+            module_obj.clone_pr(
+                all_datapoints,
+                param_obj,
+                remote_git="",
+                submission_comments=user_comments,
+                submission_source=submission_source,
+            )
         )
 
-        return pr_url
+    return pull_request_urls

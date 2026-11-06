@@ -211,7 +211,9 @@ Each quant benchmark module is a thin subclass of `QuantModule` that sets `modul
 
 `QuantModule.__init__` defaults `self.precursor_column_name = ""`. Most modules override it (e.g. `"precursor ion"` / `"peptidoform"`), but `DIAQuantIonModulediaSC` and `DIAQuantIonModulePlasma` instead set `self.precursor_name` (used in their inline benchmarking), leaving `precursor_column_name` empty.
 
-The `MODULE_CLASSES` dict in `utils/server_io.py` maps module class-name strings to classes for programmatic instantiation, but it currently lists **only 7** modules (QExactive DDA; AIF, Astral, diaPASEF, low input DIA; DDA and DIA peptidoform). It does **not** include the Astral DDA, ZenoTOF, Plasma, or de novo modules; `make_submission()` raises `ValueError` for those names.
+The `MODULE_CLASSES` dict in `utils/server_io.py` maps module class-name strings to classes for programmatic instantiation. It lists all **11** implemented modules: the 10 quant modules plus `DDAHCDDeNovoModule`. `make_submission()` raises `ValueError` for any other name, and the registry is unit-tested to keep every key equal to its class's `__name__`.
+
+`make_submission()` supports both module families despite their differing `benchmarking()` signatures. Optional keys in a submission dict (`default_cutoff_min_feature`, `evaluation_type`, `max_nr_observed`, `input_file_secondary`, listed in `OPTIONAL_BENCHMARKING_KEYS`) are forwarded only when the target module's signature accepts them, so quant's `default_cutoff_min_feature` and de novo's `evaluation_type` can both be passed without raising `TypeError`. It parses the metadata file *before* benchmarking and seeds `user_input` from the resulting `ProteoBenchParameters`, so the datapoint id — and hence the PR branch name — carries the real software version, checkpoint and decoding strategy rather than empty strings. It returns a **list** of PR URLs, one per submission.
 
 ### Rescoring Module (`proteobench/modules/rescoring/`)
 

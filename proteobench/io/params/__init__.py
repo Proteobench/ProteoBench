@@ -160,6 +160,10 @@ _INT_FIELDS = (
 )
 
 
+#: Directory of the parameter field templates; module classes set ``PARAMS_JSON`` relative to it.
+PARAMS_JSON_DIR = os.path.join(os.path.dirname(__file__), "json")
+
+
 @dataclass
 class ProteoBenchParameters:
     """

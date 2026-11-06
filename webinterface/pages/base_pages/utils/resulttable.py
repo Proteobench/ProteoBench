@@ -2,6 +2,7 @@ import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
 
 from proteobench.io.parsing.parse_settings import get_open_source_tools
+from proteobench.plotting.plot_generator_denovo import build_workflow_labels
 
 # this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
 
@@ -33,6 +34,39 @@ def add_open_source_column(df: pd.DataFrame) -> pd.DataFrame:
     cols.remove("open_source")
     idx = cols.index("software_name") + 1
     cols.insert(idx, "open_source")
+    return df[cols]
+
+
+def add_workflow_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a 'workflow' column naming what distinguishes repeat submissions of one tool.
+
+    A de novo tool may be submitted several times -- one datapoint per decoding strategy or
+    checkpoint -- in which case every row reads the same in the 'software_name' column and the
+    differences sit in scattered parameter columns. This spells the difference out in one
+    column next to the tool name. The column is only added for de novo results (identified by
+    the presence of 'decoding_strategy') that actually contain a repeated tool, so tables where
+    it would merely duplicate 'software_name' are left unchanged.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame of datapoints, expected to carry a 'software_name' column.
+
+    Returns
+    -------
+    pd.DataFrame
+        The DataFrame, with a 'workflow' column inserted after 'software_name' where it applies.
+    """
+    if "software_name" not in df.columns or "decoding_strategy" not in df.columns or len(df) == 0:
+        return df
+    if not df["software_name"].astype(str).duplicated().any():
+        return df
+    df = df.copy()
+    df["workflow"] = build_workflow_labels(df)
+    cols = df.columns.tolist()
+    cols.remove("workflow")
+    cols.insert(cols.index("software_name") + 1, "workflow")
     return df[cols]
 
 
@@ -165,6 +199,7 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
 
     parameter_cols = {
         "software_name",
+        "workflow",
         "software_version",
         "search_engine",
         "search_engine_version",
@@ -279,11 +314,13 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
         return df
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
     df = add_open_source_column(df)
+    df = add_workflow_column(df)
 
     try:
         identifier_cols = ["selected", "id"]
         parameter_cols = [
             "software_name",
+            "workflow",
             "open_source",
             "software_version",
             "search_engine",

@@ -20,7 +20,11 @@ import pytest
 from psm_utils import Peptidoform
 
 from proteobench.datapoint.denovo_datapoint import collapse_aa_scores
-from proteobench.io.parsing.parse_settings import ParseSettingsDeNovo
+from proteobench.io.parsing.parse_settings import (
+    ParseSettingsDeNovo,
+    parse_peptidoform_or_none,
+    split_nterm_tags,
+)
 from proteobench.score.denovoscores import DenovoScores
 
 # Carbamylation (+43.005814) stacked with ammonia loss (-17.026549) sums to 25.979265, whose
@@ -134,6 +138,28 @@ class TestFormatScores:
         out = settings.format_scores(supplied, peptidoform)
         assert len(out) == settings.get_length_peptidoform_with_nterm(peptidoform)
 
+    @pytest.mark.parametrize("as_text", [False, True], ids=["list", "comma_separated_string"])
+    def test_surplus_is_collapsed_whatever_the_container(self, settings, as_text):
+        """The native form matters: every mzTab/TSV tool stores its scores as a comma-separated
+        string, and `eval("0.2,0.4,0.9")` is a tuple, not a list. Guarding on `list` alone left
+        this branch dead for Casanovo, AdaNovo, ContraNovo, DeepNovo and PointNovo -- the very
+        tools that can emit one score per N-terminal modification."""
+        peptidoform = stacked_nterm()
+        supplied = [0.2, 0.4] + [0.9] * len(peptidoform)
+        payload = ",".join(str(x) for x in supplied) if as_text else supplied
+        out = settings.format_scores(payload, peptidoform)
+        assert len(out) == settings.get_length_peptidoform_with_nterm(peptidoform)
+        assert out[0] == pytest.approx(np.mean([0.2, 0.4]))
+        assert list(out[1:]) == [0.9] * len(peptidoform)
+
+    def test_tuple_input_is_collapsed(self, settings):
+        """A tuple reaches `format_scores` directly whenever a loader has already parsed the
+        score string, so it must take the same path as a list."""
+        peptidoform = stacked_nterm()
+        supplied = (0.2, 0.4) + (0.9,) * len(peptidoform)
+        out = settings.format_scores(supplied, peptidoform)
+        assert len(out) == settings.get_length_peptidoform_with_nterm(peptidoform)
+
     def test_shorter_than_expected_is_not_padded(self, settings):
         """Too FEW scores is a different fault and must not be silently patched over."""
         peptidoform = Peptidoform(SINGLE_MOD)
@@ -174,3 +200,109 @@ class TestCollapseAaScoresEndToEnd:
         frame = self._frame(settings, scorer, peptidoform, supplied)
         out = collapse_aa_scores(frame, evaluation_type="mass")
         assert len(out) == len(frame["aa_matches_dn"].iloc[0])
+
+
+class TestBlankPredictionIsNotAPeptidoform:
+    """A spectrum the tool declined to call must not become a zero-length peptidoform."""
+
+    @pytest.mark.parametrize("blank", ["", "   ", None, float("nan"), np.nan])
+    def test_blank_prediction_yields_none(self, blank):
+        """`Peptidoform("")` parses, so an empty prediction used to survive every
+        `dropna(subset="peptidoform")` carrying a NaN `aa_scores` and kill `collapse_aa_scores`
+        with "'float' object is not iterable"."""
+        assert parse_peptidoform_or_none(blank) is None
+
+    def test_unparsable_sequence_yields_none(self):
+        assert parse_peptidoform_or_none("C(+57.02)PEPTIDE") is None
+
+    @pytest.mark.parametrize("proforma", [UNMODIFIED, SINGLE_MOD, *COMPOSITE_SPELLINGS])
+    def test_real_predictions_still_parse(self, proforma):
+        assert parse_peptidoform_or_none(proforma) == Peptidoform(proforma)
+
+    def test_blank_rows_cannot_reach_collapse(self, settings, scorer):
+        """The end-to-end shape: a frame built from a blank prediction is empty after the
+        `dropna` that `get_metrics` applies, so `collapse_aa_scores` never sees it."""
+        import pandas as pd
+
+        frame = pd.DataFrame({"peptidoform": [parse_peptidoform_or_none("")], "aa_scores": [np.nan]})
+        assert len(frame.dropna(subset="peptidoform")) == 0
+
+
+class TestStackedNtermTagsSurviveParsing:
+    """Both N-terminal tags must reach the peptidoform, in either spelling.
+
+    pyteomics 4.7.5 keeps only the LAST tag of "[A]-[B]-SEQ" and rejects "[A][B]-SEQ"
+    outright, so a prediction carrying carbamylation stacked with ammonia loss used to lose
+    one of the two silently. The score LENGTH came out right either way -- which is what made
+    the loss invisible -- but the surviving N-terminal group had the wrong mass.
+    """
+
+    STACKED = [
+        "[UNIMOD:5]-[UNIMOD:385]-ALHTDSVSLINITPR",  # produced by a sequence_mapper, token by token
+        "[UNIMOD:5][UNIMOD:385]-ALHTDSVSLINITPR",  # the canonical ProForma spelling
+    ]
+    # Carbamyl (+43.005814) stacked with ammonia loss (-17.026549).
+    STACKED_MASS = 25.979265
+
+    @pytest.mark.parametrize(
+        "proforma, expected",
+        [
+            ("ALHTDSVSLINITPR", ([], "ALHTDSVSLINITPR")),
+            ("[UNIMOD:1]-ALHTDSVSLINITPR", (["UNIMOD:1"], "ALHTDSVSLINITPR")),
+            ("[A]-[B]-PEPTIDE", (["A", "B"], "PEPTIDE")),
+            ("[A][B]-PEPTIDE", (["A", "B"], "PEPTIDE")),
+            ("PEP[UNIMOD:4]TIDE", ([], "PEP[UNIMOD:4]TIDE")),
+            ("[A]", ([], "[A]")),  # unterminated: not an N-terminal run, left for the parser to reject
+        ],
+    )
+    def test_split_nterm_tags(self, proforma, expected):
+        assert split_nterm_tags(proforma) == expected
+
+    @pytest.mark.parametrize("proforma", STACKED)
+    def test_both_modifications_are_kept(self, proforma):
+        peptidoform = parse_peptidoform_or_none(proforma)
+        assert peptidoform is not None
+        n_term = peptidoform.properties["n_term"]
+        assert len(n_term) == 2
+        assert sum(mod.mass for mod in n_term) == pytest.approx(self.STACKED_MASS, abs=1e-4)
+
+    @pytest.mark.parametrize("proforma", STACKED)
+    def test_stacking_does_not_change_any_length(self, settings, scorer, proforma):
+        """The terminus is one scored position however many modifications sit on it, so the
+        extra tag must change the mass and the token string but no length."""
+        peptidoform = parse_peptidoform_or_none(proforma)
+        single = Peptidoform(SINGLE_MOD)
+        assert len(peptidoform) == len(single)
+        assert settings.get_length_peptidoform_with_nterm(peptidoform) == len(scorer.convert_peptidoform(peptidoform))
+        assert settings.get_length_peptidoform_with_nterm(peptidoform) == len(peptidoform) + 1
+
+    def test_tag_order_is_preserved(self):
+        """Order matters for the token string, so the tags must not be reversed or sorted."""
+        peptidoform = parse_peptidoform_or_none("[UNIMOD:385]-[UNIMOD:1]-LVPLHTHLWYDPK")
+        assert [mod.id for mod in peptidoform.properties["n_term"]] == [385, 1]
+
+    @pytest.mark.parametrize("proforma", STACKED)
+    def test_tool_supplied_scores_collapse_end_to_end(self, settings, scorer, proforma):
+        """The whole chain on a *parsed* peptidoform rather than a hand-built one: one score
+        per stacked modification, in the comma-separated form a tool actually emits."""
+        peptidoform = parse_peptidoform_or_none(proforma)
+        needed = len(scorer.convert_peptidoform(peptidoform))
+        supplied = [0.2, 0.4] + [0.9] * len(peptidoform)
+        out = settings.format_scores(",".join(str(x) for x in supplied), peptidoform)
+        assert len(out) == needed
+        assert out[0] == pytest.approx(np.mean([0.2, 0.4]))
+
+    @pytest.mark.parametrize(
+        "tag", ["not a modification", "UNIMOD:99999999", "UNIMOD:abc", "Formula:ZZ9", "+notanumber"]
+    )
+    def test_an_unresolvable_tag_yields_none(self, tag):
+        """ProForma happily accepts a free-text tag, and the mass lookup only fails later inside
+        `get_token_mass`. "[A][B]-SEQ" used to be rejected by the parser outright, so reattaching
+        tags must not become a way for junk to reach scoring and blow up mid-run."""
+        assert parse_peptidoform_or_none(f"[{tag}][UNIMOD:1]-PEPTIDE") is None
+        assert parse_peptidoform_or_none(f"[{tag}]-[UNIMOD:1]-PEPTIDE") is None
+
+    def test_a_resolvable_name_tag_is_kept(self):
+        """The check is on the mass resolving, not on the tag's spelling."""
+        peptidoform = parse_peptidoform_or_none("[Acetyl][UNIMOD:1]-PEPTIDE")
+        assert len(peptidoform.properties["n_term"]) == 2

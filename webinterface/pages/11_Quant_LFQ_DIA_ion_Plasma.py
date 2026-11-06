@@ -55,17 +55,19 @@ class StreamlitUI:
         self._main_page()
 
     def _render_header(self, method_name: str = None) -> None:
-        """Render the shared title, documentation link, download link, and status warning banner.
+        """Render the shared title, documentation link, download link, metrics help, sign-in, and status banner.
 
         Parameters
         ----------
         method_name : str, optional
             Name of the UIObjects method rendering this tab. It selects which metrics explanation
-            the popover shows, because the in-depth tab does not display the main plot.
+            the popover shows, because the in-depth tab does not display the main plot. It also
+            keys the sign-in widget, which needs a unique key per tab within the same script run.
         """
+        from pages.base_pages.utils.auth import render_auth_status
+
         st.title(self.variables_dia_quant.title)
-        doc_col, download_col, metrics_col = st.columns(3)
-        with doc_col:
+        with st.container(horizontal=True, gap="small"):
             st.link_button(
                 "Module documentation",
                 url=self.variables_dia_quant.doc_url,
@@ -73,7 +75,6 @@ class StreamlitUI:
                 icon="📖",
                 help="link to the module documentation",
             )
-        with download_col:
             st.link_button(
                 "Download input files",
                 url=self.variables_dia_quant.raw_data_url,
@@ -81,9 +82,8 @@ class StreamlitUI:
                 icon="⬇️",
                 help="Download the raw input files used to benchmark this module",
             )
-
-        with metrics_col:
             render_metrics_help(self.ionmodule, self.variables_dia_quant, context=context_for_tab_method(method_name))
+            render_auth_status(key_suffix=f"_{method_name}")
         display_banner(self.variables_dia_quant)
 
     def _main_page(self) -> None:

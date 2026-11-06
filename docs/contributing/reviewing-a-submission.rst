@@ -9,7 +9,7 @@ from review.
 
 1. Go to the PR page on Proteobot.
 
-2. Check the user's comments for any warning or information left for the reviewer.
+2. Check the user's comments for any warning or information left for the reviewer. If the submitter was signed in, the comments also include a ``Submitter: <name> (<provider>: <id>)`` line; see :doc:`submitter-identity` for details.
 
 3. Check the detected parameter changes. If empty fields were filled in manually because they
    weren't in the parameter file, that's fine. If a value was changed, it should be justified.

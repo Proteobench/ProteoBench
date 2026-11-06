@@ -668,8 +668,8 @@ def split_nterm_tags(proforma: str) -> tuple[List[str], str]:
     """
     Split the run of N-terminal modification tags off the front of a ProForma string.
 
-    Both spellings are recognised: the canonical ``[A][B]-SEQ`` and the ``[A]-[B]-SEQ`` that
-    a ``[sequence_mapper]`` produces by replacing one token at a time.
+    Three spellings are recognised, all unambiguously N-terminal: ``[A][B]-SEQ``,
+    ``[A]-[B]-SEQ`` (what a ``[sequence_mapper]`` produces token by token) and ``[A]SEQ``.
 
     Parameters
     ----------
@@ -688,37 +688,65 @@ def split_nterm_tags(proforma: str) -> tuple[List[str], str]:
         if match is None:
             break
         after = rest[match.end() :]
-        # A leading tag belongs to the N-terminus only if the run is ultimately closed by the
-        # "-" that separates it from the first residue; anything else is not ours to touch.
+        # A leading tag is N-terminal only if its run is closed -- by the "-" ProForma puts
+        # before the first residue, or by that residue itself. Anything else is handed back
+        # untouched for Peptidoform to judge.
         if after.startswith("-"):
             tags.append(match.group(1))
             rest = after[1:]
         elif after.startswith("["):
             tags.append(match.group(1))
             rest = after
+        elif after[:1].isupper():
+            tags.append(match.group(1))
+            return tags, after
         else:
             return [], proforma
     return tags, rest
+
+
+def _resolve_modification_masses(peptidoform: Peptidoform) -> None:
+    """
+    Touch every modification mass the de novo scorer will need, so an unresolvable one fails here.
+
+    ProForma allows name-based tags, so ``[Acetyl]`` (valid) and ``[not a modification]`` (junk)
+    both parse; pyteomics resolves the mass only when asked, so the failure otherwise surfaces
+    part-way through scoring. Covers the N-terminal group and every residue -- the positions
+    `DenovoScores.convert_peptidoform` tokenises. The C-terminus is not tokenised, so it is
+    deliberately skipped.
+
+    Parameters
+    ----------
+    peptidoform : Peptidoform
+        The peptidoform whose modification masses to resolve.
+
+    Raises
+    ------
+    Exception
+        Whatever the mass lookup raises (``KeyError``, ``PyteomicsError``, ...) when a tag
+        cannot be resolved. The caller turns that into None.
+    """
+    for modification in peptidoform.properties["n_term"] or []:
+        modification.mass
+    for _, modifications in peptidoform:
+        for modification in modifications or []:
+            modification.mass
 
 
 def parse_peptidoform_or_none(proforma: Any) -> Peptidoform | None:
     """
     Parse a ProForma string, returning None for anything that is not a real prediction.
 
-    Empty peptidoforms are filtered out.
+    Three things make a row unusable and yield None: a blank sequence (``Peptidoform("")``
+    parses as length 0 and would survive every later ``dropna`` with NaN scores), a tag run with
+    no residues, and a modification whose mass cannot be resolved.
 
-    Stacked N-terminal modifications are reattached by hand. pyteomics 4.7.5 parses
-    ``[UNIMOD:5]-[UNIMOD:385]-PEPTIDE`` without complaint but keeps only the LAST tag, and
-    ``[UNIMOD:5][UNIMOD:385]-PEPTIDE`` does not parse at all -- so a tool predicting carbamylation
-    stacked with ammonia loss silently lost one of the two, leaving the N-terminus with the mass
-    of whichever tag happened to come last (-17.027 instead of +25.979). `format_scores` still
-    produced the right score LENGTH, which is exactly what made the loss invisible: the surplus
-    score was collapsed onto an N-terminal group that no longer described the prediction.
-
-    Keeping every tag also matches how the rest of the module already treats the terminus:
-    `DenovoScores.convert_peptidoform` folds the whole ``n_term`` list onto one token and
-    `get_length_peptidoform_with_nterm` counts it once, so the extra modification changes the
-    mass and the token string without changing any length.
+    N-terminal tags are rebuilt canonically. pyteomics 4.7.5 keeps only the LAST tag of
+    ``[A]-[B]-SEQ`` and rejects both ``[A][B]-SEQ`` and ``[A]SEQ``, so stacked chemistry such as
+    carbamylation plus ammonia loss silently lost a modification (-17.027 instead of +25.979)
+    while the score length still came out right -- which is what made the loss invisible. The
+    terminus is one token however many modifications sit on it, so keeping them all changes the
+    mass and the token string, never a length.
 
     Parameters
     ----------
@@ -735,23 +763,21 @@ def parse_peptidoform_or_none(proforma: Any) -> Peptidoform | None:
 
     try:
         tags, rest = split_nterm_tags(proforma)
-        if len(tags) < 2:
-            return Peptidoform(proforma)
+        if not tags:
+            peptidoform = Peptidoform(proforma)
+        else:
+            if not rest:
+                return None  # tags but no residues: "[UNIMOD:1]-" is not a prediction
 
-        # Parse the last tag through the normal path, then prepend the ones pyteomics dropped.
-        # Each is resolved by the same parser, on a throwaway single-residue peptidoform.
-        peptidoform = Peptidoform(f"[{tags[-1]}]-{rest}")
-        earlier = [Peptidoform(f"[{tag}]-X").properties["n_term"][0] for tag in tags[:-1]]
-        peptidoform.properties["n_term"] = earlier + list(peptidoform.properties["n_term"])
+            # Rebuild canonically rather than re-parse: the last tag goes through the normal
+            # path, and the ones pyteomics would drop are prepended, each resolved by the same
+            # parser on a throwaway single-residue peptidoform.
+            peptidoform = Peptidoform(f"[{tags[-1]}]-{rest}")
+            if len(tags) > 1:
+                earlier = [Peptidoform(f"[{tag}]-X").properties["n_term"][0] for tag in tags[:-1]]
+                peptidoform.properties["n_term"] = earlier + list(peptidoform.properties["n_term"])
 
-        # ProForma accepts a free-text tag such as "[not a modification]", and the mass lookup
-        # only fails later, inside `DenovoScores.get_token_mass`. For a single tag that is
-        # pre-existing behaviour, but "[A][B]-SEQ" used to be rejected by the parser outright,
-        # so admitting it here would newly let an unresolvable tag through to blow up mid-run.
-        # Resolve the masses now and drop the row instead, as an unparsable sequence already is.
-        for modification in peptidoform.properties["n_term"]:
-            modification.mass
-
+        _resolve_modification_masses(peptidoform)
         return peptidoform
     except Exception:
         return None
@@ -822,9 +848,9 @@ class ParseSettingsDeNovo:
         peptidoform : Peptidoform
             The peptidoform the scores belong to, used to reconcile their length.
         fix_aa_length : bool
-            Collapse surplus leading scores onto the N-terminal group (see below). On by
-            default: a length mismatch here surfaces much later as an opaque "All arrays must
-            be of the same length" from `collapse_aa_scores`.
+            Collapse surplus leading scores onto the N-terminal group. On by default: a length
+            mismatch here surfaces later as "All arrays must be of the same length" from
+            `collapse_aa_scores`.
 
         Returns
         -------
@@ -834,23 +860,10 @@ class ParseSettingsDeNovo:
         if isinstance(aa_scores, str):
             aa_scores = eval(aa_scores)
 
-        # A tool may report one score per N-terminal modification while ProteoBench scores the
-        # N-terminal group as a single position, which leaves aa_scores longer than the number
-        # of scored positions. Collapse the surplus leading scores into their mean, so the
-        # N-terminal score stays comparable in magnitude with single-token positions.
-        #
-        # Keyed on the length difference, not on the modification's identity. The previous
-        # version tested `n_term[0].value == "H-2C1O1"` -- the composition of carbamylation plus
-        # ammonia loss written as ONE ProForma tag -- which missed the same chemistry written as
-        # two tags, missed every other stacked pair, and depended on how the ProForma parser of
-        # the day reported the group. It was also unreachable (no caller passed
-        # fix_aa_length=True) and raised TypeError if it ever had been: `list(np.mean(...))`
-        # calls list() on a NumPy scalar.
-        #
-        # Tuples count as well as lists: every mzTab/TSV tool stores its scores as a
-        # comma-separated string, and `eval("0.1,0.2,0.9")` is a *tuple*. Accepting only
-        # `list` made this branch dead code for Casanovo, AdaNovo, ContraNovo, DeepNovo and
-        # PointNovo -- precisely the tools that can report a score per N-terminal modification.
+        # A tool may report one score per N-terminal modification, while ProteoBench scores the
+        # N-terminal group as a single position. Collapse the surplus leading scores into their
+        # mean, keyed on the length difference rather than on the modification's identity.
+        # Tuples count as well as lists: a comma-separated score string evals to a tuple.
         if fix_aa_length and isinstance(aa_scores, (list, tuple)):
             surplus = len(aa_scores) - self.get_length_peptidoform_with_nterm(peptidoform)
             if surplus > 0 and peptidoform.properties["n_term"]:
@@ -867,16 +880,10 @@ class ParseSettingsDeNovo:
         N-terminus if it carries any modification at all.
 
         The N-terminal group counts **once**, however many modifications are stacked on it,
-        because that is how `DenovoScores.convert_peptidoform` tokenizes it: it appends a
-        single ``("", n_mod)`` token holding the whole ``n_term`` list, and `get_token_str` /
-        `get_token_mass` fold every stacked modification onto that one token.
-
-        Counting one position per modification instead -- as this did -- made the two disagree
-        for any peptidoform with two or more N-terminal modifications. The per-residue match
-        arrays are built per token, so the broadcast `aa_scores` came out one element longer and
-        `collapse_aa_scores` raised "All arrays must be of the same length", killing a whole run
-        over a handful of rows. Seen first on a 133-residue InstaNovo vocabulary that emits
-        carbamylation and ammonia loss stacked on one terminus: 2 rows in 779,863.
+        because that is how `DenovoScores.convert_peptidoform` tokenizes it: one ``("", n_mod)``
+        token holding the whole ``n_term`` list. Counting per modification instead makes this
+        disagree with the per-token match arrays, and `collapse_aa_scores` then raises
+        "All arrays must be of the same length".
 
         Parameters
         ----------

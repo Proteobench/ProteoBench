@@ -2,10 +2,16 @@
 Module for parsing results data from various de novo sequencing engines.
 """
 
-import pandas as pd
-import numpy as np
-from pyteomics.mztab import MzTab
 import re
+
+import numpy as np
+import pandas as pd
+from pyteomics.mztab import MzTab
+
+# NovoB's Prediction.py writes each predicted sequence as the text "['" + sequence + "']" (string
+# concatenation, not a serialised list), using uppercase residues plus lowercase m/n/q/s/t/y for
+# modified residues.
+_NOVOB_SEQUENCE_RE = re.compile(r"\['([A-Za-z]*)'\]")
 
 
 def load_input_file(input_path: str, input_format: str, input_secondary: str = None) -> pd.DataFrame:
@@ -263,6 +269,31 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
     return df
 
 
+def _unwrap_novob_sequence(value: str) -> str:
+    """
+    Extract the peptide sequence from NovoB's ``['SEQUENCE']`` text wrapper.
+
+    Parameters
+    ----------
+    value : str
+        A ``sequence_forward`` or ``sequence_reverse`` cell from a NovoB result file.
+
+    Returns
+    -------
+    str
+        The bare sequence, e.g. ``"PEPmTIDE"`` for ``"['PEPmTIDE']"``.
+
+    Raises
+    ------
+    ValueError
+        If the cell is not in NovoB's format.
+    """
+    match = _NOVOB_SEQUENCE_RE.fullmatch(value.strip()) if isinstance(value, str) else None
+    if match is None:
+        raise ValueError(f"Unexpected NovoB sequence {value!r:.60}; expected a value such as ['PEPTIDE'].")
+    return match.group(1)
+
+
 def _load_novob(input_csv: str) -> pd.DataFrame:
     """
     Load a NovoB output file.
@@ -294,12 +325,11 @@ def _load_novob(input_csv: str) -> pd.DataFrame:
         }
     )
 
-    # Decode spectrum_id from b'5280' to '5280'
-    df["spectrum_id"] = df["spectrum_id"].apply(lambda x: eval(x).decode("utf-8") if isinstance(x, str) else x)
-
-    # Parse sequence lists
-    df["sequence_forward"] = df["sequence_forward"].apply(lambda x: eval(x)[0])
-    df["sequence_reverse"] = df["sequence_reverse"].apply(lambda x: eval(x)[0])
+    # These cells come from an uploaded file and are handled as plain text; never evaluate them as
+    # Python. spectrum_id is written as b'5280' (a bytes tensor formatted as text) and is left
+    # as-is: the [spectrum_id_mapper] pattern in parse_settings_novob.toml extracts the scan number.
+    df["sequence_forward"] = df["sequence_forward"].apply(_unwrap_novob_sequence)
+    df["sequence_reverse"] = df["sequence_reverse"].apply(_unwrap_novob_sequence)
 
     # Select best prediction between forward and reverse
     def select_best(row):

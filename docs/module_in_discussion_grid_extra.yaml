@@ -32,3 +32,7 @@ modules:
   - label: "Peptide detectability predictors"
     url: "https://github.com/orgs/Proteobench/discussions/971"
     description: "Benchmark the performance of peptide detectability predictors."
+
+  - label: "MBR performance estimation (DDA data)"
+    url: "https://github.com/orgs/Proteobench/discussions/1168"
+    description: "Benchmark the performance of match between run on DDA data."

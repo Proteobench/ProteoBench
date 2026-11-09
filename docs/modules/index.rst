@@ -24,6 +24,7 @@ documentation first if you're not sure it's the right fit.
 
     dda/index
     dia/index
+    archived/index
 
 Downloading benchmark data
 ===========================

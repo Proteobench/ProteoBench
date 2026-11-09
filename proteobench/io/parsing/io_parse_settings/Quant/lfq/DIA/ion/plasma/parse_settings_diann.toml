@@ -3,7 +3,7 @@
 "Run" = "Raw file"
 "Protein.Ids" = "Proteins"
 "Precursor.Charge" = "Charge"
-"Precursor.Quantity" = "Intensity"
+"Precursor.Normalised" = "Intensity"
 
 [condition_mapper]
 "A9_G_DIA_nLC_tTOF_R1" = "A"

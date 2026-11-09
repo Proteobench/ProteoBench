@@ -13,6 +13,36 @@ from plotly.subplots import make_subplots
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
+# Metrics shown for a bin or species that a datapoint has no entry for.
+EMPTY_METRICS = {"exact": 0.0, "mass": 0.0, "n_spectra": 0}
+
+
+def _metrics_or_empty(value):
+    """
+    Return a datapoint's in-depth metrics, or empty metrics where the datapoint has none.
+
+    Parameters
+    ----------
+    value : dict or float
+        A ``{"exact", "mass", "n_spectra"}`` dict, or NaN/None where the datapoint lacks the bin.
+
+    Returns
+    -------
+    dict
+        The metrics dict itself, or a copy of `EMPTY_METRICS`.
+
+    Raises
+    ------
+    TypeError
+        If the value is neither a dict nor missing.
+    """
+    if isinstance(value, dict):
+        return value
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return dict(EMPTY_METRICS)
+    raise TypeError(f"Expected in-depth metrics as a dict, got {type(value).__name__}: {value!r:.60}")
+
+
 EPSILON = 0.0001
 
 # Main-metric-plot quadrant treatment: fixed axes (padded slightly past 0/1 so points at the
@@ -2435,8 +2465,15 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
 
         The per-datapoint dicts are read directly rather than melted through a DataFrame and
         recovered with ``eval``, which is how this previously round-tripped its values through
-        strings. A category a datapoint has no entry for yields no point, so its line breaks
-        there instead of being drawn through zero.
+        strings: an uploaded result file could run arbitrary code that way
+        (GHSA-p237-rc4h-82vq). Anything stored under a category still goes through
+        :func:`_metrics_or_empty`, so a value that is not a metrics dict raises rather than
+        being quietly dropped, and is never evaluated as Python.
+
+        A category a datapoint has no entry for yields no point, so its line breaks there
+        instead of being drawn through zero. A tool that was not measured in some bin has no
+        precision there; drawing it at zero states a result that was never obtained, and makes
+        the line dive to the floor and back.
 
         Parameters
         ----------
@@ -2514,12 +2551,19 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             entries = entries_for(row)
             y_values: List[Optional[float]] = []
             for category in categories:
-                entry = entries.get(category)
-                value = entry.get(evaluation_type) if isinstance(entry, dict) else None
+                if category not in entries:
+                    # Not measured here: leave the gap for `connectgaps=False` to break on.
+                    y_values.append(None)
+                    continue
+                # Stored, so it has to be metrics. `_metrics_or_empty` returns the dict, fills a
+                # recorded-but-empty entry from EMPTY_METRICS, and raises TypeError on anything
+                # else -- never evaluating it, which is what made this path exploitable.
+                entry = _metrics_or_empty(entries[category])
+                value = entry.get(evaluation_type)
                 y_values.append(
                     float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
                 )
-                if isinstance(entry, dict) and isinstance(entry.get("n_spectra"), (int, float)):
+                if isinstance(entry.get("n_spectra"), (int, float)):
                     counts_per_category[category].append(float(entry["n_spectra"]))
 
             style = _IN_DEPTH_LINE_EMPHASIS[bool(emphasised.at[idx])]

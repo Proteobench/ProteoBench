@@ -456,6 +456,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
+                "archived_warning": getattr(self.variables, "archived_warning", False),
             },
             render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints),
         )
@@ -572,6 +573,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 "label": label,
                 "alpha_warning": getattr(self.variables, "alpha_warning", False),
                 "beta_warning": getattr(self.variables, "beta_warning", False),
+                "archived_warning": getattr(self.variables, "archived_warning", False),
             },
             render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints_submitted),
         )

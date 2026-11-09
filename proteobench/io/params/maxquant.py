@@ -306,7 +306,7 @@ def extract_params(
         fragment_mass_tolerance = f"{fragment_mass_tolerance} ppm"
     fragment_mass_tolerance = f"[-{fragment_mass_tolerance}, {fragment_mass_tolerance}]"
     params.fragment_mass_tolerance = fragment_mass_tolerance
-    params.enzyme = record.loc[("parameterGroups", "parameterGroup", "enzymes", "string")].squeeze()
+    params.enzyme = pd.Series(record.loc[("parameterGroups", "parameterGroup", "enzymes", "string")]).squeeze()
     semi_enzymatic = int(record.loc[("parameterGroups", "parameterGroup", "enzymeMode")].squeeze())
 
     # enzyme mode 0: Fully specific

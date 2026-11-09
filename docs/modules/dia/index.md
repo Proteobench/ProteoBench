@@ -32,13 +32,22 @@ Quantification accuracy and sensitivity for DIA data acquired on an Orbitrap Ast
 Quantification accuracy and sensitivity for ZenoTOF 8600 ZenoSWATH data.
 :::
 
-:::{grid-item-card} LFQ, low input
-:link: dia-ion-lowinput
+:::{grid-item-card} LFQ, precursor ion (Astral, low input)
+:link: dia-ion-astral-lowinput
 :link-type: doc
 
 {bdg-success}`alpha` {bdg-primary-line}`Quantification`
 
-Quantification accuracy and sensitivity for low-input / single-cell-scale DIA on an Astral.
+Quantification accuracy and sensitivity for a 200 pg low-input DIA dataset on an Orbitrap Astral.
+:::
+
+:::{grid-item-card} LFQ, precursor ion (timsTOF, low input)
+:link: dia-ion-timstof-lowinput
+:link-type: doc
+
+{bdg-success}`alpha` {bdg-primary-line}`Quantification`
+
+Quantification accuracy and sensitivity for a 200 pg low-input dia-PASEF dataset on a timsTOF Ultra 2.
 :::
 
 :::{grid-item-card} LFQ, human plasma
@@ -59,19 +68,11 @@ Quantification accuracy and dynamic range for human plasma DIA data.
 Checks whether a DIA search engine's reported FDR is reliable, using entrapment peptides.
 :::
 
-:::{grid-item-card} LFQ, precursor ion (AIF)
-:link: dia-ion-aif
-:link-type: doc
-
-{bdg-dark}`archived` {bdg-primary-line}`Quantification`
-
-Superseded by the diaPASEF/Astral/ZenoTOF modules above; kept for reference.
-:::
-
 ::::
 
-See [Modules](../index.rst) for what a module documentation page covers, or jump to
-[DDA modules](../dda/index.md) instead.
+See [Modules](../index.rst) for what a module documentation page covers, jump to
+[DDA modules](../dda/index.md), or see [Archived modules](../archived/index.md) for modules that
+have been superseded (LFQ precursor ion AIF, LFQ low input).
 
 ```{toctree}
 :hidden:
@@ -79,8 +80,8 @@ See [Modules](../index.rst) for what a module documentation page covers, or jump
 dia-ion-diapasef
 dia-ion-astral
 dia-ion-zenotof
-dia-ion-lowinput
+dia-ion-astral-lowinput
+dia-ion-timstof-lowinput
 dia-ion-plasma
 entrapment-dia-astral
-dia-ion-aif
 ```

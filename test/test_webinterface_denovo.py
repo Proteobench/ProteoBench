@@ -21,6 +21,16 @@ from webinterface_apptest_utils import mocked_backend, new_app  # noqa: E402
 
 DENOVO_PAGE = "pages/7_denovo_DDA_HCD.py"
 
+#: The session-state keys the two results tabs keep their ticked selection under, built the way
+#: the page builds them. Derived rather than discovered by scanning the session state: the only
+#: way to enumerate that state is ``SafeSessionState.filtered_state``, a Streamlit internal that
+#: this test used to read and that does not exist in every version the project allows
+#: (``streamlit>=1.58``, no upper bound). Indexing a key is public API and stays put.
+SELECTION_KEYS = (
+    "fig_metric_dda_hcd_denovo_denovo_display_table_selected_ids",
+    "fig_metric_dda_hcd_denovo_submitted_denovo_display_table_selected_ids",
+)
+
 
 def _datapoint(point_id, software, auc, **fields):
     """A datapoint complete enough for the de novo page to rank, plot and tabulate it."""
@@ -137,11 +147,8 @@ def test_the_first_paint_agrees_with_the_ticks_it_shows(monkeypatch):
     # yet. Left unseeded, the figure coloured each tool's best above a table saying every row
     # was shown.
     app = _run(monkeypatch)
-    state = app.session_state
-    keys = [key for key in state.filtered_state if str(key).endswith("_display_table_selected_ids")]
-    assert len(keys) == 2, f"one per results tab, got {keys}"
-    for key in keys:
-        assert set(state[key]) == set(DATAPOINTS["id"]), key
+    for key in SELECTION_KEYS:
+        assert set(app.session_state[key]) == set(DATAPOINTS["id"]), key
 
 
 def test_the_label_and_emphasis_controls_are_present(monkeypatch):

@@ -1,46 +1,44 @@
 """
-Module for plotting results of de novo models
+The de novo plot generator itself.
 """
 
-import re
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
-
-# Metrics shown for a bin or species that a datapoint has no entry for.
-EMPTY_METRICS = {"exact": 0.0, "mass": 0.0, "n_spectra": 0}
-
-
-def _metrics_or_empty(value):
-    """
-    Return a datapoint's in-depth metrics, or empty metrics where the datapoint has none.
-
-    Parameters
-    ----------
-    value : dict or float
-        A ``{"exact", "mass", "n_spectra"}`` dict, or NaN/None where the datapoint lacks the bin.
-
-    Returns
-    -------
-    dict
-        The metrics dict itself, or a copy of `EMPTY_METRICS`.
-
-    Raises
-    ------
-    TypeError
-        If the value is neither a dict nor missing.
-    """
-    if isinstance(value, dict):
-        return value
-    if value is None or (isinstance(value, float) and np.isnan(value)):
-        return dict(EMPTY_METRICS)
-    raise TypeError(f"Expected in-depth metrics as a dict, got {type(value).__name__}: {value!r:.60}")
+from proteobench.plotting.plot_generator_denovo.results import (
+    _LEVELS,
+    _ambiguity_combo_for,
+    _get_metrics_leaf,
+    _metrics_or_empty,
+    datapoint_has_required_fields,
+    flatten_results_column,
+)
+from proteobench.plotting.plot_generator_denovo.labels import (
+    _display_value,
+    _is_blank,
+    build_display_labels,
+    build_variant_descriptions,
+)
+from proteobench.plotting.plot_generator_denovo.ranking import leading_datapoints, rank_within_tools
+from proteobench.plotting.plot_generator_denovo.selection import (
+    BEST_MARKER_SCALE,
+    BEST_MARKER_SYMBOL,
+    DIMMED_OPACITY,
+    MUTED_COLOR,
+    MUTED_CURVE_OPACITY,
+    SECONDARY_CURVE_OPACITY,
+    SECONDARY_OPACITY,
+    SOFTWARE_COLORS,
+    SOFTWARE_MARKERS,
+    assign_datapoint_colors,
+    resolve_coloured_datapoints,
+    resolve_emphasis,
+)
 
 
 EPSILON = 0.0001
@@ -51,10 +49,13 @@ EPSILON = 0.0001
 # into the corner" is itself meaningful -- a point deep in Q1 is doing better than one just
 # past the boundary, even though both are "good performance."
 MAIN_PLOT_AXIS_RANGE = [-0.05, 1.1]
+
 QUADRANT_BOUNDARY = 0.5
+
 # Precision-coverage curve view: a smaller pad than the scatter's, just enough that a curve
 # endpoint sitting exactly at 0 or 1 isn't clipped by the axis border.
 PR_CURVE_AXIS_RANGE = [-0.03, 1.03]
+
 # Single sequential hue, light (low) to dark blue (high) -- a magnitude encoding ("how good"),
 # not a category or polarity one, so one hue avoids both a rainbow and a red/green pair that
 # would be indistinguishable to red-green colorblind users.
@@ -65,19 +66,6 @@ QUADRANT_COLORSCALE = [
     [0.85, "#4d87ac"],
     [1.0, "#1f5678"],
 ]
-# Every curve from one tool is drawn in that tool's colour, so a tool submitted several times
-# -- one datapoint per decoding strategy, say -- would otherwise draw identically coloured,
-# identically named lines that no legend entry or hover text could tell apart. Label each line
-# by whatever actually differs between that tool's submissions. Separating them visually is the
-# job of `shade_within_tool`, which varies lightness: a dash cycle runs out after six styles,
-# and one tool's submissions already reach fifteen.
-# Tried in order, most workflow-defining first, so the shortest label that disambiguates wins.
-WORKFLOW_LABEL_FIELDS = ("decoding_strategy", "n_beams", "checkpoint", "software_version")
-# A run refined by a second model records both checkpoints in one field, base model first.
-CHECKPOINT_SEPARATOR = ";"
-# Product names for refinement models, keyed by the leading token of their checkpoint name.
-# A refinement checkpoint that is not listed still gets its own clause, just unnamed.
-REFINEMENT_MODEL_NAMES = {"instanovoplus": "InstaNovo+"}
 
 QUADRANT_LABELS = {
     "good": {"text": "<b>Good performance</b>"},
@@ -93,655 +81,22 @@ QUADRANT_LABELS = {
     },
 }
 
-SOFTWARE_COLORS = {
-    "AdaNovo": "#88CCEE",
-    "Casanovo": "#CC6677",
-    "DeepNovo": "#DDCC77",
-    "PepNet": "#117733",
-    "Pi-HelixNovo": "#332288",
-    "Pi-PrimeNovo": "#AA4499",
-    "PEAKS": "#661100",
-    "SMSNet": "#44AA99",
-    "InstaNovo": "#999933",
-    "ContraNovo": "#882255",
-    "PointNovo": "#E07030",
-    "NovoB": "#4477AA",
-    "Custom": "#000000",
-}
-SOFTWARE_MARKERS = {
-    "AdaNovo": "circle",
-    "Casanovo": "square",
-    "DeepNovo": "diamond",
-    "PepNet": "cross",
-    "Pi-HelixNovo": "x",
-    "Pi-PrimeNovo": "triangle-up",
-    "PEAKS": "star",
-    "SMSNet": "triangle-down",
-    "InstaNovo": "pentagon",
-    "ContraNovo": "hexagon",
-    "PointNovo": "triangle-left",
-    "NovoB": "triangle-right",
-    "Custom": "circle-open",
-}
-
-
-_LEVELS = ("peptide", "aa")
-_EVALUATION_TYPES = ("mass", "exact")
-_METRICS = ("precision", "recall", "coverage", "auc")
-
 # FASTA-category breakdown (correct / in_fasta / not_in_fasta), computed once per datapoint by
 # `DenovoDatapoint.get_infasta_metrics` from the "category" column `DenovoScores.add_fasta_category`
 # assigns during scoring. Colors match the exploratory notebook this feature was designed in.
 INFASTA_CATEGORIES = ("correct", "in_fasta", "not_in_fasta")
+
 INFASTA_COLORS = {
     "correct": "#4C9A6D",  # muted green
     "in_fasta": "#F2A541",  # muted amber
     "not_in_fasta": "#D1495B",  # muted rose
 }
+
 INFASTA_LABELS = {
     "correct": "Correct",
     "in_fasta": "In FASTA",
     "not_in_fasta": "Not in FASTA",
 }
-
-
-def _get_metrics_leaf(row: pd.Series, level: str, evaluation_type: str, ambiguity_combo: Optional[str] = None) -> dict:
-    """
-    Return the `{precision, recall, coverage, auc}` dict for one level/evaluation-type,
-    optionally reading an ambiguity-toggle combination instead of the baseline.
-
-    Ambiguity combinations only exist under exact-mode matching (mass-mode metrics are
-    identical regardless, since I/L are isomeric and deamidated Q/N are isobaric with E/D
-    either way), so `ambiguity_combo` is ignored for `evaluation_type == "mass"`.
-    """
-    leaf = row["results"][level][evaluation_type]
-    if evaluation_type == "exact" and ambiguity_combo:
-        return leaf["ambiguity"][ambiguity_combo]
-    return leaf
-
-
-def datapoint_has_required_fields(
-    results_dict: dict,
-    evaluation_type: str,
-    needs_auc: bool,
-    ambiguity_combo: Optional[str],
-    needs_curve: bool = False,
-) -> bool:
-    """
-    Check whether a datapoint's `results` dict has the fields the main plot needs for the
-    currently selected evaluation type, metric (precision or AUC), and ambiguity combination.
-
-    Used to silently hide datapoints submitted before a given field existed (e.g. `auc`,
-    `curve`, or the `ambiguity` sub-dict) rather than erroring, mirroring the HYE plot
-    generator's handling of legacy datapoints missing newer metric fields.
-    """
-    try:
-        for level in _LEVELS:
-            leaf = _get_metrics_leaf({"results": results_dict}, level, evaluation_type, ambiguity_combo)
-            if needs_auc and "auc" not in leaf:
-                return False
-            if needs_curve and "curve" not in leaf:
-                return False
-    except (TypeError, KeyError):
-        return False
-    return True
-
-
-def flatten_results_column(df: pd.DataFrame, ambiguity_combo: Optional[str] = None) -> pd.DataFrame:
-    """
-    Flatten each row's nested `results` dict into flat `{level}_{evaluation_type}_{metric}`
-    columns for plotting.
-
-    Parameters
-    ----------
-    ambiguity_combo : str, optional
-        One of `"il"`, `"deam"`, `"both"` to read the corresponding exact-mode ambiguity
-        combination instead of the baseline; `None` (default) reads the baseline. Ignored
-        for mass-mode fields, which don't have ambiguity combinations (see
-        `_get_metrics_leaf`).
-    """
-    results = {"engine": []}
-    for level in _LEVELS:
-        for evaluation_type in _EVALUATION_TYPES:
-            for metric in _METRICS:
-                results[f"{level}_{evaluation_type}_{metric}"] = []
-
-    for _, row in df.iterrows():
-        results["engine"].append(row["software_name"])
-        for level in _LEVELS:
-            for evaluation_type in _EVALUATION_TYPES:
-                try:
-                    leaf = _get_metrics_leaf(row, level, evaluation_type, ambiguity_combo)
-                except (TypeError, KeyError):
-                    # Every level/evaluation-type column is computed eagerly, including the one
-                    # not currently selected. `datapoint_has_required_fields` only validated the
-                    # selected evaluation type, so a datapoint carrying just "mass" reaches here
-                    # and must yield empty columns rather than raise.
-                    leaf = {}
-                for metric in _METRICS:
-                    # `.get(..., nan)`, not `[...]`: a legacy datapoint may lack "auc" even
-                    # when it's not the metric currently being plotted (datapoint_has_
-                    # required_fields already decided visibility for the active selection;
-                    # this must not crash just because it computes every column eagerly).
-                    results[f"{level}_{evaluation_type}_{metric}"].append(leaf.get(metric, float("nan")))
-
-    return pd.DataFrame(results)
-
-
-def _is_blank(value: object) -> bool:
-    """Whether a datapoint field carries no usable value."""
-    if value is None:
-        return True
-    if isinstance(value, float) and np.isnan(value):
-        return True
-    return str(value).strip() in ("", "nan", "None", "<NA>")
-
-
-def _display_value(value: object) -> str:
-    """
-    Render a datapoint field for a hover box or an on-plot label.
-
-    A blank in any row turns the whole column float, so an integer parameter such as a beam
-    count arrives here as ``10.0`` and would read that way on the plot. Whole floats are
-    therefore shown without their decimal, the same coercion `_format_label_field` undoes for
-    the parameter-style labels.
-    """
-    if _is_blank(value):
-        return "\u2014"
-    if isinstance(value, float) and float(value).is_integer():
-        return str(int(value))
-    return str(value)
-
-
-def _format_label_field(field: str, value: object) -> str:
-    """Render one distinguishing field for use inside a workflow label."""
-    text = str(value).strip()
-    if field == "n_beams":
-        # A blank in any row makes the whole column float, which would read "10.0 beams".
-        try:
-            count = float(text)
-        except ValueError:
-            return f"{text} beams"
-        return f"{count:g} beam" if count == 1 else f"{count:g} beams"
-    if field == "software_version":
-        return f"v{text.lstrip('v')}"
-    return text
-
-
-def _split_checkpoint(value: object) -> tuple:
-    """
-    Split a checkpoint field into the base model and any refinement stages.
-
-    A run that post-processes its predictions with a second model records both, separated by
-    ``;`` -- the base model first. Reported separately so a refined run reads as a refinement
-    of its base rather than as an unrelated pair of checkpoints.
-    """
-    stages = [stage.strip() for stage in str(value).split(CHECKPOINT_SEPARATOR) if stage.strip()]
-    return (stages[0] if stages else ""), stages[1:]
-
-
-def _refinement_model_name(checkpoint: str) -> Optional[str]:
-    """The product name of a refinement model, from its checkpoint name."""
-    token = re.split(r"[-_ ]", checkpoint.strip(), maxsplit=1)[0].lower()
-    return REFINEMENT_MODEL_NAMES.get(token)
-
-
-def _refinement_clause(refinements: List[str]) -> str:
-    """Render the trailing "with ... refinement" clause for any post-processing stages."""
-    if not refinements:
-        return ""
-    rendered = []
-    for checkpoint in refinements:
-        name = _refinement_model_name(checkpoint)
-        rendered.append(f"{name} refinement ({checkpoint})" if name else f"refinement ({checkpoint})")
-    return " with " + " and ".join(rendered)
-
-
-def _display_software_name(software: str, checkpoint: object) -> str:
-    """
-    The name to show for a datapoint, which is not always its ``software_name``.
-
-    A run whose only checkpoint is a refinement model is that model working on its own rather
-    than the tool that usually calls it: InstaNovo+ diffusion sampling is recorded under
-    ``software_name`` "InstaNovo", but it is not InstaNovo. Only the displayed name changes --
-    colour, marker and grouping still follow ``software_name``, which keeps such a run with the
-    rest of its project's results and avoids inventing a tool name the palettes do not know.
-    """
-    if _is_blank(checkpoint):
-        return software
-    base, refinements = _split_checkpoint(checkpoint)
-    if refinements:
-        return software  # a base model that was refined; the base model still names the run
-    return _refinement_model_name(base) or software
-
-
-def _render_workflow_label(software: str, parts: List[str], suffix: str) -> str:
-    """Assemble a workflow label from the tool name, its distinguishing fields and any suffix."""
-    if not parts:
-        return f"{software}{suffix}"
-    return f"{software} ({', '.join(parts)}){suffix}"
-
-
-def _display_name_series(result_df: pd.DataFrame, software_names: pd.Series) -> pd.Series:
-    """
-    The tool name to show per datapoint, which is not always its ``software_name``.
-
-    Grouping stays on ``software_name`` -- runs of one project are compared against each other --
-    but the name shown can differ per row, so a standalone refinement model is not mislabelled as
-    the tool that usually drives it.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to name. ``checkpoint`` is used when present.
-    software_names : pd.Series
-        ``software_name`` as strings, aligned to ``result_df.index``.
-
-    Returns
-    -------
-    pd.Series
-        Display names aligned to ``result_df.index``.
-    """
-    if "checkpoint" not in result_df.columns:
-        return software_names.copy()
-    return pd.Series(
-        [_display_software_name(name, checkpoint) for name, checkpoint in zip(software_names, result_df["checkpoint"])],
-        index=result_df.index,
-        dtype=object,
-    )
-
-
-def _variant_fields(
-    result_df: pd.DataFrame, software_names: pd.Series, display_names: pd.Series
-) -> Tuple[Dict[object, List[str]], Dict[object, str]]:
-    """
-    Collect the fields that tell each tool's own submissions apart.
-
-    A tool that appears once has nothing to tell apart and gets nothing. For a tool submitted
-    several times, a field earns a place only when that tool's own submissions differ on it:
-    a field that is constant across them would lengthen every label without separating anything.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to inspect. Any of :data:`WORKFLOW_LABEL_FIELDS` are used when present.
-    software_names : pd.Series
-        ``software_name`` as strings, which decides the grouping.
-    display_names : pd.Series
-        The name shown per datapoint, used only to test whether the fields gathered so far
-        already separate a tool's rows.
-
-    Returns
-    -------
-    tuple of dict
-        Rendered field values per index, and the trailing refinement clause per index.
-    """
-    parts: Dict[object, List[str]] = {idx: [] for idx in result_df.index}
-    suffixes: Dict[object, str] = {idx: "" for idx in result_df.index}
-
-    for _, group in result_df.groupby(software_names, sort=False):
-        if len(group) < 2:
-            continue
-
-        for field in WORKFLOW_LABEL_FIELDS:
-            if field not in group.columns:
-                continue
-            values = group[field]
-            # A field only earns a place in the label if this tool's own submissions differ
-            # on it; two distinct non-blank values is the minimum that can separate two rows.
-            if len({str(v).strip() for v in values if not _is_blank(v)}) < 2:
-                continue
-            for idx, value in values.items():
-                if _is_blank(value):
-                    continue
-                if field == "checkpoint":
-                    # The base model belongs with the other settings; refinement stages read
-                    # as a clause after them, so a refined run names what refined it.
-                    base, refinements = _split_checkpoint(value)
-                    if base:
-                        parts[idx].append(base)
-                    suffixes[idx] = _refinement_clause(refinements)
-                else:
-                    parts[idx].append(_format_label_field(field, value))
-            rendered = {_render_workflow_label(display_names.at[idx], parts[idx], suffixes[idx]) for idx in group.index}
-            if len(rendered) == len(group):
-                break  # already unique; more fields would only add noise
-
-    return parts, suffixes
-
-
-def build_variant_descriptions(result_df: pd.DataFrame) -> pd.Series:
-    """
-    Describe what sets each datapoint apart from its own tool's other submissions.
-
-    This is :func:`build_workflow_labels` without the tool name: the parenthetical alone, so it
-    can sit under the tool name in a hover box or in a column of its own beside it rather than
-    being folded into one long string. A tool submitted once has nothing it differs from, and
-    gets an empty description.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to describe. Must carry ``software_name``; any of
-        :data:`WORKFLOW_LABEL_FIELDS` are used when present.
-
-    Returns
-    -------
-    pd.Series
-        Descriptions aligned to ``result_df.index``, empty where nothing differs.
-    """
-    if "software_name" not in result_df.columns or len(result_df) == 0:
-        return pd.Series([], dtype=str) if len(result_df) == 0 else pd.Series("", index=result_df.index)
-
-    software_names = result_df["software_name"].astype(str)
-    display_names = _display_name_series(result_df, software_names)
-    parts, suffixes = _variant_fields(result_df, software_names, display_names)
-    return pd.Series(
-        [(", ".join(parts[idx]) + suffixes[idx]).strip() for idx in result_df.index],
-        index=result_df.index,
-        dtype=object,
-    )
-
-
-def build_workflow_labels(result_df: pd.DataFrame) -> pd.Series:
-    """
-    Build a display label per datapoint, unique within each software tool.
-
-    A tool that appears once keeps its plain name. A tool submitted several times gets the
-    fields that actually differ between its own submissions appended, so the label says what
-    makes each run distinct rather than repeating the tool name. Fields that are constant
-    across a tool's submissions are left out -- they would lengthen every label without
-    separating anything.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to label. Must carry ``software_name``; any of
-        :data:`WORKFLOW_LABEL_FIELDS` and ``id`` are used when present.
-
-    Returns
-    -------
-    pd.Series
-        Labels aligned to ``result_df.index``.
-    """
-    if "software_name" not in result_df.columns or len(result_df) == 0:
-        return pd.Series([], dtype=str) if len(result_df) == 0 else pd.Series("", index=result_df.index)
-
-    software_names = result_df["software_name"].astype(str)
-    display_names = _display_name_series(result_df, software_names)
-    labels = display_names.copy()
-    parts, suffixes = _variant_fields(result_df, software_names, display_names)
-
-    for idx in result_df.index:
-        if parts[idx] or suffixes[idx]:
-            labels.at[idx] = _render_workflow_label(display_names.at[idx], parts[idx], suffixes[idx])
-
-    # Whatever the recorded parameters could not separate, the ProteoBench ID always can.
-    duplicated = labels.duplicated(keep=False)
-    if duplicated.any() and "id" in result_df.columns:
-        labels[duplicated] = [
-            f"{label} [{point_id}]"
-            for label, point_id in zip(labels[duplicated], result_df.loc[duplicated, "id"].astype(str))
-        ]
-
-    return labels
-
-
-#: Ways a datapoint can be named in a plot legend, on a plot, or in the result table.
-#:
-#: ``index`` is the tool plus the datapoint's rank within that tool: short, always unique, and
-#: unaffected by how many fields differ, but it says nothing about what the run was.
-#: ``params`` is :func:`build_workflow_labels`, which spells out the fields that differ between
-#: a tool's own submissions: informative, but it grows with the number of differing fields.
-#: ``custom`` is whatever the submitter or viewer typed, falling back to ``index``.
-LABEL_STYLES = ("index", "params", "custom")
-
-#: Bounds for the lightness of a shaded family, so that no member of a tool's colour family
-#: washes out against the background or darkens into black.
-SHADE_LIGHTNESS_BOUNDS = (0.22, 0.80)
-
-
-def _hex_to_hsl(color: str) -> Tuple[float, float, float]:
-    """Convert a ``#rrggbb`` string to hue, saturation and lightness, each in [0, 1]."""
-    value = int(color.lstrip("#"), 16)
-    red, green, blue = ((value >> 16) & 255) / 255, ((value >> 8) & 255) / 255, (value & 255) / 255
-    high, low = max(red, green, blue), min(red, green, blue)
-    lightness = (high + low) / 2
-    if high == low:
-        return 0.0, 0.0, lightness
-    delta = high - low
-    saturation = delta / (2 - high - low) if lightness > 0.5 else delta / (high + low)
-    if high == red:
-        hue = (green - blue) / delta + (6 if green < blue else 0)
-    elif high == green:
-        hue = (blue - red) / delta + 2
-    else:
-        hue = (red - green) / delta + 4
-    return hue / 6, saturation, lightness
-
-
-def _hsl_to_hex(hue: float, saturation: float, lightness: float) -> str:
-    """Convert hue, saturation and lightness, each in [0, 1], to a ``#rrggbb`` string."""
-
-    def channel(p: float, q: float, t: float) -> float:
-        t = t % 1.0
-        if t < 1 / 6:
-            return p + (q - p) * 6 * t
-        if t < 1 / 2:
-            return q
-        if t < 2 / 3:
-            return p + (q - p) * (2 / 3 - t) * 6
-        return p
-
-    if saturation == 0:
-        red = green = blue = lightness
-    else:
-        q = lightness * (1 + saturation) if lightness < 0.5 else lightness + saturation - lightness * saturation
-        p = 2 * lightness - q
-        red, green, blue = channel(p, q, hue + 1 / 3), channel(p, q, hue), channel(p, q, hue - 1 / 3)
-    return "#{:02x}{:02x}{:02x}".format(*(int(round(min(1.0, max(0.0, c)) * 255)) for c in (red, green, blue)))
-
-
-def shade_within_tool(color: str, position: int, count: int) -> str:
-    """
-    Vary a tool's colour by lightness, so several of its datapoints stay distinguishable.
-
-    Hue is reserved for the tool, because that is what makes a figure readable across tools, so
-    the datapoint has to be carried by something else. Lightness offers as many distinguishable
-    steps as a group needs, where a dash cycle runs out after six, and it carries an ordering
-    for free: ``position`` 0 is the darkest, so the darkest member of a family is its best run.
-
-    Parameters
-    ----------
-    color : str
-        The tool's base colour, as ``#rrggbb``.
-    position : int
-        Zero-based position of this datapoint within its tool's displayed group.
-    count : int
-        Number of the tool's datapoints being displayed.
-
-    Returns
-    -------
-    str
-        The shaded colour as ``#rrggbb``. The base colour is returned unchanged when the group
-        holds at most one datapoint, since there is then nothing to separate.
-    """
-    if count <= 1 or position < 0:
-        return color
-    hue, saturation, lightness = _hex_to_hsl(color)
-    # Wider groups get a wider spread, capped so that even a large family stays within one hue's
-    # readable lightness range rather than running from white to black.
-    span = min(0.34, 0.08 + 0.03 * count)
-    target = lightness - span / 2 + (span * position) / (count - 1)
-    low, high = SHADE_LIGHTNESS_BOUNDS
-    return _hsl_to_hex(hue, saturation, min(high, max(low, target)))
-
-
-def datapoint_score(row: pd.Series, evaluation_type: str = "mass", ambiguity_combo: Optional[str] = None) -> float:
-    """
-    Rank a datapoint by the mean of its peptide-level and amino-acid-level AUC.
-
-    This is the single quantity "best datapoint of this tool" is decided on. Both levels are
-    required: a datapoint carrying only one of them cannot be compared against one carrying
-    both, so it scores as missing rather than being ranked on half the evidence.
-
-    Parameters
-    ----------
-    row : pd.Series
-        One datapoint, carrying the nested ``results`` dict.
-    evaluation_type : str
-        Evaluation type to read, ``"mass"`` or ``"exact"``.
-    ambiguity_combo : str, optional
-        One of ``"il"``, ``"deam"``, ``"both"`` to read that exact-mode ambiguity combination;
-        ``None`` reads the baseline.
-
-    Returns
-    -------
-    float
-        The mean of the two AUC values, or NaN when either is absent.
-    """
-    values = []
-    for level in _LEVELS:
-        try:
-            auc = _get_metrics_leaf(row, level, evaluation_type, ambiguity_combo).get("auc")
-        except (KeyError, TypeError, IndexError):
-            # `_get_metrics_leaf` indexes straight into the nested dict, so a legacy datapoint
-            # missing a level, an evaluation type or the whole `results` block raises here.
-            # Such a datapoint is simply unrankable; it must not take the page down with it.
-            return float("nan")
-        if isinstance(auc, (int, float)) and not isinstance(auc, bool) and not np.isnan(auc):
-            values.append(float(auc))
-    if len(values) < len(_LEVELS):
-        return float("nan")
-    return sum(values) / len(values)
-
-
-def rank_within_tools(
-    result_df: pd.DataFrame, evaluation_type: str = "mass", ambiguity_combo: Optional[str] = None
-) -> Tuple[pd.Series, Dict[str, Any]]:
-    """
-    Rank each datapoint against the other submissions of its own tool.
-
-    Ranking per tool rather than globally is what keeps the display from being biased by how
-    many times a tool was submitted: every tool contributes one rank-1 datapoint regardless of
-    whether it was submitted once or fifteen times.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to rank. Must carry ``software_name`` and ``results``.
-    evaluation_type : str
-        Evaluation type to rank on, ``"mass"`` or ``"exact"``.
-    ambiguity_combo : str, optional
-        Exact-mode ambiguity combination to rank on; ``None`` reads the baseline.
-
-    Returns
-    -------
-    tuple of (pd.Series, dict)
-        The 1-based rank of each datapoint within its tool, aligned to ``result_df.index``, and
-        a mapping of tool name to the index of its best datapoint. A tool whose datapoints are
-        all unscorable is absent from the mapping, and its datapoints still receive a rank so
-        that nothing is left unlabelled.
-    """
-    if "software_name" not in result_df.columns or len(result_df) == 0:
-        return pd.Series(dtype="int64"), {}
-
-    scores = pd.Series(
-        [datapoint_score(row, evaluation_type, ambiguity_combo) for _, row in result_df.iterrows()],
-        index=result_df.index,
-        dtype=float,
-    )
-    ranks = pd.Series(0, index=result_df.index, dtype="int64")
-    best: Dict[str, Any] = {}
-
-    for tool, group in result_df.groupby(result_df["software_name"].astype(str), sort=False):
-        # mergesort keeps submission order among ties, so an unchanged dataset ranks the same
-        # way every time rather than reshuffling equal-scoring runs between reruns.
-        ordered = scores.loc[group.index].sort_values(ascending=False, kind="mergesort", na_position="last")
-        for position, idx in enumerate(ordered.index, start=1):
-            ranks.at[idx] = position
-        scorable = ordered.dropna()
-        if len(scorable) > 0:
-            best[str(tool)] = scorable.index[0]
-
-    return ranks, best
-
-
-def build_display_labels(
-    result_df: pd.DataFrame,
-    style: str = "index",
-    ranks: Optional[pd.Series] = None,
-    custom_labels: Optional[Mapping[Any, str]] = None,
-    evaluation_type: str = "mass",
-    ambiguity_combo: Optional[str] = None,
-) -> pd.Series:
-    """
-    Build the label shown for each datapoint, in one of :data:`LABEL_STYLES`.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to label. Must carry ``software_name``.
-    style : str
-        One of :data:`LABEL_STYLES`.
-    ranks : pd.Series, optional
-        Precomputed ranks from :func:`rank_within_tools`, reused to avoid ranking twice when
-        the caller already has them. Computed here when omitted.
-    custom_labels : Mapping, optional
-        Index to label, consulted only for the ``"custom"`` style. An entry that is missing or
-        blank falls back to the ``"index"`` style, so a partly labelled set stays fully labelled.
-    evaluation_type : str
-        Evaluation type used when ranks have to be computed.
-    ambiguity_combo : str, optional
-        Exact-mode ambiguity combination used when ranks have to be computed.
-
-    Returns
-    -------
-    pd.Series
-        Labels aligned to ``result_df.index``.
-
-    Raises
-    ------
-    ValueError
-        If ``style`` is not one of :data:`LABEL_STYLES`.
-    """
-    if style not in LABEL_STYLES:
-        raise ValueError(f"Unknown label style {style!r}; expected one of {', '.join(LABEL_STYLES)}")
-    if len(result_df) == 0:
-        return pd.Series([], dtype=str)
-    if style == "params":
-        return build_workflow_labels(result_df)
-
-    if ranks is None:
-        ranks, _ = rank_within_tools(result_df, evaluation_type, ambiguity_combo)
-    software = (
-        result_df["software_name"].astype(str)
-        if "software_name" in result_df.columns
-        else pd.Series("Custom", index=result_df.index)
-    )
-    labels = pd.Series(
-        [f"{software.at[idx]} #{int(ranks.at[idx])}" for idx in result_df.index],
-        index=result_df.index,
-        dtype=object,
-    )
-    if style == "index":
-        return labels
-
-    for idx in result_df.index:
-        typed = (custom_labels or {}).get(idx)
-        if isinstance(typed, str) and typed.strip():
-            labels.at[idx] = typed.strip()
-    return labels
-
-
-#: Colour for a datapoint that is present but not emphasised. Every submission stays visible, so
-#: a tool's spread can be seen, without every submission competing for attention.
-MUTED_COLOR = "#c9c9c9"
-
-#: Opacity of a non-emphasised curve. Lower than the equivalent for markers because a full-width
-#: line covers far more of the plot than a marker does, so it needs to recede further to stop a
-#: tool with fifteen submissions from visually outweighing a tool with one.
-MUTED_CURVE_OPACITY = 0.18
 
 #: Most points kept per precision-coverage curve. The stored curves hold ~500 points each, which
 #: at a couple of hundred datapoints is several megabytes of JSON per rerun for a 700px-wide plot
@@ -776,527 +131,12 @@ def thin_curve(coverage: Sequence[float], precision: Sequence[float]) -> Tuple[l
     return [coverage[i] for i in keep], [precision[i] for i in keep]
 
 
-#: Opacity of a datapoint belonging to a tool other than the one currently highlighted.
-DIMMED_OPACITY = 0.12
-
-#: Opacity of a coloured datapoint that is not the best of its tool within the current selection.
-#: With every datapoint shown by default, a tool submitted fifteen times would otherwise put
-#: fifteen equally loud marks on the plot. Fading the rest keeps the spread visible as context
-#: while the eye stays on the run that decides where the tool actually sits.
-SECONDARY_OPACITY = 0.4
-
-#: Marker symbol for the best datapoint of each tool, matching the star the result table puts
-#: beside that tool's name. Only used outside colourblind mode, where the symbol is already
-#: spoken for: there it says which tool a point belongs to.
-BEST_MARKER_SYMBOL = "star"
-
-#: How much larger a star is drawn than the circle it replaces. A five-pointed star encloses
-#: roughly half the ink of a circle of the same nominal size, so a little is needed or the
-#: datapoint being singled out would read as the smallest mark on the plot. Only a little,
-#: though: the size is multiplied again for an unpublished datapoint, and at 1.35 the two
-#: multipliers together made a star twice the width of the points around it.
-BEST_MARKER_SCALE = 1.12
-
-#: Opacity of a curve in that same position. Lower than the marker equivalent for the reason
-#: :data:`MUTED_CURVE_OPACITY` is: a full-width line covers far more of the plot than a marker.
-SECONDARY_CURVE_OPACITY = 0.3
-
-
-def leading_datapoints(result_df: pd.DataFrame, coloured: pd.Series, ranks: pd.Series) -> set:
-    """
-    The best coloured datapoint of each tool.
-
-    "Coloured" says a datapoint is drawn in its tool's colour; it no longer says the datapoint
-    is that tool's representative, because a selection may hold every run a tool submitted. This
-    picks the one of each tool that is drawn at full strength.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        The datapoints being drawn. Must carry ``software_name``.
-    coloured : pd.Series
-        Boolean Series from :func:`resolve_coloured_datapoints`.
-    ranks : pd.Series
-        Ranks within each tool, from :func:`rank_within_tools`.
-
-    Returns
-    -------
-    set
-        Frame indices of the best coloured datapoint of each tool.
-    """
-    if len(result_df) == 0:
-        return set()
-    software = (
-        result_df["software_name"].astype(str)
-        if "software_name" in result_df.columns
-        else pd.Series("Custom", index=result_df.index)
-    )
-    best: dict = {}
-    for idx in result_df.index:
-        if not bool(coloured.at[idx]):
-            continue
-        tool = software.at[idx]
-        rank = int(ranks.at[idx]) if idx in ranks.index else 0
-        if tool not in best or rank < best[tool][0]:
-            best[tool] = (rank, idx)
-    return {idx for _rank, idx in best.values()}
-
-
 #: Line and marker styling for the in-depth plots, keyed by whether the datapoint is emphasised.
 #: With nothing highlighted every datapoint is emphasised, so the figure reads as it did before.
 _IN_DEPTH_LINE_EMPHASIS = {
     True: {"width": 2.6, "size": 7, "opacity": 0.95},
     False: {"width": 1.2, "size": 5, "opacity": DIMMED_OPACITY + 0.06},
 }
-
-
-#: Columns that identify a datapoint uniquely but say nothing about how it was produced. Being
-#: unique makes them trivially the most "discriminating" columns, which is exactly why they are
-#: ranked separately: sorting on discrimination would otherwise put them first, where they are
-#: the widest and least informative thing on screen.
-IDENTIFIER_COLUMNS = ("id", "intermediate_hash")
-
-#: Columns that are not run parameters and so never belong in the parameter table: metric
-#: payloads, display bookkeeping, and the flat metric fields the figures read instead.
-_NON_PARAMETER_COLUMNS = frozenset(
-    {
-        "results",
-        "old_new",
-        "is_temporary",
-        "Highlight",
-        "selected",
-        "open_source",
-        "color",
-        "opacity",
-        "line_width",
-        "marker",
-        "hover_text",
-        "scatter_size",
-        "display_label",
-        "is_coloured",
-        "engine",
-        "precision_peptide",
-        "precision_aa",
-        "recall_peptide",
-        "recall_aa",
-        "proteobench_version",
-        "comments",
-        "submission_comments",
-        "nr_feature",
-        "nr_prec",
-    }
-)
-
-
-def columns_varying_within_tool(result_df: pd.DataFrame, tool: str, columns: Iterable[str]) -> List[str]:
-    """
-    The columns on which one tool's own datapoints differ from each other.
-
-    A column needs two distinct non-blank values within the tool to count: a value every
-    submission of a tool shares cannot tell those submissions apart, which is the only job this
-    distinction has.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to inspect. Must carry ``software_name``.
-    tool : str
-        The tool whose submissions are compared against each other.
-    columns : Iterable of str
-        Columns to consider.
-
-    Returns
-    -------
-    list of str
-        The subset of ``columns`` that differ within this tool, in the given order.
-    """
-    if "software_name" not in result_df.columns:
-        return []
-    group = result_df[result_df["software_name"].astype(str) == str(tool)]
-    varying = []
-    for column in columns:
-        if column not in group.columns:
-            continue
-        seen = {str(value).strip() for value in group[column] if not _is_blank(value)}
-        if len(seen) > 1:
-            varying.append(column)
-    return varying
-
-
-def classify_datapoint_columns(
-    result_df: pd.DataFrame,
-    columns: Optional[Iterable[str]] = None,
-) -> Dict[str, List[str]]:
-    """
-    Sort datapoint columns by how far they actually discriminate.
-
-    This decides both the column order of the result table and what it hides by default. A table
-    that leads with the ProteoBench ID and the intermediate hash puts its two widest and least
-    informative columns where the eye lands first.
-
-    The four classes:
-
-    - ``discriminating``: differs between at least one tool's own datapoints. These are what tell
-      a tool's repeat submissions apart, so they belong closest to the tool name.
-    - ``contextual``: constant within every tool but not across the set. Useful background, but
-      it cannot separate one tool's submissions from each other.
-    - ``uniform``: one value, or none, across the whole set. Carries no information here.
-    - ``identifier``: :data:`IDENTIFIER_COLUMNS`, kept out of the ranking deliberately.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to classify.
-    columns : Iterable of str, optional
-        Columns to classify. Defaults to every column that is not a metric payload or display
-        bookkeeping, and that at least one datapoint fills in.
-
-    Returns
-    -------
-    dict
-        Maps each class name to its columns. Classes with no columns map to an empty list.
-    """
-    if columns is None:
-        columns = [
-            column
-            for column in result_df.columns
-            if column not in _NON_PARAMETER_COLUMNS
-            and not any(column.startswith(f"{level}_") for level in _LEVELS)
-            and any(not _is_blank(value) for value in result_df[column])
-        ]
-    columns = [column for column in columns if column != "software_name"]
-
-    classes: Dict[str, List[str]] = {name: [] for name in ("discriminating", "contextual", "uniform", "identifier")}
-    if len(result_df) == 0:
-        classes["identifier"] = [c for c in columns if c in IDENTIFIER_COLUMNS]
-        classes["uniform"] = [c for c in columns if c not in IDENTIFIER_COLUMNS]
-        return classes
-
-    tools = result_df["software_name"].astype(str).unique() if "software_name" in result_df.columns else []
-    for column in columns:
-        if column in IDENTIFIER_COLUMNS:
-            classes["identifier"].append(column)
-            continue
-        if any(columns_varying_within_tool(result_df, tool, [column]) for tool in tools):
-            classes["discriminating"].append(column)
-            continue
-        distinct = {str(value).strip() for value in result_df[column] if not _is_blank(value)}
-        classes["contextual" if len(distinct) > 1 else "uniform"].append(column)
-    return classes
-
-
-def ordered_datapoint_columns(classes: Mapping[str, List[str]]) -> List[str]:
-    """
-    Flatten a classification into display order, most discriminating first.
-
-    Parameters
-    ----------
-    classes : Mapping
-        As returned by :func:`classify_datapoint_columns`.
-
-    Returns
-    -------
-    list of str
-        Column names, discriminating first and identifiers last.
-    """
-    return [
-        column for name in ("discriminating", "contextual", "uniform", "identifier") for column in classes.get(name, [])
-    ]
-
-
-def default_hidden_columns(classes: Mapping[str, List[str]]) -> List[str]:
-    """
-    The columns a table hides until asked.
-
-    Only the columns that differ within some tool are shown. A column constant within every tool
-    cannot separate a tool's own submissions, which is what the table is for, so it is context to
-    reveal rather than width to pay for up front.
-
-    Parameters
-    ----------
-    classes : Mapping
-        As returned by :func:`classify_datapoint_columns`.
-
-    Returns
-    -------
-    list of str
-        Column names to hide by default.
-    """
-    return [column for name in ("contextual", "uniform", "identifier") for column in classes.get(name, [])]
-
-
-def resolve_coloured_datapoints(
-    result_df: pd.DataFrame,
-    best_by_tool: Optional[Mapping[str, Any]] = None,
-    muted_tools: Iterable[str] = (),
-    selected_ids: Iterable[str] = (),
-    evaluation_type: str = "mass",
-    ambiguity_combo: Optional[str] = None,
-    explicit_only: bool = False,
-) -> pd.Series:
-    """
-    Decide which datapoints are drawn in their tool's colour rather than greyed.
-
-    By default exactly one datapoint per tool is coloured, its best, which is what keeps the
-    figure from being biased by how many times a tool was submitted. Two overrides sit on top: a
-    datapoint whose ID appears in ``selected_ids`` is coloured regardless of rank, and a tool
-    named in ``muted_tools`` is never coloured at all, selected or not, which is how a whole tool
-    is greyed in one action.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to resolve. Must carry ``software_name``; ``id`` is used when present.
-    best_by_tool : Mapping, optional
-        Tool name to best index, from :func:`rank_within_tools`. Computed here when omitted.
-    muted_tools : Iterable of str
-        Tools that are never coloured, whether or not their datapoints are selected.
-    selected_ids : Iterable of str
-        ProteoBench IDs of datapoints to colour regardless of rank.
-    evaluation_type : str
-        Evaluation type used when ``best_by_tool`` has to be computed.
-    ambiguity_combo : str, optional
-        Exact-mode ambiguity combination used when ``best_by_tool`` has to be computed.
-    explicit_only : bool
-        When True, colour exactly ``selected_ids`` and nothing else. A caller driving the
-        colouring from a checkbox needs an empty selection to mean an empty plot, not a silent
-        fall back to the per-tool bests, which is what the default rule would do.
-
-    Returns
-    -------
-    pd.Series
-        Boolean Series aligned to ``result_df.index``, True where the datapoint is coloured.
-    """
-    if len(result_df) == 0:
-        return pd.Series([], dtype=bool)
-    if best_by_tool is None:
-        _, best_by_tool = rank_within_tools(result_df, evaluation_type, ambiguity_combo)
-
-    muted = {str(tool) for tool in muted_tools}
-    selected = {str(point_id) for point_id in selected_ids}
-    ids = result_df["id"].astype(str) if "id" in result_df.columns else pd.Series("", index=result_df.index)
-    software = (
-        result_df["software_name"].astype(str)
-        if "software_name" in result_df.columns
-        else pd.Series("Custom", index=result_df.index)
-    )
-
-    coloured = pd.Series(False, index=result_df.index, dtype=bool)
-    for idx in result_df.index:
-        # Muting is checked before the selection, not after it. A tool named in ``muted_tools``
-        # is never coloured, however its datapoints came to be selected: checked only on the
-        # automatic branch, a mute did nothing at all once the table was driving the colouring
-        # from its own ticks, which is why "Grey out tools" appeared not to register.
-        tool = software.at[idx]
-        if tool in muted:
-            continue
-        if ids.at[idx] in selected:
-            coloured.at[idx] = True
-            continue
-        if explicit_only:
-            continue
-        coloured.at[idx] = best_by_tool.get(tool) == idx
-    return coloured
-
-
-#: The two ways of picking which datapoints an in-depth view compares.
-SELECTION_PRESETS = ("cross_tool", "tool_specific")
-
-
-def preset_selection(
-    result_df: pd.DataFrame,
-    preset: str = "cross_tool",
-    tool: Optional[str] = None,
-    top_n: int = 0,
-    evaluation_type: str = "mass",
-    ambiguity_combo: Optional[str] = None,
-) -> List[str]:
-    """
-    The ProteoBench IDs a selection preset picks out.
-
-    The two presets answer different questions and deliberately suppress each other's:
-
-    - ``cross_tool`` takes each tool's best datapoint, one per tool. This is the comparison that
-      is not biased by how many times a tool was submitted, and it is what a reader opening the
-      page should see first.
-    - ``tool_specific`` takes one tool's own submissions, the ``top_n`` best or all of them. This
-      is the within-tool comparison the cross-tool view hides.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        Datapoints to pick from. Must carry ``software_name`` and ``id``.
-    preset : str
-        One of :data:`SELECTION_PRESETS`.
-    tool : str, optional
-        The tool for ``tool_specific``. Defaults to the tool with the best datapoint overall.
-    top_n : int
-        How many of the tool's submissions to take, best first. ``0`` means all of them.
-    evaluation_type : str
-        Evaluation type the ranking is based on.
-    ambiguity_combo : str, optional
-        Exact-mode ambiguity combination the ranking is based on.
-
-    Returns
-    -------
-    list of str
-        Selected ProteoBench IDs, ordered best first within each tool.
-
-    Raises
-    ------
-    ValueError
-        If ``preset`` is not one of :data:`SELECTION_PRESETS`.
-    """
-    if preset not in SELECTION_PRESETS:
-        raise ValueError(f"Unknown selection preset {preset!r}; expected one of {', '.join(SELECTION_PRESETS)}")
-    if len(result_df) == 0 or "id" not in result_df.columns:
-        return []
-
-    ranks, best_by_tool = rank_within_tools(result_df, evaluation_type, ambiguity_combo)
-    ids = result_df["id"].astype(str)
-    software = result_df["software_name"].astype(str)
-
-    if preset == "cross_tool":
-        # Ordered by how good each tool's best is, so the legend and table read best-first.
-        ordered_tools = sorted(
-            best_by_tool,
-            key=lambda name: -(datapoint_score(result_df.loc[best_by_tool[name]], evaluation_type, ambiguity_combo)),
-        )
-        return [ids.at[best_by_tool[name]] for name in ordered_tools]
-
-    if tool is None:
-        if not best_by_tool:
-            return []
-        tool = max(
-            best_by_tool,
-            key=lambda name: datapoint_score(result_df.loc[best_by_tool[name]], evaluation_type, ambiguity_combo),
-        )
-    members = [idx for idx in result_df.index if software.at[idx] == str(tool)]
-    members.sort(key=lambda idx: int(ranks.at[idx]) if idx in ranks.index else 0)
-    if top_n and top_n > 0:
-        members = members[:top_n]
-    return [ids.at[idx] for idx in members]
-
-
-def assign_datapoint_colors(
-    result_df: pd.DataFrame,
-    software_colors: Optional[Mapping[str, str]] = None,
-    ranks: Optional[pd.Series] = None,
-    evaluation_type: str = "mass",
-    ambiguity_combo: Optional[str] = None,
-) -> pd.Series:
-    """
-    Give every datapoint in a selection a colour, shading only where that helps.
-
-    Which rule applies follows from the selection itself, so no caller has to declare a mode:
-
-    - **Several tools selected.** Hue is doing its original job, telling tools apart, so each
-      datapoint simply takes its tool's colour. A shade per datapoint would compete with exactly
-      the comparison a cross-tool selection exists to make.
-    - **One tool selected.** Every mark belongs to that tool, so hue is free to carry the
-      datapoint instead: each run takes the tool's hue at a lightness set by its rank, best
-      darkest, via :func:`shade_within_tool`.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        The selected datapoints. Must carry ``software_name``.
-    software_colors : Mapping, optional
-        Tool name to colour. Defaults to :data:`SOFTWARE_COLORS`.
-    ranks : pd.Series, optional
-        Precomputed ranks from :func:`rank_within_tools`, reused when the caller already has
-        them. Computed here when omitted.
-    evaluation_type : str
-        Evaluation type used when ranks have to be computed.
-    ambiguity_combo : str, optional
-        Exact-mode ambiguity combination used when ranks have to be computed.
-
-    Returns
-    -------
-    pd.Series
-        Colours aligned to ``result_df.index``.
-    """
-    palette = SOFTWARE_COLORS if software_colors is None else software_colors
-    if len(result_df) == 0:
-        return pd.Series([], dtype=str)
-    software = (
-        result_df["software_name"].astype(str)
-        if "software_name" in result_df.columns
-        else pd.Series("Custom", index=result_df.index)
-    )
-    base = pd.Series([palette.get(software.at[idx], "gray") for idx in result_df.index], index=result_df.index)
-    if software.nunique() != 1:
-        return base
-
-    if ranks is None:
-        ranks, _ = rank_within_tools(result_df, evaluation_type, ambiguity_combo)
-    ordered = sorted(result_df.index, key=lambda idx: (int(ranks.at[idx]) if idx in ranks.index else 0))
-    count = len(ordered)
-    return pd.Series(
-        {idx: shade_within_tool(base.at[idx], position, count) for position, idx in enumerate(ordered)},
-        dtype=object,
-    ).reindex(result_df.index)
-
-
-def resolve_emphasis(result_df: pd.DataFrame, highlight_id: Optional[str] = None) -> pd.Series:
-    """
-    Decide which datapoints are emphasised while one of them is highlighted.
-
-    The granularity follows the selection, matching :func:`assign_datapoint_colors`. Across
-    several tools, highlighting one mark raises every mark of that software, which is what a
-    cross-tool reader wants and what the main scatter does. Within a single tool that rule would
-    raise the whole selection and say nothing, so it narrows to the one datapoint.
-
-    Parameters
-    ----------
-    result_df : pd.DataFrame
-        The selected datapoints. Must carry ``software_name``; ``id`` is used when present.
-    highlight_id : str, optional
-        ProteoBench ID of the highlighted datapoint. ``None`` means nothing is highlighted.
-
-    Returns
-    -------
-    pd.Series
-        Boolean Series aligned to ``result_df.index``. All True when nothing is highlighted or
-        the ID is not found, so callers can dim on ``not emphasised`` unconditionally.
-    """
-    if len(result_df) == 0:
-        return pd.Series([], dtype=bool)
-    everything = pd.Series(True, index=result_df.index, dtype=bool)
-    if not highlight_id or "id" not in result_df.columns:
-        return everything
-
-    ids = result_df["id"].astype(str)
-    matches = ids == str(highlight_id)
-    if not matches.any():
-        return everything
-
-    software = (
-        result_df["software_name"].astype(str)
-        if "software_name" in result_df.columns
-        else pd.Series("Custom", index=result_df.index)
-    )
-    if software.nunique() == 1:
-        return matches
-    return software == software[matches].iloc[0]
-
-
-def _ambiguity_combo_for(evaluation_type: str, allow_il: bool, allow_deamidation: bool) -> Optional[str]:
-    """
-    The stored ambiguity key for a set of toggle positions.
-
-    Ambiguity combinations only exist under exact-mode matching: mass-mode metrics are identical
-    regardless, since I/L are isomeric and deamidated Q/N isobaric with E/D.
-    """
-    if evaluation_type != "exact":
-        return None
-    if allow_il and allow_deamidation:
-        return "both"
-    if allow_il:
-        return "il"
-    if allow_deamidation:
-        return "deam"
-    return None
 
 
 def _leader_line_annotations(points: List[dict], xref: str = "x", yref: str = "y") -> List[dict]:
@@ -1356,6 +196,262 @@ def _leader_line_annotations(points: List[dict], xref: str = "x", yref: str = "y
     return annotations
 
 
+def _empty_main_metric_figure(level_title: str) -> go.Figure:
+    """
+    The main-metric figure drawn when there is nothing to plot.
+
+    Either the caller passed an empty frame, or every datapoint was filtered out as missing the
+    selected field. Boolean-indexing an empty frame drops its columns, so the real path would
+    raise ``KeyError`` on ``software_name`` rather than draw anything.
+
+    Parameters
+    ----------
+    level_title : str
+        Name of the plotted metric, for the axis titles.
+
+    Returns
+    -------
+    go.Figure
+        Empty axes, saying so.
+    """
+    empty = go.Figure()
+    empty.update_layout(
+        width=700,
+        height=700,
+        xaxis=dict(title=f"Peptide {level_title}", range=list(MAIN_PLOT_AXIS_RANGE)),
+        yaxis=dict(title=f"Amino Acid {level_title}", range=list(MAIN_PLOT_AXIS_RANGE)),
+        plot_bgcolor="white",
+    )
+    empty.add_annotation(
+        x=0.5,
+        y=0.5,
+        xref="paper",
+        yref="paper",
+        showarrow=False,
+        text="No datapoints to display for this selection",
+        font=dict(size=14, color="rgba(60,60,60,0.75)"),
+    )
+    return empty
+
+
+def _main_metric_hover_texts(
+    benchmark_metrics_df: pd.DataFrame,
+    display_labels: pd.Series,
+    variants: pd.Series,
+    best_by_tool: Dict[str, object],
+    evaluation_type: str,
+    level: str,
+    level_title: str,
+    hover_columns: Optional[Sequence[str]],
+) -> List[str]:
+    """
+    The hover box of every datapoint: its identity, what it was, and the two plotted values.
+
+    Only the columns the caller asked for are added. The previous fixed dump of every parameter
+    buried the few fields that actually differ between the points being compared among a dozen
+    identical ones. The "ProteoBench ID:" line is kept verbatim because ``render_metric_plot``
+    parses the clicked point's ID out of the hover text.
+
+    Parameters
+    ----------
+    benchmark_metrics_df : pd.DataFrame
+        The datapoints being drawn, already flattened.
+    display_labels : pd.Series
+        Name per datapoint.
+    variants : pd.Series
+        What sets each datapoint apart from its tool's other runs; blank where nothing does.
+    best_by_tool : dict
+        Tool name to the index of its best datapoint.
+    evaluation_type : str
+        ``"mass"`` or ``"exact"``.
+    level : str
+        Metric being plotted.
+    level_title : str
+        Its display name.
+    hover_columns : Sequence of str, optional
+        Parameter columns to list under the values.
+
+    Returns
+    -------
+    list of str
+        One hover string per row, in the frame's own order.
+    """
+    hover_texts = []
+    for idx, row in benchmark_metrics_df.iterrows():
+        lines = [
+            f"ProteoBench ID: {row['id']}",
+            f"<b>{display_labels.at[idx]}</b>",
+        ]
+        # Directly under the name, before anything else: on a tool submitted many times the
+        # name alone says which run this is only by its rank, and what the reader wants to
+        # know first is what that run actually was.
+        if variants.at[idx]:
+            lines.append(f"<i>{variants.at[idx]}</i>")
+        if best_by_tool.get(str(row["software_name"])) == idx:
+            lines.append("Best datapoint of this tool")
+        for axis, prefix in (("peptide", "Peptide"), ("aa", "Amino acid")):
+            value = row.get(f"{axis}_{evaluation_type}_{level}")
+            if isinstance(value, (int, float)) and not isinstance(value, bool) and not np.isnan(value):
+                lines.append(f"{prefix} {level_title}: {value:.3f}")
+        for column in hover_columns or []:
+            if column not in benchmark_metrics_df.columns:
+                continue
+            lines.append(f"{column}: {_display_value(row[column])}")
+        if row.get("is_temporary") is True:
+            lines.append("Private submission, not yet published")
+        hover_texts.append("<br>".join(lines))
+    return hover_texts
+
+
+def _main_metric_marker_arrays(
+    benchmark_metrics_df: pd.DataFrame,
+    coloured: pd.Series,
+    leading: set,
+    highlight_tool: Optional[str],
+    highlight_color: str,
+    software_colors: Dict[str, str],
+) -> Tuple[List[str], List[float], List[float]]:
+    """
+    Per-point colour, opacity and outline width for the main-metric scatter.
+
+    Colour is the tool's own where the datapoint is coloured, and the shared muted grey
+    otherwise. Highlighting a tool colours every one of its datapoints, including the ones that
+    are grey by default, which is how a tool's spread becomes visible on demand without
+    colouring every tool's spread all of the time.
+
+    Parameters
+    ----------
+    benchmark_metrics_df : pd.DataFrame
+        The datapoints being drawn.
+    coloured : pd.Series
+        Whether each datapoint is drawn in its tool's colour.
+    leading : set
+        Indices of the best coloured datapoint of each tool.
+    highlight_tool : str, optional
+        Tool to bring forward, dimming the rest.
+    highlight_color : str
+        Colour for rows flagged in a ``Highlight`` column, which overrides everything else.
+    software_colors : Dict[str, str]
+        Colour per tool.
+
+    Returns
+    -------
+    tuple of list
+        Colours, opacities and outline widths, aligned to the frame's order.
+    """
+    colors, opacities, line_widths = [], [], []
+    for idx in benchmark_metrics_df.index:
+        tool = str(benchmark_metrics_df.at[idx, "software_name"])
+        tool_color = software_colors.get(tool, "gray")
+        is_highlighted = highlight_tool is not None and tool == highlight_tool
+        if highlight_tool is not None and not is_highlighted:
+            colors.append(tool_color if coloured.at[idx] else MUTED_COLOR)
+            opacities.append(DIMMED_OPACITY)
+            line_widths.append(0.0)
+        elif is_highlighted:
+            colors.append(tool_color)
+            opacities.append(0.95)
+            line_widths.append(1.6 if coloured.at[idx] else 1.0)
+        elif coloured.at[idx]:
+            colors.append(tool_color)
+            opacities.append(0.95 if idx in leading else SECONDARY_OPACITY)
+            line_widths.append(1.0 if idx in leading else 0.0)
+        else:
+            colors.append(MUTED_COLOR)
+            opacities.append(0.55)
+            line_widths.append(1.0)
+    if "Highlight" in benchmark_metrics_df.columns:
+        colors = [
+            highlight_color if highlight else item for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
+        ]
+    return colors, opacities, line_widths
+
+
+def _add_quadrant_background(fig: go.Figure) -> None:
+    """
+    Draw the four named regions behind the datapoints, in place.
+
+    A continuous gradient, lightest at the origin and deepest at (1, 1), so "how far into the
+    corner" reads visually even within a single quadrant. Added before the markers so they are
+    drawn on top of it, with the boundary lines above both so they stay crisp at any zoom.
+
+    Parameters
+    ----------
+    fig : go.Figure
+        Figure to draw into.
+    """
+    # Continuous background gradient, lightest at the origin and deepest at (1, 1), so
+    # "how far into the corner" reads visually even within a single quadrant. Added first
+    # so the scatter markers below are drawn on top of it, not the other way around.
+    grid_coords = np.linspace(MAIN_PLOT_AXIS_RANGE[0], MAIN_PLOT_AXIS_RANGE[1], 60)
+    grid_z = [[(x + y) / 2 for x in grid_coords] for y in grid_coords]
+    fig.add_trace(
+        go.Heatmap(
+            x=grid_coords,
+            y=grid_coords,
+            z=grid_z,
+            zmin=0,
+            zmax=1,
+            colorscale=QUADRANT_COLORSCALE,
+            showscale=False,
+            opacity=0.28,
+            hoverinfo="skip",
+        )
+    )
+
+    # Dashed boundary lines at the data midpoint, splitting the plot into the four named
+    # regions (drawn above the gradient/markers so they stay crisp at any zoom).
+    fig.add_shape(
+        type="line",
+        x0=QUADRANT_BOUNDARY,
+        x1=QUADRANT_BOUNDARY,
+        y0=MAIN_PLOT_AXIS_RANGE[0],
+        y1=MAIN_PLOT_AXIS_RANGE[1],
+        line=dict(color="rgba(90,90,90,0.6)", width=1, dash="dash"),
+        layer="above",
+    )
+    fig.add_shape(
+        type="line",
+        x0=MAIN_PLOT_AXIS_RANGE[0],
+        x1=MAIN_PLOT_AXIS_RANGE[1],
+        y0=QUADRANT_BOUNDARY,
+        y1=QUADRANT_BOUNDARY,
+        line=dict(color="rgba(90,90,90,0.6)", width=1, dash="dash"),
+        layer="above",
+    )
+
+    # Quadrant labels, placed inside each region near its outer edge.
+    left_x = (MAIN_PLOT_AXIS_RANGE[0] + QUADRANT_BOUNDARY) / 2
+    right_x = (QUADRANT_BOUNDARY + MAIN_PLOT_AXIS_RANGE[1]) / 2
+    top_y = MAIN_PLOT_AXIS_RANGE[1] - 0.05
+    bottom_y = MAIN_PLOT_AXIS_RANGE[0] + 0.03
+    for x, y, quadrant_key in (
+        (right_x, top_y, "good"),
+        (left_x, top_y, "near_miss"),
+        (left_x, bottom_y, "low"),
+        (right_x, bottom_y, "alt_candidate"),
+    ):
+        fig.add_annotation(
+            x=x,
+            y=y,
+            text=QUADRANT_LABELS[quadrant_key]["text"],
+            showarrow=False,
+            font=dict(size=12, color="rgba(60,60,60,0.85)"),
+            align="center",
+        )
+
+    # Corner cue: further into the top-right is strictly better on both axes.
+    fig.add_annotation(
+        x=MAIN_PLOT_AXIS_RANGE[1],
+        y=MAIN_PLOT_AXIS_RANGE[1],
+        xanchor="right",
+        yanchor="top",
+        text="↗ better performance",
+        showarrow=False,
+        font=dict(size=11, color="#1f5678"),
+    )
+
+
 class DeNovoPlotGenerator(PlotGeneratorBase):
     """
     Plot generator for de novo sequencing data points.
@@ -1410,8 +506,6 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         selected_ids = kwargs.get("selected_ids", ())
         explicit_selection = kwargs.get("explicit_selection", False)
         highlight_tool = kwargs.get("highlight_tool", None)
-        label_style = kwargs.get("label_style", "index")
-        custom_labels = kwargs.get("custom_labels", None)
         hover_columns = kwargs.get("hover_columns", None)
         # `label` named a single column to print on every point; `annotation_columns` supersedes
         # it with a list, drawn with leader lines and only on the datapoints worth labelling.
@@ -1444,32 +538,13 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # columns, so everything below would raise KeyError on `software_name` rather than draw
         # an empty figure. The in-depth plots already return a skeleton in this situation.
         if len(benchmark_metrics_df) == 0:
-            empty = go.Figure()
-            empty.update_layout(
-                width=700,
-                height=700,
-                xaxis=dict(title=f"Peptide {level_title}", range=list(MAIN_PLOT_AXIS_RANGE)),
-                yaxis=dict(title=f"Amino Acid {level_title}", range=list(MAIN_PLOT_AXIS_RANGE)),
-                plot_bgcolor="white",
-            )
-            empty.add_annotation(
-                x=0.5,
-                y=0.5,
-                xref="paper",
-                yref="paper",
-                showarrow=False,
-                text="No datapoints to display for this selection",
-                font=dict(size=14, color="rgba(60,60,60,0.75)"),
-            )
-            return empty
+            return _empty_main_metric_figure(level_title)
 
         # Ranking, labels and colouring. Exactly one datapoint per tool is coloured by default,
         # its best, so that a tool submitted fifteen times does not visually outweigh a tool
         # submitted once. Everything else stays on the plot in grey rather than being dropped.
         ranks, best_by_tool = rank_within_tools(benchmark_metrics_df, evaluation_type, ambiguity_combo)
-        display_labels = build_display_labels(
-            benchmark_metrics_df, style=label_style, ranks=ranks, custom_labels=custom_labels
-        )
+        display_labels = build_display_labels(benchmark_metrics_df, ranks=ranks)
         # What tells a run apart from its own tool's other submissions, kept separate from the
         # name rather than folded into it: the name stays short enough to read on the plot, and
         # the parameters still reach the reader, on hover and in the table's own column.
@@ -1494,30 +569,16 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # that actually differ between the points being compared among a dozen identical ones.
         # The "ProteoBench ID:" line is kept verbatim because `render_metric_plot` parses the
         # clicked point's ID out of the hover text.
-        hover_texts = []
-        for idx, row in benchmark_metrics_df.iterrows():
-            lines = [
-                f"ProteoBench ID: {row['id']}",
-                f"<b>{display_labels.at[idx]}</b>",
-            ]
-            # Directly under the name, before anything else: on a tool submitted many times the
-            # name alone says which run this is only by its rank, and what the reader wants to
-            # know first is what that run actually was.
-            if variants.at[idx]:
-                lines.append(f"<i>{variants.at[idx]}</i>")
-            if best_by_tool.get(str(row["software_name"])) == idx:
-                lines.append("Best datapoint of this tool")
-            for axis, prefix in (("peptide", "Peptide"), ("aa", "Amino acid")):
-                value = row.get(f"{axis}_{evaluation_type}_{level}")
-                if isinstance(value, (int, float)) and not isinstance(value, bool) and not np.isnan(value):
-                    lines.append(f"{prefix} {level_title}: {value:.3f}")
-            for column in hover_columns or []:
-                if column not in benchmark_metrics_df.columns:
-                    continue
-                lines.append(f"{column}: {_display_value(row[column])}")
-            if row.get("is_temporary") is True:
-                lines.append("Private submission, not yet published")
-            hover_texts.append("<br>".join(lines))
+        hover_texts = _main_metric_hover_texts(
+            benchmark_metrics_df,
+            display_labels=display_labels,
+            variants=variants,
+            best_by_tool=best_by_tool,
+            evaluation_type=evaluation_type,
+            level=level,
+            level_title=level_title,
+            hover_columns=hover_columns,
+        )
 
         # Size says coloured or greyed; the old/new ratio is applied on top as a multiplier
         # rather than an absolute size, so an unpublished point stays easy to find without
@@ -1548,32 +609,14 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # that are grey by default, which is how a tool's spread becomes visible on demand
         # without colouring every tool's spread all of the time.
         highlight_tool = str(highlight_tool) if highlight_tool else None
-        colors, opacities, line_widths = [], [], []
-        for idx in benchmark_metrics_df.index:
-            tool = str(benchmark_metrics_df.at[idx, "software_name"])
-            tool_color = software_colors.get(tool, "gray")
-            is_highlighted = highlight_tool is not None and tool == highlight_tool
-            if highlight_tool is not None and not is_highlighted:
-                colors.append(tool_color if coloured.at[idx] else MUTED_COLOR)
-                opacities.append(DIMMED_OPACITY)
-                line_widths.append(0.0)
-            elif is_highlighted:
-                colors.append(tool_color)
-                opacities.append(0.95)
-                line_widths.append(1.6 if coloured.at[idx] else 1.0)
-            elif coloured.at[idx]:
-                colors.append(tool_color)
-                opacities.append(0.95 if idx in leading else SECONDARY_OPACITY)
-                line_widths.append(1.0 if idx in leading else 0.0)
-            else:
-                colors.append(MUTED_COLOR)
-                opacities.append(0.55)
-                line_widths.append(1.0)
-        if "Highlight" in benchmark_metrics_df.columns:
-            colors = [
-                highlight_color if highlight else item
-                for item, highlight in zip(colors, benchmark_metrics_df["Highlight"])
-            ]
+        colors, opacities, line_widths = _main_metric_marker_arrays(
+            benchmark_metrics_df,
+            coloured=coloured,
+            leading=leading,
+            highlight_tool=highlight_tool,
+            highlight_color=highlight_color,
+            software_colors=software_colors,
+        )
 
         # Set markers based on software tool (if colorblind mode is enabled). `.get` rather than
         # `[...]`: an unregistered tool must fall back, not raise.
@@ -1610,76 +653,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             layout_xaxis_range=layout_xaxis_range,
         )
 
-        # Continuous background gradient, lightest at the origin and deepest at (1, 1), so
-        # "how far into the corner" reads visually even within a single quadrant. Added first
-        # so the scatter markers below are drawn on top of it, not the other way around.
-        grid_coords = np.linspace(MAIN_PLOT_AXIS_RANGE[0], MAIN_PLOT_AXIS_RANGE[1], 60)
-        grid_z = [[(x + y) / 2 for x in grid_coords] for y in grid_coords]
-        fig.add_trace(
-            go.Heatmap(
-                x=grid_coords,
-                y=grid_coords,
-                z=grid_z,
-                zmin=0,
-                zmax=1,
-                colorscale=QUADRANT_COLORSCALE,
-                showscale=False,
-                opacity=0.28,
-                hoverinfo="skip",
-            )
-        )
-
-        # Dashed boundary lines at the data midpoint, splitting the plot into the four named
-        # regions (drawn above the gradient/markers so they stay crisp at any zoom).
-        fig.add_shape(
-            type="line",
-            x0=QUADRANT_BOUNDARY,
-            x1=QUADRANT_BOUNDARY,
-            y0=MAIN_PLOT_AXIS_RANGE[0],
-            y1=MAIN_PLOT_AXIS_RANGE[1],
-            line=dict(color="rgba(90,90,90,0.6)", width=1, dash="dash"),
-            layer="above",
-        )
-        fig.add_shape(
-            type="line",
-            x0=MAIN_PLOT_AXIS_RANGE[0],
-            x1=MAIN_PLOT_AXIS_RANGE[1],
-            y0=QUADRANT_BOUNDARY,
-            y1=QUADRANT_BOUNDARY,
-            line=dict(color="rgba(90,90,90,0.6)", width=1, dash="dash"),
-            layer="above",
-        )
-
-        # Quadrant labels, placed inside each region near its outer edge.
-        left_x = (MAIN_PLOT_AXIS_RANGE[0] + QUADRANT_BOUNDARY) / 2
-        right_x = (QUADRANT_BOUNDARY + MAIN_PLOT_AXIS_RANGE[1]) / 2
-        top_y = MAIN_PLOT_AXIS_RANGE[1] - 0.05
-        bottom_y = MAIN_PLOT_AXIS_RANGE[0] + 0.03
-        for x, y, quadrant_key in (
-            (right_x, top_y, "good"),
-            (left_x, top_y, "near_miss"),
-            (left_x, bottom_y, "low"),
-            (right_x, bottom_y, "alt_candidate"),
-        ):
-            fig.add_annotation(
-                x=x,
-                y=y,
-                text=QUADRANT_LABELS[quadrant_key]["text"],
-                showarrow=False,
-                font=dict(size=12, color="rgba(60,60,60,0.85)"),
-                align="center",
-            )
-
-        # Corner cue: further into the top-right is strictly better on both axes.
-        fig.add_annotation(
-            x=MAIN_PLOT_AXIS_RANGE[1],
-            y=MAIN_PLOT_AXIS_RANGE[1],
-            xanchor="right",
-            yanchor="top",
-            text="↗ better performance",
-            showarrow=False,
-            font=dict(size=11, color="#1f5678"),
-        )
+        _add_quadrant_background(fig)
 
         # One trace per software tool, not one per colour. Grouping by colour would split a
         # tool whose datapoints are partly coloured and partly greyed into two traces, giving it
@@ -1822,8 +796,6 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             - selected_ids: Iterable[str] - ProteoBench IDs coloured regardless of rank
             - explicit_selection: bool - colour exactly selected_ids and nothing else
             - highlight_tool: str - tool to emphasise, dimming the others
-            - label_style: str - one of LABEL_STYLES, naming each curve
-            - custom_labels: Mapping - index to label, for the "custom" style
 
         Returns
         -------
@@ -1838,8 +810,6 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         selected_ids = kwargs.get("selected_ids", ())
         explicit_selection = kwargs.get("explicit_selection", False)
         highlight_tool = kwargs.get("highlight_tool", None)
-        label_style = kwargs.get("label_style", "index")
-        custom_labels = kwargs.get("custom_labels", None)
 
         ambiguity_combo = _ambiguity_combo_for(evaluation_type, allow_il, allow_deamidation)
 
@@ -1864,9 +834,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # Ranked and coloured exactly as the scatter is, so the two views of the same selection
         # agree about which datapoint is a tool's best and which are present for context.
         ranks, best_by_tool = rank_within_tools(benchmark_metrics_df, evaluation_type, ambiguity_combo)
-        display_labels = build_display_labels(
-            benchmark_metrics_df, style=label_style, ranks=ranks, custom_labels=custom_labels
-        )
+        display_labels = build_display_labels(benchmark_metrics_df, ranks=ranks)
         variants = build_variant_descriptions(benchmark_metrics_df)
         coloured = resolve_coloured_datapoints(
             benchmark_metrics_df,
@@ -1986,10 +954,6 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             - mod_label: str - specific PTM label for detailed plot
             - feature: str - spectrum feature to plot
             - evaluation_type: str - evaluation type ("mass" or "exact")
-            - label_style: str - one of LABEL_STYLES, naming each datapoint. "index" is the tool
-              plus its rank within that tool, "params" spells out the fields that differ between
-              a tool's submissions, "custom" uses what the viewer typed.
-            - custom_labels: Mapping - index to label, for the "custom" style
             - highlight_id: str - ProteoBench ID to emphasise. Across several tools this raises
               every datapoint of that software; within one tool it raises just that datapoint.
 
@@ -2020,11 +984,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         )
         # Identity options, applied uniformly to every in-depth figure so one selection reads the
         # same way whichever plot it is looked at in.
-        identity = {
-            "label_style": kwargs.get("label_style", "index"),
-            "custom_labels": kwargs.get("custom_labels"),
-            "highlight_id": kwargs.get("highlight_id"),
-        }
+        identity = {"highlight_id": kwargs.get("highlight_id")}
 
         # Generate PTM plots
         plots["ptm_overview"] = self.plot_ptm_overview(
@@ -2252,7 +1212,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors : Dict[str, str]
             Colour per tool.
         **kwargs : dict
-            ``label_style``, ``custom_labels``, ``highlight_id`` and ``evaluation_type``.
+            ``highlight_id`` and ``evaluation_type``.
 
         Returns
         -------
@@ -2262,12 +1222,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         """
         evaluation_type = kwargs.get("evaluation_type", "mass")
         ranks, _ = rank_within_tools(benchmark_metrics_df, evaluation_type)
-        labels = build_display_labels(
-            benchmark_metrics_df,
-            style=kwargs.get("label_style", "index"),
-            ranks=ranks,
-            custom_labels=kwargs.get("custom_labels"),
-        )
+        labels = build_display_labels(benchmark_metrics_df, ranks=ranks)
         colors = assign_datapoint_colors(benchmark_metrics_df, software_colors, ranks=ranks)
         emphasised = resolve_emphasis(benchmark_metrics_df, kwargs.get("highlight_id"))
         return labels, colors, emphasised
@@ -2291,7 +1246,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors : Dict[str, str]
             Colour per tool.
         **kwargs : dict
-            ``label_style``, ``custom_labels`` and ``highlight_id``, as documented on
+            ``highlight_id``, as documented on
             :meth:`generate_in_depth_plots`.
 
         Returns
@@ -2493,7 +1448,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors : Dict[str, str]
             Colour per tool.
         **kwargs : dict
-            ``label_style``, ``custom_labels`` and ``highlight_id``.
+            ``highlight_id``.
 
         Returns
         -------
@@ -2642,7 +1597,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors : Dict[str, str]
             Colour per tool.
         **kwargs : dict
-            ``label_style``, ``custom_labels`` and ``highlight_id``.
+            ``highlight_id``.
 
         Returns
         -------
@@ -2679,7 +1634,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         software_colors : Dict[str, str]
             Colour per tool.
         **kwargs : dict
-            ``label_style``, ``custom_labels`` and ``highlight_id``.
+            ``highlight_id``.
 
         Returns
         -------
@@ -2751,6 +1706,3 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
             margin=dict(t=70, b=50, l=60, r=30),
         )
         return fig
-
-    def plot_species_specific():
-        pass

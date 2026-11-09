@@ -1,31 +1,21 @@
 """Streamlit-based web interface for ProteoBench."""
 
 import copy
-import glob
 import json
 import logging
-import os
-import tempfile
 import uuid
-import zipfile
-from datetime import datetime
-from pprint import pformat
 from typing import Any, Dict, Optional
 
-import pages.texts.proteobench_builder as pbb
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 import streamlit_utils
 from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
-from streamlit_extras.let_it_rain import rain
 
 from pages.utils.submission_source import get_submission_source, is_official_server
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
 
@@ -556,9 +546,7 @@ class DeNovoUIObjects(BaseUIModule):
             # The curve view takes the same colouring and labelling as the scatter, minus the
             # scatter-only options: there is no marker to annotate and no per-point hover box.
             curve_options = {
-                key: value
-                for key, value in (display or {}).items()
-                if key in ("custom_labels", "highlight_tool", "muted_tools")
+                key: value for key, value in (display or {}).items() if key in ("highlight_tool", "muted_tools")
             }
             fig = plot_generator.plot_precision_coverage_curves(
                 result_df=filtered_data,
@@ -673,13 +661,12 @@ class DeNovoUIObjects(BaseUIModule):
             help="Turn this off once your selection is set, to bring the figure up the page.",
         )
         if show_table:
-            table = render_denovo_result_table(
+            selected_ids = render_denovo_result_table(
                 result_df=all_datapoints_df,
                 state_prefix=f"{prefix}_table",
                 evaluation_type=display["evaluation_type"],
                 selected_ids=preset_ids,
             )
-            selected_ids = table.selected_ids
         else:
             # The table owns the selection, so with it hidden a preset has to be written straight
             # to the key the table would have written it to.
@@ -926,10 +913,7 @@ class DeNovoUIObjects(BaseUIModule):
         # Every datapoint is named by its tool and rank, here as everywhere else. What a run
         # was is carried by the table's Parameters column instead of by the name, so there is
         # nothing left for a naming control -- or for a hand-typed label -- to decide.
-        identity = {
-            "custom_labels": None,
-            "highlight_id": highlight_id,
-        }
+        identity = {"highlight_id": highlight_id}
 
         self._render_indepth_description(plot_generator, view_key)
 
@@ -1113,13 +1097,6 @@ class DeNovoUIObjects(BaseUIModule):
             ambiguity_combo=self._ambiguity_combo(evaluation_type, allow_il, allow_deamidation),
             default_selection="all",
         )
-
-        # st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
-        # st.data_editor(
-        #     st.session_state[self.variables.all_datapoints_submitted],
-        #     key=st.session_state[self.variables.table_id_uuid],
-        #     on_change=self._handle_submitted_table_edits,
-        # )
 
         st.title("Public submission")
         st.markdown(
@@ -1324,61 +1301,3 @@ class DeNovoUIObjects(BaseUIModule):
     #####################
     ### TAB 4 METHODS ###
     #####################
-    def _handle_submitted_table_edits(self) -> None:
-        """Callback function for handling edits made to the data table in the UI."""
-        edits = st.session_state[st.session_state[self.variables.table_id_uuid]]["edited_rows"].items()
-        for k, v in edits:
-            try:
-                st.session_state[self.variables.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(v.values())[
-                    0
-                ]
-            except TypeError:
-                return
-        st.session_state[self.variables.highlight_list_submitted] = list(
-            st.session_state[self.variables.all_datapoints_submitted]["Highlight"]
-        )
-        st.session_state[self.variables.placeholder_table] = st.session_state[self.variables.all_datapoints_submitted]
-
-        if len(st.session_state[self.variables.all_datapoints]) == 0:
-            st.error("No datapoints available for plotting", icon="🚨")
-
-        try:
-            # Get plot generator from module (following Quant pattern)
-            plot_generator = self.ionmodule.get_plot_generator()
-
-            # Get colorblind mode and ambiguity toggle states from session state
-            colorblind_key = self.variables.colorblind_mode_selector_uuid
-            if colorblind_key in st.session_state:
-                colorblind_mode_id = st.session_state[colorblind_key]
-                colorblind_mode = st.session_state.get(colorblind_mode_id, False)
-            else:
-                colorblind_mode = False
-
-            il_key = self.variables.il_toggle_id_uuid
-            allow_il = (
-                st.session_state.get(st.session_state.get(il_key, ""), True) if il_key in st.session_state else True
-            )
-
-            deamidation_key = self.variables.deamidation_toggle_id_uuid
-            allow_deamidation = (
-                st.session_state.get(st.session_state.get(deamidation_key, ""), False)
-                if deamidation_key in st.session_state
-                else False
-            )
-
-            fig_metric = plot_generator.plot_main_metric(
-                result_df=st.session_state[self.variables.all_datapoints],
-                hide_annot=False,
-                label=st.session_state[st.session_state[self.variables.selectbox_id_uuid]],
-                level=self.level_mapping[st.session_state[st.session_state[self.variables.radio_level_id_uuid]]],
-                evaluation_type=self.evaluation_type_mapping[
-                    st.session_state[st.session_state[self.variables.radio_evaluation_id_uuid]]
-                ],
-                allow_il=allow_il,
-                allow_deamidation=allow_deamidation,
-                colorblind_mode=colorblind_mode,
-            )
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-        st.session_state[self.variables.fig_metric] = fig_metric

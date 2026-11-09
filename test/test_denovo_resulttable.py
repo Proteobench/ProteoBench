@@ -22,7 +22,6 @@ from pages.base_pages.utils.denovo_resulttable import (  # noqa: E402
     COLUMN_PRESETS,
     METRIC_COLUMNS,
     build_table_frame,
-    custom_labels_by_index,
     header_for,
     metric_value,
     row_order,
@@ -65,7 +64,7 @@ DATA = pd.DataFrame(
 
 def _assembled(df=DATA, evaluation_type="mass"):
     ranks, best = rank_within_tools(df, evaluation_type)
-    labels = build_display_labels(df, style="index", ranks=ranks)
+    labels = build_display_labels(df, ranks=ranks)
     classes = classify_datapoint_columns(df)
     visible = [c for c in ordered_datapoint_columns(classes) if c not in default_hidden_columns(classes)]
     return ranks, best, labels, classes, visible
@@ -157,15 +156,6 @@ class TestBuildTableFrame:
         assert "Hash" not in frame.columns
         assert "Decoding" in frame.columns
 
-    def test_there_is_no_label_column_unless_labels_are_editable(self):
-        ranks, best, labels, _classes, visible = _assembled()
-        plain = build_table_frame(DATA, visible, labels, ranks, best, set(), "mass")
-        editable = build_table_frame(
-            DATA, visible, labels, ranks, best, set(), "mass", editable_labels=True, custom_labels={"i1": "mine"}
-        )
-        assert "Label" not in plain.columns
-        assert list(editable[editable["_id"] == "i1"]["Label"]) == ["mine"]
-
     def test_blank_parameter_values_render_as_empty_not_nan(self):
         df = pd.concat([DATA, pd.DataFrame([_datapoint("i4", "InstaNovo", 0.8, decoding_strategy=None)])])
         df = df.reset_index(drop=True)
@@ -219,19 +209,6 @@ class TestParametersColumn:
         one_tool = DATA[DATA["software_name"] == "InstaNovo"]
         frame = build_table_frame(one_tool, visible, labels, ranks, best, set(), "mass", variants=variants)
         assert all(cell for cell in frame["Parameters"])
-
-
-class TestCustomLabelsByIndex:
-    def test_labels_are_keyed_by_id_not_by_index(self):
-        # The index is rebuilt whenever datapoints are reloaded, which would otherwise reassign a
-        # viewer's labels to different runs.
-        shuffled = DATA.iloc[::-1].reset_index(drop=True)
-        mapping = custom_labels_by_index(shuffled, {"i1": "mine"})
-        assert len(mapping) == 1
-        assert shuffled.at[list(mapping)[0], "id"] == "i1"
-
-    def test_ids_absent_from_the_frame_are_dropped(self):
-        assert custom_labels_by_index(DATA, {"nope": "x"}) == {}
 
 
 class TestSelectionSummary:

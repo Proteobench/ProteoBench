@@ -11,7 +11,6 @@ from proteobench.plotting.plot_generator_denovo import (
     BEST_MARKER_SCALE,
     BEST_MARKER_SYMBOL,
     DIMMED_OPACITY,
-    LABEL_STYLES,
     MUTED_COLOR,
     MUTED_CURVE_OPACITY,
     SECONDARY_CURVE_OPACITY,
@@ -20,11 +19,8 @@ from proteobench.plotting.plot_generator_denovo import (
     SOFTWARE_COLORS,
     SOFTWARE_MARKERS,
     DeNovoPlotGenerator,
-    _hex_to_hsl,
-    _hsl_to_hex,
     build_display_labels,
     build_variant_descriptions,
-    build_workflow_labels,
     datapoint_score,
     assign_datapoint_colors,
     leading_datapoints,
@@ -38,6 +34,10 @@ from proteobench.plotting.plot_generator_denovo import (
     resolve_emphasis,
     shade_within_tool,
 )
+
+# Private colour maths, imported from the submodule that owns it rather than widened into
+# the package's public surface just so a test can reach it.
+from proteobench.plotting.plot_generator_denovo.selection import _hex_to_hsl, _hsl_to_hex
 
 
 def _datapoint(point_id, software, decoding=None, n_beams=None, checkpoint=None, version="1.2.2"):
@@ -63,152 +63,6 @@ INSTANOVO_MODES = pd.DataFrame(
         _datapoint("InstaNovo_7", "InstaNovo", "diffusion sampling", None, "instanovoplus-v1.1.0"),
     ]
 )
-
-
-class TestBuildWorkflowLabels:
-    def test_single_submission_keeps_the_plain_tool_name(self):
-        df = pd.DataFrame([_datapoint("Casanovo_1", "Casanovo", "beam search", 5, "casanovo_massivekb.ckpt")])
-        assert list(build_workflow_labels(df)) == ["Casanovo"]
-
-    def test_each_of_the_seven_modes_gets_a_distinct_label(self):
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert len(set(labels)) == len(INSTANOVO_MODES)
-        assert all(label.startswith("InstaNovo") for label in labels)
-
-    def test_label_names_the_decoding_strategy_and_beam_count(self):
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert "greedy search" in labels.iloc[0]
-        assert "10 beams" in labels.iloc[2]
-
-    def test_refined_and_unrefined_runs_are_separable(self):
-        # These two differ only by the extra refinement checkpoint.
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert labels.iloc[2] != labels.iloc[3]
-        assert "instanovoplus-v1.1.0" in labels.iloc[3]
-        assert "instanovoplus" not in labels.iloc[2]
-
-    def test_refined_run_names_the_model_that_refined_it(self):
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert labels.iloc[3] == (
-            "InstaNovo (beam search, 10 beams, instanovo-v1.2.0) " "with InstaNovo+ refinement (instanovoplus-v1.1.0)"
-        )
-
-    def test_unrefined_run_has_no_refinement_clause(self):
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert labels.iloc[2] == "InstaNovo (beam search, 10 beams, instanovo-v1.2.0)"
-        assert "refinement" not in labels.iloc[2]
-
-    def test_single_beam_reads_as_singular(self):
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert "1 beam," in labels.iloc[0]
-        assert "1 beams" not in labels.iloc[0]
-
-    def test_a_standalone_refinement_model_is_named_after_itself(self):
-        # diffusion-only runs InstaNovo+ on its own -- it is not a refinement of anything, and
-        # it is not InstaNovo either, even though that is its recorded software_name.
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert labels.iloc[6] == "InstaNovo+ (diffusion sampling, instanovoplus-v1.1.0)"
-        assert "refinement" not in labels.iloc[6]
-
-    def test_standalone_refinement_model_is_renamed_even_as_a_lone_submission(self):
-        df = INSTANOVO_MODES.iloc[[6]]
-        assert list(build_workflow_labels(df)) == ["InstaNovo+"]
-
-    def test_a_refined_run_keeps_the_base_tool_name(self):
-        # The base model drove the run, so the tool name stays; only the clause names InstaNovo+.
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert labels.iloc[3].startswith("InstaNovo (")
-
-    def test_an_unrecognised_lone_checkpoint_keeps_the_software_name(self):
-        df = pd.DataFrame(
-            [
-                _datapoint("A", "Tool", "greedy search", 1, "mystery-v2.ckpt"),
-                _datapoint("B", "Tool", "beam search", 5, "mystery-v2.ckpt"),
-            ]
-        )
-        labels = build_workflow_labels(df)
-        assert all(label.startswith("Tool (") for label in labels)
-
-    def test_unknown_refinement_model_still_gets_its_own_clause(self):
-        df = pd.DataFrame(
-            [
-                _datapoint("A", "Tool", "beam search", 5, "base.ckpt"),
-                _datapoint("B", "Tool", "beam search", 5, "base.ckpt; mystery-v2.ckpt"),
-            ]
-        )
-        labels = build_workflow_labels(df)
-        assert labels.iloc[1] == "Tool (base.ckpt) with refinement (mystery-v2.ckpt)"
-
-    def test_multiple_refinement_stages_are_all_named(self):
-        df = pd.DataFrame(
-            [
-                _datapoint("A", "Tool", "beam search", 5, "base.ckpt"),
-                _datapoint("B", "Tool", "beam search", 5, "base.ckpt; first.ckpt; second.ckpt"),
-            ]
-        )
-        labels = build_workflow_labels(df)
-        assert labels.iloc[1] == "Tool (base.ckpt) with refinement (first.ckpt) and refinement (second.ckpt)"
-
-    def test_constant_fields_are_left_out_of_the_label(self):
-        # Both rows share a checkpoint and version, so only the strategy should appear.
-        df = pd.DataFrame(
-            [
-                _datapoint("A", "Tool", "greedy search", 1, "same.ckpt"),
-                _datapoint("B", "Tool", "beam search", 1, "same.ckpt"),
-            ]
-        )
-        labels = build_workflow_labels(df)
-        assert list(labels) == ["Tool (greedy search)", "Tool (beam search)"]
-
-    def test_blank_fields_are_skipped(self):
-        # diffusion sampling records no beam count; the label must not read "nan beams".
-        labels = build_workflow_labels(INSTANOVO_MODES)
-        assert "nan" not in labels.iloc[6]
-        assert "None" not in labels.iloc[6]
-
-    def test_tools_are_labelled_independently(self):
-        df = pd.DataFrame(
-            [
-                _datapoint("A", "Casanovo", "beam search", 5, "casanovo.ckpt"),
-                _datapoint("B", "InstaNovo", "greedy search", 1, "instanovo.ckpt"),
-                _datapoint("C", "InstaNovo", "beam search", 10, "instanovo.ckpt"),
-            ]
-        )
-        labels = build_workflow_labels(df)
-        assert labels.iloc[0] == "Casanovo"  # only submitted once
-        assert labels.iloc[1] != labels.iloc[2]
-
-    def test_identical_parameters_fall_back_to_the_proteobench_id(self):
-        df = pd.DataFrame(
-            [
-                _datapoint("Tool_20260815_1", "Tool", "greedy search", 1, "same.ckpt"),
-                _datapoint("Tool_20260815_2", "Tool", "greedy search", 1, "same.ckpt"),
-            ]
-        )
-        labels = build_workflow_labels(df)
-        assert len(set(labels)) == 2
-        assert "Tool_20260815_1" in labels.iloc[0]
-
-    def test_missing_optional_columns_do_not_raise(self):
-        df = pd.DataFrame([{"software_name": "Tool"}, {"software_name": "Tool"}])
-        assert len(build_workflow_labels(df)) == 2
-
-    def test_empty_frame_returns_empty(self):
-        assert len(build_workflow_labels(pd.DataFrame())) == 0
-
-    def test_labels_align_to_a_non_default_index(self):
-        df = INSTANOVO_MODES.copy()
-        df.index = range(100, 100 + len(df))
-        labels = build_workflow_labels(df)
-        assert list(labels.index) == list(df.index)
-
-
-@pytest.mark.parametrize("column", ["decoding_strategy", "n_beams", "checkpoint"])
-def test_labels_stay_unique_when_one_field_is_unavailable(column):
-    """Older datapoints may not carry every field; the rest must still separate them."""
-    df = INSTANOVO_MODES.drop(columns=[column])
-    labels = build_workflow_labels(df)
-    assert len(set(labels)) == len(df)
 
 
 def _scored(point_id, software, peptide_auc, aa_auc, **fields):
@@ -345,44 +199,23 @@ class TestBuildDisplayLabels:
             ]
         )
 
-    def test_index_style_is_the_tool_and_its_rank(self):
-        assert list(build_display_labels(self._frame(), "index")) == ["InstaNovo #1", "InstaNovo #2"]
-
-    def test_params_style_delegates_to_the_workflow_labels(self):
-        df = self._frame()
-        assert list(build_display_labels(df, "params")) == list(build_workflow_labels(df))
-
-    def test_custom_style_uses_what_was_typed(self):
-        labels = build_display_labels(self._frame(), "custom", custom_labels={0: "wide beam", 1: "quick"})
-        assert list(labels) == ["wide beam", "quick"]
-
-    def test_custom_style_falls_back_per_datapoint(self):
-        # A partly labelled set must stay fully labelled, not half blank.
-        labels = build_display_labels(self._frame(), "custom", custom_labels={0: "  "})
-        assert list(labels) == ["InstaNovo #1", "InstaNovo #2"]
-
-    def test_custom_style_without_any_labels_matches_the_index_style(self):
-        df = self._frame()
-        assert list(build_display_labels(df, "custom")) == list(build_display_labels(df, "index"))
+    def test_a_label_is_the_tool_and_its_rank(self):
+        assert list(build_display_labels(self._frame())) == ["InstaNovo #1", "InstaNovo #2"]
 
     def test_precomputed_ranks_are_reused(self):
         df = self._frame()
         ranks = pd.Series([5, 6], index=df.index)
-        assert list(build_display_labels(df, "index", ranks=ranks)) == ["InstaNovo #5", "InstaNovo #6"]
-
-    def test_unknown_style_raises(self):
-        with pytest.raises(ValueError, match="Unknown label style"):
-            build_display_labels(self._frame(), "verbose")
+        assert list(build_display_labels(df, ranks=ranks)) == ["InstaNovo #5", "InstaNovo #6"]
 
     def test_empty_frame_returns_empty(self):
-        assert len(build_display_labels(pd.DataFrame(), "index")) == 0
+        assert len(build_display_labels(pd.DataFrame())) == 0
 
     def test_labels_align_to_a_non_default_index(self):
         df = pd.DataFrame(
             [_scored("a", "Casanovo", 0.5, 0.5), _scored("b", "Casanovo", 0.9, 0.9)],
             index=["x", "y"],
         )
-        labels = build_display_labels(df, "index")
+        labels = build_display_labels(df)
         assert labels.at["y"] == "Casanovo #1" and labels.at["x"] == "Casanovo #2"
 
 
@@ -536,15 +369,11 @@ class TestBuildVariantDescriptions:
         descriptions = list(build_variant_descriptions(INSTANOVO_MODES))
         assert descriptions[1].endswith("with InstaNovo+ refinement (instanovoplus-v1.1.0)")
 
-    def test_it_says_the_same_as_the_long_form_label(self):
-        # The guarantee worth holding: whatever ends up in the Parameters column names exactly
-        # the fields the long-form label would have carried, so the two never disagree. The
-        # label brackets them after the tool name, which is the only difference.
-        labels = list(build_workflow_labels(INSTANOVO_MODES))
-        for label, description in zip(labels, build_variant_descriptions(INSTANOVO_MODES)):
-            bracketed = re.match(r"^[^(]+ \((.*?)\)(.*)$", label)
-            assert bracketed, label
-            assert description == bracketed.group(1) + bracketed.group(2)
+    def test_descriptions_tell_a_tools_runs_apart(self):
+        # The point of the column: seven InstaNovo inference modes must read as seven different
+        # things, or the reader cannot tell which row is which.
+        descriptions = list(build_variant_descriptions(INSTANOVO_MODES))
+        assert len(set(descriptions)) == len(descriptions) == len(INSTANOVO_MODES)
 
     def test_an_empty_frame_gives_an_empty_series(self):
         assert len(build_variant_descriptions(pd.DataFrame())) == 0
@@ -1035,26 +864,14 @@ class TestInDepthPlots:
         opacities = [t.opacity for t in plots["ptm_overview"].data]
         assert sum(1 for o in opacities if o > 0.9) == 1
 
-    def test_label_style_flows_into_every_plot(self):
-        plots = self._plots(ONE_TOOL, label_style="params")
+    def test_the_same_labels_reach_every_plot(self):
+        # One selection has to read identically in all five figures, so they share one labelling.
+        plots = self._plots(ONE_TOOL)
         names = [trace.name for trace in plots["ptm_overview"].data]
-        # The params style names the fields that differ within the tool, and stops as soon as the
-        # labels are unique: decoding strategy alone separates these three, so the beam count is
-        # left out rather than lengthening every label for nothing.
-        assert names == [
-            "InstaNovo (knapsack beam search)",
-            "InstaNovo (beam search)",
-            "InstaNovo (greedy search)",
-        ]
-        # The same labels reach the other figures, so one selection reads identically in all five.
+        assert names == ["InstaNovo #1", "InstaNovo #2", "InstaNovo #3"]
         assert list(plots["in_fasta_overview"].data[0].x) == names
         species = [t for t in plots["species_overview"]["mass"].data if t.type == "scatter"]
         assert [t.name for t in species] == names
-
-    def test_custom_labels_flow_into_every_plot(self):
-        plots = self._plots(ONE_TOOL, label_style="custom", custom_labels={0: "my run"})
-        assert plots["ptm_overview"].data[0].name == "my run"
-        assert plots["in_fasta_overview"].data[0].x[0] == "my run"
 
     def test_an_empty_selection_builds_every_plot(self):
         plots = self._plots(CROSS_TOOL.iloc[0:0])

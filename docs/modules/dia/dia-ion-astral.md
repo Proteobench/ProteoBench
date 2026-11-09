@@ -13,7 +13,8 @@ data-independent acquisition (DIA) data, namely narrow-window 2 Th, on an Orbitr
 Fisher Scientific).
 
 For low-input / single-cell-scale data on the same instrument type, see
-[LFQ, low input](dia-ion-lowinput.md).
+[LFQ, precursor ion (Astral, low input)](dia-ion-astral-lowinput.md) (its predecessor,
+[LFQ, low input](dia-ion-lowinput.md), is now archived).
 
 ```{button-link} https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral
 :color: primary

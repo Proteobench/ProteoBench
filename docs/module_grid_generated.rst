@@ -101,15 +101,25 @@ Available ProteoBench modules
         +++
         `Web app <https://proteobench.cubimed.rub.de/denovo_DDA_HCD>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dda/denovo-dda-hcd/>`__
 
-    .. grid-item-card:: Quant LFQ DIA ion Low Input
+    .. grid-item-card:: Quant LFQ DIA ion Astral (low-input)
         :columns: 6 6 4 4
         :padding: 1
 
         :bdg-info:`in development`
         ^^^
-        Benchmark identification and quantification workflows for low-input proteomics (close to single cell level) using DIA acquisitions.
+        Benchmark ion-level label-free quantification accuracy of DIA workflows using a low-input multi-species (HYE) sample on an Orbitrap Astral instrument.
         +++
-        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-lowinput/>`__
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_Astral_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-astral-lowinput/>`__
+
+    .. grid-item-card:: Quant LFQ DIA ion timsTOF (low-input)
+        :columns: 6 6 4 4
+        :padding: 1
+
+        :bdg-info:`in development`
+        ^^^
+        Benchmark ion-level label-free quantification accuracy of DIA-PASEF workflows using a low-input (200pg) multi-species (HYE) sample on a timsTOF instrument.
+        +++
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_timsTOF_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-timstof-lowinput/>`__
 
     .. grid-item-card:: Quant LFQ DIA ion AIF
         :columns: 6 6 4 4
@@ -120,6 +130,16 @@ Available ProteoBench modules
         Benchmark ion-level label-free quantification accuracy of DIA (All-Ion Fragmentation) workflows using a multi-species (HYE) sample on an Orbitrap instrument.
         +++
         `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_AIF>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-aif/>`__
+
+    .. grid-item-card:: Quant LFQ DIA ion Low Input
+        :columns: 6 6 4 4
+        :padding: 1
+
+        :bdg-dark:`archived`
+        ^^^
+        Archived: benchmarked low-input (close to single-cell level) DIA quantification workflows on an Orbitrap Astral. Superseded by the Astral and timsTOF low-input (200 pg) modules.
+        +++
+        `Web app <https://proteobench.cubimed.rub.de/Quant_LFQ_DIA_ion_lowinput>`__ · `Documentation <https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-lowinput/>`__
 
 
 .. button-ref:: modules/index

@@ -1,12 +1,14 @@
 # LFQ, low input
 
-{bdg-success}`alpha` {bdg-primary-line}`Quantification` — DIA, Orbitrap Astral, low sample input
+{bdg-dark}`archived` {bdg-primary-line}`Quantification` — DIA, Orbitrap Astral, low sample input
 
-```{admonition} This module is in alpha stage
+```{admonition} This module is archived
 :class: warning
-This module is still in active development. Its scope, metrics, or dataset may change as we refine
-it based on community feedback. Submissions are welcome, but please be aware that comparisons may
-shift in future versions.
+Superseded by the [LFQ, precursor ion (Astral, low input)](dia-ion-astral-lowinput.md) and
+[LFQ, precursor ion (timsTOF, low input)](dia-ion-timstof-lowinput.md) modules, following
+[this discussion](https://github.com/orgs/Proteobench/discussions/426). The module and its
+submission form remain open — existing and new benchmark runs stay comparable here — but for new
+low-input benchmarking we recommend using one of the modules above instead.
 ```
 
 Compares the sensitivity and quantification accuracy of workflows for data acquired with

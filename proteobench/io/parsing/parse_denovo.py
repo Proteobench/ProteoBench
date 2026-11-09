@@ -2,10 +2,16 @@
 Module for parsing results data from various de novo sequencing engines.
 """
 
-import pandas as pd
-import numpy as np
-from pyteomics.mztab import MzTab
 import re
+
+import numpy as np
+import pandas as pd
+from pyteomics.mztab import MzTab
+
+# NovoB's Prediction.py writes each predicted sequence as the text "['" + sequence + "']" (string
+# concatenation, not a serialised list), using uppercase residues plus lowercase m/n/q/s/t/y for
+# modified residues.
+_NOVOB_SEQUENCE_RE = re.compile(r"\['([A-Za-z]*)'\]")
 
 
 def load_input_file(input_path: str, input_format: str, input_secondary: str = None) -> pd.DataFrame:
@@ -220,8 +226,7 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        The loaded dataframe, with invalid N-terminal modifications filtered out
-        and double N-terminal modification aa_scores collapsed.
+        The loaded dataframe, with invalid N-terminal modifications filtered out.
     """
     VALID_NTERM = {"+42.011", "+43.006", "-17.027", "+43.006-17.027"}
     VALID_DOUBLE_NTERM = {("+43.006", "-17.027"), ("-17.027", "+43.006")}
@@ -257,34 +262,36 @@ def _load_contranovo(input_mztab: str) -> pd.DataFrame:
             return tuple(nterm_tokens) not in VALID_DOUBLE_NTERM
         return True  # 3+ always invalid
 
-    def _fix_scores(row) -> str:
-        sequence = str(row["sequence"])
-        scores_str = row["opt_ms_run[1]_aa_scores"]
-        nterm_tokens, aa_tokens = tokenize(sequence)
-        scores = [float(x) for x in scores_str.split(",")]
-
-        # +43.006-17.027 matched as single token but was tokenized as two
-        if (
-            len(nterm_tokens) == 1
-            and nterm_tokens[0] == "+43.006-17.027"
-            and len(scores) == len(nterm_tokens) + 1 + len(aa_tokens)
-        ):
-            averaged = [(scores[0] + scores[1]) / 2] + scores[2:]
-            return ",".join(str(x) for x in averaged)
-
-        # -17.027+43.006 always two tokens
-        if len(nterm_tokens) == 2 and tuple(nterm_tokens) in VALID_DOUBLE_NTERM:
-            averaged = [(scores[0] + scores[1]) / 2] + scores[2:]
-            return ",".join(str(x) for x in averaged)
-
-        return scores_str
-
     df = _load_casanovo(input_mztab=input_mztab)
     df = df[df["sequence"].apply(len) != 0]
     df = df[~df["sequence"].apply(_is_invalid)]
-    df["opt_ms_run[1]_aa_scores"] = df.apply(_fix_scores, axis=1)
 
     return df
+
+
+def _unwrap_novob_sequence(value: str) -> str:
+    """
+    Extract the peptide sequence from NovoB's ``['SEQUENCE']`` text wrapper.
+
+    Parameters
+    ----------
+    value : str
+        A ``sequence_forward`` or ``sequence_reverse`` cell from a NovoB result file.
+
+    Returns
+    -------
+    str
+        The bare sequence, e.g. ``"PEPmTIDE"`` for ``"['PEPmTIDE']"``.
+
+    Raises
+    ------
+    ValueError
+        If the cell is not in NovoB's format.
+    """
+    match = _NOVOB_SEQUENCE_RE.fullmatch(value.strip()) if isinstance(value, str) else None
+    if match is None:
+        raise ValueError(f"Unexpected NovoB sequence {value!r:.60}; expected a value such as ['PEPTIDE'].")
+    return match.group(1)
 
 
 def _load_novob(input_csv: str) -> pd.DataFrame:
@@ -318,12 +325,11 @@ def _load_novob(input_csv: str) -> pd.DataFrame:
         }
     )
 
-    # Decode spectrum_id from b'5280' to '5280'
-    df["spectrum_id"] = df["spectrum_id"].apply(lambda x: eval(x).decode("utf-8") if isinstance(x, str) else x)
-
-    # Parse sequence lists
-    df["sequence_forward"] = df["sequence_forward"].apply(lambda x: eval(x)[0])
-    df["sequence_reverse"] = df["sequence_reverse"].apply(lambda x: eval(x)[0])
+    # These cells come from an uploaded file and are handled as plain text; never evaluate them as
+    # Python. spectrum_id is written as b'5280' (a bytes tensor formatted as text) and is left
+    # as-is: the [spectrum_id_mapper] pattern in parse_settings_novob.toml extracts the scan number.
+    df["sequence_forward"] = df["sequence_forward"].apply(_unwrap_novob_sequence)
+    df["sequence_reverse"] = df["sequence_reverse"].apply(_unwrap_novob_sequence)
 
     # Select best prediction between forward and reverse
     def select_best(row):

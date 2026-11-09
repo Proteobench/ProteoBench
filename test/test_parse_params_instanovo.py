@@ -63,9 +63,7 @@ def test_extract_params_diffusion_only_is_not_reported_as_beam_search():
     sample; no transformer beam search runs. Such a config names only the InstaNovo+
     checkpoint, which is what distinguishes it.
     """
-    actual = instanovo_params.extract_params(
-        TESTDATA_DIR / "params/denovo/instanovo/config_v1_2_2_diffusion_only.yaml"
-    )
+    actual = instanovo_params.extract_params(TESTDATA_DIR / "params/denovo/instanovo/config_v1_2_2_diffusion_only.yaml")
 
     assert actual.decoding_strategy == "diffusion sampling"
     assert actual.checkpoint == "instanovoplus-v1.1.0"

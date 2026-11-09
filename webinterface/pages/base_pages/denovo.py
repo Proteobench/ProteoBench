@@ -29,8 +29,21 @@ from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
 
+from proteobench.plotting.plot_generator_denovo import (
+    SELECTION_PRESETS,
+    classify_datapoint_columns,
+    ordered_datapoint_columns,
+    preset_selection,
+)
+
 from .base import BaseUIModule
 from .tabs import tab1_view_public_results as tab1
+from .utils.denovo_resulttable import (
+    header_for,
+    render_denovo_result_table,
+    selection_summary,
+)
+from .utils.general import clean_dataframe_for_export
 from .tabs import tab2_upload_results as tab2
 from .tabs import tab2_upload_results as tab2_quant
 from .tabs import tab4_view_public_and_new_results as tab4
@@ -38,6 +51,36 @@ from .tabs import tab5_compare_results
 from .tabs import tab6_submit_results as tab5_quant
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+#: What each of the two main views shows. Written for whoever is reading the figures rather
+#: than, as it first was, about why the switcher is not ``st.tabs``.
+FIGURE_VIEW_HELP = (
+    "Scatter: one mark per run, its peptide-level score against its amino-acid-level score. "
+    "Precision-Coverage Curves: the whole precision-against-coverage trade-off that each of "
+    "those marks summarises down to a single point."
+)
+
+#: Shown under the Benchmark Results heading on both results tabs.
+TABLE_CAPTION = (
+    "One row per datapoint, grouped by tool and best first within each tool. Every datapoint is "
+    "drawn by default; a star marks each tool's best \u2014 the same star the scatter draws that "
+    "datapoint with \u2014 which is the one drawn at full strength while its tool's other runs are "
+    "faded behind it. The Parameters column names what separates a tool's own runs; it is also "
+    "the line under the name in every hover box. Untick a row to drop it from the figures, or "
+    "use the buttons above the table. Click any column header to re-sort."
+)
+
+#: The ranking rule, stated wherever a rank, a star or a full-strength mark is on screen. It had
+#: been a clause inside a long caption and a column tooltip, neither of which answers the
+#: question the star raises. The "fixed" half matters as much as the formula: a reader who has
+#: just switched the figure to Precision has every reason to expect the ranking to have followed.
+RANKING_NOTE = (
+    "**Rank and ★ are decided by mean AUC** — the average of a run's peptide-level and "
+    "amino-acid-level AUC — compared only against other submissions of the same tool. That rule "
+    "is fixed: it never follows the metric a figure happens to be showing, so switching between "
+    "Precision and AUC does not move the star. Only the evaluation stringency (Exact / "
+    "Mass-based) re-ranks."
+)
 
 
 class DeNovoUIObjects(BaseUIModule):
@@ -198,26 +241,295 @@ class DeNovoUIObjects(BaseUIModule):
             "beta_warning": getattr(self.variables, "beta_warning", False),
         }
 
-        # Only the figure switches between these two tabs -- the results table below is
-        # shared and stays visible regardless of which one is selected.
-        view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
-        with view_tabs[0]:
-            tab1.render_main_plot(
-                variables=self.variables,
-                ionmodule=self.ionmodule,
-                plot_params=plot_params,
+        # How datapoints are named and emphasised, shared by both figures and the table below so
+        # the three always tell the same story about the same selection.
+        prefix = self._denovo_state_prefix()
+        display = self._render_denovo_display_controls(filtered_data, prefix)
+        selection = self._denovo_selection(prefix, filtered_data)
+
+        # A segmented control rather than st.tabs: it reads as a tab strip but builds only the
+        # figure on screen. The results table below is shared and stays visible either way.
+        view = st.segmented_control(
+            "View",
+            options=self.FIGURE_VIEWS,
+            default=self.FIGURE_VIEWS[0],
+            key=f"{prefix}_figure_view",
+            label_visibility="collapsed",
+            help=FIGURE_VIEW_HELP,
+        )
+        if view != self.FIGURE_VIEWS[1]:
+            self._render_denovo_scatter(
                 filtered_data=filtered_data,
+                plot_params={**plot_params, **display, **selection},
+                prefix=prefix,
+                fig_key=self.variables.fig_metric,
             )
-        with view_tabs[1]:
+        else:
             self._display_precision_coverage_curves(
                 filtered_data=filtered_data,
                 evaluation_type=evaluation_type,
                 allow_il=allow_il,
                 allow_deamidation=allow_deamidation,
                 fig_key_uuid=self.variables.fig_pc_curve,
+                display=display,
+                selection=selection,
             )
 
-        tab1.render_results_table(variables=self.variables, filtered_data=filtered_data)
+        st.subheader("Benchmark Results")
+        st.info(RANKING_NOTE, icon=":material/trophy:")
+        st.caption(TABLE_CAPTION)
+        render_denovo_result_table(
+            result_df=filtered_data,
+            state_prefix=f"{prefix}_table",
+            evaluation_type=evaluation_type,
+            ambiguity_combo=self._ambiguity_combo(evaluation_type, allow_il, allow_deamidation),
+            default_selection="all",
+        )
+        st.download_button(
+            label="Download table",
+            data=streamlit_utils.save_dataframe(clean_dataframe_for_export(filtered_data)),
+            file_name="benchmark_results.csv",
+            mime="text/csv",
+            key=f"{prefix}_download_table",
+            icon=":material/download:",
+        )
+        tab1.display_download_section(self.variables)
+
+    #: The two main-figure views. A segmented control rather than ``st.tabs``: it reads like a
+    #: tab strip, but Streamlit executes the body of every tab on every interaction, so real tabs
+    #: would rebuild both figures on every click even though one of them is off screen.
+    FIGURE_VIEWS = ("Scatter", "Precision-Coverage Curves")
+
+    def _denovo_state_prefix(self, submitted: bool = False) -> str:
+        """
+        Session-state prefix for one view's display options.
+
+        Parameters
+        ----------
+        submitted : bool
+            Whether this is the submitted-results view, which keeps its own selection.
+
+        Returns
+        -------
+        str
+            A prefix unique to this module and view.
+        """
+        base = self.variables.fig_metric_submitted if submitted else self.variables.fig_metric
+        return f"{base}_denovo_display"
+
+    def _render_denovo_display_controls(self, filtered_data: pd.DataFrame, prefix: str) -> Dict[str, Any]:
+        """
+        Controls for how datapoints are identified and emphasised in the main-tab figures.
+
+        Kept apart from the metric selectors in the plot-options expander: those choose *what* is
+        measured, these choose how the measurements are labelled and which of them stand out.
+
+        Parameters
+        ----------
+        filtered_data : pd.DataFrame
+            The datapoints on display, used to populate the tool and column choices.
+        prefix : str
+            Session-state prefix for this view.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Keyword arguments to forward to the de novo plot generator.
+        """
+        tools = sorted(filtered_data["software_name"].astype(str).unique())
+        columns = ordered_datapoint_columns(classify_datapoint_columns(filtered_data))
+
+        # A point click stages its tool here; apply it before the selectbox below is built, which
+        # is the only moment its key may still be written.
+        pending = st.session_state.pop(f"{prefix}_highlight_pending", None)
+        if pending is not None and (pending == "None" or pending in tools):
+            st.session_state[f"{prefix}_highlight_tool"] = pending
+
+        with st.expander("Labels and emphasis", expanded=False):
+            # No "name each datapoint by" control: a datapoint is always named by its tool and
+            # rank, and what the run actually was is said separately -- under that name in the
+            # hover box, and in the table's own Parameters column -- rather than being folded
+            # into the name by a setting the reader had to find first.
+            middle, right = st.columns(2)
+            highlight_choice = middle.selectbox(
+                "Highlight one tool",
+                options=["None", *tools],
+                key=f"{prefix}_highlight_tool",
+                help="Brings every datapoint of that tool forward and dims the rest. Clicking a point does the same.",
+            )
+            muted_tools = right.multiselect(
+                "Grey out tools",
+                options=tools,
+                key=f"{prefix}_muted_tools",
+                help="Removes a tool's automatic colouring. Its datapoints stay on the plot in grey.",
+            )
+
+            hover_col, annot_col = st.columns(2)
+            hover_columns = hover_col.multiselect(
+                "Add to the hover box",
+                options=columns,
+                default=columns,
+                format_func=header_for,
+                key=f"{prefix}_hover_columns",
+                help=(
+                    "Every parameter is listed on hover to begin with. Remove the ones you are "
+                    "not comparing to keep the box short enough to read at a glance."
+                ),
+            )
+            annotation_columns = annot_col.multiselect(
+                "Label on the plot",
+                options=columns,
+                format_func=header_for,
+                key=f"{prefix}_annotation_columns",
+                help="Drawn beside the coloured datapoints with leader lines. Gets crowded quickly.",
+            )
+
+            if st.button("Reset labels and emphasis", key=f"{prefix}_reset"):
+                for suffix in (
+                    "highlight_tool",
+                    "muted_tools",
+                    "hover_columns",
+                    "annotation_columns",
+                ):
+                    st.session_state.pop(f"{prefix}_{suffix}", None)
+                st.rerun()
+
+        return {
+            "highlight_tool": None if highlight_choice == "None" else highlight_choice,
+            "muted_tools": muted_tools,
+            "hover_columns": hover_columns,
+            "annotation_columns": annotation_columns,
+        }
+
+    def _denovo_selection(self, prefix: str, filtered_data: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
+        """
+        The datapoint selection driving the figures, as kept by the result table.
+
+        The figures are drawn above the table, so on the very first run the table has not written
+        a selection yet. Seeding it here, with the same rule the table would have used, keeps the
+        first paint agreeing with the ticks the reader can see; leaving it unseeded drew each
+        tool's best above a table that said every row was shown.
+
+        Parameters
+        ----------
+        prefix : str
+            Session-state prefix for this view.
+        filtered_data : pd.DataFrame, optional
+            The datapoints on display, used to seed the selection on the first run.
+
+        Returns
+        -------
+        Dict[str, Any]
+            ``selected_ids`` and ``explicit_selection`` for the plot generator.
+        """
+        key = f"{prefix}_table_selected_ids"
+        if key not in st.session_state:
+            if filtered_data is None or "id" not in getattr(filtered_data, "columns", ()):
+                return {"selected_ids": (), "explicit_selection": False}
+            st.session_state[key] = {str(point_id) for point_id in filtered_data["id"]}
+        return {"selected_ids": tuple(st.session_state[key]), "explicit_selection": True}
+
+    def _render_denovo_scatter(
+        self,
+        filtered_data: pd.DataFrame,
+        plot_params: Dict[str, Any],
+        prefix: str,
+        fig_key: str,
+    ) -> None:
+        """
+        Render the main scatter and turn a click on a point into a highlighted tool.
+
+        Streamlit exposes no hover event for Plotly, so the prototype's hover-to-highlight becomes
+        click-to-highlight here: the clicked point's ProteoBench ID arrives through the selection
+        payload as ``customdata``, and its tool is highlighted until clicked again.
+
+        Parameters
+        ----------
+        filtered_data : pd.DataFrame
+            The datapoints to plot.
+        plot_params : Dict[str, Any]
+            Parameters for the plot generator.
+        prefix : str
+            Session-state prefix for this view.
+        fig_key : str
+            Session-state key holding this figure's stable chart key.
+        """
+        if fig_key not in st.session_state:
+            st.session_state[fig_key] = str(uuid.uuid4())
+
+        try:
+            fig = self.ionmodule.get_plot_generator().plot_main_metric(result_df=filtered_data, **plot_params)
+        except Exception as exc:  # noqa: BLE001 - surfaced to the user rather than crashing the tab
+            st.error(f"Unable to plot the datapoints: {exc}", icon="🚨")
+            return
+
+        event = st.plotly_chart(
+            fig,
+            key=st.session_state[fig_key],
+            on_select="rerun",
+            selection_mode="points",
+        )
+
+        # A chart selection persists across reruns, so the same click is reported again on the
+        # run this handler triggers. Acting on it unconditionally reruns forever; act only when
+        # the selection actually changes.
+        handled_key = f"{prefix}_handled_click"
+        points = (getattr(event, "selection", None) or {}).get("points") or []
+
+        if not points:
+            # Plotly clears the selection when the selected point is clicked again. Only treat
+            # that as "unhighlight" if the highlight came from a click, so a choice made in the
+            # selectbox is left alone.
+            if st.session_state.pop(handled_key, None) is not None:
+                st.session_state[f"{prefix}_highlight_pending"] = "None"
+                st.rerun()
+            return
+
+        custom = points[0].get("customdata")
+        clicked_id = custom[0] if isinstance(custom, (list, tuple)) and custom else custom
+        if clicked_id is None or st.session_state.get(handled_key) == str(clicked_id):
+            return
+
+        match = filtered_data[filtered_data["id"].astype(str) == str(clicked_id)]
+        if match.empty:
+            return
+
+        # The "Highlight one tool" selectbox is built earlier in this same run, so its own key
+        # can no longer be written. Stage the choice instead and let the control pick it up on
+        # the next run, before it instantiates.
+        st.session_state[handled_key] = str(clicked_id)
+        st.session_state[f"{prefix}_highlight_pending"] = str(match.iloc[0]["software_name"])
+        st.rerun()
+
+    @staticmethod
+    def _ambiguity_combo(evaluation_type: str, allow_il: bool, allow_deamidation: bool) -> Optional[str]:
+        """
+        The stored ambiguity key for the current toggle positions.
+
+        Parameters
+        ----------
+        evaluation_type : str
+            ``"mass"`` or ``"exact"``.
+        allow_il : bool
+            Whether I/L mismatches are allowed.
+        allow_deamidation : bool
+            Whether deamidation mismatches are allowed.
+
+        Returns
+        -------
+        str or None
+            The ambiguity key, or None for the baseline. Mass-mode metrics have no ambiguity
+            variants, so the toggles are ignored there.
+        """
+        if evaluation_type != "exact":
+            return None
+        if allow_il and allow_deamidation:
+            return "both"
+        if allow_il:
+            return "il"
+        if allow_deamidation:
+            return "deam"
+        return None
 
     def _display_precision_coverage_curves(
         self,
@@ -226,6 +538,8 @@ class DeNovoUIObjects(BaseUIModule):
         allow_il: bool,
         allow_deamidation: bool,
         fig_key_uuid: str,
+        display: Optional[Dict[str, Any]] = None,
+        selection: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Render the peptide-level/amino-acid-level precision-coverage curve view, sharing the
@@ -238,11 +552,20 @@ class DeNovoUIObjects(BaseUIModule):
 
         try:
             plot_generator = self.ionmodule.get_plot_generator()
+            # The curve view takes the same colouring and labelling as the scatter, minus the
+            # scatter-only options: there is no marker to annotate and no per-point hover box.
+            curve_options = {
+                key: value
+                for key, value in (display or {}).items()
+                if key in ("custom_labels", "highlight_tool", "muted_tools")
+            }
             fig = plot_generator.plot_precision_coverage_curves(
                 result_df=filtered_data,
                 evaluation_type=evaluation_type,
                 allow_il=allow_il,
                 allow_deamidation=allow_deamidation,
+                **curve_options,
+                **(selection or {}),
             )
             if fig_key_uuid not in st.session_state:
                 st.session_state[fig_key_uuid] = uuid.uuid4()
@@ -302,9 +625,24 @@ class DeNovoUIObjects(BaseUIModule):
             )
 
     # Almost entirely unique to denovo module
+    #: The in-depth views, as (key, menu label, sub-selection kind).
+    INDEPTH_VIEWS = (
+        ("ptm_overview", "PTM overview", None),
+        ("ptm_specific", "PTM, one modification", "modification"),
+        ("spectrum_feature", "Spectrum feature", "feature"),
+        ("species_overview", "Species", None),
+        ("in_fasta_overview", "In FASTA", None),
+    )
+
+    @st.fragment
     def display_indepth_plots(self) -> None:
         """
-        Display the dataset selection dropdown and plot the selected dataset (Tab 3).
+        Display one in-depth plot for a chosen set of datapoints (Tab 4, "Compare Results").
+
+        A fragment, so ticking a datapoint re-runs only this tab rather than the whole page. One
+        figure is drawn at a time: ``generate_in_depth_plots`` builds sixteen, of which only one
+        is ever on screen, and Streamlit renders every tab's body on every run, so building them
+        all cost roughly 250 ms and 700 KB per click for nothing.
         """
         if self.variables.all_datapoints_submitted not in st.session_state:
             tab2.initialize_main_data_points(variables=self.variables, ionmodule=self.ionmodule)
@@ -312,178 +650,311 @@ class DeNovoUIObjects(BaseUIModule):
                 all_datapoints=st.session_state[self.variables.all_datapoints]
             )
 
-        if self.variables.all_datapoints_submitted not in st.session_state.keys():
+        all_datapoints_df = st.session_state.get(self.variables.all_datapoints_submitted)
+        if all_datapoints_df is None or all_datapoints_df.empty:
             st.error("No data available for plotting.", icon="🚨")
             return
-        if st.session_state[self.variables.all_datapoints_submitted].empty:
-            st.error("No data available for plotting.", icon="🚨")
+
+        prefix = f"{self.variables.fig_metric}_denovo_indepth"
+        display = self._render_indepth_selection_controls(all_datapoints_df, prefix)
+
+        preset_ids = display.pop("preset_ids", None)
+
+        st.info(RANKING_NOTE, icon=":material/trophy:")
+
+        # The table earns its space while a selection is being put together and costs several
+        # hundred pixels between the controls and the figure they configure once it is settled,
+        # so it folds away without giving up the selection it holds.
+        show_table = st.toggle(
+            "Show the datapoint table",
+            value=True,
+            key=f"{prefix}_show_table",
+            help="Turn this off once your selection is set, to bring the figure up the page.",
+        )
+        if show_table:
+            table = render_denovo_result_table(
+                result_df=all_datapoints_df,
+                state_prefix=f"{prefix}_table",
+                evaluation_type=display["evaluation_type"],
+                selected_ids=preset_ids,
+            )
+            selected_ids = table.selected_ids
+        else:
+            # The table owns the selection, so with it hidden a preset has to be written straight
+            # to the key the table would have written it to.
+            if preset_ids is not None:
+                st.session_state[f"{prefix}_table_selected_ids"] = {str(point_id) for point_id in preset_ids}
+            selected_ids = set(st.session_state.get(f"{prefix}_table_selected_ids", set()))
+        st.caption(selection_summary(all_datapoints_df, selected_ids))
+
+        selected = all_datapoints_df[all_datapoints_df["id"].astype(str).isin(selected_ids)]
+        if selected.empty:
+            st.info("No datapoints selected. Tick one in the table, or choose a preset above.")
             return
-        downloads_df = st.session_state[self.variables.all_datapoints_submitted][["id", "intermediate_hash"]]
-        downloads_df.set_index("intermediate_hash", drop=False, inplace=True)
 
-        if self.variables.placeholder_dataset_selection_container not in st.session_state.keys():
-            st.session_state[self.variables.placeholder_dataset_selection_container] = st.empty()
-            st.session_state[self.variables.dataset_selector_id_uuid] = uuid.uuid4()
-
-        st.subheader("Select dataset to plot")
-
-        dataset_options = [("Uploaded dataset", None)] + list(
-            zip(downloads_df["id"], downloads_df["intermediate_hash"])
+        st.divider()
+        # Every view named on screen, rather than one name and a dropped arrow: there are five of
+        # them, they are the whole point of this tab, and a reader should not have to open a menu
+        # to discover what this tab can show.
+        view_key = (
+            st.segmented_control(
+                "Plot",
+                options=[key for key, _label, _sub in self.INDEPTH_VIEWS],
+                format_func=lambda key: {k: label for k, label, _ in self.INDEPTH_VIEWS}[key],
+                default=self.INDEPTH_VIEWS[0][0],
+                key=f"{prefix}_view",
+            )
+            or self.INDEPTH_VIEWS[0][0]
         )
-
-        dataset_selection = st.multiselect(
-            label="Select datasets",
-            options=dataset_options,
-            key=st.session_state[self.variables.dataset_selector_id_uuid],
-            format_func=lambda x: x[0],
-            default=dataset_options,
-            help=self.variables.texts.Help.dataset_selection_indepth,
-        )
-
-        # Use default values for plot rendering (no user controls on this tab)
-        evaluation_types = ["exact", "mass"]
-        colorblind_mode = False
-
-        modifications = [
-            "M-Oxidation",
-            "Q-Deamidation",
-            "N-Deamidation",
-            "N-term Acetylation",
-            "N-term Carbamylation",
-            "N-term Ammonia-loss",
-        ]
-        feature_names = ["Missing Fragmentation Sites", "Peptide Length", "% Explained Intensity"]
-
-        # Handle dataset selection - separate uploaded data from public data
-        all_datapoints_df = st.session_state[self.variables.all_datapoints_submitted]
-        selected_dtps = pd.DataFrame()
-
-        for dtp_id, dtp_hash in dataset_selection:
-            if dtp_hash is None:  # "Uploaded dataset" case
-                # Get the newly uploaded data (marked as "new")
-                uploaded_data = all_datapoints_df[all_datapoints_df["old_new"] == "new"]
-                selected_dtps = pd.concat([selected_dtps, uploaded_data], ignore_index=True)
+        sub_kind = {k: sub for k, _label, sub in self.INDEPTH_VIEWS}[view_key]
+        sub_value = None
+        if sub_kind is not None:
+            sub_col = st.columns([1, 2])[0]
+            if sub_kind == "modification":
+                sub_value = sub_col.selectbox("Modification", options=self.PTM_LABELS, key=f"{prefix}_modification")
             else:
-                # Get public dataset by hash
-                public_data = all_datapoints_df[all_datapoints_df["intermediate_hash"] == dtp_hash]
-                selected_dtps = pd.concat([selected_dtps, public_data], ignore_index=True)
+                sub_value = sub_col.selectbox("Feature", options=self.SPECTRUM_FEATURES, key=f"{prefix}_feature")
 
-        # Generate in-depth plots using plot generator
-        if not selected_dtps.empty:
-            plot_generator = self.ionmodule.get_plot_generator()
+        self._render_indepth_figure(selected, display, view_key, sub_value)
 
-            # Create kwargs with De Novo-specific parameters (now using user selections)
-            plot_kwargs = {
-                "mod_labels": modifications,
-                "feature": feature_names,
-                "evaluation_type": evaluation_types,
-                "colorblind_mode": colorblind_mode,
-            }
+    #: Where each in-depth view's full explanation lives on ``variables.texts.Description``.
+    #: These are the several screens of method that the tabbed layout used to show beside each
+    #: figure; the one-line entries in ``get_in_depth_plot_descriptions`` are a summary of them,
+    #: not a replacement, so both are rendered.
+    INDEPTH_DESCRIPTIONS = {
+        "ptm_overview": "ptm_overview",
+        "ptm_specific": "ptm_specific",
+        "spectrum_feature": "spectrum_features_overview",
+        "species_overview": "species",
+        "in_fasta_overview": "in_fasta_overview",
+    }
 
-            try:
-                # Generate all plots
-                plots = plot_generator.generate_in_depth_plots(selected_dtps, **plot_kwargs)
+    #: Modifications scored by the de novo module, in display order.
+    def _render_indepth_selection_controls(self, all_datapoints_df: pd.DataFrame, prefix: str) -> Dict[str, Any]:
+        """
+        Presets and labelling controls for the in-depth plots.
 
-                # Display plots using layout from plot generator
-                layout = plot_generator.get_in_depth_plot_layout()
-                descriptions = plot_generator.get_in_depth_plot_descriptions()
+        Collapsed by default, with the current selection summarised beneath it, so the controls do
+        not occupy the page once a selection is settled. The expander label is deliberately static:
+        a label carrying a live count changes the element's props on every interaction and makes it
+        collapse under the viewer.
 
-                for section in layout:
-                    st.subheader(section.get("title", ""))
-                    for idx, plot_name in enumerate(section["plots"]):
-                        if plot_name in plots:
-                            if plot_name in descriptions:
-                                st.caption(descriptions[plot_name])
-                            self._display_indepth_plot(plot_name=plot_name, figs=plots[plot_name])
-                            # st.plotly_chart(plots[plot_name])
+        Parameters
+        ----------
+        all_datapoints_df : pd.DataFrame
+            Every datapoint available to select from.
+        prefix : str
+            Session-state prefix for this view.
 
-            except Exception as e:
-                st.error(f"Error generating in-depth plots: {e}", icon="🚨")
-                import traceback
+        Returns
+        -------
+        Dict[str, Any]
+            The chosen evaluation type, label style, highlighted tool, and, when a preset was just
+            applied, the ``preset_ids`` it resolved to.
+        """
+        tools = sorted(all_datapoints_df["software_name"].astype(str).unique())
 
-                with st.expander("Error details"):
-                    st.code(traceback.format_exc())
-        else:
-            st.info("No datasets selected for plotting.")
+        with st.expander("Selection and labels", expanded=False):
+            st.caption(
+                "Changing **Compare**, **Tool** or **How many** re-picks the selection "
+                "immediately and replaces your ticks. Everything else here only changes how the "
+                "figure is drawn and never touches which datapoints are in it."
+            )
+            preset_col, tool_col, topn_col = st.columns([1.1, 1, 1])
+            preset = preset_col.radio(
+                "Compare",
+                options=SELECTION_PRESETS,
+                format_func=lambda name: (
+                    "Across tools (each tool's best)" if name == "cross_tool" else "Within one tool"
+                ),
+                key=f"{prefix}_preset",
+                help=(
+                    "Across tools is unbiased by how many times a tool was submitted. Within one "
+                    "tool is the comparison that view deliberately hides."
+                ),
+            )
+            tool_choice = tool_col.selectbox(
+                "Tool",
+                options=tools,
+                key=f"{prefix}_preset_tool",
+                disabled=preset != "tool_specific",
+            )
+            top_n = topn_col.selectbox(
+                "How many",
+                options=[10, 5, 0],
+                format_func=lambda n: "All" if n == 0 else f"Top {n}",
+                key=f"{prefix}_preset_topn",
+                disabled=preset != "tool_specific",
+            )
 
-    def _display_ptm_overview(self, figs) -> None:
-        # Overview PTM plot
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.ptm_overview)
+            eval_col, highlight_col = st.columns(2)
+            evaluation_choice = eval_col.radio(
+                "Evaluation",
+                options=["Exact", "Mass-based"],
+                index=1,
+                key=f"{prefix}_evaluation",
+                horizontal=True,
+            )
+            highlight_choice = highlight_col.selectbox(
+                "Highlight",
+                options=["None", *tools],
+                key=f"{prefix}_highlight_tool",
+                help=(
+                    "Across tools this raises every datapoint of that software. Within one tool "
+                    "every datapoint is that software, so raise one from the table instead."
+                ),
+            )
 
-        st.plotly_chart(figs)
+            if st.button(
+                "Reset selection and labels",
+                key=f"{prefix}_reset",
+                icon=":material/restart_alt:",
+                help="Clears your ticks and labels and goes back to the preset's own selection.",
+            ):
+                for suffix in (
+                    "preset",
+                    "preset_tool",
+                    "preset_topn",
+                    "preset_signature",
+                    "highlight_tool",
+                    "table_selected_ids",
+                    "view",
+                    "modification",
+                    "feature",
+                ):
+                    st.session_state.pop(f"{prefix}_{suffix}", None)
+                st.rerun()
 
-    def _display_ptm_specific(self, figs) -> None:
-        # Specific PTM plots
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.ptm_specific)
+        evaluation_type = self.evaluation_type_mapping[evaluation_choice]
+        options: Dict[str, Any] = {
+            "evaluation_type": evaluation_type,
+            "highlight_tool": None if highlight_choice == "None" else highlight_choice,
+        }
 
-        modification_labels = list(figs.keys())
-        tabs = st.tabs(modification_labels)
-        tab_dict = {mod_label: tab for mod_label, tab in zip(modification_labels, tabs)}
-        for mod_label, tab in tab_dict.items():
-            with tab:
-                st.header(mod_label)
-                st.plotly_chart(
-                    figs[mod_label],
-                    key=f"ptm_plot_{mod_label}",
+        # The preset applies the moment one of its own three controls moves, rather than on a
+        # separate press: a block where some controls take effect immediately and others wait for
+        # a button is what made this feel unpredictable. A hand-picked set is still never
+        # replaced silently, because an unrelated rerun leaves the signature unchanged, and the
+        # remaining controls here (evaluation, labels, emphasis) are not part of it.
+        signature = (preset, tool_choice, int(top_n))
+        signature_key = f"{prefix}_preset_signature"
+        first_run = f"{prefix}_table_selected_ids" not in st.session_state
+        if first_run or st.session_state.get(signature_key) != signature:
+            st.session_state[signature_key] = signature
+            options["preset_ids"] = preset_selection(
+                all_datapoints_df,
+                preset=preset,
+                tool=tool_choice,
+                top_n=int(top_n),
+                evaluation_type=evaluation_type,
+            )
+        return options
+
+    PTM_LABELS = (
+        "M-Oxidation",
+        "Q-Deamidation",
+        "N-Deamidation",
+        "N-term Acetylation",
+        "N-term Carbamylation",
+        "N-term Ammonia-loss",
+    )
+
+    #: Spectrum features scored by the de novo module.
+    SPECTRUM_FEATURES = ("Missing Fragmentation Sites", "Peptide Length", "% Explained Intensity")
+
+    def _render_indepth_description(self, plot_generator, view_key: str) -> None:
+        """
+        Render the one-line caption and the full explanation for an in-depth view.
+
+        The caption summarises; the expander holds what each metric actually is and how to read
+        the plot, which is the text the tabbed layout showed beside every figure and which the
+        caption replaced rather than condensed.
+
+        Parameters
+        ----------
+        plot_generator : object
+            The module's plot generator, which supplies the short captions.
+        view_key : str
+            Which figure is on screen, a key of :data:`INDEPTH_VIEWS`.
+        """
+        descriptions = plot_generator.get_in_depth_plot_descriptions()
+        if view_key in descriptions:
+            st.caption(descriptions[view_key])
+
+        attribute = self.INDEPTH_DESCRIPTIONS.get(view_key)
+        detail = getattr(self.variables.texts.Description, attribute, None) if attribute else None
+        if detail:
+            with st.expander("What this plot shows, and how to read it", icon=":material/menu_book:"):
+                st.markdown(detail)
+
+    def _render_indepth_figure(
+        self,
+        selected: pd.DataFrame,
+        display: Dict[str, Any],
+        view_key: str,
+        sub_value: Optional[str],
+    ) -> None:
+        """
+        Build and draw the one in-depth figure currently chosen.
+
+        Calls the individual plot method rather than ``generate_in_depth_plots``, which builds all
+        sixteen figures. The orchestrator is still used by anything that wants the whole set, but
+        a page that shows one figure should not pay for fifteen it will not display.
+
+        Parameters
+        ----------
+        selected : pd.DataFrame
+            The datapoints to plot.
+        display : Dict[str, Any]
+            Options from :meth:`_render_indepth_selection_controls`.
+        view_key : str
+            Which figure to build, a key of :data:`INDEPTH_VIEWS`.
+        sub_value : str, optional
+            The chosen modification or spectrum feature, where the view needs one.
+        """
+        plot_generator = self.ionmodule.get_plot_generator()
+        evaluation_type = display["evaluation_type"]
+
+        highlight_id = None
+        highlight_tool = display.get("highlight_tool")
+        if highlight_tool:
+            matching = selected[selected["software_name"].astype(str) == str(highlight_tool)]
+            if not matching.empty:
+                highlight_id = str(matching.iloc[0]["id"])
+
+        # Every datapoint is named by its tool and rank, here as everywhere else. What a run
+        # was is carried by the table's Parameters column instead of by the name, so there is
+        # nothing left for a naming control -- or for a hand-typed label -- to decide.
+        identity = {
+            "custom_labels": None,
+            "highlight_id": highlight_id,
+        }
+
+        self._render_indepth_description(plot_generator, view_key)
+
+        try:
+            if view_key == "ptm_overview":
+                fig = plot_generator.plot_ptm_overview(selected, mod_labels=list(self.PTM_LABELS), **identity)
+            elif view_key == "ptm_specific":
+                fig = plot_generator.plot_ptm_specific(selected, mod_label=sub_value, **identity)
+            elif view_key == "spectrum_feature":
+                fig = plot_generator.plot_spectrum_feature(
+                    selected, feature=sub_value, evaluation_type=evaluation_type, **identity
                 )
+            elif view_key == "species_overview":
+                fig = plot_generator.plot_species_overview(selected, evaluation_type=evaluation_type, **identity)
+            else:
+                fig = plot_generator.plot_infasta_overview(selected, **identity)
+        except Exception as e:  # noqa: BLE001 - surfaced to the user rather than crashing the tab
+            st.error(f"Error generating the in-depth plot: {e}", icon="🚨")
+            import traceback
 
-    def _display_spectrum_features(self, figs) -> None:
-        feature_names = list(figs.keys())
-        exact_mode = st.toggle(
-            label="Exact evaluation mode", value=False, key=self.variables.evaluation_mode_toggle_tab3_features
-        )
-        if exact_mode:
-            evaluation_type = "exact"
-        else:
-            evaluation_type = "mass"
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
+            return
 
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.spectrum_features_overview)
+        st.plotly_chart(fig, key=f"{self.variables.fig_metric}_indepth_{view_key}_{sub_value or 'none'}")
 
-        tabs = st.tabs(feature_names)
-        tab_dict = {feature_name: tab for feature_name, tab in zip(feature_names, tabs)}
-        for feature_name, tab in tab_dict.items():
-            with tab:
-                st.header(feature_name)
-                st.plotly_chart(figs[feature_name][evaluation_type])
-
-    def _display_species_overview(self, figs) -> None:
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.species)
-
-        exact_mode = st.toggle(
-            label="Exact evaluation mode", value=False, key=self.variables.evaluation_mode_toggle_tab3_species
-        )
-        if exact_mode:
-            evaluation_type = "exact"
-        else:
-            evaluation_type = "mass"
-
-        st.plotly_chart(figs[evaluation_type], key=self.variables.fig_species_overview)
-
-    def _display_infasta_overview(self, figs) -> None:
-        with st.expander("Description"):
-            st.markdown(self.variables.texts.Description.in_fasta_overview)
-
-        st.plotly_chart(figs)
-
-    def _display_indepth_plot(self, plot_name: str, figs) -> None:
-        if plot_name == "ptm_overview":
-            self._display_ptm_overview(figs)
-        elif plot_name == "ptm_specific":
-            self._display_ptm_specific(figs)
-        elif plot_name == "spectrum_feature":
-            self._display_spectrum_features(figs)
-        elif plot_name == "species_overview":
-            self._display_species_overview(figs)
-        elif plot_name == "in_fasta_overview":
-            self._display_infasta_overview(figs)
-        else:
-            raise Exception("Cannot display non-implemented in-depth plot.")
-
-    @st.fragment
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
@@ -599,24 +1070,48 @@ class DeNovoUIObjects(BaseUIModule):
             "colorblind_mode": colorblind_mode,
         }
 
-        view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
-        with view_tabs[0]:
-            tab4.render_submitted_main_plot(
-                variables=self.variables,
-                ionmodule=self.ionmodule,
-                plot_params=plot_params,
+        # Same labelling and emphasis controls as the public-results tab, with their own state so
+        # the two views can be set up differently.
+        prefix = self._denovo_state_prefix(submitted=True)
+        display = self._render_denovo_display_controls(filtered_data, prefix)
+        selection = self._denovo_selection(prefix, filtered_data)
+
+        view = st.segmented_control(
+            "View",
+            options=self.FIGURE_VIEWS,
+            default=self.FIGURE_VIEWS[0],
+            key=f"{prefix}_figure_view",
+            label_visibility="collapsed",
+            help=FIGURE_VIEW_HELP,
+        )
+        if view != self.FIGURE_VIEWS[1]:
+            self._render_denovo_scatter(
                 filtered_data=filtered_data,
+                plot_params={**plot_params, **display, **selection},
+                prefix=prefix,
+                fig_key=self.variables.fig_metric_submitted,
             )
-        with view_tabs[1]:
+        else:
             self._display_precision_coverage_curves(
                 filtered_data=filtered_data,
                 evaluation_type=evaluation_type,
                 allow_il=allow_il,
                 allow_deamidation=allow_deamidation,
                 fig_key_uuid=self.variables.fig_pc_curve_submitted,
+                display=display,
+                selection=selection,
             )
 
-        tab4.render_submitted_results_table(filtered_data, self.variables)
+        st.subheader("Benchmark Results")
+        st.info(RANKING_NOTE, icon=":material/trophy:")
+        st.caption(TABLE_CAPTION)
+        render_denovo_result_table(
+            result_df=filtered_data,
+            state_prefix=f"{prefix}_table",
+            evaluation_type=evaluation_type,
+            ambiguity_combo=self._ambiguity_combo(evaluation_type, allow_il, allow_deamidation),
+            default_selection="all",
+        )
 
         # st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
         # st.data_editor(

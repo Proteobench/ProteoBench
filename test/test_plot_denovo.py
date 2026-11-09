@@ -8,10 +8,14 @@ import pandas as pd
 import pytest
 
 from proteobench.plotting.plot_generator_denovo import (
+    BEST_MARKER_SCALE,
+    BEST_MARKER_SYMBOL,
     DIMMED_OPACITY,
     LABEL_STYLES,
     MUTED_COLOR,
     MUTED_CURVE_OPACITY,
+    SECONDARY_CURVE_OPACITY,
+    SECONDARY_OPACITY,
     SHADE_LIGHTNESS_BOUNDS,
     SOFTWARE_COLORS,
     SOFTWARE_MARKERS,
@@ -19,13 +23,16 @@ from proteobench.plotting.plot_generator_denovo import (
     _hex_to_hsl,
     _hsl_to_hex,
     build_display_labels,
+    build_variant_descriptions,
     build_workflow_labels,
     datapoint_score,
     assign_datapoint_colors,
+    leading_datapoints,
     classify_datapoint_columns,
     columns_varying_within_tool,
     default_hidden_columns,
     ordered_datapoint_columns,
+    preset_selection,
     rank_within_tools,
     resolve_coloured_datapoints,
     resolve_emphasis,
@@ -430,6 +437,9 @@ def _plottable(point_id, software, auc, *, curve=True, is_temporary=False, **fie
     return row
 
 
+#: How ``build_display_labels`` separates a tool name from the datapoint's rank within it.
+RANK_MARK = "#"
+
 #: Three tools, one of them submitted three times: the shape the redesign exists for.
 REPEATED_TOOL = pd.DataFrame(
     [
@@ -466,10 +476,205 @@ class TestResolveColouredDatapoints:
         coloured = resolve_coloured_datapoints(REPEATED_TOOL, selected_ids=["i_low"])
         assert REPEATED_TOOL.loc[coloured, "id"].tolist() == ["i_best", "i_low", "cas", "ada"]
 
-    def test_a_selection_survives_its_tool_being_muted(self):
-        # Muting is about the automatic colouring; an explicit pick is still an explicit pick.
+    def test_muting_a_tool_beats_selecting_its_datapoints(self):
+        # Deliberately the reverse of what this used to assert. Muting was checked only on the
+        # automatic branch, so once the table drove the colouring from its own ticks -- and
+        # especially once it ticked everything by default -- "Grey out tools" had no visible
+        # effect whatever. A mute is now the stronger statement of the two.
         coloured = resolve_coloured_datapoints(REPEATED_TOOL, muted_tools=["InstaNovo"], selected_ids=["i_low"])
-        assert REPEATED_TOOL.loc[coloured, "id"].tolist() == ["i_low", "cas", "ada"]
+        assert REPEATED_TOOL.loc[coloured, "id"].tolist() == ["cas", "ada"]
+
+    def test_muting_survives_an_explicit_selection_of_everything(self):
+        coloured = resolve_coloured_datapoints(
+            REPEATED_TOOL,
+            muted_tools=["InstaNovo"],
+            selected_ids=list(REPEATED_TOOL["id"]),
+            explicit_only=True,
+        )
+        assert REPEATED_TOOL.loc[coloured, "id"].tolist() == ["cas", "ada"]
+
+
+class TestLeadingDatapoints:
+    """Which datapoint of each tool is drawn at full strength once several are coloured."""
+
+    def _leading(self, **kwargs):
+        coloured = resolve_coloured_datapoints(REPEATED_TOOL, **kwargs)
+        ranks, _best = rank_within_tools(REPEATED_TOOL)
+        return set(REPEATED_TOOL.loc[sorted(leading_datapoints(REPEATED_TOOL, coloured, ranks)), "id"])
+
+    def test_every_datapoint_coloured_still_leaves_one_leader_per_tool(self):
+        leaders = self._leading(selected_ids=list(REPEATED_TOOL["id"]), explicit_only=True)
+        assert leaders == {"i_best", "cas", "ada"}
+
+    def test_the_leader_is_the_best_of_what_is_coloured_not_of_the_tool(self):
+        # i_best is unticked, so i_mid leads InstaNovo rather than nothing leading it.
+        leaders = self._leading(selected_ids=["i_mid", "i_low", "cas"], explicit_only=True)
+        assert leaders == {"i_mid", "cas"}
+
+    def test_a_muted_tool_has_no_leader(self):
+        leaders = self._leading(muted_tools=["InstaNovo"], selected_ids=list(REPEATED_TOOL["id"]))
+        assert leaders == {"cas", "ada"}
+
+    def test_empty_frame_has_no_leaders(self):
+        empty = pd.DataFrame()
+        assert leading_datapoints(empty, pd.Series(dtype=bool), pd.Series(dtype=int)) == set()
+
+
+class TestBuildVariantDescriptions:
+    """The differing-parameter set on its own, without the tool name wrapped around it."""
+
+    def test_a_tool_submitted_once_has_nothing_to_differ_from(self):
+        df = pd.DataFrame([_datapoint("a", "Casanovo")])
+        assert list(build_variant_descriptions(df)) == [""]
+
+    def test_it_names_the_fields_that_separate_a_tools_runs(self):
+        descriptions = list(build_variant_descriptions(INSTANOVO_MODES))
+        assert descriptions[0] == "greedy search, 1 beam, instanovo-v1.2.0"
+        assert descriptions[2] == "beam search, 10 beams, instanovo-v1.2.0"
+
+    def test_it_carries_the_refinement_clause(self):
+        descriptions = list(build_variant_descriptions(INSTANOVO_MODES))
+        assert descriptions[1].endswith("with InstaNovo+ refinement (instanovoplus-v1.1.0)")
+
+    def test_it_says_the_same_as_the_long_form_label(self):
+        # The guarantee worth holding: whatever ends up in the Parameters column names exactly
+        # the fields the long-form label would have carried, so the two never disagree. The
+        # label brackets them after the tool name, which is the only difference.
+        labels = list(build_workflow_labels(INSTANOVO_MODES))
+        for label, description in zip(labels, build_variant_descriptions(INSTANOVO_MODES)):
+            bracketed = re.match(r"^[^(]+ \((.*?)\)(.*)$", label)
+            assert bracketed, label
+            assert description == bracketed.group(1) + bracketed.group(2)
+
+    def test_an_empty_frame_gives_an_empty_series(self):
+        assert len(build_variant_descriptions(pd.DataFrame())) == 0
+
+    def test_a_frame_without_software_names_is_tolerated(self):
+        df = pd.DataFrame([{"id": "a"}])
+        assert list(build_variant_descriptions(df)) == [""]
+
+
+class TestBestDatapointMarker:
+    """Each tool's best run is a star on the scatter, as it is in the table."""
+
+    ALL = dict(selected_ids=list(REPEATED_TOOL["id"]), explicit_selection=True)
+
+    def _symbols(self, fig):
+        symbols = {}
+        for trace in fig.data:
+            if getattr(trace, "mode", None) != "markers" or _is_legend_proxy(trace):
+                continue
+            symbols.update(zip([str(value) for value in trace.customdata], trace.marker.symbol))
+        return symbols
+
+    def test_the_tools_best_is_a_star_and_the_rest_are_circles(self):
+        symbols = self._symbols(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL))
+        assert symbols["i_best"] == BEST_MARKER_SYMBOL
+        assert symbols["i_mid"] == symbols["i_low"] == "circle"
+
+    def test_a_tool_submitted_once_is_its_own_best(self):
+        symbols = self._symbols(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL))
+        assert symbols["cas"] == symbols["ada"] == BEST_MARKER_SYMBOL
+
+    def test_the_star_survives_its_tool_being_unticked(self):
+        # The star says which run the ranking is about, which does not change with the ticks.
+        symbols = self._symbols(
+            DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, selected_ids=["cas"], explicit_selection=True)
+        )
+        assert symbols["i_best"] == BEST_MARKER_SYMBOL
+
+    def test_a_star_is_drawn_larger_than_the_circle_it_replaces(self):
+        fig = DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL)
+        sizes = {}
+        for trace in fig.data:
+            if getattr(trace, "mode", None) != "markers" or _is_legend_proxy(trace):
+                continue
+            sizes.update(zip([str(value) for value in trace.customdata], trace.marker.size))
+        assert sizes["i_best"] == pytest.approx(14 * BEST_MARKER_SCALE)
+
+    def test_colourblind_mode_keeps_the_symbol_for_the_tool(self):
+        # There the symbol is what identifies a tool, so starring one point per tool would make
+        # every tool's best look like the same tool.
+        symbols = self._symbols(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, colorblind_mode=True, **self.ALL))
+        assert symbols["i_best"] == SOFTWARE_MARKERS.get("InstaNovo", "circle")
+        assert symbols["i_best"] == symbols["i_mid"]
+
+
+class TestVariantsInHover:
+    """What a run was reaches the reader without any control having to be found first."""
+
+    ALL = dict(selected_ids=list(REPEATED_TOOL["id"]), explicit_selection=True)
+
+    def _hover(self, fig):
+        texts = {}
+        for trace in fig.data:
+            if getattr(trace, "hovertext", None) is None or _is_legend_proxy(trace):
+                continue
+            texts.update(zip([str(value) for value in trace.customdata], trace.hovertext))
+        return texts
+
+    def test_the_differing_parameters_sit_directly_under_the_name(self):
+        hover = self._hover(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL))
+        lines = hover["i_mid"].split("<br>")
+        assert lines[1] == f"<b>InstaNovo {RANK_MARK}2</b>"
+        assert "beam search" in lines[2]
+
+    def test_a_tool_submitted_once_gains_no_extra_line(self):
+        hover = self._hover(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL))
+        assert "<i>" not in hover["cas"]
+
+    def test_the_curves_say_the_same_thing(self):
+        fig = DeNovoPlotGenerator().plot_precision_coverage_curves(REPEATED_TOOL, **self.ALL)
+        drawn = [t for t in fig.data if not _is_legend_proxy(t)]
+        templates = {str(t.name): t.hovertemplate for t in drawn}
+        assert "beam search" in templates[f"InstaNovo {RANK_MARK}2"]
+        assert "<i>" not in templates[f"Casanovo {RANK_MARK}1"]
+
+
+class TestSecondaryEmphasis:
+    """A tool's non-best coloured runs recede rather than shouting at the same volume."""
+
+    ALL = dict(selected_ids=list(REPEATED_TOOL["id"]), explicit_selection=True)
+
+    def _markers(self, fig):
+        """Marker opacity per ProteoBench ID, across the one trace each tool gets."""
+        opacity = {}
+        for trace in fig.data:
+            if getattr(trace, "mode", None) != "markers" or _is_legend_proxy(trace):
+                continue
+            opacity.update(zip([str(value) for value in trace.customdata], trace.marker.opacity))
+        return opacity
+
+    def test_the_tools_best_run_is_the_only_opaque_one(self):
+        opacity = self._markers(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL))
+        assert opacity["i_best"] > opacity["i_mid"] == opacity["i_low"] == SECONDARY_OPACITY
+
+    def test_a_tool_submitted_once_is_unaffected(self):
+        opacity = self._markers(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL))
+        assert opacity["cas"] == opacity["ada"] == opacity["i_best"]
+
+    def test_curves_fade_the_same_way(self):
+        fig = DeNovoPlotGenerator().plot_precision_coverage_curves(REPEATED_TOOL, **self.ALL)
+        drawn = [t for t in fig.data if not _is_legend_proxy(t)]
+        by_label = {str(t.name): t.opacity for t in drawn}
+        best, second = f"InstaNovo {RANK_MARK}1", f"InstaNovo {RANK_MARK}2"
+        assert by_label[best] > by_label[second] == SECONDARY_CURVE_OPACITY
+
+    def test_a_muted_but_ticked_tool_stays_on_the_curve_plot_in_grey(self):
+        # "Grey out tools" says the datapoints stay, in grey. Dropping an unticked curve is the
+        # payload saving; a muted tool is still ticked, so it is still drawn.
+        fig = DeNovoPlotGenerator().plot_precision_coverage_curves(REPEATED_TOOL, muted_tools=["InstaNovo"], **self.ALL)
+        drawn = [t for t in fig.data if not _is_legend_proxy(t)]
+        instanovo = [t for t in drawn if str(t.name).startswith("InstaNovo")]
+        assert instanovo, "a muted tool must not vanish from the plot"
+        assert {t.line.color for t in instanovo} == {MUTED_COLOR}
+
+    def test_an_unticked_curve_is_not_drawn_at_all(self):
+        fig = DeNovoPlotGenerator().plot_precision_coverage_curves(
+            REPEATED_TOOL, selected_ids=["cas"], explicit_selection=True
+        )
+        drawn = [t for t in fig.data if not _is_legend_proxy(t)]
+        assert {str(t.name) for t in drawn} == {f"Casanovo {RANK_MARK}1"}
 
     def test_empty_frame_returns_empty(self):
         assert len(resolve_coloured_datapoints(pd.DataFrame())) == 0
@@ -996,3 +1201,75 @@ class TestColumnsVaryingWithinTool:
     def test_a_missing_column_is_skipped(self):
         df = pd.DataFrame([{"software_name": "InstaNovo"}])
         assert columns_varying_within_tool(df, "InstaNovo", ["nope"]) == []
+
+
+class TestPresetSelection:
+    def test_cross_tool_takes_one_datapoint_per_tool(self):
+        df = pd.concat([CROSS_TOOL, ONE_TOOL.tail(2)], ignore_index=True)
+        chosen = preset_selection(df, preset="cross_tool")
+        tools = df[df["id"].isin(chosen)]["software_name"].tolist()
+        assert sorted(tools) == sorted(df["software_name"].unique())
+
+    def test_cross_tool_takes_each_tools_best(self):
+        df = pd.concat([CROSS_TOOL, ONE_TOOL.tail(2)], ignore_index=True)
+        chosen = preset_selection(df, preset="cross_tool")
+        # i1 is InstaNovo's best in this combined frame.
+        assert "i1" in chosen
+
+    def test_cross_tool_is_not_biased_by_submission_count(self):
+        # Three runs of one tool must contribute one datapoint, like every other tool.
+        df = pd.concat([CROSS_TOOL, ONE_TOOL.tail(2)], ignore_index=True)
+        chosen = preset_selection(df, preset="cross_tool")
+        counts = df[df["id"].isin(chosen)]["software_name"].value_counts()
+        assert set(counts) == {1}
+
+    def test_cross_tool_is_ordered_best_first(self):
+        chosen = preset_selection(CROSS_TOOL, preset="cross_tool")
+        assert chosen == ["i1", "c1", "a1"]
+
+    def test_tool_specific_takes_that_tools_runs_best_first(self):
+        chosen = preset_selection(ONE_TOOL, preset="tool_specific", tool="InstaNovo")
+        assert chosen == ["i1", "i2", "i3"]
+
+    def test_tool_specific_honours_top_n(self):
+        chosen = preset_selection(ONE_TOOL, preset="tool_specific", tool="InstaNovo", top_n=2)
+        assert chosen == ["i1", "i2"]
+
+    def test_top_n_of_zero_means_all(self):
+        chosen = preset_selection(ONE_TOOL, preset="tool_specific", tool="InstaNovo", top_n=0)
+        assert len(chosen) == len(ONE_TOOL)
+
+    def test_tool_specific_ignores_other_tools(self):
+        df = pd.concat([CROSS_TOOL, ONE_TOOL.tail(2)], ignore_index=True)
+        chosen = preset_selection(df, preset="tool_specific", tool="Casanovo")
+        assert chosen == ["c1"]
+
+    def test_tool_defaults_to_the_one_with_the_best_datapoint(self):
+        df = pd.concat([CROSS_TOOL, ONE_TOOL.tail(2)], ignore_index=True)
+        chosen = preset_selection(df, preset="tool_specific")
+        assert set(df[df["id"].isin(chosen)]["software_name"]) == {"InstaNovo"}
+
+    def test_the_evaluation_type_can_change_what_is_picked(self):
+        df = CROSS_TOOL.copy()
+        # Make AdaNovo the strongest under exact matching only.
+        df.at[2, "results"] = {
+            "peptide": {"mass": {"auc": 0.1}, "exact": {"auc": 0.99}},
+            "aa": {"mass": {"auc": 0.1}, "exact": {"auc": 0.99}},
+            "in_depth": df.at[2, "results"]["in_depth"],
+        }
+        assert preset_selection(df, "cross_tool", evaluation_type="exact")[0] == "a1"
+        assert preset_selection(df, "cross_tool", evaluation_type="mass")[0] == "i1"
+
+    def test_an_unknown_preset_raises(self):
+        with pytest.raises(ValueError, match="Unknown selection preset"):
+            preset_selection(CROSS_TOOL, preset="everything")
+
+    def test_an_empty_frame_selects_nothing(self):
+        assert preset_selection(CROSS_TOOL.iloc[0:0], "cross_tool") == []
+
+    def test_a_tool_with_nothing_scorable_is_left_out_of_cross_tool(self):
+        df = CROSS_TOOL.copy()
+        df.at[1, "results"] = {"peptide": {}, "aa": {}, "in_depth": {}}
+        chosen = preset_selection(df, "cross_tool")
+        assert "c1" not in chosen
+        assert set(chosen) == {"i1", "a1"}

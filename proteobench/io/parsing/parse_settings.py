@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
 import re
 from collections import defaultdict
@@ -784,6 +785,55 @@ def parse_peptidoform_or_none(proforma: Any) -> Peptidoform | None:
         return None
 
 
+# Longest per-residue score string accepted. A 100-residue peptide written at full float precision
+# takes about 2,500 characters; the cap bounds the work any one cell of an uploaded file can cause.
+MAX_SCORE_STRING_LENGTH = 16_384
+
+
+def parse_score_string(scores: str) -> List[float]:
+    """
+    Parse a per-residue score string from a tool's output file into a list of floats.
+
+    Tools write these scores as comma-separated numbers (mzTab ``opt_ms_run[1]_aa_scores``,
+    DeepNovo, PointNovo), optionally inside square brackets (InstaNovo, PepNet). The text comes
+    from an uploaded file, so it is split and converted directly and never evaluated as Python.
+
+    Parameters
+    ----------
+    scores : str
+        The score text, e.g. ``"0.98,0.97,0.95"`` or ``"[0.98, 0.97, 0.95]"``.
+
+    Returns
+    -------
+    List[float]
+        One float per comma-separated value; empty for ``"[]"``.
+
+    Raises
+    ------
+    ValueError
+        If the text is longer than `MAX_SCORE_STRING_LENGTH`, or any value is not a finite number.
+    """
+    if len(scores) > MAX_SCORE_STRING_LENGTH:
+        raise ValueError(
+            f"Amino-acid score text is {len(scores)} characters long, more than the "
+            f"{MAX_SCORE_STRING_LENGTH} allowed: {scores[:60]!r}..."
+        )
+    text = scores.strip()
+    if text.startswith("[") and text.endswith("]"):
+        text = text[1:-1].strip()
+    if not text:
+        return []
+    try:
+        values = [float(value) for value in text.split(",")]
+    except ValueError:
+        values = None
+    if values is None or not all(math.isfinite(value) for value in values):
+        raise ValueError(
+            f"Amino-acid scores must be comma-separated numbers, optionally in square brackets; got {scores[:60]!r}."
+        )
+    return values
+
+
 class ParseSettingsDeNovo:
     #: Fraction of PSMs that may be dropped for unalignable scores before the conversion is
     #: refused outright. A handful of malformed rows is a tool quirk worth skipping; a large
@@ -865,12 +915,12 @@ class ParseSettingsDeNovo:
             The formatted list of scores.
         """
         if isinstance(aa_scores, str):
-            aa_scores = eval(aa_scores)
+            aa_scores = parse_score_string(aa_scores)
 
         # A tool may report one score per N-terminal modification, while ProteoBench scores the
         # N-terminal group as a single position. Collapse the surplus leading scores into their
         # mean, keyed on the length difference rather than on the modification's identity.
-        # Tuples count as well as lists: a comma-separated score string evals to a tuple.
+        # Tuples count as well as lists, since a loader may hand over already-parsed scores.
         if fix_aa_length and isinstance(aa_scores, (list, tuple)):
             surplus = len(aa_scores) - self.get_length_peptidoform_with_nterm(peptidoform)
             if surplus > 0 and peptidoform.properties["n_term"]:

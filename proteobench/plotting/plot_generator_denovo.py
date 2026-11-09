@@ -13,6 +13,36 @@ from plotly.subplots import make_subplots
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
+# Metrics shown for a bin or species that a datapoint has no entry for.
+EMPTY_METRICS = {"exact": 0.0, "mass": 0.0, "n_spectra": 0}
+
+
+def _metrics_or_empty(value):
+    """
+    Return a datapoint's in-depth metrics, or empty metrics where the datapoint has none.
+
+    Parameters
+    ----------
+    value : dict or float
+        A ``{"exact", "mass", "n_spectra"}`` dict, or NaN/None where the datapoint lacks the bin.
+
+    Returns
+    -------
+    dict
+        The metrics dict itself, or a copy of `EMPTY_METRICS`.
+
+    Raises
+    ------
+    TypeError
+        If the value is neither a dict nor missing.
+    """
+    if isinstance(value, dict):
+        return value
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return dict(EMPTY_METRICS)
+    raise TypeError(f"Expected in-depth metrics as a dict, got {type(value).__name__}: {value!r:.60}")
+
+
 EPSILON = 0.0001
 
 # Main-metric-plot quadrant treatment: fixed axes (padded slightly past 0/1 so points at the
@@ -1167,13 +1197,12 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # Stringify the keys of the datapoint to plot and convert to dataframe
         df = pd.DataFrame([{str(k): v for k, v in i.items()} for i in dtps_to_plot])
 
-        df = df.fillna(str({"exact": 0.0, "mass": 0.0, "n_spectra": 0}))
         df = (
             pd.concat([df, benchmark_metrics_df[["software_name", "id"]]], axis=1)
             .melt(id_vars=["id", "software_name"])
             .rename(columns={"variable": feature, "value": "metrics"})
         )
-        df["metrics"] = df["metrics"].apply(lambda x: eval(x) if isinstance(x, str) else x)
+        df["metrics"] = df["metrics"].apply(_metrics_or_empty)
 
         ### Create the scatter-lineplot of the feature
         for dtp_id in df["id"].unique():
@@ -1271,17 +1300,13 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
 
         benchmark_metrics_df = benchmark_metrics_df.reset_index(drop=True)
 
-        df = (
-            pd.DataFrame([x["in_depth"]["Species"] for x in benchmark_metrics_df["results"].tolist()])
-            .fillna(str({"exact": 0.0, "mass": 0.0, "n_spectra": 0}))
-            .map(lambda x: eval(x) if isinstance(x, str) else x)
-        )
+        df = pd.DataFrame([x["in_depth"]["Species"] for x in benchmark_metrics_df["results"].tolist()])
         df = (
             pd.concat([df, benchmark_metrics_df[["software_name", "id"]]], axis=1)
             .melt(id_vars=["id", "software_name"])
             .rename(columns={"variable": "Species", "value": "metrics"})
         )
-        df["metrics"] = df["metrics"].apply(lambda x: eval(x) if isinstance(x, str) else x)
+        df["metrics"] = df["metrics"].apply(_metrics_or_empty)
 
         ### Create the scatter-lineplot of the feature
         for dtp_id in df["id"].unique():

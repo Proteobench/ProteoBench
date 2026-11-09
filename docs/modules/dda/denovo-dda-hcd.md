@@ -330,7 +330,7 @@ If your tool isn't listed above, submit a plain CSV/TSV with:
 | `spectrum_id` | Yes | Must contain `scan=<number>` or be a plain integer scan number |
 | `sequence` | Yes | Predicted sequence; ProForma or mass-offset brackets (e.g. `C[+57.021]`) |
 | `score` | Yes | Per-prediction confidence score |
-| `aa_scores` | No | Per-amino-acid scores; defaults to the peptide score per position if omitted |
+| `aa_scores` | No | Per-amino-acid scores as comma-separated numbers, optionally in square brackets (e.g. `0.98,0.97,0.95` or `[0.98, 0.97, 0.95]`); defaults to the peptide score per position if omitted |
 
 Spectrum identifiers must match the scan numbers in the ProteoBench ground-truth dataset. No
 parameter file is supported; describe your tool and settings in `Comments for submission`.

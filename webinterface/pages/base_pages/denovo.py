@@ -196,6 +196,7 @@ class DeNovoUIObjects(BaseUIModule):
             "colorblind_mode": colorblind_mode,
             "alpha_warning": getattr(self.variables, "alpha_warning", False),
             "beta_warning": getattr(self.variables, "beta_warning", False),
+            "archived_warning": getattr(self.variables, "archived_warning", False),
         }
 
         # Only the figure switches between these two tabs -- the results table below is

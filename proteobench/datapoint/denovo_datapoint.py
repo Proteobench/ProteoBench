@@ -117,6 +117,36 @@ def calculate_auc(curve: pd.DataFrame) -> float:
     return float(trapezoid(curve["precision"], curve["coverage"]))
 
 
+def summarize_prediction_status(df: pd.DataFrame, n_examples: int = 3) -> dict:
+    """
+    Count what became of the submitted predictions, from the ``prediction_status`` column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The intermediate frame, one row per ground-truth spectrum.
+    n_examples : int
+        How many unparseable predictions to quote.
+
+    Returns
+    -------
+    dict
+        ``n_spectra``, ``n_scored``, ``n_no_prediction``, ``n_unparseable``, ``n_unscorable``
+        and ``unparseable_examples``. Unparseable and unscorable predictions are scored as no
+        prediction; the counts make that visible.
+    """
+    counts = df["prediction_status"].value_counts()
+    unparseable = df.loc[df["prediction_status"] == "unparseable", "unscored_prediction"]
+    return {
+        "n_spectra": int(len(df)),
+        "n_scored": int(counts.get("scored", 0)),
+        "n_no_prediction": int(counts.get("no prediction", 0)),
+        "n_unparseable": int(counts.get("unparseable", 0)),
+        "n_unscorable": int(counts.get("unscorable", 0)),
+        "unparseable_examples": [str(text) for text in unparseable.head(n_examples)],
+    }
+
+
 def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str, exact_dn_column: str = "aa_exact_dn"):
     df_aa = {}
 
@@ -289,6 +319,8 @@ class DenovoDatapoint(DatapointBase):
                 )
 
         results["in_depth"] = DenovoDatapoint.get_indepth_metrics(self=DenovoDatapoint(), df=intermediate)
+        if "prediction_status" in intermediate.columns:
+            results["predictions"] = summarize_prediction_status(intermediate)
         result_datapoint.results = results
         result_datapoint.precision_peptide = result_datapoint.results["peptide"][evaluation_type]["precision"]
         result_datapoint.recall_peptide = result_datapoint.results["peptide"][evaluation_type]["recall"]

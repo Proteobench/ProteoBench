@@ -83,6 +83,17 @@ spectrum identifiers to prevent duplicates).
 
 The performance is evaluated at both the amino acid and peptide level. As introduced by [DeepNovo](https://www.pnas.org/doi/10.1073/pnas.1705691114), a correct amino acid whose mass differs by less than 0.1 Da from the corresponding ground truth amino acid. Additionally, this predicted amino acid must have either a prefix or suffix that differs by no more than 0.5 Da in mass from the corresponding amino acid sequence in the ground truth peptide. Correct peptides are defined as sequences where all amino acid predictions meet these criteria, ensuring that only fully accurate predictions are considered correct at the peptide level. In the module, this mode of evaluation is called '**mass-based**', where the tolerances for the particular token and prefix/suffix are set at 20 and 50 ppm respectively. However, a more strict evaluation mode can be selected and is termed '**exact mode**'. In this mode, the two sequences should be exactly the same. However, you can specify to allow mistakes made between isoleucine-leucine and deamidated-DE - NQ.
 
+### Predictions that cannot be scored
+
+Every ground-truth spectrum ends up in one of four states, recorded per spectrum as `prediction_status` and counted in the datapoint under `results["predictions"]`:
+
+- **scored**: the tool made a prediction and it is evaluated;
+- **no prediction**: the tool reported nothing for the spectrum, or left the sequence blank;
+- **unparseable**: the tool wrote a sequence that is not valid ProForma, or names a modification whose mass cannot be resolved;
+- **unscorable**: the sequence parses, but its per-residue scores cannot be lined up with its residues.
+
+Unparseable and unscorable predictions are scored like a missing one: they are left out of precision and lower coverage, rather than counted as wrong predictions. So that this is never silent, the upload page warns with their number and a few examples, and the datapoint keeps the counts (`n_unparseable`, `n_unscorable`, with `unparseable_examples`).
+
 ### Main benchmarking plot
 
 The main accuracy plot provides a **global overview of de novo sequencing performance** across the evaluated tools. It visualizes the relationship between **peptide-level identification performance** and **amino-acid level sequence accuracy**. Each point in the plot corresponds to a de novo sequencing tool and shows the amino acid and peptide level accuracy. The plot combines two levels of evaluation:
@@ -369,6 +380,8 @@ spectrum is retained, with `NaN` prediction columns where the tool made no call.
 **Match evaluation**: `match_type` (`exact` / `mass` / `mismatch`), `pep_match`, `aa_matches_gt`,
 `aa_matches_dn`, `aa_exact_gt`, `aa_exact_dn` (booleans indexed to ground-truth or predicted sequence
 length), `match_type_il`, `aa_exact_gt_il`, `aa_exact_dn_il` (same, but computed with I-L treated as equivalent), `match_type_deam`, `aa_exact_gt_deam`, `aa_exact_dn_deam` (same, but with deamidated Q/N treated as equivalent to E/D), `match_type_both`, `aa_exact_gt_both`, `aa_exact_dn_both` (same, with both ambiguities allowed at once), `bare` (predicted sequence with all I replaced by L), `category` (correct|in_fasta|not_in_fasta).
+
+**Prediction status**: `prediction_status` (`scored` / `no prediction` / `unparseable` / `unscorable`, see [Predictions that cannot be scored](#predictions-that-cannot-be-scored)) and `unscored_prediction` (the submitted sequence, for unparseable and unscorable rows).
 
 `aa_matches_gt`/`aa_matches_dn`/`pep_match` are mass-based and therefore identical regardless of the ambiguity toggles (I/L are already isomeric and deamidated Q/N are already isobaric with E/D under mass-based matching), so they are not duplicated per ambiguity combination the way `match_type`/`aa_exact_gt`/`aa_exact_dn` are.
 

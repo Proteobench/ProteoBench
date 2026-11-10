@@ -931,6 +931,78 @@ class ParseSettingsDeNovo:
     def add_modification_parser(self, parser: ParseModificationSettings):
         self.modification_parser = parser
 
+    def drop_unparseable_rows(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Parse each prediction into a peptidoform, and set aside the rows that have none.
+
+        A blank prediction is the tool declining to sequence the spectrum. A prediction that is
+        written but cannot be parsed is different: the tool did sequence it, and the submitter
+        should know that ProteoBench could not read the result. Both kinds of row leave the
+        frame here, so after the ground-truth join both count as "no prediction" in the metrics
+        (out of the precision denominator, lowering coverage). The unparseable ones are logged
+        with examples and recorded in `unparseable_predictions`, from which
+        `mark_prediction_status` labels them and the datapoint reports how many there were.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Standard-format frame with ``spectrum_id`` and ``proforma`` columns.
+
+        Returns
+        -------
+        pd.DataFrame
+            The rows whose prediction parsed, with a ``peptidoform`` column.
+        """
+        df = df.copy()
+        df["peptidoform"] = df["proforma"].apply(parse_peptidoform_or_none)
+        blank = df["proforma"].apply(lambda text: not isinstance(text, str) or not text.strip())
+        unparseable = df["peptidoform"].isna() & ~blank
+        self.unparseable_predictions = dict(zip(df.loc[unparseable, "spectrum_id"], df.loc[unparseable, "proforma"]))
+
+        n_unparseable = int(unparseable.sum())
+        if n_unparseable:
+            examples = "; ".join(repr(text) for text in df.loc[unparseable, "proforma"].head(3))
+            logging.warning(
+                "%d of %d predictions (%.2f%%) could not be parsed as ProForma and are scored as if the "
+                "tool had made no prediction for those spectra. Examples: %s.",
+                n_unparseable,
+                len(df),
+                100 * n_unparseable / len(df),
+                examples,
+            )
+        return df[df["peptidoform"].notna()]
+
+    def mark_prediction_status(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Label every ground-truth spectrum with what became of the tool's prediction for it.
+
+        Adds ``prediction_status``: ``scored`` (a prediction that is evaluated), ``unparseable``
+        (written but not valid ProForma), ``unscorable`` (parsed, but its per-residue scores do
+        not line up with its residues), or ``no prediction``. Adds ``unscored_prediction``, the
+        prediction as submitted, for the unparseable and unscorable rows. Neither column changes
+        how a row is scored.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The frame after the ground-truth join.
+
+        Returns
+        -------
+        pd.DataFrame
+            The frame with the two columns added.
+        """
+        df["prediction_status"] = np.where(df["peptidoform"].notna(), "scored", "no prediction")
+        df["unscored_prediction"] = None
+        for status, predictions in (
+            ("unscorable", getattr(self, "unscorable_predictions", {})),
+            ("unparseable", getattr(self, "unparseable_predictions", {})),
+        ):
+            rows = df["peptidoform"].isna() & df["spectrum_id"].isin(list(predictions))
+            df.loc[rows, "prediction_status"] = status
+            df.loc[rows, "unscored_prediction"] = df.loc[rows, "spectrum_id"].map(predictions)
+        return df
+
     def drop_unscorable_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Drop rows whose scores cannot be lined up with their peptidoform's scored positions.
@@ -965,6 +1037,11 @@ class ParseSettingsDeNovo:
         expected = df["peptidoform"].apply(self.get_length_peptidoform_with_nterm)
         supplied = df["aa_scores"].apply(lambda scores: len(scores) if hasattr(scores, "__len__") else -1)
         scorable = supplied == expected
+        self.unscorable_predictions = (
+            dict(zip(df.loc[~scorable, "spectrum_id"], df.loc[~scorable, "proforma"]))
+            if {"spectrum_id", "proforma"} <= set(df.columns)
+            else {}
+        )
 
         n_dropped = int((~scorable).sum())
         if not n_dropped:
@@ -1206,8 +1283,7 @@ class ParseSettingsDeNovo:
             df["proforma"] = df["sequence"]
 
         if "proforma" in df.columns:
-            df["peptidoform"] = df["proforma"].apply(parse_peptidoform_or_none)
-            df = df.dropna(subset="peptidoform")
+            df = self.drop_unparseable_rows(df)
 
         # If AA scores are not provided, simulate them from peptide score. A column that is
         # present but empty counts as not provided: InstaNovo's diffusion and refinement paths
@@ -1240,6 +1316,7 @@ class ParseSettingsDeNovo:
 
         df = pd.merge(df_ground_truth, df, on=["spectrum_id"], how="left", suffixes=("_ground_truth", ""))
         df = self.add_features(df=df)
+        df = self.mark_prediction_status(df)
 
         return df
 

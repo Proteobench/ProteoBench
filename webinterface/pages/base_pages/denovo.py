@@ -24,6 +24,7 @@ from pages.utils.submission_source import get_submission_source, is_official_ser
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.datapoint.denovo_datapoint import summarize_prediction_status
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
@@ -301,6 +302,30 @@ class DeNovoUIObjects(BaseUIModule):
                 ionmodule=self.ionmodule,
                 user_input=self.user_input,
             )
+            if self.first_point_plotted:
+                self._warn_unscored_predictions()
+
+    def _warn_unscored_predictions(self) -> None:
+        """Tell the submitter how many of their predictions could not be scored, and why."""
+        intermediate = st.session_state.get(self.variables.result_perf)
+        if intermediate is None or "prediction_status" not in intermediate.columns:
+            return
+        summary = summarize_prediction_status(intermediate)
+        if not (summary["n_unparseable"] or summary["n_unscorable"]):
+            return
+        lines = []
+        if summary["n_unparseable"]:
+            examples = ", ".join(f"`{text}`" for text in summary["unparseable_examples"])
+            lines.append(f"{summary['n_unparseable']:,} predictions could not be parsed as ProForma (e.g. {examples}).")
+        if summary["n_unscorable"]:
+            lines.append(
+                f"{summary['n_unscorable']:,} predictions have per-residue scores that do not line up with "
+                "their residues."
+            )
+        st.warning(
+            " ".join(lines) + " These spectra are scored as if no prediction had been made: they are left out "
+            "of precision and lower coverage. Fix the output and upload it again to have them scored."
+        )
 
     # Almost entirely unique to denovo module
     def display_indepth_plots(self) -> None:

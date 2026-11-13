@@ -6,9 +6,10 @@
 :class: warning
 Superseded by the [LFQ, precursor ion (Astral, low input)](dia-ion-astral-lowinput.md) and
 [LFQ, precursor ion (timsTOF, low input)](dia-ion-timstof-lowinput.md) modules, following
-[this discussion](https://github.com/orgs/Proteobench/discussions/426). The module and its
-submission form remain open — existing and new benchmark runs stay comparable here — but for new
-low-input benchmarking we recommend using one of the modules above instead.
+[this discussion](https://github.com/orgs/Proteobench/discussions/426). Existing public results
+remain viewable, and you can still benchmark your own results privately against them, but the
+module no longer accepts public submissions. For new low-input benchmarking, use one of the
+modules above instead.
 ```
 
 Compares the sensitivity and quantification accuracy of workflows for data acquired with
@@ -63,8 +64,8 @@ Do not rename the downloaded raw files.
 ## Run your workflow
 
 Run your analysis on the downloaded files, then follow
-[Your First Submission](../../your-first-submission/index.md) to upload, inspect, and (if you'd
-like) submit your results publicly.
+[Your First Submission](../../your-first-submission/index.md) to upload and inspect your results
+privately. This archived module does not accept public submissions.
 
 ## Tool-specific setup
 

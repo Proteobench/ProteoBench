@@ -1,8 +1,8 @@
 # Archived modules
 
 Modules that have been superseded by newer ones. Their documentation is kept for reference, and
-public submissions remain viewable, but they are no longer the recommended starting point for new
-benchmark runs.
+existing public results remain viewable, but they no longer accept public submissions and are not
+the recommended starting point for new benchmark runs.
 
 ::::{grid} 1 2 2 2
 :gutter: 3
@@ -22,7 +22,7 @@ Superseded by the diaPASEF/Astral/ZenoTOF modules; kept for reference.
 
 {bdg-dark}`archived` {bdg-primary-line}`Quantification`
 
-Superseded by the Astral and timsTOF low-input (200 pg) modules; submissions remain open.
+Superseded by the Astral and timsTOF low-input (200 pg) modules; kept for reference.
 :::
 
 ::::

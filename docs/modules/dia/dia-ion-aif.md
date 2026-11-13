@@ -8,7 +8,8 @@ Archived because of oxidations that prevent accurate measurement of quantificati
 the original [GitHub discussion](https://github.com/orgs/Proteobench/discussions/641). Oxidized
 peptides produce a human-ratio distribution close to the *E. coli* expected ratio (see figure
 below). Superseded by the [diaPASEF](dia-ion-diapasef.md), [Astral](dia-ion-astral.md), and
-[ZenoTOF](dia-ion-zenotof.md) modules; kept here for reference.
+[ZenoTOF](dia-ion-zenotof.md) modules; kept here for reference. It no longer accepts public
+submissions.
 ```
 
 ![log2-transformed ratio (A/B) for oxidized peptides and their unmodified counterparts, versus the expected ratio](../../_static/img/Module_documentation/Archived_modules/AIF_Module_density_FC_20250707.svg)

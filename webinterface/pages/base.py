@@ -78,16 +78,19 @@ class BaseStreamlitUI:
     def get_tab_config(self) -> list:
         """Return tab configuration as list of (tab_name, method_name) tuples.
 
-        Override this method in subclasses to customize tabs.
+        Override this method in subclasses to customize tabs. Archived modules get no
+        "Submit New Results" tab: they no longer accept public submissions.
         """
-        return [
+        tabs = [
             ("View Public Results", "display_all_data_results_main"),
             ("Upload New Results (Private)", "display_submission_form"),
             ("View Single Result", "display_indepth_plots"),
             ("View Public + New Results", "display_all_data_results_submitted"),
             ("Compare Two Results", "display_workflow_comparison"),
-            ("Submit New Results", "display_public_submission_ui"),
         ]
+        if not getattr(self.variables, "archived_warning", False):
+            tabs.append(("Submit New Results", "display_public_submission_ui"))
+        return tabs
 
     def main_page(self) -> None:
         """

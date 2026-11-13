@@ -43,18 +43,20 @@ class BaseStreamlitUI:
         self.uiobjects = uiobjects(self.variables, self.ionmodule, self.parsesettingsbuilder, page_name=page_name)
 
     def _render_tab_header(self, method_name: str = None) -> None:
-        """Render common tab header elements: title, documentation link, metrics help, and banner.
+        """Render common tab header elements: title, documentation link, metrics help, sign-in, and banner.
 
         Parameters
         ----------
         method_name : str, optional
             Name of the UIObjects method rendering this tab. It selects which metrics explanation
-            the popover shows, because the in-depth tab does not display the main plot.
+            the popover shows, because the in-depth tab does not display the main plot. It also
+            keys the sign-in widget, which needs a unique key per tab within the same script run.
         """
+        from pages.base_pages.utils.auth import render_auth_status
+
         st.title(self.variables.title)
         raw_data_url = getattr(self.variables, "raw_data_url", None)
-        doc_col, download_col, metrics_col = st.columns(3)
-        with doc_col:
+        with st.container(horizontal=True, gap="small"):
             st.link_button(
                 "Module documentation",
                 url=self.variables.doc_url,
@@ -62,8 +64,7 @@ class BaseStreamlitUI:
                 icon="📖",
                 help="link to the module documentation",
             )
-        if raw_data_url:
-            with download_col:
+            if raw_data_url:
                 st.link_button(
                     "Download input files",
                     url=raw_data_url,
@@ -71,8 +72,8 @@ class BaseStreamlitUI:
                     icon="⬇️",
                     help="Download the raw input files used to benchmark this module",
                 )
-        with metrics_col:
             render_metrics_help(self.ionmodule, self.variables, context=context_for_tab_method(method_name))
+            render_auth_status(key_suffix=f"_{method_name}")
         display_banner(self.variables)
 
     def get_tab_config(self) -> list:

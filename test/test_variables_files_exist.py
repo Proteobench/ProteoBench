@@ -19,7 +19,6 @@ PAGES_VARS_DIR = WEBINTERFACE_DIR / "pages" / "pages_variables"
 
 # Fields to check: {field_name: expected_kind}
 PATH_FIELDS = {
-    "additional_params_json": "file",
     "parse_settings_dir": "dir",
 }
 

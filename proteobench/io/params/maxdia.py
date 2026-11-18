@@ -8,11 +8,11 @@ import re
 from typing import Any
 
 import pandas as pd
-from maxquant import build_Series_from_records
-from maxquant import extract_params as extract_params_mq
-from maxquant import read_file
 
 from proteobench.io.params import ProteoBenchParameters
+from proteobench.io.params.maxquant import build_Series_from_records
+from proteobench.io.params.maxquant import extract_params as extract_params_mq
+from proteobench.io.params.maxquant import read_file
 
 
 def extract_params(

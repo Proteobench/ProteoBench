@@ -31,6 +31,11 @@ AMBIGUITY_COMBOS = {
 }
 
 
+# Deamidation (UNIMOD:7) as an elemental composition, to recognise it however it is spelled.
+DEAMIDATION_COMPOSITION = {"H": -1, "N": -1, "O": 1}
+DEAMIDATION_MASS = 0.984016
+
+
 def get_ambiguity_suffix(allow_il: bool, allow_deamidation: bool) -> str:
     """
     Return the intermediate-dataframe column suffix for a given ambiguity toggle state.
@@ -342,9 +347,9 @@ class DenovoScores(ScoreBase):
             # this for every position it visits; the suffix walk must do the same, or any
             # position resolved only here silently keeps its initialized `False` regardless
             # of whether it's actually an identity match.
-            aa_str1 = self.get_token_str(peptide1[i1], allow_il=allow_il, allow_deamidation=allow_deamidation)
-            aa_str2 = self.get_token_str(peptide2[i2], allow_il=allow_il, allow_deamidation=allow_deamidation)
-            exact_match = aa_str1 == aa_str2
+            exact_match = self.tokens_identical(
+                peptide1[i1], peptide2[i2], allow_il=allow_il, allow_deamidation=allow_deamidation
+            )
             aa_exact_1[i1] = exact_match
             aa_exact_2[i2] = exact_match
 
@@ -419,9 +424,9 @@ class DenovoScores(ScoreBase):
         i1, i2, cum_mass1, cum_mass2 = 0, 0, 0.0, 0.0
         while i1 < len(peptide1) and i2 < len(peptide2):
             # Exact (identity, subject to the ambiguity toggles)
-            aa_str1 = self.get_token_str(peptide1[i1], allow_il=allow_il, allow_deamidation=allow_deamidation)
-            aa_str2 = self.get_token_str(peptide2[i2], allow_il=allow_il, allow_deamidation=allow_deamidation)
-            exact_match = aa_str1 == aa_str2
+            exact_match = self.tokens_identical(
+                peptide1[i1], peptide2[i2], allow_il=allow_il, allow_deamidation=allow_deamidation
+            )
             aa_exact_1[i1] = exact_match
             aa_exact_2[i2] = exact_match
 
@@ -477,6 +482,112 @@ class DenovoScores(ScoreBase):
                 continue
             mass += mod.mass
         return mass
+
+    # A modification written as a bare mass shift ("[+15.995]") carries no composition, so it is
+    # compared by mass. Two modification masses closer than this are the same modification.
+    MOD_MASS_TOLERANCE_DA = 0.01
+
+    @staticmethod
+    def _mod_composition(mods: list) -> Optional[dict]:
+        """
+        Sum the elemental compositions of a token's modifications.
+
+        Parameters
+        ----------
+        mods : list
+            The token's modifications, without ``None`` entries.
+
+        Returns
+        -------
+        dict or None
+            Element to count, with zero counts dropped, so stacked tags and one formula tag of
+            the same chemistry compare equal. None when any modification has no composition,
+            such as a bare mass shift.
+        """
+        total = {}
+        for mod in mods:
+            try:
+                composition = mod.composition
+            except Exception:
+                return None
+            if composition is None:
+                return None
+            for element, count in composition.items():
+                total[element] = total.get(element, 0) + count
+        return {element: count for element, count in total.items() if count}
+
+    def _canonical_token(self, token: tuple, allow_il: bool = False, allow_deamidation: bool = False) -> tuple:
+        """
+        Reduce a token to what exact-mode matching compares: residue, modification composition and mass.
+
+        Parameters
+        ----------
+        token : tuple
+            A ``(residue, modifications)`` token from `convert_peptidoform`.
+        allow_il : bool
+            If True, I is read as L.
+        allow_deamidation : bool
+            If True, a deamidated Q or N is read as its isobaric partner, E or D, with no
+            modification. The deamidation is recognised by its UNIMOD accession, by its composition,
+            or, for a bare mass shift, by its mass.
+
+        Returns
+        -------
+        tuple
+            ``(residue, composition or None, modification mass)``; see `_mod_composition`.
+        """
+        aa, mods = token
+        mods = [mod for mod in mods if mod is not None]
+        composition = self._mod_composition(mods)
+        mass = sum(mod.mass for mod in mods)
+
+        if allow_deamidation and len(mods) == 1:
+            partner = self.DEAMIDATION_ISOBARS.get((aa, getattr(mods[0], "id", None)))
+            is_deamidation = composition == DEAMIDATION_COMPOSITION or (
+                composition is None and abs(mass - DEAMIDATION_MASS) < self.MOD_MASS_TOLERANCE_DA
+            )
+            if partner is None and is_deamidation:
+                partner = self.DEAMIDATION_ISOBARS.get((aa, 7))
+            if partner is not None:
+                return partner, {}, 0.0
+
+        if allow_il and aa in ("I", "L"):
+            aa = "L"
+        return aa, composition, mass
+
+    def tokens_identical(
+        self, token1: tuple, token2: tuple, allow_il: bool = False, allow_deamidation: bool = False
+    ) -> bool:
+        """
+        Whether two tokens are the same residue carrying the same modifications, however written.
+
+        Modifications are compared as chemistry, not as text: ``[UNIMOD:35]``, ``[Oxidation]`` and
+        ``[+15.995]`` are the same modification, and so are the stacked N-terminal group
+        ``[UNIMOD:5][UNIMOD:385]`` and the single tag ``[Formula:H-2C1O1]``. When both sides
+        resolve to an elemental composition, the compositions must be equal; when either side is
+        a bare mass shift, the modification masses must agree within `MOD_MASS_TOLERANCE_DA`.
+
+        Parameters
+        ----------
+        token1, token2 : tuple
+            ``(residue, modifications)`` tokens from `convert_peptidoform`.
+        allow_il : bool
+            Treat I and L as the same residue.
+        allow_deamidation : bool
+            Treat deamidated Q/N as identical to E/D.
+
+        Returns
+        -------
+        bool
+            True if the tokens are identical under the active toggles.
+        """
+        aa1, composition1, mass1 = self._canonical_token(token1, allow_il, allow_deamidation)
+        aa2, composition2, mass2 = self._canonical_token(token2, allow_il, allow_deamidation)
+        if aa1 != aa2:
+            return False
+        if composition1 is not None and composition2 is not None:
+            return composition1 == composition2
+        return abs(mass1 - mass2) < self.MOD_MASS_TOLERANCE_DA
 
     def get_token_str(self, token: tuple, allow_il: bool = False, allow_deamidation: bool = False) -> str:
         """

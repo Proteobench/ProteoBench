@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.plotting.utils.software_styles import SOFTWARE_COLORS, SOFTWARE_MARKERS
 from proteobench.score.entrapmentscores import EntrapmentScores
 
 
@@ -745,46 +746,8 @@ class EntrapmentPlotGenerator(PlotGeneratorBase):
         metric: str = "Estimated upper FDP bound - Paired method",
         colorblind_mode: bool = False,
         threshold: float = None,
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
-        software_markers: Dict[str, str] = {
-            "MaxQuant": "circle",
-            "AlphaPept": "square",
-            "ProlineStudio": "diamond",
-            "MSAngel": "cross",
-            "FragPipe": "x",
-            "i2MassChroQ": "triangle-up",
-            "Sage": "triangle-down",
-            "WOMBAT": "pentagon",
-            "DIA-NN": "star",
-            "AlphaDIA": "star-triangle-up",
-            "Custom": "star-square",
-            "Spectronaut": "diamond-tall",
-            "FragPipe (DIA-NN quant)": "circle-x",
-            "MSAID": "square-cross",
-            "MetaMorpheus": "asterisk",
-            "Proteome Discoverer": "hash",
-            "PEAKS": "diamond-wide",
-            "quantms": "hexagram",
-        },
+        software_colors: Dict[str, str] = SOFTWARE_COLORS,
+        software_markers: Dict[str, str] = SOFTWARE_MARKERS,
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",

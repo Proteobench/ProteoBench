@@ -8,15 +8,11 @@ import numpy as np
 import pandas as pd
 
 from proteobench.exceptions import ParseError
-from proteobench.score.score_base import ScoreBase
 
 
-class EntrapmentScores(ScoreBase):
+class EntrapmentScores:
     """
     Class for computing entrapment scores for entrapment benchmarking.
-
-    This class inherits from ScoreBase and extends it with entrapment metrics
-    and calculations.
 
     Parameters
     ----------

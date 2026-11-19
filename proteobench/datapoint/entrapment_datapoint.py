@@ -6,8 +6,7 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
-import logging
-from collections import ChainMap, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict
@@ -16,16 +15,16 @@ import numpy as np
 import pandas as pd
 
 import proteobench
-from proteobench.datapoint.datapoint_base import DatapointBase
+from proteobench.datapoint.quant_datapoint import generate_id
 from proteobench.score.entrapmentscores import EntrapmentScores
 
 
 @dataclass
-class EntrapmentDatapoint(DatapointBase):
+class EntrapmentDatapoint:
     """
     A data structure used to store the results of a entrapment benchmark run.
 
-    This class extends DatapointBase to implement entrapment-specific metrics and metadata
+    This class implements entrapment-specific metrics and metadata
     storage for LFQ benchmarking runs.
 
     Attributes:
@@ -84,19 +83,6 @@ class EntrapmentDatapoint(DatapointBase):
     fdp_curve: dict = None
     comments: str = ""
     proteobench_version: str = ""
-
-    def generate_id(self) -> None:
-        """
-        Generate a unique ID for the benchmark run by combining the software name and a timestamp.
-
-        This ID is used to uniquely identify each run of the benchmark. The timestamp carries
-        microseconds because datapoints are also generated in batches -- the resubmission
-        script regenerates many in a loop -- where whole-second resolution hands several runs
-        the same ID.
-        """
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        self.id = "_".join([self.software_name, str(time_stamp)])
-        logging.info(f"Assigned the following ID to this run: {self.id}")
 
     @staticmethod
     def generate_datapoint(
@@ -159,7 +145,7 @@ class EntrapmentDatapoint(DatapointBase):
             proteobench_version=proteobench.__version__,
         )
 
-        result_datapoint.generate_id()
+        result_datapoint.id = generate_id(result_datapoint.software_name)
         metrics = EntrapmentDatapoint.get_metrics(intermediate, entrapment_scores)
 
         result_datapoint.reported_fdr_parsed_from_input = metrics["reported_fdr_parsed_from_input"]

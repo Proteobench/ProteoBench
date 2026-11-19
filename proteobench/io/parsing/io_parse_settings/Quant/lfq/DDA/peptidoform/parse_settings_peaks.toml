@@ -18,11 +18,6 @@
 "Area Sample 5" = "Condition_B_Sample_Alpha_02"
 "Area Sample 6" = "Condition_B_Sample_Alpha_03"
 
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Sequence"
 "before_aa" = false

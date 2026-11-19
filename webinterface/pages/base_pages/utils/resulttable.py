@@ -3,7 +3,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
 
 from proteobench.io.parsing.parse_settings import get_open_source_tools
 
-# this file contains utility functions for rendering the result table in tab1_results and tab4_display_results_submitted
+# Utility functions for rendering the result table in Tab 1 and Tab 4 (tabs/tab1_view_public_results.py)
 
 # === Open Source Tools ===
 # Loaded from proteobench/io/parsing/io_parse_settings/tool_metadata.toml
@@ -44,6 +44,55 @@ COLOR_ADDITIONAL = "#FAFAFA"  # near-white gray     – extra / unknown columns
 
 # Row-level highlight applied to every cell when the row is selected
 COLOR_ROW_SELECTED = "#FFF3CD"
+
+# === Column categories (drive both colour coding and display order) ===
+PARAMETER_COLS = (
+    "software_name",
+    "software_version",
+    "search_engine",
+    "search_engine_version",
+    "ident_fdr_psm",
+    "ident_fdr_protein",
+    "ident_fdr_peptide",
+    "enable_match_between_runs",
+    "precursor_mass_tolerance",
+    "fragment_mass_tolerance",
+    "enzyme",
+    "allowed_miscleavages",
+    "min_peptide_length",
+    "max_peptide_length",
+    "fixed_mods",
+    "variable_mods",
+    "max_mods",
+    "min_precursor_charge",
+    "max_precursor_charge",
+    "quantification_method",
+    "protein_inference",
+    "abundance_normalization_ions",
+    "submission_comments",
+    "checkpoint",
+    "n_beams",
+    "n_peaks",
+    "min_mz",
+    "max_mz",
+    "min_intensity",
+    "max_intensity",
+    "tokens",
+    "remove_precursor_tol",
+    "isotope_error_range",
+    "decoding_strategy",
+)
+RESULT_COLS = ("median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results", "precision", "recall")
+TECHNICAL_COLS = (
+    "proteobench_version",
+    "intermediate_hash",
+    "hover_text",
+    "color",
+    "old_new",
+    "is_temporary",
+    "comments",
+    "scatter_size",
+)
 
 
 def _get_cell_style_js(bg_color_normal: str, align: str = "left") -> JsCode:
@@ -146,8 +195,6 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
     dict
         AgGrid gridOptions dictionary.
     """
-    from st_aggrid import GridOptionsBuilder
-
     gb = GridOptionsBuilder.from_dataframe(df)
 
     # Defaults: sortable, filterable, resizable, wrapped headers
@@ -162,55 +209,6 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
 
     if enable_selection:
         gb.configure_selection(selection_mode="single", use_checkbox=False)
-
-    parameter_cols = {
-        "software_name",
-        "software_version",
-        "search_engine",
-        "search_engine_version",
-        "ident_fdr_psm",
-        "ident_fdr_protein",
-        "ident_fdr_peptide",
-        "enable_match_between_runs",
-        "precursor_mass_tolerance",
-        "fragment_mass_tolerance",
-        "enzyme",
-        "allowed_miscleavages",
-        "min_peptide_length",
-        "max_peptide_length",
-        "fixed_mods",
-        "variable_mods",
-        "max_mods",
-        "min_precursor_charge",
-        "max_precursor_charge",
-        "quantification_method",
-        "protein_inference",
-        "abundance_normalization_ions",
-        "submission_comments",
-        "checkpoint",
-        "n_beams",
-        "n_peaks",
-        "min_mz",
-        "max_mz",
-        "min_intensity",
-        "max_intensity",
-        "tokens",
-        "remove_precursor_tol",
-        "isotope_error_range",
-        "decoding_strategy",
-    }
-
-    result_cols = {"median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results", "precision", "recall"}
-    technical_cols = {
-        "proteobench_version",
-        "intermediate_hash",
-        "hover_text",
-        "color",
-        "old_new",
-        "is_temporary",
-        "comments",
-        "scatter_size",
-    }
 
     for col in df.columns:
         if col == "selected":
@@ -244,9 +242,9 @@ def configure_aggrid(df: pd.DataFrame, enable_selection: bool = False):
                 minWidth=90,
                 cellStyle=_get_cell_style_js(COLOR_PARAMETER, align="center"),
             )
-        elif col in parameter_cols:
+        elif col in PARAMETER_COLS:
             gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_PARAMETER))
-        elif col in result_cols:
+        elif col in RESULT_COLS:
             # Right-align metrics so decimal points line up
             gb.configure_column(col, cellStyle=_get_cell_style_js(COLOR_RESULT, align="right"), minWidth=130)
         else:
@@ -278,68 +276,16 @@ def prepare_display_dataframe(df: pd.DataFrame, highlight_id: str | None) -> pd.
     if len(df) == 0:
         return df
     df["selected"] = df["id"].apply(lambda x: "➡️" if x == highlight_id else "")
-    df = add_open_source_column(df)
 
     try:
-        identifier_cols = ["selected", "id"]
-        parameter_cols = [
-            "software_name",
-            "open_source",
-            "software_version",
-            "search_engine",
-            "search_engine_version",
-            "ident_fdr_psm",
-            "ident_fdr_protein",
-            "ident_fdr_peptide",
-            "enable_match_between_runs",
-            "precursor_mass_tolerance",
-            "fragment_mass_tolerance",
-            "enzyme",
-            "allowed_miscleavages",
-            "min_peptide_length",
-            "max_peptide_length",
-            "fixed_mods",
-            "variable_mods",
-            "max_mods",
-            "min_precursor_charge",
-            "max_precursor_charge",
-            "quantification_method",
-            "protein_inference",
-            "abundance_normalization_ions",
-            "submission_comments",
-            "checkpoint",
-            "n_beams",
-            "n_peaks",
-            "min_mz",
-            "max_mz",
-            "min_intensity",
-            "max_intensity",
-            "tokens",
-            "remove_precursor_tol",
-            "isotope_error_range",
-            "decoding_strategy",
-        ]
-        result_cols = ["median_abs_epsilon", "mean_abs_epsilon", "nr_feature", "results", "precision", "recall"]
-        technical_cols = [
-            "proteobench_version",
-            "intermediate_hash",
-            "hover_text",
-            "color",
-            "old_new",
-            "is_temporary",
-            "comments",
-            "scatter_size",
-        ]
-
         # Define display column order
-        cols = identifier_cols + parameter_cols + result_cols + technical_cols
+        parameter_cols = (PARAMETER_COLS[0], "open_source") + PARAMETER_COLS[1:]
+        cols = ("selected", "id") + parameter_cols + RESULT_COLS + TECHNICAL_COLS
         cols = [col for col in cols if col in df.columns]
         additional_cols = [col for col in df.columns if col not in cols]
         # remove boring columns
         cols = [
-            col
-            for col in cols
-            if col not in ["comments", "scatter_size", "old_new", "is_temporary", "color", "hover_text"]
+            col for col in cols if col not in ["comments", "scatter_size", "old_new", "is_temporary", "color", "hover_text"]
         ]
         df = df[cols + additional_cols]
 

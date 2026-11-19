@@ -24,3 +24,8 @@
 # Validation profile applied to submissions for this module.
 # Resolved by proteobench.validation (ModuleValidationConfig.from_parse_settings).
 "profile" = "quant_lfq"
+
+[species_mapper]
+"_YEAST" = "YEAST"
+"_ECOLI" = "ECOLI"
+"_HUMAN" = "HUMAN"

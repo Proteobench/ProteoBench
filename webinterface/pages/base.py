@@ -1,7 +1,11 @@
+import logging
+
 import pages.texts.proteobench_builder as pbb
 import streamlit as st
 from pages.base_pages.banner import display_banner
 from pages.base_pages.utils.metrics_help import context_for_tab_method, render_metrics_help
+
+from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 
 # The guided tour is an optional driver.js overlay. Importing it can fail when the
 # installed streamlit_tour is incompatible with the streamlit version (e.g.
@@ -12,22 +16,53 @@ try:
 except Exception:  # noqa: BLE001 - any import/component-registration failure
     Tour = None
 
+# Default tabs of a module page, as (tab label, UIObjects method name) pairs.
+DEFAULT_TABS = [
+    ("View Public Results", "display_all_data_results_main"),
+    ("Upload New Results (Private)", "display_submission_form"),
+    ("View Single Result", "display_indepth_plots"),
+    ("View Public + New Results", "display_all_data_results_submitted"),
+    ("Compare Two Results", "display_workflow_comparison"),
+    ("Submit New Results", "display_public_submission_ui"),
+]
+
+
+def run_page(variables) -> None:
+    """Build and render a module page from its Variables instance.
+
+    The Variables class names the backend module (``ionmodule``), the UIObjects class
+    (``uiobjects``), and optionally ``tabs`` (default ``DEFAULT_TABS``) and ``tour``.
+
+    Parameters
+    ----------
+    variables : VariablesBase
+        Instance of the module's ``Variables*`` dataclass.
+    """
+    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
+    BaseStreamlitUI(
+        variables,
+        variables.ionmodule,
+        variables.uiobjects,
+        variables.sidebar_label,
+        tabs=variables.tabs or DEFAULT_TABS,
+        tour=variables.tour,
+    ).main_page()
+
 
 class BaseStreamlitUI:
     """
-    Streamlit UI for the DDA quantification - precursor ions module.
+    Streamlit UI shared by all module pages: tabs, tab headers and the guided tour.
     """
 
-    def __init__(self, variables, texts, ionmodule, parsesettingsbuilder, uiobjects, page_name):
+    def __init__(self, variables, ionmodule, uiobjects, page_name, tabs=DEFAULT_TABS, tour=True):
         """
-        Initialize the Streamlit UI for the DDA quantification - precursor ions module.
+        Initialize the module page UI.
         """
-        self.variables = variables
-        self.texts = texts
-
-        self.user_input = dict()
-
         pbb.proteobench_page_config()
+
+        self.variables = variables
+        self.tabs = tabs
+        self.tour = tour
 
         if self.variables.submit not in st.session_state:
             st.session_state[self.variables.submit] = False
@@ -36,7 +71,7 @@ class BaseStreamlitUI:
         except KeyError:
             token = ""
         self.ionmodule = ionmodule(token=token)
-        self.parsesettingsbuilder = parsesettingsbuilder(
+        self.parsesettingsbuilder = ParseSettingsBuilder(
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables.parse_settings_dir
         )
 
@@ -75,20 +110,6 @@ class BaseStreamlitUI:
             render_metrics_help(self.ionmodule, self.variables, context=context_for_tab_method(method_name))
         display_banner(self.variables)
 
-    def get_tab_config(self) -> list:
-        """Return tab configuration as list of (tab_name, method_name) tuples.
-
-        Override this method in subclasses to customize tabs.
-        """
-        return [
-            ("View Public Results", "display_all_data_results_main"),
-            ("Upload New Results (Private)", "display_submission_form"),
-            ("View Single Result", "display_indepth_plots"),
-            ("View Public + New Results", "display_all_data_results_submitted"),
-            ("Compare Two Results", "display_workflow_comparison"),
-            ("Submit New Results", "display_public_submission_ui"),
-        ]
-
     def main_page(self) -> None:
         """
         Set up the main page layout for the Streamlit application.
@@ -112,26 +133,18 @@ class BaseStreamlitUI:
                 unsafe_allow_html=True,
             )
 
-        # Get tab configuration
-        tab_config = self.get_tab_config()
+        tab_config = self.tabs
         # Archived modules no longer accept public submissions.
         if getattr(self.variables, "archived_warning", False):
             tab_config = [t for t in tab_config if t[1] != "display_public_submission_ui"]
-        # ? could also go here: if debug state is set, show debug tab
-        tab_names = [name for name, _ in tab_config]
-
-        # Create tabs dynamically
-        tabs = st.tabs(tab_names)
-
-        # Render each tab
-        for tab, (tab_name, method_name) in zip(tabs, tab_config):
+        tabs = st.tabs([name for name, _ in tab_config])
+        for tab, (_, method_name) in zip(tabs, tab_config):
             with tab:
                 self._render_tab_header(method_name=method_name)
-                # Call the appropriate method on uiobjects
                 getattr(self.uiobjects, method_name)()
 
         # Skip tour setup entirely when the streamlit_tour component is unavailable.
-        tour_steps = self.uiobjects.get_tour_steps() if Tour is not None else None
+        tour_steps = self.uiobjects.get_tour_steps() if self.tour and Tour is not None else None
         if tour_steps:
             if st.sidebar.button("Take a Tour", key="module_tour_trigger"):
                 st.session_state["start_module_tour"] = True

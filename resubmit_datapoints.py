@@ -49,61 +49,24 @@ import requests
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
 from proteobench.modules.denovo.denovo_base import DeNovoModule
-from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule
 from proteobench.modules.quant.quant_base_module import QuantModule
-from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
-    DDAQuantIonModuleQExactive,
-)
-from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
-from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
-from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
-    DIAQuantIonModulediaPASEF,
-)
-from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
-from proteobench.modules.quant.quant_lfq_ion_DIA_lowinput import (
-    DIAQuantIonModulediaSC,
-)
-from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
-from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
-    DDAQuantPeptidoformModule,
-)
-from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
-    DIAQuantPeptidoformModule,
-)
+from proteobench.utils.server_io import MODULE_CLASSES
 
-# ---------------------------------------------------------------------------
-# Registry: repo suffix -> (module_id, module_class, params_json_path)
-#
-# ** To add a new module, add ONE line here. **
-#
-# params_json_path is relative to the proteobench package directory.
-# ---------------------------------------------------------------------------
 _PARAMS_JSON_DIR = Path(__file__).parent / "proteobench" / "io" / "params" / "json"
 
-REPO_MODULE_REGISTRY: dict[str, tuple[str, type, Path]] = {
-    # fmt: off
-    # Quant — DDA ion
-    "Results_quant_ion_DDA":              ("quant_lfq_DDA_ion_QExactive",   DDAQuantIonModuleQExactive,  _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DDA_ion.json"),
-    "Results_quant_ion_DDA_Astral":       ("quant_lfq_DDA_ion_Astral",      DDAQuantIonAstralModule,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DDA_ion.json"),
-    # Quant — DDA peptidoform
-    "Results_quant_peptidoform_DDA":      ("quant_lfq_DDA_peptidoform",     DDAQuantPeptidoformModule,   _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DDA_peptidoform.json"),
-    # Quant — DIA ion
-    "Results_quant_ion_DIA":              ("quant_lfq_DIA_ion_AIF",         DIAQuantIonModuleAIF,        _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
-    "Results_quant_ion_DIA_diaPASEF":     ("quant_lfq_DIA_ion_diaPASEF",   DIAQuantIonModulediaPASEF,   _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
-    "Results_quant_ion_DIA_lowinput":   ("quant_lfq_DIA_ion_lowinput", DIAQuantIonModulediaSC,      _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
-    "Results_quant_ion_DIA_Astral":       ("quant_lfq_DIA_ion_Astral",     DIAQuantIonModuleAstral,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
-    "Results_quant_lfq_DIA_ion_ZenoTOF":  ("quant_lfq_DIA_ion_ZenoTOF",   DIAQuantIonModuleZenoTOF,    _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"),
-    "Results_quant_ion_DIA_plasma":       ("quant_lfq_DIA_ion_Plasma",     DIAQuantIonModulePlasma,     _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_ion.json"), 
-    # Quant — DIA peptidoform
-    "Results_quant_peptidoform_DIA":      ("quant_lfq_DIA_peptidoform",     DIAQuantPeptidoformModule,   _PARAMS_JSON_DIR / "Quant" / "quant_lfq_DIA_peptidoform.json"),
-    # De novo
-    "Results_denovo_lfq_DDA_HCD":        ("denovo_DDA_HCD",                DDAHCDDeNovoModule,          _PARAMS_JSON_DIR / "denovo" / "denovo_DDA_HCD.json"),
-    # fmt: on
-}
 
-# Inverted: module_id -> (repo_suffix, module_class, params_json_path)
-MODULE_ID_REGISTRY: dict[str, tuple[str, type, Path]] = {v[0]: (k, v[1], v[2]) for k, v in REPO_MODULE_REGISTRY.items()}
+def _params_json_path(module_id: str) -> Path:
+    """Submission-form JSON for a module: quant ids share one per acquisition/level, de novo has its own."""
+    if module_id.startswith("denovo"):
+        return _PARAMS_JSON_DIR / "denovo" / f"{module_id}.json"
+    return _PARAMS_JSON_DIR / "Quant" / ("_".join(module_id.split("_")[:4]) + ".json")
+
+
+# Registry: results repo suffix -> (module_id, module_class, params_json_path), derived from the
+# module classes registered in proteobench.utils.server_io.MODULE_CLASSES.
+REPO_MODULE_REGISTRY: dict[str, tuple[str, type, Path]] = {
+    cls.results_repo: (cls.module_id, cls, _params_json_path(cls.module_id)) for cls in MODULE_CLASSES.values()
+}
 logger = logging.getLogger("resubmit")
 
 
@@ -154,14 +117,8 @@ def _gh_get_paginated(url: str, token: str, params: dict | None = None) -> list[
     while url:
         resp = _gh_get(url, token, params)
         results.extend(resp.json())
-        # Follow 'next' link header
-        url = None
-        if "Link" in resp.headers:
-            for part in resp.headers["Link"].split(","):
-                if 'rel="next"' in part:
-                    url = part.split(";")[0].strip().strip("<>")
-                    params = {}  # params are already embedded in the next URL
-                    break
+        url = resp.links.get("next", {}).get("url")
+        params = {}  # the next URL already embeds the query parameters
     return results
 
 
@@ -1000,10 +957,8 @@ def write_datapoint_json(
 # Batch PR creation for Proteobot repos
 
 # Mapping from repo suffix → proteobot repo full name
-_PROTEOBOT_REPO_MAP: dict[str, str] = {suffix: f"Proteobot/{suffix}" for suffix in REPO_MODULE_REGISTRY}
 
 # Mapping from repo suffix → proteobench repo full name
-_PROTEOBENCH_REPO_MAP: dict[str, str] = {suffix: f"Proteobench/{suffix}" for suffix in REPO_MODULE_REGISTRY}
 
 
 def create_batch_pr(
@@ -1045,11 +1000,10 @@ def create_batch_pr(
         logger.error(f"Cannot create PR for {repo_suffix}: no GITHUB_TOKEN set.")
         return None
 
-    proteobot_name = _PROTEOBOT_REPO_MAP.get(repo_suffix)
-    proteobench_name = _PROTEOBENCH_REPO_MAP.get(repo_suffix)
-    if not proteobot_name or not proteobench_name:
+    if repo_suffix not in REPO_MODULE_REGISTRY:
         logger.error(f"Unknown repo suffix: {repo_suffix}")
         return None
+    proteobot_name, proteobench_name = f"Proteobot/{repo_suffix}", f"Proteobench/{repo_suffix}"
 
     logger.info(
         f"Creating PR on {proteobot_name} with {len(datapoint_updates)} update(s), "
@@ -1328,8 +1282,7 @@ def reprocess_datapoint(
 
         # --- 6e/f: Run benchmarking ---
         try:
-            # Pass input_file as a positional arg to avoid kwarg name mismatch:
-            # some subclasses use "input_file", others "input_file_loc".
+            # input_file is passed positionally: quant and de novo name it differently.
             input_file_val = extracted["input_file"]
             kwargs: dict[str, Any] = {
                 "input_format": input_format,

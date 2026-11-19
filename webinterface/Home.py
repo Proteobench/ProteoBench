@@ -1,9 +1,10 @@
 """Proteobench Streamlit-based web server."""
 
+import pages.texts.proteobench_builder as pbb
 import streamlit as st
-from _base import StreamlitPage
+from _base import render_logos, render_preface
 from pages.base_pages.tour_steps import get_homepage_tour_steps
-from pages.utils.module_registry import MODULE_CATEGORIES, get_all_modules
+from pages.utils.module_registry import HOME_URL_PATH, MODULE_CATEGORIES, all_module_pages, get_all_modules, module_page
 
 # Optional guided-tour overlay; disable gracefully if streamlit_tour cannot be
 # imported (e.g. version-incompatible with the installed streamlit). See base.py.
@@ -31,9 +32,7 @@ _MODULE_CARD_FALLBACK_DESCRIPTION = "Benchmark this workflow and compare your re
 _MODULE_CARD_IMAGE_ASPECT_RATIO = 3.5
 
 _ABSTRACT_DIR = "../img/module_graphical_abstracts"
-_GRAPHICAL_ABSTRACT_DISCLAIMER = (
-    "Graphical abstracts were created with BioRender.com and NIH BioArt Source (public domain)."
-)
+_GRAPHICAL_ABSTRACT_DISCLAIMER = "Graphical abstracts were created with BioRender.com and NIH BioArt Source (public domain)."
 
 
 def _module_graphical_abstract(module):
@@ -191,15 +190,19 @@ def _show_tool_breakdown(module_title, tool_counts):
     st.plotly_chart(pie_fig)
 
 
-class StreamlitPageHome(StreamlitPage):
+class StreamlitPageHome:
     """
     This class sets up the main page layout for the Streamlit application.
     """
 
-    PAGE_LAYOUT = "wide"
+    def __init__(self) -> None:
+        pbb.proteobench_page_config(page_layout="wide")
+        pbb.proteobench_sidebar(current_page="/")
 
-    # overwrites _main_page from StreamlitPage
-    # is called by initializer along sidebar and other setup
+        render_preface()
+        self._main_page()
+        render_logos()
+
     def _main_page(self):
         """
         Set up the main page layout for the Streamlit application.
@@ -232,7 +235,7 @@ class StreamlitPageHome(StreamlitPage):
         home_tour_active = f"stTour--{_HOME_TOUR_KEY}-active"
         if st.session_state.get("_home_tour_in_progress", False) and not st.session_state.get(home_tour_active, False):
             st.session_state.pop("_home_tour_in_progress", None)
-            st.switch_page("pages/6_Quant_LFQ_DIA_ion_Astral.py")
+            st.switch_page(module_page("/Quant_LFQ_DIA_ion_Astral"))
 
     @staticmethod
     def _render_feature_highlights():
@@ -340,7 +343,7 @@ class StreamlitPageHome(StreamlitPage):
 
                             friendly_title = module.homepage_title or module.label
                             st.page_link(
-                                module.file_path,
+                                module.page,
                                 label=f"**{friendly_title}**",
                                 icon=":material/arrow_forward:",
                             )
@@ -506,4 +509,8 @@ class StreamlitPageHome(StreamlitPage):
 
 
 if __name__ == "__main__":
-    StreamlitPageHome()
+    # Router: one page for Home plus one per registered module (built from its Variables
+    # class by the module registry). position="hidden" keeps ProteoBench's own sidebar.
+    pbb.proteobench_page_config(page_layout="wide")
+    home = st.Page(StreamlitPageHome, title="ProteoBench", url_path=HOME_URL_PATH, default=True)
+    st.navigation([home, *all_module_pages()], position="hidden").run()

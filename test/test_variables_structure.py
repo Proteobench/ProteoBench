@@ -59,8 +59,24 @@ def _get_variables_files():
     return sorted(f for f in PAGES_VARS_DIR.rglob("*_variables.py") if not f.name.startswith("_"))
 
 
-def _collect_class_attribute_names(filepath: Path) -> set:
-    """Return the set of attribute names defined at class body level in the file."""
+BASE_FILE = PAGES_VARS_DIR / "base.py"
+
+
+def _base_derived_names() -> set:
+    """Names VariablesBase provides: its own fields plus the session keys it derives from ``key``."""
+    tree = ast.parse(BASE_FILE.read_text(encoding="utf-8"))
+    names = set()
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and node.targets[0].id in ("SESSION_KEYS", "SLIDER_SESSION_KEYS"):
+            names |= set(ast.literal_eval(node.value))
+    return names | _collect_class_attribute_names(BASE_FILE, include_base=False)
+
+
+def _collect_class_attribute_names(filepath: Path, include_base: bool = True) -> set:
+    """Return the attribute names defined at class body level in the file.
+
+    Classes inheriting ``VariablesBase`` also get the names that base defines or derives.
+    """
     source = filepath.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(filepath))
 
@@ -68,6 +84,8 @@ def _collect_class_attribute_names(filepath: Path) -> set:
     for node in ast.walk(tree):
         if not isinstance(node, ast.ClassDef):
             continue
+        if include_base and any(isinstance(b, ast.Name) and b.id == "VariablesBase" for b in node.bases):
+            names |= _base_derived_names()
         for item in node.body:
             # Annotated assignment:  field: type = value
             if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):

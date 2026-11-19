@@ -3,23 +3,17 @@
 import copy
 import logging
 import uuid
-from typing import Any, Dict
 
-import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import streamlit as st
-from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import (
-    VariablesDDAQuant,
-)
+from pages.pages_variables.base import VariablesBase
 
 from pages.utils.submission_source import get_submission_source, is_official_server
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
-    DDAQuantIonModuleQExactive as IonModule,
-)
+from proteobench.modules.quant.quant_base_module import QuantModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
@@ -27,7 +21,6 @@ from .tabs import (
     tab1_view_public_results,
     tab2_upload_results,
     tab3_view_single_result,
-    tab4_view_public_and_new_results,
     tab5_compare_results,
     tab6_submit_results,
 )
@@ -42,7 +35,7 @@ class QuantUIObjects(BaseUIModule):
 
     Parameters
     ----------
-    variables : VariablesDDAQuant
+    variables : VariablesBase
         The variables for the quantification module.
     ionmodule : IonModule
         The quantification module.
@@ -52,7 +45,7 @@ class QuantUIObjects(BaseUIModule):
 
     def __init__(
         self,
-        variables: VariablesDDAQuant,
+        variables: VariablesBase,
         ionmodule: IonModule,
         parsesettingsbuilder: ParseSettingsBuilder,
         page_name: str = "/",
@@ -62,7 +55,7 @@ class QuantUIObjects(BaseUIModule):
 
         Parameters
         ----------
-        variables : VariablesDDAQuant
+        variables : VariablesBase
             The variables for the quantification module.
         ionmodule : IonModule
             The quantification module.
@@ -76,7 +69,6 @@ class QuantUIObjects(BaseUIModule):
         # Quant-specific attributes
         self.first_point_plotted = False
         st.session_state[self.variables.submit] = False
-        self.stop_duplicating = False
 
     def get_tour_steps(self) -> list:
         """Return tour steps for this quantification module."""
@@ -143,9 +135,7 @@ class QuantUIObjects(BaseUIModule):
         st.subheader("Select dataset to plot")
 
         if not downloads_df.empty:
-            dataset_options = [("Uploaded dataset", None)] + list(
-                zip(downloads_df["id"], downloads_df["intermediate_hash"])
-            )
+            dataset_options = [("Uploaded dataset", None)] + list(zip(downloads_df["id"], downloads_df["intermediate_hash"]))
         else:
             dataset_options = [("Uploaded dataset", None)]
 
@@ -202,15 +192,11 @@ class QuantUIObjects(BaseUIModule):
         if self.variables.check_submission not in st.session_state:
             st.session_state[self.variables.check_submission] = False
 
-        if self.variables.first_new_plot:
-            self.submission_ready = tab6_submit_results.generate_submission_ui_elements(
-                variables=self.variables,
-                user_input=self.user_input,
-                parsesettingsbuilder=self.parsesettingsbuilder,
-            )
-        elif is_tour:
-            # Show the metadata uploader for tour preview even without a result file
-            tab6_submit_results.generate_metadata_uploader(self.variables, self.user_input)
+        self.submission_ready = tab6_submit_results.generate_submission_ui_elements(
+            variables=self.variables,
+            user_input=self.user_input,
+            parsesettingsbuilder=self.parsesettingsbuilder,
+        )
 
         if self.user_input[self.variables.meta_data]:
             params = tab6_submit_results.load_user_parameters(
@@ -229,10 +215,7 @@ class QuantUIObjects(BaseUIModule):
                 variables=self.variables,
                 user_input=self.user_input,
             )
-            # ? stop_duplicating is not used?
-            self.stop_duplicating = tab6_submit_results.generate_confirmation_checkbox(
-                check_submission=self.variables.check_submission
-            )
+            tab6_submit_results.generate_confirmation_checkbox(check_submission=self.variables.check_submission)
         elif is_tour:
             # Tour preview: render parameter fields with defaults so users can see the form.
             if self.variables.params_file_dict not in st.session_state:
@@ -288,220 +271,78 @@ class QuantUIObjects(BaseUIModule):
     @st.fragment
     def display_all_data_results_main(self) -> None:
         """Display the results for all data in Tab 1."""
-        tab1_view_public_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
-        tab1_view_public_results.initialize_main_selectbox(
-            selectbox_id_uuid=self.variables.selectbox_id_uuid,
-            default_value="None",
-        )
-
-        # --- OPTIONS EXPANDER FIRST ---
-        def render_slider():
-            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
-            tab1_view_public_results.generate_main_slider(
-                slider_id_uuid=self.variables.slider_id_uuid,
-                description_slider_md=self.variables.description_slider_md,
-                default_val_slider=self.variables.default_val_slider,
-                max_nr_observed=max_nr_obs,
-            )
-
-        def render_selectbox():
-            tab1_view_public_results.generate_main_selectbox(
-                self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid
-            )
-
-        metric_key = f"_tab1_metric_{self.variables.sidebar_path}"
-        mode_key = f"_tab1_mode_{self.variables.sidebar_path}"
-        if metric_key not in st.session_state:
-            st.session_state[metric_key] = "Median"
-        if mode_key not in st.session_state:
-            st.session_state[mode_key] = "Species-weighted"
-
-        def render_metric_selector():
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
-            )
-            return st.radio("Select metric", ["Median", "Mean"], key=metric_key, help=help_text, horizontal=True)
-
-        def render_mode_selector():
-            if st.session_state.get(metric_key) == "ROC-AUC":
-                return None
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
-            )
-            return st.radio(
-                "Select metric calculation approach",
-                ["Species-weighted", "Global"],
-                key=mode_key,
-                help=help_text,
-                horizontal=True,
-            )
-
-        def render_colorblind_selector():
-            return tab1_view_public_results.display_colorblindmode_selector(self.variables)
-
-        self.render_plot_options_expander(
-            filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[
-                render_metric_selector,
-                render_mode_selector,
-                render_colorblind_selector,
-            ],
-            filter_cols_spec=2,
-            selector_cols_spec=[1, 1, 1],
-            expander_key="tour_plot_options",
-        )
-
-        # --- PLOT, TABLE, DOWNLOAD BELOW ---
-        metric = st.session_state[metric_key]
-        mode = st.session_state[mode_key]
-
-        if self.variables.colorblind_mode_selector_uuid not in st.session_state:
-            st.session_state[self.variables.colorblind_mode_selector_uuid] = uuid.uuid4()
-        colorblind_uuid = st.session_state[self.variables.colorblind_mode_selector_uuid]
-        colorblind_mode = st.session_state.get(colorblind_uuid, False)
-
-        min_nr_observed = None
-        if self.variables.slider_id_uuid in st.session_state:
-            slider_key = st.session_state[self.variables.slider_id_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
-
-        tab1_view_public_results.display_existing_results(
-            variables=self.variables,
-            ionmodule=self.ionmodule,
-            plot_params={
-                "metric": metric,
-                "mode": mode,
-                "colorblind_mode": colorblind_mode,
-                "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
-                "min_nr_observed": min_nr_observed,
-                "alpha_warning": getattr(self.variables, "alpha_warning", False),
-                "beta_warning": getattr(self.variables, "beta_warning", False),
-                "archived_warning": getattr(self.variables, "archived_warning", False),
-            },
-        )
+        self._display_results(submitted=False)
 
     @st.fragment
     def display_all_data_results_submitted(self) -> None:
         """Display the results for all data in Tab 4."""
-        st.title("Results (All Data)")
+        self._display_results(submitted=True)
 
-        # Initialize plot options controls (same as tab 1)
-        tab1_view_public_results.initialize_main_slider(
-            slider_id_uuid=self.variables.slider_id_submitted_uuid,
-            default_val_slider=self.variables.default_val_slider,
-        )
-        tab1_view_public_results.initialize_main_selectbox(
-            selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
-            default_value="None",
-        )
+    def _display_results(self, submitted: bool) -> None:
+        """
+        Render the plot options, metric plot and results table for Tab 1 (public data) or,
+        with ``submitted=True``, Tab 4 (public + new data). The two tabs use separate widget
+        keys so their selections are independent.
+        """
+        v = self.variables
+        slider_id = v.slider_id_submitted_uuid if submitted else v.slider_id_uuid
+        selectbox_id = v.selectbox_id_submitted_uuid if submitted else v.selectbox_id_uuid
+        tab = 4 if submitted else 1
+        metric_key = f"_tab{tab}_metric_{v.sidebar_path}"
+        mode_key = f"_tab{tab}_mode_{v.sidebar_path}"
 
-        # Define callbacks for plot options
+        if submitted:
+            st.title("Results (All Data)")
+
+        tab1_view_public_results.initialize_main_slider(slider_id_uuid=slider_id, default_val_slider=v.default_val_slider)
+        tab1_view_public_results.initialize_main_selectbox(selectbox_id_uuid=selectbox_id, default_value="None")
+        st.session_state.setdefault(metric_key, "Median")
+        st.session_state.setdefault(mode_key, "Species-weighted")
+
         def render_slider():
-            # Get max_nr_observed for slider range if available
-            max_nr_obs = getattr(self.variables, "max_nr_observed", 6)
             tab1_view_public_results.generate_main_slider(
-                slider_id_uuid=self.variables.slider_id_submitted_uuid,
-                description_slider_md=self.variables.description_slider_md,
-                default_val_slider=self.variables.default_val_slider,
-                max_nr_observed=max_nr_obs,
+                slider_id_uuid=slider_id,
+                description_slider_md=v.description_slider_md,
+                default_val_slider=v.default_val_slider,
+                max_nr_observed=getattr(v, "max_nr_observed", 6),
             )
 
         def render_selectbox():
-            tab1_view_public_results.generate_main_selectbox(
-                self.variables,
-                selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
-            )
-
-        # Store metric in a container to share between callbacks
-        metric_container = {"metric": None}
+            tab1_view_public_results.generate_main_selectbox(v, selectbox_id_uuid=selectbox_id)
 
         def render_metric_selector():
-            key = self.variables.metric_selector_submitted_uuid
-            if key not in st.session_state:
-                st.session_state[key] = uuid.uuid4()
-            metric_uuid = st.session_state[key]
-
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
-            )
-            metric = st.radio(
-                "Select metric",
-                ["Median", "Mean"],
-                help=help_text,
-                horizontal=True,
-                key=metric_uuid,
-            )
-            metric_container["metric"] = metric
-            return metric
+            return st.radio("Select metric", ["Median", "Mean"], key=metric_key, horizontal=True)
 
         def render_mode_selector():
-            # ROC-AUC has no mode variants (it's already species-aware by design)
-            if metric_container["metric"] == "ROC-AUC":
-                return None
-
-            key = self.variables.metric_calc_approach_selector_submitted_uuid
-            if key not in st.session_state:
-                st.session_state[key] = uuid.uuid4()
-            mode_uuid = st.session_state[key]
-
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_mode", None) if hasattr(self.variables, "texts") else None
-            )
             return st.radio(
-                "Select metric calculation approach",
-                ["Species-weighted", "Global"],
-                help=help_text,
-                horizontal=True,
-                key=mode_uuid,
+                "Select metric calculation approach", ["Species-weighted", "Global"], key=mode_key, horizontal=True
             )
 
         def render_colorblind_selector():
-            return tab1_view_public_results.display_colorblindmode_selector(self.variables, use_submitted=True)
+            return tab1_view_public_results.display_colorblindmode_selector(v, use_submitted=submitted)
 
-        # Render plot options expander and capture return values
-        results = self.render_plot_options_expander(
+        _, _, metric, mode, colorblind_mode = self.render_plot_options_expander(
             filter_callbacks=[render_slider, render_selectbox],
-            selector_callbacks=[
-                render_metric_selector,
-                render_mode_selector,
-                render_colorblind_selector,
-            ],
+            selector_callbacks=[render_metric_selector, render_mode_selector, render_colorblind_selector],
             filter_cols_spec=2,
             selector_cols_spec=[1, 1, 1],
+            expander_key=None if submitted else "tour_plot_options",
         )
 
-        # Extract returned values
-        metric = results[2] if len(results) > 2 else "Median"
-        mode = results[3] if len(results) > 3 else "Species-weighted"
-        colorblind_mode = results[4] if len(results) > 4 else False
-
-        # Get current selections from session state
-        label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
-
-        # Get the min_nr_observed value from the slider if available
-        min_nr_observed = None
-        if self.variables.slider_id_submitted_uuid in st.session_state:
-            slider_key = st.session_state[self.variables.slider_id_submitted_uuid]
-            if slider_key in st.session_state:
-                min_nr_observed = st.session_state[slider_key]
-
-        tab4_view_public_and_new_results.display_submitted_results(
-            variables=self.variables,
+        tab1_view_public_results.display_existing_results(
+            variables=v,
             ionmodule=self.ionmodule,
             plot_params={
                 "metric": metric,
                 "mode": mode,
                 "colorblind_mode": colorblind_mode,
-                "label": label,
-                "min_nr_observed": min_nr_observed,
-                "alpha_warning": getattr(self.variables, "alpha_warning", False),
-                "beta_warning": getattr(self.variables, "beta_warning", False),
-                "archived_warning": getattr(self.variables, "archived_warning", False),
+                "label": st.session_state.get(st.session_state.get(selectbox_id, ""), "None"),
+                "min_nr_observed": st.session_state.get(st.session_state.get(slider_id)),
+                "alpha_warning": getattr(v, "alpha_warning", False),
+                "beta_warning": getattr(v, "beta_warning", False),
+                "archived_warning": getattr(v, "archived_warning", False),
             },
+            submitted=submitted,
         )
 
     def display_workflow_comparison(self) -> None:

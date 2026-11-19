@@ -29,13 +29,13 @@ pytest.importorskip("streamlit", reason="webinterface interaction tests require 
 
 # Ensure the sibling helper module is importable regardless of pytest import mode.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from webinterface_apptest_utils import EMPTY_DATAPOINTS, mocked_backend, new_app  # noqa: E402
+from webinterface_apptest_utils import EMPTY_DATAPOINTS, mocked_backend, new_module_app  # noqa: E402
 
 from proteobench.github.gh import GithubProteobotRepo  # noqa: E402
 from proteobench.io.params import ProteoBenchParameters  # noqa: E402
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive  # noqa: E402
+from proteobench.modules.quant.quant_modules import DDAQuantIonModuleQExactive  # noqa: E402
 
-QEXACTIVE_PAGE = "pages/2_Quant_LFQ_DDA_ion_QExactive.py"
+QEXACTIVE_PAGE = ("pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables", "VariablesDDAQuant")
 TESTDATA_DIR = os.path.join(os.path.dirname(__file__), "data/quant/quant_lfq_ion_DDA_QExactive")
 MAXQUANT_FILE = os.path.join(TESTDATA_DIR, "MaxQuant_evidence_sample.txt")
 MAXQUANT_PARAMS_FILE = os.path.join(os.path.dirname(__file__), "params", "mqpar_MQ1.6.3.3_MBR.xml")
@@ -80,7 +80,7 @@ def benchmarked_datapoints() -> pd.DataFrame:
 def test_tab1_slider_drives_recompute_without_error(benchmarked_datapoints, monkeypatch):
     """Driving the Tab 1 result slider across its range re-runs the page cleanly."""
     with mocked_backend(datapoints=benchmarked_datapoints):
-        app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
+        app_test = new_module_app(*QEXACTIVE_PAGE, monkeypatch)
         app_test.run()
         assert not app_test.exception, f"initial render raised: {[e.message for e in app_test.exception]}"
 
@@ -94,16 +94,14 @@ def test_tab1_slider_drives_recompute_without_error(benchmarked_datapoints, monk
         # options/value may differ in type (e.g. formatted '1' vs underlying 1), so compare as strings.
         for target in (options[0], options[-1]):
             app_test.select_slider[0].set_value(target).run()
-            assert (
-                not app_test.exception
-            ), f"setting slider to {target} raised: {[e.message for e in app_test.exception]}"
+            assert not app_test.exception, f"setting slider to {target} raised: {[e.message for e in app_test.exception]}"
             assert str(app_test.select_slider[0].value) == str(target)
 
 
 def test_tab2_software_selector_changes_selection(benchmarked_datapoints, monkeypatch):
     """Selecting a different tool in the Tab 2 software selector re-runs cleanly."""
     with mocked_backend(datapoints=benchmarked_datapoints):
-        app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
+        app_test = new_module_app(*QEXACTIVE_PAGE, monkeypatch)
         app_test.run()
         assert not app_test.exception
 
@@ -161,7 +159,7 @@ def test_tab2_file_upload_runs_benchmarking(monkeypatch):
     """
     content = Path(MAXQUANT_FILE).read_bytes()
     with mocked_backend():
-        app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
+        app_test = new_module_app(*QEXACTIVE_PAGE, monkeypatch)
         app_test.run()
 
         # The software selector is outside the form; set it before submitting.
@@ -201,7 +199,7 @@ def test_tab6_full_submission_via_ui(monkeypatch):
         mock.patch("pages.base_pages.tabs.tab6_submit_results.render_validation_report", lambda report: None),
     ]
     with mocked_backend(extra_patches=extra):
-        app_test = new_app(QEXACTIVE_PAGE, monkeypatch)
+        app_test = new_module_app(*QEXACTIVE_PAGE, monkeypatch)
         app_test.run()
 
         # Tab 2: benchmark a MaxQuant result file (provides the datapoint to submit).

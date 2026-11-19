@@ -19,9 +19,6 @@ from proteobench.modules.quant.quant_lfq_ion_DIA_lowinput import (
 from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
     DDAQuantPeptidoformModule,
 )
-from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
-    DIAQuantPeptidoformModule,
-)
 from proteobench.plotting import plot_quant
 
 # Dictionary mapping module name strings to their classes
@@ -32,7 +29,6 @@ MODULE_CLASSES = {
     "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
     "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,
     "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
-    "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
 }
 
 

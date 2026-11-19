@@ -3,7 +3,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from pages.texts.generic_texts import WebpageTexts
-from pages.utils.module_registry import MODULE_CATEGORIES
+from pages.utils.module_registry import MODULE_CATEGORIES, home_page_link
 from UI_utils import svg_data_uri
 
 _ICON_PATH = "../img/proteobench-icon.svg"
@@ -59,7 +59,7 @@ def render_links(modules):
     for module in modules:
         badge = RELEASE_STAGE_BADGES.get(module.release_stage)
         label = f"{badge} {module.label}" if badge else module.label
-        st.page_link(module.file_path, label=label)
+        st.page_link(module.page, label=label)
 
 
 def proteobench_sidebar(current_page):
@@ -116,7 +116,7 @@ def proteobench_sidebar(current_page):
 
     # Sidebar layout
     with st.sidebar:
-        st.page_link("Home.py", label=f"![Home]({svg_data_uri(_ICON_PATH)}) **ProteoBench**")
+        st.page_link(home_page_link(), label=f"![Home]({svg_data_uri(_ICON_PATH)}) **ProteoBench**")
 
         # Search box
         search_query = st.text_input(

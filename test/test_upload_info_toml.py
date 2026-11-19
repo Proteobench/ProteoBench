@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
-import toml
+import tomllib
 
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.constants import MODULE_SETTINGS_DIRS
@@ -19,7 +19,6 @@ _SKIP_NAMES = {
     "tool_metadata.toml",
     # Custom format intentionally omitted from upload_info (graceful-handling tested separately)
     "parse_settings_custom.toml",
-    "parse_settings_DIA_peptidoform.toml",
 }
 
 _UPLOAD_INFO_KEYS = ("datapoint_file", "datapoint_file_description", "params_file", "params_file_description")
@@ -37,7 +36,7 @@ def _collect_tool_tomls():
 @pytest.mark.parametrize("toml_path", _collect_tool_tomls())
 def test_upload_info_present_and_non_empty(toml_path):
     """Every tool TOML (except Custom) must have [upload_info] with non-empty string values."""
-    data = toml.load(toml_path)
+    data = tomllib.loads(Path(toml_path).read_text(encoding="utf-8"))
     assert "upload_info" in data, f"Missing [upload_info] section in {toml_path}"
     info = data["upload_info"]
     for key in _UPLOAD_INFO_KEYS:

@@ -358,46 +358,6 @@ def generate_sample_name(input_format: str) -> str:
     return f"{input_format}_{time_stamp}"
 
 
-def display_in_depth_plots_generic(variables, ionmodule, performance_data: pd.DataFrame, **kwargs) -> None:
-    """
-    Generic function to display in-depth plots for any module type.
-
-    This is a simpler alternative to generate_indepth_plots when you already
-    have the performance data loaded.
-
-    Parameters
-    ----------
-    variables : object
-        Variables object.
-    ionmodule : object
-        The module instance.
-    performance_data : pd.DataFrame
-        The performance data to visualize.
-    **kwargs : dict
-        Additional module-specific parameters to pass to generate_in_depth_plots.
-    """
-    if performance_data is None or len(performance_data) == 0:
-        st.warning("No data available for in-depth analysis.", icon="⚠️")
-        return
-
-    # Get plot generator from module
-    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
-
-    # Generate plots
-    try:
-        plots = plot_generator.generate_in_depth_plots(performance_data=performance_data, **kwargs)
-    except Exception as e:
-        st.error(f"Error generating in-depth plots: {e}", icon="🚨")
-        import traceback
-
-        with st.expander("Error details"):
-            st.code(traceback.format_exc())
-        return
-
-    # Display plots with layout
-    display_plots_with_layout(plots, plot_generator, variables, "Current Dataset")
-
-
 def display_pmultiqc_report(performance_data: pd.DataFrame, sample_name: str, cache_key: str) -> None:
     """
     Display the pMultiQC report section.

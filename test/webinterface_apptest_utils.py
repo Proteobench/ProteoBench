@@ -110,6 +110,47 @@ def mocked_backend(datapoints: pd.DataFrame = None, home: bool = False, extra_pa
         yield
 
 
+def _render_module_page(web_dir: str, variables_module: str, variables_class: str) -> None:
+    """AppTest script: render one module page the way Home.py's router does."""
+    import importlib
+    import sys
+
+    sys.path.insert(0, web_dir)
+    from pages.base import run_page
+
+    run_page(getattr(importlib.import_module(variables_module), variables_class)())
+
+
+def new_module_app(variables_module: str, variables_class: str, monkeypatch, timeout: int = 120) -> AppTest:
+    """Return a configured (not yet run) AppTest for one module page.
+
+    Module pages have no file of their own (Home.py builds them with st.navigation from
+    the module's Variables class), so the page is rendered through ``run_page`` directly.
+
+    Parameters
+    ----------
+    variables_module : str
+        Import path of the Variables module, e.g. ``"pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables"``.
+    variables_class : str
+        Name of the Variables dataclass in that module.
+    monkeypatch : pytest.MonkeyPatch
+        Used to chdir into the webinterface directory.
+    timeout : int, optional
+        Default AppTest timeout in seconds.
+
+    Returns
+    -------
+    AppTest
+        The configured, not yet run, AppTest.
+    """
+    monkeypatch.chdir(WEB_DIR)
+    app_test = AppTest.from_function(
+        _render_module_page, args=(str(WEB_DIR), variables_module, variables_class), default_timeout=timeout
+    )
+    app_test.secrets["gh"] = {"token": ""}
+    return app_test
+
+
 def new_app(page_rel: str, monkeypatch, timeout: int = 120) -> AppTest:
     """Return a configured (not yet run) AppTest for a webinterface page.
 

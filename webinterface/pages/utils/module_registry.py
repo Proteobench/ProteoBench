@@ -10,11 +10,53 @@ import inspect
 import os
 from dataclasses import dataclass, is_dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import streamlit as st
 
 MODULE_CATEGORIES = ["DDA", "DIA", "Archived", "Debug"]
+
+# url_path of the home page in Home.py's st.navigation. Callable pages are identified by
+# a hash of their url_path, so any st.Page built with this path links to the home page.
+HOME_URL_PATH = "home"
+
+
+def home_page_link():
+    """Return an ``st.Page`` that ``st.page_link`` / ``st.switch_page`` resolve to the home page.
+
+    Returns
+    -------
+    streamlit.navigation.page.StreamlitPage
+        A page with the home page's url_path; its callable is never run.
+    """
+    return st.Page(lambda: None, title="ProteoBench", url_path=HOME_URL_PATH, default=True)
+
+
+def _module_page(variables_class) -> Any:
+    """Build the ``st.Page`` for one module from its Variables class.
+
+    Parameters
+    ----------
+    variables_class : type
+        The module's Variables dataclass.
+
+    Returns
+    -------
+    streamlit.navigation.page.StreamlitPage
+        A page at the module's ``sidebar_path``.
+    """
+    title, url_path = variables_class.sidebar_label, variables_class.sidebar_path
+    page_file = getattr(variables_class, "page_file", None)
+    if page_file:
+        # Anchored to webinterface/ so it resolves however the app was launched.
+        return st.Page(Path(__file__).resolve().parents[2] / page_file, title=title, url_path=url_path)
+
+    def render_module_page():
+        from pages.base import run_page  # deferred: pages.base imports the sidebar, which imports this module
+
+        run_page(variables_class())  # fresh instance per run, as a page script would create
+
+    return st.Page(render_module_page, title=title, url_path=url_path)
 
 
 def is_debug_enabled() -> bool:
@@ -39,7 +81,7 @@ class ModuleMetadata:
 
     label: str
     path: str
-    file_path: str  # Actual file path for st.page_link
+    page: Any  # st.Page for st.navigation / st.page_link
     category: str
     release_stage: str
     keywords: List[str]
@@ -114,19 +156,6 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             else:
                 release_stage = "live"
 
-            # Find the actual page file path
-            page_name = variables.sidebar_path.lstrip("/")
-            pages_dir = current_file.parent.parent  # pages/ directory
-            matching_files = list(pages_dir.glob(f"*{page_name}.py"))
-
-            if matching_files:
-                # Get relative path from webinterface/ directory
-                webinterface_dir = pages_dir.parent
-                file_path = str(matching_files[0].relative_to(webinterface_dir))
-            else:
-                # Fallback
-                file_path = f"pages/{page_name}.py"
-
             # Extract results repo name from github_link_pr
             # e.g. "github.com/Proteobot/Results_quant_ion_DDA.git" -> "Results_quant_ion_DDA"
             results_repo = None
@@ -137,7 +166,7 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
             metadata = ModuleMetadata(
                 label=variables.sidebar_label,
                 path=variables.sidebar_path,
-                file_path=file_path,
+                page=_module_page(variables_class),
                 category=variables.sidebar_category,
                 release_stage=release_stage,
                 keywords=variables.keywords,
@@ -166,9 +195,34 @@ def get_all_modules() -> Dict[str, List[ModuleMetadata]]:
     return modules_by_category
 
 
-def filter_modules(
-    modules_by_category: Dict[str, List[ModuleMetadata]], search_query: str
-) -> Dict[str, List[ModuleMetadata]]:
+def all_module_pages() -> List[Any]:
+    """Return the ``st.Page`` of every registered module (debug pages only when enabled).
+
+    Returns
+    -------
+    list
+        One ``st.Page`` per module, in category order.
+    """
+    return [m.page for modules in get_all_modules().values() for m in modules]
+
+
+def module_page(sidebar_path: str) -> Any:
+    """Return the ``st.Page`` of the module at ``sidebar_path`` (e.g. ``"/Quant_LFQ_DIA_ion_Astral"``).
+
+    Parameters
+    ----------
+    sidebar_path : str
+        The module's ``sidebar_path``.
+
+    Returns
+    -------
+    streamlit.navigation.page.StreamlitPage
+        The module's page.
+    """
+    return next(m.page for modules in get_all_modules().values() for m in modules if m.path == sidebar_path)
+
+
+def filter_modules(modules_by_category: Dict[str, List[ModuleMetadata]], search_query: str) -> Dict[str, List[ModuleMetadata]]:
     """
     Filter modules based on search query matching keywords or title.
 

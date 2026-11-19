@@ -17,7 +17,6 @@ from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-from pandas import DataFrame
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import GithubProteobotRepo
@@ -271,17 +270,6 @@ class EntrapmentModule:
 
         return df
 
-    def is_implemented(self) -> bool:
-        """
-        Return whether the module is fully implemented.
-
-        Returns
-        -------
-        bool
-            Always returns True in this implementation.
-        """
-        return True
-
     def add_current_data_point(
         self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None
     ) -> pd.DataFrame:
@@ -456,48 +444,6 @@ class EntrapmentModule:
             return "Unable to create PR. Please check the logs."
 
         return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
-
-    def write_json_local_development(self, temporary_datapoints: pd.DataFrame, datapoint_params: dict) -> str:
-        """
-        Write the datapoints to a JSON file for local development.
-
-        Parameters
-        ----------
-        temporary_datapoints : pd.DataFrame
-            Temporary data points.
-        datapoint_params : dict
-            Data point parameters.
-
-        Returns
-        -------
-        str
-            The path to the written JSON file.
-        """
-
-        # TODO: need to test if this still works...
-
-        os.mkdir(self.t_dir_pr)
-
-        current_datapoint = temporary_datapoints.iloc[-1]
-
-        # Update parameters based on parsed params
-        for k, v in datapoint_params.__dict__.items():
-            current_datapoint[k] = v
-
-        current_datapoint["is_temporary"] = False
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
-
-        fname = os.path.join(self.t_dir_pr, "results.json")
-        logging.info(f"Writing the json to: {fname}")
-
-        cols_to_drop = [c for c in ("color", "hover_text", "scatter_size", "marker") if c in all_datapoints.columns]
-        all_datapoints_clean = all_datapoints.drop(columns=cols_to_drop)
-
-        f = open(os.path.join(self.t_dir_pr, "results.json"), "w")
-
-        all_datapoints_clean.to_json(f, orient="records", indent=2)
-
-        return os.path.join(self.t_dir_pr, "results.json")
 
     def write_intermediate_raw(
         self,

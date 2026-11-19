@@ -44,7 +44,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Optional, Tuple
 
-import toml
+import tomllib
 
 from proteobench.validation.protein_ids import DEFAULT_GROUP_SEPARATORS
 
@@ -222,7 +222,8 @@ class ModuleValidationConfig:
         # so the reference and profile resolve even if the parser cannot be built.
         module_settings = {}
         try:
-            module_settings = toml.load(os.path.join(parse_settings_dir, "module_settings.toml"))
+            with open(os.path.join(parse_settings_dir, "module_settings.toml"), "rb") as f:
+                module_settings = tomllib.load(f)
         except Exception:
             module_settings = {}
 
@@ -255,7 +256,8 @@ class ModuleValidationConfig:
         """
         path = os.path.join(parse_settings_dir, "module_settings.toml")
         try:
-            module_settings = toml.load(path)
+            with open(path, "rb") as f:
+                module_settings = tomllib.load(f)
         except Exception:
             return {}
         return module_settings.get("reference_database", {}) or {}

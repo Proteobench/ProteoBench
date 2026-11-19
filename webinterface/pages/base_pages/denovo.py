@@ -1,39 +1,27 @@
 """Streamlit-based web interface for ProteoBench."""
 
 import copy
-import glob
 import json
 import logging
-import os
-import tempfile
 import uuid
-import zipfile
-from datetime import datetime
-from pprint import pformat
-from typing import Any, Dict, Optional
+from typing import Optional
 
-import pages.texts.proteobench_builder as pbb
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
-import streamlit_utils
-from pages.pages_variables.DeNovo.DDA_HCD_variables import VariablesDDADeNovo
-from streamlit_extras.let_it_rain import rain
+from pages.pages_variables.base import VariablesBase
 
 from pages.utils.submission_source import get_submission_source, is_official_server
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.io.parsing.utils import add_maxquant_fixed_modifications
-from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule as IonModule
+from proteobench.modules.denovo.denovo_base import DeNovoModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
 from .tabs import tab1_view_public_results as tab1
 from .tabs import tab2_upload_results as tab2
 from .tabs import tab2_upload_results as tab2_quant
-from .tabs import tab4_view_public_and_new_results as tab4
 from .tabs import tab5_compare_results
 from .tabs import tab6_submit_results as tab5_quant
 
@@ -48,7 +36,7 @@ class DeNovoUIObjects(BaseUIModule):
 
     Parameters
     ----------
-    variables : VariablesDDAQuant
+    variables : VariablesBase
         The variables for the quantification module.
     ionmodule : IonModule
         The quantification module.
@@ -58,7 +46,7 @@ class DeNovoUIObjects(BaseUIModule):
 
     def __init__(
         self,
-        variables: VariablesDDADeNovo,
+        variables: VariablesBase,
         ionmodule: IonModule,
         parsesettingsbuilder: ParseSettingsBuilder,
         page_name: str = "/",
@@ -68,7 +56,7 @@ class DeNovoUIObjects(BaseUIModule):
 
         Parameters
         ----------
-        variables : VariablesDDADeNovo
+        variables : VariablesBase
             The variables for the de novo module.
         ionmodule : IonModule
             The de novo module.
@@ -81,77 +69,87 @@ class DeNovoUIObjects(BaseUIModule):
 
         # Specific to the 'de novo' module.
         self.level_mapping = {"Precision": "precision", "AUC": "auc"}
-        self.level_mapping_submitted = {"Precision": "precision", "AUC": "auc"}
         self.evaluation_type_mapping = {"Exact": "exact", "Mass-based": "mass"}
 
     @st.fragment
     def display_all_data_results_main(self):
         """Display the results for all data in Tab 1."""
+        self._display_results(submitted=False)
+
+    @st.fragment
+    def display_all_data_results_submitted(self) -> None:
+        """Display the results for all data in Tab 4."""
+        self._display_results(submitted=True)
+
+    def _display_results(self, submitted: bool) -> None:
+        """
+        Render the plot options, scatter / precision-coverage views and results table for
+        Tab 1 (public data) or, with ``submitted=True``, Tab 4 (public + new data). The two
+        tabs use separate widget keys (the ``_submitted`` variants) so their selections are
+        independent.
+        """
+        v = self.variables
+        sfx = "_submitted" if submitted else ""
+        selectbox_id = getattr(v, f"selectbox_id{sfx}_uuid")
+        level_id = getattr(v, f"radio_level_id{sfx}_uuid")
+        evaluation_id = getattr(v, f"radio_evaluation_id{sfx}_uuid")
+        il_id = getattr(v, f"il_toggle_id{sfx}_uuid")
+        deamidation_id = getattr(v, f"deamidation_toggle_id{sfx}_uuid")
+        fig_pc_curve = getattr(v, f"fig_pc_curve{sfx}")
+
         st.title("Results (All Data)")
 
-        # Initialize selectbox
-        tab1.initialize_main_selectbox(
-            selectbox_id_uuid=self.variables.selectbox_id_uuid,
-            default_value="None",
-        )
-
+        tab1.initialize_main_selectbox(selectbox_id_uuid=selectbox_id, default_value="None")
         # Radio for level (Precision or AUC)
-        tab1.initialize_radio(
-            radio_id_uuid=self.variables.radio_level_id_uuid, default_value=self.variables.default_level
-        )
-
+        tab1.initialize_radio(radio_id_uuid=level_id, default_value=v.default_level)
         # Radio for evaluation type (Exact or Mass-Based)
-        tab1.initialize_radio(
-            radio_id_uuid=self.variables.radio_evaluation_id_uuid, default_value=self.variables.default_evaluation
-        )
+        tab1.initialize_radio(radio_id_uuid=evaluation_id, default_value=v.default_evaluation)
 
         def current_evaluation_type() -> str:
-            evaluation_choice = st.session_state.get(
-                st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), self.variables.default_evaluation
-            )
+            evaluation_choice = st.session_state.get(st.session_state.get(evaluation_id, ""), v.default_evaluation)
             return self.evaluation_type_mapping[evaluation_choice]
 
         # Define callbacks for plot options
         def render_selectbox():
-            tab1.generate_main_selectbox(self.variables, selectbox_id_uuid=self.variables.selectbox_id_uuid)
+            tab1.generate_main_selectbox(v, selectbox_id_uuid=selectbox_id)
 
         def render_level_radio():
             tab1.generate_main_radio(
-                radio_id_uuid=self.variables.radio_level_id_uuid,
+                radio_id_uuid=level_id,
                 description="Select the classification metric",
                 options=["Precision", "AUC"],
-                help=self.variables.texts.Help.radio_level,
+                help=v.texts.Help.radio_level,
             )
 
         def render_evaluation_radio():
             tab1.generate_main_radio(
-                radio_id_uuid=self.variables.radio_evaluation_id_uuid,
+                radio_id_uuid=evaluation_id,
                 description="Select the stringency of evaluation",
                 options=["Exact", "Mass-based"],
-                help=self.variables.texts.Help.radio_evaluation,
+                help=v.texts.Help.radio_evaluation,
             )
 
         def render_colorblind_selector():
-            return tab1.display_colorblindmode_selector(self.variables)
+            return tab1.display_colorblindmode_selector(v, use_submitted=submitted)
 
         def render_il_toggle():
             is_mass_mode = current_evaluation_type() == "mass"
             return tab1.generate_forced_toggle(
-                toggle_id_uuid=self.variables.il_toggle_id_uuid,
+                toggle_id_uuid=il_id,
                 label="Allow I/L mismatches",
                 default=True,
                 force_value=True if is_mass_mode else None,
-                help=self.variables.texts.Help.toggle_il,
+                help=v.texts.Help.toggle_il,
             )
 
         def render_deamidation_toggle():
             is_mass_mode = current_evaluation_type() == "mass"
             return tab1.generate_forced_toggle(
-                toggle_id_uuid=self.variables.deamidation_toggle_id_uuid,
+                toggle_id_uuid=deamidation_id,
                 label="Allow deamidation mismatches (Q↔E, N↔D)",
                 default=False,
                 force_value=True if is_mass_mode else None,
-                help=self.variables.texts.Help.toggle_deamidation,
+                help=v.texts.Help.toggle_deamidation,
             )
 
         # Render plot options expander
@@ -173,41 +171,41 @@ class DeNovoUIObjects(BaseUIModule):
         colorblind_mode = results[3] if len(results) > 3 else False
         allow_il = results[4] if len(results) > 4 else True
         allow_deamidation = results[5] if len(results) > 5 else False
-        evaluation_type = self.evaluation_type_mapping[
-            st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_uuid, ""), "Exact")
-        ]
+        evaluation_type = self.evaluation_type_mapping[st.session_state.get(st.session_state.get(evaluation_id, ""), "Exact")]
 
         filtered_data = tab1.load_and_filter_main_data(
-            variables=self.variables, ionmodule=self.ionmodule, use_slider=False
+            variables=v, ionmodule=self.ionmodule, use_slider=False, submitted=submitted
         )
 
-        if filtered_data.empty:
+        if not submitted and filtered_data.empty:
             st.info("No results available yet.", icon="ℹ️")
             return
 
         plot_params = {
-            "label": st.session_state.get(st.session_state.get(self.variables.selectbox_id_uuid, ""), "None"),
-            "level": self.level_mapping[
-                st.session_state.get(st.session_state.get(self.variables.radio_level_id_uuid, ""), "Precision")
-            ],
+            "label": st.session_state.get(st.session_state.get(selectbox_id, ""), "None"),
+            "level": self.level_mapping[st.session_state.get(st.session_state.get(level_id, ""), "Precision")],
             "evaluation_type": evaluation_type,
             "allow_il": allow_il,
             "allow_deamidation": allow_deamidation,
             "colorblind_mode": colorblind_mode,
-            "alpha_warning": getattr(self.variables, "alpha_warning", False),
-            "beta_warning": getattr(self.variables, "beta_warning", False),
-            "archived_warning": getattr(self.variables, "archived_warning", False),
         }
+        if not submitted:
+            plot_params.update(
+                alpha_warning=getattr(v, "alpha_warning", False),
+                beta_warning=getattr(v, "beta_warning", False),
+                archived_warning=getattr(v, "archived_warning", False),
+            )
 
         # Only the figure switches between these two tabs -- the results table below is
         # shared and stays visible regardless of which one is selected.
         view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
         with view_tabs[0]:
             tab1.render_main_plot(
-                variables=self.variables,
+                variables=v,
                 ionmodule=self.ionmodule,
                 plot_params=plot_params,
                 filtered_data=filtered_data,
+                submitted=submitted,
             )
         with view_tabs[1]:
             self._display_precision_coverage_curves(
@@ -215,10 +213,17 @@ class DeNovoUIObjects(BaseUIModule):
                 evaluation_type=evaluation_type,
                 allow_il=allow_il,
                 allow_deamidation=allow_deamidation,
-                fig_key_uuid=self.variables.fig_pc_curve,
+                fig_key_uuid=fig_pc_curve,
             )
 
-        tab1.render_results_table(variables=self.variables, filtered_data=filtered_data)
+        tab1.render_results_table(variables=v, filtered_data=filtered_data, submitted=submitted)
+
+        if submitted:
+            st.title("Public submission")
+            st.markdown(
+                "If you want to make this point — and the associated data — publicly available, "
+                "please go to “Public Submission"
+            )
 
     def _display_precision_coverage_curves(
         self,
@@ -328,9 +333,7 @@ class DeNovoUIObjects(BaseUIModule):
 
         st.subheader("Select dataset to plot")
 
-        dataset_options = [("Uploaded dataset", None)] + list(
-            zip(downloads_df["id"], downloads_df["intermediate_hash"])
-        )
+        dataset_options = [("Uploaded dataset", None)] + list(zip(downloads_df["id"], downloads_df["intermediate_hash"]))
 
         dataset_selection = st.multiselect(
             label="Select datasets",
@@ -483,153 +486,6 @@ class DeNovoUIObjects(BaseUIModule):
             self._display_infasta_overview(figs)
         else:
             raise Exception("Cannot display non-implemented in-depth plot.")
-
-    @st.fragment
-    def display_all_data_results_submitted(self) -> None:
-        """Display the results for all data in Tab 4."""
-        st.title("Results (All Data)")
-
-        # Initialize selectbox
-        tab1.initialize_main_selectbox(
-            selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid,
-            default_value="None",
-        )
-
-        # Radio one for precision or AUC
-        tab1.initialize_radio(
-            radio_id_uuid=self.variables.radio_level_id_submitted_uuid, default_value=self.variables.default_level
-        )
-
-        # Radio two for evaluation stringency
-        tab1.initialize_radio(
-            radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
-            default_value=self.variables.default_evaluation,
-        )
-
-        def current_evaluation_type() -> str:
-            evaluation_choice = st.session_state.get(
-                st.session_state.get(self.variables.radio_evaluation_id_submitted_uuid, ""),
-                self.variables.default_evaluation,
-            )
-            return self.evaluation_type_mapping[evaluation_choice]
-
-        # Define callbacks for plot options
-        def render_selectbox():
-            tab1.generate_main_selectbox(
-                variables=self.variables, selectbox_id_uuid=self.variables.selectbox_id_submitted_uuid
-            )
-
-        def render_level_radio():
-            tab1.generate_main_radio(
-                radio_id_uuid=self.variables.radio_level_id_submitted_uuid,
-                description="Select the classification metric",
-                options=["Precision", "AUC"],
-                help=self.variables.texts.Help.radio_level,
-            )
-
-        def render_evaluation_radio():
-            tab1.generate_main_radio(
-                radio_id_uuid=self.variables.radio_evaluation_id_submitted_uuid,
-                description="Select the stringency of evaluation",
-                options=["Exact", "Mass-based"],
-                help=self.variables.texts.Help.radio_evaluation,
-            )
-
-        def render_colorblind_selector():
-            return tab1.display_colorblindmode_selector(self.variables, use_submitted=True)
-
-        def render_il_toggle():
-            is_mass_mode = current_evaluation_type() == "mass"
-            return tab1.generate_forced_toggle(
-                toggle_id_uuid=self.variables.il_toggle_id_submitted_uuid,
-                label="Allow I/L mismatches",
-                default=True,
-                force_value=True if is_mass_mode else None,
-                help=self.variables.texts.Help.toggle_il,
-            )
-
-        def render_deamidation_toggle():
-            is_mass_mode = current_evaluation_type() == "mass"
-            return tab1.generate_forced_toggle(
-                toggle_id_uuid=self.variables.deamidation_toggle_id_submitted_uuid,
-                label="Allow deamidation mismatches (Q↔E, N↔D)",
-                default=False,
-                force_value=True if is_mass_mode else None,
-                help=self.variables.texts.Help.toggle_deamidation,
-            )
-
-        # Render plot options expander
-        results = self.render_plot_options_expander(
-            filter_callbacks=[render_selectbox],
-            selector_callbacks=[
-                render_level_radio,
-                render_evaluation_radio,
-                render_colorblind_selector,
-                render_il_toggle,
-                render_deamidation_toggle,
-            ],
-            filter_cols_spec=1,
-            selector_cols_spec=[1, 1, 1, 1, 1],
-        )
-
-        # Extract toggle values from results (index 0 is the filter/selectbox callback,
-        # which returns None; indices 1-5 are the selector callbacks in the order above).
-        colorblind_mode = results[3] if len(results) > 3 else False
-        allow_il = results[4] if len(results) > 4 else True
-        allow_deamidation = results[5] if len(results) > 5 else False
-
-        # Get current selections from session state
-        label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
-        level = self.level_mapping[
-            st.session_state.get(st.session_state.get(self.variables.radio_level_id_submitted_uuid, ""), "Precision")
-        ]
-        evaluation_type = self.evaluation_type_mapping[
-            st.session_state.get(st.session_state.get(self.variables.radio_evaluation_id_submitted_uuid, ""), "Exact")
-        ]
-
-        # Load once, then only the figure switches between the two tabs below -- the
-        # results table stays outside the switcher, visible regardless of which is selected.
-        filtered_data = tab4.load_and_filter_submitted_data(variables=self.variables, ionmodule=self.ionmodule)
-
-        plot_params = {
-            "label": label,
-            "level": level,
-            "evaluation_type": evaluation_type,
-            "allow_il": allow_il,
-            "allow_deamidation": allow_deamidation,
-            "colorblind_mode": colorblind_mode,
-        }
-
-        view_tabs = st.tabs(["Scatter", "Precision-Coverage Curves"])
-        with view_tabs[0]:
-            tab4.render_submitted_main_plot(
-                variables=self.variables,
-                ionmodule=self.ionmodule,
-                plot_params=plot_params,
-                filtered_data=filtered_data,
-            )
-        with view_tabs[1]:
-            self._display_precision_coverage_curves(
-                filtered_data=filtered_data,
-                evaluation_type=evaluation_type,
-                allow_il=allow_il,
-                allow_deamidation=allow_deamidation,
-                fig_key_uuid=self.variables.fig_pc_curve_submitted,
-            )
-
-        tab4.render_submitted_results_table(filtered_data, self.variables)
-
-        # st.session_state[self.variables.table_id_uuid] = uuid.uuid4()
-        # st.data_editor(
-        #     st.session_state[self.variables.all_datapoints_submitted],
-        #     key=st.session_state[self.variables.table_id_uuid],
-        #     on_change=self._handle_submitted_table_edits,
-        # )
-
-        st.title("Public submission")
-        st.markdown(
-            "If you want to make this point — and the associated data — publicly available, please go to “Public Submission"
-        )
 
     def display_workflow_comparison(self) -> None:
         """Display the workflow comparison tab."""
@@ -789,10 +645,7 @@ class DeNovoUIObjects(BaseUIModule):
             variables=self.variables,
             user_input=self.user_input,
         )
-        # ? stop_duplicating is not used?
-        self.stop_duplicating = tab5_quant.generate_confirmation_checkbox(
-            check_submission=self.variables.check_submission
-        )
+        tab5_quant.generate_confirmation_checkbox(check_submission=self.variables.check_submission)
 
         params = None
         pr_url = None
@@ -825,65 +678,3 @@ class DeNovoUIObjects(BaseUIModule):
                 variables=self.variables,
                 pr_url=pr_url,
             )
-
-    #####################
-    ### TAB 4 METHODS ###
-    #####################
-    def _handle_submitted_table_edits(self) -> None:
-        """Callback function for handling edits made to the data table in the UI."""
-        edits = st.session_state[st.session_state[self.variables.table_id_uuid]]["edited_rows"].items()
-        for k, v in edits:
-            try:
-                st.session_state[self.variables.all_datapoints_submitted][list(v.keys())[0]].iloc[k] = list(v.values())[
-                    0
-                ]
-            except TypeError:
-                return
-        st.session_state[self.variables.highlight_list_submitted] = list(
-            st.session_state[self.variables.all_datapoints_submitted]["Highlight"]
-        )
-        st.session_state[self.variables.placeholder_table] = st.session_state[self.variables.all_datapoints_submitted]
-
-        if len(st.session_state[self.variables.all_datapoints]) == 0:
-            st.error("No datapoints available for plotting", icon="🚨")
-
-        try:
-            # Get plot generator from module (following Quant pattern)
-            plot_generator = self.ionmodule.get_plot_generator()
-
-            # Get colorblind mode and ambiguity toggle states from session state
-            colorblind_key = self.variables.colorblind_mode_selector_uuid
-            if colorblind_key in st.session_state:
-                colorblind_mode_id = st.session_state[colorblind_key]
-                colorblind_mode = st.session_state.get(colorblind_mode_id, False)
-            else:
-                colorblind_mode = False
-
-            il_key = self.variables.il_toggle_id_uuid
-            allow_il = (
-                st.session_state.get(st.session_state.get(il_key, ""), True) if il_key in st.session_state else True
-            )
-
-            deamidation_key = self.variables.deamidation_toggle_id_uuid
-            allow_deamidation = (
-                st.session_state.get(st.session_state.get(deamidation_key, ""), False)
-                if deamidation_key in st.session_state
-                else False
-            )
-
-            fig_metric = plot_generator.plot_main_metric(
-                result_df=st.session_state[self.variables.all_datapoints],
-                hide_annot=False,
-                label=st.session_state[st.session_state[self.variables.selectbox_id_uuid]],
-                level=self.level_mapping[st.session_state[st.session_state[self.variables.radio_level_id_uuid]]],
-                evaluation_type=self.evaluation_type_mapping[
-                    st.session_state[st.session_state[self.variables.radio_evaluation_id_uuid]]
-                ],
-                allow_il=allow_il,
-                allow_deamidation=allow_deamidation,
-                colorblind_mode=colorblind_mode,
-            )
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-
-        st.session_state[self.variables.fig_metric] = fig_metric

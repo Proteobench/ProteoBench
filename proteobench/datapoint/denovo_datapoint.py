@@ -6,18 +6,17 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
-import logging
-from collections import ChainMap, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import chain
-from typing import Any, Dict, List
+from typing import List
 
 import numpy as np
 import pandas as pd
 
 import proteobench
-from proteobench.datapoint.datapoint_base import DatapointBase
+from proteobench.datapoint.quant_datapoint import generate_id
 from proteobench.score.denovoscores import AMBIGUITY_COMBOS, get_ambiguity_suffix
 
 
@@ -133,7 +132,7 @@ def collapse_aa_scores(df: pd.DataFrame, evaluation_type: str, exact_dn_column: 
 
 
 @dataclass
-class DenovoDatapoint(DatapointBase):
+class DenovoDatapoint:
     """
     A data structure used to store the results of a benchmark run.
 
@@ -193,19 +192,6 @@ class DenovoDatapoint(DatapointBase):
     comments: str = ""
     proteobench_version: str = ""
 
-    def generate_id(self) -> None:
-        """
-        Generate a unique ID for the benchmark run by combining the software name and a timestamp.
-
-        This ID is used to uniquely identify each run of the benchmark. The timestamp carries
-        microseconds because datapoints are also generated in batches -- the resubmission
-        script regenerates many in a loop -- where whole-second resolution hands several runs
-        the same ID.
-        """
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        self.id = "_".join([self.software_name, str(time_stamp)])
-        logging.info(f"Assigned the following ID to this run: {self.id}")
-
     @staticmethod
     def generate_datapoint(
         intermediate: pd.DataFrame,
@@ -264,7 +250,7 @@ class DenovoDatapoint(DatapointBase):
             proteobench_version=proteobench.__version__,
         )
 
-        result_datapoint.generate_id()
+        result_datapoint.id = generate_id(result_datapoint.software_name)
 
         results = {"peptide": {}, "aa": {}}
         for l in ["peptide", "aa"]:

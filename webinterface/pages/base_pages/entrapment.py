@@ -1,25 +1,18 @@
 """Streamlit-based web interface for ProteoBench."""
 
 import copy
-import logging
 import uuid
-from typing import Any, Dict
 
-import pages.texts.proteobench_builder as pbb
 import pandas as pd
 import streamlit as st
-from pages.pages_variables.Entrapment.Entrapment_DIA_ion_Astral_variables import (
-    VariablesDIAEntrapmentAstral,
-)
+from pages.pages_variables.base import VariablesBase
 
 from pages.utils.submission_source import get_submission_source, is_official_server
 
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.io.params import ProteoBenchParameters
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-from proteobench.modules.entrapment.entrapment_ion_DIA_Astral import (
-    DIAEntrapmentIonModuleAstral as IonModule,
-)
+from proteobench.modules.entrapment.entrapment_base_module import EntrapmentModule as IonModule
 from proteobench.utils.server_io import dataset_folder_exists
 
 from .base import BaseUIModule
@@ -27,7 +20,6 @@ from .tabs import (
     tab1_view_public_results,
     tab2_upload_results,
     tab3_view_single_result,
-    tab4_view_public_and_new_results,
     tab6_submit_results,
 )
 
@@ -39,7 +31,7 @@ class EntrapmentUIObjects(BaseUIModule):
 
     Parameters
     ----------
-    variables : VariablesDIAEntrapmentAstral
+    variables : VariablesBase
         The variables for the entrapment module.
     ionmodule : IonModule
         The entrapment module.
@@ -49,7 +41,7 @@ class EntrapmentUIObjects(BaseUIModule):
 
     def __init__(
         self,
-        variables: VariablesDIAEntrapmentAstral,
+        variables: VariablesBase,
         ionmodule: IonModule,
         parsesettingsbuilder: ParseSettingsBuilder,
         page_name: str = "/",
@@ -73,7 +65,6 @@ class EntrapmentUIObjects(BaseUIModule):
         # Quant-specific attributes
         self.first_point_plotted = False
         st.session_state[self.variables.submit] = False
-        self.stop_duplicating = False
 
     def display_submission_form(self) -> None:
         """Create the main submission form for the Streamlit UI in Tab 2."""
@@ -132,9 +123,7 @@ class EntrapmentUIObjects(BaseUIModule):
         st.subheader("Select dataset to plot")
 
         if not downloads_df.empty:
-            dataset_options = [("Uploaded dataset", None)] + list(
-                zip(downloads_df["id"], downloads_df["intermediate_hash"])
-            )
+            dataset_options = [("Uploaded dataset", None)] + list(zip(downloads_df["id"], downloads_df["intermediate_hash"]))
         else:
             dataset_options = [("Uploaded dataset", None)]
 
@@ -213,11 +202,10 @@ class EntrapmentUIObjects(BaseUIModule):
         if self.variables.check_submission not in st.session_state:
             st.session_state[self.variables.check_submission] = False
 
-        if self.variables.first_new_plot:
-            self.submission_ready = tab6_submit_results.generate_submission_ui_elements(
-                variables=self.variables,
-                user_input=self.user_input,
-            )
+        self.submission_ready = tab6_submit_results.generate_submission_ui_elements(
+            variables=self.variables,
+            user_input=self.user_input,
+        )
 
         if self.user_input[self.variables.meta_data]:
             params = tab6_submit_results.load_user_parameters(
@@ -236,10 +224,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 variables=self.variables,
                 user_input=self.user_input,
             )
-            # ? stop_duplicating is not used?
-            self.stop_duplicating = tab6_submit_results.generate_confirmation_checkbox(
-                check_submission=self.variables.check_submission
-            )
+            tab6_submit_results.generate_confirmation_checkbox(check_submission=self.variables.check_submission)
         else:
             params = None
 
@@ -353,12 +338,9 @@ class EntrapmentUIObjects(BaseUIModule):
                 icon="⚠️",
             )
             st.markdown("##### FDP estimates")
+            st.markdown("Two estimated bounds on the false discovery proportion (FDP) are computed from the search results:")
             st.markdown(
-                "Two estimated bounds on the false discovery proportion (FDP) are computed from the search results:"
-            )
-            st.markdown(
-                "**Estimated lower FDP bound** — fraction of identified entrapment peptides among all "
-                "identifications:"
+                "**Estimated lower FDP bound** — fraction of identified entrapment peptides among all " "identifications:"
             )
             st.latex(
                 r"\widehat{\underline{\mathrm{FDP}}}_{\mathcal{T}\cup\mathcal{E}_{\mathcal{T}}}"
@@ -466,9 +448,10 @@ class EntrapmentUIObjects(BaseUIModule):
         """Display the results for all data in Tab 4."""
         st.title("Results (All Data)")
 
-        tab4_view_public_and_new_results.initialize_submitted_data_points(
+        tab1_view_public_results.initialize_main_data_points(
             variables=self.variables,
             ionmodule=self.ionmodule,
+            submitted=True,
         )
 
         # Initialize plot options controls (same as tab 1)
@@ -503,13 +486,9 @@ class EntrapmentUIObjects(BaseUIModule):
                 st.session_state[key] = uuid.uuid4()
             metric_uuid = st.session_state[key]
 
-            help_text = (
-                getattr(self.variables.texts.Help, "radio_metric", None) if hasattr(self.variables, "texts") else None
-            )
             metric = st.radio(
                 "Select metric to show in x axis",
                 ["Estimated upper FDP bound - Paired method", "Estimated lower FDP bound"],
-                help=help_text,
                 horizontal=True,
                 key=metric_uuid,
             )
@@ -563,7 +542,7 @@ class EntrapmentUIObjects(BaseUIModule):
         # Get current selections from session state
         label = st.session_state.get(st.session_state.get(self.variables.selectbox_id_submitted_uuid, ""), "None")
 
-        tab4_view_public_and_new_results.display_submitted_results(
+        tab1_view_public_results.display_existing_results(
             variables=self.variables,
             ionmodule=self.ionmodule,
             plot_params={
@@ -576,6 +555,7 @@ class EntrapmentUIObjects(BaseUIModule):
                 "archived_warning": getattr(self.variables, "archived_warning", False),
             },
             render_forest_plot=lambda: self._render_forest_plot(session_key=self.variables.all_datapoints_submitted),
+            submitted=True,
         )
 
     def display_workflow_comparison(self) -> None:

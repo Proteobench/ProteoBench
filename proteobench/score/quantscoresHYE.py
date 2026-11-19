@@ -7,14 +7,12 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from proteobench.score.score_base import ScoreBase
 
-
-class QuantScoresHYE(ScoreBase):
+class QuantScoresHYE:
     """
     Class for computing quantification scores for LFQ benchmarking.
 
-    This class implements the ScoreBase interface to compute quantification-specific metrics
+    This class computes quantification-specific metrics
     including condition statistics, fold changes, and epsilon (difference) values.
 
     Parameters

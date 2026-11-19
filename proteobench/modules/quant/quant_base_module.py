@@ -10,9 +10,10 @@ import logging
 import os
 import uuid
 import zipfile
+from contextlib import contextmanager
 from datetime import datetime
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 import pandas as pd
 from pandas import DataFrame
@@ -22,7 +23,16 @@ from proteobench.datapoint.quant_datapoint import (
     filter_df_numquant_epsilon,
     filter_df_numquant_nr_feature,
 )
-from proteobench.exceptions import DatasetAlreadyExistsOnServerError
+from proteobench.exceptions import (
+    ConvertStandardFormatError,
+    DatapointAppendError,
+    DatapointGenerationError,
+    DatasetAlreadyExistsOnServerError,
+    IntermediateFormatGenerationError,
+    ParseError,
+    ParseSettingsError,
+    QuantificationError,
+)
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
 from proteobench.io.params.alphadia import extract_params as extract_params_alphadia
@@ -49,27 +59,53 @@ from proteobench.io.params.spectronaut import (
 from proteobench.io.params.wombat import extract_params as extract_params_wombat
 from proteobench.io.parsing.parse_ion import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
+from proteobench.modules.constants import MODULE_SETTINGS_DIRS
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
 from proteobench.score.quantscoresHYE import QuantScoresHYE
+
+
+@contextmanager
+def _benchmarking_step(error_type: Type[Exception], message: str):
+    """
+    Re-raise any exception from the wrapped step as ``error_type``, prefixed with ``message``.
+
+    Parameters
+    ----------
+    error_type : Type[Exception]
+        The ProteoBench exception the step's failures are reported as.
+    message : str
+        Prefix for the re-raised exception's message.
+
+    Yields
+    ------
+    None
+        Control to the wrapped benchmarking step.
+    """
+    try:
+        yield
+    except Exception as e:
+        raise error_type(f"{message}: {e}") from e
 
 
 class QuantModule:
     """
     Base Module for Quantification.
 
+    A concrete module is configured entirely through class attributes; the pipeline in
+    :meth:`benchmarking` is shared by all of them.
+
     Parameters
     ----------
     token : Optional[str]
         The GitHub token.
-    proteobench_repo_name : str
-        The name of the ProteoBench repository.
-    proteobot_repo_name : str
-        The name of the ProteoBot repository.
-    parse_settings_dir : str
-        The directory containing parse settings.
-    module_id : str
-        The module identifier for configuration.
+    proteobot_repo_name : str, optional
+        The ProteoBot repository for pull requests. Defaults to ``Proteobot/<results_repo>``.
+    proteobench_repo_name : str, optional
+        The ProteoBench repository with public results. Defaults to ``Proteobench/<results_repo>``.
+    branch : Optional[str]
+        If set, check out this branch of the Proteobench repo after cloning.
+        Useful for previewing a PR branch without merging.
     """
 
     # Maps format name to a function(files) -> str warning when the upload is incomplete.
@@ -78,6 +114,16 @@ class QuantModule:
         "MetaMorpheus": validate_metamorpheus_files,
     }
     y_axis_title: str = "Total number of features quantified in the selected number of raw files"
+
+    # Per-module configuration, overridden by the concrete module classes.
+    module_id: str = ""
+    results_repo: str = ""
+    precursor_column_name: str = "precursor ion"
+    score_cls: type = QuantScoresHYE
+    datapoint_cls: type = QuantDatapointHYE
+    plot_generator_cls: type = LFQHYEPlotGenerator
+    default_cutoff_min_feature: int = 3
+    max_nr_observed: Optional[int] = None
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
         "MaxQuant": extract_params_maxquant,
@@ -103,58 +149,36 @@ class QuantModule:
     def __init__(
         self,
         token: Optional[str],
-        proteobench_repo_name: str,
-        proteobot_repo_name: str,
-        parse_settings_dir: str,
-        module_id: str,
+        proteobot_repo_name: Optional[str] = None,
+        proteobench_repo_name: Optional[str] = None,
         branch: Optional[str] = None,
     ):
         """
-        Initialize the QuantModule with GitHub repo and settings.
+        Initialize the module: clone its results repository and locate its parse settings.
 
         Parameters
         ----------
         token : Optional[str]
             The GitHub token.
-        proteobench_repo_name : str
-            The name of the ProteoBench repository.
-        proteobot_repo_name : str
-            The name of the ProteoBot repository.
-        parse_settings_dir : str
-            The directory containing parse settings.
-        module_id : str
-            The module identifier for configuration.
+        proteobot_repo_name : str, optional
+            The ProteoBot repository for pull requests. Defaults to ``Proteobot/<results_repo>``.
+        proteobench_repo_name : str, optional
+            The ProteoBench repository with public results. Defaults to ``Proteobench/<results_repo>``.
         branch : Optional[str]
             If set, check out this branch of the Proteobench repo after cloning.
-            Useful for previewing a PR branch without merging.
         """
         self.t_dir = TemporaryDirectory().name
-        print(f"Cloning GitHub repo to temporary directory: {self.t_dir}")
         self.t_dir_pr = TemporaryDirectory().name
         self.github_repo = GithubProteobotRepo(
             token,
-            proteobot_repo_name=proteobot_repo_name,
-            proteobench_repo_name=proteobench_repo_name,
+            proteobot_repo_name=proteobot_repo_name or f"Proteobot/{self.results_repo}",
+            proteobench_repo_name=proteobench_repo_name or f"Proteobench/{self.results_repo}",
             clone_dir=self.t_dir,
             clone_dir_pr=self.t_dir_pr,
             branch=branch,
         )
         self.github_repo.clone_repo()
-        self.parse_settings_dir = parse_settings_dir
-
-        self.precursor_column_name = ""
-        self.module_id = module_id
-
-    def is_implemented(self) -> bool:
-        """
-        Return whether the module is fully implemented.
-
-        Returns
-        -------
-        bool
-            Always returns True in this implementation.
-        """
-        return True
+        self.parse_settings_dir = MODULE_SETTINGS_DIRS[self.module_id]
 
     def add_current_data_point(
         self, current_datapoint: pd.Series, all_datapoints: Optional[pd.DataFrame] = None
@@ -280,12 +304,14 @@ class QuantModule:
         input_format: str,
         user_input: dict,
         all_datapoints: Optional[pd.DataFrame],
-        default_cutoff_min_feature: int = 3,
-        input_file_secondary: str = None,
-        max_nr_observed: int = None,
+        default_cutoff_min_feature: Optional[int] = None,
+        input_file_secondary: Optional[str] = None,
+        max_nr_observed: Optional[int] = None,
     ) -> tuple[DataFrame, DataFrame, DataFrame]:
         """
         Main workflow of the module. Used to benchmark workflow results.
+
+        Each step's failures are re-raised as the matching ProteoBench exception.
 
         Parameters
         ----------
@@ -298,41 +324,78 @@ class QuantModule:
         all_datapoints : Optional[pd.DataFrame]
             DataFrame containing all datapoints from the ProteoBench repo.
         default_cutoff_min_feature : int, optional
-            Minimum number of runs a feature has to be identified in. Defaults to 3.
+            Minimum number of runs a feature has to be identified in. Defaults to the module's
+            ``default_cutoff_min_feature``.
         input_file_secondary : str, optional
             Path to a secondary input file (used for some formats like AlphaDIA).
         max_nr_observed : int, optional
-            Maximum number of quantification depth levels to calculate metrics for. Defaults to None (uses 6).
+            Maximum number of quantification depth levels to calculate metrics for. Defaults to the
+            module's ``max_nr_observed``.
 
         Returns
         -------
         tuple[DataFrame, DataFrame, DataFrame]
             A tuple containing the intermediate data structure, all data points, and the input DataFrame.
         """
-        # Parse user config
-        input_df = load_input_file(input_file, input_format, input_file_secondary)
-        parse_settings = ParseSettingsBuilder(
-            parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
-        ).build_parser(input_format)
-        standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(
-            input_df
-        )  # Get quantification data
-        quant_score = QuantScoresHYE(
-            self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
-        )
-        intermediate_metric_structure = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        if default_cutoff_min_feature is None:
+            default_cutoff_min_feature = self.default_cutoff_min_feature
+        if max_nr_observed is None:
+            max_nr_observed = self.max_nr_observed
 
-        current_datapoint = QuantDatapointHYE.generate_datapoint(
-            intermediate_metric_structure,
-            input_format,
-            user_input,
-            default_cutoff_min_feature=default_cutoff_min_feature,
-            max_nr_observed=max_nr_observed,
-        )
+        try:
+            input_df = self.load_input(input_file, input_format, input_file_secondary)
+        except pd.errors.ParserError as e:
+            raise ParseError(
+                f"Error parsing {input_format} file, please ensure the format is correct "
+                f"and the correct software tool is chosen: {e}"
+            ) from e
+        except Exception as e:
+            raise ParseError(f"Error parsing the input file: {e}") from e
 
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
+        with _benchmarking_step(ParseSettingsError, "Error parsing settings file for parsing"):
+            parse_settings = ParseSettingsBuilder(
+                parse_settings_dir=self.parse_settings_dir, module_id=self.module_id
+            ).build_parser(input_format)
+        with _benchmarking_step(ConvertStandardFormatError, "Error converting to standard format"):
+            standard_format, replicate_to_raw = parse_settings.convert_to_standard_format(input_df)
+        with _benchmarking_step(QuantificationError, "Error generating quantification scores"):
+            quant_score = self.score_cls(
+                self.precursor_column_name, parse_settings.species_expected_ratio(), parse_settings.species_dict()
+            )
+        with _benchmarking_step(IntermediateFormatGenerationError, "Error generating intermediate data structure"):
+            intermediate = quant_score.generate_intermediate(standard_format, replicate_to_raw)
+        with _benchmarking_step(DatapointGenerationError, "Error generating datapoint"):
+            current_datapoint = self.datapoint_cls.generate_datapoint(
+                intermediate,
+                input_format,
+                user_input,
+                default_cutoff_min_feature=default_cutoff_min_feature,
+                max_nr_observed=max_nr_observed,
+            )
+        with _benchmarking_step(DatapointAppendError, "Error adding current data point"):
+            all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=all_datapoints)
 
-        return intermediate_metric_structure, all_datapoints, input_df
+        return intermediate, all_datapoints, input_df
+
+    def load_input(self, input_file: str, input_format: str, input_file_secondary: Optional[str] = None) -> DataFrame:
+        """
+        Load the workflow output file. Peptidoform modules override this.
+
+        Parameters
+        ----------
+        input_file : str
+            Path to the workflow output file.
+        input_format : str
+            Format of the workflow output file.
+        input_file_secondary : str, optional
+            Path to a secondary input file (used for some formats like AlphaDIA).
+
+        Returns
+        -------
+        DataFrame
+            The loaded workflow output.
+        """
+        return load_input_file(input_file, input_format, input_file_secondary)
 
     def check_new_unique_hash(self, datapoints: pd.DataFrame) -> bool:
         """
@@ -447,48 +510,6 @@ class QuantModule:
             return "Unable to create PR. Please check the logs."
 
         return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
-
-    def write_json_local_development(self, temporary_datapoints: pd.DataFrame, datapoint_params: dict) -> str:
-        """
-        Write the datapoints to a JSON file for local development.
-
-        Parameters
-        ----------
-        temporary_datapoints : pd.DataFrame
-            Temporary data points.
-        datapoint_params : dict
-            Data point parameters.
-
-        Returns
-        -------
-        str
-            The path to the written JSON file.
-        """
-
-        # TODO: need to test if this still works...
-
-        os.mkdir(self.t_dir_pr)
-
-        current_datapoint = temporary_datapoints.iloc[-1]
-
-        # Update parameters based on parsed params
-        for k, v in datapoint_params.__dict__.items():
-            current_datapoint[k] = v
-
-        current_datapoint["is_temporary"] = False
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
-
-        fname = os.path.join(self.t_dir_pr, "results.json")
-        logging.info(f"Writing the json to: {fname}")
-
-        cols_to_drop = [c for c in ("color", "hover_text", "scatter_size", "marker") if c in all_datapoints.columns]
-        all_datapoints_clean = all_datapoints.drop(columns=cols_to_drop)
-
-        f = open(os.path.join(self.t_dir_pr, "results.json"), "w")
-
-        all_datapoints_clean.to_json(f, orient="records", indent=2)
-
-        return os.path.join(self.t_dir_pr, "results.json")
 
     def write_intermediate_raw(
         self,
@@ -610,7 +631,7 @@ class QuantModule:
 
     def get_plot_generator(self, y_axis_title: str = None) -> PlotGeneratorBase:
         """
-        Get the plot generator for LFQ Ion plots.
+        Get the module's plot generator (``plot_generator_cls``).
 
         Parameters
         ----------
@@ -623,4 +644,4 @@ class QuantModule:
             The plot generator instance.
         """
         title = y_axis_title if y_axis_title is not None else self.y_axis_title
-        return LFQHYEPlotGenerator(y_axis_title=title)
+        return self.plot_generator_cls(y_axis_title=title)

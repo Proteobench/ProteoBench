@@ -1,4 +1,3 @@
-import json
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -17,19 +16,6 @@ class BaseUIModule(ABC):
         self.page_name = page_name
         self.submission_ready = False
         self.params_file_dict_copy: Dict[str, Any] = {}
-
-        pbb.proteobench_page_config()
-
-        st.markdown(
-            """
-            <style>
-            [data-testid="stSidebarNav"] {
-                display: none;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
 
         pbb.proteobench_sidebar(current_page=self.page_name)
 

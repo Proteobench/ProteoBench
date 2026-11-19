@@ -6,13 +6,13 @@ import logging
 import math
 import os
 import re
+import tomllib
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
-import toml
 from psm_utils import Peptidoform
 
 from .parse_ion import get_proforma_bracketed
@@ -41,9 +41,27 @@ _TOOL_METADATA_PATH = os.path.join(
 )
 
 
+def _load_toml(path: str) -> Dict[str, Any]:
+    """
+    Read a TOML file with the standard-library parser.
+
+    Parameters
+    ----------
+    path : str
+        Path to the TOML file.
+
+    Returns
+    -------
+    Dict[str, Any]
+        The parsed TOML content.
+    """
+    with open(path, "rb") as f:
+        return tomllib.load(f)
+
+
 def get_open_source_tools() -> set:
     """Return the set of open-source tool names (lower-cased) from tool_metadata.toml."""
-    metadata = toml.load(_TOOL_METADATA_PATH)
+    metadata = _load_toml(_TOOL_METADATA_PATH)
     return {name.lower() for name in metadata.get("open_source", {}).get("tools", [])}
 
 
@@ -71,7 +89,7 @@ class ParseSettingsBuilder:
             The ID of the module used to fetch the specific parse settings.
         """
 
-        self.PARSE_SETTINGS_TOMLS = toml.load(
+        self.PARSE_SETTINGS_TOMLS = _load_toml(
             os.path.join(os.path.dirname(__file__), "io_parse_settings", "parse_settings_files.toml")
         )
 
@@ -112,8 +130,8 @@ class ParseSettingsBuilder:
             The parser for the specified input format.
         """
         toml_file = self.PARSE_SETTINGS_FILES[input_format]
-        parse_settings = toml.load(toml_file)
-        parse_settings_module = toml.load(self.PARSE_SETTINGS_FILES_MODULE)
+        parse_settings = _load_toml(toml_file)
+        parse_settings_module = _load_toml(self.PARSE_SETTINGS_FILES_MODULE)
 
         parser = MODULE_TO_CLASS[self.MODULE_ID](parse_settings, parse_settings_module)
         if "modifications_parser" in parse_settings.keys():
@@ -144,7 +162,7 @@ class ParseSettingsBuilder:
         toml_file = self.PARSE_SETTINGS_FILES.get(input_format)
         if toml_file is None:
             return {}
-        parse_settings = toml.load(toml_file)
+        parse_settings = _load_toml(toml_file)
         base = parse_settings.get("upload_info", {})
         # Apply per-tool overrides when multiple input_formats share the same TOML
         # (e.g. "FragPipe (DIA-NN quant)" shares parse_settings_diann.toml with "DIA-NN").
@@ -176,11 +194,15 @@ class ParseSettingsQuant:
         parse_settings_module : Dict[str, Any]
             Module-specific settings, typically loaded from a TOML file.
         """
+        # Mappers shared by all tools of a module live in module_settings.toml;
+        # a tool TOML may override them (e.g. plasma DIA-NN keeps its own
+        # species_mapper key order, which the intermediate hash depends on).
+        mappers = {**parse_settings_module, **parse_settings}
         self.mapper = parse_settings["mapper"]
-        self.condition_mapper = parse_settings["condition_mapper"]
-        self.run_mapper = parse_settings["run_mapper"]
+        self.condition_mapper = mappers["condition_mapper"]
+        self.run_mapper = mappers["run_mapper"]
         self.decoy_flag = parse_settings["general"]["decoy_flag"]
-        self._species_dict = parse_settings["species_mapper"]
+        self._species_dict = mappers["species_mapper"]
         self.contaminant_flag = parse_settings["general"]["contaminant_flag"]
         self.min_count_multispec = parse_settings_module["general"]["min_count_multispec"]
         self.analysis_level = parse_settings_module["general"]["level"]

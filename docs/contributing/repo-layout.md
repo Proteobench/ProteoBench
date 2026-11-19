@@ -39,7 +39,6 @@ proteobench
 ├── __init__.py
 ├── datapoint
 │   ├── __init__.py
-│   ├── datapoint_base.py                 # Abstract base class for all datapoints
 │   └── quant_datapoint.py                # Quantification-specific datapoint implementations
 ├── exceptions.py                         # Custom exceptions
 ├── github
@@ -60,7 +59,6 @@ proteobench
 │   └── plot_generator_lfq_HYE.py         # LFQ HYE-specific plot generator implementation
 ├── score                                 # Score calculation (computing benchmarking metrics)
 │   ├── __init__.py
-│   ├── score_base.py                     # Abstract base class for all score calculators
 │   ├── quantscoresHYE.py                 # Quantification-specific score calculator (QuantScoresHYE)
 │   └── quant/                            # Legacy quantification scoring (deprecated structure)
 └── utils
@@ -76,20 +74,16 @@ webinterface
 ├── logos
 ├── pages
 │   ├── base_pages                        # QuantUIObjects (e.g. used for plotting)
-│   ├── future_pages
 │   ├── markdown_files                    # text snippets for the web interface
-│   ├── pages_variables                   # variables each module (dataclasses)
+│   ├── pages_variables                   # one dataclass per module: config + page definition
 │   └── texts                             # text scopes for the web interface (short and help msgs)
 │   ├── __init__.py
-│   ├── 2_Quant_LFQ_DDA_ion_QExactive.py
-│   ├── 3_Quant_LFQ_DIA_ion_AIF.py
-│   ├── 4_Quant_LFQ_DIA_ion_diaPASEF.py
-│   ├── 5_Quant_LFQ_DDA_peptidoform.py
-│   ├── 6_Quant_LFQ_DIA_ion_Astral.py
+│   ├── 0_debug_session_state.py          # local-only debug page (PROTEOBENCH_DEBUG=1)
+│   ├── base.py                           # run_page(), BaseStreamlitUI, DEFAULT_TABS
 ├── __init__.py
 ├── _base.py                              # Homepage
-├── Home.py                               # EntryPoint (using Homepage)
+├── Home.py                               # Entry point and router: home page + one st.Page per module
 ├── README.md
 ├── requirements.txt
-└── streamlit_utils.py                    # mainly logging functionality (is it used?)
+└── streamlit_utils.py                    # error display helpers and CSV export
 ```

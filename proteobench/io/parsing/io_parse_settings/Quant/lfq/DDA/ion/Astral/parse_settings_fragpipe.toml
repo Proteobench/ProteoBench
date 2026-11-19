@@ -19,11 +19,6 @@
 "LFQ_Astral_DDA_15min_50ng_Condition_B_REP2 Intensity" = "Condition_B_Sample_Alpha_02"
 "LFQ_Astral_DDA_15min_50ng_Condition_B_REP3 Intensity" = "Condition_B_Sample_Alpha_03"
 
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Modified Sequence"
 "before_aa" = false

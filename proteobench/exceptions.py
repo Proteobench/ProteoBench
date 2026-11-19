@@ -1,4 +1,4 @@
-class ProteobenchError(Exception):
+class ProteoBenchError(Exception):
     """Base class for errors raised by the ProteoBench benchmarking pipeline."""
 
     def __init__(self, message=""):
@@ -10,37 +10,37 @@ class DatasetAlreadyExistsOnServerError(Exception):
     """Raised when attempting to submit a dataset that already exists on the public datasets server."""
 
 
-class ParseError(ProteobenchError):
+class ParseError(ProteoBenchError):
     """Raised when an input file cannot be loaded or parsed."""
 
 
-class ParseSettingsError(ProteobenchError):
+class ParseSettingsError(ProteoBenchError):
     """Raised when a tool's parse settings cannot be loaded."""
 
 
-class ConvertStandardFormatError(ProteobenchError):
+class ConvertStandardFormatError(ProteoBenchError):
     """Raised when converting the input to the standard format fails."""
 
 
-class QuantificationError(ProteobenchError):
+class QuantificationError(ProteoBenchError):
     """Raised when the quantification scores cannot be set up."""
 
 
-class IntermediateFormatGenerationError(ProteobenchError):
+class IntermediateFormatGenerationError(ProteoBenchError):
     """Raised when generating the intermediate data structure fails."""
 
 
-class DatapointGenerationError(ProteobenchError):
+class DatapointGenerationError(ProteoBenchError):
     """Raised when generating a datapoint fails."""
 
 
-class DatapointAppendError(ProteobenchError):
+class DatapointAppendError(ProteoBenchError):
     """Raised when adding a datapoint to the collection fails."""
 
 
-class EntrapmentError(ProteobenchError):
+class EntrapmentError(ProteoBenchError):
     """Raised when an entrapment-specific step fails."""
 
 
-class PlotError(ProteobenchError):
+class PlotError(ProteoBenchError):
     """Raised when plotting fails."""

@@ -135,10 +135,10 @@ Old datapoints have `{metric}_abs_epsilon` without a mode suffix. New datapoints
 
 ### Exception Hierarchy (`proteobench/exceptions.py`)
 
-All benchmarking-step exceptions subclass a single base, `ProteobenchError` (lowercase b), which stores the text on `.message`:
+All benchmarking-step exceptions subclass a single base, `ProteoBenchError`, which stores the text on `.message`:
 
 ```
-ProteobenchError
+ProteoBenchError
 ├── ParseError                              # Input file loading
 ├── ParseSettingsError                      # TOML settings loading
 ├── ConvertStandardFormatError              # Standard format conversion

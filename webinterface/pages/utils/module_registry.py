@@ -48,7 +48,8 @@ def _module_page(variables_class) -> Any:
     title, url_path = variables_class.sidebar_label, variables_class.sidebar_path
     page_file = getattr(variables_class, "page_file", None)
     if page_file:
-        return st.Page(page_file, title=title, url_path=url_path)
+        # Anchored to webinterface/ so it resolves however the app was launched.
+        return st.Page(Path(__file__).resolve().parents[2] / page_file, title=title, url_path=url_path)
 
     def render_module_page():
         from pages.base import run_page  # deferred: pages.base imports the sidebar, which imports this module

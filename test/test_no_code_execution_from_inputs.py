@@ -204,7 +204,12 @@ METRICS = {"exact": 0.4, "mass": 0.5, "n_spectra": 3}
 
 
 class TestDeNovoPlots:
-    def test_missing_bins_are_filled_with_empty_metrics(self):
+    def test_missing_bins_leave_a_gap_rather_than_a_zero(self):
+        # This asserted that a missing bin plots at EMPTY_METRICS["mass"], i.e. 0.0. It now
+        # plots nothing there: a tool that was not measured in a bin has no precision in it,
+        # and drawing it at zero states a result that was never obtained while making the line
+        # dive to the floor and back. The security property the test was written for is
+        # untouched -- nothing is evaluated either way; only the gap is new.
         frame = _metrics_df(
             [
                 ("dtp_1", {"7": METRICS, "8": METRICS}, {"Yeast": METRICS, "Human": METRICS}),
@@ -214,7 +219,22 @@ class TestDeNovoPlots:
         plotter = DeNovoPlotGenerator()
         spectrum = plotter.plot_spectrum_feature(frame, "Peptide Length")
         species = plotter.plot_species_overview(frame)
-        # dtp_2 has no "7" bin and no "Yeast" entry, so those points come from EMPTY_METRICS.
+        # dtp_2 has no "7" bin and no "Yeast" entry, so neither yields a point.
+        assert list(spectrum.data[1].y) == [None, METRICS["mass"]]
+        assert list(species.data[1].y) == [None, METRICS["mass"]]
+
+    def test_a_recorded_but_empty_bin_is_filled_with_empty_metrics(self):
+        # The other half of _metrics_or_empty: a bin the datapoint does record, but with
+        # nothing in it, is a measured zero rather than an absent measurement.
+        frame = _metrics_df(
+            [
+                ("dtp_1", {"7": METRICS, "8": METRICS}, {"Yeast": METRICS, "Human": METRICS}),
+                ("dtp_2", {"7": None, "8": METRICS}, {"Yeast": None, "Human": METRICS}),
+            ]
+        )
+        plotter = DeNovoPlotGenerator()
+        spectrum = plotter.plot_spectrum_feature(frame, "Peptide Length")
+        species = plotter.plot_species_overview(frame)
         assert list(spectrum.data[1].y) == [EMPTY_METRICS["mass"], METRICS["mass"]]
         assert list(species.data[1].y) == [EMPTY_METRICS["mass"], METRICS["mass"]]
 

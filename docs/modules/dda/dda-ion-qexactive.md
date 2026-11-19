@@ -249,11 +249,13 @@ Each tool's output format is described in a `.toml` file under
   columns), that's noted here too.
 - **`[condition_mapper]`** — which raw file belongs to condition A vs. B.
 - **`[run_mapper]`** — raw file to display name (condition + replicate).
-- **`[species_mapper]`** — protein-ID suffix to species, for expected-ratio lookup.
 - **`[general]`** — the contaminant flag (`Cont_` for this module) and decoy flag used for
   filtering.
 - **`[modifications_parser]`** (where needed) — how to parse a combined
   sequence-with-modifications column into a stripped sequence plus localized modifications.
+
+The **`[species_mapper]`** (protein-ID suffix to species, for expected-ratio lookup) is shared by all
+tools and lives once in the module's `module_settings.toml`.
 
 ## Result columns
 

@@ -28,7 +28,7 @@ Naming convention
 
 New modules and classes should be given descriptive names, and fit into existing naming schemes.
 Go from general to specific properties, and make clear what distinguishes the module
-from existing ones, e.g. :class:`DIAQuantPeptidoformModule`.
+from existing ones, e.g. :class:`DDAQuantPeptidoformModule`.
 
 The modules are stored in the Python package ``proteobench`` in the
 ``modules`` subpackage: `proteobench.modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules/quant/>`_.
@@ -47,9 +47,11 @@ Backend
 The backend is organized into seven main components that you can extend or customize:
 
 **1. Module implementation** - Define how your benchmarking is performed
-   - For quantification: Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule`
-   - Implement the ``benchmarking`` method with your specific logic
-   - Initialize with custom parameters in the ``__init__`` method
+   - For quantification: add a class to :file:`proteobench/modules/quant/quant_modules.py` that
+     subclasses :class:`~proteobench.modules.quant.quant_base_module.QuantModule` and sets class
+     attributes only (``module_id``, ``results_repo``, and where needed ``precursor_column_name``,
+     ``score_cls``, ``datapoint_cls``, ``plot_generator_cls``, ``default_cutoff_min_feature``,
+     ``max_nr_observed``). The shared ``QuantModule.benchmarking`` runs the pipeline.
 
 **2. Data parsing** - Convert software output to standard format
    - Functions in :file:`proteobench/io/parsing/parse_ion.py` parse precursor ion data
@@ -64,17 +66,15 @@ The backend is organized into seven main components that you can extend or custo
      marked with ✅ in the Benchmark Results table
 
 **3. Score calculation** - Compute benchmarking metrics
-   - Base class: :class:`~proteobench.score.score_base.ScoreBase` (ABC)
    - For quantification: Use or extend :class:`~proteobench.score.quantscoresHYE.QuantScoresHYE`
    - Generates the ``intermediate`` data structure
-   - For new module types: Create a new class inheriting from ``ScoreBase``
+   - For new module types: Create a plain class with a ``generate_intermediate`` method (no base class)
    - See :ref:`score-configuration` for detailed information
 
 **4. Result representation** - Store benchmark results as datapoints
-   - Base class: :class:`~proteobench.datapoint.datapoint_base.DatapointBase` (ABC)
    - For quantification: Use or extend :class:`~proteobench.datapoint.quant_datapoint.QuantDatapointHYE`
    - Stores metadata and metrics for each benchmark run
-   - For new module types: Create a new class inheriting from ``DatapointBase``
+   - For new module types: Create a plain ``@dataclass`` with a ``generate_datapoint`` static method (no base class)
    - See :ref:`datapoint-configuration` for detailed information
 
 **5. Visualization** - Create plots for web interface
@@ -334,12 +334,12 @@ Score Configuration
 ...................
 
 ProteoBench uses a modular score calculation architecture where each module defines how to compute
-benchmarking metrics by subclassing :class:`~proteobench.score.score_base.ScoreBase`. This section
+benchmarking metrics in a score class (a plain class; there is no base class to inherit). This section
 explains how to configure score calculators for your module.
 
 **Required Methods**
 
-When creating a new score calculator, you must implement the abstract method from ``ScoreBase``:
+A score calculator must provide this method, which the module's ``benchmarking`` calls:
 
 1. **generate_intermediate()** - Computes metrics and creates the intermediate data structure
 
@@ -397,11 +397,9 @@ Here's a complete example for a hypothetical peptide identification module:
 
 .. code-block:: python
 
-    from proteobench.score.score_base import ScoreBase
     import pandas as pd
-    import numpy as np
 
-    class PeptideIDScores(ScoreBase):
+    class PeptideIDScores:
         """Score calculator for peptide identification modules."""
 
         def __init__(self, fdr_threshold: float = 0.01):
@@ -486,7 +484,7 @@ Datapoint Configuration
 .......................
 
 ProteoBench uses datapoints to store metadata and benchmarking results for each submission. Each module
-defines its datapoint structure by subclassing :class:`~proteobench.datapoint.datapoint_base.DatapointBase`.
+defines its datapoint structure as a plain ``@dataclass`` (there is no base class to inherit).
 This section explains how to configure datapoints for your module.
 
 **Required Components**
@@ -498,10 +496,9 @@ When creating a new datapoint class, you must:
    .. code-block:: python
 
        from dataclasses import dataclass
-       from proteobench.datapoint.datapoint_base import DatapointBase
 
        @dataclass
-       class QuantDatapointHYE(DatapointBase):
+       class QuantDatapointHYE:
            """
            Datapoint for LFQ quantification benchmarking.
 
@@ -521,28 +518,14 @@ When creating a new datapoint class, you must:
            # Results
            results: dict  # Contains metrics at different filters
 
-2. **Implement generate_id()** - Create a unique identifier
+2. **Set the id** with the shared :func:`~proteobench.datapoint.quant_datapoint.generate_id` helper,
+   which returns ``<software_name>_<timestamp>``:
 
    .. code-block:: python
 
-       def generate_id(self) -> None:
-           """
-           Generate a unique hash ID for this benchmark run.
+       from proteobench.datapoint.quant_datapoint import generate_id
 
-           The ID should be deterministic based on the input data and settings,
-           allowing detection of duplicate submissions.
-           """
-           # Combine relevant fields into a string
-           id_string = (
-               f"{self.software_name}_{self.software_version}_"
-               f"{self.search_engine}_{self.ident_fdr_psm}_"
-               f"{self.enable_match_between_runs}_{self.enzyme}"
-               # ... include all distinguishing parameters ...
-           )
-
-           # Create hash
-           import hashlib
-           self.id = hashlib.sha256(id_string.encode()).hexdigest()[:10]
+       datapoint.id = generate_id(datapoint.software_name)
 
 3. **Implement generate_datapoint()** - Create datapoint from intermediate data
 
@@ -586,7 +569,7 @@ When creating a new datapoint class, you must:
            # 2. Create datapoint object
            import dataclasses
            datapoint = QuantDatapointHYE(
-               id="",  # Will be set by generate_id()
+               id=generate_id(input_format),
                software_name=input_format,
                software_version=user_input.get("software_version", "unknown"),
                search_engine=user_input.get("search_engine", input_format),
@@ -596,10 +579,7 @@ When creating a new datapoint class, you must:
                results=results,
            )
 
-           # 3. Generate unique ID
-           datapoint.generate_id()
-
-           # 4. Convert to pandas Series for storage
+           # 3. Convert to pandas Series for storage
            return pd.Series(dataclasses.asdict(datapoint))
 
 **Example: Creating a Custom Datapoint**
@@ -609,13 +589,13 @@ Here's a complete example for a hypothetical peptide identification module:
 .. code-block:: python
 
     from dataclasses import dataclass
-    from proteobench.datapoint.datapoint_base import DatapointBase
-    import hashlib
     import dataclasses
     import pandas as pd
 
+    from proteobench.datapoint.quant_datapoint import generate_id
+
     @dataclass
-    class PeptideIDDatapoint(DatapointBase):
+    class PeptideIDDatapoint:
         """Datapoint for peptide identification benchmarking."""
 
         # Metadata
@@ -630,14 +610,6 @@ Here's a complete example for a hypothetical peptide identification module:
         num_proteins: int
         replicate_overlap: float
 
-        def generate_id(self) -> None:
-            """Generate unique ID based on metadata."""
-            id_string = (
-                f"{self.software_name}_{self.software_version}_"
-                f"{self.database}_{self.fdr_threshold}"
-            )
-            self.id = hashlib.sha256(id_string.encode()).hexdigest()[:10]
-
         @staticmethod
         def generate_datapoint(
             intermediate: pd.DataFrame,
@@ -649,7 +621,7 @@ Here's a complete example for a hypothetical peptide identification module:
             metrics = intermediate.iloc[0]  # Assuming aggregated data
 
             datapoint = PeptideIDDatapoint(
-                id="",
+                id=generate_id(input_format),
                 software_name=input_format,
                 software_version=user_input.get("software_version", "unknown"),
                 database=user_input.get("database", "unknown"),
@@ -658,8 +630,6 @@ Here's a complete example for a hypothetical peptide identification module:
                 num_proteins=int(metrics["num_proteins"]),
                 replicate_overlap=float(metrics["overlap_score"]),
             )
-
-            datapoint.generate_id()
             return pd.Series(dataclasses.asdict(datapoint))
 
 Web interface
@@ -689,6 +659,13 @@ that defines both the module's behavior and its appearance in the sidebar naviga
 Create a new file following the pattern ``<module_type>_variables.py`` (e.g., ``lfq_DDA_ion_Astral_variables.py``)
 in the appropriate subdirectory under ``pages_variables/`` (e.g., ``Quant/``).
 
+The dataclass inherits ``VariablesBase`` (``pages_variables/base.py``) and only holds the module's real
+configuration. Set ``key`` to a string unique to the module: every Streamlit session-state key the
+pages use (``submit``, ``all_datapoints``, ``slider_id_uuid``, ...) is derived from it as
+``f"{name}_{key}"``. Set ``markdown_dir`` to the module's markdown folder; the
+``input_file``, ``table`` and ``slider`` description paths are derived from it. A module without
+a min-observations slider sets ``has_slider = False``.
+
 **Required Sidebar Metadata Fields**
 
 Your variables dataclass must include these fields for the module registry to discover and display it:
@@ -698,8 +675,12 @@ Your variables dataclass must include these fields for the module registry to di
     from dataclasses import dataclass, field
     from typing import List
 
+    from pages.pages_variables.base import VariablesBase
+
     @dataclass
-    class VariablesDDAQuantAstral:
+    class VariablesDDAQuantAstral(VariablesBase):
+        key: str = "dda_quant_Astral"
+        markdown_dir: str = "pages/markdown_files/Quant/lfq/DDA/ion/Astral"
         # ... other module-specific fields ...
 
         # Sidebar metadata (required)
@@ -719,9 +700,8 @@ Your variables dataclass must include these fields for the module registry to di
 **Sidebar Configuration Details:**
 
 - **sidebar_label**: Display name shown in the sidebar (keep concise but descriptive)
-- **sidebar_path**: URL path for the page (must match the page filename without numeric prefix)
-
-  - Example: If your page file is ``8_Quant_LFQ_DDA_ion_Astral.py``, use ``/Quant_LFQ_DDA_ion_Astral``
+- **sidebar_path**: URL path of the page, e.g. ``/Quant_LFQ_DDA_ion_Astral`` (must be unique;
+  existing paths must not change, since they are the public URLs)
 
 - **sidebar_category**: Determines which expandable section contains the module
 
@@ -874,49 +854,39 @@ to show the respective figures with the right metadata.
 Change the text and the field names accordingly in the ``dataclass``
 in `webinterface.pages.pages_variables <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages/pages_variables>`_.
 
-Creating a Module Page with StreamlitUI
-........................................
+Creating a Module Page
+......................
 
-Each module page inherits from :class:`~webinterface.pages.base.BaseStreamlitUI`,
-which provides a standardized structure for creating multi-tab interfaces with minimal code duplication.
+A module has no page file of its own. ``Home.py`` is the app's router: it builds one
+``st.Page`` per Variables class found by the module registry (at the class's
+``sidebar_path``) and runs ``st.navigation``. Each module page then calls
+:func:`~webinterface.pages.base.run_page`, which builds a
+:class:`~webinterface.pages.base.BaseStreamlitUI` (tabs, the standard header with title,
+documentation link and banner, the guided tour) from the Variables instance.
 
-**BaseStreamlitUI Architecture**
-
-The base class handles common functionality:
-
-- Tab creation and rendering
-- Standard header elements (title, documentation link, banner)
-- Integration with module backend and UI objects
-
-**For Standard Quantification Modules (6 tabs)**
-
-Most quantification modules use the default 6-tab configuration and require minimal code:
+So the page is defined by four class attributes on the Variables dataclass:
 
 .. code-block:: python
 
-    # webinterface/pages/2_Quant_LFQ_DDA_ion_QExactive.py
-    from pages.base import BaseStreamlitUI
     from pages.base_pages.quant import QuantUIObjects
-    from pages.pages_variables.Quant.lfq_DDA_ion_QExactive_variables import VariablesDDAQuant
-    from pages.texts.generic_texts import WebpageTexts
-    from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
-    from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import DDAQuantIonModuleQExactive
+    from pages.pages_variables.base import VariablesBase
+    from proteobench.modules.quant.quant_modules import DDAQuantIonModuleQExactive
 
-    if __name__ == "__main__":
-        # Instantiate and run directly - no subclass needed
-        st_ui = BaseStreamlitUI(
-            variables=VariablesDDAQuant(),
-            texts=WebpageTexts,
-            ionmodule=DDAQuantIonModuleQExactive,
-            parsesettingsbuilder=ParseSettingsBuilder,
-            uiobjects=QuantUIObjects,
-            page_name="Quant LFQ DDA ion QExactive",
-        )
-        st_ui.main_page()
+    @dataclass
+    class VariablesDDAQuant(VariablesBase):
+        key: str = "dda_quant_QExactive"
+        markdown_dir: str = "pages/markdown_files/Quant/lfq/DDA/ion/QExactive"
+        ionmodule = DDAQuantIonModuleQExactive   # backend module class
+        uiobjects = QuantUIObjects               # UIObjects class providing the tab methods
+        # tabs = [...]  optional, defaults to DEFAULT_TABS
+        # tour = False  optional, hides the guided tour (default True)
+        ...
+
+The page title in the sidebar is ``sidebar_label`` and its URL is ``sidebar_path``.
 
 **Default Tab Configuration (Quant Modules)**
 
-The default :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config` returns:
+``DEFAULT_TABS`` in :file:`webinterface/pages/base.py` is:
 
 1. **View Public Results** → ``display_all_data_results_main()``
 2. **Upload New Results (Private)** → ``display_submission_form()``
@@ -927,56 +897,18 @@ The default :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config` retu
 
 **For Custom Tab Configurations**
 
-If your module needs a different number or order of tabs, create a subclass and override
-:meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config`:
+Set ``tabs`` to a list of ``(tab_display_name, uiobjects_method_name)`` tuples; each method
+is called on the ``uiobjects`` instance when its tab renders. The de novo module does this:
 
 .. code-block:: python
 
-    # webinterface/pages/7_denovo_DDA_HCD.py
-    from pages.base import BaseStreamlitUI
-    from pages.base_pages.denovo import DeNovoUIObjects
-
-    class StreamlitUI(BaseStreamlitUI):
-        """Streamlit UI for the DDA de novo identification module."""
-
-        def get_tab_config(self) -> list:
-            """Override tab configuration for De Novo module (5 tabs instead of 6)."""
-            return [
-                ("View Public Results", "display_all_data_results_main"),
-                ("Upload New Results (Private)", "display_submission_form"),
-                ("View Public + New Results", "display_all_data_results_submitted"),
-                ("Compare Results", "display_indepth_plots"),
-                ("Submit New Results", "display_public_submission_ui"),
-            ]
-
-    if __name__ == "__main__":
-        st_ui = StreamlitUI(
-            variables=VariablesDDADeNovo(),
-            texts=WebpageTexts,
-            ionmodule=DDAHCDDeNovoModule,
-            parsesettingsbuilder=ParseSettingsBuilder,
-            uiobjects=DeNovoUIObjects,
-            page_name="De novo DDA-HCD peptidoform",
-        )
-        st_ui.main_page()
-
-**Tab Configuration Format**
-
-The :meth:`~webinterface.pages.base.BaseStreamlitUI.get_tab_config` method returns a list of tuples:
-
-.. code-block:: python
-
-    [
-        (tab_display_name, uiobjects_method_name),
-        ...
+    tabs = [
+        ("View Public Results", "display_all_data_results_main"),
+        ("Upload New Results (Private)", "display_submission_form"),
+        ("View Public + New Results", "display_all_data_results_submitted"),
+        ("Compare Results", "display_indepth_plots"),
+        ("Submit New Results", "display_public_submission_ui"),
     ]
-
-- **tab_display_name**: String shown in the tab header
-- **uiobjects_method_name**: Name of the method to call on the ``uiobjects`` instance
-
-Each method is automatically called when its tab is rendered, with the standard header
-(title, documentation link, banner) added automatically by
-:meth:`~webinterface.pages.base.BaseStreamlitUI._render_tab_header`.
 
 Storing results
 ----------------
@@ -1032,10 +964,10 @@ a new type of module:
 `PR 727 <https://github.com/Proteobench/ProteoBench/pull/727/files>`_.
 
 
-1. Subclass :class:`~proteobench.modules.quant.quant_base_module.QuantModule` and replace
-   the :func:`benchmarking` method with your own implementation. You can copy from other
-   modules in the folder
-   `proteobench/modules <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/modules>`_
+1. Add a class to :file:`proteobench/modules/quant/quant_modules.py` that subclasses
+   :class:`~proteobench.modules.quant.quant_base_module.QuantModule` and sets its configuration
+   as class attributes (see the existing modules there). Override ``benchmarking`` only for a
+   module type whose pipeline differs from the quant one.
 2. Define the input formats using toml files in a new subfolder of
    `proteobench/io/parsing/io_parse_settings <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing/io_parse_settings>`_.
    Each tool TOML must include an ``[upload_info]`` section with four keys:
@@ -1068,17 +1000,13 @@ a new type of module:
 3. Check, modify or add a parsing procedures in
    `proteobench/io/parsing <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/io/parsing>`_
    e.g. :file:`parse_ion.py` or :file:`parse_peptidoform.py`.
-4. **Create a datapoint class** by subclassing
-   :class:`~proteobench.datapoint.datapoint_base.DatapointBase` in
+4. **Create a datapoint class** (a plain ``@dataclass``) in
    `proteobench/datapoint <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/datapoint>`_.
-   Define attributes for metadata and results, then implement:
-
-   - :meth:`generate_id` - Create unique identifier for the benchmark run
-   - :meth:`generate_datapoint` - Generate datapoint from intermediate data
+   Define attributes for metadata and results, then implement
+   :meth:`generate_datapoint` (set the id with the shared ``generate_id`` helper).
 
    See :ref:`datapoint-configuration` for detailed examples.
-5. **Create a score calculator** by subclassing
-   :class:`~proteobench.score.score_base.ScoreBase` in
+5. **Create a score calculator** (a plain class) in
    `proteobench/score <https://github.com/Proteobench/ProteoBench/tree/main/proteobench/score>`_.
    Implement the required method:
 
@@ -1105,7 +1033,7 @@ a new type of module:
    - **Sidebar metadata** (for automatic discovery and navigation):
 
      - ``sidebar_label: str`` - Display name in sidebar
-     - ``sidebar_path: str`` - URL path (must match page filename without numeric prefix)
+     - ``sidebar_path: str`` - URL path of the module page (unique; keep existing paths stable)
      - ``sidebar_category: str`` - Category: ``"DDA"``, ``"DIA"``, ``"DDA Id"``, or ``"Archived"``
      - ``keywords: List[str]`` - Search terms for sidebar filtering
 
@@ -1124,17 +1052,14 @@ a new type of module:
    The module will be automatically discovered by the module registry system.
    See the "Module Variables and Sidebar Configuration" section above for detailed examples.
 
-9. Add a new page file to
-   `webinterface/pages <https://github.com/Proteobench/ProteoBench/tree/main/webinterface/pages>`_
-   using the base functionality and your ``pages_variables`` dataclass. Name the file with
-   an optional numeric prefix for ordering (e.g., ``8_Quant_LFQ_DDA_ion_Astral.py``).
+9. Set ``ionmodule`` and ``uiobjects`` (and optionally ``tabs`` / ``tour``) on your
+   ``pages_variables`` dataclass. No page file is needed: ``Home.py`` builds the page from it.
 10. Create a new results repository for the module in
     `Proteobench <https://github.com/Proteobench>`_ and
     a fork in `Proteobot <https://github.com/proteobot>`_
-11. **Register your module in** :file:`resubmit_datapoints.py` by adding one line to
-    ``REPO_MODULE_REGISTRY`` with the format:
-    ``"Results_repo_name": ("module_id", ModuleClass, path_to_params_json)``
-    This enables automatic datapoint reprocessing for your module.
+11. **Register your module in** ``MODULE_CLASSES`` in :file:`proteobench/utils/server_io.py`.
+    :file:`resubmit_datapoints.py` derives its registry from it (via the class's ``module_id``
+    and ``results_repo``), which enables automatic datapoint reprocessing for your module.
 12. **Configure submission validation.** For a quantification module, add a
     ``[reference_database]`` section (with ``fasta_url``) to the module's
     ``module_settings.toml``; the ``quant_lfq`` profile is resolved automatically.

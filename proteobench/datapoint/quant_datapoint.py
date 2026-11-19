@@ -7,7 +7,6 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import logging
-import re
 from collections import ChainMap, defaultdict
 from dataclasses import dataclass
 from datetime import datetime
@@ -18,7 +17,29 @@ import pandas as pd
 from sklearn.metrics import roc_auc_score
 
 import proteobench
-from proteobench.datapoint.datapoint_base import DatapointBase
+
+
+def generate_id(software_name: str) -> str:
+    """
+    Generate a unique ID for a benchmark run by combining the software name and a timestamp.
+
+    The timestamp carries microseconds because datapoints are also generated in batches -- the
+    resubmission script regenerates many in a loop -- where whole-second resolution hands several
+    runs the same ID.
+
+    Parameters
+    ----------
+    software_name : str
+        Name of the software that produced the run.
+
+    Returns
+    -------
+    str
+        The run ID, ``<software_name>_<YYYYmmdd_HHMMSS_ffffff>``.
+    """
+    run_id = "_".join([software_name, datetime.now().strftime("%Y%m%d_%H%M%S_%f")])
+    logging.info(f"Assigned the following ID to this run: {run_id}")
+    return run_id
 
 
 def filter_df_numquant_epsilon(
@@ -254,11 +275,11 @@ def compute_roc_auc_directional(df: pd.DataFrame) -> float:
 
 
 @dataclass
-class QuantDatapointHYE(DatapointBase):
+class QuantDatapointHYE:
     """
     A data structure used to store the results of a quantification benchmark run.
 
-    This class extends DatapointBase to implement quantification-specific metrics and metadata
+    This class implements quantification-specific metrics and metadata
     storage for LFQ benchmarking runs.
 
     Attributes:
@@ -322,19 +343,6 @@ class QuantDatapointHYE(DatapointBase):
     nr_feature: int = 0
     comments: str = ""
     proteobench_version: str = ""
-
-    def generate_id(self) -> None:
-        """
-        Generate a unique ID for the benchmark run by combining the software name and a timestamp.
-
-        This ID is used to uniquely identify each run of the benchmark. The timestamp carries
-        microseconds because datapoints are also generated in batches -- the resubmission
-        script regenerates many in a loop -- where whole-second resolution hands several runs
-        the same ID.
-        """
-        time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        self.id = "_".join([self.software_name, str(time_stamp)])
-        logging.info(f"Assigned the following ID to this run: {self.id}")
 
     @staticmethod
     def generate_datapoint(
@@ -400,7 +408,7 @@ class QuantDatapointHYE(DatapointBase):
             proteobench_version=proteobench.__version__,
         )
 
-        result_datapoint.generate_id()
+        result_datapoint.id = generate_id(result_datapoint.software_name)
 
         # Use provided max_nr_observed or default to 6
         if max_nr_observed is None:
@@ -415,30 +423,17 @@ class QuantDatapointHYE(DatapointBase):
             )
         )
         result_datapoint.results = results
-        result_datapoint.median_abs_epsilon_global = result_datapoint.results[default_cutoff_min_feature][
-            "median_abs_epsilon_global"
-        ]
-        result_datapoint.mean_abs_epsilon_global = result_datapoint.results[default_cutoff_min_feature][
-            "mean_abs_epsilon_global"
-        ]
-        result_datapoint.median_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_feature][
-            "median_abs_epsilon_eq_species"
-        ]
-        result_datapoint.mean_abs_epsilon_eq_species = result_datapoint.results[default_cutoff_min_feature][
-            "mean_abs_epsilon_eq_species"
-        ]
-        result_datapoint.median_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_feature][
-            "median_abs_epsilon_precision_global"
-        ]
-        result_datapoint.mean_abs_epsilon_precision_global = result_datapoint.results[default_cutoff_min_feature][
-            "mean_abs_epsilon_precision_global"
-        ]
-        result_datapoint.median_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_feature][
-            "median_abs_epsilon_precision_eq_species"
-        ]
-        result_datapoint.mean_abs_epsilon_precision_eq_species = result_datapoint.results[default_cutoff_min_feature][
-            "mean_abs_epsilon_precision_eq_species"
-        ]
+        for key in (
+            "median_abs_epsilon_global",
+            "mean_abs_epsilon_global",
+            "median_abs_epsilon_eq_species",
+            "mean_abs_epsilon_eq_species",
+            "median_abs_epsilon_precision_global",
+            "mean_abs_epsilon_precision_global",
+            "median_abs_epsilon_precision_eq_species",
+            "mean_abs_epsilon_precision_eq_species",
+        ):
+            setattr(result_datapoint, key, results[default_cutoff_min_feature][key])
         result_datapoint.nr_feature = result_datapoint.results[default_cutoff_min_feature].get(
             "nr_feature", result_datapoint.results[default_cutoff_min_feature].get("nr_prec", 0)
         )

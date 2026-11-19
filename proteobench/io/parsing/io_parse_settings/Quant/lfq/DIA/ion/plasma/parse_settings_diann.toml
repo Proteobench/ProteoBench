@@ -33,6 +33,8 @@
 "B9_G_DIA_nLC_tTOF_R5" = "Condition_B_Sample_5"
 "B9_G_DIA_nLC_tTOF_R6" = "Condition_B_Sample_6"
 
+# Overrides module_settings.toml: this key order is kept because it sets the
+# species column order and hence the intermediate hash of existing datapoints.
 [species_mapper]
 "_YEAST" = "YEAST"
 "_HUMAN" = "HUMAN"

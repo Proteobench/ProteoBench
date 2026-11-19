@@ -13,7 +13,6 @@ import requests
 from bs4 import BeautifulSoup
 import gzip
 from pathlib import Path
-from proteobench.score.score_base import ScoreBase
 
 PEPTIDE_SETS_URL = "https://proteobench.cubimed.rub.de/datasets/module_data/de_novo_peptide_sets"
 PEPTIDE_SETS_DIR_SERVER = "/mnt/data/proteobench/module_data/"
@@ -53,7 +52,7 @@ def get_ambiguity_suffix(allow_il: bool, allow_deamidation: bool) -> str:
     raise ValueError(f"No known ambiguity combination for allow_il={allow_il}, allow_deamidation={allow_deamidation}")
 
 
-class DenovoScores(ScoreBase):
+class DenovoScores:
     """
     Class for computing de novo scores.
 

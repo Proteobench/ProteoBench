@@ -85,17 +85,6 @@ class DIAEntrapmentIonModuleAstral(EntrapmentModule):
         )
         self.precursor_column_name = "precursor ion"
 
-    def is_implemented(self) -> bool:
-        """
-        Return whether the module is fully implemented.
-
-        Returns
-        -------
-        bool
-            Whether the module is fully implemented.
-        """
-        return False
-
     def benchmarking(
         self,
         input_file: str,

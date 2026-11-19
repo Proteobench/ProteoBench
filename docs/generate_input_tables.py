@@ -6,7 +6,7 @@ Run from the docs/ directory:
 
 from pathlib import Path
 
-import toml
+import tomllib
 
 SETTINGS_ROOT = Path(__file__).resolve().parent.parent / "proteobench" / "io" / "parsing" / "io_parse_settings"
 PARSE_SETTINGS_FILES_TOML = SETTINGS_ROOT / "parse_settings_files.toml"
@@ -53,7 +53,7 @@ MODULE_DOC_CONFIG = {
 
 
 def get_upload_info(tool_name: str, toml_path: Path) -> dict:
-    data = toml.load(toml_path)
+    data = tomllib.loads(Path(toml_path).read_text(encoding="utf-8"))
     base = data.get("upload_info", {})
     override = data.get("upload_info_overrides", {}).get(tool_name, {})
     return {**base, **override}
@@ -61,7 +61,7 @@ def get_upload_info(tool_name: str, toml_path: Path) -> dict:
 
 def get_parsed_fdr_column(toml_path: Path) -> str:
     """Return the raw [mapper] source column renamed to "Q-Value" (entrapment modules only)."""
-    data = toml.load(toml_path)
+    data = tomllib.loads(Path(toml_path).read_text(encoding="utf-8"))
     mapper = data.get("mapper", {})
     return next((src for src, dst in mapper.items() if dst == "Q-Value"), "")
 
@@ -106,7 +106,7 @@ def replace_table_in_markdown(md_text: str, table_marker: str, new_table: str) -
 
 
 def main() -> None:
-    parse_settings_files = toml.load(PARSE_SETTINGS_FILES_TOML)
+    parse_settings_files = tomllib.loads(Path(PARSE_SETTINGS_FILES_TOML).read_text(encoding="utf-8"))
 
     for module_id, config in MODULE_DOC_CONFIG.items():
         tool_to_toml = parse_settings_files.get(module_id, {})

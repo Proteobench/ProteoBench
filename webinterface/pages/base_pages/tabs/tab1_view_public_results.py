@@ -1,13 +1,17 @@
 """
-Generic Tab 1: Results Display (All Data)
+Generic Tab 1 / Tab 4: Results Display (All Data, and Public + New Data)
 
 This module provides a unified interface for displaying benchmark results
-across all ProteoBench module types (Quant, De Novo, etc.).
+across all ProteoBench module types (Quant, De Novo, etc.). Tab 1 shows the
+public datapoints; Tab 4 (``submitted=True``) shows the public datapoints plus
+the user's new one, pinned through the parameter filters.
 """
 
+import contextlib
 import os
+import traceback
 import uuid
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import pandas as pd
 import streamlit as st
@@ -15,14 +19,8 @@ import streamlit_utils
 
 from ..utils.general import clean_dataframe_for_export
 from ..utils.metricplot import render_metric_plot
-from ..utils.resulttable import configure_aggrid, prepare_display_dataframe, render_aggrid
-
-
-from ..utils.parameter_filters import (  # noqa: F401
-    apply_parameter_filters,
-    generate_parameter_filters,
-)
-from ..utils.resulttable import add_open_source_column
+from ..utils.parameter_filters import generate_parameter_filters
+from ..utils.resulttable import add_open_source_column, configure_aggrid, prepare_display_dataframe, render_aggrid
 
 
 def initialize_uuid_state(key: str, default_value: Any = None) -> None:
@@ -45,9 +43,14 @@ def initialize_uuid_state(key: str, default_value: Any = None) -> None:
             st.session_state[uuid_key] = default_value
 
 
-def initialize_main_data_points(variables, ionmodule) -> None:
+def _data_key(variables, submitted: bool) -> str:
+    """Session-state key holding the Tab 1 (public) or Tab 4 (public + new) datapoints."""
+    return variables.all_datapoints_submitted if submitted else variables.all_datapoints
+
+
+def initialize_main_data_points(variables, ionmodule, submitted: bool = False) -> None:
     """
-    Initialize the all_datapoints variable in the session state.
+    Load the datapoints into the session state if they are not there yet.
 
     Parameters
     ----------
@@ -55,12 +58,13 @@ def initialize_main_data_points(variables, ionmodule) -> None:
         Variables object containing session state keys.
     ionmodule : object
         The module instance with obtain_all_data_points method.
+    submitted : bool, optional
+        If True, use the Tab 4 (public + new) key instead of the Tab 1 key.
     """
-    if variables.all_datapoints not in st.session_state:
-        st.session_state[variables.all_datapoints] = None
-        st.session_state[variables.all_datapoints] = ionmodule.obtain_all_data_points(
-            all_datapoints=st.session_state[variables.all_datapoints]
-        )
+    key = _data_key(variables, submitted)
+    if key not in st.session_state:
+        st.session_state[key] = None
+        st.session_state[key] = ionmodule.obtain_all_data_points(all_datapoints=st.session_state[key])
 
 
 # UI Control Functions
@@ -124,14 +128,7 @@ def initialize_main_selectbox(selectbox_id_uuid: str, default_value: str = "None
 
 def generate_main_selectbox(variables, selectbox_id_uuid: str) -> None:
     """Generate the main selectbox for label selection."""
-    selectbox_uuid = st.session_state[selectbox_id_uuid]
-    help_text = getattr(variables.texts.Help, "selectbox", None) if hasattr(variables, "texts") else None
-    st.selectbox(
-        "Select label",
-        variables.metric_plot_labels,
-        key=selectbox_uuid,
-        help=help_text,
-    )
+    st.selectbox("Select label", variables.metric_plot_labels, key=st.session_state[selectbox_id_uuid])
 
 
 def display_metric_selector(variables, options: Optional[list] = None, label: str = "Select metric") -> str:
@@ -149,24 +146,7 @@ def display_metric_selector(variables, options: Optional[list] = None, label: st
     """
     if options is None:
         options = ["Median", "Mean"]
-    help_text = getattr(variables.texts.Help, "radio_metric", None) if hasattr(variables, "texts") else None
-    return st.radio(
-        label,
-        options,
-        help=help_text,
-        horizontal=True,
-    )
-
-
-def display_metric_calc_approach_selector(variables) -> str:
-    """Display metric calculation approach selector and return selected mode."""
-    help_text = getattr(variables.texts.Help, "radio_mode", None) if hasattr(variables, "texts") else None
-    return st.radio(
-        "Select metric calculation approach",
-        ["Species-weighted", "Global"],
-        help=help_text,
-        horizontal=True,
-    )
+    return st.radio(label, options, horizontal=True)
 
 
 def display_colorblindmode_selector(variables, use_submitted: bool = False) -> str:
@@ -184,9 +164,7 @@ def display_colorblindmode_selector(variables, use_submitted: bool = False) -> s
     bool
         Current state of the colorblind mode toggle
     """
-    key = (
-        variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
-    )
+    key = variables.colorblind_mode_selector_submitted_uuid if use_submitted else variables.colorblind_mode_selector_uuid
     if key not in st.session_state.keys():
         st.session_state[key] = uuid.uuid4()
     _id_of_key = st.session_state[key]
@@ -243,7 +221,7 @@ def generate_forced_toggle(
     )
 
 
-def filter_data_if_applicable(variables, ionmodule, use_slider: bool = True) -> pd.DataFrame:
+def filter_data_if_applicable(variables, ionmodule, use_slider: bool = True, submitted: bool = False) -> pd.DataFrame:
     """
     Filter data using module-specific filtering logic.
 
@@ -255,65 +233,20 @@ def filter_data_if_applicable(variables, ionmodule, use_slider: bool = True) -> 
         The module instance with filter_data_point method.
     use_slider : bool, optional
         Whether to use slider-based filtering (Quant) or return all data (De Novo).
+    submitted : bool, optional
+        If True, use the Tab 4 data and slider keys.
 
     Returns
     -------
     pd.DataFrame
         Filtered or unfiltered data points.
     """
-    if not use_slider or not hasattr(ionmodule, "filter_data_point"):
-        return st.session_state[variables.all_datapoints]
-
-    if hasattr(variables, "slider_id_uuid"):
-        slider_key = st.session_state.get(variables.slider_id_uuid)
-        filter_value = st.session_state.get(slider_key, 3)
-        return ionmodule.filter_data_point(st.session_state[variables.all_datapoints], filter_value)
-
-    return st.session_state[variables.all_datapoints]
-
-
-def render_main_plot(plot_generator, data: pd.DataFrame, variables, plot_params: Dict[str, Any]) -> None:
-    """
-    Render the main metric plot using the module's plot generator.
-
-    Parameters
-    ----------
-    plot_generator : PlotGeneratorBase
-        The plot generator instance from the module.
-    data : pd.DataFrame
-        The data to plot.
-    variables : object
-        Variables object containing session state keys.
-    plot_params : Dict[str, Any]
-        Module-specific parameters for plotting (label, metric, mode, etc.).
-    """
-    # Prepare plot key
-    key = variables.fig_metric if hasattr(variables, "fig_metric") else "main_plot"
-    if key not in st.session_state:
-        st.session_state[key] = uuid.uuid4()
-    plot_uuid = st.session_state[key]
-
-    # Build annotation text based on alpha/beta warnings
-    annotation = ""
-    if plot_params.get("archived_warning", False):
-        annotation = "-Archived-"
-    elif plot_params.get("beta_warning", False):
-        annotation = "-Beta-"
-    elif plot_params.get("alpha_warning", False):
-        annotation = "-Alpha-"
-
-    with st.container(key="tour_metric_plot"):
-        try:
-            fig = plot_generator.plot_main_metric(
-                result_df=data, hide_annot=plot_params.get("hide_annot", False), annotation=annotation, **plot_params
-            )
-            st.plotly_chart(fig, key=plot_uuid)
-        except Exception as e:
-            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
-            import traceback
-
-            with st.expander("Error details"):
-                st.code(traceback.format_exc())
+    data = st.session_state[_data_key(variables, submitted)]
+    slider_attr = "slider_id_submitted_uuid" if submitted else "slider_id_uuid"
+    if use_slider and hasattr(ionmodule, "filter_data_point") and hasattr(variables, slider_attr):
+        slider_key = st.session_state.get(getattr(variables, slider_attr))
+        return ionmodule.filter_data_point(data, st.session_state.get(slider_key, 3))
+    return data
 
 
 def display_download_section(variables, sort_by: str = "id") -> None:
@@ -342,10 +275,7 @@ def display_download_section(variables, sort_by: str = "id") -> None:
         if hasattr(variables, "placeholder_downloads_container"):
             st.session_state[variables.placeholder_downloads_container] = st.empty()
 
-    if (
-        not hasattr(variables, "download_selector_id_uuid")
-        or variables.download_selector_id_uuid not in st.session_state
-    ):
+    if not hasattr(variables, "download_selector_id_uuid") or variables.download_selector_id_uuid not in st.session_state:
         if hasattr(variables, "download_selector_id_uuid"):
             st.session_state[variables.download_selector_id_uuid] = uuid.uuid4()
 
@@ -390,12 +320,12 @@ def display_download_section(variables, sort_by: str = "id") -> None:
         st.info("Storage directory is not configured. Set `storage.dir` in secrets.toml to enable downloads.", icon="ℹ️")
 
 
-def load_and_filter_main_data(variables, ionmodule, use_slider: bool = True) -> pd.DataFrame:
+def load_and_filter_main_data(variables, ionmodule, use_slider: bool = True, submitted: bool = False) -> pd.DataFrame:
     """
-    Load, slider/parameter-filter, and open-source-annotate the main (public) datapoints
-    table for Tab 1 -- the data-loading half of `display_existing_results`, exposed
-    separately so a caller can render more than one view (e.g. a plot *and* an alternative
-    plot behind a tab switcher) off the same filtered selection without loading it twice.
+    Load, slider/parameter-filter, and open-source-annotate the datapoints table -- the
+    data-loading half of `display_existing_results`, exposed separately so a caller can
+    render more than one view (e.g. a plot *and* an alternative plot behind a tab switcher)
+    off the same filtered selection without loading it twice.
 
     Parameters
     ----------
@@ -405,18 +335,47 @@ def load_and_filter_main_data(variables, ionmodule, use_slider: bool = True) -> 
         The module instance (Quant, De Novo, etc.).
     use_slider : bool, optional
         Whether to use slider-based filtering (default True for Quant).
+    submitted : bool, optional
+        If True, load the Tab 4 (public + new) data and pin the newly submitted row so it
+        survives all parameter filters.
 
     Returns
     -------
     pd.DataFrame
         The filtered dataframe (empty if there's nothing to show yet).
     """
-    initialize_main_data_points(variables, ionmodule)
-    filtered_data = filter_data_if_applicable(variables, ionmodule, use_slider)
-    filtered_data = add_open_source_column(filtered_data)
-    # Apply parameter-based filters (key_prefix must be unique per module page)
-    filtered_data = generate_parameter_filters(filtered_data, key_prefix=f"param_filter_{variables.all_datapoints}")
-    return filtered_data
+    initialize_main_data_points(variables, ionmodule, submitted)
+    filtered_data = add_open_source_column(filter_data_if_applicable(variables, ionmodule, use_slider, submitted))
+    pinned = None
+    if submitted and "old_new" in filtered_data.columns:
+        pinned = filtered_data.index[filtered_data["old_new"] == "new"]
+    # key_prefix must be unique per module page
+    return generate_parameter_filters(
+        filtered_data,
+        key_prefix=f"param_filter_{_data_key(variables, submitted)}",
+        pinned_indices=pinned,
+    )
+
+
+def _render_submitted_plot(variables, ionmodule, plot_params: Dict[str, Any], filtered_data: pd.DataFrame) -> None:
+    """Render Tab 4's plain metric plot (no click-to-highlight, no Alpha/Beta annotation)."""
+    plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
+    fig_key = getattr(variables, "fig_metric_submitted", "submitted_plot")
+    if fig_key not in st.session_state:
+        st.session_state[fig_key] = uuid.uuid4()
+
+    with st.container(key="tour_submitted_plot"):
+        try:
+            fig = plot_generator.plot_main_metric(
+                result_df=filtered_data,
+                hide_annot=plot_params.get("hide_annot", False),
+                **plot_params,
+            )
+            st.plotly_chart(fig, key=st.session_state[fig_key])
+        except Exception as e:
+            st.error(f"Unable to plot the datapoints: {e}", icon="🚨")
+            with st.expander("Error details"):
+                st.code(traceback.format_exc())
 
 
 def render_main_plot(
@@ -425,10 +384,11 @@ def render_main_plot(
     plot_params: Dict[str, Any],
     filtered_data: pd.DataFrame,
     render_forest_plot=None,
+    submitted: bool = False,
 ) -> None:
     """
-    Render Tab 1's main scatter/metric plot, with click-to-highlight against the table
-    rendered separately by `render_results_table` (both read/write the same highlight
+    Render the main scatter/metric plot. On Tab 1 it has click-to-highlight against the
+    table rendered separately by `render_results_table` (both read/write the same highlight
     session-state key, so they stay in sync even when rendered in different containers,
     e.g. one inside a tab switcher and the other outside it).
 
@@ -446,7 +406,19 @@ def render_main_plot(
     render_forest_plot : callable, optional
         Optional callable that renders an additional plot (e.g. a forest plot)
         directly below the main plot.
+    submitted : bool, optional
+        If True, render Tab 4's plain plot (no highlight, no Alpha/Beta annotation).
     """
+    if submitted:
+        _render_submitted_plot(variables, ionmodule, plot_params, filtered_data)
+    else:
+        _render_highlight_plot(variables, ionmodule, plot_params, filtered_data)
+    if render_forest_plot is not None:
+        render_forest_plot()
+
+
+def _render_highlight_plot(variables, ionmodule, plot_params: Dict[str, Any], filtered_data: pd.DataFrame) -> None:
+    """Render Tab 1's metric plot with click-to-highlight and the Alpha/Beta/Archived annotation."""
     plot_generator = ionmodule.get_plot_generator(y_axis_title=getattr(variables, "y_axis_title", None))
 
     # --- Session state keys for bidirectional selection ---
@@ -480,7 +452,6 @@ def render_main_plot(
         annotation = "-Beta-"
     elif plot_params.get("alpha_warning"):
         annotation = "-Alpha-"
-    
 
     consumed_keys = {"alpha_warning", "beta_warning", "metric", "mode", "label", "colorblind_mode"}
     extra_plot_kwargs = {k: v for k, v in plot_params.items() if k not in consumed_keys}
@@ -503,16 +474,14 @@ def render_main_plot(
         st.session_state[agrid_key_id] = uuid.uuid4()
         st.rerun(scope="fragment")
 
-    if render_forest_plot is not None:
-        render_forest_plot()
 
-
-def render_results_table(variables, filtered_data: pd.DataFrame) -> None:
+def render_results_table(variables, filtered_data: pd.DataFrame, submitted: bool = False) -> None:
     """
-    Render Tab 1's "Benchmark Results" table and download section, using whichever ID is
-    currently highlighted (set by `render_main_plot` or by a row click here) -- kept as its
-    own function so it can be rendered once regardless of how many alternative plots a page
-    switches between (see `render_main_plot`'s docstring).
+    Render the results table. On Tab 1 it is selectable, shows the ID currently
+    highlighted (set by `render_main_plot`), and is followed by the raw-data download
+    section; on Tab 4 it is read-only with no download section. Kept as its own function
+    so it can be rendered once regardless of how many alternative plots a page switches
+    between (see `render_main_plot`'s docstring).
 
     Parameters
     ----------
@@ -520,46 +489,48 @@ def render_results_table(variables, filtered_data: pd.DataFrame) -> None:
         Variables object containing session state keys and configuration.
     filtered_data : pd.DataFrame
         The dataframe to display, as returned by `load_and_filter_main_data`.
+    submitted : bool, optional
+        If True, render Tab 4's read-only table.
     """
-    highlight_key = f"{variables.fig_metric}_tab1_highlight_id"
-    agrid_key_id = f"{variables.fig_metric}_tab1_aggrid_key"
+    if submitted:
+        if len(filtered_data) == 0:
+            st.info("No submitted datapoints available to display.", icon="ℹ️")
+            return
+        highlight_id = None
+        suffix = getattr(variables, "fig_metric_submitted", "submitted")
+        table_key = f"tab4_table_{suffix}"
+        download_key = f"tab4_download_table_{suffix}"
+        subheader, file_name = "Submitted Benchmark Results", "submitted_benchmark_results.csv"
+        container = contextlib.nullcontext()
+    else:
+        agrid_key_id = f"{variables.fig_metric}_tab1_aggrid_key"
+        if agrid_key_id not in st.session_state:
+            st.session_state[agrid_key_id] = uuid.uuid4()
+        highlight_id = st.session_state.get(f"{variables.fig_metric}_tab1_highlight_id", None)
+        table_key = st.session_state[agrid_key_id]
+        download_key = f"tab1_download_table_{variables.fig_metric}"
+        subheader, file_name = "Benchmark Results", "benchmark_results.csv"
+        container = st.container(key="tour_results_table")
 
-    if agrid_key_id not in st.session_state:
-        st.session_state[agrid_key_id] = uuid.uuid4()
-    highlight_id = st.session_state.get(highlight_key, None)
-
-    with st.container(key="tour_results_table"):
-        st.subheader("Benchmark Results")
+    with container:
+        st.subheader(subheader)
         df_display = prepare_display_dataframe(filtered_data, highlight_id)
-        grid_options = configure_aggrid(df_display, enable_selection=True)
-        grid_response = render_aggrid(
-            df_display,
-            grid_options,
-            key=st.session_state[agrid_key_id],
-            enable_selection=True,
-        )
+        enable_selection = not submitted
+        grid_options = configure_aggrid(df_display, enable_selection=enable_selection)
+        render_aggrid(df_display, grid_options, key=table_key, enable_selection=enable_selection)
 
         st.download_button(
             label="Download table",
             data=streamlit_utils.save_dataframe(clean_dataframe_for_export(df_display)),
-            file_name="benchmark_results.csv",
+            file_name=file_name,
             mime="text/csv",
-            key=f"tab1_download_table_{variables.fig_metric}",
+            key=download_key,
             icon=":material/download:",
         )
 
-    if grid_response is not None:
-        selected_rows = grid_response.selected_rows
-        selected_id = None
-        if selected_rows is not None:
-            if isinstance(selected_rows, pd.DataFrame) and not selected_rows.empty:
-                selected_id = selected_rows.iloc[0].get("id")
-            elif isinstance(selected_rows, list) and len(selected_rows) > 0:
-                selected_id = selected_rows[0].get("id")
-
-    # Display download section
-    with st.container(key="tour_download_section"):
-        display_download_section(variables)
+    if not submitted:
+        with st.container(key="tour_download_section"):
+            display_download_section(variables)
 
 
 def display_existing_results(
@@ -567,16 +538,13 @@ def display_existing_results(
     ionmodule,
     plot_params: Dict[str, Any],
     use_slider: bool = True,
-    table_style: str = "aggrid",
-    column_config: Optional[Dict] = None,
     render_forest_plot=None,
+    submitted: bool = False,
 ) -> Optional[pd.DataFrame]:
     """
-    Main orchestration function for Tab 1: plot + interactive table with bidirectional
-    highlight synchronisation.
+    Main orchestration function for Tab 1 (and Tab 4 with ``submitted=True``): plot + table.
 
-    Clicking a point in the scatter plot highlights the matching row in the table.
-    Clicking a row in the table highlights the matching point in the scatter plot.
+    On Tab 1, clicking a point in the scatter plot highlights the matching row in the table.
 
     A thin wrapper around `load_and_filter_main_data` + `render_main_plot` +
     `render_results_table` -- callers that need the plot and table in separate containers
@@ -594,28 +562,25 @@ def display_existing_results(
         (and on to plot_main_metric). alpha_warning and beta_warning are consumed here.
     use_slider : bool, optional
         Whether to use slider-based filtering (default True for Quant).
-    table_style : str, optional
-        Reserved; AgGrid is always used.
-    column_config : Optional[Dict], optional
-        Reserved for future st.dataframe column configuration.
     render_forest_plot : callable, optional
         Optional callable that renders an additional plot (e.g. a forest plot)
         between the scatter plot and the results table.
+    submitted : bool, optional
+        If True, show the Tab 4 (public + new) view.
 
     Returns
     -------
     Optional[pd.DataFrame]
         The filtered dataframe used to render the plot and table (after slider/parameter
-        filtering), so a caller can reuse it for an alternative view of the same selection
-        (e.g. de novo's precision-coverage-curve tab). `None` if nothing has been rendered yet.
+        filtering), so a caller can reuse it for an alternative view of the same selection.
     """
-    filtered_data = load_and_filter_main_data(variables, ionmodule, use_slider)
+    filtered_data = load_and_filter_main_data(variables, ionmodule, use_slider, submitted)
 
-    if filtered_data.empty:
+    if not submitted and filtered_data.empty:
         st.info("No results available yet.", icon="ℹ️")
         return filtered_data
 
-    render_main_plot(variables, ionmodule, plot_params, filtered_data, render_forest_plot=render_forest_plot)
-    render_results_table(variables, filtered_data)
+    render_main_plot(variables, ionmodule, plot_params, filtered_data, render_forest_plot, submitted)
+    render_results_table(variables, filtered_data, submitted)
 
     return filtered_data

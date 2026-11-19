@@ -6,7 +6,6 @@ import tempfile
 import streamlit as st
 from streamlit_utils import display_error, get_error_suggestions
 
-from proteobench.exceptions import ProteoBenchError
 
 
 def show_software_selector_and_alphadia_info(variables, parsesettingsbuilder, user_input) -> None:
@@ -180,7 +179,7 @@ def execute_proteobench(variables, ionmodule, user_input) -> bool:
         st.session_state[variables.input_df] = input_df
         return True
 
-    except (ProteoBenchError, Exception) as e:
+    except Exception as e:
         friendly_msg, suggestions = get_error_suggestions(e, user_input)
         display_error(friendly_msg, exception=e, suggestions=suggestions)
         return False

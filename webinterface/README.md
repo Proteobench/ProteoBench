@@ -58,7 +58,8 @@ st.session_state[self.variables_quant.result_perf]
 ```
 
 So in general everthing scoped with a variable `variables_quant`, which is a `dataclass` 
-is a list of dictionary keys (unique to the model). For now the session state is a flat
+is a list of dictionary keys (unique to the model). The keys are derived from the module's `key`
+field by `VariablesBase` in `pages/pages_variables/base.py` as `f"{name}_{key}"`. For now the session state is a flat
 dictionary with many keys, which are kept separated by unique keys for each entry. One 
 could also imagine to use a nested dictionary structure, e.g. with the module name as the first key
 and the variable name as the second key. This would allow to have a more scoped session state
@@ -75,12 +76,8 @@ st.session_state[self.variables_quant.slider_id_uuid]
 st.session_state[self.variables_quant.slider_id_submitted_uuid]
 st.session_state[self.variables_quant.selectbox_id_uuid]
 st.session_state[self.variables_quant.selectbox_id_submitted_uuid]
-st.session_state[self.variables_quant.table_id_uuid]
-st.session_state[self.variables_quant.placeholder_table]
-st.session_state[self.variables_quant.placeholder_slider]
 st.session_state[self.variables_quant.placeholder_downloads_container]
 st.session_state[self.variables_quant.download_selector_id_uuid]
-st.session_state[self.variables_quant.highlight_list]
 st.session_state[self.variables_quant.highlight_list_submitted]
 st.session_state[self.variables_quant.all_datapoints]
 st.session_state[self.variables_quant.all_datapoints_submitted]
@@ -92,14 +89,7 @@ st.session_state[self.variables_quant.result_performance_submission]
 st.session_state[self.variables_quant.meta_data]
 st.session_state[self.variables_quant.meta_data_text]
 st.session_state[self.variables_quant.meta_file_uploader_uuid]
-st.session_state[self.variables_quant.comments_submission_uuid]
 st.session_state[self.variables_quant.check_submission]
-st.session_state[self.variables_quant.check_submission_uuid]
 st.session_state[self.variables_quant.button_submission_uuid]
-st.session_state[self.variables_quant.df_head]
-st.session_state[self.variables_quant.fig_logfc]
 st.session_state[self.variables_quant.fig_metric]
-st.session_state[self.variables_quant.fig_cv]
-st.session_state[self.variables_quant.fig_ma_plot]
-st.session_state[self.variables_quant.placeholder_fig_compare]
 ```

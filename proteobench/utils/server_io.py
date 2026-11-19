@@ -7,44 +7,40 @@ from collections import defaultdict
 
 import pandas as pd
 import requests
-import toml
 from bs4 import BeautifulSoup
 
 from proteobench.modules.denovo.denovo_DDA_HCD import DDAHCDDeNovoModule
-from proteobench.modules.quant.quant_lfq_ion_DDA_Astral import DDAQuantIonAstralModule
-from proteobench.modules.quant.quant_lfq_ion_DDA_QExactive import (
+from proteobench.modules.quant.quant_modules import (
+    DDAQuantIonAstralModule,
     DDAQuantIonModuleQExactive,
-)
-from proteobench.modules.quant.quant_lfq_ion_DIA_AIF import DIAQuantIonModuleAIF
-from proteobench.modules.quant.quant_lfq_ion_DIA_Astral import DIAQuantIonModuleAstral
-from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
-from proteobench.modules.quant.quant_lfq_ion_DIA_ZenoTOF import DIAQuantIonModuleZenoTOF
-from proteobench.modules.quant.quant_lfq_ion_DIA_diaPASEF import (
-    DIAQuantIonModulediaPASEF,
-)
-from proteobench.modules.quant.quant_lfq_ion_DIA_lowinput import (
-    DIAQuantIonModulediaSC,
-)
-from proteobench.modules.quant.quant_lfq_peptidoform_DDA import (
     DDAQuantPeptidoformModule,
-)
-from proteobench.modules.quant.quant_lfq_peptidoform_DIA import (
-    DIAQuantPeptidoformModule,
+    DIAQuantIonModuleAIF,
+    DIAQuantIonModuleAstral,
+    DIAQuantIonModuleAstralLowInput,
+    DIAQuantIonModulediaPASEF,
+    DIAQuantIonModulediaSC,
+    DIAQuantIonModulePlasma,
+    DIAQuantIonModuleZenoTOF,
+    DIAQuantIonModuletimsTOFLowInput,
 )
 
 # Dictionary mapping module name strings to their classes
 MODULE_CLASSES = {
-    "DDAQuantIonModuleQExactive": DDAQuantIonModuleQExactive,
-    "DDAQuantIonAstralModule": DDAQuantIonAstralModule,
-    "DIAQuantIonModuleAIF": DIAQuantIonModuleAIF,
-    "DIAQuantIonModuleAstral": DIAQuantIonModuleAstral,
-    "DIAQuantIonModulediaPASEF": DIAQuantIonModulediaPASEF,
-    "DIAQuantIonModuleZenoTOF": DIAQuantIonModuleZenoTOF,
-    "DIAQuantIonModulediaSC": DIAQuantIonModulediaSC,
-    "DIAQuantIonModulePlasma": DIAQuantIonModulePlasma,
-    "DDAQuantPeptidoformModule": DDAQuantPeptidoformModule,
-    "DIAQuantPeptidoformModule": DIAQuantPeptidoformModule,
-    "DDAHCDDeNovoModule": DDAHCDDeNovoModule,
+    cls.__name__: cls
+    for cls in (
+        DDAQuantIonModuleQExactive,
+        DDAQuantIonAstralModule,
+        DIAQuantIonModuleAIF,
+        DIAQuantIonModuleAstral,
+        DIAQuantIonModulediaPASEF,
+        DIAQuantIonModuleZenoTOF,
+        DIAQuantIonModulediaSC,
+        DIAQuantIonModuleAstralLowInput,
+        DIAQuantIonModuletimsTOFLowInput,
+        DIAQuantIonModulePlasma,
+        DDAQuantPeptidoformModule,
+        DDAHCDDeNovoModule,
+    )
 }
 
 # Keys a caller may place in a submission_settings dict that are forwarded to the module's

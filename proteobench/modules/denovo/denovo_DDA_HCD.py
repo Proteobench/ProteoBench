@@ -13,7 +13,6 @@ from proteobench.exceptions import (
     IntermediateFormatGenerationError,
     ParseError,
     ParseSettingsError,
-    QuantificationError,
 )
 from proteobench.io.parsing.parse_denovo import load_input_file
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
@@ -28,12 +27,13 @@ class DDAHCDDeNovoModule(DeNovoModule):
     """
 
     module_id = "denovo_DDA_HCD"
+    results_repo = "Results_denovo_lfq_DDA_HCD"
 
     def __init__(
         self,
         token: str,
-        proteobot_repo_name: str = "Proteobot/Results_denovo_lfq_DDA_HCD",
-        proteobench_repo_name: str = "Proteobench/Results_denovo_lfq_DDA_HCD",
+        proteobot_repo_name: str = "Proteobot/" + results_repo,
+        proteobench_repo_name: str = "Proteobench/" + results_repo,
     ):
         """
         Initialize the DDA Quantification Module for Ion level Quantification.
@@ -43,9 +43,9 @@ class DDAHCDDeNovoModule(DeNovoModule):
         token : str
             GitHub token for the user.
         proteobot_repo_name : str, optional
-            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_quant_ion_DDA".
+            Name of the repository for pull requests and where new points are added, by default "Proteobot/Results_denovo_lfq_DDA_HCD".
         proteobench_repo_name : str, optional
-            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_quant_ion_DDA".
+            Name of the repository where the benchmarking results will be stored, by default "Proteobench/Results_denovo_lfq_DDA_HCD".
         """
 
         super().__init__(
@@ -55,17 +55,6 @@ class DDAHCDDeNovoModule(DeNovoModule):
             parse_settings_dir=MODULE_SETTINGS_DIRS[self.module_id],
             module_id=self.module_id,
         )
-
-    def is_implemented(self) -> bool:
-        """
-        Return whether the module is fully implemented.
-
-        Returns
-        -------
-        bool
-            Always returns True in this implementation.
-        """
-        return False
 
     def benchmarking(
         self,

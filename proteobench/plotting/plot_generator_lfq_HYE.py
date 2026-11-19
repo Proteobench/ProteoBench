@@ -6,8 +6,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
-from proteobench.plotting.utils import create_kde_distribution_plot, fill_density_traces
+from proteobench.plotting.utils import create_kde_distribution_plot, empty_figure, fill_density_traces
 from proteobench.plotting.utils.accuracy_vs_abundance import plot_accuracy_vs_abundance
+from proteobench.plotting.utils.software_styles import SOFTWARE_COLORS, SOFTWARE_MARKERS
 
 
 class LFQHYEPlotGenerator(PlotGeneratorBase):
@@ -219,46 +220,8 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         metric: str = "Median",
         mode: str = "Species-weighted",
         colorblind_mode: bool = False,
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
-        software_markers: Dict[str, str] = {
-            "MaxQuant": "circle",
-            "AlphaPept": "square",
-            "ProlineStudio": "diamond",
-            "MSAngel": "cross",
-            "FragPipe": "x",
-            "i2MassChroQ": "triangle-up",
-            "Sage": "triangle-down",
-            "WOMBAT": "pentagon",
-            "DIA-NN": "star",
-            "AlphaDIA": "star-triangle-up",
-            "Custom": "star-square",
-            "Spectronaut": "diamond-tall",
-            "FragPipe (DIA-NN quant)": "circle-x",
-            "MSAID": "square-cross",
-            "MetaMorpheus": "asterisk",
-            "Proteome Discoverer": "hash",
-            "PEAKS": "diamond-wide",
-            "quantms": "hexagram",
-        },
+        software_colors: Dict[str, str] = SOFTWARE_COLORS,
+        software_markers: Dict[str, str] = SOFTWARE_MARKERS,
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
@@ -514,22 +477,25 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             Plotly figure with fold change distributions
         """
         species_list = list(species_expected_ratio.keys())
+        species_cols = [s for s in species_list if s in performance_data.columns]
+        if not species_cols:
+            return empty_figure("No species data available for fold change plot")
 
         # Filter to rows where at least one species is present
-        performance_data = performance_data[performance_data[species_list].any(axis=1)]
-        performance_data["species"] = performance_data[species_list].apply(lambda x: species_list[np.argmax(x)], axis=1)
+        performance_data = performance_data[performance_data[species_cols].any(axis=1)].copy()
+        performance_data["species"] = performance_data[species_cols].apply(lambda x: species_cols[np.argmax(x)], axis=1)
 
-        # Prepare plot data
+        # Prepare plot data, skipping species without any fold change
         hist_data = []
         group_labels = []
         colors = []
 
         for species in species_list:
-            hist_data.append(
-                performance_data.loc[performance_data["species"] == species, "log2_A_vs_B"].dropna().tolist()
-            )
-            group_labels.append(species)
-            colors.append(species_expected_ratio[species].get("color", "#000000"))
+            species_data = performance_data.loc[performance_data["species"] == species, "log2_A_vs_B"].dropna().tolist()
+            if species_data:
+                hist_data.append(species_data)
+                group_labels.append(species)
+                colors.append(species_expected_ratio[species].get("color", "#000000"))
 
         # Create distribution plot
         if hist_data:
@@ -556,16 +522,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
                 )
 
         else:
-            # Create empty figure if no data
-            fig = go.Figure()
-            fig.add_annotation(
-                text="No data available for fold change plot",
-                xref="paper",
-                yref="paper",
-                x=0.5,
-                y=0.5,
-                showarrow=False,
-            )
+            fig = empty_figure("No data available for fold change plot")
 
         return fig
 

@@ -192,9 +192,9 @@ The table must not contain non-validated ions.
 
 Each tool's output format is described in a `.toml` file under
 `proteobench/io/parsing/io_parse_settings/`, defining `[mapper]` (column-name mapping),
-`[condition_mapper]`/`[run_mapper]` (raw file to condition/sample), `[species_mapper]` (protein-ID
-suffix to species), `[general]` (contaminant flag `Cont_` and decoy flag), and
-`[modifications_parser]` where needed.
+`[condition_mapper]`/`[run_mapper]` (raw file to condition/sample), `[general]` (contaminant flag `Cont_` and decoy flag), and
+`[modifications_parser]` where needed. The `[species_mapper]` (protein-ID suffix to species) is the same for every tool and lives
+once in the module's `module_settings.toml`.
 
 ## Result columns
 

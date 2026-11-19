@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 import pytest
-import toml
+import tomllib
 from git import Head, Repo, exc
 
 from proteobench.github.gh import (
@@ -32,8 +32,8 @@ def test_clone_repo_anonymous():
 # create a function that reads the token from secrets.toml located in ~/.streamlit/secrets.toml
 def read_token():
     try:
-        with open(os.path.expanduser("~/.streamlit/secrets.toml")) as f:
-            secrets = toml.load(f)
+        with open(os.path.expanduser("~/.streamlit/secrets.toml"), "rb") as f:
+            secrets = tomllib.load(f)
             return secrets["gh"]["token_test"]
     except FileNotFoundError:
         return ""

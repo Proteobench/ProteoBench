@@ -3,15 +3,14 @@ Plot generator for LFQ PYE (Plasma-Yeast-Ecoli) quantification modules.
 """
 
 import textwrap
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 
 from proteobench.plotting.plot_generator_lfq_HYE import LFQHYEPlotGenerator
-from proteobench.plotting.utils import create_kde_distribution_plot, fill_density_traces
+from proteobench.plotting.utils.software_styles import SOFTWARE_COLORS, SOFTWARE_MARKERS
 
 
 #: Species present in the PYE (Plasma/Yeast/E. coli) sample, plasma background first.
@@ -71,29 +70,20 @@ class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
         Dict[str, go.Figure]
             Dictionary mapping plot names to plotly figures
         """
-        plots = {}
-
         # Get expected ratios from parse settings if available
         try:
             species_expected_ratio = parse_settings.species_expected_ratio()
-        except:
+        except Exception:
             species_expected_ratio = {}
 
-        # Generate fold change histogram
-        plots["logfc"] = self._plot_fold_change_histogram(performance_data, species_expected_ratio)
-
-        # Generate CV violin plot
-        plots["cv"] = self._plot_cv_violinplot(performance_data)
-
-        plots["ma_plot"] = self._plot_ma_plot(performance_data, species_expected_ratio)
-
-        plots["dynamic_range_plot"] = self._plot_dynamic_range(performance_data, species_expected_ratio)
-
-        plots["missing_values_plot"] = self._plot_missing_values(performance_data)
-
-        plots["signed_epsilon_plot"] = self._plot_signed_epsilon(performance_data, species_expected_ratio)
-
-        return plots
+        return {
+            "logfc": self._plot_fold_change_histogram(performance_data, species_expected_ratio),
+            "cv": self._plot_cv_violinplot(performance_data),
+            "ma_plot": self._plot_ma_plot(performance_data, species_expected_ratio),
+            "dynamic_range_plot": self._plot_dynamic_range(performance_data, species_expected_ratio),
+            "missing_values_plot": self._plot_missing_values(performance_data),
+            "signed_epsilon_plot": self._plot_signed_epsilon(performance_data, species_expected_ratio),
+        }
 
     def get_in_depth_plot_layout(self) -> list:
         """
@@ -278,216 +268,6 @@ class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
             Unlike the overview plot, these plots use all precursors of the run: they are not filtered
             by the minimal-quantifications slider.
             """
-
-    def _plot_fold_change_histogram(
-        self, performance_data: pd.DataFrame, species_expected_ratio: Dict[str, Dict[str, Union[float, str]]]
-    ) -> go.Figure:
-        """
-        Generate fold change histogram plot.
-
-        Parameters
-        ----------
-        performance_data : pd.DataFrame
-            Intermediate data containing log2_A_vs_B column
-        species_expected_ratio : Dict[str, Dict[str, Union[float, str]]]
-            Dictionary with expected ratios for each species, and colors
-
-        Returns
-        -------
-        go.Figure
-            Plotly figure with fold change distributions
-        """
-        species_list = list(species_expected_ratio.keys())
-
-        # Filter to rows where at least one species is present
-        species_cols = [s for s in species_list if s in performance_data.columns]
-        if not species_cols:
-            # If no species columns, create empty figure
-            fig = go.Figure()
-            fig.add_annotation(
-                text="No species data available for fold change plot",
-                xref="paper",
-                yref="paper",
-                x=0.5,
-                y=0.5,
-                showarrow=False,
-            )
-            return fig
-
-        performance_data_filtered = performance_data[performance_data[species_cols].any(axis=1)].copy()
-        performance_data_filtered["species"] = performance_data_filtered[species_cols].apply(
-            lambda x: species_cols[np.argmax(x)], axis=1
-        )
-
-        # Prepare plot data
-        hist_data = []
-        group_labels = []
-        colors = []
-
-        for species in species_list:
-            if species in performance_data_filtered.columns or species in species_expected_ratio:
-                species_data = (
-                    performance_data_filtered.loc[performance_data_filtered["species"] == species, "log2_A_vs_B"]
-                    .dropna()
-                    .tolist()
-                )
-                if species_data:
-                    hist_data.append(species_data)
-                    group_labels.append(species)
-                    if species_expected_ratio and species in species_expected_ratio:
-                        colors.append(species_expected_ratio[species].get("color", "#000000"))
-                    else:
-                        colors.append("#000000")
-
-        # Create distribution plot
-        if hist_data:
-            fig = fill_density_traces(create_kde_distribution_plot(hist_data, group_labels, colors))
-
-            fig.update_layout(
-                xaxis=dict(
-                    title="Log2(Condition A / Condition B)",
-                    color="black",
-                    gridwidth=1,
-                    gridcolor="lightgray",
-                    range=[-4, 4],
-                ),
-                yaxis=dict(title="Density", color="black", gridwidth=1, gridcolor="lightgray"),
-            )
-
-            # Add expected ratio lines if available
-            if species_expected_ratio:
-                ratio_map = {species: np.log2(data["A_vs_B"]) for species, data in species_expected_ratio.items()}
-                for species, ratio in ratio_map.items():
-                    fig.add_vline(
-                        x=ratio,
-                        line_dash="dash",
-                        line_color=species_expected_ratio[species].get("color", "#000000"),
-                        annotation_text=f"Expected {species}",
-                    )
-        else:
-            # Create empty figure if no data
-            fig = go.Figure()
-            fig.add_annotation(
-                text="No data available for fold change plot",
-                xref="paper",
-                yref="paper",
-                x=0.5,
-                y=0.5,
-                showarrow=False,
-            )
-
-        return fig
-
-    def _plot_cv_violinplot(self, performance_data: pd.DataFrame) -> go.Figure:
-        """
-        Generate coefficient of variation violin plot.
-
-        Parameters
-        ----------
-        performance_data : pd.DataFrame
-            Intermediate data containing CV_A and CV_B columns
-
-        Returns
-        -------
-        go.Figure
-            Plotly figure with CV violin plots
-        """
-        # Prepare data for violin plot
-        cv_data = []
-        conditions = []
-
-        # Add CV data for Condition A
-        if "CV_A" in performance_data.columns:
-            cv_a = performance_data["CV_A"].replace([np.inf, -np.inf], np.nan).dropna()
-            cv_data.extend(cv_a)
-            conditions.extend(["Condition A"] * len(cv_a))
-
-        # Add CV data for Condition B
-        if "CV_B" in performance_data.columns:
-            cv_b = performance_data["CV_B"].replace([np.inf, -np.inf], np.nan).dropna()
-            cv_data.extend(cv_b)
-            conditions.extend(["Condition B"] * len(cv_b))
-
-        # Create violin plot
-        if cv_data:
-            df_plot = pd.DataFrame({"CV": cv_data, "Condition": conditions})
-
-            fig = px.violin(df_plot, y="CV", x="Condition", box=True, points=False)
-        else:
-            # Create empty figure if no data
-            fig = go.Figure()
-            fig.add_annotation(
-                text="No CV data available",
-                xref="paper",
-                yref="paper",
-                x=0.5,
-                y=0.5,
-                showarrow=False,
-            )
-
-        return fig
-
-    def _plot_ma_plot(
-        self, performance_data: pd.DataFrame, species_expected_ratio: Dict[str, Dict[str, Union[float, str]]]
-    ) -> go.Figure:
-        """
-        Generate MA plot (M vs A plot) but with A on the y-axis and M on the x-axis.
-
-        Parameters
-        ----------
-        performance_data : pd.DataFrame
-            Performance data containing log2_A_vs_B and mean abundance columns
-        species_expected_ratio : Dict[str, Dict[str, Union[float, str]]]
-            Expected ratios for each species and their colors
-
-        Returns
-        -------
-        go.Figure
-            Plotly figure with MA plot (M on x, A on y)
-        """
-        fig = go.Figure()
-
-        # Define colors for species
-        color_map = {species: data["color"] for species, data in species_expected_ratio.items()}
-
-        performance_data["logIntensityMean"] = (
-            performance_data["log_Intensity_mean_A"] + performance_data["log_Intensity_mean_B"]
-        ) / 2
-
-        fig = px.scatter(
-            performance_data,
-            x="log2_A_vs_B",
-            y="logIntensityMean",
-            color="species",
-            color_discrete_map=color_map,
-            labels={"log2_A_vs_B": "M (Log2 Fold Change(A:B))", "logIntensityMean": "A (Mean Abundance)"},
-            title="MA Plot",
-            size_max=10,
-            opacity=0.2,
-        )
-
-        # Add vertical lines for expected M values (since M is on x-axis) across the A range
-        if fig.data:
-            ratio_map = {species: np.log2(data["A_vs_B"]) for species, data in species_expected_ratio.items()}
-            for species, ratio in ratio_map.items():
-                fig.add_vline(
-                    x=ratio,
-                    line_dash="dash",
-                    line_color=species_expected_ratio[species].get("color", "#000000"),
-                    annotation_text=f"Expected {species}",
-                )
-
-            fig.update_traces(marker=dict(size=6))
-        else:
-            fig.add_annotation(
-                text="No data available for MA plot",
-                xref="paper",
-                yref="paper",
-                x=0.5,
-                y=0.5,
-                showarrow=False,
-            )
-        return fig
 
     def _plot_dynamic_range(self, performance_data: pd.DataFrame, species_expected_ratio: any) -> go.Figure:
         """
@@ -964,46 +744,8 @@ class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
         result_df: pd.DataFrame,
         metric: str = "Median",
         mode: str = "Species-weighted",
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
-        software_markers: Dict[str, str] = {
-            "MaxQuant": "circle",
-            "AlphaPept": "square",
-            "ProlineStudio": "diamond",
-            "MSAngel": "cross",
-            "FragPipe": "x",
-            "i2MassChroQ": "triangle-up",
-            "Sage": "triangle-down",
-            "WOMBAT": "pentagon",
-            "DIA-NN": "star",
-            "AlphaDIA": "star-triangle-up",
-            "Custom": "star-square",
-            "Spectronaut": "diamond-tall",
-            "FragPipe (DIA-NN quant)": "circle-x",
-            "MSAID": "square-cross",
-            "MetaMorpheus": "asterisk",
-            "Proteome Discoverer": "hash",
-            "PEAKS": "diamond-wide",
-            "quantms": "hexagram",
-        },
+        software_colors: Dict[str, str] = SOFTWARE_COLORS,
+        software_markers: Dict[str, str] = SOFTWARE_MARKERS,
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
@@ -1012,121 +754,6 @@ class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
         colorblind_mode: bool = False,
         default_cutoff_min_feature: int = 3,
         min_nr_observed: int = None,
-        annotation: str = "",
-        **kwargs,
-    ) -> go.Figure:
-        """
-        Generate the main plasma benchmarking scatterplot.
-
-        This method returns the plasma performance scatterplot for comparing multiple methods.
-
-        Parameters
-        ----------
-        result_df : pd.DataFrame
-            DataFrame containing the results to plot, must have 'results' column with metrics.
-        metric : str, optional
-            Metric to use for calculations: "Median" or "Mean". Defaults to "Median".
-        mode : str, optional
-            Mode for metric calculation: "Global" or "Species-weighted". Currently both modes
-            use the same metrics for plasma. Defaults to "Species-weighted".
-        software_colors : Dict[str, str]
-            Mapping of software names to colors.
-        mapping : Dict[str, str]
-            Mapping for marker sizes.
-        highlight_color : str
-            Color to use for highlighting specific software.
-        label : str
-            Label for plot annotations.
-        legend_name_map : Dict[str, str]
-            Mapping for legend names.
-        hide_annot : bool
-            Whether to hide annotations on the plot.
-        default_cutoff_min_feature : int
-            Default min precursor threshold for extracting metrics.
-        min_nr_observed : int, optional
-            Override the cutoff level with this value if provided.
-        annotation : str, optional
-            Text annotation to display on the plot (e.g., "-Alpha-", "-Beta-").
-        **kwargs : dict
-            Additional parameters.
-
-        Returns
-        -------
-        go.Figure
-            Plotly figure with the plasma scatterplot.
-        """
-        # Use min_nr_observed if provided, otherwise use default_cutoff_min_feature
-        cutoff_level = min_nr_observed if min_nr_observed is not None else default_cutoff_min_feature
-        return self._plot_plasma_scatterplot(
-            result_df,
-            metric=metric,
-            mode=mode,
-            software_colors=software_colors,
-            software_markers=software_markers,
-            mapping=mapping,
-            highlight_color=highlight_color,
-            label=label,
-            legend_name_map=legend_name_map,
-            hide_annot=hide_annot,
-            colorblind_mode=colorblind_mode,
-            default_cutoff_min_feature=cutoff_level,
-            annotation=annotation,
-            **kwargs,
-        )
-
-    def _plot_plasma_scatterplot(
-        self,
-        result_df: pd.DataFrame,
-        metric: str = "Median",
-        mode: str = "Species-weighted",
-        # TODO: move software_colors to constants
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
-        software_markers: Dict[str, str] = {
-            "MaxQuant": "circle",
-            "AlphaPept": "square",
-            "ProlineStudio": "diamond",
-            "MSAngel": "cross",
-            "FragPipe": "x",
-            "i2MassChroQ": "triangle-up",
-            "Sage": "triangle-down",
-            "WOMBAT": "pentagon",
-            "DIA-NN": "star",
-            "AlphaDIA": "star-triangle-up",
-            "Custom": "star-square",
-            "Spectronaut": "diamond-tall",
-            "FragPipe (DIA-NN quant)": "circle-x",
-            "MSAID": "square-cross",
-            "MetaMorpheus": "asterisk",
-            "Proteome Discoverer": "hash",
-            "PEAKS": "diamond-wide",
-            "quantms": "hexagram",
-        },
-        mapping: Dict[str, str] = {"old": 10, "new": 20},
-        highlight_color: str = "#d30067",
-        label: str = "",
-        legend_name_map: Dict[str, str] = {"AlphaPept": "AlphaPept (legacy tool)"},
-        hide_annot: bool = False,
-        colorblind_mode: bool = False,
-        default_cutoff_min_feature: int = 3,
         annotation: str = "",
         **kwargs,
     ) -> go.Figure:
@@ -1167,6 +794,8 @@ class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
             Whether to hide annotations on the plot.
         default_cutoff_min_feature : int
             Default min precursor threshold for extracting metrics.
+        min_nr_observed : int, optional
+            Override the cutoff level with this value if provided.
         annotation : str, optional
             Text annotation to display on the plot (e.g., "-Alpha-", "-Beta-").
         **kwargs : dict
@@ -1177,6 +806,9 @@ class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
         go.Figure
             Plotly figure with the plasma scatterplot.
         """
+        if min_nr_observed is not None:
+            default_cutoff_min_feature = min_nr_observed
+
         fig = go.Figure()
 
         # Determine which metric keys to use based on selected metric and mode
@@ -1408,68 +1040,3 @@ class LFQPYEPlotGenerator(LFQHYEPlotGenerator):
             return results[cutoff_str]
 
         return None
-
-    def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
-        """
-        Get the appropriate metric column names based on the specified metric and mode.
-
-        Note: For plasma (PYE) modules, this is primarily for compatibility with the UI
-        which offers metric and mode selectors. The plasma plot uses different metrics
-        (spike-in errors, quantification depth, dynamic range) rather than the
-        epsilon-based metrics used in HYE modules.
-
-        Parameters
-        ----------
-        metric : str
-            The metric to plot: "Median" or "Mean".
-        mode : str
-            The mode for filtering: "Global" or "Species-weighted".
-
-        Returns
-        -------
-        Tuple[str, str, str]
-            A tuple containing (metric_lower, mode_suffix, plot_title).
-        """
-        metric_lower = metric.lower()
-        mode_suffix = "global" if mode == "Global" else "eq_species"
-        mode_description = "globally" if mode == "Global" else "using equally weighted species averages"
-
-        plot_title = (
-            f"{metric} absolute difference between measured and expected log2-transformed fold change "
-            f"(calculated {mode_description})"
-        )
-
-        return metric_lower, mode_suffix, plot_title
-
-    def _filter_datapoints_with_metric(self, benchmark_metrics_df: pd.DataFrame, metric_col_name: str) -> pd.DataFrame:
-        """
-        Filter datapoints to only include those that have the specified metric calculated.
-
-        For plasma modules, this ensures consistency with HYE module behavior when
-        filtering for species-weighted metrics.
-
-        Parameters
-        ----------
-        benchmark_metrics_df : pd.DataFrame
-            DataFrame containing benchmark metrics for datapoints.
-        metric_col_name : str
-            The name of the metric column to filter on.
-
-        Returns
-        -------
-        pd.DataFrame
-            Filtered DataFrame containing only datapoints with the specified metric.
-        """
-
-        def has_metric(results_dict):
-            """Check if the results dictionary contains the specified metric."""
-            try:
-                for threshold_dict in results_dict.values():
-                    if metric_col_name in threshold_dict:
-                        return True
-            except (TypeError, AttributeError):
-                pass
-            return False
-
-        # Filter to only datapoints that have the specified metric calculated
-        return benchmark_metrics_df[benchmark_metrics_df["results"].apply(has_metric)].copy()

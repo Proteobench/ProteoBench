@@ -65,7 +65,6 @@ MOCK_PARSE_SETTINGS_LONG = {
     },
     "condition_mapper": {"file1": "A", "file2": "B"},
     "run_mapper": {"file1": "run1", "file2": "run2"},
-    "species_mapper": {"_YEAST": "YEAST", "_ECOLI": "ECOLI", "_HUMAN": "HUMAN"},
     "general": {"decoy_flag": True, "contaminant_flag": "Cont_"},
 }
 
@@ -83,11 +82,14 @@ MOCK_PARSE_SETTINGS_SHORT = {
     },
     "condition_mapper": {"file1": "A", "file2": "B"},
     "run_mapper": {"file1": "run1", "file2": "run2"},
-    "species_mapper": {"_YEAST": "YEAST", "_ECOLI": "ECOLI", "_HUMAN": "HUMAN"},
     "general": {"decoy_flag": True, "contaminant_flag": "Cont_"},
 }
 
-MOCK_MODULE_SETTINGS = {"general": {"min_count_multispec": 1, "level": "ion"}, "species_expected_ratio": 1.0}
+MOCK_MODULE_SETTINGS = {
+    "general": {"min_count_multispec": 1, "level": "ion"},
+    "species_expected_ratio": 1.0,
+    "species_mapper": {"_YEAST": "YEAST", "_ECOLI": "ECOLI", "_HUMAN": "HUMAN"},
+}
 
 # Mock parse settings mirroring a PEAKS TOML: wide format, with the fuzzy
 # run-name-matching opt-in enabled.
@@ -108,7 +110,6 @@ MOCK_PARSE_SETTINGS_PEAKS = {
         "LFQ_ttSCP_diaPASEF_Condition_A_Sample_01 Normalized Area": "Condition_A_Sample_01",
         "LFQ_ttSCP_diaPASEF_Condition_B_Sample_01 Normalized Area": "Condition_B_Sample_01",
     },
-    "species_mapper": {"_YEAST": "YEAST", "_ECOLI": "ECOLI", "_HUMAN": "HUMAN"},
     "general": {"decoy_flag": True, "contaminant_flag": "Cont_", "run_name_fuzzy_match": True},
 }
 
@@ -220,6 +221,12 @@ class TestParseSettingsQuant:
         # Calling it again on the same, still-unmutated object must succeed.
         result = parser._validate_and_rename_columns(df)
         assert list(result.columns) == ["Proteins", "Sequence"]
+
+    def test_species_mapper_from_module_settings_with_tool_override(self, parse_settings_long):
+        assert parse_settings_long.species_dict() == MOCK_MODULE_SETTINGS["species_mapper"]
+        override = {"_HUMAN": "HUMAN", "_YEAST": "YEAST"}
+        parser = ParseSettingsQuant({**MOCK_PARSE_SETTINGS_LONG, "species_mapper": override}, MOCK_MODULE_SETTINGS)
+        assert list(parser.species_dict().items()) == list(override.items())
 
     def test_filter_decoys(self, parse_settings_long, parse_settings_short):
         df = TEST_DATA["long_format"].copy()

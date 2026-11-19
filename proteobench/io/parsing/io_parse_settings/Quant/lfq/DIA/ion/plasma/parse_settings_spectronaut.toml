@@ -33,11 +33,6 @@
 "B9_G_DIA_nLC_tTOF_R5" = "Condition_B_Sample_5"
 "B9_G_DIA_nLC_tTOF_R6" = "Condition_B_Sample_6"
 
-[species_mapper]
-"_YEAST" = "YEAST"
-"_ECOLI" = "ECOLI"
-"_HUMAN" = "HUMAN"
-
 [modifications_parser]
 "parse_column" = "Sequence"
 "before_aa" = false

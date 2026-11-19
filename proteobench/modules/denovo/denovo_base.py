@@ -7,6 +7,7 @@ import os
 import uuid
 import zipfile
 from datetime import datetime
+from functools import partial
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
@@ -20,20 +21,10 @@ from proteobench.datapoint.quant_datapoint import (
 from proteobench.exceptions import DatasetAlreadyExistsOnServerError
 from proteobench.github.gh import GithubProteobotRepo
 from proteobench.io.params import ProteoBenchParameters, normalize_dataframe_columns
-from proteobench.io.params.adanovo import extract_params as extract_params_adanovo
-from proteobench.io.params.casanovo import extract_params as extract_params_casanovo
-from proteobench.io.params.contranovo import extract_params as extract_params_contranovo
 from proteobench.io.params.deepnovo import extract_params as extract_params_deepnovo
+from proteobench.io.params.denovo_yaml import extract_yaml_params
 from proteobench.io.params.instanovo import extract_params as extract_params_instanovo
-from proteobench.io.params.pihelixnovo import (
-    extract_params as extract_params_pihelixnovo,
-)
-from proteobench.io.params.piprimenovo import (
-    extract_params as extract_params_piprimenovo,
-)
 from proteobench.io.params.pointnovo import extract_params as extract_params_pointnovo
-from proteobench.io.parsing.parse_denovo import load_input_file
-from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
 
@@ -56,13 +47,17 @@ class DeNovoModule:
     """
 
     EXTRACT_PARAMS_DICT: Dict[str, Any] = {
-        "AdaNovo": extract_params_adanovo,
-        "Casanovo": extract_params_casanovo,
-        "ContraNovo": extract_params_contranovo,
+        "AdaNovo": partial(extract_yaml_params, software_name="AdaNovo"),
+        "Casanovo": partial(extract_yaml_params, software_name="Casanovo"),
+        "ContraNovo": partial(extract_yaml_params, software_name="ContraNovo", read_min_len=False),
         "DeepNovo": extract_params_deepnovo,
         "InstaNovo": extract_params_instanovo,
-        "Pi-HelixNovo": extract_params_pihelixnovo,
-        "Pi-PrimeNovo": extract_params_piprimenovo,
+        "Pi-HelixNovo": partial(
+            extract_yaml_params, software_name="Pi-HelixNovo", read_min_len=False, decoding="pihelixnovo"
+        ),
+        "Pi-PrimeNovo": partial(
+            extract_yaml_params, software_name="Pi-PrimeNovo", read_min_len=False, decoding="piprimenovo"
+        ),
         "PointNovo": extract_params_pointnovo,
     }
 
@@ -104,17 +99,6 @@ class DeNovoModule:
 
         self.precursor_column_name = ""
         self.module_id = module_id
-
-    def is_implemented(self) -> bool:
-        """
-        Return whether the module is fully implemented.
-
-        Returns
-        -------
-        bool
-            Always returns True in this implementation.
-        """
-        return False
 
     def get_plot_generator(self, **kwargs) -> PlotGeneratorBase:
         """
@@ -370,45 +354,6 @@ class DeNovoModule:
             return "Unable to create PR. Please check the logs."
 
         return "https://" + remote_git.replace(".git", "") + "/pull/" + str(pr_id)
-
-    def write_json_local_development(self, temporary_datapoints: pd.DataFrame, datapoint_params: dict) -> str:
-        """
-        Write the datapoints to a JSON file for local development.
-
-        Parameters
-        ----------
-        temporary_datapoints : pd.DataFrame
-            Temporary data points.
-        datapoint_params : dict
-            Data point parameters.
-
-        Returns
-        -------
-        str
-            The path to the written JSON file.
-        """
-
-        # TODO: need to test if this still works...
-
-        os.mkdir(self.t_dir_pr)
-
-        current_datapoint = temporary_datapoints.iloc[-1]
-
-        # Update parameters based on parsed params
-        for k, v in datapoint_params.__dict__.items():
-            current_datapoint[k] = v
-
-        current_datapoint["is_temporary"] = False
-        all_datapoints = self.add_current_data_point(current_datapoint, all_datapoints=None)
-
-        fname = os.path.join(self.t_dir_pr, "results.json")
-        logging.info(f"Writing the json to: {fname}")
-
-        f = open(os.path.join(self.t_dir_pr, "results.json"), "w")
-
-        all_datapoints.to_json(f, orient="records", indent=2)
-
-        return os.path.join(self.t_dir_pr, "results.json")
 
     def write_intermediate_raw(
         self,

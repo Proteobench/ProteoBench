@@ -80,40 +80,40 @@ pre-commit run --all-files
 
 Scoring and datapoint code are **top-level packages**, not nested under `modules/`:
 
-- `proteobench/score/`: `score_base.py` (`ScoreBase` ABC), `quantscoresHYE.py` (`QuantScoresHYE`), `quantscoresPYE.py` (`QuantScoresPYE`), `denovoscores.py` (`DenovoScores`)
-- `proteobench/datapoint/`: `datapoint_base.py` (`DatapointBase` ABC), `quant_datapoint.py` (`QuantDatapointHYE`, `QuantDatapointPYE`), `denovo_datapoint.py` (`DenovoDatapoint`)
+- `proteobench/score/`: `quantscoresHYE.py` (`QuantScoresHYE`, also used by Plasma), `denovoscores.py` (`DenovoScores`), `entrapmentscores.py`. No base class: a score class is anything with `generate_intermediate(filtered_df, replicate_to_raw)`.
+- `proteobench/datapoint/`: `quant_datapoint.py` (`QuantDatapointHYE`, `QuantDatapointPYE`, and the shared module-level `generate_id(software_name)` used by all datapoint classes), `denovo_datapoint.py` (`DenovoDatapoint`), `entrapment_datapoint.py`. No base class.
 - `proteobench/plotting/`: `plot_generator_base.py` (`PlotGeneratorBase` ABC) plus HYE/PYE/DeNovo generators
-- `proteobench/modules/`: thin module classes (quant, denovo, rescoring) that orchestrate the pipeline
+- `proteobench/modules/`: thin module classes (quant, denovo, entrapment) that orchestrate the pipeline
 
 So, for example, `from proteobench.score.quantscoresHYE import QuantScoresHYE` and `from proteobench.datapoint.quant_datapoint import QuantDatapointHYE`.
 
 ### Core Benchmarking Pipeline
 
-The reference entry point is `run_benchmarking()` in `proteobench/modules/quant/benchmarking.py`. **Only two modules actually delegate to it:** `DDAQuantIonModuleQExactive.benchmarking()` calls `run_benchmarking()`, and `DDAQuantIonAstralModule.benchmarking()` calls `run_benchmarking_with_timing()` (a profiling variant returning an extra `timings` dict with per-step durations) and slices `[:3]`. The Astral DDA module also exposes a `benchmarking_2()` that returns the full 4-tuple including `timings`. **All other quant modules implement the same load/parse/score/datapoint pipeline inline within their own `benchmarking()` methods** rather than calling the shared helper.
+All quant modules share one pipeline: `QuantModule.benchmarking()` in `proteobench/modules/quant/quant_base_module.py`. All concrete quant modules live in one file, `modules/quant/quant_modules.py`; each is pure configuration via class attributes: `module_id`, `results_repo` (the Proteobot/Proteobench repo names default to `Proteobot/<results_repo>` / `Proteobench/<results_repo>`), `precursor_column_name` (default `"precursor ion"`), `score_cls` (default `QuantScoresHYE`), `datapoint_cls` (default `QuantDatapointHYE`), `plot_generator_cls` (default `LFQHYEPlotGenerator`), `default_cutoff_min_feature` (default 3) and `max_nr_observed` (default None). `parse_settings_dir` comes from `MODULE_SETTINGS_DIRS[module_id]`. Overrides: Plasma sets the PYE score/datapoint/plot classes and keeps its own `filter_data_point`; the Astral/timsTOF low-input modules use `LFQLowInputPlotGenerator` with 6/12; peptidoform modules override `load_input()` to use `parse_peptidoform.load_input_file` (no secondary file).
 
-In `run_benchmarking()`, each step is a helper wrapped with `handle_benchmarking_error(<ExceptionType>, ...)`, which maps raised exceptions to the custom exception hierarchy (see `proteobench/exceptions.py`). Note that `run_benchmarking_with_timing()` calls the underlying functions directly and does **not** apply this error wrapping.
+Each step runs inside `_benchmarking_step(<ExceptionType>, message)`, which re-raises any failure as that ProteoBench exception (see `proteobench/exceptions.py`). Load failures become `ParseError` (with a "check the software tool" hint for `pandas.errors.ParserError`).
 
-**Pipeline steps (decorated helpers in `run_benchmarking`):**
+**Pipeline steps:**
 
-1. **Load input** (`_load_input`, `ParseError`) - `io/parsing/parse_ion.py:load_input_file()` dispatches to format-specific loaders via the `_LOAD_FUNCTIONS` dict (17 entries). AlphaDIA has special handling: auto-detects matrix vs long format between two files and supports v1 (TSV) and v2 (parquet).
+1. **Load input** (`load_input()`, `ParseError`) - `io/parsing/parse_ion.py:load_input_file()` dispatches to format-specific loaders via the `_LOAD_FUNCTIONS` dict (17 entries). AlphaDIA has special handling: auto-detects matrix vs long format between two files and supports v1 (TSV) and v2 (parquet).
 
-2. **Load settings** (`_load_settings`, `ParseSettingsError`) - `ParseSettingsBuilder(parse_settings_dir, module_id).build_parser(input_format)` loads the tool's TOML config and builds a `ParseSettingsQuant` parser.
+2. **Load settings** (`ParseSettingsError`) - `ParseSettingsBuilder(parse_settings_dir, module_id).build_parser(input_format)` loads the tool's TOML config and builds a `ParseSettingsQuant` parser.
 
-3. **Convert to standard format** (`_convert_format`, `ConvertStandardFormatError`) - `ParseSettingsQuant.convert_to_standard_format()` runs a 10-step pipeline: validate/rename columns, create replicate mapping, filter decoys, clean run names via `_clean_run_name()` regex, mark contaminants, process species (filter multi-species by `min_count_multispec`), process modifications to ProForma notation, melt wide-to-long if needed (with run-name cleanup on the `Raw file` column), filter zero intensities, format by analysis level (create the "precursor ion" or "peptidoform" column).
+3. **Convert to standard format** (`ConvertStandardFormatError`) - `ParseSettingsQuant.convert_to_standard_format()` runs a 10-step pipeline: validate/rename columns, create replicate mapping, filter decoys, clean run names via `_clean_run_name()` regex, mark contaminants, process species (filter multi-species by `min_count_multispec`), process modifications to ProForma notation, melt wide-to-long if needed (with run-name cleanup on the `Raw file` column), filter zero intensities, format by analysis level (create the "precursor ion" or "peptidoform" column).
 
-4. **Create quant scores** (`_create_quant_scores`, `QuantificationError`) - instantiates `QuantScoresHYE(precursor_column_name, species_expected_ratio, species_dict)`.
+4. **Create quant scores** (`QuantificationError`) - instantiates `score_cls(precursor_column_name, species_expected_ratio, species_dict)` (default `QuantScoresHYE`).
 
-5. **Generate intermediate** (`_generate_intermediate`, `IntermediateFormatGenerationError`) - `QuantScoresHYE.generate_intermediate()`:
+5. **Generate intermediate** (`IntermediateFormatGenerationError`) - `QuantScoresHYE.generate_intermediate()`:
    - `compute_condition_stats()`: Groups by precursor/condition, computes log2 intensities, CV (= Intensity_std/Intensity_mean), pivots wide with columns like `log_Intensity_mean_A`, `CV_B`. Calculates `log2_A_vs_B = log_Intensity_mean_A - log_Intensity_mean_B`.
    - `compute_epsilon()`: Filters to single-species precursors (`unique==1`), assigns `log2_expectedRatio` per species (e.g., log2(2.0) for YEAST), computes `epsilon = log2_A_vs_B - log2_expectedRatio` (accuracy) plus the empirical per-species centers `log2_empirical_median`/`log2_empirical_mean` and `epsilon_precision_median`/`epsilon_precision_mean = log2_A_vs_B - empirical_center` (precision/reproducibility). When no single-species precursors remain it returns an empty DataFrame with the expected columns.
 
-6. **Generate datapoint** (`_generate_datapoint`, `DatapointGenerationError`) - `QuantDatapointHYE.generate_datapoint()`:
+6. **Generate datapoint** (`DatapointGenerationError`) - `datapoint_cls.generate_datapoint()`:
    - Computes `intermediate_hash` = SHA1 of the intermediate DataFrame string representation (`intermediate.to_string()`).
-   - Calls `get_metrics()` for `min_nr_observed` thresholds `1..max_nr_observed` (default 6; configurable, the Plasma/PYE path uses 12), producing a nested dict `{threshold: {metric_name: value, ...}, ...}`.
+   - Calls `get_metrics()` for `min_nr_observed` thresholds `1..max_nr_observed` (default 6; configurable, e.g. 12 for the Astral/timsTOF low-input modules), producing a nested dict `{threshold: {metric_name: value, ...}, ...}`.
    - Metrics include: epsilon accuracy (`{median,mean}_abs_epsilon_global` and `_eq_species`, plus per-species), epsilon precision (`*_abs_epsilon_precision_global`/`_eq_species`), per-species empirical centers (`{median,mean}_log2_empirical_{SPECIES}`), CV quantiles (`CV_median`/`q75`/`q90`/`q95`), `roc_auc` (abs-log2FC based), precursor counts (`nr_prec`), and `variance_epsilon_global`. Note: `compute_roc_auc_directional()` is implemented but is **not** invoked by `get_metrics()`, so only the abs-based ROC-AUC is stored.
    - Returns a `pd.Series` with all datapoint fields.
 
-7. **Append datapoint** (`_append_datapoint`, `DatapointAppendError`) - calls the supplied `add_datapoint_func`. Deduplication by `intermediate_hash` (rejecting duplicate submissions) is performed inside that function (e.g., `check_new_unique_hash()` in `quant_base_module.py`), not in `_append_datapoint` itself.
+7. **Append datapoint** (`DatapointAppendError`) - calls `add_current_data_point()`. Rejecting duplicate submissions by `intermediate_hash` happens separately, in `check_new_unique_hash()`.
 
 ### Intermediate DataFrame Structure
 
@@ -135,7 +135,7 @@ Old datapoints have `{metric}_abs_epsilon` without a mode suffix. New datapoints
 
 ### Exception Hierarchy (`proteobench/exceptions.py`)
 
-The benchmarking-step exceptions subclass `ProteobenchError` (lowercase b):
+All benchmarking-step exceptions subclass a single base, `ProteobenchError` (lowercase b), which stores the text on `.message`:
 
 ```
 ProteobenchError
@@ -146,14 +146,13 @@ ProteobenchError
 ├── QuantificationError                     # Quant score creation
 ├── DatapointGenerationError                # Datapoint creation
 ├── DatapointAppendError                    # Appending to collection
+├── EntrapmentError                         # Entrapment-specific steps
 └── PlotError                               # Plotting
 
 DatasetAlreadyExistsOnServerError           # standalone Exception subclass
 ```
 
-**Caveat (likely an unintentional code bug worth flagging before relying on it):** `exceptions.py` also defines a near-duplicate base class `ProteoBenchError` (capital B) and defines `ParseError` twice (the second definition, subclassing `ProteobenchError`, wins). `ValidationError` subclasses `ProteoBenchError` (capital B), so it sits in a separate branch from the benchmarking-step exceptions. Treat the capitalization carefully and consider consolidating these.
-
-Each `run_benchmarking()` step wraps its errors into the appropriate type via `handle_benchmarking_error`.
+Each `QuantModule.benchmarking()` step wraps its errors into the appropriate type via `_benchmarking_step`.
 
 ### TOML-Based Parse Settings
 
@@ -171,7 +170,7 @@ Each software tool + module combination has a TOML file in `proteobench/io/parsi
 - `[mapper]`: column renames (e.g., `"Sequence" = "Sequence"`)
 - `[condition_mapper]`: raw file name -> condition ("A"/"B"). Keys are normalized at init via `_clean_run_name()` (extensions like `.mzML`, `.raw` are stripped automatically).
 - `[run_mapper]`: raw file name -> display name (also normalized at init)
-- `[species_mapper]`: protein ID flag -> species (e.g., `"_YEAST" = "YEAST"`)
+- `[species_mapper]` (optional override): normally lives in `module_settings.toml` (see below). A tool TOML only repeats it to override the module value; plasma `parse_settings_diann.toml` does, because its species order differs and the order feeds the intermediate hash.
 - `[general]`: `contaminant_flag`, `decoy_flag`, and optionally `run_name_cleanup` (regex to override the default extension-stripping pattern)
 - `[modifications_parser]` (optional): `parse_column`, `before_aa`, `isalpha`, `isupper`, `pattern` (regex), `modification_dict` (mass -> name)
 - `[upload_info]`: human-readable guidance shown in the web UI when the tool is selected. Keys: `datapoint_file` (filename), `datapoint_file_description` (shown above the result-file uploader in Tab 2), `params_file` (filename), `params_file_description` (shown above the metadata uploader in Tab 6). Markdown is supported in description strings. The Custom format uses `datapoint_file_description` to embed a module-specific link to the documentation. Missing `[upload_info]` is handled gracefully — no message is shown.
@@ -192,6 +191,9 @@ run_name_cleanup = "(?:\\.custom_suffix|\\.raw)$"
 **Module settings TOML structure:**
 - `[species_expected_ratio.<SPECIES>]`: `A_vs_B` (float ratio), `color` (hex)
 - `[general]`: `min_count_multispec` (int), `level` ("ion" or "peptidoform")
+- `[species_mapper]`: protein ID flag -> species (e.g., `"_YEAST" = "YEAST"`), shared by all tools of the module. `ParseSettingsQuant` reads the mappers from `{**module_settings, **tool_settings}`, so a tool TOML value overrides. Astral_lowinput and timsTOF_lowinput also keep `[condition_mapper]`/`[run_mapper]` here since they are identical across tools.
+
+All TOML reads use stdlib `tomllib` (via `_load_toml()` in `parse_settings.py`); the third-party `toml` package is no longer a dependency.
 
 The `MODULE_TO_CLASS` dict at the bottom of `parse_settings.py` routes module IDs to parser classes: all `quant_lfq_*` modules use `ParseSettingsQuant`, and `denovo_DDA_HCD` uses `ParseSettingsDeNovo`. (It has no `quant_lfq_DIA_peptidoform` entry, matching that module being an unregistered stub.) The validation layer reuses this dict to infer a module's default validation profile.
 
@@ -207,31 +209,25 @@ A `maxdia.py` parser exists (delegating to MaxQuant's parser) but is **not** wir
 
 ### Module System (`proteobench/modules/`)
 
-Each quant benchmark module is a thin subclass of `QuantModule` that sets `module_id`, GitHub repo names, and typically a precursor column. The `MODULE_SETTINGS_DIRS` dict in `modules/constants.py` maps module IDs to their TOML config directories (10 entries; `quant_lfq_DIA_peptidoform` is deliberately absent).
+Each quant benchmark module is a thin subclass of `QuantModule` made of class attributes only (see Core Benchmarking Pipeline). The `MODULE_SETTINGS_DIRS` dict in `modules/constants.py` maps module IDs to their TOML config directories.
 
-`QuantModule.__init__` defaults `self.precursor_column_name = ""`. Most modules override it (e.g. `"precursor ion"` / `"peptidoform"`), but `DIAQuantIonModulediaSC` and `DIAQuantIonModulePlasma` instead set `self.precursor_name` (used in their inline benchmarking), leaving `precursor_column_name` empty.
-
-The `MODULE_CLASSES` dict in `utils/server_io.py` maps module class-name strings to classes for programmatic instantiation. It lists all **11** implemented modules: the 10 quant modules plus `DDAHCDDeNovoModule`. `make_submission()` raises `ValueError` for any other name, and the registry is unit-tested to keep every key equal to its class's `__name__`.
+The `MODULE_CLASSES` dict in `utils/server_io.py` maps module class-name strings to classes for programmatic instantiation. It lists the 11 quant modules plus `DDAHCDDeNovoModule`, keyed by `cls.__name__` (entrapment is not registered). `resubmit_datapoints.py` derives its repo registry from it via each class's `module_id` and `results_repo` (the de novo module also has `results_repo`). `make_submission()` raises `ValueError` for any other name, and the registry is unit-tested to keep every key equal to its class's `__name__`.
 
 `make_submission()` supports both module families despite their differing `benchmarking()` signatures. Optional keys in a submission dict (`default_cutoff_min_feature`, `evaluation_type`, `max_nr_observed`, `input_file_secondary`, listed in `OPTIONAL_BENCHMARKING_KEYS`) are forwarded only when the target module's signature accepts them, so quant's `default_cutoff_min_feature` and de novo's `evaluation_type` can both be passed without raising `TypeError`. It parses the metadata file *before* benchmarking and seeds `user_input` from the resulting `ProteoBenchParameters`, so the datapoint id — and hence the PR branch name — carries the real software version, checkpoint and decoding strategy rather than empty strings. It returns a **list** of PR URLs, one per submission.
-
-### Rescoring Module (`proteobench/modules/rescoring/`)
-
-A placeholder for a future rescoring module. Currently a stub: `module_rescoring.py` defines only a module-level `is_implemented()` returning `False`; `__init__.py` is a docstring. No module class, `module_id`, parse settings, or `MODULE_SETTINGS_DIRS`/`MODULE_CLASSES` registration exists yet, and it is not wired into the benchmarking pipeline or web interface.
 
 ### Plotting System (`proteobench/plotting/`)
 
 `PlotGeneratorBase` (abstract) defines four abstract methods: `plot_main_metric()`, `generate_in_depth_plots()`, `get_in_depth_plot_layout()` (column/title layout for the UI), and `get_in_depth_plot_descriptions()` (per-plot description strings). There are **three** concrete implementations:
 
 **`LFQHYEPlotGenerator`** (HYE = Human-Yeast-Ecoli mixed-species benchmarks):
-- **Main metric plot** (`plot_main_metric()`): Scatter of metric value (x) vs `nr_prec` (y), one trace per software tool. Supports `metric="Median"/"Mean"/"ROC-AUC"`, `mode="Global"/"Species-weighted"` (default `Species-weighted`), and `colorblind_mode=True` (uses marker shapes, not color alone). Selecting `Species-weighted` or `ROC-AUC` invokes `_filter_datapoints_with_metric()` to drop legacy datapoints lacking the new mode-suffixed columns. The `software_colors` dict maps **18** tools to hex colors; `software_markers` maps the same 18 tools to plotly marker symbols.
+- **Main metric plot** (`plot_main_metric()`): Scatter of metric value (x) vs `nr_prec` (y), one trace per software tool. Supports `metric="Median"/"Mean"/"ROC-AUC"`, `mode="Global"/"Species-weighted"` (default `Species-weighted`), and `colorblind_mode=True` (uses marker shapes, not color alone). Selecting `Species-weighted` or `ROC-AUC` invokes `_filter_datapoints_with_metric()` to drop legacy datapoints lacking the new mode-suffixed columns. Tool colors and markers come from `SOFTWARE_COLORS` / `SOFTWARE_MARKERS` (18 tools) in `plotting/utils/software_styles.py`.
 - **In-depth plots** (`generate_in_depth_plots()`):
   - `logfc`: Log2 fold-change distribution curves per species with expected-ratio vertical lines
   - `cv`: CV violin plot for Condition A and B
   - `ma_plot`: MA plot (`log2_A_vs_B` vs mean abundance) colored by species
 
 **`LFQPYEPlotGenerator`** (PYE = Plasma-Yeast-Ecoli, for the Plasma module):
-- Main metric plot (`_plot_plasma_scatterplot`) uses `QuantDatapointPYE` metrics and encodes four visual dimensions: x = absolute log2 fold-change error of spike-ins, y = number of quantified spike-in precursors, marker size = human-plasma dynamic range (min-max normalized), marker opacity = human-plasma accuracy (lower error = darker). It maintains its own 18-tool `software_colors` dict (same keys as HYE, different hex values).
+- Main metric plot (`plot_main_metric`) uses `QuantDatapointPYE` metrics and encodes four visual dimensions: x = absolute log2 fold-change error of spike-ins, y = number of quantified spike-in precursors, marker size = human-plasma dynamic range (min-max normalized), marker opacity = human-plasma accuracy (lower error = darker). It uses the same shared `SOFTWARE_COLORS`.
 - `generate_in_depth_plots()` returns `logfc`, `cv`, `ma_plot`, plus the plasma-specific `dynamic_range_plot` (human-plasma dynamic range with epsilon trend and per-species dropdown) and `missing_values_plot` (distribution of missing values). Note the dict key is `dynamic_range_plot`, not `dynamic_range`.
 
 **`DeNovoPlotGenerator`** (de novo sequencing):
@@ -257,23 +253,17 @@ Submission flow: clone Proteobot repo -> create branch (with unique hash suffix)
 
 ### Web Interface (`webinterface/`)
 
-Streamlit multi-page app. Entry point: `Home.py` (`StreamlitPageHome`, inherits from the `StreamlitPage` ABC in `_base.py`).
+Streamlit multi-page app routed with `st.navigation`. Entry point and router: `Home.py`, which builds the home page (`StreamlitPageHome`, a plain class;  shared preface/logo rendering lives in `render_preface()` / `render_logos()` in `_base.py`) plus one `st.Page` per module from the module registry, and runs `st.navigation(..., position="hidden")` so ProteoBench's own sidebar stays. There are **no per-module page files**: a module page is defined entirely by its Variables class. The only remaining file page is the local-only `pages/0_debug_session_state.py` (its Variables class sets `page_file`).
 
 **Inheritance chain:**
-1. `BaseStreamlitUI` (`pages/base.py`): Top-level entry point. Constructor signature is `(variables, texts, ionmodule, parsesettingsbuilder, uiobjects, page_name)`. Reads `st.secrets["gh"]["token"]`, instantiates `ionmodule(token)`, `parsesettingsbuilder`, and the UIObjects, then `main_page()` builds `st.tabs()` from `get_tab_config()` and dispatches to UIObjects methods via `getattr`. At the top of every tab it calls `_render_tab_header()` (module title, a "Go to module documentation" link button, and a warning banner) and it wires up the optional guided tour.
+1. `BaseStreamlitUI` (`pages/base.py`): Top-level entry point, built by `run_page(variables)`, which reads `variables.ionmodule`, `variables.uiobjects`, `variables.tabs` (default `DEFAULT_TABS`), `variables.tour` and uses `sidebar_label` as the page name. Reads `st.secrets["gh"]["token"]`, instantiates `ionmodule(token)`, `ParseSettingsBuilder` and the UIObjects, then `main_page()` builds `st.tabs()` from `self.tabs` (a list of `(tab label, UIObjects method name)`; `DEFAULT_TABS` is the 6 quant tabs) and dispatches to UIObjects methods via `getattr`. At the top of every tab it calls `_render_tab_header()` (module title, a "Go to module documentation" link button, and a warning banner) and it wires up the optional guided tour.
 2. `BaseUIModule` (`pages/base_pages/base.py`): ABC with `render_plot_options_expander()` (callback-based layout for filter and selector controls in `st.columns`), five abstract tab methods (`display_all_data_results_main`, `display_submission_form`, `display_indepth_plots`, `display_all_data_results_submitted`, `display_public_submission_ui`), and a non-abstract `get_tour_steps()` hook returning `None` by default.
 3. `QuantUIObjects` (`pages/base_pages/quant.py`): Concrete implementation for quant modules. Tabs 1, 3, and 4 use `@st.fragment` for partial reruns. Overrides `get_tour_steps()` to return the quant tour. Delegates to the tab module functions.
 4. `DeNovoUIObjects` (`pages/base_pages/denovo.py`): Concrete implementation for de novo modules with different controls (Precision/Recall, Exact/Mass-based radios, no slider).
 
-**Page structure:** Each module page (e.g., `pages/2_Quant_LFQ_DDA_ion_QExactive.py`) instantiates `BaseStreamlitUI` with keyword args:
-1. `variables`: a `Variables*` dataclass **instance** from `pages/pages_variables/` (defines session state keys with unique prefixes, plus sidebar metadata for module registry discovery and a `texts` attribute)
-2. `texts`: a `WebpageTexts` class (UI copy)
-3. `ionmodule`: the backend module **class** (instantiated with the token inside `BaseStreamlitUI`)
-4. `parsesettingsbuilder`: the `ParseSettingsBuilder` class
-5. `uiobjects`: `QuantUIObjects` or `DeNovoUIObjects`
-6. `page_name`: the sidebar label
+**Page structure:** Each module's `Variables*` dataclass in `pages/pages_variables/` inherits `VariablesBase` (`pages_variables/base.py`) and holds only real config (sidebar/registry metadata, flags, paths, plot labels, slider defaults), `key`, `markdown_dir`, and the page definition: `ionmodule` (backend module class), `uiobjects` (`QuantUIObjects` / `DeNovoUIObjects` / `EntrapmentUIObjects`), optional `tabs` and `tour` (class attributes, not dataclass fields). `VariablesBase.__post_init__` derives every session-state key in `SESSION_KEYS` as `f"{name}_{key}"` (plus `SLIDER_SESSION_KEYS` unless `has_slider = False`, as for de novo, because tabs probe those with `hasattr`) and the `description_{input_file,table,slider}_md` paths from `markdown_dir`. `base.py` must not match `*_variables.py` or annotate `sidebar_label` (module_registry relies on both). The `sidebar_*`, `doc_url`, `documentation_description` and `*_warning` fields must stay literal in each module file: `docs/generate_module_grid.py` and the variables tests read them via AST.
 
-**6 tabs per quant module** (de novo has 5, Plasma has 5):
+**6 tabs per quant module** (`DEFAULT_TABS`; de novo has 5):
 1. View Public Results - load all datapoints, filter by slider, plot scatter, show ag-grid table, download datasets
 2. Upload New Results (Private) - file upload (with AlphaDIA two-file support), software selector, keyword field, runs `ionmodule.benchmarking()`
 3. View Single Result - dataset selector dropdown (uploaded + all public), in-depth plots (fold change, CV, MA), performance table, pMultiQC report generation
@@ -287,7 +277,7 @@ For the de novo page the 5 tabs are View Public Results, Upload New Results (Pri
 - `tab1_view_public_results.py`: `display_existing_results()` (Tab 1 orchestrator)
 - `tab2_upload_results.py`: `process_submission_form()` (file upload and benchmarking)
 - `tab3_view_single_result.py`: `generate_indepth_plots()` (in-depth analysis; also `create_pmultiqc_report_section()` which runs `multiqc` via subprocess)
-- `tab4_view_public_and_new_results.py`: `display_submitted_results()` (Tab 4 orchestrator)
+- Tab 4 has no module of its own: it is `tab1_view_public_results.display_existing_results(..., submitted=True)` (submitted data/slider keys, pinned "new" row, read-only table, no downloads, no click-to-highlight)
 - `tab5_compare_results.py`: `display_workflow_comparison()` (two-workflow comparison)
 - `tab6_submit_results.py`: `submit_to_repository()` (PR creation workflow)
 
@@ -299,13 +289,11 @@ For the de novo page the 5 tabs are View Public Results, Upload New Results (Pri
 
 **Banner** (`pages/base_pages/banner.py`): `display_banner(variables)` renders an archived/alpha/beta warning banner based on the module's `archived_warning`/`alpha_warning`/`beta_warning` flags using texts from `variables.texts.ShortMessages`. Invoked by `BaseStreamlitUI._render_tab_header()`.
 
-**Texts package** (`pages/texts/`): `proteobench_builder.py` centralizes Streamlit page setup (`proteobench_page_config()`, `proteobench_sidebar()` which renders the searchable, categorized module navigation with ALPHA/BETA/ARCH badges driven by `pages/utils/module_registry.py`, and `render_links()`; it can inject analytics JS from `st.secrets["tracking"]["html_js"]`). Static UI copy lives in `generic_texts.py` (`WebpageTexts` with nested `ShortMessages` and `Help` classes), `generic_texts_dia.py`, and `generic_texts_denovo.py` (which adds a `Description` class).
-
-**Future pages** (`pages/future_pages/`): non-active page stubs. Currently holds `6_Quant_LFQ_peptidoform_DIA_AIF.py`, a stale prototype (marked TODO-remove) referencing an obsolete StreamlitUI API and import paths that no longer exist; it is not discovered or run by the app.
+**Texts package** (`pages/texts/`): `proteobench_builder.py` centralizes Streamlit page setup (`proteobench_page_config()`, `proteobench_sidebar()` which renders the searchable, categorized module navigation with ALPHA/BETA/ARCH badges driven by `pages/utils/module_registry.py`, and `render_links()`; it can inject analytics JS from `st.secrets["tracking"]["html_js"]`). Static UI copy lives in `generic_texts.py` (`WebpageTexts` with nested `ShortMessages` and `Help` classes) and `generic_texts_denovo.py` (which adds a `Description` class).
 
 **Guided tour:** an optional onboarding tour built on the third-party `streamlit_tour` library (driver.js under the hood). Step definitions live in `pages/base_pages/tour_steps.py`: `get_homepage_tour_steps()` and `get_quant_tour_steps(module_name)` (the `_tab_step()` helper targets the Nth tab button). `Home.py` shows an opt-in container and a "Take a Tour" sidebar button; `BaseStreamlitUI.main_page()` starts/finishes module tours and injects `.driver-active` pointer-events CSS so Streamlit selectbox portals remain clickable during the tour. State is tracked via session keys `_tour_opted_in`, `_home_tour_in_progress`, `_module_tour_in_progress`, `_module_tour_completed`.
 
-**Module registry** (`pages/utils/module_registry.py`): a cached (`@st.cache_resource`) `get_all_modules()` rglobs `*_variables.py` files and builds `ModuleMetadata` (fields: `label`, `path`, `file_path`, `category`, `release_stage`, `keywords`, `title`, `doc_url`, `results_repo`). `release_stage` is derived from the `archived_warning`/`alpha_warning`/`beta_warning` flags (default `"live"`). Categories are `"DDA"`, `"DIA"`, `"Archived"`. `filter_modules()` powers sidebar search and filtering.
+**Module registry** (`pages/utils/module_registry.py`): a cached (`@st.cache_resource`) `get_all_modules()` rglobs `*_variables.py` files and builds `ModuleMetadata` (fields: `label`, `path`, `page`, `category`, `release_stage`, `keywords`, `title`, `doc_url`, `results_repo`, ...). `page` is the module's `st.Page` (a callable running `run_page(VariablesClass())`, at `url_path = sidebar_path`); `all_module_pages()` feeds the router, `module_page(sidebar_path)` looks one up (e.g. for the home tour's `st.switch_page`), and `home_page_link()` is a link target for the home page. `st.Page` needs a running script context, so build pages only inside a Streamlit run. `release_stage` is derived from the `archived_warning`/`alpha_warning`/`beta_warning` flags (default `"live"`). Categories are `"DDA"`, `"DIA"`, `"Archived"`, `"Debug"` (debug only with `PROTEOBENCH_DEBUG=1`). `filter_modules()` powers sidebar search and filtering.
 
 **Secrets** (`webinterface/.streamlit/secrets.toml`, gitignored):
 - `st.secrets["gh"]["token"]` - GitHub token for PR creation
@@ -313,7 +301,7 @@ For the de novo page the 5 tabs are View Public Results, Upload New Results (Pri
 - `st.secrets["tracking"]` - Matomo analytics: `matomo_endpoint`, `matomo_idsite`, `matomo_token` (checked together in `Home.py`), plus optional `html_js` for injecting analytics JS
 - `st.secrets["hosting"]["information"]` - Custom hosting info
 
-**Streamlit config** (`webinterface/.streamlit/config.toml`): Light theme, max upload 1000MB, custom sidebar navigation disabled (uses its own implementation), widget state duplication warning disabled.
+**Streamlit config** (`webinterface/.streamlit/config.toml`): Light theme, max upload 1000MB, widget state duplication warning disabled.
 
 Changes to `webinterface/` auto-reload; changes to `proteobench/` require a server restart.
 
@@ -405,12 +393,7 @@ The `denovo` profile currently runs only `run_consistency` plus a `denovo_pendin
 
 ### Streamlit Coupling in Core Library
 
-Three files in `proteobench/` import Streamlit (coupling violations):
-1. `modules/quant/quant_base_module.py:18` - `import streamlit as st`, uses `st.error()` in `check_new_unique_hash()` (line ~352)
-2. `github/gh.py:24` - `import streamlit as st` (in try/except), uses `st.secrets` in `is_official_server()` (line ~26)
-3. `modules/denovo/denovo_base.py:14` - same pattern as quant_base_module (`st.error()` at line ~280)
-
-These would need to be decoupled for any framework migration (replace `st.error()` with exceptions, replace `st.secrets` with env vars).
+`proteobench/` does not import Streamlit: the core package (module classes, `benchmarking()`, `make_submission()`) runs from plain Python. Only comments mention Streamlit (parsers accept file-like upload objects as well as paths). Keep it that way: UI concerns belong in `webinterface/`.
 
 ## Testing
 
@@ -476,7 +459,7 @@ Separate workflow for the webinterface (`test-streamlit.yml`):
 2. Add the filename mapping to `parse_settings_files.toml` under the relevant module section
 3. Add an `extract_params` function in `io/params/newtool.py`
 4. Register it in `QuantModule.EXTRACT_PARAMS_DICT` in `modules/quant/quant_base_module.py`
-5. Add a color entry in the relevant plot generator's `software_colors` dict (`LFQHYEPlotGenerator`, and `LFQPYEPlotGenerator` for plasma, each maintains its own dict)
+5. Add a color and marker entry to `SOFTWARE_COLORS` / `SOFTWARE_MARKERS` in `proteobench/plotting/utils/software_styles.py` (shared by the HYE, PYE and entrapment generators; de novo keeps its own module-level dicts)
 6. If the tool is open source, add its `software_name` to the `[open_source].tools` list in `io/parsing/io_parse_settings/tool_metadata.toml`
 7. Add an `[upload_info]` section to the TOML with `datapoint_file`, `datapoint_file_description`, `params_file`, and `params_file_description`. If the new tool reuses an existing TOML (e.g., shares the DIA-NN report format), add an `[upload_info_overrides."New Tool Name"]` table to that TOML instead of creating a new one.
 8. Add test data file to `test/data/quant/<module>/` and parameter files to `test/params/`
@@ -485,16 +468,16 @@ Separate workflow for the webinterface (`test-streamlit.yml`):
 
 ### Adding a new benchmark module
 
-1. Create a module class in `modules/quant/` inheriting `QuantModule`, setting `module_id`, the precursor column, and repo names
+1. Add a class to `modules/quant/quant_modules.py` inheriting `QuantModule`, setting `module_id`, `results_repo` and any other class attributes that differ from the defaults
    - For submission validation (see the Submission Validation Layer section): add a `[reference_database] fasta_url = "..."` entry to the new module's `module_settings.toml` (if absent, protein-identifier validation is silently skipped). A quant module auto-resolves to the `quant_lfq` profile; a module of a new category should declare `[validation] profile = "<name>"` and register a matching profile in `proteobench/validation/profiles.py`.
 2. Add the settings directory to `MODULE_SETTINGS_DIRS` in `modules/constants.py`
 3. Register the parse settings class in `MODULE_TO_CLASS` in `parse_settings.py`
 4. Create TOML configs: `module_settings.toml` + per-tool parse settings in the new directory
 5. Add the module class to `MODULE_CLASSES` in `utils/server_io.py` (needed for programmatic submission)
-6. Create a Streamlit page in `webinterface/pages/`
-7. Create a `Variables*` dataclass in `webinterface/pages/pages_variables/Quant/` — the dataclass **must** include `sidebar_label`, `sidebar_path`, `sidebar_category`, `doc_url`, `documentation_description`, and the appropriate release-stage flag (`alpha_warning`/`beta_warning`/`archived_warning`) for the documentation homepage grid to be generated correctly
+6. Set `ionmodule` and `uiobjects` (and optionally `tabs` / `tour`) on the module's Variables class; no page file is needed
+7. Create a `Variables*` dataclass inheriting `VariablesBase` in `webinterface/pages/pages_variables/Quant/`, with a unique `key` and its `markdown_dir` — the dataclass **must** include `sidebar_label`, `sidebar_path`, `sidebar_category`, `doc_url`, `documentation_description`, and the appropriate release-stage flag (`alpha_warning`/`beta_warning`/`archived_warning`) for the documentation homepage grid to be generated correctly
 8. Add module markdown files in `webinterface/pages/markdown_files/`
-9. The module is auto-discovered by `module_registry.py` if the Variables dataclass has the sidebar metadata fields
+9. The module is auto-discovered by `module_registry.py` (and so gets a page in `Home.py`'s router) if the Variables dataclass has the sidebar metadata fields
 10. Add a test file and test data
 
 ### Adding a new parameter JSON for submission forms
@@ -503,22 +486,22 @@ Parameter field definitions are in `proteobench/io/params/json/`. Present files:
 
 ## All Module Classes and Repositories
 
-### Quant Modules (`proteobench/modules/quant/`)
+### Quant Modules (`proteobench/modules/quant/quant_modules.py`)
 
-| Class | module_id | precursor_col | Proteobot Repo | Implemented |
-|-------|-----------|---------------|----------------|-------------|
-| `DDAQuantIonModuleQExactive` | `quant_lfq_DDA_ion_QExactive` | `precursor ion` | `Results_quant_ion_DDA` | Yes |
-| `DDAQuantIonAstralModule` | `quant_lfq_DDA_ion_Astral` | `precursor ion` | `Results_quant_ion_DDA_Astral` | Yes |
-| `DIAQuantIonModuleAIF` | `quant_lfq_DIA_ion_AIF` | `precursor ion` | `Results_quant_ion_DIA` | No (archived) |
-| `DIAQuantIonModulediaPASEF` | `quant_lfq_DIA_ion_diaPASEF` | `precursor ion` | `Results_quant_ion_DIA_diaPASEF` | No |
-| `DIAQuantIonModuleAstral` | `quant_lfq_DIA_ion_Astral` | `precursor ion` | `Results_quant_ion_DIA_Astral` | No |
-| `DIAQuantIonModuleZenoTOF` | `quant_lfq_DIA_ion_ZenoTOF` | `precursor ion` | `Results_quant_lfq_DIA_ion_ZenoTOF` | No |
-| `DIAQuantIonModulediaSC` | `quant_lfq_DIA_ion_lowinput` | `precursor ion`* | `Results_quant_ion_DIA_lowinput` | No |
-| `DIAQuantIonModulePlasma` | `quant_lfq_DIA_ion_plasma` | `precursor ion`* | `Results_quant_ion_DIA_plasma` | No |
-| `DDAQuantPeptidoformModule` | `quant_lfq_DDA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DDA` | No |
-| `DIAQuantPeptidoformModule` | `quant_lfq_DIA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DIA` | No (stub, raises NotImplementedError) |
-
-*The low input and Plasma modules set `self.precursor_name` instead of `self.precursor_column_name`, so the documented value is the intent but `precursor_column_name` stays `""` at runtime.
+| Class | module_id | precursor_column_name | results_repo | Notes |
+|---|---|---|---|---|
+| `DDAQuantIonModuleQExactive` | `quant_lfq_DDA_ion_QExactive` | `precursor ion` | `Results_quant_ion_DDA` |  |
+| `DDAQuantIonAstralModule` | `quant_lfq_DDA_ion_Astral` | `precursor ion` | `Results_quant_ion_DDA_Astral` |  |
+| `DIAQuantIonModuleAIF` | `quant_lfq_DIA_ion_AIF` | `precursor ion` | `Results_quant_ion_DIA` | archived |
+| `DIAQuantIonModulediaPASEF` | `quant_lfq_DIA_ion_diaPASEF` | `precursor ion` | `Results_quant_ion_DIA_diaPASEF` |  |
+| `DIAQuantIonModuleAstral` | `quant_lfq_DIA_ion_Astral` | `precursor ion` | `Results_quant_ion_DIA_Astral` |  |
+| `DIAQuantIonModuleZenoTOF` | `quant_lfq_DIA_ion_ZenoTOF` | `precursor ion` | `Results_quant_lfq_DIA_ion_ZenoTOF` |  |
+| `DIAQuantIonModulediaSC` | `quant_lfq_DIA_ion_lowinput` | `precursor ion` | `Results_quant_ion_DIA_lowinput` |  |
+| `DIAQuantIonModuleAstralLowInput` | `quant_lfq_DIA_ion_Astral_lowinput` | `precursor ion` | `Results_quant_ion_DIA_Astral_lowinput` | `LFQLowInputPlotGenerator`, cutoff 6, max_nr_observed 12 |
+| `DIAQuantIonModuletimsTOFLowInput` | `quant_lfq_DIA_ion_timsTOF_lowinput` | `precursor ion` | `Results_quant_ion_DIA_timsTOF_lowinput` | `LFQLowInputPlotGenerator`, cutoff 6, max_nr_observed 12 |
+| `DIAQuantIonModulePlasma` | `quant_lfq_DIA_ion_plasma` | `precursor ion` | `Results_quant_ion_DIA_plasma` | PYE score/datapoint/plot classes, own `filter_data_point` |
+| `DDAQuantPeptidoformModule` | `quant_lfq_DDA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DDA` |  |
+| `DIAQuantPeptidoformModule` | `quant_lfq_DIA_peptidoform` | `peptidoform` | `Results_quant_peptidoform_DIA` | stub, raises NotImplementedError |
 
 ### De Novo Module (`proteobench/modules/denovo/`)
 
@@ -526,17 +509,17 @@ Parameter field definitions are in `proteobench/io/params/json/`. Present files:
 |-------|-----------|----------------|
 | `DDAHCDDeNovoModule` | `denovo_DDA_HCD` | `Results_denovo_lfq_DDA_HCD` |
 
-De novo `EXTRACT_PARAMS_DICT` (`denovo_base.py`): AdaNovo, Casanovo, DeepNovo, InstaNovo, Pi-HelixNovo, Pi-PrimeNovo, PointNovo.
+De novo `EXTRACT_PARAMS_DICT` (`denovo_base.py`): AdaNovo, Casanovo, ContraNovo, DeepNovo, InstaNovo, Pi-HelixNovo, Pi-PrimeNovo, PointNovo. The YAML-config tools (AdaNovo, Casanovo, ContraNovo, Pi-HelixNovo, Pi-PrimeNovo) share `io/params/denovo_yaml.py:extract_yaml_params()`, registered via `functools.partial` with per-tool `read_min_len` / `decoding` options.
 
 ### Score, Datapoint, and Plotting Class Hierarchy
 
-| Layer | ABC | HYE Implementation | PYE (Plasma) | De Novo |
+| Layer | Base | HYE Implementation | PYE (Plasma) | De Novo |
 |-------|-----|-------------------|--------------|---------|
-| Score (`proteobench/score/`) | `ScoreBase` | `QuantScoresHYE` | `QuantScoresPYE` | `DenovoScores` |
-| Datapoint (`proteobench/datapoint/`) | `DatapointBase` | `QuantDatapointHYE` | `QuantDatapointPYE` | `DenovoDatapoint` |
+| Score (`proteobench/score/`) | — | `QuantScoresHYE` | `QuantScoresHYE` | `DenovoScores` |
+| Datapoint (`proteobench/datapoint/`) | — | `QuantDatapointHYE` | `QuantDatapointPYE` | `DenovoDatapoint` |
 | Plotting (`proteobench/plotting/`) | `PlotGeneratorBase` | `LFQHYEPlotGenerator` | `LFQPYEPlotGenerator` | `DeNovoPlotGenerator` |
 
-`QuantScoresPYE` is a thin pass-through over `QuantScoresHYE`; all plasma-specific metrics (spike-in fold-change error, dynamic range, human-plasma epsilon) are computed in `QuantDatapointPYE._get_plasma_metrics`. `QuantDatapointPYE` extends `QuantDatapointHYE` with `median/mean_abs_log2_fc_error_spike_ins`, `nr_quantified_spike_ins`, `dynamic_range_human_plasma`, and `median/mean_abs_epsilon_human_plasma`. The plasma metrics path defaults `max_nr_observed` to 12 when `None`; the inherited HYE thresholds still default to 6 (the `QuantDatapointPYE.generate_datapoint` docstring claiming 6 for the plasma path is a doc bug).
+Plasma scores with `QuantScoresHYE`; all plasma-specific metrics (spike-in fold-change error, dynamic range, human-plasma epsilon) are computed in `QuantDatapointPYE._get_plasma_metrics`. `QuantDatapointPYE` extends `QuantDatapointHYE` with `median/mean_abs_log2_fc_error_spike_ins`, `nr_quantified_spike_ins`, `dynamic_range_human_plasma`, and `median/mean_abs_epsilon_human_plasma`. Both the plasma metrics path and the inherited HYE thresholds default `max_nr_observed` to 6 when `None`.
 
 ### Tools Supported Per Module (from `parse_settings_files.toml`)
 
@@ -554,18 +537,23 @@ De novo `EXTRACT_PARAMS_DICT` (`denovo_base.py`): AdaNovo, Casanovo, DeepNovo, I
 
 ### Webinterface Pages
 
-| File | Variables Class | Module Class | UIObjects | Entry Pattern |
-|------|----------------|-------------|-----------|---------------|
-| `2_Quant_LFQ_DDA_ion_QExactive.py` | `VariablesDDAQuant` | `DDAQuantIonModuleQExactive` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `3_Quant_LFQ_DIA_ion_AIF.py` | `VariablesDIAQuant` | `DIAQuantIonModuleAIF` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `4_Quant_LFQ_DIA_ion_diaPASEF.py` | `VariablesDIAQuantdiaPASEF` | `DIAQuantIonModulediaPASEF` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `5_Quant_LFQ_DDA_peptidoform.py` | `VariablesDDAQuant` (peptidoform) | `DDAQuantPeptidoformModule` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `6_Quant_LFQ_DIA_ion_Astral.py` | `VariablesDIAQuantAstral` | `DIAQuantIonModuleAstral` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `7_denovo_DDA_HCD.py` | `VariablesDDADeNovo` | `DDAHCDDeNovoModule` | `DeNovoUIObjects` | `BaseStreamlitUI` subclass `StreamlitUI`, overrides `get_tab_config()` for 5 tabs |
-| `8_Quant_LFQ_DDA_ion_Astral.py` | `VariablesDDAQuantAstral` | `DDAQuantIonAstralModule` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `9_Quant_LFQ_DIA_ion_lowinput.py` | `VariablesDIAQuantSC` | `DIAQuantIonModulediaSC` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `10_Quant_LFQ_DIA_ion_ZenoTOF.py` | `VariablesDIAQuantZenoTOF` | `DIAQuantIonModuleZenoTOF` | `QuantUIObjects` | `BaseStreamlitUI` |
-| `11_Quant_LFQ_DIA_ion_Plasma.py` | `VariablesDIAQuantPlasma` | `DIAQuantIonModulePlasma` | `QuantUIObjects` | Standalone `StreamlitUI` (not `BaseStreamlitUI`), 5 tabs, delegates to `QuantUIObjects` |
+One page per Variables class (no page files); `sidebar_path` is the URL.
+
+| Variables Class | Module Class | UIObjects | Page options |
+|---|---|---|---|
+| `VariablesDDAQuant` | `DDAQuantIonModuleQExactive` | `QuantUIObjects` |  |
+| `VariablesDIAQuant` | `DIAQuantIonModuleAIF` | `QuantUIObjects` |  |
+| `VariablesDIAQuantdiaPASEF` | `DIAQuantIonModulediaPASEF` | `QuantUIObjects` |  |
+| `VariablesDDAQuant` (peptidoform) | `DDAQuantPeptidoformModule` | `QuantUIObjects` |  |
+| `VariablesDIAQuantAstral` | `DIAQuantIonModuleAstral` | `QuantUIObjects` |  |
+| `VariablesDDADeNovo` | `DDAHCDDeNovoModule` | `DeNovoUIObjects` | `tabs` = 5 tabs |
+| `VariablesDDAQuantAstral` | `DDAQuantIonAstralModule` | `QuantUIObjects` |  |
+| `VariablesDIAQuantLI` | `DIAQuantIonModulediaSC` | `QuantUIObjects` |  |
+| `VariablesDIAQuantZenoTOF` | `DIAQuantIonModuleZenoTOF` | `QuantUIObjects` |  |
+| `VariablesDIAQuantPlasma` | `DIAQuantIonModulePlasma` | `QuantUIObjects` | `tour = False` |
+| `VariablesDIAQuantAstralLowinput` | `DIAQuantIonModuleAstralLowInput` | `QuantUIObjects` |  |
+| `VariablesDIAQuanttimsTOFLowinput` | `DIAQuantIonModuletimsTOFLowInput` | `QuantUIObjects` |  |
+| `VariablesDIAEntrapmentAstral` | `DIAEntrapmentIonModuleAstral` | `EntrapmentUIObjects` |  |
 
 ## Documentation (`docs/`)
 
@@ -612,11 +600,9 @@ Built with Sphinx using the `pydata_sphinx_theme`. Extensions: myst_parser (Mark
 
 ## Streamlit Utilities (`webinterface/streamlit_utils.py`)
 
-- `StreamlitLogger`: context manager that captures Python logging output and displays it in a Streamlit placeholder. Supports `accumulate` (append to previous) and `persist` (keep after context exit).
 - `display_error(friendly_message, exception, suggestions, technical_details)`: shows a user-friendly error with `st.error`, an optional suggestion list with `st.info`, and expandable technical details.
 - `get_error_suggestions(exception, context)`: analyzes the exception type/message and a `context` dict (reads `context["input_format"]`) and returns `(friendly_message, suggestions_list)`. Handles missing runs, invalid format, parser errors, missing columns.
 - `save_dataframe(df)`: cached CSV export function.
-- `hide_streamlit_menu()`: injects CSS to hide the Streamlit hamburger menu.
 
 ## Homepage (`webinterface/Home.py` + `UI_utils.py`)
 

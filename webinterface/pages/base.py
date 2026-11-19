@@ -114,6 +114,9 @@ class BaseStreamlitUI:
 
         # Get tab configuration
         tab_config = self.get_tab_config()
+        # Archived modules no longer accept public submissions.
+        if getattr(self.variables, "archived_warning", False):
+            tab_config = [t for t in tab_config if t[1] != "display_public_submission_ui"]
         # ? could also go here: if debug state is set, show debug tab
         tab_names = [name for name, _ in tab_config]
 

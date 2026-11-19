@@ -133,8 +133,12 @@ class BaseStreamlitUI:
                 unsafe_allow_html=True,
             )
 
-        tabs = st.tabs([name for name, _ in self.tabs])
-        for tab, (_, method_name) in zip(tabs, self.tabs):
+        tab_config = self.tabs
+        # Archived modules no longer accept public submissions.
+        if getattr(self.variables, "archived_warning", False):
+            tab_config = [t for t in tab_config if t[1] != "display_public_submission_ui"]
+        tabs = st.tabs([name for name, _ in tab_config])
+        for tab, (_, method_name) in zip(tabs, tab_config):
             with tab:
                 self._render_tab_header(method_name=method_name)
                 getattr(self.uiobjects, method_name)()

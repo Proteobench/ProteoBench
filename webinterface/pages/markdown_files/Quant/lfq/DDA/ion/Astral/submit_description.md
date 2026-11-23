@@ -2,7 +2,7 @@
 
 To do so, you need to provide the parameter file that corresponds to
 your analysis. You can upload it in the drag and drop area below.
-See [here](https://proteobench.readthedocs.io/en/stable/available-modules/8-quant-lfq-ion-dda-astral/)
+See [here](https://proteobench.readthedocs.io/en/latest/modules/dda/dda-ion-astral/)
 for all compatible parameter files.
 In this module, we keep track of the following parameters, if you feel
 that some important information is missing, please add it in the

@@ -14,7 +14,7 @@ class VariablesDIAEntrapmentAstral:
     Variables for the DIA entrapment - precursor ions Astral module.
     """
 
-    all_datapoints: str = "all_datapoints_Astral"
+    all_datapoints: str = "all_datapoints_dia_entrapment_Astral"
     all_datapoints_submission: str = "all_datapoints_submission_dia_entrapment_Astral"
     input_df_submission: str = "input_df_submission_dia_entrapment_Astral"
     result_performance_submission: str = "result_performance_submission_dia_entrapment_Astral"
@@ -87,8 +87,8 @@ class VariablesDIAEntrapmentAstral:
     first_new_plot: bool = True
     default_val_slider: int = 3
     max_nr_observed: int = 6
-    alpha_warning: bool = True
-    beta_warning: bool = False
+    alpha_warning: bool = False
+    beta_warning: bool = True
     archived_warning: bool = False
     enable_pmultiqc: bool = False
     github_link_pr: str = "github.com/Proteobot/Results_entrapment_ion_DIA_Astral.git"
@@ -119,9 +119,7 @@ class VariablesDIAEntrapmentAstral:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/entrapment/DIA/ion/Astral"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/13-entrapment-ion-dia-astral/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/entrapment-dia-astral/"
     raw_data_url: str = (
         "https://proteobench.cubimed.rub.de/raws/DIA-astral-entrapment/all_data_Entrapment_DIA_Astral.tar.gz"
     )

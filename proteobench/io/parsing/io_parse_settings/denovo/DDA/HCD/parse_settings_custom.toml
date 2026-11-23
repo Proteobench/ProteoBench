@@ -2,10 +2,15 @@
 "spectrum_id" = "spectrum_id"
 "sequence" = "sequence"
 "score" = "score"
-"aa_scores" = "aa_scores"
 
-[spectrum_id]
+[spectrum_id_mapper]
 "pattern" = "scan=(\\d+)"
 
 [sequence_mapper]
 [sequence_mapper.replacement_dict]
+
+[upload_info]
+"datapoint_file" = "*.csv"
+"datapoint_file_description" = "Upload the de novo sequencing output CSV file defined in custom format"
+"params_file" = ""
+"params_file_description" = ""

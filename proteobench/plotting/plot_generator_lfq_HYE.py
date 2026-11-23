@@ -1,13 +1,14 @@
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.figure_factory import create_distplot
 
 from proteobench.plotting.plot_constants import QUANT_SOFTWARE_COLORS, QUANT_SOFTWARE_MARKERS
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
+from proteobench.plotting.utils import create_kde_distribution_plot, fill_density_traces
+from proteobench.plotting.utils.accuracy_vs_abundance import plot_accuracy_vs_abundance
 
 
 class LFQHYEPlotGenerator(PlotGeneratorBase):
@@ -97,34 +98,121 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             "ma_plot": "MA plot calculated from the performance data",
         }
 
-    def _get_metric_column_name(self, metric: str, mode: str) -> Tuple[str, str, str]:
+    def get_metrics_help_markdown(self) -> str:
         """
-        Get the appropriate metric column names based on metric type and calculation mode.
-
-        Parameters
-        ----------
-        metric : str
-            The metric type: "Median" or "Mean"
-        mode : str
-            The calculation mode: "Global" or "Equal weighted species"
+        Return a Markdown explanation of how the metrics of the main plot are calculated.
 
         Returns
         -------
-        Tuple[str, str, str]
-            Tuple of (metric_lower, mode_suffix, plot_title) for constructing column names
-            and plot title.
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover.
         """
-        metric_lower = metric.lower()
-        mode_suffix = "global" if mode == "Global" else "eq_species"
+        return f"""
+            Each point is one benchmark run. Both axes are recomputed whenever the
+            **Minimal precursor quantifications** slider is moved, so every metric refers to the
+            subset of features that is quantified in at least that many raw files.
 
-        mode_description = "global" if mode == "Global" else "equal weighted species"
+            **X-axis** - the quantification error, expressed as the absolute deviation between the
+            measured and the expected log2 fold change. Per feature (precursor ion or peptidoform)
+            the deviation is called epsilon:
 
-        plot_title = (
-            f"{metric} absolute difference between measured and expected log2-transformed fold change "
-            f"(calculated {mode_description})"
-        )
+            `epsilon = log2(mean intensity in A / mean intensity in B) - log2(expected ratio A/B)`
 
-        return metric_lower, mode_suffix, plot_title
+            The expected ratio is the known mixing ratio of the species the feature belongs to, so
+            only species-specific features are used. The absolute epsilon values are then
+            aggregated over the selected feature set. A value closer to zero means the measured
+            fold changes are closer to the ground truth.
+
+            **Y-axis** - {self.y_axis_title.lower()}. This is the plain count of features that
+            passed the slider threshold, and it reflects the identification and quantification
+            depth of the workflow.
+
+            A workflow in the **upper left corner** therefore quantifies many features with a small
+            fold-change error.
+
+            **Select metric** - how the absolute epsilon values are aggregated:
+
+            - **Median** - the median absolute epsilon. Robust against a small number of strongly
+              deviating features.
+            - **Mean** - the mean absolute epsilon. More sensitive to outliers, so it penalises a
+              tail of badly quantified features more strongly.
+
+            **Select metric calculation approach** - how the species are weighted:
+
+            - **Species-weighted** - the absolute epsilon is aggregated per species first, and those
+              per-species values are then averaged with equal weight. Every species contributes
+              equally, regardless of how many features were quantified for it.
+            - **Global** - all selected features are aggregated as one population. Species with many
+              quantified features therefore dominate the value.
+
+            The two approaches can rank workflows differently when the number of quantified features
+            is unbalanced across the species. Benchmark runs submitted before the species-weighted
+            metric existed are hidden in that mode, because the value cannot be recomputed from the
+            stored results.
+
+            **Select label** - annotates each point with the value of the chosen search parameter,
+            which makes it easier to see how a single setting affects the results.
+
+            **Colorblind Mode** - distinguishes the software tools by marker shape in addition to
+            colour.
+            """
+
+    def get_in_depth_metrics_help_markdown(self) -> str:
+        """
+        Return a Markdown explanation of how the in-depth plots are calculated.
+
+        Returns
+        -------
+        str
+            The Markdown explanation shown in the "How are the metrics calculated?" popover on the
+            in-depth tab.
+        """
+        return """
+            The plots on this tab describe **one single benchmark run** instead of comparing runs,
+            and every point in them is one feature (precursor ion or peptidoform) rather than one
+            workflow. They are computed from the intermediate table shown further down this page,
+            which can be downloaded for your own analysis.
+
+            All of them start from the same per-feature quantities. For each condition, the
+            intensities of a feature over the raw files of that condition are summarised as:
+
+            - `Intensity_mean` and `Intensity_std` - mean and standard deviation of the raw
+              intensities.
+            - `log_Intensity_mean` - mean of the log2-transformed intensities. Note this is the mean
+              of the logs, not the log of the mean.
+            - `CV = Intensity_std / Intensity_mean` - the coefficient of variation, computed on the
+              raw (not log-transformed) intensities.
+            - `nr_observed` - in how many raw files the feature was quantified. Missing values are
+              never imputed, they are simply left out of these summaries.
+
+            The measured fold change is then the difference of the two condition means on the log2
+            scale, and the deviation from the ground truth is epsilon:
+
+            `log2_A_vs_B = log_Intensity_mean_A - log_Intensity_mean_B`
+
+            `epsilon = log2_A_vs_B - log2(expected ratio A/B)`
+
+            **Log2 fold change distribution** - a kernel density estimate of `log2_A_vs_B`, drawn
+            separately per species over a fixed x-range of -4 to 4. The dashed vertical lines mark the
+            expected ratio of each species. A curve that is shifted away from its line indicates a
+            systematic bias, and a broad curve indicates poor reproducibility. Because the curves are
+            densities, each is normalised to an area of one, so their heights say nothing about how
+            many features each species contributed.
+
+            **Coefficient of variation** - a violin plot of the `CV_A` and `CV_B` values, with the
+            embedded box showing the quartiles. Infinite values (a feature quantified in one run of a
+            condition, so without a defined standard deviation) are dropped. This measures the
+            technical reproducibility within a condition, independently of the ground truth.
+
+            **MA plot** - each feature is drawn with its measured fold change `log2_A_vs_B` on the
+            x-axis and its mean abundance on the y-axis, calculated as the average of
+            `log_Intensity_mean_A` and `log_Intensity_mean_B`. The dashed vertical lines again mark
+            the expected ratios. This shows whether the quantification error depends on abundance,
+            which is typically the case at the low-abundance end.
+
+            Unlike the main plot, these plots use all features of the run: they are not filtered by
+            the minimal-quantifications slider.
+            """
 
     def plot_main_metric(
         self,
@@ -166,10 +254,11 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
             Label for the highlighted software/tool.
         legend_name_map : Dict[str, str]
             Mapping for legend names.
-        hide_annot : bool
-            Whether to hide annotations on the plot.
+        annotation : str
+            Extra text shown next to the highlighted software/tool.
         **kwargs : dict
             Additional module-specific parameters.
+
         Returns
         -------
         go.Figure
@@ -308,7 +397,6 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         for _, row in color_software_combinations.iterrows():
             color = row["color"]
             software = row["software_name"]
-            marker = row["marker"]
 
             tmp_df = result_df[(result_df["color"] == color) & (result_df["software_name"] == software)]
             # to do: remove this line as soon as parameters are homogeneous, see #380
@@ -413,17 +501,7 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
         # Create distribution plot
         if hist_data:
-            fig = create_distplot(
-                hist_data,
-                group_labels,
-                show_hist=False,
-                show_rug=False,
-                colors=colors,
-            )
-
-            for trace in fig.data:
-                if trace.mode == "lines":
-                    trace.update(fill="tozeroy", opacity=0.4)
+            fig = fill_density_traces(create_kde_distribution_plot(hist_data, group_labels, colors))
 
             fig.update_layout(
                 xaxis=dict(
@@ -630,3 +708,157 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
 
         # Filter to only datapoints that have the specified metric calculated
         return result_df[result_df["results"].apply(has_metric)].copy()
+
+    def plot_accuracy_vs_abundance(self, intermediates: Dict[str, pd.DataFrame], **kwargs) -> go.Figure:
+        """
+        Compare quantification accuracy over the abundance range of each workflow.
+
+        A module opts into this comparison plot by returning it from
+        ``generate_comparison_plots``. The figure is large enough to own its module: see
+        :mod:`proteobench.plotting.utils.accuracy_vs_abundance` for what it shows and what its
+        two dropdowns change.
+
+        Parameters
+        ----------
+        intermediates : Dict[str, pd.DataFrame]
+            Mapping of workflow label (e.g. a ProteoBench ID or tool name) to that workflow's
+            intermediate DataFrame. At least two workflows are required.
+        **kwargs : dict
+            Forwarded unchanged to
+            :func:`proteobench.plotting.utils.accuracy_vs_abundance.plot_accuracy_vs_abundance`,
+            which documents them. ``precursor_column_name`` is the usual one.
+
+        Returns
+        -------
+        go.Figure
+            The figure, or a placeholder carrying an explanatory message when it cannot be built.
+        """
+        return plot_accuracy_vs_abundance(intermediates, **kwargs)
+
+    def plot_precursor_overlap(
+        self,
+        workflow_1_id: str,
+        precursors_1: Iterable[str],
+        workflow_2_id: str,
+        precursors_2: Iterable[str],
+    ) -> go.Figure:
+        """
+        Plot how many features two workflows share and how many are unique to each.
+
+        The comparison is plain set arithmetic on the feature identifiers, so it applies to every
+        LFQ quant module, whose intermediate tables all identify features by a precursor ion or
+        peptidoform column.
+
+        Parameters
+        ----------
+        workflow_1_id : str
+            Label of the first workflow, used in the legend.
+        precursors_1 : Iterable[str]
+            Feature identifiers quantified by the first workflow.
+        workflow_2_id : str
+            Label of the second workflow, used in the legend.
+        precursors_2 : Iterable[str]
+            Feature identifiers quantified by the second workflow.
+
+        Returns
+        -------
+        go.Figure
+            A grouped bar chart with one bar for the features unique to each workflow and one
+            for the features they share.
+        """
+        set_1 = set(precursors_1)
+        set_2 = set(precursors_2)
+
+        counts = [
+            (f"Unique to {workflow_1_id}", len(set_1 - set_2)),
+            ("Shared", len(set_1 & set_2)),
+            (f"Unique to {workflow_2_id}", len(set_2 - set_1)),
+        ]
+
+        fig = go.Figure()
+        for name, count in counts:
+            fig.add_trace(
+                go.Bar(
+                    name=name,
+                    x=["Precursor Distribution"],
+                    y=[count],
+                    text=[count],
+                    textposition="auto",
+                )
+            )
+
+        fig.update_layout(
+            title="Precursor Overlap Distribution",
+            barmode="group",
+            yaxis_title="Number of Precursors",
+            showlegend=True,
+        )
+        return fig
+
+    def generate_comparison_plots(self, intermediates: Dict[str, pd.DataFrame], **kwargs) -> Dict[str, go.Figure]:
+        """
+        Generate the plots that compare several benchmark runs with each other.
+
+        Unlike ``generate_in_depth_plots``, which describes a single run, these plots take the
+        intermediate tables of several runs at once. LFQ modules that offer no such plot inherit
+        this default, which returns nothing, and show only the two generic comparison tabs.
+
+        Parameters
+        ----------
+        intermediates : Dict[str, pd.DataFrame]
+            Mapping of workflow label (e.g. a ProteoBench ID) to that workflow's intermediate
+            DataFrame.
+        **kwargs : dict
+            Additional module-specific parameters. Implementations should document which ones
+            they accept; ``precursor_column_name`` is the usual one.
+
+        Returns
+        -------
+        Dict[str, go.Figure]
+            Dictionary mapping plot names to plotly figures. Empty by default.
+        """
+        return {}
+
+    def get_comparison_plot_layout(self) -> List[dict]:
+        """
+        Define the full set of tabs the workflow comparison shows, and in which order.
+
+        This is the complete specification the web interface renders, so an LFQ module controls
+        its comparison tabs entirely from its plot generator. Two names are rendered by the web
+        interface itself rather than by a figure, because they combine a plot with widgets:
+        ``precursor_overlap`` and ``parameter_differences``. Every other name must match a key
+        returned by ``generate_comparison_plots``.
+
+        The default returns only the two generic tabs. Modules that add a comparison plot should
+        extend rather than replace it, for example
+        ``return super().get_comparison_plot_layout() + [{"name": ..., "title": ...}]``.
+
+        Returns
+        -------
+        List[dict]
+            List of tab configurations, each with a ``name`` and a ``title``.
+        """
+        return [
+            {"name": "precursor_overlap", "title": "Precursor Overlap"},
+            {"name": "parameter_differences", "title": "Parameter Differences"},
+        ]
+
+    def get_comparison_plot_descriptions(self) -> Dict[str, str]:
+        """
+        Get descriptions for each comparison tab.
+
+        The web interface renders the description under the tab title. Keys match the ``name``
+        values of ``get_comparison_plot_layout``.
+
+        Returns
+        -------
+        Dict[str, str]
+            Dictionary mapping comparison tab names to their descriptions.
+        """
+        return {
+            "precursor_overlap": "Shows which precursors are shared or unique to each workflow.",
+            "parameter_differences": (
+                "Parameter comparison for new points is possible after uploading the parameter "
+                "files in a public submission."
+            ),
+        }

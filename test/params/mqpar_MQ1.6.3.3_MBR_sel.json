@@ -21,5 +21,7 @@
     "max_precursor_charge": 7,
     "quantification_method": NaN,
     "protein_inference": NaN,
-    "abundance_normalization_ions": NaN
+    "abundance_normalization_ions": NaN,
+    "postprocessing_performed": false,
+    "postprocessing_description": NaN
 }

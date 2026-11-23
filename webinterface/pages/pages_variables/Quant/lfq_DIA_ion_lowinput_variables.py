@@ -42,9 +42,9 @@ class VariablesDIAQuantLI:
     first_new_plot: bool = True
     default_val_slider: int = 3
     max_nr_observed: int = 6
-    alpha_warning: bool = True
+    alpha_warning: bool = False
     beta_warning: bool = False
-    archived_warning: bool = False
+    archived_warning: bool = True
     github_link_pr: str = "github.com/Proteobot/Results_quant_ion_DIA_lowinput.git"
 
     # Sidebar metadata
@@ -52,10 +52,11 @@ class VariablesDIAQuantLI:
     homepage_title: str = "LFQ Quantification for Low-Input"
     graphical_abstract: str = "Graphical_abstract_low_input.png"
     documentation_description: str = (
-        "Benchmark identification and quantification workflows for low-input proteomics (close to single cell level) using DIA acquisitions."
+        "Archived: benchmarked low-input (close to single-cell level) DIA quantification workflows on an "
+        "Orbitrap Astral. Superseded by the Astral and timsTOF low-input (200 pg) modules."
     )
     sidebar_path: str = "/Quant_LFQ_DIA_ion_lowinput"
-    sidebar_category: str = "DIA"
+    sidebar_category: str = "Archived"
     keywords: List[str] = field(
         default_factory=lambda: [
             "DIA",
@@ -123,9 +124,7 @@ class VariablesDIAQuantLI:
     parse_settings_dir: str = "../proteobench/io/parsing/io_parse_settings/Quant/lfq/DIA/ion/lowinput"
 
     texts: Type[WebpageTexts] = WebpageTexts
-    doc_url: str = (
-        "https://proteobench.readthedocs.io/en/latest/available-modules/active-modules/9-quant-lfq-ion-dia-lowinput/"
-    )
+    doc_url: str = "https://proteobench.readthedocs.io/en/latest/modules/dia/dia-ion-lowinput/"
     raw_data_url: str = "https://proteobench.cubimed.rub.de/raws/DIA-SingleCell/all_data_LFQ_Quant_DIA_SC.tar.gz"
 
     title: str = "DIA Precursor quantification - Low Input"

@@ -1,0 +1,30 @@
+[mapper]
+"FG.LabeledSequence" = "Sequence"
+"PEP.StrippedSequence" = "Peptide"
+"R.FileName" = "Raw file"
+"FG.Charge" = "Charge"
+"EG.LibraryQvalue" = "Q-Value"
+
+
+[modifications_parser]
+"parse_column" = "Sequence"
+"before_aa" = false
+"isalpha" = true
+"isupper" = true
+"pattern" = "\\[(.*?)\\]"
+"modification_dict" = {"[oxidation (m)]" = "Oxidation", "[carbamidomethyl (c)]" = "Carbamidomethyl"}
+
+[run_mapper]
+"LFQ_Astral_DIA_15min_50ng_Human_01" = "LFQ_Astral_DIA_15min_50ng_Human_01"
+"LFQ_Astral_DIA_15min_50ng_Human_02" = "LFQ_Astral_DIA_15min_50ng_Human_02"
+"LFQ_Astral_DIA_15min_50ng_Human_03" = "LFQ_Astral_DIA_15min_50ng_Human_03"
+
+[general]
+"contaminant_flag" = "Cont_"
+"decoy_flag" = true
+
+[upload_info]
+"datapoint_file" = "*.tsv"
+"datapoint_file_description" = "Upload the Spectronaut report TSV file exported from the Spectronaut analysis."
+"params_file" = "ExperimentSetupOverview.txt"
+"params_file_description" = "Upload the Spectronaut ExperimentSetupOverview export file (`.txt`), available via Export > ExperimentSetupOverview in Spectronaut."

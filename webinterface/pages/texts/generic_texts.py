@@ -55,8 +55,8 @@ class WebpageTexts:
             for more details.
             """
 
-        warning_alpha = """This module is in ALPHA phase. It has not yet passed peer review 
-            and should be used with caution.
+        warning_alpha = """This module is in ALPHA phase. It  remains to be fully discussed 
+            with experts and should be used with caution.
             """
 
         warning_beta = """This module is in BETA phase. The figure presented below and 
@@ -70,7 +70,7 @@ class WebpageTexts:
 
         input_file = """
             Output file of the software tool. More information on the accepted format can
-            be found [here](https://proteobench.readthedocs.io/en/latest/available-modules/)
+            be found [here](https://proteobench.readthedocs.io/en/latest/modules/)
             """
 
         pull_req = """
@@ -80,7 +80,7 @@ class WebpageTexts:
         input_format = """
             Please select the software you used to generate the results. If it is not yet
             implemented in ProteoBench, you can use a tab-delimited format that is described
-            further [here](https://proteobench.readthedocs.io/en/latest/available-modules/)
+            further [here](https://proteobench.readthedocs.io/en/latest/modules/)
         """
 
         parse_button = """
@@ -89,6 +89,6 @@ class WebpageTexts:
 
         meta_data_file = """
             Please add a file with meta data that contains all relevant information about
-            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/available-modules/)
+            your search parameters. See [here](https://proteobench.readthedocs.io/en/latest/modules/)
             for all compatible parameter files.
         """

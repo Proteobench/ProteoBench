@@ -46,7 +46,7 @@ def process_markdown_to_csv(filepath, output_csv_path):
 
 
 if __name__ == "__main__":
-    input_file = "available-modules/12-parsed-parameters-for-public-submission.md"
+    input_file = "concepts/parameter-parsing.md"
     output_file = "parsing_overview.tsv"
 
     process_markdown_to_csv(input_file, output_file)

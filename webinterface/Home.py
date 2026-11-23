@@ -37,15 +37,40 @@ _GRAPHICAL_ABSTRACT_DISCLAIMER = (
 
 
 def _module_graphical_abstract(module):
-    """Return the module's graphical abstract image, falling back to the generic
-    module icon if none is configured."""
+    """
+    Get the image path for a module's graphical abstract.
+
+    Parameters
+    ----------
+    module : ModuleMetadata
+        Module metadata containing an optional graphical abstract filename.
+
+    Returns
+    -------
+    str
+        The graphical abstract path, or the generic module icon path if none is configured.
+    """
     if module.graphical_abstract:
         return f"{_ABSTRACT_DIR}/{module.graphical_abstract}"
     return _MODULE_CARD_ICON
 
 
 def _chunked(items, size):
-    """Yield successive `size`-sized chunks from `items`."""
+    """
+    Yield successive chunks from a sequence.
+
+    Parameters
+    ----------
+    items : sequence
+        Values to divide into chunks.
+    size : int
+        Maximum number of values in each chunk.
+
+    Yields
+    ------
+    sequence
+        The next slice of values.
+    """
     for i in range(0, len(items), size):
         yield items[i : i + size]
 
@@ -60,8 +85,19 @@ _INSTRUMENT_KEYWORDS = ["QExactive", "Astral", "ZenoTOF", "timsTOF", "orbitrap",
 
 
 def _module_type_tag(keywords):
-    """Derive a coarse benchmark-type tag ("Quantification", "FDR validation",
-    "Identification") from a module's keyword list."""
+    """
+    Derive a benchmark-type tag from module keywords.
+
+    Parameters
+    ----------
+    keywords : list of str
+        Keywords describing the module.
+
+    Returns
+    -------
+    str or None
+        The matching benchmark type, or None if no type is identified.
+    """
     if "entrapment" in keywords:
         return "FDR validation"
     if "de novo" in keywords or "identification" in keywords:
@@ -72,8 +108,19 @@ def _module_type_tag(keywords):
 
 
 def _module_instrument(keywords):
-    """Return the first known instrument keyword found, or None if the module
-    isn't tied to a specific instrument."""
+    """
+    Find the first known instrument keyword in a module's keywords.
+
+    Parameters
+    ----------
+    keywords : list of str
+        Keywords describing the module.
+
+    Returns
+    -------
+    str or None
+        The first matching instrument, or None if no instrument is identified.
+    """
     for instrument in _INSTRUMENT_KEYWORDS:
         if instrument in keywords:
             return instrument
@@ -81,7 +128,19 @@ def _module_instrument(keywords):
 
 
 def _module_acquisition(keywords):
-    """Return the acquisition mode ("DDA" or "DIA") from a module's keyword list."""
+    """
+    Find the acquisition mode in a module's keywords.
+
+    Parameters
+    ----------
+    keywords : list of str
+        Keywords describing the module.
+
+    Returns
+    -------
+    str or None
+        The acquisition mode (DDA or DIA), or None if it is not identified.
+    """
     if "DDA" in keywords:
         return "DDA"
     if "DIA" in keywords:
@@ -118,6 +177,16 @@ _FEATURE_HIGHLIGHTS = [
 
 @st.dialog("Tool Breakdown", width="large")
 def _show_tool_breakdown(module_title, tool_counts):
+    """
+    Display a pie chart of tools used for the selected module.
+
+    Parameters
+    ----------
+    module_title : str
+        Title of the selected benchmark module.
+    tool_counts : dict
+        Mapping of tool names to submission counts for the module.
+    """
     pie_fig = build_tool_pie_chart(module_title, tool_counts)
     st.plotly_chart(pie_fig)
 
@@ -167,6 +236,7 @@ class StreamlitPageHome(StreamlitPage):
 
     @staticmethod
     def _render_feature_highlights():
+        """Render the homepage feature highlights."""
         with st.container(horizontal_alignment="center"):
             st.subheader("Why ProteoBench?", text_alignment="center")
         for col, (icon, heading, body) in zip(st.columns(4, border=True), _FEATURE_HIGHLIGHTS):
@@ -177,6 +247,7 @@ class StreamlitPageHome(StreamlitPage):
 
     @staticmethod
     def _render_module_quicklinks():
+        """Render cards linking to available benchmark modules."""
         # The page_link label is truncated with an ellipsis by default (single-line,
         # no-wrap); let it wrap onto multiple lines instead so the full module
         # title is always visible.
@@ -282,6 +353,14 @@ class StreamlitPageHome(StreamlitPage):
 
     @staticmethod
     def _get_monthly_visits():
+        """
+        Get monthly visits or a status message when tracking is not configured.
+
+        Returns
+        -------
+        int or str
+            The visit count, or a status message if tracking is not configured.
+        """
         secrets = st.secrets
         has_tracking_config = (
             "tracking" in secrets
@@ -298,6 +377,7 @@ class StreamlitPageHome(StreamlitPage):
         )
 
     def _render_stats(self):
+        """Render the homepage platform statistics cards."""
         stats = [
             (
                 f"{_ICON_DIR}/module.svg",
@@ -318,8 +398,7 @@ class StreamlitPageHome(StreamlitPage):
                 "Supported workflows",
                 get_n_supported_tools(),
                 "Software tools with parameter parsing support in ProteoBench.",
-                "https://proteobench.readthedocs.io/en/stable/available-modules/"
-                "12-parsed-parameters-for-public-submission/",
+                "https://proteobench.readthedocs.io/en/stable/concepts/parameter-parsing/",
             ),
             (
                 f"{_ICON_DIR}/scatter-plot.svg",
@@ -375,6 +454,7 @@ class StreamlitPageHome(StreamlitPage):
 
     @staticmethod
     def _render_submissions_chart():
+        """Render submissions per module and show tool details for a selected bar."""
         with st.container(key="tour_submissions_chart", border=True):
             st.subheader("Submissions per module", anchor=False)
             st.caption("Click a bar to see the breakdown of tools used for that module.")
@@ -401,6 +481,7 @@ class StreamlitPageHome(StreamlitPage):
 
     @staticmethod
     def _handle_tour_start():
+        """Start the homepage tour when requested or opted into by the user."""
         if Tour is None:
             return
         tour = Tour(

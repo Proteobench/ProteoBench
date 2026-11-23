@@ -10,6 +10,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from proteobench.plotting.plot_constants import DENOVO_SOFTWARE_COLORS, DENOVO_SOFTWARE_MARKERS
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 
 # Metrics shown for a bin or species that a datapoint has no entry for.
@@ -76,37 +77,6 @@ QUADRANT_LABELS = {
             "<span style='font-size:10px'>(Often correct, but when incorrect, suggest a completely different peptide)</span>"
         )
     },
-}
-
-SOFTWARE_COLORS = {
-    "AdaNovo": "#88CCEE",
-    "Casanovo": "#CC6677",
-    "DeepNovo": "#DDCC77",
-    "PepNet": "#117733",
-    "Pi-HelixNovo": "#332288",
-    "Pi-PrimeNovo": "#AA4499",
-    "PEAKS": "#661100",
-    "SMSNet": "#44AA99",
-    "InstaNovo": "#999933",
-    "ContraNovo": "#882255",
-    "PointNovo": "#E07030",
-    "NovoB": "#4477AA",
-    "Custom": "#000000",
-}
-SOFTWARE_MARKERS = {
-    "AdaNovo": "circle",
-    "Casanovo": "square",
-    "DeepNovo": "diamond",
-    "PepNet": "cross",
-    "Pi-HelixNovo": "x",
-    "Pi-PrimeNovo": "triangle-up",
-    "PEAKS": "star",
-    "SMSNet": "triangle-down",
-    "InstaNovo": "pentagon",
-    "ContraNovo": "hexagon",
-    "PointNovo": "triangle-left",
-    "NovoB": "triangle-right",
-    "Custom": "circle-open",
 }
 
 
@@ -247,11 +217,11 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         colorblind_mode = kwargs.get("colorblind_mode", False)
         software_colors = kwargs.get(
             "software_colors",
-            SOFTWARE_COLORS,
+            DENOVO_SOFTWARE_COLORS,
         )
         software_markers = kwargs.get(
             "software_markers",
-            SOFTWARE_MARKERS,
+            DENOVO_SOFTWARE_MARKERS,
         )
         mapping = kwargs.get("mapping", {"old": 10, "new": 20})
         highlight_color = kwargs.get("highlight_color", "#d30067")
@@ -532,7 +502,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         evaluation_type = kwargs.get("evaluation_type", "mass")
         allow_il = kwargs.get("allow_il", True)
         allow_deamidation = kwargs.get("allow_deamidation", False)
-        software_colors = kwargs.get("software_colors", SOFTWARE_COLORS)
+        software_colors = kwargs.get("software_colors", DENOVO_SOFTWARE_COLORS)
 
         ambiguity_combo = None
         if evaluation_type == "exact":
@@ -631,7 +601,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         evaluation_types = kwargs.get("evaluation_type", ["mass", "exact"])
         software_colors = kwargs.get(
             "software_colors",
-            SOFTWARE_COLORS,
+            DENOVO_SOFTWARE_COLORS,
         )
 
         # Generate PTM plots
@@ -839,7 +809,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         self,
         benchmark_metrics_df: pd.DataFrame,
         mod_labels: List[str],
-        software_colors: Dict[str, str] = SOFTWARE_COLORS,
+        software_colors: Dict[str, str] = DENOVO_SOFTWARE_COLORS,
     ):
         fig = go.Figure()
         for i, row in benchmark_metrics_df.iterrows():
@@ -865,7 +835,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         self,
         benchmark_metrics_df,
         mod_label,
-        software_colors: Dict[str, str] = SOFTWARE_COLORS,
+        software_colors: Dict[str, str] = DENOVO_SOFTWARE_COLORS,
     ):
         fig = go.Figure()
 
@@ -946,7 +916,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         benchmark_metrics_df,
         feature,
         evaluation_type="mass",
-        software_colors=SOFTWARE_COLORS,
+        software_colors=DENOVO_SOFTWARE_COLORS,
     ):
         # Create a subplot with 2 rows, shared x-axis
         fig = make_subplots(
@@ -1054,7 +1024,7 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         self,
         benchmark_metrics_df,
         evaluation_type="mass",
-        software_colors=SOFTWARE_COLORS,
+        software_colors=DENOVO_SOFTWARE_COLORS,
     ):
         # Create a subplot with 2 rows, shared x-axis
         fig = make_subplots(

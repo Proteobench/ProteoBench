@@ -89,7 +89,10 @@ def _get_tab_config_method_names(filepath: Path) -> List[str]:
     """
     Parse *filepath* and extract the list of method-name strings from any
     ``get_tab_config`` function/method.  Returns the method names (second
-    element of each tuple in the returned list).
+    element of each 2-tuple found anywhere in the function body).
+
+    This handles both a ``return [(name, method), ...]`` literal and the
+    dynamic pattern where tuples are appended to a list variable.
     """
     source = filepath.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(filepath))
@@ -99,19 +102,18 @@ def _get_tab_config_method_names(filepath: Path) -> List[str]:
             continue
         if node.name != "get_tab_config":
             continue
-        # Walk the body looking for a return of a list of 2-tuples
+        # Collect second elements of all 2-tuples anywhere in the function body,
+        # preserving insertion order and deduplicating.
+        seen: Set[str] = set()
+        method_names: List[str] = []
         for stmt in ast.walk(node):
-            if not isinstance(stmt, ast.Return):
-                continue
-            if not isinstance(stmt.value, ast.List):
-                continue
-            method_names: List[str] = []
-            for elt in stmt.value.elts:
-                if isinstance(elt, ast.Tuple) and len(elt.elts) >= 2:
-                    second = elt.elts[1]
-                    if isinstance(second, ast.Constant) and isinstance(second.value, str):
+            if isinstance(stmt, ast.Tuple) and len(stmt.elts) >= 2:
+                second = stmt.elts[1]
+                if isinstance(second, ast.Constant) and isinstance(second.value, str):
+                    if second.value not in seen:
+                        seen.add(second.value)
                         method_names.append(second.value)
-            return method_names
+        return method_names
     return []
 
 
@@ -194,15 +196,17 @@ def test_denovo_uiobjects_inherits_from_base_ui_module():
 
 
 def test_default_tab_config_methods_exist_in_quant_uiobjects():
-    """All methods in BaseStreamlitUI.get_tab_config() must exist in QuantUIObjects."""
+    """All methods in BaseStreamlitUI.get_tab_config() must exist in QuantUIObjects or BaseUIModule."""
     tab_methods = _get_tab_config_method_names(BASE_STREAMLIT_UI_FILE)
     assert tab_methods, "No methods found in BaseStreamlitUI.get_tab_config() — check parsing"
 
     implemented = _get_class_method_names(UIOBJECTS_FILES["QuantUIObjects"], "QuantUIObjects")
+    # Also include methods defined on the shared base class (inherited by QuantUIObjects).
+    implemented |= _get_class_method_names(BASE_UI_MODULE_FILE, KNOWN_BASE_CLASS)
     missing = set(tab_methods) - implemented
     assert (
         not missing
-    ), f"Methods referenced in BaseStreamlitUI.get_tab_config() are not defined in QuantUIObjects: {sorted(missing)}"
+    ), f"Methods referenced in BaseStreamlitUI.get_tab_config() are not defined in QuantUIObjects or {KNOWN_BASE_CLASS}: {sorted(missing)}"
 
 
 # ---------------------------------------------------------------------------

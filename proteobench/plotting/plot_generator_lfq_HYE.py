@@ -1,10 +1,11 @@
-from typing import Dict, Iterable, List, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+from proteobench.plotting.plot_constants import QUANT_SOFTWARE_COLORS, QUANT_SOFTWARE_MARKERS
 from proteobench.plotting.plot_generator_base import PlotGeneratorBase
 from proteobench.plotting.utils import create_kde_distribution_plot, fill_density_traces
 from proteobench.plotting.utils.accuracy_vs_abundance import plot_accuracy_vs_abundance
@@ -219,46 +220,8 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         metric: str = "Median",
         mode: str = "Species-weighted",
         colorblind_mode: bool = False,
-        software_colors: Dict[str, str] = {
-            "MaxQuant": "#88ccef",
-            "AlphaPept": "#cc6777",
-            "ProlineStudio": "#ddcc77",
-            "MSAngel": "#147733",
-            "FragPipe": "#342288",
-            "i2MassChroQ": "#aa4599",
-            "Sage": "#671100",
-            "WOMBAT": "#44aa9a",
-            "DIA-NN": "#999934",
-            "AlphaDIA": "#1D2732",
-            "Custom": "#000000",
-            "Spectronaut": "#007548",
-            "FragPipe (DIA-NN quant)": "#F89008",
-            "MSAID": "#bfef45",
-            "MetaMorpheus": "#637C7A",
-            "Proteome Discoverer": "#911eb4",
-            "PEAKS": "#f032e6",
-            "quantms": "#f5e830",
-        },
-        software_markers: Dict[str, str] = {
-            "MaxQuant": "circle",
-            "AlphaPept": "square",
-            "ProlineStudio": "diamond",
-            "MSAngel": "cross",
-            "FragPipe": "x",
-            "i2MassChroQ": "triangle-up",
-            "Sage": "triangle-down",
-            "WOMBAT": "pentagon",
-            "DIA-NN": "star",
-            "AlphaDIA": "star-triangle-up",
-            "Custom": "star-square",
-            "Spectronaut": "diamond-tall",
-            "FragPipe (DIA-NN quant)": "circle-x",
-            "MSAID": "square-cross",
-            "MetaMorpheus": "asterisk",
-            "Proteome Discoverer": "hash",
-            "PEAKS": "diamond-wide",
-            "quantms": "hexagram",
-        },
+        software_colors: Optional[Dict[str, str]] = None,
+        software_markers: Optional[Dict[str, str]] = None,
         mapping: Dict[str, str] = {"old": 10, "new": 20},
         highlight_color: str = "#d30067",
         label: str = "",
@@ -301,6 +264,11 @@ class LFQHYEPlotGenerator(PlotGeneratorBase):
         go.Figure
             Plotly figure with the main performance metric plot.
         """
+        if software_colors is None:
+            software_colors = QUANT_SOFTWARE_COLORS
+        if software_markers is None:
+            software_markers = QUANT_SOFTWARE_MARKERS
+
         # Get metric column names and plot_title based on selected metric and mode
         metric_lower, mode_suffix, plot_title = self._get_metric_column_name(metric, mode)
 

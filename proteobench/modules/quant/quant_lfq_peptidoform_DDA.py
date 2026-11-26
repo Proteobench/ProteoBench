@@ -48,6 +48,8 @@ class DDAQuantPeptidoformModule(QuantModule):
     """
 
     module_id: str = "quant_lfq_DDA_peptidoform"
+    # Parameter field template, relative to proteobench/io/params/json/.
+    PARAMS_JSON: str = "Quant/quant_lfq_DDA_peptidoform.json"
     y_axis_title: str = "Total number of peptidoforms quantified in the selected number of raw files"
 
     def __init__(

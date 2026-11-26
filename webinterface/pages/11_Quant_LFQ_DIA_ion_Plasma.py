@@ -3,6 +3,7 @@ Streamlit UI for the DIA quantification - precursor ions module - Plasma.
 """
 
 import logging
+import os
 from typing import Any, Dict, Type
 
 import pages.texts.proteobench_builder as pbb
@@ -15,6 +16,7 @@ from pages.pages_variables.Quant.lfq_DIA_ion_Plasma_variables import (
 )
 from pages.texts.generic_texts import WebpageTexts
 
+from proteobench.io.params import PARAMS_JSON_DIR
 from proteobench.io.parsing.parse_settings import ParseSettingsBuilder
 from proteobench.modules.quant.quant_lfq_ion_DIA_Plasma import DIAQuantIonModulePlasma
 
@@ -41,6 +43,8 @@ class StreamlitUI:
         except KeyError:
             token = ""
         self.ionmodule: DIAQuantIonModulePlasma = DIAQuantIonModulePlasma(token=token)
+        # The parameter template is defined once, on the module class.
+        self.variables_dia_quant.additional_params_json = os.path.join(PARAMS_JSON_DIR, self.ionmodule.PARAMS_JSON)
         self.parsesettingsbuilder = ParseSettingsBuilder(
             module_id=self.ionmodule.module_id, parse_settings_dir=self.variables_dia_quant.parse_settings_dir
         )
@@ -76,7 +80,7 @@ class StreamlitUI:
         with download_col:
             st.link_button(
                 "Download input files",
-                url=self.variables_dia_quant.raw_data_url,
+                url=self.ionmodule.RAW_DATA_URL,
                 type="secondary",
                 icon="⬇️",
                 help="Download the raw input files used to benchmark this module",

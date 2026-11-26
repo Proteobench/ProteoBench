@@ -48,6 +48,10 @@ class DIAQuantIonModuleZenoTOF(QuantModule):
     """
 
     module_id: str = "quant_lfq_DIA_ion_ZenoTOF"
+    # Parameter field template, relative to proteobench/io/params/json/.
+    PARAMS_JSON: str = "Quant/quant_lfq_DIA_ion.json"
+    # Raw input files of the benchmark, offered for download.
+    RAW_DATA_URL: str = "https://proteobench.cubimed.rub.de/raws/DIA-ZenoSWATH/all_data_LFQ_Quant_DIA_ZenoSWATH.tar.gz"
 
     def __init__(
         self,

@@ -41,7 +41,6 @@ FRAMEWORK_FIELDS = frozenset(
         "parse_settings_dir",
         "params_file_dict",
         # Resource references
-        "additional_params_json",
         "github_link_pr",
         # Stage flags
         "alpha_warning",

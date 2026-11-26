@@ -341,7 +341,7 @@ def _load_proteome_discoverer(input_csv: str) -> pd.DataFrame:
         The loaded dataframe.
     """
     input_data_frame = pd.read_csv(input_csv, low_memory=False, sep="\t")
-    input_data_frame["Modifications"].fillna("", inplace=True)
+    input_data_frame["Modifications"] = input_data_frame["Modifications"].fillna("")
     input_data_frame["proforma"] = input_data_frame.apply(
         lambda x: aggregate_modification_column(x["Sequence"], x["Modifications"]),
         axis=1,

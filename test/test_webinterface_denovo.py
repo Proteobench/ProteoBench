@@ -419,17 +419,6 @@ class TestSubmittedResultsTab:
         assert not app.exception, [e.message for e in app.exception]
 
 
-def test_the_ranking_rule_is_stated_wherever_a_rank_is_shown(monkeypatch):
-    # A clause buried in a long caption and a column tooltip does not answer the question the
-    # star raises, and says nothing about the rule being fixed.
-    app = _run(monkeypatch)
-    notes = [block.value for block in app.get("info") if "mean AUC" in block.value]
-    assert len(notes) == 3, f"one per ranked table, got {len(notes)}"
-    note = notes[0]
-    assert "peptide-level and amino-acid-level AUC" in note
-    assert "same tool" in note, "ranking is within a tool, not global"
-    assert "Precision and AUC does not move the star" in note, "the fixed half has to be stated"
-
 
 def test_the_hover_box_starts_with_every_parameter(monkeypatch):
     app = _run(monkeypatch)

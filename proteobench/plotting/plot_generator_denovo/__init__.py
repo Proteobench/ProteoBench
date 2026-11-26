@@ -32,6 +32,7 @@ from proteobench.plotting.plot_generator_denovo.columns import (  # noqa: F401
 from proteobench.plotting.plot_generator_denovo.selection import (  # noqa: F401
     BEST_MARKER_SCALE,
     BEST_MARKER_SYMBOL,
+    BEST_RING_LABEL,
     DIMMED_OPACITY,
     MUTED_COLOR,
     MUTED_CURVE_OPACITY,
@@ -65,6 +66,7 @@ from proteobench.plotting.plot_generator_denovo.generator import (  # noqa: F401
 __all__ = [
     "BEST_MARKER_SCALE",
     "BEST_MARKER_SYMBOL",
+    "BEST_RING_LABEL",
     "CHECKPOINT_SEPARATOR",
     "DIMMED_OPACITY",
     "DeNovoPlotGenerator",

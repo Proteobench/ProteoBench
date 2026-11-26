@@ -32,7 +32,7 @@ SOFTWARE_MARKERS = {
     "PepNet": "cross",
     "Pi-HelixNovo": "x",
     "Pi-PrimeNovo": "triangle-up",
-    "PEAKS": "star",
+    "PEAKS": "star-diamond",
     "SMSNet": "triangle-down",
     "InstaNovo": "pentagon",
     "ContraNovo": "hexagon",
@@ -151,6 +151,11 @@ BEST_MARKER_SYMBOL = "star"
 #: though: the size is multiplied again for an unpublished datapoint, and at 1.35 the two
 #: multipliers together made a star twice the width of the points around it.
 BEST_MARKER_SCALE = 1.12
+
+#: Colourblind mode's stand-in for the star. The symbol already names the tool there, so the
+#: best run keeps its tool's shape and gets a black ring drawn around it instead: a mark that
+#: carries no colour and does not collide with any tool's shape.
+BEST_RING_LABEL = "★ Best run per tool"
 
 #: Opacity of a curve in that same position. Lower than the marker equivalent for the reason
 #: :data:`MUTED_CURVE_OPACITY` is: a full-width line covers far more of the plot than a marker.

@@ -224,12 +224,12 @@ class TestSelectionSummary:
 
 class TestColumnPresets:
     def test_the_default_preset_shows_only_the_discriminating_columns(self):
-        key, _label, visible_classes = COLUMN_PRESETS[0]
+        key, _label, visible_classes, _tooltip = COLUMN_PRESETS[0]
         assert key == "default"
         assert visible_classes == ("discriminating",)
 
     def test_show_all_covers_every_class(self):
-        _key, _label, visible_classes = COLUMN_PRESETS[-1]
+        _key, _label, visible_classes, _tooltip = COLUMN_PRESETS[-1]
         assert set(visible_classes) == {"discriminating", "contextual", "uniform", "identifier"}
 
 

@@ -10,6 +10,7 @@ import pytest
 from proteobench.plotting.plot_generator_denovo import (
     BEST_MARKER_SCALE,
     BEST_MARKER_SYMBOL,
+    BEST_RING_LABEL,
     DIMMED_OPACITY,
     MUTED_COLOR,
     MUTED_CURVE_OPACITY,
@@ -391,7 +392,7 @@ class TestBestDatapointMarker:
     def _symbols(self, fig):
         symbols = {}
         for trace in fig.data:
-            if getattr(trace, "mode", None) != "markers" or _is_legend_proxy(trace):
+            if getattr(trace, "mode", None) != "markers" or _is_legend_proxy(trace) or _is_ring(trace):
                 continue
             symbols.update(zip([str(value) for value in trace.customdata], trace.marker.symbol))
         return symbols
@@ -427,6 +428,22 @@ class TestBestDatapointMarker:
         symbols = self._symbols(DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, colorblind_mode=True, **self.ALL))
         assert symbols["i_best"] == SOFTWARE_MARKERS.get("InstaNovo", "circle")
         assert symbols["i_best"] == symbols["i_mid"]
+
+    def test_colourblind_mode_rings_each_tools_best_instead(self):
+        fig = DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, colorblind_mode=True, **self.ALL)
+        rings = [t for t in fig.data if _is_ring(t) and not _is_legend_proxy(t)]
+        # One ring per tool, in that tool's legendgroup so it hides with the tool.
+        assert sorted(t.legendgroup for t in rings) == ["AdaNovo", "Casanovo", "InstaNovo"]
+        assert all(len(t.x) == 1 and t.marker.symbol == "circle-open" for t in rings)
+        assert sum(1 for t in fig.data if _is_ring(t) and t.showlegend) == 1
+
+    def test_no_ring_outside_colourblind_mode(self):
+        fig = DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL, **self.ALL)
+        assert not any(_is_ring(t) for t in fig.data)
+
+    def test_no_tool_uses_the_star_as_its_colourblind_symbol(self):
+        # A star means "best run"; a tool drawn as stars would look best everywhere.
+        assert BEST_MARKER_SYMBOL not in SOFTWARE_MARKERS.values()
 
 
 class TestVariantsInHover:
@@ -509,6 +526,11 @@ class TestSecondaryEmphasis:
         assert len(resolve_coloured_datapoints(pd.DataFrame())) == 0
 
 
+def _is_ring(trace) -> bool:
+    """Whether a trace is colourblind mode's ring around each tool's best run."""
+    return trace.name == BEST_RING_LABEL
+
+
 def _is_legend_proxy(trace) -> bool:
     """
     Whether a trace exists only to put an entry in the legend.
@@ -524,7 +546,7 @@ class TestLegend:
     """The legend names tools and their colours, whatever any individual datapoint is drawn in."""
 
     def _legend(self, fig):
-        return [trace for trace in fig.data if getattr(trace, "showlegend", False)]
+        return [trace for trace in fig.data if getattr(trace, "showlegend", False) and not _is_ring(trace)]
 
     def test_scatter_has_one_entry_per_tool(self):
         fig = DeNovoPlotGenerator().plot_main_metric(REPEATED_TOOL)
@@ -576,7 +598,11 @@ class TestLegend:
 class TestPlotMainMetric:
     def _scatter(self, fig):
         """The traces carrying datapoints, excluding the legend-only proxies."""
-        return [trace for trace in fig.data if trace.type == "scatter" and not _is_legend_proxy(trace)]
+        return [
+            trace
+            for trace in fig.data
+            if trace.type == "scatter" and not _is_legend_proxy(trace) and not _is_ring(trace)
+        ]
 
     def test_one_trace_per_tool_not_one_per_colour(self):
         # Grouping by colour would split a partly greyed tool into two identical legend entries,

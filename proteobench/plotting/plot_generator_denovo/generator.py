@@ -28,6 +28,7 @@ from proteobench.plotting.plot_generator_denovo.ranking import leading_datapoint
 from proteobench.plotting.plot_generator_denovo.selection import (
     BEST_MARKER_SCALE,
     BEST_MARKER_SYMBOL,
+    BEST_RING_LABEL,
     DIMMED_OPACITY,
     MUTED_COLOR,
     MUTED_CURVE_OPACITY,
@@ -631,7 +632,8 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
         # Each tool's best run is drawn as a star, the same mark the table puts beside it, so
         # the point the ranking is about can be found in the cloud without reading any label.
         # Not in colourblind mode: there the symbol is how a tool is identified at all, and
-        # restyling one point per tool would make every tool's best look like the same tool.
+        # restyling one point per tool would make every tool's best look like the same tool;
+        # it gets a ring around it instead (added after the tool traces, below).
         if colorblind_mode:
             benchmark_metrics_df["marker"] = markers
         else:
@@ -702,6 +704,43 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
                     name=str(software),
                     legendgroup=str(software),
                     showlegend=False,
+                )
+            )
+            # Colourblind mode: ring the best run instead of starring it. Same legendgroup as
+            # the tool, so hiding a tool hides its ring too; no hover, so it never eats a click.
+            if colorblind_mode:
+                best_df = tmp_df[tmp_df.index.isin(best_indices)]
+                if not best_df.empty:
+                    fig.add_trace(
+                        go.Scatter(
+                            x=best_df[f"peptide_{evaluation_type}_{level}"],
+                            y=best_df[f"aa_{evaluation_type}_{level}"],
+                            mode="markers",
+                            marker=dict(
+                                symbol="circle-open",
+                                size=[size * 1.8 for size in best_df["scatter_size"]],
+                                color="black",
+                                line=dict(width=2),
+                            ),
+                            name=BEST_RING_LABEL,
+                            legendgroup=str(software),
+                            showlegend=False,
+                            hoverinfo="skip",
+                        )
+                    )
+
+        if colorblind_mode and best_indices:
+            # One legend entry explaining the ring, in the same proxy style as the tool entries.
+            fig.add_trace(
+                go.Scatter(
+                    x=[None],
+                    y=[None],
+                    mode="markers",
+                    marker=dict(symbol="circle-open", size=14, color="black", line=dict(width=2)),
+                    name=BEST_RING_LABEL,
+                    legendgroup=BEST_RING_LABEL,
+                    showlegend=True,
+                    hoverinfo="skip",
                 )
             )
 
@@ -1118,7 +1157,8 @@ class DeNovoPlotGenerator(PlotGeneratorBase):
               exact numbers.
 
             **Colorblind Mode** - distinguishes the software tools by marker shape in addition to
-            colour.
+            colour. Since the shape then names the tool, each tool's best run (★ in the table) is
+            marked by a black ring around it instead of a star.
             """
 
     def get_in_depth_metrics_help_markdown(self) -> str:

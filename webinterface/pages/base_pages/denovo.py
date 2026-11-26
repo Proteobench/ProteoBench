@@ -54,8 +54,8 @@ FIGURE_VIEW_HELP = (
 TABLE_CAPTION = (
     "One row per datapoint, grouped by tool and best first within each tool. Every datapoint is "
     "drawn by default; a star marks each tool's best \u2014 the same star the scatter draws that "
-    "datapoint with \u2014 which is the one drawn at full strength while its tool's other runs are "
-    "faded behind it. The Parameters column names what separates a tool's own runs; it is also "
+    "datapoint with (a black ring in Colorblind Mode) \u2014 which is the one drawn at full strength while its tool's other runs are "
+    "faded behind it. The Parameters column names what separates a tool's own submissions; it is also "
     "the line under the name in every hover box. Untick a row to drop it from the figures, or "
     "use the buttons above the table. Click any column header to re-sort."
 )
@@ -65,11 +65,11 @@ TABLE_CAPTION = (
 #: question the star raises. The "fixed" half matters as much as the formula: a reader who has
 #: just switched the figure to Precision has every reason to expect the ranking to have followed.
 RANKING_NOTE = (
-    "**Rank and ★ are decided by mean AUC** — the average of a run's peptide-level and "
-    "amino-acid-level AUC — compared only against other submissions of the same tool. That rule "
-    "is fixed: it never follows the metric a figure happens to be showing, so switching between "
-    "Precision and AUC does not move the star. Only the evaluation stringency (Exact / "
-    "Mass-based) re-ranks."
+    "**Rank and ★ are decided by mean AUC** — the average of a submission's peptide-level and "
+    "amino-acid-level AUC — compared only against other submissions of the same tool. This rule "
+    "is fixed: switching between "
+    "Precision and AUC does not change the starred submissions. Only the evaluation stringency (Exact / "
+    "Mass-based) re-ranks. In colorblind mode, the ★ is replaced by a black ring around the mark."
 )
 
 
@@ -744,9 +744,9 @@ class DeNovoUIObjects(BaseUIModule):
 
         with st.expander("Selection and labels", expanded=False):
             st.caption(
-                "Changing **Compare**, **Tool** or **How many** re-picks the selection "
-                "immediately and replaces your ticks. Everything else here only changes how the "
-                "figure is drawn and never touches which datapoints are in it."
+                "Changing values for **Compare**, **Tool** or **How many** reselects the visualized datapoints "
+                "immediately. Everything else here only changes how the "
+                "figure is drawn."
             )
             preset_col, tool_col, topn_col = st.columns([1.1, 1, 1])
             preset = preset_col.radio(
@@ -782,6 +782,7 @@ class DeNovoUIObjects(BaseUIModule):
                 index=1,
                 key=f"{prefix}_evaluation",
                 horizontal=True,
+                help=self.variables.texts.Help.radio_evaluation,
             )
             highlight_choice = highlight_col.selectbox(
                 "Highlight",

@@ -12,20 +12,57 @@ from proteobench.plotting.plot_generator_denovo import ordered_datapoint_columns
 from pages.base_pages.utils.denovo_resulttable.frame import header_for
 
 
-#: What each column class means, shown beside its group in the column picker so the grouping is
-#: self-explaining rather than something the reader has to infer.
+#: Per column class: (multiselect label, help tooltip, placeholder when nothing is picked). The
+#: label names the group, the tooltip says why the columns ended up in it, and the placeholder
+#: replaces Streamlit's bare "Choose options" with what picking actually does.
 CLASS_DESCRIPTIONS = {
-    "discriminating": "Differ within a tool - these tell a tool's own runs apart",
-    "contextual": "Differ between tools only - cannot separate one tool's runs",
-    "uniform": "Same for every datapoint - no information in this set",
-    "identifier": "Identifiers - unique but unreadable",
+    "discriminating": (
+        "Parameters that differ between runs of the same tool",
+        "These settings change between submissions of one tool (e.g. a different checkpoint or "
+        "decoding strategy), so they are what tells a tool's own runs apart. Shown by default.",
+        "Add a parameter that separates a tool's runs",
+    ),
+    "contextual": (
+        "Parameters that differ only between tools",
+        "Every run of a given tool has the same value here, but tools differ from each other. "
+        "Useful to compare tools; they cannot tell one tool's runs apart.",
+        "Add a parameter for comparing tools",
+    ),
+    "uniform": (
+        "Parameters with the same value for every datapoint",
+        "Identical across all datapoints in the table, so they carry no information for "
+        "comparison. Show them only to check what that shared value is.",
+        "Add a parameter that is the same everywhere",
+    ),
+    "identifier": (
+        "Identifier columns",
+        "Unique per datapoint (e.g. ProteoBench ID, hash). Useful to look up or cite a specific "
+        "submission, not to compare runs.",
+        "Add an identifier column",
+    ),
 }
 
-#: Column presets, as (key, button label, which classes to show).
+#: Column presets, as (key, button label, which classes to show, tooltip).
 COLUMN_PRESETS = (
-    ("default", "Default", ("discriminating",)),
-    ("context", "Add between-tool context", ("discriminating", "contextual", "uniform")),
-    ("all", "Show all", ("discriminating", "contextual", "uniform", "identifier")),
+    (
+        "default",
+        "Default",
+        ("discriminating",),
+        "Show only the parameters that differ between runs of the same tool. Hides everything else.",
+    ),
+    (
+        "context",
+        "Add between-tool context",
+        ("discriminating", "contextual", "uniform"),
+        "Default, plus the parameters that differ only between tools and the ones that are the "
+        "same for every datapoint. Identifier columns stay hidden.",
+    ),
+    (
+        "all",
+        "Show all",
+        ("discriminating", "contextual", "uniform", "identifier"),
+        "Every parameter column, including identifier columns such as the ProteoBench ID.",
+    ),
 )
 
 #: Row height and chrome used to size the table, in pixels, and the bounds it is kept within.
@@ -101,20 +138,24 @@ def _render_column_picker(state_key: str, variant_key: str, classes: Dict[str, L
         )
 
         preset_cols = st.columns(len(COLUMN_PRESETS))
-        for container, (key, label, visible_classes) in zip(preset_cols, COLUMN_PRESETS):
-            if container.button(label, key=f"{state_key}_preset_{key}", width="stretch"):
+        for container, (key, label, visible_classes, tooltip) in zip(preset_cols, COLUMN_PRESETS):
+            if container.button(label, key=f"{state_key}_preset_{key}", help=tooltip, width="stretch"):
                 st.session_state[state_key] = {
                     column for name, members in classes.items() if name not in visible_classes for column in members
                 }
                 st.rerun()
 
+        st.markdown("**Unhide a column**")
         for name in ("discriminating", "contextual", "uniform", "identifier"):
             members = classes.get(name, [])
             if not members:
                 continue
+            label, tooltip, placeholder = CLASS_DESCRIPTIONS[name]
             chosen = st.multiselect(
-                CLASS_DESCRIPTIONS[name],
+                label,
                 options=members,
+                help=tooltip,
+                placeholder=placeholder,
                 default=[column for column in members if column not in hidden],
                 format_func=header_for,
                 key=f"{state_key}_pick_{name}",
